@@ -1,0 +1,13 @@
+- symbol: PRIVATE-1
+  name: Example private investment
+  asset_class: private
+  platform: Manual
+  quantity: 1
+  currency: EUR
+  estimated_price: 2500
+  cost_basis: 2000
+  sector: Alternatives
+  vertical: Private investment
+  geography: Europe
+  updated_at: "2026-05-04T00:00:00Z"
+  notes: Example manual asset. Replace with your own local data.
