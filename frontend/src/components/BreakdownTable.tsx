@@ -5,9 +5,10 @@ type Props = {
   title: string;
   items: BreakdownItem[];
   currency: string;
+  displayRate: number;
 };
 
-export function BreakdownTable({ title, items, currency }: Props) {
+export function BreakdownTable({ title, items, currency, displayRate }: Props) {
   return (
     <section className="panel">
       <div className="panel-heading">
@@ -18,7 +19,7 @@ export function BreakdownTable({ title, items, currency }: Props) {
           <div className="breakdown-row" key={item.name}>
             <div>
               <strong>{item.name}</strong>
-              <span>{formatMoney(item.value, currency)}</span>
+              <span>{formatMoney(item.value * displayRate, currency)}</span>
             </div>
             <div className="bar" aria-hidden="true">
               <span style={{ width: `${Math.max(2, item.percent)}%` }} />

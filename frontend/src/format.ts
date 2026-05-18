@@ -9,3 +9,13 @@ export function formatMoney(value: number, currency: string) {
 export function formatNumber(value: number) {
   return new Intl.NumberFormat(undefined, { maximumFractionDigits: 6 }).format(value);
 }
+
+export function formatDateTime(value?: string | null) {
+  if (!value) {
+    return "-";
+  }
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.models import RefreshRequest
+from app.services.recommendations import Recommendation, evaluate
 from app.snapshot import get_portfolio_snapshot, refresh_portfolio_snapshot
 
 
@@ -39,6 +40,11 @@ def open_orders():
 @app.get("/api/orders/history")
 def order_history():
     return get_portfolio_snapshot().order_history
+
+
+@app.get("/api/recommendations")
+def recommendations() -> list[Recommendation]:
+    return evaluate(get_portfolio_snapshot())
 
 
 @app.post("/api/refresh")

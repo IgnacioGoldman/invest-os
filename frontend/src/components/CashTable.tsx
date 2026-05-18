@@ -1,11 +1,13 @@
 import type { CashBalance } from "../api";
-import { formatMoney } from "../format";
+import { formatMoney, formatNumber } from "../format";
 
 type Props = {
   cash: CashBalance[];
+  displayCurrency: string;
+  displayRate: number;
 };
 
-export function CashTable({ cash }: Props) {
+export function CashTable({ cash, displayCurrency, displayRate }: Props) {
   return (
     <section className="panel">
       <div className="panel-heading">
@@ -17,8 +19,9 @@ export function CashTable({ cash }: Props) {
           <thead>
             <tr>
               <th>Platform</th>
+              <th>Display Value</th>
+              <th>Native Balance</th>
               <th>Currency</th>
-              <th>Balance</th>
               <th>Purpose</th>
               <th>Source</th>
             </tr>
@@ -27,15 +30,19 @@ export function CashTable({ cash }: Props) {
             {cash.map((item) => (
               <tr key={item.id}>
                 <td>{item.platform}</td>
+                <td>{item.value_in_base == null ? "-" : formatMoney(item.value_in_base * displayRate, displayCurrency)}</td>
+                <td>
+                  <strong>{formatNumber(item.balance)}</strong>
+                  <small>{formatMoney(item.balance, item.currency)}</small>
+                </td>
                 <td>{item.currency}</td>
-                <td>{formatMoney(item.balance, item.currency)}</td>
                 <td>{item.purpose}</td>
                 <td>{item.source}</td>
               </tr>
             ))}
             {cash.length === 0 && (
               <tr>
-                <td colSpan={5} className="empty">No cash balances loaded.</td>
+                <td colSpan={6} className="empty">No cash balances loaded.</td>
               </tr>
             )}
           </tbody>

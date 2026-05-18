@@ -32,6 +32,7 @@ def _normalize_ib_order(trade: Any) -> Order:
     order = getattr(trade, "order", None)
     status = getattr(trade, "orderStatus", None)
     symbol = _contract_symbol(contract)
+    currency = str(getattr(contract, "currency", None) or "UNKNOWN").upper()
     side = str(getattr(order, "action", "BUY")).upper()
     created = None
     fills = getattr(trade, "fills", None) or []
@@ -48,11 +49,13 @@ def _normalize_ib_order(trade: Any) -> Order:
         limit_price=as_float(getattr(order, "lmtPrice", None)) or None,
         status=getattr(status, "status", None),
         created_at=created,
+        quote_currency=currency,
         raw={
             "orderId": getattr(order, "orderId", None),
             "permId": getattr(order, "permId", None),
             "clientId": getattr(order, "clientId", None),
             "account": getattr(order, "account", None),
+            "currency": currency,
         },
     )
 
@@ -61,6 +64,9 @@ def _normalize_fill(fill: Any) -> Order:
     execution = fill.execution
     contract = fill.contract
     symbol = _contract_symbol(contract)
+    currency = str(getattr(contract, "currency", None) or "UNKNOWN").upper()
+    quantity = as_float(execution.shares)
+    price = as_float(execution.price) or None
     return Order(
         id=stable_id("ibkr-fill", execution.execId, symbol),
         source="ibkr",
@@ -68,17 +74,47 @@ def _normalize_fill(fill: Any) -> Order:
         symbol=symbol,
         side="SELL" if str(execution.side).upper().startswith("SLD") else "BUY",
         order_type="execution",
-        quantity=as_float(execution.shares),
-        limit_price=as_float(execution.price) or None,
+        quantity=quantity,
+        limit_price=price,
         status="FILLED",
         created_at=execution.time,
+        quote_currency=currency,
+        purchase_amount=quantity * price if price is not None else None,
         raw={
             "execId": execution.execId,
             "orderId": execution.orderId,
             "account": execution.acctNumber,
             "exchange": execution.exchange,
+            "currency": currency,
         },
     )
+
+
+def _select_cash_values(account_values: list[Any], base_currency: str) -> list[Any]:
+    candidates = [
+        value
+        for value in account_values
+        if value.tag in {"CashBalance", "TotalCashBalance", "SettledCash"} and as_float(value.value) != 0
+    ]
+    if not candidates:
+        return []
+
+    # IBKR can return overlapping cash rows such as CashBalance, SettledCash,
+    # TotalCashBalance, and BASE pseudo-currency. Prefer TotalCashBalance and
+    # concrete currencies so the same cash is not counted multiple times.
+    preferred = [value for value in candidates if value.tag == "TotalCashBalance"] or candidates
+    concrete = [value for value in preferred if str(value.currency or "").upper() not in {"BASE", ""}]
+    selected = concrete or preferred
+
+    by_currency: dict[str, Any] = {}
+    for value in selected:
+        currency = str(value.currency or base_currency).upper()
+        if currency == "BASE":
+            currency = base_currency.upper()
+        existing = by_currency.get(currency)
+        if existing is None or value.tag == "TotalCashBalance":
+            by_currency[currency] = value
+    return list(by_currency.values())
 
 
 def _connect(settings: Settings):
@@ -138,18 +174,17 @@ def fetch_ibkr(settings: Settings) -> SourceResult:
                 )
             )
 
-        for value in ib.accountValues():
-            if value.tag not in {"CashBalance", "TotalCashBalance", "SettledCash"}:
-                continue
+        for value in _select_cash_values(ib.accountValues(), settings.base_currency):
             amount = as_float(value.value)
-            if amount == 0:
-                continue
+            currency = str(value.currency or settings.base_currency).upper()
+            if currency == "BASE":
+                currency = settings.base_currency
             cash_balances.append(
                 CashBalance(
                     id=stable_id("ibkr-cash", value.account, value.currency, value.tag),
                     source="ibkr",
                     platform="Interactive Brokers",
-                    currency=str(value.currency or "UNKNOWN").upper(),
+                    currency=currency,
                     balance=amount,
                     purpose="deployable_cash",
                     updated_at=now,

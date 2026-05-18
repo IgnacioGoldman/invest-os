@@ -1,17 +1,43 @@
 import type { Holding } from "../api";
-import { formatMoney, formatNumber } from "../format";
+import { formatDateTime, formatMoney, formatNumber } from "../format";
 
 type Props = {
   title: string;
   holdings: Holding[];
+  displayCurrency: string;
+  displayRate: number;
 };
 
-export function HoldingsTable({ title, holdings }: Props) {
+export function HoldingsTable({ title, holdings, displayCurrency, displayRate }: Props) {
+  const aggregate = holdings.reduce(
+    (totals, holding) => {
+      if (holding.value_in_base == null || holding.cost_basis == null || holding.market_value === 0) {
+        return totals;
+      }
+      const valueToBaseRate = holding.value_in_base / holding.market_value;
+      const costBasisInBase = holding.cost_basis * valueToBaseRate;
+      totals.value += holding.value_in_base;
+      totals.costBasis += costBasisInBase;
+      return totals;
+    },
+    { value: 0, costBasis: 0 },
+  );
+  const aggregatePnl = aggregate.costBasis > 0 ? aggregate.value - aggregate.costBasis : null;
+  const aggregateRoi = aggregatePnl == null ? null : (aggregatePnl / aggregate.costBasis) * 100;
+
   return (
     <section className="panel">
       <div className="panel-heading">
         <h2>{title}</h2>
-        <span>{holdings.length}</span>
+        <div className="panel-heading-meta">
+          {aggregatePnl != null && (
+            <strong className={aggregatePnl >= 0 ? "positive" : "negative"}>
+              {formatMoney(aggregatePnl * displayRate, displayCurrency)}
+              <small>{aggregateRoi == null ? "" : `${new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(aggregateRoi)}%`}</small>
+            </strong>
+          )}
+          <span>{holdings.length}</span>
+        </div>
       </div>
       <div className="table-wrap">
         <table>
@@ -23,6 +49,8 @@ export function HoldingsTable({ title, holdings }: Props) {
               <th>Qty</th>
               <th>Price</th>
               <th>Value</th>
+              <th>Display Value</th>
+              <th>Valuation</th>
               <th>P/L</th>
               <th>Confidence</th>
             </tr>
@@ -39,6 +67,11 @@ export function HoldingsTable({ title, holdings }: Props) {
                 <td>{formatNumber(holding.quantity)}</td>
                 <td>{holding.current_price == null ? "-" : formatMoney(holding.current_price, holding.currency)}</td>
                 <td>{formatMoney(holding.market_value, holding.currency)}</td>
+                <td>{holding.value_in_base == null ? "-" : formatMoney(holding.value_in_base * displayRate, displayCurrency)}</td>
+                <td>
+                  <span>{holding.valuation_source ?? "-"}</span>
+                  <small>{formatDateTime(holding.valuation_timestamp)}</small>
+                </td>
                 <td className={(holding.unrealized_pnl ?? 0) >= 0 ? "positive" : "negative"}>
                   {holding.unrealized_pnl == null ? "-" : formatMoney(holding.unrealized_pnl, holding.currency)}
                 </td>
@@ -47,7 +80,7 @@ export function HoldingsTable({ title, holdings }: Props) {
             ))}
             {holdings.length === 0 && (
               <tr>
-                <td colSpan={8} className="empty">No holdings loaded.</td>
+                <td colSpan={10} className="empty">No holdings loaded.</td>
               </tr>
             )}
           </tbody>

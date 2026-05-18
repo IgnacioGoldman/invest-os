@@ -1,6 +1,7 @@
 import json
 import os
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict
 
@@ -22,6 +23,8 @@ class Settings:
     ibkr_client_id: int = 1
     fx_rates: Dict[str, float] = field(default_factory=lambda: {"EUR": 1.0})
     enable_demo_fallback: bool = True
+    market_price_stale_hours: int = 24
+    binance_ledger_start_date: datetime = datetime(2020, 1, 1, tzinfo=timezone.utc)
 
 
 def _load_fx_rates(raw: str | None) -> Dict[str, float]:
@@ -38,8 +41,19 @@ def _load_fx_rates(raw: str | None) -> Dict[str, float]:
     return rates
 
 
+def _load_datetime(raw: str | None, default: datetime) -> datetime:
+    if not raw:
+        return default
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+    except ValueError:
+        return default
+
+
 def get_settings() -> Settings:
     load_dotenv(PROJECT_DIR / ".env")
+    ledger_start = _load_datetime(os.getenv("BINANCE_LEDGER_START_DATE"), datetime(2020, 1, 1, tzinfo=timezone.utc))
     return Settings(
         base_currency=os.getenv("BASE_CURRENCY", "EUR").upper(),
         binance_api_key=os.getenv("BINANCE_API_KEY") or None,
@@ -49,4 +63,6 @@ def get_settings() -> Settings:
         ibkr_client_id=int(os.getenv("IBKR_CLIENT_ID", "1")),
         fx_rates=_load_fx_rates(os.getenv("FX_RATES_JSON")),
         enable_demo_fallback=os.getenv("ENABLE_DEMO_FALLBACK", "true").lower() == "true",
+        market_price_stale_hours=int(os.getenv("MARKET_PRICE_STALE_HOURS", "24")),
+        binance_ledger_start_date=ledger_start,
     )

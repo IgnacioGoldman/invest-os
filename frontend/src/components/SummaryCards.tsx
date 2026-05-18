@@ -4,13 +4,15 @@ import { formatMoney } from "../format";
 
 type Props = {
   snapshot: PortfolioSnapshot;
+  displayCurrency: string;
+  displayRate: number;
 };
 
-export function SummaryCards({ snapshot }: Props) {
+export function SummaryCards({ snapshot, displayCurrency, displayRate }: Props) {
   const cards = [
-    { label: "Net Worth", value: formatMoney(snapshot.total_net_worth, snapshot.base_currency), icon: WalletCards },
-    { label: "Invested", value: formatMoney(snapshot.total_invested, snapshot.base_currency), icon: BriefcaseBusiness },
-    { label: "Cash", value: formatMoney(snapshot.total_cash, snapshot.base_currency), icon: Banknote },
+    { label: "Net Worth", value: formatMoney(snapshot.total_net_worth * displayRate, displayCurrency), icon: WalletCards },
+    { label: "Invested", value: formatMoney(snapshot.total_invested * displayRate, displayCurrency), icon: BriefcaseBusiness },
+    { label: "Cash", value: formatMoney(snapshot.total_cash * displayRate, displayCurrency), icon: Banknote },
     { label: "Holdings", value: snapshot.holdings.length.toString(), icon: Layers },
     { label: "Open Orders", value: snapshot.open_orders.length.toString(), icon: ListOrdered },
   ];

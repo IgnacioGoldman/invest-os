@@ -44,6 +44,18 @@ button:disabled {
   opacity: 0.65;
 }
 
+.icon-button {
+  background: transparent;
+  color: #39445a;
+  min-height: 28px;
+  padding: 0;
+}
+
+.row-toggle {
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
 .app-shell {
   margin: 0 auto;
   max-width: 1440px;
@@ -61,7 +73,110 @@ button:disabled {
 .refresh-controls {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
+  justify-content: flex-end;
+}
+
+.segmented {
+  align-items: center;
+  border: 1px solid #cfd6e2;
+  border-radius: 6px;
+  display: inline-flex;
+  min-height: 40px;
+  overflow: hidden;
+}
+
+.segmented button {
+  background: white;
+  border-radius: 0;
+  color: #39445a;
+  min-height: 38px;
+  padding: 0 12px;
+}
+
+.segmented button.active {
+  background: #194f90;
+  color: white;
+}
+
+.segmented button:disabled {
+  background: #edf0f5;
+  color: #8b95a6;
+}
+
+.header-menu {
+  position: relative;
+}
+
+.header-menu-button {
+  align-items: center;
+  background: white;
+  border: 1px solid #cfd6e2;
+  border-radius: 6px;
+  color: #39445a;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 800;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px;
+  user-select: none;
+}
+
+.header-menu-button::-webkit-details-marker {
+  display: none;
+}
+
+.header-menu-button::marker {
+  content: "";
+}
+
+.header-menu-button.warning {
+  border-color: #efd9a8;
+  color: #7a5416;
+}
+
+.header-menu-button span {
+  align-items: center;
+  background: #edf0f5;
+  border-radius: 999px;
+  color: #39445a;
+  display: inline-flex;
+  font-size: 0.74rem;
+  justify-content: center;
+  min-width: 22px;
+  padding: 1px 7px;
+}
+
+.header-menu-button.warning span {
+  background: #fff1cf;
+  color: #7a5416;
+}
+
+.header-menu-content {
+  background: white;
+  border: 1px solid #dde2ea;
+  border-radius: 8px;
+  box-shadow: 0 14px 40px rgba(24, 33, 47, 0.14);
+  min-width: min(420px, calc(100vw - 36px));
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 460px;
+  z-index: 20;
+}
+
+.header-menu-content .warnings,
+.header-menu-content .panel {
+  border: 0;
+  border-radius: 8px;
+  box-shadow: none;
+  margin: 0;
+}
+
+.source-menu {
+  width: 520px;
 }
 
 .topbar p {
@@ -148,6 +263,23 @@ button:disabled {
   padding: 0 16px;
 }
 
+.section-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 6px 0 12px;
+}
+
+.section-heading h2 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.orders-section,
+.positions-section {
+  margin-top: 4px;
+}
+
 .panel-heading h2,
 .warnings h2 {
   font-size: 1rem;
@@ -166,14 +298,80 @@ button:disabled {
   text-align: center;
 }
 
+.panel-heading-meta {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.panel-heading-meta strong {
+  align-items: center;
+  display: inline-flex;
+  gap: 7px;
+}
+
+.panel-heading-meta strong small {
+  margin: 0;
+}
+
 .table-wrap {
   overflow-x: auto;
 }
 
+.activity-controls {
+  align-items: center;
+  border-bottom: 1px solid #edf0f5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+}
+
+.filter-chip {
+  background: white;
+  border: 1px solid #cfd6e2;
+  color: #39445a;
+  font-size: 0.84rem;
+  font-weight: 800;
+  min-height: 32px;
+  padding: 0 10px;
+}
+
+.filter-chip.active {
+  background: #e7f0ea;
+  border-color: #b9d6c4;
+  color: #24563a;
+}
+
+.open-order-summary {
+  border-top: 1px solid #edf0f5;
+  display: grid;
+  gap: 1px;
+  padding: 12px 16px;
+}
+
+.open-order-summary-row {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(110px, 1fr) repeat(3, minmax(140px, auto));
+  min-height: 34px;
+}
+
+.open-order-summary-row span,
+.open-order-summary-row small {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
 table {
   border-collapse: collapse;
-  min-width: 880px;
+  min-width: 1040px;
   width: 100%;
+}
+
+.activity-table {
+  min-width: 1880px;
 }
 
 th,
@@ -200,6 +398,59 @@ td small {
   text-overflow: ellipsis;
 }
 
+.activity-list-cell {
+  min-width: 190px;
+  white-space: normal;
+}
+
+.activity-list-cell.wide {
+  min-width: 250px;
+}
+
+.asset-list {
+  display: grid;
+  gap: 4px;
+  max-width: 360px;
+}
+
+.asset-list span {
+  align-items: baseline;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.asset-list strong {
+  color: #657186;
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  letter-spacing: 0;
+}
+
+.asset-list em {
+  color: #18212f;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.asset-list em.positive {
+  color: #177245;
+}
+
+.asset-list em.negative {
+  color: #b43b3b;
+}
+
+.value-list {
+  max-width: 420px;
+}
+
+.change-list {
+  max-width: 300px;
+}
+
 .positive,
 .buy {
   color: #177245;
@@ -210,6 +461,15 @@ td small {
 .sell {
   color: #b43b3b;
   font-weight: 800;
+}
+
+.child-row {
+  background: #f9fafc;
+}
+
+.child-row td {
+  color: #546073;
+  font-size: 0.92rem;
 }
 
 .empty {
@@ -319,6 +579,12 @@ td small {
   margin: 4px 0;
 }
 
+.warnings li strong {
+  color: #7a5416;
+  display: block;
+  margin-top: 3px;
+}
+
 .error,
 .loading {
   margin-bottom: 18px;
@@ -329,6 +595,55 @@ td small {
   border-color: #e7b5b5;
   color: #9d2626;
 }
+
+/* ── Recommendations ── */
+
+.recommendations {
+  margin-bottom: 18px;
+}
+
+.rec-list {
+  display: grid;
+  gap: 1px;
+  list-style: none;
+  margin: 0;
+  padding: 12px 16px;
+}
+
+.rec-item {
+  align-items: flex-start;
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.rec-item + .rec-item {
+  border-top: 1px solid #edf0f5;
+}
+
+.rec-icon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.rec-item strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.rec-item p {
+  color: #546073;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  margin: 3px 0 0;
+}
+
+.rec-info .rec-icon {  color: #2d7f6f; }
+.rec-warning .rec-icon { color: #b08218; }
+.rec-critical .rec-icon { color: #b43b3b; }
+
+.rec-critical strong { color: #9d2626; }
+.rec-warning strong { color: #7a5416; }
 
 @media (max-width: 980px) {
   .app-shell {

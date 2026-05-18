@@ -1,14 +1,14 @@
 - account_name: Main checking
   platform: Bank
   currency: EUR
-  balance: 3500
+  balance: 6000
   purpose: monthly_spending
   updated_at: "2026-05-04T00:00:00Z"
-  notes: Example manual cash balance. Replace with your own local data.
+  notes: Day-to-day spending account.
 - account_name: Emergency reserve
   platform: Bank
   currency: EUR
-  balance: 10000
+  balance: 20000
   purpose: emergency_fund
   updated_at: "2026-05-04T00:00:00Z"
-  notes: Example emergency fund bucket.
+  notes: Emergency reserve.
