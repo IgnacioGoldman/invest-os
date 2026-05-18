@@ -15,7 +15,7 @@ import "./styles.css";
 type SourceFilter = "all" | "binance" | "ibkr";
 type DashboardView = "portfolio" | "crypto" | "stocks";
 
-const STOCK_ASSET_CLASSES = new Set(["equity", "stock", "etf", "fund", "rsu"]);
+const STOCK_ASSET_CLASSES = new Set(["equity", "stock", "etf", "fund"]);
 
 const addAmount = (values: Record<string, number>, key: string, amount: number) => {
   if (!Number.isFinite(amount) || Math.abs(amount) <= 0.00000001) {
@@ -75,7 +75,9 @@ function App() {
   const cryptoOrderHistory = (snapshot?.order_history ?? []).filter((order) => order.source === "binance");
   const cryptoLedgerEvents = (snapshot?.ledger_events ?? []).filter((event) => event.source === "binance");
   const stockHoldings = (snapshot?.holdings ?? []).filter(
-    (holding) => holding.source === "ibkr" || STOCK_ASSET_CLASSES.has(holding.asset_class.toLowerCase()),
+    (holding) => holding.asset_class.toLowerCase() !== "rsu" && (
+      holding.source === "ibkr" || STOCK_ASSET_CLASSES.has(holding.asset_class.toLowerCase())
+    ),
   );
   const stockOpenOrders = (snapshot?.open_orders ?? []).filter((order) => order.source === "ibkr");
   const stockCashBalances = (snapshot?.cash_balances ?? []).filter((cash) => cash.source === "ibkr");

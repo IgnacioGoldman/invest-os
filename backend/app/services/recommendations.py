@@ -1,32 +1,49 @@
-"""Recommendation engine – reads skills/*.yaml and evaluates the portfolio snapshot."""
+"""Recommendation engine for deterministic portfolio policy checks."""
 
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Literal
 
-import yaml
 from pydantic import BaseModel
 
 from app.models import PortfolioSnapshot
 
 
-SKILLS_DIR = Path(__file__).resolve().parents[2] / "skills"
+DEFAULT_ALLOCATION_RULES = {
+    "cash_reserve": {
+        "target_percent": 20,
+        "warning_low_percent": 10,
+        "warning_high_percent": 40,
+    },
+    "invested_ratio": {
+        "target_percent": 80,
+        "overinvested_threshold": 90,
+        "underinvested_threshold": 60,
+    },
+    "concentration": {
+        "max_single_position_percent": 25,
+        "warn_single_position_percent": 15,
+    },
+    "diversification": {
+        "min_asset_classes": 2,
+    },
+    "platform_risk": {
+        "max_single_platform_percent": 60,
+    },
+    "swing_trading": {
+        "warn_many_open_orders": 10,
+    },
+    "stale_data": {
+        "warn_hours": 48,
+    },
+}
 
 
 class Recommendation(BaseModel):
     severity: Literal["info", "warning", "critical"]
     title: str
     detail: str
-
-
-def _load_allocation_rules() -> dict:
-    path = SKILLS_DIR / "allocation.yaml"
-    if not path.exists():
-        return {}
-    with open(path) as fh:
-        return yaml.safe_load(fh) or {}
 
 
 def _pct(part: float, whole: float) -> float:
@@ -43,7 +60,7 @@ def _hours_since(dt: datetime | None) -> float | None:
 
 
 def evaluate(snapshot: PortfolioSnapshot) -> list[Recommendation]:
-    rules = _load_allocation_rules()
+    rules = DEFAULT_ALLOCATION_RULES
     recs: list[Recommendation] = []
     nw = snapshot.total_net_worth
     cash = snapshot.total_cash

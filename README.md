@@ -1,8 +1,6 @@
 # Invest OS
 
-**Invest OS** is a local investment operating system for portfolio, cash, exposure, and order decisions.
-
-It consolidates broker, exchange, and manual financial data into a structured snapshot, then uses a defined investment policy and AI analysis workflow to generate disciplined, human-approved recommendations.
+**Invest OS** is a local investment operating system for portfolio, cash, exposure, and order decisions. It consolidates broker, exchange, and manual financial data into a structured snapshot, then uses a defined investment policy and AI analysis workflow to generate disciplined, human-approved recommendations.
 
 Invest OS is read-only. It does not place, modify, cancel, transmit, or automate trades.
 
@@ -23,60 +21,3 @@ Dashboard reads are cache-only: page load and `GET` endpoints read from local SQ
 | **AI Analysis Package** | Feed Claude/Codex consistent inputs | Can an LLM generate structured recommendations from clean data? | Snapshot, orders, policy, metadata, prompt/skill files |
 | **Recommendation Format & Approval** | Standardize human-approved decisions | What is recommended, why, under what conditions, and with what confidence? | Action, evidence, risk, conditions, confidence, missing data; no auto-trading |
 
-## Data Sources
-
-### API Sources
-
-- Interactive Brokers
-- Binance
-
-Binance order history can also show an estimated account value before and after each trade. Use **Refresh Binance ledger** to fetch read-only deposit/withdrawal history and historical Binance prices into SQLite. The dashboard then replays cached trades, deposits, withdrawals, and fees locally.
-
-This replay is intentionally conservative: if deposits/withdrawals, historical prices, or earlier trades are missing, the value columns stay blank and the row warning explains what is incomplete.
-
-### Manual Sources
-
-- Bank cash
-- External broker holdings
-- Private/manual assets
-- Other unconnected sources
-
-Example manual entries:
-
-- Cash in bank account
-- 1,000 Dynatrace shares in E*TRADE
-- Private investment
-- Offline asset
-- Reserved cash bucket
-
-## Recommendation Philosophy
-
-Invest OS does **not** automatically place trades.
-
-The system generates structured **order ideas** and **portfolio recommendations** for human review.
-
-Examples:
-
-- Consider placing a buy-limit order
-- Consider trimming an overweight position
-- Review or cancel stale open orders
-- Add an exit plan to unmanaged positions
-- Avoid new buying if exposure limits are already exceeded
-- Highlight missing data before making a recommendation
-
-## Human Approval Required
-
-All outputs are advisory.
-
-The system should help answer:
-
-1. What do I own?
-2. How exposed am I?
-3. What orders are currently open?
-4. Do those orders still make sense?
-5. Which holdings need exit plans?
-6. What buy/sell ideas should I consider?
-7. What risks or blind spots should I review?
-8. What should I act on today or this week?
-
-Final investment decisions and order placement remain manual.
