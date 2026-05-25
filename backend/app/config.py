@@ -25,6 +25,8 @@ class Settings:
     enable_demo_fallback: bool = True
     market_price_stale_hours: int = 24
     binance_ledger_start_date: datetime = datetime(2020, 1, 1, tzinfo=timezone.utc)
+    openai_api_key: str | None = None
+    openai_recommendation_model: str = "gpt-5-mini"
 
 
 def _load_fx_rates(raw: str | None) -> Dict[str, float]:
@@ -65,4 +67,6 @@ def get_settings() -> Settings:
         enable_demo_fallback=os.getenv("ENABLE_DEMO_FALLBACK", "true").lower() == "true",
         market_price_stale_hours=int(os.getenv("MARKET_PRICE_STALE_HOURS", "24")),
         binance_ledger_start_date=ledger_start,
+        openai_api_key=os.getenv("OPENAI_API_KEY") or None,
+        openai_recommendation_model=os.getenv("OPENAI_RECOMMENDATION_MODEL", "gpt-5-mini"),
     )

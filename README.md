@@ -21,3 +21,14 @@ Dashboard reads are cache-only: page load and `GET` endpoints read from local SQ
 | **AI Analysis Package** | Feed Claude/Codex consistent inputs | Can an LLM generate structured recommendations from clean data? | Snapshot, orders, policy, metadata, prompt/skill files |
 | **Recommendation Format & Approval** | Standardize human-approved decisions | What is recommended, why, under what conditions, and with what confidence? | Action, evidence, risk, conditions, confidence, missing data; no auto-trading |
 
+## Run locally
+
+```sh
+trap 'kill 0' EXIT; (cd backend && ../.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000) & (cd frontend && npm run dev -- --host 0.0.0.0)
+```
+
+Open http://localhost:5173/.
+
+## Run AI
+
+"Analyze Portfolio"

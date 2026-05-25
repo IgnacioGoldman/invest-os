@@ -1,6 +1,6 @@
 import { AlertTriangle, DatabaseZap, RefreshCcw } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fetchRecommendations, fetchSnapshot, refreshSnapshot, type PortfolioSnapshot, type Recommendation, type RefreshSource } from "./api";
+import { fetchRecommendations, fetchSnapshot, generateRecommendations, refreshSnapshot, type PortfolioSnapshot, type Recommendation, type RefreshSource } from "./api";
 import { BinanceActivityTable } from "./components/BinanceActivityTable";
 import { BreakdownTable } from "./components/BreakdownTable";
 import { CashTable } from "./components/CashTable";
@@ -12,7 +12,6 @@ import { SourceStatus } from "./components/SourceStatus";
 import { SummaryCards } from "./components/SummaryCards";
 import "./styles.css";
 
-type SourceFilter = "all" | "binance" | "ibkr";
 type DashboardView = "portfolio" | "crypto" | "stocks";
 
 const STOCK_ASSET_CLASSES = new Set(["equity", "stock", "etf", "fund"]);
@@ -31,9 +30,9 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [refreshSource, setRefreshSource] = useState<RefreshSource>("all");
   const [displayCurrency, setDisplayCurrency] = useState("EUR");
-  const [sourceFilter, setSourceFilter] = useState<SourceFilter>("all");
   const [dashboardView, setDashboardView] = useState<DashboardView>("portfolio");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [analyzingPortfolio, setAnalyzingPortfolio] = useState(false);
 
   useEffect(() => {
     Promise.all([fetchSnapshot(), fetchRecommendations()])
@@ -60,11 +59,22 @@ function App() {
     }
   };
 
+  const analyzePortfolio = async () => {
+    setAnalyzingPortfolio(true);
+    setError(null);
+    try {
+      const recs = await generateRecommendations();
+      setRecommendations(recs);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not generate recommendations.");
+    } finally {
+      setAnalyzingPortfolio(false);
+    }
+  };
+
   const displayRate = snapshot?.display_rates.find((rate) => rate.currency === displayCurrency)?.rate_from_base ?? 1;
   const canShowUsd = Boolean(snapshot?.display_rates.some((rate) => rate.currency === "USD"));
 
-  const filterBySource = <T extends { source: string }>(items: T[]) =>
-    sourceFilter === "all" ? items : items.filter((item) => item.source === sourceFilter);
   const cryptoHoldings = (snapshot?.holdings ?? []).filter(
     (holding) => holding.source === "binance" || holding.asset_class.toLowerCase() === "crypto",
   );
@@ -210,63 +220,26 @@ function App() {
 
       {snapshot && (
         <>
+          <Recommendations
+            recommendations={recommendations}
+            analyzing={analyzingPortfolio}
+            onAnalyze={analyzePortfolio}
+          />
+
           {dashboardView === "portfolio" && (
             <>
               <SummaryCards snapshot={snapshot} displayCurrency={displayCurrency} displayRate={displayRate} />
 
-              <div className="grid two">
-                <BreakdownTable
-                  title="Platform Breakdown"
-                  items={snapshot.platform_breakdown}
-                  currency={displayCurrency}
-                  displayRate={displayRate}
-                />
-                <BreakdownTable
-                  title="Asset Class Breakdown"
-                  items={snapshot.asset_class_breakdown}
-                  currency={displayCurrency}
-                  displayRate={displayRate}
-                />
-              </div>
-
-              <CashTable cash={snapshot.cash_balances} displayCurrency={displayCurrency} displayRate={displayRate} />
-
-              <Recommendations recommendations={recommendations} />
-
-              <section className="positions-section">
-                <div className="section-heading">
-                  <h2>Open Positions</h2>
-                  <div className="segmented" aria-label="Source filter">
-                    <button
-                      type="button"
-                      className={sourceFilter === "all" ? "active" : ""}
-                      onClick={() => setSourceFilter("all")}
-                    >
-                      All
-                    </button>
-                    <button
-                      type="button"
-                      className={sourceFilter === "binance" ? "active" : ""}
-                      onClick={() => setSourceFilter("binance")}
-                    >
-                      Binance
-                    </button>
-                    <button
-                      type="button"
-                      className={sourceFilter === "ibkr" ? "active" : ""}
-                      onClick={() => setSourceFilter("ibkr")}
-                    >
-                      IBKR
-                    </button>
-                  </div>
-                </div>
-                <HoldingsTable
-                  title="Open Positions"
-                  holdings={filterBySource(snapshot.holdings)}
-                  displayCurrency={displayCurrency}
-                  displayRate={displayRate}
-                />
-              </section>
+              <BreakdownTable
+                title="Platform Breakdown"
+                items={snapshot.platform_breakdown}
+                currency={displayCurrency}
+                displayRate={displayRate}
+                holdings={snapshot.holdings}
+                cashBalances={snapshot.cash_balances}
+                openOrders={snapshot.open_orders}
+                displayRates={snapshot.display_rates}
+              />
             </>
           )}
 

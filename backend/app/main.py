@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import get_settings
 from app.models import RefreshRequest
-from app.services.recommendations import Recommendation, evaluate
+from app.services.recommendations import Recommendation, evaluate, generate_and_store
 from app.snapshot import get_portfolio_snapshot, refresh_portfolio_snapshot
 
 
@@ -45,6 +46,17 @@ def order_history():
 @app.get("/api/recommendations")
 def recommendations() -> list[Recommendation]:
     return evaluate(get_portfolio_snapshot())
+
+
+@app.post("/api/recommendations")
+def generate_recommendations() -> list[Recommendation]:
+    settings = get_settings()
+    if not settings.openai_api_key:
+        raise HTTPException(status_code=400, detail="OPENAI_API_KEY is not configured.")
+    try:
+        return generate_and_store(get_portfolio_snapshot(), settings)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"AI recommendations failed: {exc}") from exc
 
 
 @app.post("/api/refresh")

@@ -298,6 +298,18 @@ button:disabled {
   text-align: center;
 }
 
+.panel-heading-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.panel-heading-actions button {
+  font-size: 0.86rem;
+  min-height: 34px;
+  padding: 0 10px;
+}
+
 .panel-heading-meta {
   align-items: center;
   display: flex;
@@ -554,14 +566,62 @@ td small {
 .bar {
   background: #e8ecf2;
   border-radius: 999px;
+  display: flex;
   height: 9px;
   overflow: hidden;
 }
 
-.bar span {
-  background: #2d7f6f;
+.bar-segment {
   display: block;
   height: 100%;
+}
+
+.bar-segment.invested {
+  background: #2d7f6f;
+}
+
+.bar-segment.open-orders {
+  background: #bd6a22;
+}
+
+.bar-segment.cash {
+  background: #8b95a6;
+}
+
+.breakdown-segments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 7px;
+}
+
+.segment-label {
+  align-items: center;
+  color: #657186;
+  display: inline-flex;
+  font-size: 0.78rem;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.segment-label::before {
+  border-radius: 999px;
+  content: "";
+  display: inline-block;
+  height: 7px;
+  width: 7px;
+}
+
+.segment-label.invested::before {
+  background: #2d7f6f;
+}
+
+.segment-label.open-orders::before {
+  background: #bd6a22;
+}
+
+.segment-label.cash::before {
+  background: #8b95a6;
 }
 
 .warnings {

@@ -1,43 +1,23 @@
-"""Recommendation engine for deterministic portfolio policy checks."""
+"""AI-generated portfolio recommendations."""
 
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
-from typing import Literal
+from pathlib import Path
+from typing import Any, Literal
 
-from pydantic import BaseModel
+import requests
+from pydantic import BaseModel, ValidationError
 
+from app.config import Settings, get_settings
 from app.models import PortfolioSnapshot
+from app.services.storage import connect, load_recommendation_payloads, replace_recommendations
 
 
-DEFAULT_ALLOCATION_RULES = {
-    "cash_reserve": {
-        "target_percent": 20,
-        "warning_low_percent": 10,
-        "warning_high_percent": 40,
-    },
-    "invested_ratio": {
-        "target_percent": 80,
-        "overinvested_threshold": 90,
-        "underinvested_threshold": 60,
-    },
-    "concentration": {
-        "max_single_position_percent": 25,
-        "warn_single_position_percent": 15,
-    },
-    "diversification": {
-        "min_asset_classes": 2,
-    },
-    "platform_risk": {
-        "max_single_platform_percent": 60,
-    },
-    "swing_trading": {
-        "warn_many_open_orders": 10,
-    },
-    "stale_data": {
-        "warn_hours": 48,
-    },
-}
+PROJECT_DIR = Path(__file__).resolve().parents[3]
+PORTFOLIO_ADVISOR_SKILL_PATH = PROJECT_DIR / "skills" / "general-portfolio-advisor.md"
+OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 
 
 class Recommendation(BaseModel):
@@ -46,153 +26,126 @@ class Recommendation(BaseModel):
     detail: str
 
 
-def _pct(part: float, whole: float) -> float:
-    return round(part / whole * 100, 1) if whole else 0.0
+class RecommendationList(BaseModel):
+    recommendations: list[Recommendation]
 
 
-def _hours_since(dt: datetime | None) -> float | None:
-    if dt is None:
-        return None
-    now = datetime.now(timezone.utc)
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return (now - dt).total_seconds() / 3600
+RECOMMENDATION_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "recommendations": {
+            "type": "array",
+            "maxItems": 8,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "severity": {"type": "string", "enum": ["info", "warning", "critical"]},
+                    "title": {"type": "string"},
+                    "detail": {"type": "string"},
+                },
+                "required": ["severity", "title", "detail"],
+            },
+        }
+    },
+    "required": ["recommendations"],
+}
 
 
-def evaluate(snapshot: PortfolioSnapshot) -> list[Recommendation]:
-    rules = DEFAULT_ALLOCATION_RULES
-    recs: list[Recommendation] = []
-    nw = snapshot.total_net_worth
-    cash = snapshot.total_cash
-    invested = snapshot.total_invested
+def _skill_text() -> str:
+    try:
+        return PORTFOLIO_ADVISOR_SKILL_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return (
+            "Analyze the portfolio snapshot as a read-only portfolio advisor. "
+            "Return concise, actionable recommendations without placing trades."
+        )
 
-    if nw <= 0:
-        return recs
 
-    # ── Cash Reserve ──
-    cr = rules.get("cash_reserve", {})
-    cash_pct = _pct(cash, nw)
-    target = cr.get("target_percent", 20)
-    low = cr.get("warning_low_percent", 10)
-    high = cr.get("warning_high_percent", 40)
+def _snapshot_payload(snapshot: PortfolioSnapshot) -> str:
+    return json.dumps(snapshot.model_dump(mode="json"), indent=2, sort_keys=True)
 
-    if cash_pct < low:
-        recs.append(Recommendation(
-            severity="critical",
-            title="Cash reserve critically low",
-            detail=f"Cash is {cash_pct}% of net worth (target {target}%). Consider trimming positions to rebuild reserves.",
-        ))
-    elif cash_pct < target:
-        recs.append(Recommendation(
-            severity="warning",
-            title="Cash below target",
-            detail=f"Cash is {cash_pct}% of net worth (target {target}%). Building a buffer improves flexibility for swing trades.",
-        ))
-    elif cash_pct > high:
-        recs.append(Recommendation(
-            severity="warning",
-            title="Excess idle cash",
-            detail=f"Cash is {cash_pct}% of net worth. Consider deploying some into diversified positions or short-term opportunities.",
-        ))
-    else:
-        recs.append(Recommendation(
-            severity="info",
-            title="Cash reserve healthy",
-            detail=f"Cash is {cash_pct}% of net worth — within the {low}–{high}% comfort zone.",
-        ))
 
-    # ── Invested Ratio ──
-    ir = rules.get("invested_ratio", {})
-    inv_pct = _pct(invested, nw)
-    over_thresh = ir.get("overinvested_threshold", 90)
-    under_thresh = ir.get("underinvested_threshold", 60)
+def _extract_text(response_json: dict[str, Any]) -> str:
+    output_text = response_json.get("output_text")
+    if isinstance(output_text, str):
+        return output_text
 
-    if inv_pct >= over_thresh:
-        recs.append(Recommendation(
-            severity="warning",
-            title="Over-invested",
-            detail=f"{inv_pct}% of net worth is deployed. This leaves little room for new opportunities or drawdowns.",
-        ))
-    elif inv_pct <= under_thresh:
-        recs.append(Recommendation(
-            severity="warning",
-            title="Under-invested",
-            detail=f"Only {inv_pct}% deployed. Capital sitting idle loses to inflation — look for quality entries.",
-        ))
-    else:
-        recs.append(Recommendation(
-            severity="info",
-            title="Investment ratio balanced",
-            detail=f"{inv_pct}% of net worth is invested — within target range.",
-        ))
+    parts: list[str] = []
+    for item in response_json.get("output", []):
+        if not isinstance(item, dict):
+            continue
+        for content in item.get("content", []):
+            if isinstance(content, dict) and isinstance(content.get("text"), str):
+                parts.append(content["text"])
+    return "\n".join(parts)
 
-    # ── Single-Position Concentration ──
-    conc = rules.get("concentration", {})
-    hard_cap = conc.get("max_single_position_percent", 25)
-    soft_warn = conc.get("warn_single_position_percent", 15)
 
-    for h in snapshot.holdings:
-        val = h.value_in_base if h.value_in_base is not None else 0
-        pos_pct = _pct(val, nw)
-        if pos_pct >= hard_cap:
-            recs.append(Recommendation(
-                severity="critical",
-                title=f"{h.symbol} is {pos_pct}% of portfolio",
-                detail=f"Single position exceeds {hard_cap}% cap. Consider trimming to reduce concentration risk.",
-            ))
-        elif pos_pct >= soft_warn:
-            recs.append(Recommendation(
-                severity="warning",
-                title=f"{h.symbol} concentration at {pos_pct}%",
-                detail=f"Position is approaching the {hard_cap}% hard cap. Monitor closely.",
-            ))
+def load_saved_recommendations(settings: Settings | None = None) -> list[Recommendation]:
+    settings = settings or get_settings()
+    with connect(settings.data_dir) as conn:
+        return [
+            Recommendation.model_validate_json(payload)
+            for payload in load_recommendation_payloads(conn)
+        ]
 
-    # ── Asset-Class Diversification ──
-    div_rules = rules.get("diversification", {})
-    min_classes = div_rules.get("min_asset_classes", 2)
-    classes = {h.asset_class for h in snapshot.holdings}
-    if len(classes) < min_classes:
-        recs.append(Recommendation(
-            severity="warning",
-            title="Low asset-class diversity",
-            detail=f"Positions span only {len(classes)} class(es) ({', '.join(sorted(classes)) or 'none'}). Diversifying reduces overall risk.",
-        ))
 
-    # ── Platform Concentration ──
-    plat = rules.get("platform_risk", {})
-    max_plat_pct = plat.get("max_single_platform_percent", 60)
-    for item in snapshot.platform_breakdown:
-        if item.percent > max_plat_pct:
-            recs.append(Recommendation(
-                severity="warning",
-                title=f"{item.name} holds {round(item.percent)}% of value",
-                detail=f"Platform concentration exceeds {max_plat_pct}%. Spreading across platforms mitigates custodial risk.",
-            ))
+def save_recommendations(recommendations: list[Recommendation], settings: Settings | None = None) -> list[Recommendation]:
+    settings = settings or get_settings()
+    with connect(settings.data_dir) as conn:
+        replace_recommendations(conn, datetime.now(timezone.utc), recommendations)
+        conn.commit()
+    return recommendations
 
-    # ── Swing / Open Orders ──
-    sw = rules.get("swing_trading", {})
-    warn_many = sw.get("warn_many_open_orders", 10)
-    open_count = len(snapshot.open_orders)
-    if open_count >= warn_many:
-        recs.append(Recommendation(
-            severity="warning",
-            title=f"{open_count} open orders",
-            detail=f"Having many open orders increases execution risk. Review and cancel stale ones.",
-        ))
 
-    # ── Stale Valuations ──
-    stale = rules.get("stale_data", {})
-    stale_hours = stale.get("warn_hours", 48)
-    stale_symbols: list[str] = []
-    for h in snapshot.holdings:
-        age = _hours_since(h.valuation_timestamp)
-        if age is not None and age > stale_hours:
-            stale_symbols.append(h.symbol)
-    if stale_symbols:
-        recs.append(Recommendation(
-            severity="warning",
-            title=f"{len(stale_symbols)} stale valuation(s)",
-            detail=f"Prices older than {stale_hours}h for: {', '.join(stale_symbols[:5])}{'…' if len(stale_symbols) > 5 else ''}. Refresh market data.",
-        ))
+def generate_recommendations(snapshot: PortfolioSnapshot, settings: Settings | None = None) -> list[Recommendation]:
+    settings = settings or get_settings()
+    if not settings.openai_api_key:
+        return []
 
-    return recs
+    instructions = (
+        f"{_skill_text()}\n\n"
+        "Return only JSON matching the provided schema. Keep recommendations specific to the supplied snapshot. "
+        "Do not use fixed portfolio thresholds unless they are explicitly present in the supplied context."
+    )
+    response = requests.post(
+        OPENAI_RESPONSES_URL,
+        headers={
+            "Authorization": f"Bearer {settings.openai_api_key}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "model": settings.openai_recommendation_model,
+            "instructions": instructions,
+            "input": f"Portfolio snapshot JSON:\n{_snapshot_payload(snapshot)}",
+            "text": {
+                "format": {
+                    "type": "json_schema",
+                    "name": "portfolio_recommendations",
+                    "schema": RECOMMENDATION_SCHEMA,
+                    "strict": True,
+                }
+            },
+        },
+        timeout=45,
+    )
+    response.raise_for_status()
+
+    try:
+        parsed = RecommendationList.model_validate_json(_extract_text(response.json()))
+        return parsed.recommendations
+    except (json.JSONDecodeError, ValidationError) as exc:
+        raise ValueError(f"AI recommendations response did not match expected format: {exc}") from exc
+
+
+def generate_and_store(snapshot: PortfolioSnapshot, settings: Settings | None = None) -> list[Recommendation]:
+    settings = settings or get_settings()
+    recommendations = generate_recommendations(snapshot, settings)
+    if recommendations:
+        save_recommendations(recommendations, settings)
+    return recommendations
+
+
+def evaluate(_snapshot: PortfolioSnapshot, settings: Settings | None = None) -> list[Recommendation]:
+    return load_saved_recommendations(settings)

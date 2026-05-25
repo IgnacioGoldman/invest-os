@@ -198,3 +198,26 @@ export async function fetchRecommendations(): Promise<Recommendation[]> {
     window.clearTimeout(timeout);
   }
 }
+
+export async function generateRecommendations(): Promise<Recommendation[]> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS * 3);
+  try {
+    const response = await fetch(`${API_BASE}/api/recommendations`, {
+      method: "POST",
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      const detail = await response.json().catch(() => null);
+      throw new Error(detail?.detail ?? `Recommendations generation failed: ${response.status}`);
+    }
+    return response.json();
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Recommendations generation timed out.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}

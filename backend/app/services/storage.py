@@ -93,6 +93,13 @@ def init_db(conn: sqlite3.Connection) -> None:
             fetched_at TEXT NOT NULL,
             PRIMARY KEY (asset, currency, priced_at)
         );
+
+        CREATE TABLE IF NOT EXISTS recommendations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            generated_at TEXT NOT NULL,
+            position INTEGER NOT NULL,
+            payload TEXT NOT NULL
+        );
         """
     )
     conn.commit()
@@ -304,3 +311,21 @@ def load_sync_status(conn: sqlite3.Connection) -> list[SourceSyncStatus]:
         if source not in seen:
             statuses.append(SourceSyncStatus(source=source))
     return statuses
+
+
+def replace_recommendations(conn: sqlite3.Connection, generated_at: datetime, recommendations: Iterable[BaseModel]) -> None:
+    conn.execute("DELETE FROM recommendations")
+    conn.executemany(
+        "INSERT INTO recommendations (generated_at, position, payload) VALUES (?, ?, ?)",
+        [
+            (generated_at.isoformat(), position, recommendation.model_dump_json())
+            for position, recommendation in enumerate(recommendations)
+        ],
+    )
+
+
+def load_recommendation_payloads(conn: sqlite3.Connection) -> list[str]:
+    return [
+        row["payload"]
+        for row in conn.execute("SELECT payload FROM recommendations ORDER BY position, id")
+    ]
