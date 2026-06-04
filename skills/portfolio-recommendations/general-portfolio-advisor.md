@@ -40,11 +40,21 @@ Local workflow:
    - If a symbol is ambiguous or cannot be identified confidently, list that in
      Missing data with the exact symbol and why it was ambiguous.
 
-5. Read `skills/trade-mentality.md` before interpreting cash, open orders, and
+5. Read `skills/portfolio-recommendations/trade-mentality.md` before interpreting cash, open orders, and
    staged entries. Open BUY limit orders may be intentional drawdown-entry
    planning rather than stale or idle cash.
 
-6. Keep the analysis advisory and read-only. Do not place, modify, cancel,
+6. Read `skills/portfolio-recommendations/macro-theme-research.md` before recommending new sectors,
+   verticals, themes, or geographies. Recommendations should identify specific
+   current macro-aligned research areas rather than merely saying to diversify
+   away from an existing concentration.
+
+7. Read `skills/portfolio-recommendations/allocation-drawdown-advisor.md` before recommending any entry.
+   Do not assume the next action is to enter a trade. Decide first whether the
+   portfolio calls for holding, trimming/exiting, moving capital, reserving dip
+   capital, or only then entering in stages.
+
+8. Keep the analysis advisory and read-only. Do not place, modify, cancel,
    transmit, or automate orders.
 
 Inputs to inspect:
@@ -66,6 +76,8 @@ Recommendation format:
 
 Return a concise ranked list. Each recommendation should include:
 
+- Category: `allocation`, `drawdown_reserve`, `trim_or_exit`, `capital_move`,
+  `entry`, `concentration`, or `theme`
 - Action: what to do next
 - Why: evidence from the snapshot
 - Target or guardrail: amount, percentage, threshold, or condition when possible
@@ -89,6 +101,7 @@ Advisor framework:
 
 - Cash reserve:
   - Treat cash as optionality and downside protection, not just idle capital.
+  - Separate emergency/monthly cash from deployable cash and open-order reserve.
   - If cash is too low, recommend rebuilding reserves through trims,
     deposits, or pausing new buys.
   - If cash is healthy, say what it enables.
@@ -97,14 +110,19 @@ Advisor framework:
 
 - Invested ratio:
   - Compare invested capital against net worth and cash.
-  - If under-invested, identify whether the next deployment should favor stocks,
-    crypto, or another missing exposure.
+  - If under-invested, still check concentration and drawdown reserves before
+    recommending entry.
   - If over-invested, prioritize liquidity, concentration reduction, and order
     cleanup before adding risk.
 
 - Stocks vs crypto:
   - Compare broker/stock exposure with crypto/exchange exposure.
   - Treat platform concentration and asset-class concentration separately.
+  - Use `skills/portfolio-recommendations/allocation-drawdown-advisor.md` to decide whether current
+    stock/crypto/cash/open-order reserve distribution is balanced enough to add
+    risk.
+  - Count crypto-adjacent equities such as bitcoin-treasury companies with the
+    crypto-risk sleeve when evaluating allocation.
   - Recommend adding to crypto only when crypto exposure is low relative to the
     investor's policy and cash reserve is adequate.
   - Recommend adding to stocks when cash is high, stock exposure is low, and
@@ -133,8 +151,13 @@ Advisor framework:
 - Vertical, sector, and geography:
   - Before recommending based on missing exposure, enrich missing metadata for
     each symbol where possible.
+  - Use `skills/portfolio-recommendations/macro-theme-research.md` to identify current macro-aligned
+    themes, sectors, verticals, and geographies that may fit the portfolio.
   - Group holdings by `vertical`, `sector`, and `geography`.
   - Identify overrepresented themes, missing themes, and blind spots.
+  - Name the specific underrepresented areas, such as healthcare, energy
+    infrastructure, utilities/grid, industrial automation, defense/cybersecurity,
+    non-US quality, or emerging markets, when supported by current research.
   - Mark enriched classifications as inferred if they were not present in the
     snapshot.
   - Use "missing vertical data" only as a residual missing-data note for
@@ -150,7 +173,7 @@ Advisor framework:
 - Open orders:
   - Count open orders and inspect side, symbol, purpose, quote currency, and
     notional size when available.
-  - Use `skills/trade-mentality.md` when interpreting open BUY limit orders.
+  - Use `skills/portfolio-recommendations/trade-mentality.md` when interpreting open BUY limit orders.
   - Recognize staged lower-price entries as a deliberate way to avoid depending
     only on markets going up.
   - If there are many or large open orders, recommend thesis/sizing review
@@ -158,6 +181,15 @@ Advisor framework:
   - Flag open orders that conflict with allocation needs, concentration, or
     stale prices.
   - Treat BUY orders as reserved risk budget or reserved cash.
+
+- Allocation and drawdown reserve:
+  - Use `skills/portfolio-recommendations/allocation-drawdown-advisor.md`.
+  - Before recommending new entries, decide whether the next action should be
+    hold, trim/exit, move capital, reserve capital, or staged entry.
+  - Consider historical crash context when suggesting how much margin to keep
+    for lower entries.
+  - If you suggest a percentage reserve or trim, label it as an assumption unless
+    supplied by investor policy.
 
 - Stale valuations and data quality:
   - Do not create standalone recommendations for stale prices, missing FX,
@@ -191,8 +223,15 @@ Actionability rules:
   above the concentration review threshold."
 - Do say: "After enriching missing metadata, healthcare and non-US consumer
   exposure still look underrepresented."
+- Do say: "Given current macro research, energy infrastructure and healthcare
+  are better next research areas than another technology single name."
+- Do say: "Before entering anything new, cap or trim the existing concentration
+  if it remains above the investor's intended risk budget."
+- Do say: "This is a capital-move recommendation, not an entry recommendation."
 - Do not say: "Buy stocks" without naming the exposure gap, risk budget, and
   data needed.
+- Do not assume the next recommendation should be an entry. Entry comes after
+  allocation, concentration, drawdown-reserve, and capital-move checks.
 - Do not say: "Fill missing vertical data" as a recommendation if the missing
   fields can be researched during the analysis.
 - Do not say: "Refresh market data", "review data blockers", or similar as a

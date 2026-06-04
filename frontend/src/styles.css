@@ -386,6 +386,292 @@ table {
   min-width: 1880px;
 }
 
+.entry-table {
+  min-width: 3360px;
+}
+
+.open-data-table {
+  min-width: 1840px;
+}
+
+.open-data-table td strong {
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+
+.ticker-drilldown {
+  background: transparent;
+  color: #18212f;
+  font-weight: 800;
+  min-height: 28px;
+  padding: 0;
+}
+
+.ticker-drilldown svg {
+  color: #657186;
+  transition: transform 160ms ease;
+}
+
+.ticker-drilldown.open svg:first-child {
+  transform: rotate(180deg);
+}
+
+.ticker-drilldown strong {
+  display: inline;
+}
+
+.latest-badge {
+  background: #edf0f5;
+  border-radius: 999px;
+  color: #39445a;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 800;
+  margin-top: 7px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.open-data-detail {
+  border-top: 1px solid #e8ecf2;
+  padding: 16px;
+}
+
+.open-data-detail-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.open-data-detail-heading h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.open-data-detail-heading p {
+  color: #657186;
+  font-size: 0.88rem;
+  margin: 3px 0 0;
+}
+
+.open-data-detail-heading span {
+  background: #e7f0ea;
+  border-radius: 999px;
+  color: #24563a;
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 3px 9px;
+}
+
+.chart-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+}
+
+.mini-chart {
+  border: 1px solid #dde2ea;
+  border-radius: 8px;
+  min-height: 214px;
+  padding: 12px;
+}
+
+.mini-chart-heading {
+  align-items: baseline;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.mini-chart-heading strong,
+.mini-chart.empty-chart strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.mini-chart-heading small,
+.mini-chart.empty-chart small {
+  color: #657186;
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.mini-chart svg {
+  display: block;
+  height: auto;
+  overflow: visible;
+  width: 100%;
+}
+
+.mini-chart line {
+  stroke: #d5dbe5;
+  stroke-width: 1;
+}
+
+.mini-chart polyline {
+  fill: none;
+  stroke: #2d7f6f;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.6;
+}
+
+.mini-chart circle {
+  fill: white;
+  stroke: #2d7f6f;
+  stroke-width: 2;
+}
+
+.mini-chart text {
+  fill: #657186;
+  font-size: 10px;
+}
+
+.mini-chart.empty-chart {
+  align-items: center;
+  color: #657186;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+.data-gaps {
+  border-top: 1px solid #edf0f5;
+  margin-top: 16px;
+  padding-top: 14px;
+}
+
+.company-context {
+  border-top: 1px solid #edf0f5;
+  margin-top: 16px;
+  padding-top: 14px;
+}
+
+.company-context-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.company-context-heading h4 {
+  font-size: 0.96rem;
+  margin: 0;
+}
+
+.company-context-heading p {
+  color: #657186;
+  font-size: 0.86rem;
+  margin: 3px 0 0;
+}
+
+.company-context-heading span {
+  background: #edf0f5;
+  border-radius: 999px;
+  color: #39445a;
+  flex: 0 0 auto;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 3px 9px;
+}
+
+.filing-list {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+}
+
+.filing-item {
+  border: 1px solid #dde2ea;
+  border-radius: 8px;
+  padding: 11px 12px;
+}
+
+.filing-title {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.filing-title strong {
+  color: #18212f;
+  font-size: 0.92rem;
+}
+
+.filing-title span,
+.filing-meta span {
+  color: #657186;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.filing-title a,
+.exhibit-list a {
+  color: #194f90;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.filing-item p {
+  color: #546073;
+  font-size: 0.84rem;
+  margin: 6px 0 0;
+  white-space: normal;
+}
+
+.filing-meta,
+.exhibit-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.filing-meta span,
+.exhibit-list a {
+  background: #f6f7f9;
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+
+.context-gaps {
+  margin-top: 12px;
+}
+
+.context-gaps strong {
+  display: block;
+  font-size: 0.88rem;
+  margin-bottom: 6px;
+}
+
+.context-gaps ul {
+  color: #546073;
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.data-gaps strong {
+  display: block;
+  font-size: 0.92rem;
+  margin-bottom: 8px;
+}
+
+.data-gaps ul {
+  color: #546073;
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 18px;
+}
+
 th,
 td {
   border-bottom: 1px solid #edf0f5;
@@ -651,6 +937,12 @@ td small {
   padding: 16px;
 }
 
+.loading.inline {
+  border: 0;
+  box-shadow: none;
+  margin: 0;
+}
+
 .error {
   border-color: #e7b5b5;
   color: #9d2626;
@@ -662,12 +954,31 @@ td small {
   margin-bottom: 18px;
 }
 
+.rec-groups {
+  display: grid;
+  gap: 1px;
+  padding: 12px 16px;
+}
+
+.rec-group + .rec-group {
+  border-top: 1px solid #edf0f5;
+  padding-top: 10px;
+}
+
+.rec-group h3 {
+  color: #657186;
+  font-size: 0.76rem;
+  letter-spacing: 0;
+  margin: 0 0 2px;
+  text-transform: uppercase;
+}
+
 .rec-list {
   display: grid;
   gap: 1px;
   list-style: none;
   margin: 0;
-  padding: 12px 16px;
+  padding: 0;
 }
 
 .rec-item {
@@ -705,6 +1016,41 @@ td small {
 .rec-critical strong { color: #9d2626; }
 .rec-warning strong { color: #7a5416; }
 
+/* Entry opportunities */
+
+.entry-opportunities {
+  margin-bottom: 18px;
+}
+
+.entry-meta {
+  align-items: center;
+  border-bottom: 1px solid #edf0f5;
+  color: #657186;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 16px;
+}
+
+.entry-meta strong,
+.entry-controls strong {
+  color: #18212f;
+}
+
+.entry-meta span {
+  border-left: 1px solid #dde2ea;
+  padding-left: 10px;
+}
+
+.entry-controls {
+  justify-content: flex-end;
+}
+
+.entry-controls .icon-button {
+  min-height: 34px;
+  padding: 0 6px;
+}
+
 @media (max-width: 980px) {
   .app-shell {
     padding: 18px;
@@ -713,6 +1059,14 @@ td small {
   .summary-grid,
   .grid.two {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .chart-grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+
+  .filing-list {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -738,5 +1092,17 @@ td small {
 
   .summary-card {
     min-height: 88px;
+  }
+
+  .open-data-detail-heading {
+    flex-direction: column;
+  }
+
+  .company-context-heading {
+    flex-direction: column;
+  }
+
+  .chart-grid {
+    grid-template-columns: 1fr;
   }
 }

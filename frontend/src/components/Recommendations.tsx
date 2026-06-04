@@ -13,8 +13,23 @@ const ICON = {
   critical: <ShieldAlert size={16} />,
 } as const;
 
+const CATEGORY_LABEL = {
+  allocation: "Allocation",
+  drawdown_reserve: "Drawdown reserve",
+  trim_or_exit: "Trim / exit",
+  capital_move: "Capital move",
+  entry: "Entry",
+  concentration: "Concentration",
+  theme: "Theme",
+} as const;
+
 export function Recommendations({ recommendations, analyzing = false, onAnalyze }: Props) {
   const visibleRecommendations = recommendations.filter((rec) => rec.severity !== "info");
+  const groupedRecommendations = visibleRecommendations.reduce<Record<string, Recommendation[]>>((groups, rec) => {
+    const category = rec.category ?? "allocation";
+    groups[category] = [...(groups[category] ?? []), rec];
+    return groups;
+  }, {});
 
   if (visibleRecommendations.length === 0 && !onAnalyze) return null;
 
@@ -33,17 +48,24 @@ export function Recommendations({ recommendations, analyzing = false, onAnalyze 
         </div>
       </div>
       {visibleRecommendations.length ? (
-        <ul className="rec-list">
-          {visibleRecommendations.map((rec, i) => (
-            <li key={i} className={`rec-item rec-${rec.severity}`}>
-              <span className="rec-icon">{ICON[rec.severity]}</span>
-              <div>
-                <strong>{rec.title}</strong>
-                <p>{rec.detail}</p>
-              </div>
-            </li>
+        <div className="rec-groups">
+          {Object.entries(groupedRecommendations).map(([category, recs]) => (
+            <div className="rec-group" key={category}>
+              <h3>{CATEGORY_LABEL[category as keyof typeof CATEGORY_LABEL] ?? category}</h3>
+              <ul className="rec-list">
+                {recs.map((rec, i) => (
+                  <li key={i} className={`rec-item rec-${rec.severity}`}>
+                    <span className="rec-icon">{ICON[rec.severity]}</span>
+                    <div>
+                      <strong>{rec.title}</strong>
+                      <p>{rec.detail}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
       ) : (
         <p className="empty block">No warning recommendations yet.</p>
       )}

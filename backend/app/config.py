@@ -27,6 +27,7 @@ class Settings:
     binance_ledger_start_date: datetime = datetime(2020, 1, 1, tzinfo=timezone.utc)
     openai_api_key: str | None = None
     openai_recommendation_model: str = "gpt-5-mini"
+    fmp_api_key: str | None = None
 
 
 def _load_fx_rates(raw: str | None) -> Dict[str, float]:
@@ -69,4 +70,5 @@ def get_settings() -> Settings:
         binance_ledger_start_date=ledger_start,
         openai_api_key=os.getenv("OPENAI_API_KEY") or None,
         openai_recommendation_model=os.getenv("OPENAI_RECOMMENDATION_MODEL", "gpt-5-mini"),
+        fmp_api_key=os.getenv("FMP_API_KEY") or None,
     )

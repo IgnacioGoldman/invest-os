@@ -6,3 +6,5 @@ node_modules/
 dist/
 .DS_Store
 data/*.sqlite
+.cache/
+data/stocks/open_data/

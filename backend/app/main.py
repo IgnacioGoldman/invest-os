@@ -2,6 +2,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
+from app.entry_engine.build_entry_snapshot import build_entry_snapshot
+from app.entry_engine.models import EntrySnapshotFile, EntrySnapshotRequest
+from app.entry_engine.open_data_models import OpenDataSnapshot
+from app.entry_engine.providers.open_data_provider import OpenDataProvider
+from app.entry_engine.utils.file_storage import (
+    load_latest_entry_snapshot,
+    load_latest_open_data_stock_snapshot,
+    save_open_data_stock_snapshot,
+)
 from app.models import RefreshRequest
 from app.services.recommendations import Recommendation, evaluate, generate_and_store
 from app.snapshot import get_portfolio_snapshot, refresh_portfolio_snapshot
@@ -57,6 +66,45 @@ def generate_recommendations() -> list[Recommendation]:
         return generate_and_store(get_portfolio_snapshot(), settings)
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"AI recommendations failed: {exc}") from exc
+
+
+@app.get("/api/entry/snapshot")
+def latest_entry_snapshot() -> EntrySnapshotFile:
+    snapshot = load_latest_entry_snapshot()
+    if snapshot is None:
+        raise HTTPException(status_code=404, detail="No entry snapshot has been generated yet.")
+    return snapshot
+
+
+@app.post("/api/entry/snapshot")
+def generate_entry_snapshot(request: EntrySnapshotRequest) -> EntrySnapshotFile:
+    settings = get_settings()
+    if not settings.fmp_api_key:
+        raise HTTPException(status_code=400, detail="FMP_API_KEY is not configured.")
+    try:
+        return build_entry_snapshot(limit=request.limit)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Entry snapshot generation failed: {exc}") from exc
+
+
+@app.get("/api/open-data/stocks/{ticker}")
+def open_data_stock(ticker: str) -> OpenDataSnapshot:
+    saved = load_latest_open_data_stock_snapshot(ticker)
+    if saved is not None:
+        return saved
+    return refresh_open_data_stock(ticker)
+
+
+@app.post("/api/open-data/stocks/{ticker}/refresh")
+def refresh_open_data_stock(ticker: str) -> OpenDataSnapshot:
+    try:
+        snapshot = OpenDataProvider().get_open_data_snapshot(ticker)
+        save_open_data_stock_snapshot(snapshot)
+        return snapshot
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Open data stock fetch failed: {exc}") from exc
 
 
 @app.post("/api/refresh")

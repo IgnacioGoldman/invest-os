@@ -1,5 +1,6 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 const REQUEST_TIMEOUT_MS = 30000;
+const ENTRY_BUILD_TIMEOUT_MS = 30 * 60 * 1000;
 
 export type Holding = {
   id: string;
@@ -126,8 +127,146 @@ export type DisplayRate = {
 
 export type Recommendation = {
   severity: "info" | "warning" | "critical";
+  category:
+    | "allocation"
+    | "drawdown_reserve"
+    | "trim_or_exit"
+    | "capital_move"
+    | "entry"
+    | "concentration"
+    | "theme";
   title: string;
   detail: string;
+};
+
+export type BusinessHealth = {
+  revenue_growth_yoy?: number | null;
+  revenue_cagr_3y?: number | null;
+  eps_growth_yoy?: number | null;
+  eps_cagr_3y?: number | null;
+  gross_margin?: number | null;
+  operating_margin?: number | null;
+  net_margin?: number | null;
+  free_cash_flow?: number | null;
+  roe?: number | null;
+  roic?: number | null;
+  cash?: number | null;
+  debt?: number | null;
+  debt_to_equity?: number | null;
+};
+
+export type PriceOpportunity = {
+  current_price?: number | null;
+  change_1d?: number | null;
+  change_1w?: number | null;
+  change_1m?: number | null;
+  change_3m?: number | null;
+  change_6m?: number | null;
+  change_1y?: number | null;
+  change_2y?: number | null;
+  change_5y?: number | null;
+  distance_from_ath?: number | null;
+  distance_from_52w_high?: number | null;
+  distance_from_52w_low?: number | null;
+};
+
+export type Valuation = {
+  pe?: number | null;
+  forward_pe?: number | null;
+  peg?: number | null;
+  price_to_sales?: number | null;
+  ev_to_ebitda?: number | null;
+  fcf_yield?: number | null;
+};
+
+export type EntryStockSnapshot = {
+  date: string;
+  ticker: string;
+  name?: string | null;
+  exchange?: string | null;
+  country?: string | null;
+  sector?: string | null;
+  industry?: string | null;
+  market_cap?: number | null;
+  avg_volume?: number | null;
+  business_health: BusinessHealth;
+  price_opportunity: PriceOpportunity;
+  valuation: Valuation;
+};
+
+export type EntrySnapshotFile = {
+  date: string;
+  source: string;
+  generated_at: string;
+  count: number;
+  failed_tickers: string[];
+  stocks: EntryStockSnapshot[];
+};
+
+export type OpenDataMetricTier =
+  | "exact_public_fact"
+  | "computed_from_public_facts"
+  | "proxy_estimate"
+  | "unavailable_open_free";
+
+export type OpenDataMetric = {
+  value?: number | null;
+  source: string;
+  tier: OpenDataMetricTier;
+  as_of: string;
+  notes: string;
+};
+
+export type OpenDataFilingExhibit = {
+  document: string;
+  description?: string | null;
+  type?: string | null;
+  url?: string | null;
+};
+
+export type OpenDataCompanyFiling = {
+  accession_number: string;
+  form: string;
+  filing_date: string;
+  report_date?: string | null;
+  acceptance_datetime?: string | null;
+  primary_document?: string | null;
+  primary_document_description?: string | null;
+  items: string[];
+  exhibits: OpenDataFilingExhibit[];
+  source_url?: string | null;
+  notes: string;
+};
+
+export type OpenDataCompanyContext = {
+  source: string;
+  as_of: string;
+  recent_filings: OpenDataCompanyFiling[];
+  known_context_gaps: string[];
+  notes: string;
+};
+
+export type OpenDataStockSnapshot = {
+  ticker: string;
+  name?: string | null;
+  cik?: number | null;
+  exchange?: string | null;
+  country?: string | null;
+  sector?: string | null;
+  industry?: string | null;
+  source: string;
+  generated_at: string;
+  business_health: Record<string, OpenDataMetric>;
+  price_opportunity: Record<string, OpenDataMetric>;
+  valuation: Record<string, OpenDataMetric>;
+  historical_series: Record<string, Array<{
+    period: string;
+    as_of: string;
+    metrics: Record<string, OpenDataMetric>;
+  }>>;
+  company_context?: OpenDataCompanyContext | null;
+  data_gaps: string[];
+  metrics: Record<string, OpenDataMetric>;
 };
 
 export type PortfolioSnapshot = {
@@ -161,6 +300,26 @@ async function requestSnapshot(path: string, init?: RequestInit): Promise<Portfo
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
       throw new Error("Snapshot request timed out.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
+async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = REQUEST_TIMEOUT_MS): Promise<T> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(`${API_BASE}${path}`, { ...init, signal: controller.signal });
+    if (!response.ok) {
+      const detail = await response.json().catch(() => null);
+      throw new Error(detail?.detail ?? `Request failed: ${response.status}`);
+    }
+    return response.json();
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Request timed out.");
     }
     throw error;
   } finally {
@@ -220,4 +379,39 @@ export async function generateRecommendations(): Promise<Recommendation[]> {
   } finally {
     window.clearTimeout(timeout);
   }
+}
+
+export async function fetchLatestEntrySnapshot(): Promise<EntrySnapshotFile | null> {
+  try {
+    return await requestJson<EntrySnapshotFile>("/api/entry/snapshot");
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("No entry snapshot")) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export async function buildEntrySnapshot(limit = 2000): Promise<EntrySnapshotFile> {
+  return requestJson<EntrySnapshotFile>(
+    "/api/entry/snapshot",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ limit }),
+    },
+    ENTRY_BUILD_TIMEOUT_MS,
+  );
+}
+
+export async function fetchOpenDataStock(ticker = "GOOGL"): Promise<OpenDataStockSnapshot> {
+  return requestJson<OpenDataStockSnapshot>(`/api/open-data/stocks/${encodeURIComponent(ticker)}`);
+}
+
+export async function refreshOpenDataStock(ticker = "GOOGL"): Promise<OpenDataStockSnapshot> {
+  return requestJson<OpenDataStockSnapshot>(
+    `/api/open-data/stocks/${encodeURIComponent(ticker)}/refresh`,
+    { method: "POST" },
+    ENTRY_BUILD_TIMEOUT_MS,
+  );
 }

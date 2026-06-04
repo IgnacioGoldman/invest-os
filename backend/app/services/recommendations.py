@@ -16,12 +16,21 @@ from app.services.storage import connect, load_recommendation_payloads, replace_
 
 
 PROJECT_DIR = Path(__file__).resolve().parents[3]
-PORTFOLIO_ADVISOR_SKILL_PATH = PROJECT_DIR / "skills" / "general-portfolio-advisor.md"
+PORTFOLIO_RECOMMENDATIONS_SKILL_DIR = PROJECT_DIR / "skills" / "portfolio-recommendations"
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 
 
 class Recommendation(BaseModel):
     severity: Literal["info", "warning", "critical"]
+    category: Literal[
+        "allocation",
+        "drawdown_reserve",
+        "trim_or_exit",
+        "capital_move",
+        "entry",
+        "concentration",
+        "theme",
+    ] = "allocation"
     title: str
     detail: str
 
@@ -42,10 +51,22 @@ RECOMMENDATION_SCHEMA: dict[str, Any] = {
                 "additionalProperties": False,
                 "properties": {
                     "severity": {"type": "string", "enum": ["info", "warning", "critical"]},
+                    "category": {
+                        "type": "string",
+                        "enum": [
+                            "allocation",
+                            "drawdown_reserve",
+                            "trim_or_exit",
+                            "capital_move",
+                            "entry",
+                            "concentration",
+                            "theme",
+                        ],
+                    },
                     "title": {"type": "string"},
                     "detail": {"type": "string"},
                 },
-                "required": ["severity", "title", "detail"],
+                "required": ["severity", "category", "title", "detail"],
             },
         }
     },
@@ -54,13 +75,16 @@ RECOMMENDATION_SCHEMA: dict[str, Any] = {
 
 
 def _skill_text() -> str:
-    try:
-        return PORTFOLIO_ADVISOR_SKILL_PATH.read_text(encoding="utf-8")
-    except FileNotFoundError:
-        return (
-            "Analyze the portfolio snapshot as a read-only portfolio advisor. "
-            "Return concise, actionable recommendations without placing trades."
-        )
+    if PORTFOLIO_RECOMMENDATIONS_SKILL_DIR.exists():
+        skill_parts = []
+        for path in sorted(PORTFOLIO_RECOMMENDATIONS_SKILL_DIR.glob("*.md")):
+            skill_parts.append(f"# Skill file: {path.name}\n\n{path.read_text(encoding='utf-8')}")
+        if skill_parts:
+            return "\n\n---\n\n".join(skill_parts)
+    return (
+        "Analyze the portfolio snapshot as a read-only portfolio advisor. "
+        "Return concise, actionable recommendations without placing trades."
+    )
 
 
 def _snapshot_payload(snapshot: PortfolioSnapshot) -> str:

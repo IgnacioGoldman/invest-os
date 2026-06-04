@@ -1,12 +1,28 @@
 import { AlertTriangle, DatabaseZap, RefreshCcw } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fetchRecommendations, fetchSnapshot, generateRecommendations, refreshSnapshot, type PortfolioSnapshot, type Recommendation, type RefreshSource } from "./api";
+import {
+  buildEntrySnapshot,
+  fetchOpenDataStock,
+  fetchLatestEntrySnapshot,
+  fetchRecommendations,
+  fetchSnapshot,
+  generateRecommendations,
+  refreshSnapshot,
+  refreshOpenDataStock,
+  type EntrySnapshotFile,
+  type OpenDataStockSnapshot,
+  type PortfolioSnapshot,
+  type Recommendation,
+  type RefreshSource,
+} from "./api";
 import { BinanceActivityTable } from "./components/BinanceActivityTable";
 import { BreakdownTable } from "./components/BreakdownTable";
 import { CashTable } from "./components/CashTable";
 import { DataWarnings } from "./components/DataWarnings";
+import { EntryOpportunities } from "./components/EntryOpportunities";
 import { HoldingsTable } from "./components/HoldingsTable";
 import { OrdersTable } from "./components/OrdersTable";
+import { OpenDataStockTable } from "./components/OpenDataStockTable";
 import { Recommendations } from "./components/Recommendations";
 import { SourceStatus } from "./components/SourceStatus";
 import { SummaryCards } from "./components/SummaryCards";
@@ -33,6 +49,13 @@ function App() {
   const [dashboardView, setDashboardView] = useState<DashboardView>("portfolio");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [analyzingPortfolio, setAnalyzingPortfolio] = useState(false);
+  const [entrySnapshot, setEntrySnapshot] = useState<EntrySnapshotFile | null>(null);
+  const [entrySnapshotLoading, setEntrySnapshotLoading] = useState(false);
+  const [entrySnapshotLoaded, setEntrySnapshotLoaded] = useState(false);
+  const [buildingEntrySnapshot, setBuildingEntrySnapshot] = useState(false);
+  const [openDataStock, setOpenDataStock] = useState<OpenDataStockSnapshot | null>(null);
+  const [openDataStockLoading, setOpenDataStockLoading] = useState(false);
+  const [openDataStockLoaded, setOpenDataStockLoaded] = useState(false);
 
   useEffect(() => {
     Promise.all([fetchSnapshot(), fetchRecommendations()])
@@ -43,6 +66,34 @@ function App() {
       .catch((err) => setError(err instanceof Error ? err.message : "Could not load snapshot."))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (dashboardView !== "stocks" || openDataStock || openDataStockLoading || openDataStockLoaded) {
+      return;
+    }
+    setOpenDataStockLoading(true);
+    fetchOpenDataStock("GOOGL")
+      .then((snapshot) => setOpenDataStock(snapshot))
+      .catch((err) => setError(err instanceof Error ? err.message : "Could not load GOOGL open data."))
+      .finally(() => {
+        setOpenDataStockLoaded(true);
+        setOpenDataStockLoading(false);
+      });
+  }, [dashboardView, openDataStock, openDataStockLoaded, openDataStockLoading]);
+
+  useEffect(() => {
+    if (dashboardView !== "stocks" || entrySnapshot || entrySnapshotLoading || entrySnapshotLoaded) {
+      return;
+    }
+    setEntrySnapshotLoading(true);
+    fetchLatestEntrySnapshot()
+      .then((snapshot) => setEntrySnapshot(snapshot))
+      .catch((err) => setError(err instanceof Error ? err.message : "Could not load entry snapshot."))
+      .finally(() => {
+        setEntrySnapshotLoaded(true);
+        setEntrySnapshotLoading(false);
+      });
+  }, [dashboardView, entrySnapshot, entrySnapshotLoaded, entrySnapshotLoading]);
 
   const refresh = async () => {
     setLoading(true);
@@ -69,6 +120,34 @@ function App() {
       setError(err instanceof Error ? err.message : "Could not generate recommendations.");
     } finally {
       setAnalyzingPortfolio(false);
+    }
+  };
+
+  const findEntryOpportunities = async () => {
+    setBuildingEntrySnapshot(true);
+    setError(null);
+    try {
+      const snapshot = await buildEntrySnapshot(2000);
+      setEntrySnapshot(snapshot);
+      setEntrySnapshotLoaded(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not generate entry snapshot.");
+    } finally {
+      setBuildingEntrySnapshot(false);
+    }
+  };
+
+  const collectOpenDataStockFacts = async () => {
+    setOpenDataStockLoading(true);
+    setError(null);
+    try {
+      const snapshot = await refreshOpenDataStock("GOOGL");
+      setOpenDataStock(snapshot);
+      setOpenDataStockLoaded(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not collect GOOGL facts.");
+    } finally {
+      setOpenDataStockLoading(false);
     }
   };
 
@@ -271,6 +350,17 @@ function App() {
               <div className="section-heading">
                 <h2>Stocks</h2>
               </div>
+              <OpenDataStockTable
+                snapshot={openDataStock}
+                loading={openDataStockLoading}
+                onRefresh={collectOpenDataStockFacts}
+              />
+              <EntryOpportunities
+                snapshot={entrySnapshot}
+                loading={entrySnapshotLoading}
+                building={buildingEntrySnapshot}
+                onBuild={findEntryOpportunities}
+              />
               <HoldingsTable
                 title="Stock Positions"
                 holdings={stockHoldings}
