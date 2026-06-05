@@ -269,6 +269,41 @@ export type OpenDataStockSnapshot = {
   metrics: Record<string, OpenDataMetric>;
 };
 
+export type StockEntryAnalysisSection = {
+  assessment: string;
+  evidence: string[];
+  concerns: string[];
+};
+
+export type StockEntryDcaPlan = {
+  buy_now: number;
+  buy_dip_1: number;
+  buy_dip_2: number;
+};
+
+export type StockEntryAnalysis = {
+  ticker: string;
+  name?: string | null;
+  generated_at: string;
+  source_snapshot_generated_at?: string | null;
+  needs_more_data: boolean;
+  conviction: number;
+  summary: string;
+  opportunity_type:
+    | "Temporary selloff"
+    | "Quality compounder pullback"
+    | "Valuation reset"
+    | "Momentum continuation"
+    | "Falling knife risk"
+    | "Insufficient data";
+  business_health: StockEntryAnalysisSection;
+  price_opportunity: StockEntryAnalysisSection;
+  valuation: StockEntryAnalysisSection;
+  company_context: StockEntryAnalysisSection;
+  missing_data: string[];
+  dca_entry: StockEntryDcaPlan;
+};
+
 export type PortfolioSnapshot = {
   generated_at: string;
   base_currency: string;
@@ -404,8 +439,23 @@ export async function buildEntrySnapshot(limit = 2000): Promise<EntrySnapshotFil
   );
 }
 
+export async function fetchOpenDataStocks(): Promise<OpenDataStockSnapshot[]> {
+  return requestJson<OpenDataStockSnapshot[]>("/api/open-data/stocks");
+}
+
 export async function fetchOpenDataStock(ticker = "GOOGL"): Promise<OpenDataStockSnapshot> {
   return requestJson<OpenDataStockSnapshot>(`/api/open-data/stocks/${encodeURIComponent(ticker)}`);
+}
+
+export async function fetchOpenDataStockAnalysis(ticker = "GOOGL"): Promise<StockEntryAnalysis | null> {
+  try {
+    return await requestJson<StockEntryAnalysis>(`/api/open-data/stocks/${encodeURIComponent(ticker)}/analysis`);
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("No collected open-data facts")) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export async function refreshOpenDataStock(ticker = "GOOGL"): Promise<OpenDataStockSnapshot> {

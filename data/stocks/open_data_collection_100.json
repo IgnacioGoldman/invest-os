@@ -1,0 +1,5036 @@
+{
+  "mode": "universe_file",
+  "requested_count": 100,
+  "source": "data/stocks/stocks.json",
+  "skipped_tickers": [],
+  "min_coverage_percent": 0.0,
+  "collected_count": 100,
+  "failed_count": 0,
+  "skipped_low_fidelity_count": 0,
+  "results": [
+    {
+      "ticker": "AVGO",
+      "name": "Broadcom Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 100.0,
+      "dollar_volume": 19216130238.800003,
+      "cik": 1730168,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:34.215924+00:00",
+      "saved_path": "data/stocks/open_data/AVGO/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 6.8,
+        "opportunity_type": "Momentum continuation",
+        "business": "strong",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care."
+      ],
+      "duration_seconds": 0.68,
+      "attempts": 1
+    },
+    {
+      "ticker": "MRVL",
+      "name": "MARVELL TECHNOLOGY, INC",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 96.64,
+      "dollar_volume": 16333842484.6,
+      "cik": 1835632,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:34.109120+00:00",
+      "saved_path": "data/stocks/open_data/MRVL/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "solid",
+        "price": "no_dip",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 28,
+      "total_metrics": 31,
+      "coverage_percent": 90.32,
+      "collectable_metrics": 28,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_growth_yoy",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 3.07, comparison -1.02); YoY EPS growth is not meaningful."
+        },
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 3.07, comparison -0.19); 3-year EPS CAGR is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 4 annual values available for revenue.",
+        "Only 4 annual values available for eps_diluted.",
+        "Only 4 annual values available for gross_margin.",
+        "Only 4 annual values available for operating_margin.",
+        "Only 4 annual values available for net_margin.",
+        "Only 4 annual values available for free_cash_flow.",
+        "Only 4 annual values available for shares_diluted.",
+        "Only 4 historical valuation values available for pe.",
+        "Only 4 historical valuation values available for price_to_sales.",
+        "Only 4 historical valuation values available for ev_to_ebitda.",
+        "Only 4 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.6,
+      "attempts": 1
+    },
+    {
+      "ticker": "GOOG",
+      "name": "Alphabet Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Computer Software: Programming Data Processing",
+      "composite_score": 94.52,
+      "dollar_volume": 5174540533.9683,
+      "cik": 1652044,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:34.255869+00:00",
+      "saved_path": "data/stocks/open_data/GOOG/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 6.8,
+        "opportunity_type": "Quality compounder pullback",
+        "business": "strong",
+        "price": "pullback",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.67,
+      "attempts": 1
+    },
+    {
+      "ticker": "META",
+      "name": "Meta Platforms, Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Computer Software: Programming Data Processing",
+      "composite_score": 94.5,
+      "dollar_volume": 6577997222.160001,
+      "cik": 1326801,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:34.082859+00:00",
+      "saved_path": "data/stocks/open_data/META/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "better_spot",
+        "valuation": "fair",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.53,
+      "attempts": 1
+    },
+    {
+      "ticker": "ASML",
+      "name": "ASML HOLDING NV",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Technology",
+      "industry": "Industrial Machinery/Components",
+      "composite_score": 94.48,
+      "dollar_volume": 2214498679.94,
+      "cik": 937966,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:34.055343+00:00",
+      "saved_path": "data/stocks/open_data/ASML/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.6,
+        "opportunity_type": "Momentum continuation",
+        "business": "strong",
+        "price": "no_dip",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 historical valuation values available for pe.",
+        "Only 0 historical valuation values available for price_to_sales.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 0 historical valuation values available for fcf_yield.",
+        "Company-specific SEC filing context was unavailable from the deterministic provider."
+      ],
+      "duration_seconds": 0.39,
+      "attempts": 1
+    },
+    {
+      "ticker": "LLY",
+      "name": "ELI LILLY & Co",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Pharmaceutical Preparations",
+      "composite_score": 94.09,
+      "dollar_volume": 2130605588.16,
+      "cik": 59478,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:34.270758+00:00",
+      "saved_path": "data/stocks/open_data/LLY/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 6.8,
+        "opportunity_type": "Momentum continuation",
+        "business": "strong",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.66,
+      "attempts": 1
+    },
+    {
+      "ticker": "PLTR",
+      "name": "Palantir Technologies Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Computer Software: Prepackaged Software",
+      "composite_score": 93.96,
+      "dollar_volume": 3504412466.72,
+      "cik": 1321655,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:34.128864+00:00",
+      "saved_path": "data/stocks/open_data/PLTR/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 6.8,
+        "opportunity_type": "Temporary selloff",
+        "business": "strong",
+        "price": "deep_pullback",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 28,
+      "total_metrics": 31,
+      "coverage_percent": 90.32,
+      "collectable_metrics": 29,
+      "collectable_coverage_percent": 96.55,
+      "missing_metrics": [
+        "valuation.ev_to_ebitda"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 0.63, comparison -0.18); 3-year EPS CAGR is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 1 annual values available for debt.",
+        "Only 1 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.6,
+      "attempts": 1
+    },
+    {
+      "ticker": "CRWD",
+      "name": "CROWDSTRIKE HOLDINGS, INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Computer Software: Prepackaged Software",
+      "composite_score": 93.81,
+      "dollar_volume": 3237100448.3999996,
+      "cik": 1535527,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:34.183514+00:00",
+      "saved_path": "data/stocks/open_data/CRWD/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "weak",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 28,
+      "total_metrics": 31,
+      "coverage_percent": 90.32,
+      "collectable_metrics": 28,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_growth_yoy",
+          "reason": "EPS remains loss-making (latest -0.65); EPS growth is not meaningful."
+        },
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS remains loss-making (latest -0.65); EPS growth is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 4 annual values available for revenue.",
+        "Only 4 annual values available for eps_diluted.",
+        "Only 4 annual values available for gross_margin.",
+        "Only 4 annual values available for operating_margin.",
+        "Only 4 annual values available for net_margin.",
+        "Only 4 annual values available for free_cash_flow.",
+        "Only 4 annual values available for shares_diluted.",
+        "Only 4 historical valuation values available for pe.",
+        "Only 4 historical valuation values available for price_to_sales.",
+        "Only 4 historical valuation values available for ev_to_ebitda.",
+        "Only 4 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.6,
+      "attempts": 1
+    },
+    {
+      "ticker": "MU",
+      "name": "MICRON TECHNOLOGY INC",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 93.61,
+      "dollar_volume": 33251915067.199997,
+      "cik": 723125,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:34.881362+00:00",
+      "saved_path": "data/stocks/open_data/MU/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 6.8,
+        "opportunity_type": "Momentum continuation",
+        "business": "strong",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.93,
+      "attempts": 1
+    },
+    {
+      "ticker": "NFLX",
+      "name": "Netflix, Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Consumer Electronics/Video Chains",
+      "composite_score": 93.56,
+      "dollar_volume": 1521548979.9750001,
+      "cik": 1065280,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:35.074179+00:00",
+      "saved_path": "data/stocks/open_data/NFLX/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "falling",
+        "valuation": "fair",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.91,
+      "attempts": 1
+    },
+    {
+      "ticker": "AMD",
+      "name": "ADVANCED MICRO DEVICES INC",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 93.44,
+      "dollar_volume": 9058984825.0,
+      "cik": 2488,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:35.024206+00:00",
+      "saved_path": "data/stocks/open_data/AMD/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "mixed",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.84,
+      "attempts": 1
+    },
+    {
+      "ticker": "ORCL",
+      "name": "Oracle Corporation",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Computer Software: Prepackaged Software",
+      "composite_score": 93.35,
+      "dollar_volume": 2507334251.61,
+      "cik": 1341439,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:35.045384+00:00",
+      "saved_path": "data/stocks/open_data/ORCL/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 6.8,
+        "opportunity_type": "Momentum continuation",
+        "business": "strong",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin."
+      ],
+      "duration_seconds": 0.8,
+      "attempts": 1
+    },
+    {
+      "ticker": "TSM",
+      "name": "Taiwan Semiconductor Manufacturing Company Limited",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 93.34,
+      "dollar_volume": 2800203530.2227,
+      "cik": 1046179,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:34.823394+00:00",
+      "saved_path": "data/stocks/open_data/TSM/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.6,
+        "opportunity_type": "Momentum continuation",
+        "business": "strong",
+        "price": "no_dip",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "SEC companyfacts uses IFRS taxonomy. Foreign-currency fundamentals are supported; current valuation can use an explicit FX and ADR-ratio bridge, while historical valuation still needs historical FX handling.",
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care.",
+        "Only 1 historical valuation values available for pe.",
+        "Only 1 historical valuation values available for price_to_sales.",
+        "Only 1 historical valuation values available for ev_to_ebitda.",
+        "Only 1 historical valuation values available for fcf_yield.",
+        "Company-specific SEC filing context was unavailable from the deterministic provider."
+      ],
+      "duration_seconds": 0.51,
+      "attempts": 1
+    },
+    {
+      "ticker": "NVDA",
+      "name": "NVIDIA CORP",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 93.26,
+      "dollar_volume": 18261386814.48,
+      "cik": 1045810,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:35.055406+00:00",
+      "saved_path": "data/stocks/open_data/NVDA/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 6.8,
+        "opportunity_type": "Momentum continuation",
+        "business": "strong",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 4 annual values available for revenue.",
+        "Only 4 annual values available for eps_diluted.",
+        "Only 4 annual values available for gross_margin.",
+        "Only 4 annual values available for operating_margin.",
+        "Only 4 annual values available for net_margin.",
+        "Only 4 annual values available for free_cash_flow.",
+        "Only 4 annual values available for shares_diluted.",
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care.",
+        "Only 4 historical valuation values available for pe.",
+        "Only 4 historical valuation values available for price_to_sales.",
+        "Only 4 historical valuation values available for ev_to_ebitda.",
+        "Only 4 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.77,
+      "attempts": 1
+    },
+    {
+      "ticker": "AMZN",
+      "name": "AMAZON.COM, INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Catalog/Specialty Distribution",
+      "composite_score": 92.98,
+      "dollar_volume": 4356327472.455,
+      "cik": 1018724,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:35.273111+00:00",
+      "saved_path": "data/stocks/open_data/AMZN/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "better_spot",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 29,
+      "total_metrics": 31,
+      "coverage_percent": 93.55,
+      "collectable_metrics": 29,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 7.17, comparison -0.27); 3-year EPS CAGR is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.93,
+      "attempts": 1
+    },
+    {
+      "ticker": "TSLA",
+      "name": "Tesla,\u00a0Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Industrials",
+      "industry": "Auto Manufacturing",
+      "composite_score": 92.72,
+      "dollar_volume": 8404956883.504,
+      "cik": 1318605,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:35.106452+00:00",
+      "saved_path": "data/stocks/open_data/TSLA/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "weak",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.76,
+      "attempts": 1
+    },
+    {
+      "ticker": "SNDK",
+      "name": "Sandisk Corporation",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Electronic Components",
+      "composite_score": 92.67,
+      "dollar_volume": 13037242936.5,
+      "cik": 2023554,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:35.659290+00:00",
+      "saved_path": "data/stocks/open_data/SNDK/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "no_dip",
+        "valuation": "very_pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 24,
+      "total_metrics": 31,
+      "coverage_percent": 77.42,
+      "collectable_metrics": 29,
+      "collectable_coverage_percent": 82.76,
+      "missing_metrics": [
+        "business_health.revenue_cagr_3y",
+        "business_health.eps_cagr_3y",
+        "price_opportunity.change_2y",
+        "price_opportunity.change_5y",
+        "valuation.ev_to_ebitda"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_growth_yoy",
+          "reason": "EPS remains loss-making (latest -11.32); EPS growth is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Less than 5 annual fundamental rows were available.",
+        "Less than 5 annual valuation rows were available.",
+        "Only 2 annual values available for revenue.",
+        "Only 2 annual values available for eps_diluted.",
+        "Only 2 annual values available for gross_margin.",
+        "Only 2 annual values available for operating_margin.",
+        "Only 2 annual values available for net_margin.",
+        "Only 2 annual values available for free_cash_flow.",
+        "Only 2 annual values available for cash.",
+        "Only 1 annual values available for debt.",
+        "Only 2 annual values available for shares_diluted.",
+        "Only 0 historical valuation values available for pe.",
+        "Only 0 historical valuation values available for price_to_sales.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 0 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.98,
+      "attempts": 1
+    },
+    {
+      "ticker": "MSFT",
+      "name": "MICROSOFT CORPORATION",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Computer Software: Prepackaged Software",
+      "composite_score": 92.28,
+      "dollar_volume": 5303934162.1,
+      "cik": 789019,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:35.924648+00:00",
+      "saved_path": "data/stocks/open_data/MSFT/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 6.8,
+        "opportunity_type": "Temporary selloff",
+        "business": "strong",
+        "price": "better_spot",
+        "valuation": "fair",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.03,
+      "attempts": 1
+    },
+    {
+      "ticker": "INTC",
+      "name": "INTEL CORP",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 92.24,
+      "dollar_volume": 4861241652.96,
+      "cik": 50863,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:36.305402+00:00",
+      "saved_path": "data/stocks/open_data/INTC/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "weak",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 28,
+      "total_metrics": 31,
+      "coverage_percent": 90.32,
+      "collectable_metrics": 28,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_growth_yoy",
+          "reason": "EPS remains loss-making (latest -0.06); EPS growth is not meaningful."
+        },
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS remains loss-making (latest -0.06); EPS growth is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.29,
+      "attempts": 1
+    },
+    {
+      "ticker": "IBM",
+      "name": "INTERNATIONAL BUSINESS MACHINES CORP",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Computer Manufacturing",
+      "composite_score": 91.73,
+      "dollar_volume": 1385170982.15,
+      "cik": 51143,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:36.320295+00:00",
+      "saved_path": "data/stocks/open_data/IBM/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "solid",
+        "price": "better_spot",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 1.42,
+      "attempts": 1
+    },
+    {
+      "ticker": "AMAT",
+      "name": "APPLIED MATERIALS INC /DE",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 91.63,
+      "dollar_volume": 1296414723.66,
+      "cik": 6951,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:36.098611+00:00",
+      "saved_path": "data/stocks/open_data/AMAT/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "solid",
+        "price": "no_dip",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.01,
+      "attempts": 1
+    },
+    {
+      "ticker": "WMT",
+      "name": "WALMART INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Department/Specialty Retail Stores",
+      "composite_score": 91.51,
+      "dollar_volume": 1184704995.22,
+      "cik": 104169,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:36.279979+00:00",
+      "saved_path": "data/stocks/open_data/WMT/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "weak",
+        "price": "better_spot",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 4 annual values available for revenue.",
+        "Only 4 annual values available for eps_diluted.",
+        "Only 4 annual values available for gross_margin.",
+        "Only 4 annual values available for operating_margin.",
+        "Only 4 annual values available for net_margin.",
+        "Only 4 annual values available for free_cash_flow.",
+        "Only 4 annual values available for shares_diluted.",
+        "Only 4 historical valuation values available for pe.",
+        "Only 4 historical valuation values available for price_to_sales.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 4 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 1.29,
+      "attempts": 1
+    },
+    {
+      "ticker": "DELL",
+      "name": "Dell Technologies Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Computer Manufacturing",
+      "composite_score": 91.24,
+      "dollar_volume": 2747248604.0099998,
+      "cik": 1571996,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:36.045438+00:00",
+      "saved_path": "data/stocks/open_data/DELL/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "weak",
+        "price": "strong_trend",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 4 annual values available for revenue.",
+        "Only 4 annual values available for eps_diluted.",
+        "Only 4 annual values available for gross_margin.",
+        "Only 4 annual values available for operating_margin.",
+        "Only 4 annual values available for net_margin.",
+        "Only 4 annual values available for free_cash_flow.",
+        "Only 4 annual values available for cash.",
+        "Only 4 annual values available for debt.",
+        "Only 4 annual values available for shares_diluted.",
+        "Only 4 historical valuation values available for pe.",
+        "Only 4 historical valuation values available for price_to_sales.",
+        "Only 4 historical valuation values available for ev_to_ebitda.",
+        "Only 4 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 1.01,
+      "attempts": 1
+    },
+    {
+      "ticker": "JPM",
+      "name": "JPMORGAN CHASE & CO",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Major Banks",
+      "composite_score": 90.51,
+      "dollar_volume": 1136518906.16,
+      "cik": 19617,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:36.525332+00:00",
+      "saved_path": "data/stocks/open_data/JPM/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "no_dip",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 25,
+      "total_metrics": 31,
+      "coverage_percent": 80.65,
+      "collectable_metrics": 25,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        },
+        {
+          "metric": "business_health.operating_margin",
+          "reason": "Operating margin is not meaningful for many financial businesses because interest income, credit costs, and balance-sheet funding do not map cleanly to normal operating-company margins."
+        },
+        {
+          "metric": "business_health.free_cash_flow",
+          "reason": "Free cash flow is not meaningful for many financial businesses because operating cash flow is distorted by balance-sheet lending, deposits, and financing activity."
+        },
+        {
+          "metric": "business_health.roic",
+          "reason": "ROIC is not meaningful for many financial businesses because invested capital is not comparable to operating-company capital."
+        },
+        {
+          "metric": "valuation.ev_to_ebitda",
+          "reason": "EV/EBITDA is not meaningful for many financial businesses because debt is part of the operating model."
+        },
+        {
+          "metric": "valuation.fcf_yield",
+          "reason": "FCF yield is not meaningful for many financial businesses because free cash flow is not comparable to operating-company free cash flow."
+        }
+      ],
+      "proxy_metrics": [
+        "valuation.forward_pe",
+        "valuation.peg"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 annual values available for free_cash_flow.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 0 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 1.49,
+      "attempts": 1
+    },
+    {
+      "ticker": "CSCO",
+      "name": "CISCO SYSTEMS, INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Communication Services",
+      "industry": "Computer Communications Equipment",
+      "composite_score": 90.18,
+      "dollar_volume": 1115292189.06,
+      "cik": 858877,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:37.036770+00:00",
+      "saved_path": "data/stocks/open_data/CSCO/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "solid",
+        "price": "no_dip",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.31,
+      "attempts": 1
+    },
+    {
+      "ticker": "COST",
+      "name": "COSTCO WHOLESALE CORP /NEW",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Department/Specialty Retail Stores",
+      "composite_score": 89.66,
+      "dollar_volume": 1060474974.65,
+      "cik": 909832,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:37.104759+00:00",
+      "saved_path": "data/stocks/open_data/COST/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "weak",
+        "price": "better_spot",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.1,
+      "attempts": 1
+    },
+    {
+      "ticker": "CAT",
+      "name": "CATERPILLAR INC",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Industrials",
+      "industry": "Construction/Ag Equipment/Trucks",
+      "composite_score": 88.99,
+      "dollar_volume": 1052710681.4799999,
+      "cik": 18230,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:37.451416+00:00",
+      "saved_path": "data/stocks/open_data/CAT/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "mixed",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.38,
+      "attempts": 1
+    },
+    {
+      "ticker": "GLW",
+      "name": "CORNING INC /NY",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Industrials",
+      "industry": "Telecommunications Equipment",
+      "composite_score": 87.85,
+      "dollar_volume": 1324252926.8400002,
+      "cik": 24741,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:37.342488+00:00",
+      "saved_path": "data/stocks/open_data/GLW/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 29,
+      "total_metrics": 31,
+      "coverage_percent": 93.55,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 93.55,
+      "missing_metrics": [
+        "business_health.free_cash_flow",
+        "valuation.fcf_yield"
+      ],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for free_cash_flow.",
+        "Only 0 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 1.38,
+      "attempts": 1
+    },
+    {
+      "ticker": "V",
+      "name": "VISA INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Business Services",
+      "composite_score": 86.96,
+      "dollar_volume": 872617007.6500001,
+      "cik": 1403161,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:37.460134+00:00",
+      "saved_path": "data/stocks/open_data/V/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "better_spot",
+        "valuation": "fair",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 27,
+      "total_metrics": 31,
+      "coverage_percent": 87.1,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 90.0,
+      "missing_metrics": [
+        "business_health.eps_growth_yoy",
+        "business_health.eps_cagr_3y",
+        "business_health.gross_margin"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for eps_diluted.",
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for shares_diluted.",
+        "Only 0 historical valuation values available for pe.",
+        "Only 0 historical valuation values available for price_to_sales.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 0 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 1.1,
+      "attempts": 1
+    },
+    {
+      "ticker": "BAC",
+      "name": "BANK OF AMERICA CORP /DE/",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Major Banks",
+      "composite_score": 86.42,
+      "dollar_volume": 914224216.87,
+      "cik": 70858,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:37.493463+00:00",
+      "saved_path": "data/stocks/open_data/BAC/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "no_dip",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 25,
+      "total_metrics": 31,
+      "coverage_percent": 80.65,
+      "collectable_metrics": 25,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        },
+        {
+          "metric": "business_health.operating_margin",
+          "reason": "Operating margin is not meaningful for many financial businesses because interest income, credit costs, and balance-sheet funding do not map cleanly to normal operating-company margins."
+        },
+        {
+          "metric": "business_health.free_cash_flow",
+          "reason": "Free cash flow is not meaningful for many financial businesses because operating cash flow is distorted by balance-sheet lending, deposits, and financing activity."
+        },
+        {
+          "metric": "business_health.roic",
+          "reason": "ROIC is not meaningful for many financial businesses because invested capital is not comparable to operating-company capital."
+        },
+        {
+          "metric": "valuation.ev_to_ebitda",
+          "reason": "EV/EBITDA is not meaningful for many financial businesses because debt is part of the operating model."
+        },
+        {
+          "metric": "valuation.fcf_yield",
+          "reason": "FCF yield is not meaningful for many financial businesses because free cash flow is not comparable to operating-company free cash flow."
+        }
+      ],
+      "proxy_metrics": [
+        "valuation.forward_pe",
+        "valuation.peg"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 annual values available for free_cash_flow.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 0 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 1.1,
+      "attempts": 1
+    },
+    {
+      "ticker": "GS",
+      "name": "The Goldman Sachs Group, Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Investment Bankers/Brokers/Service",
+      "composite_score": 85.97,
+      "dollar_volume": 881106576.3,
+      "cik": 886982,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:37.468415+00:00",
+      "saved_path": "data/stocks/open_data/GS/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "no_dip",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 27,
+      "total_metrics": 31,
+      "coverage_percent": 87.1,
+      "collectable_metrics": 27,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        },
+        {
+          "metric": "business_health.operating_margin",
+          "reason": "Operating margin is not meaningful for many financial businesses because interest income, credit costs, and balance-sheet funding do not map cleanly to normal operating-company margins."
+        },
+        {
+          "metric": "business_health.roic",
+          "reason": "ROIC is not meaningful for many financial businesses because invested capital is not comparable to operating-company capital."
+        },
+        {
+          "metric": "valuation.ev_to_ebitda",
+          "reason": "EV/EBITDA is not meaningful for many financial businesses because debt is part of the operating model."
+        }
+      ],
+      "proxy_metrics": [
+        "valuation.forward_pe",
+        "valuation.peg"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 annual values available for debt.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.98,
+      "attempts": 1
+    },
+    {
+      "ticker": "LITE",
+      "name": "Lumentum Holdings Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Communication Services",
+      "industry": "Telecommunications Equipment",
+      "composite_score": 85.57,
+      "dollar_volume": 2983499589.96,
+      "cik": 1633978,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:37.609524+00:00",
+      "saved_path": "data/stocks/open_data/LITE/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "mixed",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 29,
+      "total_metrics": 31,
+      "coverage_percent": 93.55,
+      "collectable_metrics": 29,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_growth_yoy",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 0.37, comparison -8.12); YoY EPS growth is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 4 annual values available for debt.",
+        "Only 4 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.93,
+      "attempts": 1
+    },
+    {
+      "ticker": "CIEN",
+      "name": "Ciena Corp",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Utilities",
+      "industry": "Telecommunications Equipment",
+      "composite_score": 84.7,
+      "dollar_volume": 2221898097.19,
+      "cik": 936395,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:37.971815+00:00",
+      "saved_path": "data/stocks/open_data/CIEN/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "mixed",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.88,
+      "attempts": 1
+    },
+    {
+      "ticker": "HOOD",
+      "name": "Robinhood Markets, Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Investment Bankers/Brokers/Service",
+      "composite_score": 83.97,
+      "dollar_volume": 1327497645.25,
+      "cik": 1783879,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:37.931227+00:00",
+      "saved_path": "data/stocks/open_data/HOOD/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "falling",
+        "valuation": "very_pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 22,
+      "total_metrics": 31,
+      "coverage_percent": 70.97,
+      "collectable_metrics": 25,
+      "collectable_coverage_percent": 88.0,
+      "missing_metrics": [
+        "business_health.debt",
+        "business_health.debt_to_equity",
+        "price_opportunity.change_5y"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 2.05, comparison -1.17); 3-year EPS CAGR is not meaningful."
+        },
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        },
+        {
+          "metric": "business_health.operating_margin",
+          "reason": "Operating margin is not meaningful for many financial businesses because interest income, credit costs, and balance-sheet funding do not map cleanly to normal operating-company margins."
+        },
+        {
+          "metric": "business_health.roic",
+          "reason": "ROIC is not meaningful for many financial businesses because invested capital is not comparable to operating-company capital."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        },
+        {
+          "metric": "valuation.ev_to_ebitda",
+          "reason": "EV/EBITDA is not meaningful for many financial businesses because debt is part of the operating model."
+        }
+      ],
+      "proxy_metrics": [
+        "valuation.forward_pe"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 2 annual values available for free_cash_flow.",
+        "Only 0 annual values available for debt.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 2 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.84,
+      "attempts": 1
+    },
+    {
+      "ticker": "XOM",
+      "name": "Exxon Mobil Corporation",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Energy",
+      "industry": "Integrated oil Companies",
+      "composite_score": 83.96,
+      "dollar_volume": 605791643.45,
+      "cik": 34088,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:38.134759+00:00",
+      "saved_path": "data/stocks/open_data/XOM/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "strong_trend",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 26,
+      "total_metrics": 31,
+      "coverage_percent": 83.87,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 86.67,
+      "missing_metrics": [
+        "business_health.gross_margin",
+        "business_health.operating_margin",
+        "business_health.roic",
+        "valuation.ev_to_ebitda"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "valuation.forward_pe"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.72,
+      "attempts": 1
+    },
+    {
+      "ticker": "RKLB",
+      "name": "Rocket Lab Corp",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Industrials",
+      "industry": "Military/Government/Technical",
+      "composite_score": 83.53,
+      "dollar_volume": 1604846844.6,
+      "cik": 1819994,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:47.913893+00:00",
+      "saved_path": "data/stocks/open_data/RKLB/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "weak",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 27,
+      "total_metrics": 31,
+      "coverage_percent": 87.1,
+      "collectable_metrics": 27,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_growth_yoy",
+          "reason": "EPS remains loss-making (latest -0.37); EPS growth is not meaningful."
+        },
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS remains loss-making (latest -0.37); EPS growth is not meaningful."
+        },
+        {
+          "metric": "valuation.forward_pe",
+          "reason": "Trailing EPS is loss-making; forward PE proxy is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Free public forward PE estimate was unavailable; forward PE remains a SEC-derived proxy."
+      ],
+      "duration_seconds": 10.41,
+      "attempts": 1
+    },
+    {
+      "ticker": "ANET",
+      "name": "Arista Networks,\u00a0Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Communication Services",
+      "industry": "Computer Communications Equipment",
+      "composite_score": 83.33,
+      "dollar_volume": 898707820.0500001,
+      "cik": 1596532,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:38.295166+00:00",
+      "saved_path": "data/stocks/open_data/ANET/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 6.8,
+        "opportunity_type": "Momentum continuation",
+        "business": "strong",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for debt.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.85,
+      "attempts": 1
+    },
+    {
+      "ticker": "MA",
+      "name": "Mastercard Incorporated",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Business Services",
+      "composite_score": 82.46,
+      "dollar_volume": 682164533.84,
+      "cik": 1141391,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:38.357523+00:00",
+      "saved_path": "data/stocks/open_data/MA/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "better_spot",
+        "valuation": "cheap",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 96.77,
+      "missing_metrics": [
+        "business_health.gross_margin"
+      ],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin."
+      ],
+      "duration_seconds": 1.01,
+      "attempts": 1
+    },
+    {
+      "ticker": "BE",
+      "name": "BLOOM ENERGY CORPORATION",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Energy",
+      "industry": "Industrial Machinery/Components",
+      "composite_score": 81.15,
+      "dollar_volume": 984572165.16,
+      "cik": 1664703,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:38.307990+00:00",
+      "saved_path": "data/stocks/open_data/BE/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "weak",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 28,
+      "total_metrics": 31,
+      "coverage_percent": 90.32,
+      "collectable_metrics": 28,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_growth_yoy",
+          "reason": "EPS remains loss-making (latest -0.37); EPS growth is not meaningful."
+        },
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS remains loss-making (latest -0.37); EPS growth is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.82,
+      "attempts": 1
+    },
+    {
+      "ticker": "WFC",
+      "name": "WELLS        FARGO & COMPANY/MN",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Major Banks",
+      "composite_score": 79.03,
+      "dollar_volume": 649003378.18,
+      "cik": 72971,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:38.523192+00:00",
+      "saved_path": "data/stocks/open_data/WFC/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "better_spot",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 25,
+      "total_metrics": 31,
+      "coverage_percent": 80.65,
+      "collectable_metrics": 25,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        },
+        {
+          "metric": "business_health.operating_margin",
+          "reason": "Operating margin is not meaningful for many financial businesses because interest income, credit costs, and balance-sheet funding do not map cleanly to normal operating-company margins."
+        },
+        {
+          "metric": "business_health.free_cash_flow",
+          "reason": "Free cash flow is not meaningful for many financial businesses because operating cash flow is distorted by balance-sheet lending, deposits, and financing activity."
+        },
+        {
+          "metric": "business_health.roic",
+          "reason": "ROIC is not meaningful for many financial businesses because invested capital is not comparable to operating-company capital."
+        },
+        {
+          "metric": "valuation.ev_to_ebitda",
+          "reason": "EV/EBITDA is not meaningful for many financial businesses because debt is part of the operating model."
+        },
+        {
+          "metric": "valuation.fcf_yield",
+          "reason": "FCF yield is not meaningful for many financial businesses because free cash flow is not comparable to operating-company free cash flow."
+        }
+      ],
+      "proxy_metrics": [
+        "valuation.forward_pe",
+        "valuation.peg"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 annual values available for free_cash_flow.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 0 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.87,
+      "attempts": 1
+    },
+    {
+      "ticker": "JNJ",
+      "name": "Johnson & Johnson",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Pharmaceutical Preparations",
+      "composite_score": 78.94,
+      "dollar_volume": 524526263.82,
+      "cik": 200406,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:39.001640+00:00",
+      "saved_path": "data/stocks/open_data/JNJ/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "solid",
+        "price": "strong_trend",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 1.09,
+      "attempts": 1
+    },
+    {
+      "ticker": "HD",
+      "name": "HOME DEPOT,\u00a0INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "RETAIL: Building Materials",
+      "composite_score": 78.93,
+      "dollar_volume": 524219148.59,
+      "cik": 354950,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:38.892178+00:00",
+      "saved_path": "data/stocks/open_data/HD/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "deep_pullback",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 4 annual values available for revenue.",
+        "Only 4 annual values available for eps_diluted.",
+        "Only 4 annual values available for gross_margin.",
+        "Only 4 annual values available for operating_margin.",
+        "Only 4 annual values available for net_margin.",
+        "Only 4 annual values available for free_cash_flow.",
+        "Only 4 annual values available for shares_diluted.",
+        "Only 4 historical valuation values available for pe.",
+        "Only 4 historical valuation values available for price_to_sales.",
+        "Only 4 historical valuation values available for ev_to_ebitda.",
+        "Only 4 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 1.05,
+      "attempts": 1
+    },
+    {
+      "ticker": "BA",
+      "name": "THE BOEING COMPANY",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Industrials",
+      "industry": "Aerospace",
+      "composite_score": 78.64,
+      "dollar_volume": 633648351.0400001,
+      "cik": 12927,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:39.033731+00:00",
+      "saved_path": "data/stocks/open_data/BA/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "weak",
+        "price": "deep_pullback",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 28,
+      "total_metrics": 31,
+      "coverage_percent": 90.32,
+      "collectable_metrics": 28,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_growth_yoy",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 2.48, comparison -18.36); YoY EPS growth is not meaningful."
+        },
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 2.48, comparison -8.3); 3-year EPS CAGR is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.83,
+      "attempts": 1
+    },
+    {
+      "ticker": "C",
+      "name": "Citigroup Inc",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Major Banks",
+      "composite_score": 77.22,
+      "dollar_volume": 573942851.965,
+      "cik": 831001,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:39.399364+00:00",
+      "saved_path": "data/stocks/open_data/C/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "mixed",
+        "price": "strong_trend",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 1.08,
+      "attempts": 1
+    },
+    {
+      "ticker": "ASTS",
+      "name": "AST SpaceMobile, Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Telecommunications Equipment",
+      "composite_score": 77.06,
+      "dollar_volume": 1067141702.9,
+      "cik": 1780312,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:47.961941+00:00",
+      "saved_path": "data/stocks/open_data/ASTS/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "weak",
+        "price": "strong_trend",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 27,
+      "total_metrics": 31,
+      "coverage_percent": 87.1,
+      "collectable_metrics": 27,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_growth_yoy",
+          "reason": "EPS remains loss-making (latest -5.634); EPS growth is not meaningful."
+        },
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS remains loss-making (latest -5.634); EPS growth is not meaningful."
+        },
+        {
+          "metric": "valuation.forward_pe",
+          "reason": "Trailing EPS is loss-making; forward PE proxy is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for eps_diluted.",
+        "Only 2 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 4 annual values available for net_margin.",
+        "Only 3 annual values available for shares_diluted.",
+        "Only 3 historical valuation values available for pe.",
+        "Only 2 historical valuation values available for price_to_sales.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 3 historical valuation values available for fcf_yield.",
+        "Free public forward PE estimate was unavailable; forward PE remains a SEC-derived proxy."
+      ],
+      "duration_seconds": 9.61,
+      "attempts": 1
+    },
+    {
+      "ticker": "UBER",
+      "name": "UBER TECHNOLOGIES, INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Business Services",
+      "composite_score": 76.85,
+      "dollar_volume": 628968600.3149999,
+      "cik": 1543151,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:39.192793+00:00",
+      "saved_path": "data/stocks/open_data/UBER/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "deep_pullback",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 28,
+      "total_metrics": 31,
+      "coverage_percent": 90.32,
+      "collectable_metrics": 29,
+      "collectable_coverage_percent": 96.55,
+      "missing_metrics": [
+        "business_health.gross_margin"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 4.73, comparison -4.65); 3-year EPS CAGR is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin."
+      ],
+      "duration_seconds": 0.84,
+      "attempts": 1
+    },
+    {
+      "ticker": "ABBV",
+      "name": "AbbVie Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Pharmaceutical Preparations",
+      "composite_score": 76.76,
+      "dollar_volume": 538920319.47,
+      "cik": 1551152,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:39.510143+00:00",
+      "saved_path": "data/stocks/open_data/ABBV/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "weak",
+        "price": "better_spot",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.98,
+      "attempts": 1
+    },
+    {
+      "ticker": "CVX",
+      "name": "Chevron Corp",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Energy",
+      "industry": "Integrated oil Companies",
+      "composite_score": 75.7,
+      "dollar_volume": 327037998.04499996,
+      "cik": 93410,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:39.872127+00:00",
+      "saved_path": "data/stocks/open_data/CVX/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "weak",
+        "price": "strong_trend",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.88,
+      "attempts": 1
+    },
+    {
+      "ticker": "MS",
+      "name": "MORGAN STANLEY",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Investment Bankers/Brokers/Service",
+      "composite_score": 75.48,
+      "dollar_volume": 448462422.0,
+      "cik": 895421,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:39.907666+00:00",
+      "saved_path": "data/stocks/open_data/MS/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "no_dip",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 25,
+      "total_metrics": 31,
+      "coverage_percent": 80.65,
+      "collectable_metrics": 25,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        },
+        {
+          "metric": "business_health.operating_margin",
+          "reason": "Operating margin is not meaningful for many financial businesses because interest income, credit costs, and balance-sheet funding do not map cleanly to normal operating-company margins."
+        },
+        {
+          "metric": "business_health.free_cash_flow",
+          "reason": "Free cash flow is not meaningful for many financial businesses because operating cash flow is distorted by balance-sheet lending, deposits, and financing activity."
+        },
+        {
+          "metric": "business_health.roic",
+          "reason": "ROIC is not meaningful for many financial businesses because invested capital is not comparable to operating-company capital."
+        },
+        {
+          "metric": "valuation.ev_to_ebitda",
+          "reason": "EV/EBITDA is not meaningful for many financial businesses because debt is part of the operating model."
+        },
+        {
+          "metric": "valuation.fcf_yield",
+          "reason": "FCF yield is not meaningful for many financial businesses because free cash flow is not comparable to operating-company free cash flow."
+        }
+      ],
+      "proxy_metrics": [
+        "valuation.forward_pe",
+        "valuation.peg"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 annual values available for free_cash_flow.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 0 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.87,
+      "attempts": 1
+    },
+    {
+      "ticker": "T",
+      "name": "AT&T INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Communication Services",
+      "industry": "Telecommunications Equipment",
+      "composite_score": 75.32,
+      "dollar_volume": 618642337.855,
+      "cik": 732717,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:39.800359+00:00",
+      "saved_path": "data/stocks/open_data/T/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "falling",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 29,
+      "total_metrics": 31,
+      "coverage_percent": 93.55,
+      "collectable_metrics": 29,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 3.04, comparison -1.13); 3-year EPS CAGR is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin."
+      ],
+      "duration_seconds": 0.86,
+      "attempts": 1
+    },
+    {
+      "ticker": "ABT",
+      "name": "ABBOTT LABORATORIES",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Pharmaceutical Preparations",
+      "composite_score": 74.92,
+      "dollar_volume": 615827647.0038,
+      "cik": 1800,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:39.982910+00:00",
+      "saved_path": "data/stocks/open_data/ABT/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "falling",
+        "valuation": "cheap",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.81,
+      "attempts": 1
+    },
+    {
+      "ticker": "MRK",
+      "name": "Merck & Co., Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Pharmaceutical Preparations",
+      "composite_score": 73.87,
+      "dollar_volume": 437539635.53499997,
+      "cik": 310158,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:40.242194+00:00",
+      "saved_path": "data/stocks/open_data/MRK/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "mixed",
+        "price": "strong_trend",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for operating_margin.",
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.89,
+      "attempts": 1
+    },
+    {
+      "ticker": "COIN",
+      "name": "Coinbase Global, Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Finance: Consumer Services",
+      "composite_score": 73.45,
+      "dollar_volume": 768487583.46,
+      "cik": 1679788,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:40.366809+00:00",
+      "saved_path": "data/stocks/open_data/COIN/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "falling",
+        "valuation": "very_pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 28,
+      "total_metrics": 31,
+      "coverage_percent": 90.32,
+      "collectable_metrics": 28,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 4.45, comparison -11.83); 3-year EPS CAGR is not meaningful."
+        },
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 2 annual values available for free_cash_flow.",
+        "Only 2 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 1.02,
+      "attempts": 1
+    },
+    {
+      "ticker": "PG",
+      "name": "PROCTER & GAMBLE CO",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Package Goods/Cosmetics",
+      "composite_score": 73.45,
+      "dollar_volume": 393252073.2,
+      "cik": 80424,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:40.737528+00:00",
+      "saved_path": "data/stocks/open_data/PG/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "better_spot",
+        "valuation": "cheap",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.95,
+      "attempts": 1
+    },
+    {
+      "ticker": "LIN",
+      "name": "LINDE PLC",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Materials",
+      "industry": "Major Chemicals",
+      "composite_score": 72.96,
+      "dollar_volume": 472793832.12,
+      "cik": 1707925,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:40.822546+00:00",
+      "saved_path": "data/stocks/open_data/LIN/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "no_dip",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 96.77,
+      "missing_metrics": [
+        "business_health.gross_margin"
+      ],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin."
+      ],
+      "duration_seconds": 1.01,
+      "attempts": 1
+    },
+    {
+      "ticker": "BKNG",
+      "name": "Booking Holdings Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Transportation Services",
+      "composite_score": 72.6,
+      "dollar_volume": 501640120.0,
+      "cik": 1075531,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:40.860033+00:00",
+      "saved_path": "data/stocks/open_data/BKNG/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "weak",
+        "price": "deep_pullback",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for net_margin.",
+        "Only 0 historical valuation values available for pe."
+      ],
+      "duration_seconds": 1.01,
+      "attempts": 1
+    },
+    {
+      "ticker": "KO",
+      "name": "COCA COLA CO",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Defensive",
+      "industry": "Beverages (Production/Distribution)",
+      "composite_score": 72.57,
+      "dollar_volume": 402651386.56,
+      "cik": 21344,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:41.273609+00:00",
+      "saved_path": "data/stocks/open_data/KO/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "no_dip",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.21,
+      "attempts": 1
+    },
+    {
+      "ticker": "HON",
+      "name": "Honeywell International Inc",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Industrials",
+      "industry": "Aerospace",
+      "composite_score": 72.26,
+      "dollar_volume": 506261038.41,
+      "cik": 773840,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:41.265711+00:00",
+      "saved_path": "data/stocks/open_data/HON/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "weak",
+        "price": "better_spot",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 4 annual values available for operating_margin.",
+        "Only 4 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 1.08,
+      "attempts": 1
+    },
+    {
+      "ticker": "MDT",
+      "name": "Medtronic plc",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Electromedical & Electrotherapeutic Apparatus",
+      "composite_score": 71.97,
+      "dollar_volume": 600598249.9499999,
+      "cik": 1613103,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:41.589063+00:00",
+      "saved_path": "data/stocks/open_data/MDT/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "deep_pullback",
+        "valuation": "fair",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.02,
+      "attempts": 1
+    },
+    {
+      "ticker": "PEP",
+      "name": "PepsiCo, Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Defensive",
+      "industry": "Beverages (Production/Distribution)",
+      "composite_score": 71.36,
+      "dollar_volume": 412975664.71050006,
+      "cik": 77476,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:41.784551+00:00",
+      "saved_path": "data/stocks/open_data/PEP/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "deep_pullback",
+        "valuation": "fair",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.94,
+      "attempts": 1
+    },
+    {
+      "ticker": "VZ",
+      "name": "VERIZON COMMUNICATIONS INC",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Communication Services",
+      "industry": "Telecommunications Equipment",
+      "composite_score": 71.16,
+      "dollar_volume": 458792082.45000005,
+      "cik": 732712,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:41.762168+00:00",
+      "saved_path": "data/stocks/open_data/VZ/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "deep_pullback",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for free_cash_flow.",
+        "Only 0 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.87,
+      "attempts": 1
+    },
+    {
+      "ticker": "TMO",
+      "name": "THERMO FISHER SCIENTIFIC INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Industrials",
+      "industry": "Industrial Machinery/Components",
+      "composite_score": 70.81,
+      "dollar_volume": 361370487.90000004,
+      "cik": 97745,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:41.773703+00:00",
+      "saved_path": "data/stocks/open_data/TMO/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "deep_pullback",
+        "valuation": "fair",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 96.77,
+      "missing_metrics": [
+        "business_health.gross_margin"
+      ],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin."
+      ],
+      "duration_seconds": 0.87,
+      "attempts": 1
+    },
+    {
+      "ticker": "ISRG",
+      "name": "Intuitive Surgical, Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Healthcare",
+      "industry": "Industrial Specialties",
+      "composite_score": 70.79,
+      "dollar_volume": 426485757.34999996,
+      "cik": 1035267,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:42.177467+00:00",
+      "saved_path": "data/stocks/open_data/ISRG/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "falling",
+        "valuation": "very_pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 27,
+      "total_metrics": 31,
+      "coverage_percent": 87.1,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 87.1,
+      "missing_metrics": [
+        "business_health.roic",
+        "business_health.debt",
+        "business_health.debt_to_equity",
+        "valuation.ev_to_ebitda"
+      ],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "valuation.forward_pe",
+        "valuation.peg"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for debt.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.81,
+      "attempts": 1
+    },
+    {
+      "ticker": "CRCL",
+      "name": "CIRCLE INTERNET GROUP, INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Finance: Consumer Services",
+      "composite_score": 70.73,
+      "dollar_volume": 673736715.5830001,
+      "cik": 1876042,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:41.943292+00:00",
+      "saved_path": "data/stocks/open_data/CRCL/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "unclear",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality.",
+          "Enough price-history facts to judge whether the stock is actually offering a useful pullback."
+        ]
+      },
+      "available_metrics": 20,
+      "total_metrics": 31,
+      "coverage_percent": 64.52,
+      "collectable_metrics": 25,
+      "collectable_coverage_percent": 80.0,
+      "missing_metrics": [
+        "business_health.debt",
+        "business_health.debt_to_equity",
+        "price_opportunity.change_1y",
+        "price_opportunity.change_2y",
+        "price_opportunity.change_5y"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_growth_yoy",
+          "reason": "EPS remains loss-making (latest -0.44); EPS growth is not meaningful."
+        },
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS remains loss-making (latest -1.029); EPS growth is not meaningful."
+        },
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        },
+        {
+          "metric": "business_health.roic",
+          "reason": "ROIC is not meaningful for many financial businesses because invested capital is not comparable to operating-company capital."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        },
+        {
+          "metric": "valuation.ev_to_ebitda",
+          "reason": "EV/EBITDA is not meaningful for many financial businesses because debt is part of the operating model."
+        }
+      ],
+      "proxy_metrics": [
+        "valuation.forward_pe"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Less than 5 annual fundamental rows were available.",
+        "Less than 5 annual valuation rows were available.",
+        "Only 3 annual values available for revenue.",
+        "Only 3 annual values available for eps_diluted.",
+        "Only 0 annual values available for gross_margin.",
+        "Only 3 annual values available for operating_margin.",
+        "Only 3 annual values available for net_margin.",
+        "Only 3 annual values available for free_cash_flow.",
+        "Only 3 annual values available for cash.",
+        "Only 0 annual values available for debt.",
+        "Only 3 annual values available for shares_diluted.",
+        "Only 1 historical valuation values available for pe.",
+        "Only 1 historical valuation values available for price_to_sales.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 1 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.74,
+      "attempts": 1
+    },
+    {
+      "ticker": "GILD",
+      "name": "GILEAD SCIENCES, INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Biological Products (No Diagnostic Substances)",
+      "composite_score": 70.43,
+      "dollar_volume": 434336547.89,
+      "cik": 882095,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:42.385868+00:00",
+      "saved_path": "data/stocks/open_data/GILD/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "better_spot",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care."
+      ],
+      "duration_seconds": 0.87,
+      "attempts": 1
+    },
+    {
+      "ticker": "BSX",
+      "name": "BOSTON SCIENTIFIC CORP",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Healthcare",
+      "industry": "Medical/Dental Instruments",
+      "composite_score": 70.37,
+      "dollar_volume": 513838250.64,
+      "cik": 885725,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:42.712874+00:00",
+      "saved_path": "data/stocks/open_data/BSX/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "solid",
+        "price": "falling",
+        "valuation": "cheap",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.92,
+      "attempts": 1
+    },
+    {
+      "ticker": "AXP",
+      "name": "AMERICAN EXPRESS CO",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Finance: Consumer Services",
+      "composite_score": 70.29,
+      "dollar_volume": 371836068.049,
+      "cik": 4962,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:42.586927+00:00",
+      "saved_path": "data/stocks/open_data/AXP/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "better_spot",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.92,
+      "attempts": 1
+    },
+    {
+      "ticker": "TMUS",
+      "name": "T-Mobile US, Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Communication Services",
+      "industry": "Telecommunications Equipment",
+      "composite_score": 69.63,
+      "dollar_volume": 378700433.76,
+      "cik": 1283699,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:42.600463+00:00",
+      "saved_path": "data/stocks/open_data/TMUS/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "solid",
+        "price": "falling",
+        "valuation": "cheap",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin."
+      ],
+      "duration_seconds": 0.92,
+      "attempts": 1
+    },
+    {
+      "ticker": "MCD",
+      "name": "McDONALD\u2019S CORPORATION",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Restaurants",
+      "composite_score": 69.63,
+      "dollar_volume": 365517566.55,
+      "cik": 63908,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:42.960996+00:00",
+      "saved_path": "data/stocks/open_data/MCD/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "better_spot",
+        "valuation": "fair",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 96.77,
+      "missing_metrics": [
+        "business_health.gross_margin"
+      ],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin."
+      ],
+      "duration_seconds": 0.84,
+      "attempts": 1
+    },
+    {
+      "ticker": "RTX",
+      "name": "RTX CORPORATION",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Industrials",
+      "industry": "Aerospace",
+      "composite_score": 69.26,
+      "dollar_volume": 311872584.52,
+      "cik": 101829,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:43.197929+00:00",
+      "saved_path": "data/stocks/open_data/RTX/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "strong_trend",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 96.77,
+      "missing_metrics": [
+        "business_health.gross_margin"
+      ],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin."
+      ],
+      "duration_seconds": 1.11,
+      "attempts": 1
+    },
+    {
+      "ticker": "DHR",
+      "name": "DANAHER CORP /DE/",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Industrials",
+      "industry": "Industrial Machinery/Components",
+      "composite_score": 68.96,
+      "dollar_volume": 447159354.78,
+      "cik": 313616,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:43.337482+00:00",
+      "saved_path": "data/stocks/open_data/DHR/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "deep_pullback",
+        "valuation": "fair",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.92,
+      "attempts": 1
+    },
+    {
+      "ticker": "BLK",
+      "name": "BlackRock, Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Investment Bankers/Brokers/Service",
+      "composite_score": 68.6,
+      "dollar_volume": 411000107.075,
+      "cik": 2012383,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:43.643308+00:00",
+      "saved_path": "data/stocks/open_data/BLK/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "better_spot",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 29,
+      "total_metrics": 31,
+      "coverage_percent": 93.55,
+      "collectable_metrics": 29,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Less than 5 annual fundamental rows were available.",
+        "Less than 5 annual valuation rows were available.",
+        "Only 4 annual values available for revenue.",
+        "Only 4 annual values available for eps_diluted.",
+        "Only 0 annual values available for gross_margin.",
+        "Only 4 annual values available for operating_margin.",
+        "Only 4 annual values available for net_margin.",
+        "Only 4 annual values available for free_cash_flow.",
+        "Only 4 annual values available for cash.",
+        "Only 3 annual values available for debt.",
+        "Only 4 annual values available for shares_diluted.",
+        "Only 4 historical valuation values available for pe.",
+        "Only 4 historical valuation values available for price_to_sales.",
+        "Only 3 historical valuation values available for ev_to_ebitda.",
+        "Only 4 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.93,
+      "attempts": 1
+    },
+    {
+      "ticker": "CVS",
+      "name": "CVS HEALTH Corp",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Defensive",
+      "industry": "Retail-Drug Stores and Proprietary Stores",
+      "composite_score": 68.25,
+      "dollar_volume": 432191260.2,
+      "cik": 64803,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:43.604327+00:00",
+      "saved_path": "data/stocks/open_data/CVS/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "weak",
+        "price": "strong_trend",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.92,
+      "attempts": 1
+    },
+    {
+      "ticker": "NVO",
+      "name": "NOVO NORDISK A/S",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Pharmaceutical Preparations",
+      "composite_score": 68.24,
+      "dollar_volume": 392414996.19,
+      "cik": 353278,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:43.384222+00:00",
+      "saved_path": "data/stocks/open_data/NVO/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "solid",
+        "price": "falling",
+        "valuation": "fair",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "SEC companyfacts uses IFRS taxonomy. Foreign-currency fundamentals are supported; current valuation can use an explicit FX and ADR-ratio bridge, while historical valuation still needs historical FX handling.",
+        "Only 0 historical valuation values available for pe.",
+        "Only 0 historical valuation values available for price_to_sales.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 0 historical valuation values available for fcf_yield.",
+        "Company-specific SEC filing context was unavailable from the deterministic provider."
+      ],
+      "duration_seconds": 0.67,
+      "attempts": 1
+    },
+    {
+      "ticker": "SCHW",
+      "name": "SCHWAB CHARLES CORP",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Investment Bankers/Brokers/Service",
+      "composite_score": 68.02,
+      "dollar_volume": 325267031.34000003,
+      "cik": 316709,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:43.754232+00:00",
+      "saved_path": "data/stocks/open_data/SCHW/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "better_spot",
+        "valuation": "cheap",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 27,
+      "total_metrics": 31,
+      "coverage_percent": 87.1,
+      "collectable_metrics": 27,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        },
+        {
+          "metric": "business_health.operating_margin",
+          "reason": "Operating margin is not meaningful for many financial businesses because interest income, credit costs, and balance-sheet funding do not map cleanly to normal operating-company margins."
+        },
+        {
+          "metric": "business_health.roic",
+          "reason": "ROIC is not meaningful for many financial businesses because invested capital is not comparable to operating-company capital."
+        },
+        {
+          "metric": "valuation.ev_to_ebitda",
+          "reason": "EV/EBITDA is not meaningful for many financial businesses because debt is part of the operating model."
+        }
+      ],
+      "proxy_metrics": [
+        "valuation.forward_pe",
+        "valuation.peg"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.89,
+      "attempts": 1
+    },
+    {
+      "ticker": "SPGI",
+      "name": "S&P Global Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Finance: Consumer Services",
+      "composite_score": 66.42,
+      "dollar_volume": 389486388.195,
+      "cik": 64040,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:44.053376+00:00",
+      "saved_path": "data/stocks/open_data/SPGI/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "solid",
+        "price": "deep_pullback",
+        "valuation": "cheap",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.84,
+      "attempts": 1
+    },
+    {
+      "ticker": "AZO",
+      "name": "AUTOZONE INC",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Auto & Home Supply Stores",
+      "composite_score": 62.66,
+      "dollar_volume": 484940379.33,
+      "cik": 866787,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:44.081080+00:00",
+      "saved_path": "data/stocks/open_data/AZO/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "weak",
+        "price": "deep_pullback",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.75,
+      "attempts": 1
+    },
+    {
+      "ticker": "CEG",
+      "name": "CONSTELLATION ENERGY CORPORATION",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Utilities",
+      "industry": "Electric Utilities: Central",
+      "composite_score": 62.41,
+      "dollar_volume": 347137592.7,
+      "cik": 1868275,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:44.138388+00:00",
+      "saved_path": "data/stocks/open_data/CEG/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "falling",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 27,
+      "total_metrics": 31,
+      "coverage_percent": 87.1,
+      "collectable_metrics": 29,
+      "collectable_coverage_percent": 93.1,
+      "missing_metrics": [
+        "business_health.gross_margin",
+        "price_opportunity.change_5y"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 7.4, comparison -0.49); 3-year EPS CAGR is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 4 historical valuation values available for pe.",
+        "Only 4 historical valuation values available for price_to_sales.",
+        "Only 4 historical valuation values available for ev_to_ebitda.",
+        "Only 4 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.83,
+      "attempts": 1
+    },
+    {
+      "ticker": "FCX",
+      "name": "Freeport-McMoRan Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Materials",
+      "industry": "Metal Mining",
+      "composite_score": 62.16,
+      "dollar_volume": 418478623.71,
+      "cik": 831259,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:44.540898+00:00",
+      "saved_path": "data/stocks/open_data/FCX/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "mixed",
+        "price": "no_dip",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 1 annual values available for eps_diluted."
+      ],
+      "duration_seconds": 0.91,
+      "attempts": 1
+    },
+    {
+      "ticker": "ACN",
+      "name": "Accenture plc",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Consumer Cyclical",
+      "industry": "Business Services",
+      "composite_score": 62.08,
+      "dollar_volume": 333716128.00500005,
+      "cik": 1467373,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:44.493400+00:00",
+      "saved_path": "data/stocks/open_data/ACN/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "falling",
+        "valuation": "cheap",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.89,
+      "attempts": 1
+    },
+    {
+      "ticker": "DE",
+      "name": "DEERE & CO",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Industrials",
+      "industry": "Industrial Machinery/Components",
+      "composite_score": 61.81,
+      "dollar_volume": 331476838.85999995,
+      "cik": 315189,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:44.655232+00:00",
+      "saved_path": "data/stocks/open_data/DE/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "better_spot",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 29,
+      "total_metrics": 31,
+      "coverage_percent": 93.55,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 96.67,
+      "missing_metrics": [
+        "business_health.gross_margin"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 4 annual values available for operating_margin.",
+        "Only 4 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.92,
+      "attempts": 1
+    },
+    {
+      "ticker": "AMGN",
+      "name": "Amgen Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Biological Products (No Diagnostic Substances)",
+      "composite_score": 61.69,
+      "dollar_volume": 319060875.90760005,
+      "cik": 318154,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:44.910694+00:00",
+      "saved_path": "data/stocks/open_data/AMGN/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 6.8,
+        "opportunity_type": "Temporary selloff",
+        "business": "strong",
+        "price": "better_spot",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.78,
+      "attempts": 1
+    },
+    {
+      "ticker": "MELI",
+      "name": "MercadoLibre, Inc.",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Consumer Cyclical",
+      "industry": "Business Services",
+      "composite_score": 61.65,
+      "dollar_volume": 326835692.68,
+      "cik": 1099590,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:44.917906+00:00",
+      "saved_path": "data/stocks/open_data/MELI/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "falling",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care."
+      ],
+      "duration_seconds": 0.79,
+      "attempts": 1
+    },
+    {
+      "ticker": "BX",
+      "name": "Blackstone Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Investment Managers",
+      "composite_score": 61.26,
+      "dollar_volume": 450909276.1,
+      "cik": 1393818,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:44.811680+00:00",
+      "saved_path": "data/stocks/open_data/BX/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "falling",
+        "valuation": "cheap",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 27,
+      "total_metrics": 31,
+      "coverage_percent": 87.1,
+      "collectable_metrics": 27,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        },
+        {
+          "metric": "business_health.operating_margin",
+          "reason": "Operating margin is not meaningful for many financial businesses because interest income, credit costs, and balance-sheet funding do not map cleanly to normal operating-company margins."
+        },
+        {
+          "metric": "business_health.roic",
+          "reason": "ROIC is not meaningful for many financial businesses because invested capital is not comparable to operating-company capital."
+        },
+        {
+          "metric": "valuation.ev_to_ebitda",
+          "reason": "EV/EBITDA is not meaningful for many financial businesses because debt is part of the operating model."
+        }
+      ],
+      "proxy_metrics": [
+        "valuation.forward_pe",
+        "valuation.peg"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.71,
+      "attempts": 1
+    },
+    {
+      "ticker": "NEM",
+      "name": "NEWMONT CORPORATION",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Materials",
+      "industry": "Precious Metals",
+      "composite_score": 61.1,
+      "dollar_volume": 353574407.76,
+      "cik": 1164727,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:45.337245+00:00",
+      "saved_path": "data/stocks/open_data/NEM/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "strong_trend",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 25,
+      "total_metrics": 31,
+      "coverage_percent": 80.65,
+      "collectable_metrics": 29,
+      "collectable_coverage_percent": 86.21,
+      "missing_metrics": [
+        "business_health.gross_margin",
+        "business_health.operating_margin",
+        "business_health.roic",
+        "valuation.ev_to_ebitda"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 6.39, comparison -0.54); 3-year EPS CAGR is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "valuation.forward_pe"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.86,
+      "attempts": 1
+    },
+    {
+      "ticker": "TER",
+      "name": "TERADYNE, INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Industrials",
+      "industry": "Electrical Products",
+      "composite_score": 61.07,
+      "dollar_volume": 356121526.3236,
+      "cik": 97210,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:45.405524+00:00",
+      "saved_path": "data/stocks/open_data/TER/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "solid",
+        "price": "no_dip",
+        "valuation": "very_pricey",
+        "missing_data": []
+      },
+      "available_metrics": 29,
+      "total_metrics": 31,
+      "coverage_percent": 93.55,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 96.67,
+      "missing_metrics": [
+        "valuation.ev_to_ebitda"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for debt.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.92,
+      "attempts": 1
+    },
+    {
+      "ticker": "PFE",
+      "name": "Pfizer Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Pharmaceutical Preparations",
+      "composite_score": 60.7,
+      "dollar_volume": 334338159.87,
+      "cik": 78003,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:45.532081+00:00",
+      "saved_path": "data/stocks/open_data/PFE/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "weak",
+        "price": "deep_pullback",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for operating_margin.",
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.77,
+      "attempts": 1
+    },
+    {
+      "ticker": "DIS",
+      "name": "WALT DISNEY CO/",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Services-Misc. Amusement & Recreation",
+      "composite_score": 60.58,
+      "dollar_volume": 285602946.09999996,
+      "cik": 1744489,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:45.620676+00:00",
+      "saved_path": "data/stocks/open_data/DIS/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "deep_pullback",
+        "valuation": "cheap",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 96.77,
+      "missing_metrics": [
+        "business_health.gross_margin"
+      ],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin."
+      ],
+      "duration_seconds": 0.82,
+      "attempts": 1
+    },
+    {
+      "ticker": "CME",
+      "name": "CME GROUP INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Financials",
+      "industry": "Investment Bankers/Brokers/Service",
+      "composite_score": 59.77,
+      "dollar_volume": 318321936.21000004,
+      "cik": 1156375,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:45.700239+00:00",
+      "saved_path": "data/stocks/open_data/CME/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "better_spot",
+        "valuation": "fair",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for debt.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.83,
+      "attempts": 1
+    },
+    {
+      "ticker": "TJX",
+      "name": "The TJX Companies, Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Clothing/Shoe/Accessory Stores",
+      "composite_score": 59.67,
+      "dollar_volume": 227784814.9668,
+      "cik": 109198,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:45.657082+00:00",
+      "saved_path": "data/stocks/open_data/TJX/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "no_dip",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 4 annual values available for revenue.",
+        "Only 4 annual values available for eps_diluted.",
+        "Only 4 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 4 annual values available for net_margin.",
+        "Only 4 annual values available for free_cash_flow.",
+        "Only 4 annual values available for shares_diluted.",
+        "Only 4 historical valuation values available for pe.",
+        "Only 4 historical valuation values available for price_to_sales.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 4 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.83,
+      "attempts": 1
+    },
+    {
+      "ticker": "SPOT",
+      "name": "Spotify Technology S.A.",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Consumer Cyclical",
+      "industry": "Broadcasting",
+      "composite_score": 58.87,
+      "dollar_volume": 254002343.39999998,
+      "cik": 1639920,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:45.753063+00:00",
+      "saved_path": "data/stocks/open_data/SPOT/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "mixed",
+        "price": "deep_pullback",
+        "valuation": "fair",
+        "missing_data": []
+      },
+      "available_metrics": 28,
+      "total_metrics": 31,
+      "coverage_percent": 90.32,
+      "collectable_metrics": 29,
+      "collectable_coverage_percent": 96.55,
+      "missing_metrics": [
+        "valuation.ev_to_ebitda"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 10.51, comparison -2.93); 3-year EPS CAGR is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "SEC companyfacts uses IFRS taxonomy. Foreign-currency fundamentals are supported; current valuation can use an explicit FX and ADR-ratio bridge, while historical valuation still needs historical FX handling.",
+        "Only 0 historical valuation values available for pe.",
+        "Only 0 historical valuation values available for price_to_sales.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 0 historical valuation values available for fcf_yield.",
+        "Company-specific SEC filing context was unavailable from the deterministic provider."
+      ],
+      "duration_seconds": 0.42,
+      "attempts": 1
+    },
+    {
+      "ticker": "NU",
+      "name": "Nu Holdings Ltd.",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Financials",
+      "industry": "Finance: Consumer Services",
+      "composite_score": 57.94,
+      "dollar_volume": 333418432.545,
+      "cik": 1691493,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:45.688093+00:00",
+      "saved_path": "data/stocks/open_data/NU/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "falling",
+        "valuation": "pricey",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 24,
+      "total_metrics": 31,
+      "coverage_percent": 77.42,
+      "collectable_metrics": 25,
+      "collectable_coverage_percent": 96.0,
+      "missing_metrics": [
+        "price_opportunity.change_5y"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.operating_margin",
+          "reason": "Operating margin is not meaningful for many financial businesses because interest income, credit costs, and balance-sheet funding do not map cleanly to normal operating-company margins."
+        },
+        {
+          "metric": "business_health.free_cash_flow",
+          "reason": "Free cash flow is not meaningful for many financial businesses because operating cash flow is distorted by balance-sheet lending, deposits, and financing activity."
+        },
+        {
+          "metric": "business_health.roic",
+          "reason": "ROIC is not meaningful for many financial businesses because invested capital is not comparable to operating-company capital."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        },
+        {
+          "metric": "valuation.ev_to_ebitda",
+          "reason": "EV/EBITDA is not meaningful for many financial businesses because debt is part of the operating model."
+        },
+        {
+          "metric": "valuation.fcf_yield",
+          "reason": "FCF yield is not meaningful for many financial businesses because free cash flow is not comparable to operating-company free cash flow."
+        }
+      ],
+      "proxy_metrics": [
+        "valuation.forward_pe"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "SEC companyfacts uses IFRS taxonomy. Foreign-currency fundamentals are supported; current valuation can use an explicit FX and ADR-ratio bridge, while historical valuation still needs historical FX handling.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 annual values available for free_cash_flow.",
+        "Only 4 historical valuation values available for pe.",
+        "Only 4 historical valuation values available for price_to_sales.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 0 historical valuation values available for fcf_yield.",
+        "Company-specific SEC filing context was unavailable from the deterministic provider."
+      ],
+      "duration_seconds": 0.29,
+      "attempts": 1
+    },
+    {
+      "ticker": "JCI",
+      "name": "JOHNSON CONTROLS INTERNATIONAL PLC",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Industrials",
+      "industry": "Industrial Machinery/Components",
+      "composite_score": 56.22,
+      "dollar_volume": 319263366.604,
+      "cik": 833444,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:46.283048+00:00",
+      "saved_path": "data/stocks/open_data/JCI/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "weak",
+        "price": "strong_trend",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.75,
+      "attempts": 1
+    },
+    {
+      "ticker": "B",
+      "name": "BARRICK MINING CORP",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Materials",
+      "industry": "Precious Metals",
+      "composite_score": 53.73,
+      "dollar_volume": 265653008.80999997,
+      "cik": 756894,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:46.144094+00:00",
+      "saved_path": "data/stocks/open_data/B/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 6.8,
+        "opportunity_type": "Momentum continuation",
+        "business": "strong",
+        "price": "strong_trend",
+        "valuation": "cheap",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for operating_margin.",
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Company-specific SEC filing context was unavailable from the deterministic provider."
+      ],
+      "duration_seconds": 0.47,
+      "attempts": 1
+    },
+    {
+      "ticker": "SLB",
+      "name": "SLB LIMITED/NV",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Energy",
+      "industry": "Oilfield Services/Equipment",
+      "composite_score": 52.99,
+      "dollar_volume": 203192779.41,
+      "cik": 87347,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:46.476896+00:00",
+      "saved_path": "data/stocks/open_data/SLB/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Momentum continuation",
+        "business": "weak",
+        "price": "strong_trend",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 3 annual values available for operating_margin.",
+        "Only 0 annual values available for cash.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.73,
+      "attempts": 1
+    },
+    {
+      "ticker": "AZN",
+      "name": "ASTRAZENECA PLC",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Pharmaceutical Preparations",
+      "composite_score": 52.64,
+      "dollar_volume": 160463299.20000002,
+      "cik": 901832,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:46.174307+00:00",
+      "saved_path": "data/stocks/open_data/AZN/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 6.8,
+        "opportunity_type": "Temporary selloff",
+        "business": "strong",
+        "price": "better_spot",
+        "valuation": "cheap",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "SEC companyfacts uses IFRS taxonomy. Foreign-currency fundamentals are supported; current valuation can use an explicit FX and ADR-ratio bridge, while historical valuation still needs historical FX handling.",
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care.",
+        "Company-specific SEC filing context was unavailable from the deterministic provider."
+      ],
+      "duration_seconds": 0.45,
+      "attempts": 1
+    },
+    {
+      "ticker": "NVS",
+      "name": "Novartis AG",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Pharmaceutical Preparations",
+      "composite_score": 52.35,
+      "dollar_volume": 208371233.17999998,
+      "cik": 1114448,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:46.257709+00:00",
+      "saved_path": "data/stocks/open_data/NVS/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 6.8,
+        "opportunity_type": "Momentum continuation",
+        "business": "strong",
+        "price": "strong_trend",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "SEC companyfacts uses IFRS taxonomy. Foreign-currency fundamentals are supported; current valuation can use an explicit FX and ADR-ratio bridge, while historical valuation still needs historical FX handling.",
+        "Only 4 historical valuation values available for ev_to_ebitda.",
+        "Company-specific SEC filing context was unavailable from the deterministic provider."
+      ],
+      "duration_seconds": 0.54,
+      "attempts": 1
+    },
+    {
+      "ticker": "HSBC",
+      "name": "HSBC HOLDINGS PLC",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Financials",
+      "industry": "Savings Institutions",
+      "composite_score": 51.33,
+      "dollar_volume": 182404160.4,
+      "cik": 1089113,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:46.201204+00:00",
+      "saved_path": "data/stocks/open_data/HSBC/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "strong_trend",
+        "valuation": "cheap",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 30,
+      "total_metrics": 31,
+      "coverage_percent": 96.77,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "SEC companyfacts uses IFRS taxonomy. Foreign-currency fundamentals are supported; current valuation can use an explicit FX and ADR-ratio bridge, while historical valuation still needs historical FX handling.",
+        "Only 0 annual values available for gross_margin.",
+        "Company-specific SEC filing context was unavailable from the deterministic provider."
+      ],
+      "duration_seconds": 0.47,
+      "attempts": 1
+    },
+    {
+      "ticker": "TT",
+      "name": "TRANE TECHNOLOGIES PLC",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Industrials",
+      "industry": "Auto Parts:O.E.M.",
+      "composite_score": 51.08,
+      "dollar_volume": 168129595.59,
+      "cik": 1466258,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:46.584903+00:00",
+      "saved_path": "data/stocks/open_data/TT/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": false,
+        "conviction": 5.0,
+        "opportunity_type": "Temporary selloff",
+        "business": "solid",
+        "price": "no_dip",
+        "valuation": "pricey",
+        "missing_data": []
+      },
+      "available_metrics": 31,
+      "total_metrics": 31,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin."
+      ],
+      "duration_seconds": 0.4,
+      "attempts": 1
+    },
+    {
+      "ticker": "CB",
+      "name": "Chubb Ltd",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Financials",
+      "industry": "Property-Casualty Insurers",
+      "composite_score": 50.86,
+      "dollar_volume": 203423640.45000002,
+      "cik": 896159,
+      "source": "open_free_public",
+      "generated_at": "2026-06-05T12:07:46.602569+00:00",
+      "saved_path": "data/stocks/open_data/CB/2026-06-05.json",
+      "analysis": {
+        "needs_more_data": true,
+        "conviction": 4.5,
+        "opportunity_type": "Insufficient data",
+        "business": "unclear",
+        "price": "better_spot",
+        "valuation": "fair",
+        "missing_data": [
+          "Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality."
+        ]
+      },
+      "available_metrics": 25,
+      "total_metrics": 31,
+      "coverage_percent": 80.65,
+      "collectable_metrics": 25,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.gross_margin",
+          "reason": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses."
+        },
+        {
+          "metric": "business_health.operating_margin",
+          "reason": "Operating margin is not meaningful for many financial businesses because interest income, credit costs, and balance-sheet funding do not map cleanly to normal operating-company margins."
+        },
+        {
+          "metric": "business_health.free_cash_flow",
+          "reason": "Free cash flow is not meaningful for many financial businesses because operating cash flow is distorted by balance-sheet lending, deposits, and financing activity."
+        },
+        {
+          "metric": "business_health.roic",
+          "reason": "ROIC is not meaningful for many financial businesses because invested capital is not comparable to operating-company capital."
+        },
+        {
+          "metric": "valuation.ev_to_ebitda",
+          "reason": "EV/EBITDA is not meaningful for many financial businesses because debt is part of the operating model."
+        },
+        {
+          "metric": "valuation.fcf_yield",
+          "reason": "FCF yield is not meaningful for many financial businesses because free cash flow is not comparable to operating-company free cash flow."
+        }
+      ],
+      "proxy_metrics": [
+        "valuation.forward_pe",
+        "valuation.peg"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin.",
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 annual values available for free_cash_flow.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 0 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.4,
+      "attempts": 1
+    }
+  ],
+  "skipped_low_fidelity": [],
+  "failures": []
+}

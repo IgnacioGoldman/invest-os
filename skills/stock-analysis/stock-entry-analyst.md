@@ -123,6 +123,10 @@ Strict evidence rules:
   public facts.
 - If a required fact is missing, stale, unavailable, or only a weak proxy, say
   so in `missing_data`.
+- Do not put optional research items in `missing_data` when
+  `needs_more_data` is false. Exhibit text, transcripts, management Q&A, and
+  general news should be listed only when the entry call actually depends on
+  them.
 - If the facts are not enough to answer confidently, return
   `needs_more_data: true` and ask for the exact missing data.
 - Do not hide uncertainty by filling gaps with generic market commentary.
@@ -144,6 +148,8 @@ the pattern. Examples:
   regulation, guidance, or management commentary, use `company_context` first
   and ask for deterministic exhibit text, general news collection, or transcripts
   only if SEC filing context is not enough.
+- If the thesis does not depend on the cause of the selloff, do not list
+  transcript/news/exhibit collection as missing data.
 
 Allowed opportunity types:
 
@@ -153,6 +159,32 @@ Allowed opportunity types:
 - `Momentum continuation`
 - `Falling knife risk`
 - `Insufficient data`
+
+Price assessment guidance:
+
+- Business assessments:
+  - `strong`: Growth, margins, returns, and cash generation look strong.
+  - `solid`: Good enough fundamentals, but not elite across the board.
+  - `mixed`: Some facts are good and others are weaker or less clean.
+  - `weak`: Fundamentals look poor or deteriorating.
+  - `unclear`: Not enough business facts to classify.
+- Price assessments:
+  - `no_dip`: Near highs or still stretched; no useful pullback.
+  - `strong_trend`: Uptrend is strong, but this is not a dip setup.
+  - `better_spot`: Off highs and less stretched, but not a clear bargain.
+  - `pullback`: Meaningful pullback while the longer trend remains healthy.
+  - `deep_pullback`: Meaningfully below highs, but trend is weak or sideways.
+  - `falling`: Large drawdown with weak trend evidence.
+  - `unclear`: Not enough price facts to classify.
+- Valuation assessments:
+  - `cheap`: Clearly attractive versus available history and quality.
+  - `fair`: Not cheap, not obviously expensive.
+  - `slightly_expensive`: Elevated, but not severely stretched.
+  - `pricey`: Clearly expensive on available valuation facts.
+  - `very_pricey`: Stretched on multiple valuation measures.
+  - `unclear`: Not enough valuation facts to classify.
+- Use `unclear` only when the price facts are missing, contradictory, or too
+  sparse to classify; do not use it for a nuanced but classifiable setup.
 
 3. Output JSON, return only JSON in this shape.
 
@@ -169,12 +201,12 @@ Allowed opportunity types:
     "concerns": []
   },
   "price_opportunity": {
-    "assessment": "moderate_pullback",
+    "assessment": "pullback",
     "evidence": [],
     "concerns": []
   },
   "valuation": {
-    "assessment": "fair_to_expensive",
+    "assessment": "slightly_expensive",
     "evidence": [],
     "concerns": []
   },
@@ -183,15 +215,11 @@ Allowed opportunity types:
     "evidence": [],
     "concerns": []
   },
-  "bull_case": [],
-  "bear_case": [],
-  "risks": [],
   "missing_data": [],
   "dca_entry": {
     "buy_now": 40,
     "buy_dip_1": 30,
-    "buy_dip_2": 30,
-    "conditions": []
+    "buy_dip_2": 30
   }
 }
 ```
@@ -210,19 +238,45 @@ DCA entry module:
   - `buy_now`: 40
   - `buy_dip_1`: 30
   - `buy_dip_2`: 30
-- Conditions must be fact-based, such as lower price levels, larger drawdown
-  from ATH, valuation compression, or updated fundamentals.
-- If data is insufficient, set all DCA percentages to 0 and explain what data is
-  needed before sizing an entry.
+- If data is insufficient, set all DCA percentages to 0 and use `missing_data`
+  to explain what data is needed before sizing an entry.
+- Do not include DCA condition text. Keep the staged percentages simple.
 
 Do not include:
 
 - Exit logic
 - Portfolio allocation advice
 - Ranking versus other stocks unless a list of stocks is supplied
+- Bull-case, bear-case, or risk-list sections
 - RSI
 - Volume anomaly detection
+- DCA condition text
 - DCA automation
 - Trade placement instructions
 
 4. Should be added in the stocks UI "Entry Opportunities", the relevant fields
+
+UI guidance:
+
+- Show the main analysis around Business, Price, and Valuation.
+- Treat `company_context` / SEC filing metadata as supporting evidence and audit
+  context, not as a fourth top-level opportunity card.
+- Use SEC facts to qualify the business, valuation, missing-data, or price-move
+  uncertainty when relevant.
+- Use meaningful tag colors:
+  - Green means favorable based on supplied facts. Examples: strong business,
+    valuation reset that is actually attractive, or "Good business, less
+    stretched" only when the company quality is strong, the pullback is real,
+    `needs_more_data` is false, conviction is green, and valuation is not red.
+  - Yellow means mixed, watch, or context-dependent. Examples: ordinary
+    pullback, momentum continuation, medium conviction, or any otherwise-good
+    setup where valuation is red or conviction is only yellow.
+  - Red means unfavorable or caution. Examples: expensive valuation, falling
+    knife risk, low conviction, or a setup where missing facts are severe.
+  - Neutral gray means informational only, not good or bad.
+- Color conviction using the same meaning:
+  - `0-3` red
+  - `4-7` yellow
+  - `8-10` green
+  - Force red when `needs_more_data` is true and the missing data blocks the
+    basic entry call.

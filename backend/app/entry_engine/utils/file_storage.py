@@ -10,6 +10,8 @@ from app.entry_engine.open_data_models import OpenDataSnapshot
 
 ENTRY_DATA_DIR = DATA_DIR / "entry"
 OPEN_DATA_STOCK_DIR = DATA_DIR / "stocks" / "open_data"
+OPEN_DATA_REQUIRED_GROUPS = ("business_health", "price_opportunity", "valuation")
+OPEN_DATA_DISPLAY_MIN_COVERAGE = 80.0
 
 
 def entry_snapshot_path(date: str, data_dir: Path = ENTRY_DATA_DIR) -> Path:
@@ -74,3 +76,39 @@ def load_latest_open_data_stock_snapshot(
     if not files:
         return None
     return OpenDataSnapshot.model_validate_json(files[-1].read_text(encoding="utf-8"))
+
+
+def open_data_stock_snapshot_coverage(snapshot: OpenDataSnapshot) -> float:
+    total = 0
+    available = 0
+    for group_name in OPEN_DATA_REQUIRED_GROUPS:
+        group = getattr(snapshot, group_name)
+        for metric in group.values():
+            total += 1
+            if metric.value is not None and metric.tier != "unavailable_open_free":
+                available += 1
+    return (available / total * 100) if total else 0
+
+
+def is_displayable_open_data_stock_snapshot(
+    snapshot: OpenDataSnapshot,
+    min_coverage: float = OPEN_DATA_DISPLAY_MIN_COVERAGE,
+) -> bool:
+    return open_data_stock_snapshot_coverage(snapshot) >= min_coverage
+
+
+def load_latest_open_data_stock_snapshots(
+    data_dir: Path = OPEN_DATA_STOCK_DIR,
+    *,
+    include_low_fidelity: bool = False,
+) -> list[OpenDataSnapshot]:
+    if not data_dir.exists():
+        return []
+
+    snapshots: list[OpenDataSnapshot] = []
+    for ticker_dir in sorted(path for path in data_dir.iterdir() if path.is_dir()):
+        snapshot = load_latest_open_data_stock_snapshot(ticker_dir.name, data_dir)
+        if snapshot is not None and (include_low_fidelity or is_displayable_open_data_stock_snapshot(snapshot)):
+            snapshots.append(snapshot)
+    snapshots.sort(key=lambda snapshot: snapshot.ticker)
+    return snapshots

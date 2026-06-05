@@ -9,10 +9,12 @@ from app.entry_engine.providers.open_data_provider import OpenDataProvider
 from app.entry_engine.utils.file_storage import (
     load_latest_entry_snapshot,
     load_latest_open_data_stock_snapshot,
+    load_latest_open_data_stock_snapshots,
     save_open_data_stock_snapshot,
 )
 from app.models import RefreshRequest
 from app.services.recommendations import Recommendation, evaluate, generate_and_store
+from app.services.stock_entry_analysis import StockEntryAnalysis, analyze_latest_open_data_stock_entry
 from app.snapshot import get_portfolio_snapshot, refresh_portfolio_snapshot
 
 
@@ -87,12 +89,25 @@ def generate_entry_snapshot(request: EntrySnapshotRequest) -> EntrySnapshotFile:
         raise HTTPException(status_code=502, detail=f"Entry snapshot generation failed: {exc}") from exc
 
 
+@app.get("/api/open-data/stocks")
+def open_data_stocks() -> list[OpenDataSnapshot]:
+    return load_latest_open_data_stock_snapshots()
+
+
 @app.get("/api/open-data/stocks/{ticker}")
 def open_data_stock(ticker: str) -> OpenDataSnapshot:
     saved = load_latest_open_data_stock_snapshot(ticker)
     if saved is not None:
         return saved
     return refresh_open_data_stock(ticker)
+
+
+@app.get("/api/open-data/stocks/{ticker}/analysis")
+def open_data_stock_analysis(ticker: str) -> StockEntryAnalysis:
+    analysis = analyze_latest_open_data_stock_entry(ticker)
+    if analysis is None:
+        raise HTTPException(status_code=404, detail=f"No collected open-data facts for {ticker.upper()}.")
+    return analysis
 
 
 @app.post("/api/open-data/stocks/{ticker}/refresh")

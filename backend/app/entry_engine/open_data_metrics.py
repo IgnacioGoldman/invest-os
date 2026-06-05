@@ -18,38 +18,75 @@ from app.entry_engine.open_data_models import (
 REVENUE_CONCEPTS = (
     "Revenues",
     "RevenueFromContractWithCustomerExcludingAssessedTax",
+    "RevenueFromContractWithCustomerIncludingAssessedTax",
     "SalesRevenueNet",
+    "SalesRevenueGoodsNet",
+    "Revenue",
+    "RevenueFromContractsWithCustomers",
+    "RevenueAndOperatingIncome",
+    "RevenuesNetOfInterestExpense",
+    "RevenueFromSaleOfGoods",
 )
-NET_INCOME_CONCEPTS = ("NetIncomeLoss",)
+NET_INCOME_CONCEPTS = (
+    "NetIncomeLoss",
+    "ProfitLoss",
+    "ProfitLossAttributableToOwnersOfParent",
+    "ProfitLossAttributableToOrdinaryEquityHoldersOfParentEntity",
+)
 GROSS_PROFIT_CONCEPTS = ("GrossProfit",)
-COST_OF_REVENUE_CONCEPTS = ("CostOfRevenue", "CostOfGoodsAndServicesSold")
-OPERATING_INCOME_CONCEPTS = ("OperatingIncomeLoss",)
+COST_OF_REVENUE_CONCEPTS = ("CostOfRevenue", "CostOfGoodsAndServicesSold", "CostOfSales", "CostOfMerchandiseSold")
+OPERATING_INCOME_CONCEPTS = ("OperatingIncomeLoss", "ProfitLossFromOperatingActivities")
+OPERATING_EXPENSES_CONCEPTS = ("OperatingExpenses",)
+RESEARCH_DEVELOPMENT_EXPENSE_CONCEPTS = (
+    "ResearchAndDevelopmentExpense",
+    "ResearchAndDevelopmentExpenseExcludingAcquiredInProcessCost",
+)
+SELLING_GENERAL_ADMINISTRATIVE_EXPENSE_CONCEPTS = ("SellingGeneralAndAdministrativeExpense",)
 OPERATING_CASH_FLOW_CONCEPTS = (
     "NetCashProvidedByUsedInOperatingActivities",
     "NetCashProvidedByUsedInOperatingActivitiesContinuingOperations",
+    "CashFlowsFromUsedInOperatingActivities",
+    "CashFlowsFromUsedInOperations",
 )
 CAPEX_CONCEPTS = (
     "PaymentsToAcquirePropertyPlantAndEquipment",
+    "PaymentsToAcquireOtherPropertyPlantAndEquipment",
     "PaymentsToAcquireProductiveAssets",
     "CapitalExpenditures",
+    "PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities",
+    "PurchaseOfPropertyPlantAndEquipmentIntangibleAssetsOtherThanGoodwillInvestmentPropertyAndOtherNoncurrentAssets",
 )
-DILUTED_SHARES_CONCEPTS = ("WeightedAverageNumberOfDilutedSharesOutstanding",)
-DILUTED_EPS_CONCEPTS = ("EarningsPerShareDiluted",)
+DILUTED_SHARES_CONCEPTS = (
+    "WeightedAverageNumberOfDilutedSharesOutstanding",
+    "AdjustedWeightedAverageShares",
+    "WeightedAverageShares",
+)
+DILUTED_EPS_CONCEPTS = ("EarningsPerShareDiluted", "DilutedEarningsLossPerShare")
 CASH_CONCEPTS = (
     "CashAndCashEquivalentsAtCarryingValue",
     "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
     "CashCashEquivalentsAndShortTermInvestments",
+    "CashAndCashEquivalents",
 )
 EQUITY_CONCEPTS = (
     "StockholdersEquity",
     "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+    "Equity",
+    "EquityAttributableToOwnersOfParent",
 )
 DEPRECIATION_AMORTIZATION_CONCEPTS = (
     "Depreciation",
+    "DepreciationExpense",
+    "DepreciationPropertyPlantAndEquipment",
+    "DepreciationPropertyPlantAndEquipmentIncludingRightofuseAssets",
     "AmortizationOfIntangibleAssets",
     "DepreciationDepletionAndAmortization",
     "DepreciationDepletionAndAmortizationExpense",
     "DepreciationAndAmortization",
+    "DepreciationAndAmortisationExpense",
+    "AdjustmentsForDepreciationAndAmortisationExpense",
+    "AdjustmentsForDepreciationAndAmortisationExpenseAndImpairmentLossReversalOfImpairmentLossRecognisedInProfitOrLoss",
+    "DepreciationAmortisationAndImpairmentLossReversalOfImpairmentLossRecognisedInProfitOrLoss",
 )
 
 DEBT_COMPONENT_GROUPS = (
@@ -58,6 +95,8 @@ DEBT_COMPONENT_GROUPS = (
     ("ShortTermBorrowings", "LongTermDebt"),
     ("DebtCurrent", "LongTermDebtNoncurrent"),
     ("DebtCurrent", "LongTermDebt"),
+    ("CurrentBorrowingsAndCurrentPortionOfNoncurrentBorrowings", "NoncurrentBorrowings"),
+    ("CurrentLeaseLiabilities", "NoncurrentLeaseLiabilities"),
 )
 DEBT_DIRECT_CONCEPTS = (
     "LongTermDebtAndCapitalLeaseObligationsIncludingCurrentMaturities",
@@ -67,15 +106,21 @@ DEBT_DIRECT_CONCEPTS = (
     "FinanceLeaseLiability",
     "LongTermDebtNoncurrent",
     "DebtCurrent",
+    "Borrowings",
+    "LongtermBorrowings",
+    "LeaseLiabilities",
 )
 
-USD_UNITS = ("USD",)
+SEC_TAXONOMIES = ("us-gaap", "ifrs-full")
+MONETARY_UNITS = ("USD", "EUR", "GBP", "DKK", "CHF", "CAD", "TWD", "JPY", "CNY", "HKD")
+USD_UNITS = MONETARY_UNITS
 SHARE_UNITS = ("shares",)
-EPS_UNITS = ("USD/shares",)
+EPS_UNITS = tuple(f"{currency}/shares" for currency in MONETARY_UNITS)
 
 
 @dataclass(frozen=True)
 class FactPoint:
+    taxonomy: str
     concept: str
     unit: str
     value: float
@@ -119,10 +164,15 @@ def compute_open_data_snapshot(
     industry: str | None = None,
     forward_pe_estimate: OpenDataMetric | None = None,
     company_context: OpenDataCompanyContext | None = None,
+    statement_currency_rates: dict[str, OpenDataMetric] | None = None,
+    market_cap_estimate: OpenDataMetric | None = None,
+    adr_ratio: float = 1.0,
+    adr_ratio_source: str | None = None,
     generated_as_of: str | None = None,
 ) -> OpenDataSnapshot:
     as_of = generated_as_of or date.today().isoformat()
     name = companyfacts.get("entityName") if isinstance(companyfacts.get("entityName"), str) else None
+    fx_rates = statement_currency_rates or {}
 
     revenue = _ttm_metric(companyfacts, REVENUE_CONCEPTS, USD_UNITS, "revenue_ttm", as_of)
     net_income = _ttm_metric(companyfacts, NET_INCOME_CONCEPTS, USD_UNITS, "net_income_ttm", as_of)
@@ -153,6 +203,47 @@ def compute_open_data_snapshot(
         "operating_income_ttm",
         as_of,
     )
+    operating_expenses = _ttm_metric(companyfacts, OPERATING_EXPENSES_CONCEPTS, USD_UNITS, "operating_expenses_ttm", as_of)
+    if operating_income.value is None and gross_profit.value is not None and operating_expenses.value is not None:
+        operating_income = _computed_metric(
+            "operating_income_ttm",
+            gross_profit.value,
+            operating_expenses.value,
+            lambda profit, expenses: profit - expenses,
+            source=f"{gross_profit.source}; {operating_expenses.source}",
+            as_of=_max_as_of(gross_profit.as_of, operating_expenses.as_of),
+            notes="Operating income computed as gross profit TTM minus SEC operating expenses TTM.",
+            fallback_as_of=as_of,
+        )
+    if operating_income.value is None and gross_profit.value is not None:
+        research_development = _ttm_metric(
+            companyfacts,
+            RESEARCH_DEVELOPMENT_EXPENSE_CONCEPTS,
+            USD_UNITS,
+            "research_development_expense_ttm",
+            as_of,
+        )
+        selling_general_admin = _ttm_metric(
+            companyfacts,
+            SELLING_GENERAL_ADMINISTRATIVE_EXPENSE_CONCEPTS,
+            USD_UNITS,
+            "selling_general_administrative_expense_ttm",
+            as_of,
+        )
+        if research_development.value is not None and selling_general_admin.value is not None:
+            operating_income = _computed_metric(
+                "operating_income_ttm",
+                gross_profit.value,
+                research_development.value,
+                lambda profit, rd: profit - rd - (selling_general_admin.value or 0),
+                source=f"{gross_profit.source}; {research_development.source}; {selling_general_admin.source}",
+                as_of=_max_as_of(gross_profit.as_of, research_development.as_of, selling_general_admin.as_of),
+                notes=(
+                    "Proxy operating income computed as gross profit TTM minus SEC R&D and SG&A expense components."
+                ),
+                fallback_as_of=as_of,
+                tier="proxy_estimate",
+            )
     capex = _ttm_metric(companyfacts, CAPEX_CONCEPTS, USD_UNITS, "capex_ttm", as_of)
     if capex.value is not None and capex.value < 0:
         capex = capex.model_copy(
@@ -275,59 +366,89 @@ def compute_open_data_snapshot(
         "market_cap",
         price,
         shares.value,
-        lambda latest_price, share_count: latest_price * share_count,
+        lambda latest_price, share_count: latest_price * (share_count / adr_ratio),
         source=f"{price.source if price else 'price_unavailable'}; {shares.source}",
         as_of=_max_as_of(price.as_of if price else as_of, shares.as_of),
-        notes="Latest open/free price multiplied by SEC diluted weighted-average shares.",
+        notes=_market_cap_notes(adr_ratio, adr_ratio_source),
         fallback_as_of=as_of,
     )
-    pe = _computed_metric(
-        "pe_ttm",
-        market_cap.value,
-        net_income.value,
-        lambda market_value, income: market_value / income,
-        source=f"{market_cap.source}; {net_income.source}",
-        as_of=_max_as_of(market_cap.as_of, net_income.as_of),
-        notes="Market cap divided by net income TTM.",
-        fallback_as_of=as_of,
+    if market_cap.value is None and market_cap_estimate is not None and market_cap_estimate.value is not None:
+        market_cap = market_cap_estimate
+    revenue_for_valuation = _metric_in_price_currency("revenue_ttm_price_currency", revenue, price, fx_rates, as_of)
+    net_income_for_valuation = _metric_in_price_currency("net_income_ttm_price_currency", net_income, price, fx_rates, as_of)
+    free_cash_flow_for_valuation = _metric_in_price_currency(
+        "free_cash_flow_ttm_price_currency",
+        free_cash_flow,
+        price,
+        fx_rates,
+        as_of,
     )
-    price_to_sales = _computed_metric(
-        "price_to_sales_ttm",
-        market_cap.value,
-        revenue.value,
-        lambda market_value, sales: market_value / sales,
-        source=f"{market_cap.source}; {revenue.source}",
-        as_of=_max_as_of(market_cap.as_of, revenue.as_of),
-        notes="Market cap divided by revenue TTM.",
-        fallback_as_of=as_of,
+    pe = (
+        _valuation_input_unavailable("pe_ttm", net_income_for_valuation, as_of)
+        if _is_currency_bridge_unavailable(net_income_for_valuation)
+        else
+        _computed_metric(
+            "pe_ttm",
+            market_cap.value,
+            net_income_for_valuation.value,
+            lambda market_value, income: market_value / income,
+            source=f"{market_cap.source}; {net_income_for_valuation.source}",
+            as_of=_max_as_of(market_cap.as_of, net_income_for_valuation.as_of),
+            notes="Market cap divided by net income TTM.",
+            fallback_as_of=as_of,
+        )
     )
-    fcf_yield = _computed_metric(
-        "fcf_yield",
-        free_cash_flow.value,
-        market_cap.value,
-        lambda fcf, market_value: (fcf / market_value) * 100,
-        source=f"{free_cash_flow.source}; {market_cap.source}",
-        as_of=_max_as_of(free_cash_flow.as_of, market_cap.as_of),
-        notes="Free cash flow TTM divided by market cap, expressed as a percentage.",
-        fallback_as_of=as_of,
+    price_to_sales = (
+        _valuation_input_unavailable("price_to_sales_ttm", revenue_for_valuation, as_of)
+        if _is_currency_bridge_unavailable(revenue_for_valuation)
+        else
+        _computed_metric(
+            "price_to_sales_ttm",
+            market_cap.value,
+            revenue_for_valuation.value,
+            lambda market_value, sales: market_value / sales,
+            source=f"{market_cap.source}; {revenue_for_valuation.source}",
+            as_of=_max_as_of(market_cap.as_of, revenue_for_valuation.as_of),
+            notes="Market cap divided by revenue TTM.",
+            fallback_as_of=as_of,
+        )
+    )
+    fcf_yield = (
+        _valuation_input_unavailable("fcf_yield", free_cash_flow_for_valuation, as_of)
+        if _is_currency_bridge_unavailable(free_cash_flow_for_valuation)
+        else
+        _computed_metric(
+            "fcf_yield",
+            free_cash_flow_for_valuation.value,
+            market_cap.value,
+            lambda fcf, market_value: (fcf / market_value) * 100,
+            source=f"{free_cash_flow_for_valuation.source}; {market_cap.source}",
+            as_of=_max_as_of(free_cash_flow_for_valuation.as_of, market_cap.as_of),
+            notes="Free cash flow TTM divided by market cap, expressed as a percentage.",
+            fallback_as_of=as_of,
+        )
     )
 
-    forward_pe_proxy = _forward_pe_proxy(price, net_income.value, shares.value, eps_cagr_3y.value, as_of)
+    forward_pe_proxy = _forward_pe_proxy(price, net_income, shares.value, eps_cagr_3y.value, fx_rates, as_of)
     forward_pe = (
         forward_pe_estimate
         if forward_pe_estimate is not None and forward_pe_estimate.value is not None
         else forward_pe_proxy
     )
-    peg = _computed_metric(
-        "peg",
-        pe.value,
-        eps_cagr_3y.value,
-        lambda pe_value, growth_pct: pe_value / growth_pct,
-        source=f"{pe.source}; {eps_cagr_3y.source}",
-        as_of=_max_as_of(pe.as_of, eps_cagr_3y.as_of),
-        notes="Proxy PEG: trailing P/E divided by 3-year EPS CAGR percentage. This is not analyst-consensus PEG.",
-        fallback_as_of=as_of,
-        tier="proxy_estimate",
+    peg = (
+        _unavailable("peg", "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful.", as_of)
+        if eps_cagr_3y.value is None or eps_cagr_3y.value <= 0
+        else _computed_metric(
+            "peg",
+            pe.value,
+            eps_cagr_3y.value,
+            lambda pe_value, growth_pct: pe_value / growth_pct,
+            source=f"{pe.source}; {eps_cagr_3y.source}",
+            as_of=_max_as_of(pe.as_of, eps_cagr_3y.as_of),
+            notes="Proxy PEG: trailing P/E divided by 3-year EPS CAGR percentage. This is not analyst-consensus PEG.",
+            fallback_as_of=as_of,
+            tier="proxy_estimate",
+        )
     )
     depreciation_amortization = _ttm_metric(
         companyfacts,
@@ -347,30 +468,40 @@ def compute_open_data_snapshot(
         fallback_as_of=as_of,
         tier="proxy_estimate",
     )
-    enterprise_value = _computed_metric(
-        "enterprise_value_proxy",
-        market_cap.value,
-        debt.value,
-        lambda market_value, total_debt: market_value + total_debt - (cash.value or 0),
-        source=f"{market_cap.source}; {debt.source}; {cash.source}",
-        as_of=_max_as_of(market_cap.as_of, debt.as_of, cash.as_of),
-        notes="Proxy enterprise value: market cap plus debt minus cash.",
-        fallback_as_of=as_of,
-        tier="proxy_estimate",
+    ebitda_for_valuation = _metric_in_price_currency("ebitda_proxy_price_currency", ebitda, price, fx_rates, as_of)
+    debt_for_valuation = _metric_in_price_currency("debt_price_currency", debt, price, fx_rates, as_of)
+    cash_for_valuation = _metric_in_price_currency("cash_price_currency", cash, price, fx_rates, as_of)
+    enterprise_value = (
+        _valuation_input_unavailable("enterprise_value_proxy", debt_for_valuation, as_of)
+        if _is_currency_bridge_unavailable(debt_for_valuation)
+        else _valuation_input_unavailable("enterprise_value_proxy", cash_for_valuation, as_of)
+        if _is_currency_bridge_unavailable(cash_for_valuation)
+        else
+        _computed_metric(
+            "enterprise_value_proxy",
+            market_cap.value,
+            debt_for_valuation.value,
+            lambda market_value, total_debt: market_value + total_debt - (cash_for_valuation.value or 0),
+            source=f"{market_cap.source}; {debt_for_valuation.source}; {cash_for_valuation.source}",
+            as_of=_max_as_of(market_cap.as_of, debt_for_valuation.as_of, cash_for_valuation.as_of),
+            notes="Proxy enterprise value: market cap plus debt minus cash.",
+            fallback_as_of=as_of,
+            tier="proxy_estimate",
+        )
     )
     ev_to_ebitda = _computed_metric(
         "ev_to_ebitda",
         enterprise_value.value,
-        ebitda.value,
+        ebitda_for_valuation.value,
         lambda ev, ebitda_value: ev / ebitda_value,
-        source=f"{enterprise_value.source}; {ebitda.source}",
-        as_of=_max_as_of(enterprise_value.as_of, ebitda.as_of),
+        source=f"{enterprise_value.source}; {ebitda_for_valuation.source}",
+        as_of=_max_as_of(enterprise_value.as_of, ebitda_for_valuation.as_of),
         notes="Proxy EV/EBITDA from open/free public facts.",
         fallback_as_of=as_of,
         tier="proxy_estimate",
     )
     historical_series = _historical_series(companyfacts, price_history or [], as_of)
-    data_gaps = _data_gaps(historical_series, forward_pe_estimate, company_context)
+    data_gaps = _data_gaps(historical_series, forward_pe_estimate, company_context, companyfacts)
 
     business_health = {
         "revenue_growth_yoy": revenue_growth_yoy,
@@ -409,6 +540,7 @@ def compute_open_data_snapshot(
         "ev_to_ebitda": ev_to_ebitda,
         "fcf_yield": fcf_yield,
     }
+    _mark_non_comparable_metrics(sector, industry, business_health, valuation, as_of)
     metrics = {
         "revenue_ttm": revenue,
         "net_income_ttm": net_income,
@@ -579,6 +711,7 @@ def _eps_growth_metric(companyfacts: dict[str, Any], metric_name: str, years: in
                 as_of=latest.end.isoformat(),
                 notes=f"{label} computed from annual SEC diluted EPS facts.",
             )
+        return _eps_not_meaningful_metric(metric_name, latest.value, prior.value, _source(latest), _source(prior), latest.end.isoformat(), years)
 
     net_income_points = _annual_points(companyfacts, NET_INCOME_CONCEPTS, USD_UNITS)
     share_points = _annual_points(companyfacts, DILUTED_SHARES_CONCEPTS, SHARE_UNITS)
@@ -596,8 +729,45 @@ def _eps_growth_metric(companyfacts: dict[str, Any], metric_name: str, years: in
                 as_of=latest["as_of"],
                 notes=f"Proxy {label} computed from SEC annual net income and diluted shares.",
             )
+        return _eps_not_meaningful_metric(
+            metric_name,
+            latest["eps"],
+            prior["eps"],
+            latest["source"],
+            prior["source"],
+            latest["as_of"],
+            years,
+        )
 
     return _unavailable(metric_name, f"A positive {years}-year SEC EPS history was unavailable.", fallback_as_of)
+
+
+def _eps_not_meaningful_metric(
+    metric_name: str,
+    latest_eps: float,
+    prior_eps: float,
+    latest_source: str,
+    prior_source: str,
+    as_of: str,
+    years: int,
+) -> OpenDataMetric:
+    if latest_eps > 0 and prior_eps <= 0:
+        label = "YoY EPS growth" if years == 1 else f"{years}-year EPS CAGR"
+        notes = (
+            f"{metric_name}: EPS turned positive from a loss-making comparison period "
+            f"(latest {latest_eps:.4g}, comparison {prior_eps:.4g}); {label} is not meaningful."
+        )
+    elif latest_eps <= 0:
+        notes = f"{metric_name}: EPS remains loss-making (latest {latest_eps:.4g}); EPS growth is not meaningful."
+    else:
+        notes = f"{metric_name}: Comparison EPS was non-positive ({prior_eps:.4g}); EPS growth is not meaningful."
+    return OpenDataMetric(
+        value=None,
+        source=f"{latest_source}; {prior_source}",
+        tier="unavailable_open_free",
+        as_of=as_of,
+        notes=notes,
+    )
 
 
 def _debt_metric(companyfacts: dict[str, Any], fallback_as_of: str) -> OpenDataMetric:
@@ -615,7 +785,18 @@ def _debt_metric(companyfacts: dict[str, Any], fallback_as_of: str) -> OpenDataM
         ]
         values = [component.value for component in components]
         as_of_dates = {component.as_of for component in components if component.value is not None}
-        if all(value is not None for value in values) and any(value for value in values) and len(as_of_dates) == 1:
+        statement_currencies = {
+            currency
+            for component in components
+            if component.value is not None
+            for currency in _source_statement_currencies(component.source)
+        }
+        if (
+            all(value is not None for value in values)
+            and any(value for value in values)
+            and len(as_of_dates) == 1
+            and len(statement_currencies) <= 1
+        ):
             return OpenDataMetric(
                 value=sum(value or 0 for value in values),
                 source="; ".join(component.source for component in components),
@@ -805,7 +986,7 @@ def _annual_valuation_rows(
     fallback_as_of: str,
 ) -> list[OpenDataPeriodMetrics]:
     depreciation = _annual_fact_map(companyfacts, DEPRECIATION_AMORTIZATION_CONCEPTS, USD_UNITS)
-    prices = sorted(price_history, key=lambda point: point.date)
+    prices = sorted((point for point in price_history if math.isfinite(point.close) and point.close > 0), key=lambda point: point.date)
     rows: list[OpenDataPeriodMetrics] = []
 
     for annual in annual_rows:
@@ -841,13 +1022,29 @@ def _annual_valuation_rows(
             fallback_as_of,
             tier="proxy_estimate",
         )
-        enterprise_value = _enterprise_value_from_metrics(market_cap, debt, cash, fallback_as_of)
+        enterprise_value = (
+            _currency_mismatch_metric_for_price_currency("enterprise_value", "USD", debt, cash, fallback_as_of=fallback_as_of)
+            if _has_statement_currency_mismatch("USD", debt, cash)
+            else _enterprise_value_from_metrics(market_cap, debt, cash, fallback_as_of)
+        )
         row = {
             "year_end_price": price,
             "market_cap": market_cap,
-            "pe": _computed_from_metrics("pe", market_cap, net_income, lambda value, income: value / income, "Historical PE from public facts.", fallback_as_of),
-            "price_to_sales": _computed_from_metrics("price_to_sales", market_cap, revenue, lambda value, sales: value / sales, "Historical Price/Sales from public facts.", fallback_as_of),
-            "fcf_yield": _computed_from_metrics("fcf_yield", fcf, market_cap, lambda free_cash_flow, value: (free_cash_flow / value) * 100, "Historical FCF yield from public facts.", fallback_as_of),
+            "pe": (
+                _currency_mismatch_metric_for_price_currency("pe", "USD", net_income, fallback_as_of=fallback_as_of)
+                if _has_statement_currency_mismatch("USD", net_income)
+                else _computed_from_metrics("pe", market_cap, net_income, lambda value, income: value / income, "Historical PE from public facts.", fallback_as_of)
+            ),
+            "price_to_sales": (
+                _currency_mismatch_metric_for_price_currency("price_to_sales", "USD", revenue, fallback_as_of=fallback_as_of)
+                if _has_statement_currency_mismatch("USD", revenue)
+                else _computed_from_metrics("price_to_sales", market_cap, revenue, lambda value, sales: value / sales, "Historical Price/Sales from public facts.", fallback_as_of)
+            ),
+            "fcf_yield": (
+                _currency_mismatch_metric_for_price_currency("fcf_yield", "USD", fcf, fallback_as_of=fallback_as_of)
+                if _has_statement_currency_mismatch("USD", fcf)
+                else _computed_from_metrics("fcf_yield", fcf, market_cap, lambda free_cash_flow, value: (free_cash_flow / value) * 100, "Historical FCF yield from public facts.", fallback_as_of)
+            ),
             "enterprise_value": enterprise_value,
             "ev_to_ebitda": _computed_from_metrics("ev_to_ebitda", enterprise_value, ebitda, lambda ev, ebitda_value: ev / ebitda_value, "Historical proxy EV/EBITDA from public facts.", fallback_as_of, tier="proxy_estimate"),
         }
@@ -879,8 +1076,15 @@ def _data_gaps(
     historical_series: dict[str, list[OpenDataPeriodMetrics]],
     forward_pe_estimate: OpenDataMetric | None,
     company_context: OpenDataCompanyContext | None,
+    companyfacts: dict[str, Any],
 ) -> list[str]:
     gaps: list[str] = []
+    taxonomies = companyfacts.get("facts", {}) if isinstance(companyfacts.get("facts"), dict) else {}
+    if "us-gaap" not in taxonomies and "ifrs-full" in taxonomies:
+        gaps.append(
+            "SEC companyfacts uses IFRS taxonomy. Foreign-currency fundamentals are supported; current valuation can use "
+            "an explicit FX and ADR-ratio bridge, while historical valuation still needs historical FX handling."
+        )
     annual = historical_series.get("annual_fundamentals", [])
     valuations = historical_series.get("valuation_history", [])
     if len(annual) < 5:
@@ -917,13 +1121,13 @@ def _price_opportunity_metrics(
     latest_price: LatestPrice | None,
     fallback_as_of: str,
 ) -> dict[str, OpenDataMetric]:
-    points = sorted(history, key=lambda point: point.date)
+    points = sorted((point for point in history if math.isfinite(point.close) and point.close > 0), key=lambda point: point.date)
     if points:
         latest = points[-1]
         price = latest.close
         as_of = latest.date
         source = latest.source
-    elif latest_price is not None:
+    elif latest_price is not None and math.isfinite(latest_price.price) and latest_price.price > 0:
         price = latest_price.price
         as_of = latest_price.as_of
         source = latest_price.source
@@ -1065,31 +1269,201 @@ def _eps_growth_3y_proxy(companyfacts: dict[str, Any], fallback_as_of: str) -> O
 
 def _forward_pe_proxy(
     price: LatestPrice | None,
-    net_income_ttm: float | None,
+    net_income_ttm: OpenDataMetric,
     shares_diluted: float | None,
     eps_growth_3y_pct: float | None,
+    statement_currency_rates: dict[str, OpenDataMetric],
     fallback_as_of: str,
 ) -> OpenDataMetric:
     if price is None:
         return _unavailable("forward_pe_proxy", "Open/free latest price was unavailable.", fallback_as_of)
-    if net_income_ttm is None or shares_diluted in (None, 0) or eps_growth_3y_pct is None:
+    net_income = _metric_in_price_currency(
+        "net_income_ttm_price_currency",
+        net_income_ttm,
+        price,
+        statement_currency_rates,
+        fallback_as_of,
+    )
+    if net_income.value is None or shares_diluted in (None, 0):
         return _unavailable(
             "forward_pe_proxy",
-            "Trailing EPS or positive 3-year EPS CAGR was unavailable.",
+            "Trailing EPS was unavailable, so a forward PE proxy could not be computed.",
             fallback_as_of,
         )
-    trailing_eps = net_income_ttm / shares_diluted
+    trailing_eps = net_income.value / shares_diluted
+    if trailing_eps <= 0:
+        return _unavailable("forward_pe_proxy", "Trailing EPS is loss-making; forward PE proxy is not meaningful.", fallback_as_of)
+    if eps_growth_3y_pct is None:
+        return _unavailable(
+            "forward_pe_proxy",
+            "Positive 3-year EPS CAGR was unavailable, so a forward PE proxy is not meaningful.",
+            fallback_as_of,
+        )
     growth_decimal = eps_growth_3y_pct / 100
-    if trailing_eps <= 0 or growth_decimal <= -1:
+    if growth_decimal <= -1:
         return _unavailable("forward_pe_proxy", "Trailing EPS or EPS growth proxy was not usable.", fallback_as_of)
     forward_eps_proxy = trailing_eps * (1 + growth_decimal)
     return OpenDataMetric(
         value=price.price / forward_eps_proxy,
-        source=price.source,
+        source=f"{price.source}; {net_income.source}",
         tier="proxy_estimate",
         as_of=price.as_of,
         notes="Proxy forward P/E using trailing EPS grown by 3-year EPS CAGR. This is not analyst consensus.",
     )
+
+
+def _source_statement_currencies(source: str) -> set[str]:
+    currencies: set[str] = set()
+    for raw_part in source.split(";"):
+        part = raw_part.strip()
+        if not part.startswith("sec_companyfacts:"):
+            continue
+        pieces = part.split(":")
+        if len(pieces) < 3:
+            continue
+        unit = pieces[2]
+        currency = unit.split("/", 1)[0].upper()
+        if currency in MONETARY_UNITS:
+            currencies.add(currency)
+    return currencies
+
+
+def _has_price_currency_mismatch(price: LatestPrice | None, *metrics: OpenDataMetric) -> bool:
+    if price is None:
+        return False
+    return _has_statement_currency_mismatch(price.currency, *metrics)
+
+
+def _has_statement_currency_mismatch(price_currency: str, *metrics: OpenDataMetric) -> bool:
+    statement_currencies: set[str] = set()
+    for metric in metrics:
+        statement_currencies.update(_source_statement_currencies(metric.source))
+    if not statement_currencies:
+        return False
+    return statement_currencies != {price_currency.upper()}
+
+
+def _currency_mismatch_metric(
+    metric_name: str,
+    price: LatestPrice | None,
+    *metrics: OpenDataMetric,
+    fallback_as_of: str,
+) -> OpenDataMetric:
+    price_currency = price.currency.upper() if price is not None else "unknown"
+    return _currency_mismatch_metric_for_price_currency(metric_name, price_currency, *metrics, fallback_as_of=fallback_as_of)
+
+
+def _currency_mismatch_metric_for_price_currency(
+    metric_name: str,
+    price_currency: str,
+    *metrics: OpenDataMetric,
+    fallback_as_of: str,
+) -> OpenDataMetric:
+    statement_currencies = sorted({currency for metric in metrics for currency in _source_statement_currencies(metric.source)})
+    statement_label = ", ".join(statement_currencies) if statement_currencies else "unknown"
+    return _unavailable(
+        metric_name,
+        f"Statement currency ({statement_label}) does not match price currency ({price_currency}); FX and ADR ratio handling are required.",
+        fallback_as_of,
+    )
+
+
+def _metric_in_price_currency(
+    metric_name: str,
+    metric: OpenDataMetric,
+    price: LatestPrice | None,
+    statement_currency_rates: dict[str, OpenDataMetric],
+    fallback_as_of: str,
+) -> OpenDataMetric:
+    if metric.value is None or price is None:
+        return metric
+    statement_currencies = _source_statement_currencies(metric.source)
+    if not statement_currencies or statement_currencies == {price.currency.upper()}:
+        return metric
+    if len(statement_currencies) != 1:
+        return _currency_mismatch_metric(metric_name, price, metric, fallback_as_of=fallback_as_of)
+    statement_currency = next(iter(statement_currencies))
+    rate = statement_currency_rates.get(statement_currency)
+    if rate is None or rate.value is None:
+        return _currency_mismatch_metric(metric_name, price, metric, fallback_as_of=fallback_as_of)
+    return OpenDataMetric(
+        value=metric.value * rate.value,
+        source=f"{metric.source}; {rate.source}",
+        tier="computed_from_public_facts" if metric.tier != "unavailable_open_free" else metric.tier,
+        as_of=_max_as_of(metric.as_of, rate.as_of),
+        notes=(
+            f"{metric.notes} Converted from {statement_currency} to {price.currency.upper()} using a public FX "
+            f"reference rate for valuation."
+        ),
+    )
+
+
+def _is_currency_bridge_unavailable(metric: OpenDataMetric) -> bool:
+    return metric.value is None and "Statement currency" in metric.notes and "price currency" in metric.notes
+
+
+def _mark_non_comparable_metrics(
+    sector: str | None,
+    industry: str | None,
+    business_health: dict[str, OpenDataMetric],
+    valuation: dict[str, OpenDataMetric],
+    fallback_as_of: str,
+) -> None:
+    if not _is_financial_business(sector, industry):
+        return
+    replacements = {
+        "business_health": {
+            "gross_margin": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses.",
+            "operating_margin": "Operating margin is not meaningful for many financial businesses because interest income, credit costs, and balance-sheet funding do not map cleanly to normal operating-company margins.",
+            "free_cash_flow": "Free cash flow is not meaningful for many financial businesses because operating cash flow is distorted by balance-sheet lending, deposits, and financing activity.",
+            "roic": "ROIC is not meaningful for many financial businesses because invested capital is not comparable to operating-company capital.",
+        },
+        "valuation": {
+            "ev_to_ebitda": "EV/EBITDA is not meaningful for many financial businesses because debt is part of the operating model.",
+            "fcf_yield": "FCF yield is not meaningful for many financial businesses because free cash flow is not comparable to operating-company free cash flow.",
+        },
+    }
+    for key, notes in replacements["business_health"].items():
+        metric = business_health.get(key)
+        if metric is not None and metric.value is None:
+            business_health[key] = _unavailable(key, notes, metric.as_of or fallback_as_of)
+    for key, notes in replacements["valuation"].items():
+        metric = valuation.get(key)
+        if metric is not None and metric.value is None:
+            valuation[key] = _unavailable(key, notes, metric.as_of or fallback_as_of)
+
+
+def _is_financial_business(sector: str | None, industry: str | None) -> bool:
+    sector_text = (sector or "").lower()
+    industry_text = (industry or "").lower()
+    if sector_text == "financials":
+        return True
+    financial_terms = (
+        "bank",
+        "banks",
+        "insurance",
+        "insurer",
+        "broker",
+        "brokers",
+        "asset management",
+        "capital markets",
+        "credit",
+        "savings institution",
+        "investment banker",
+    )
+    return any(term in industry_text for term in financial_terms)
+
+
+def _valuation_input_unavailable(metric_name: str, input_metric: OpenDataMetric, fallback_as_of: str) -> OpenDataMetric:
+    _, _, reason = input_metric.notes.partition(": ")
+    return _unavailable(metric_name, reason or input_metric.notes, fallback_as_of)
+
+
+def _market_cap_notes(adr_ratio: float, adr_ratio_source: str | None) -> str:
+    base = "Latest open/free price multiplied by SEC diluted weighted-average shares."
+    if adr_ratio == 1:
+        return f"{base} ADR/share ratio is 1:1." if adr_ratio_source else base
+    return f"{base} Share count adjusted by ADR ratio of {adr_ratio:g} ordinary shares per ADS."
 
 
 def _computed_metric(
@@ -1237,7 +1611,8 @@ def _is_ytd_quarter(point: FactPoint) -> bool:
 
 
 def _is_10k(point: FactPoint) -> bool:
-    return point.form.upper().startswith("10-K")
+    form = point.form.upper()
+    return form.startswith("10-K") or form.startswith("20-F") or form.startswith("40-F")
 
 
 def _is_10q(point: FactPoint) -> bool:
@@ -1317,7 +1692,8 @@ def _annual_debt_metrics(companyfacts: dict[str, Any], fallback_as_of: str) -> d
                 continue
             points = [component_map[fy] for component_map in component_maps]
             end_dates = {point.end for point in points}
-            if len(end_dates) != 1:
+            units = {point.unit for point in points}
+            if len(end_dates) != 1 or len(units) != 1:
                 continue
             result[fy] = OpenDataMetric(
                 value=sum(point.value for point in points),
@@ -1432,18 +1808,22 @@ def _median(values: list[float]) -> float:
 
 
 def _fact_points(companyfacts: dict[str, Any], concept: str, units: tuple[str, ...]) -> list[FactPoint]:
-    concept_data = companyfacts.get("facts", {}).get("us-gaap", {}).get(concept, {})
-    unit_data = concept_data.get("units", {}) if isinstance(concept_data, dict) else {}
     points: list[FactPoint] = []
-    for unit in units:
-        for row in unit_data.get(unit, []):
-            point = _parse_fact_point(concept, unit, row)
-            if point is not None:
-                points.append(point)
+    facts = companyfacts.get("facts", {})
+    if not isinstance(facts, dict):
+        return points
+    for taxonomy in SEC_TAXONOMIES:
+        concept_data = facts.get(taxonomy, {}).get(concept, {})
+        unit_data = concept_data.get("units", {}) if isinstance(concept_data, dict) else {}
+        for unit in units:
+            for row in unit_data.get(unit, []):
+                point = _parse_fact_point(taxonomy, concept, unit, row)
+                if point is not None:
+                    points.append(point)
     return points
 
 
-def _parse_fact_point(concept: str, unit: str, row: dict[str, Any]) -> FactPoint | None:
+def _parse_fact_point(taxonomy: str, concept: str, unit: str, row: dict[str, Any]) -> FactPoint | None:
     value = row.get("val")
     try:
         number = float(value)
@@ -1460,6 +1840,7 @@ def _parse_fact_point(concept: str, unit: str, row: dict[str, Any]) -> FactPoint
     except (TypeError, ValueError):
         fy_int = None
     return FactPoint(
+        taxonomy=taxonomy,
         concept=concept,
         unit=unit,
         value=number,
@@ -1483,7 +1864,7 @@ def _parse_date(raw: Any) -> date | None:
 
 
 def _source(point: FactPoint) -> str:
-    return f"sec_companyfacts:us-gaap/{point.concept}:{point.unit}:{point.form}:{point.end.isoformat()}"
+    return f"sec_companyfacts:{point.taxonomy}/{point.concept}:{point.unit}:{point.form}:{point.end.isoformat()}"
 
 
 def _point_sort_key(point: FactPoint) -> tuple[date, date, str]:

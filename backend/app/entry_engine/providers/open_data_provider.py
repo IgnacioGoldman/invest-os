@@ -3,8 +3,11 @@ from __future__ import annotations
 import csv
 import json
 import logging
+import math
 import os
 import re
+import threading
+import time
 from datetime import date, datetime, timedelta, timezone
 from io import StringIO
 from pathlib import Path
@@ -35,8 +38,8 @@ SEC_COMPANYFACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010d}
 SEC_SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
 SEC_ARCHIVES_BASE_URL = "https://www.sec.gov/Archives/edgar/data"
 STOOQ_DAILY_HISTORY_URL = "https://stooq.com/q/d/l/"
+FRANKFURTER_LATEST_URL = "https://api.frankfurter.dev/v1/latest"
 GOOGL_FALLBACK_CIK = 1652044
-SUPPORTED_TICKERS = {"GOOGL"}
 GOOGL_FALLBACK_METADATA = {
     "ticker": "GOOGL",
     "name": "Alphabet Inc.",
@@ -46,6 +49,37 @@ GOOGL_FALLBACK_METADATA = {
     "sector": "Communication Services",
     "industry": "Internet Content & Information",
 }
+ADR_RATIO_BY_TICKER = {
+    "ASML": {
+        "ratio": 1.0,
+        "source": "ASML New York registry share ratio: 1 ADS represents 1 ordinary share.",
+    },
+    "AZN": {
+        "ratio": 2.0,
+        "source": "AstraZeneca ADS ratio: 1 ADS represents 2 ordinary shares.",
+    },
+    "HSBC": {
+        "ratio": 5.0,
+        "source": "HSBC ADS ratio: 1 ADS represents 5 ordinary shares.",
+    },
+    "NVO": {
+        "ratio": 1.0,
+        "source": "Novo Nordisk ADR ratio: 1 ADR represents 1 B share.",
+    },
+    "NVS": {
+        "ratio": 1.0,
+        "source": "Novartis ADR ratio: 1 ADR represents 1 ordinary share.",
+    },
+    "NOK": {
+        "ratio": 1.0,
+        "source": "Nokia 2025 Form 20-F: ADSs each represent one share.",
+    },
+    "TSM": {
+        "ratio": 5.0,
+        "source": "TSMC ADS ratio: 1 ADS represents 5 common shares.",
+    },
+}
+SUPPORTED_FX_CURRENCIES = {"USD", "EUR", "GBP", "DKK", "CHF", "CAD", "TWD", "JPY", "CNY", "HKD"}
 
 
 class JsonFileCache:
@@ -67,7 +101,9 @@ class JsonFileCache:
 
     def set(self, name: str, value: Any) -> None:
         path = self.cache_dir / name
-        path.write_text(json.dumps(value, indent=2, sort_keys=True), encoding="utf-8")
+        tmp_path = path.with_suffix(f"{path.suffix}.tmp.{os.getpid()}.{threading.get_ident()}")
+        tmp_path.write_text(json.dumps(value, indent=2, sort_keys=True), encoding="utf-8")
+        tmp_path.replace(path)
 
 
 class OpenDataProvider(OpenDataMetricProvider):
@@ -79,6 +115,9 @@ class OpenDataProvider(OpenDataMetricProvider):
         cache: JsonFileCache | None = None,
         session: requests.Session | None = None,
         sec_user_agent: str | None = None,
+        request_timeout: float = 20,
+        retry_attempts: int = 2,
+        retry_backoff: float = 0.75,
     ) -> None:
         self.cache = cache or JsonFileCache()
         self.session = session or requests.Session()
@@ -86,20 +125,43 @@ class OpenDataProvider(OpenDataMetricProvider):
             "SEC_USER_AGENT",
             "Invest OS OpenDataProvider/0.1 contact=local-invest-os@example.com",
         )
+        self.request_timeout = request_timeout
+        self.retry_attempts = max(1, retry_attempts)
+        self.retry_backoff = max(0, retry_backoff)
         self.stooq_api_key = os.getenv("STOOQ_API_KEY") or None
+        self._yfinance_info_cache: dict[str, dict[str, Any] | None] = {}
+
+    def _get(self, url: str, *, timeout: float | None = None, **kwargs: Any) -> requests.Response:
+        attempts = self.retry_attempts
+        last_error: requests.RequestException | None = None
+        for attempt in range(1, attempts + 1):
+            try:
+                response = self.session.get(url, timeout=timeout or self.request_timeout, **kwargs)
+                response.raise_for_status()
+                return response
+            except requests.RequestException as exc:
+                last_error = exc
+                if attempt >= attempts:
+                    break
+                sleep_for = self.retry_backoff * (2 ** (attempt - 1))
+                logger.warning("GET failed for %s on attempt %s/%s: %s", url, attempt, attempts, exc)
+                if sleep_for > 0:
+                    time.sleep(sleep_for)
+        assert last_error is not None
+        raise last_error
 
     def get_open_data_snapshot(self, ticker: str) -> OpenDataSnapshot:
         symbol = ticker.upper().strip()
-        if symbol not in SUPPORTED_TICKERS:
-            raise ValueError("OpenDataProvider proof-of-concept supports exactly one ticker: GOOGL.")
-
         metadata = self.resolve_company_metadata(symbol)
         cik = int(metadata["cik"])
         companyfacts = self.fetch_companyfacts(cik)
         price_history = self.fetch_price_history(symbol)
         price = self._latest_price_from_history(symbol, price_history) or self.fetch_latest_price(symbol)
         forward_pe_estimate = self.fetch_forward_pe_estimate(symbol)
+        market_cap_estimate = self.fetch_market_cap_estimate(symbol)
         company_context = self.fetch_company_context(cik)
+        statement_currency_rates = self.fetch_statement_currency_rates(companyfacts, price)
+        adr = ADR_RATIO_BY_TICKER.get(symbol, {"ratio": 1.0, "source": None})
         return compute_open_data_snapshot(
             ticker=symbol,
             cik=cik,
@@ -112,6 +174,10 @@ class OpenDataProvider(OpenDataMetricProvider):
             industry=metadata.get("industry"),
             forward_pe_estimate=forward_pe_estimate,
             company_context=company_context,
+            statement_currency_rates=statement_currency_rates,
+            market_cap_estimate=market_cap_estimate,
+            adr_ratio=float(adr["ratio"]),
+            adr_ratio_source=adr["source"],
         )
 
     def resolve_company_metadata(self, ticker: str) -> dict[str, Any]:
@@ -127,14 +193,15 @@ class OpenDataProvider(OpenDataMetricProvider):
 
         row = self._find_exchange_mapping_row(mapping, symbol)
         if row is not None:
+            universe_metadata = self._universe_metadata(symbol)
             metadata = {
                 "ticker": row.get("ticker") or symbol,
-                "name": row.get("name") or GOOGL_FALLBACK_METADATA["name"],
+                "name": universe_metadata.get("name") or row.get("name") or GOOGL_FALLBACK_METADATA["name"],
                 "cik": int(row.get("cik") or row.get("cik_str") or GOOGL_FALLBACK_CIK),
                 "exchange": row.get("exchange") or GOOGL_FALLBACK_METADATA["exchange"],
-                "country": "US",
-                "sector": GOOGL_FALLBACK_METADATA["sector"],
-                "industry": GOOGL_FALLBACK_METADATA["industry"],
+                "country": universe_metadata.get("region") or "US",
+                "sector": universe_metadata.get("sector") or GOOGL_FALLBACK_METADATA["sector"],
+                "industry": universe_metadata.get("industry") or GOOGL_FALLBACK_METADATA["industry"],
             }
             return metadata
 
@@ -163,6 +230,36 @@ class OpenDataProvider(OpenDataMetricProvider):
                 if str(raw_row.get("ticker") or "").upper() == symbol:
                     return raw_row
         return None
+
+    def _universe_metadata(self, symbol: str) -> dict[str, Any]:
+        universe = self.cache.get("stocks_universe_metadata.json", timedelta(minutes=15))
+        if universe is None:
+            universe_path = PROJECT_DIR / "data" / "stocks" / "stocks.json"
+            try:
+                payload = json.loads(universe_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                universe = {}
+            else:
+                rows = payload.get("rows") if isinstance(payload, dict) else payload
+                universe = {}
+                if isinstance(rows, list):
+                    for row in rows:
+                        if not isinstance(row, dict):
+                            continue
+                        row_symbol = str(row.get("symbol") or row.get("ticker") or "").upper()
+                        if not row_symbol:
+                            continue
+                        universe[row_symbol] = {
+                            "name": row.get("name"),
+                            "region": row.get("region"),
+                            "sector": row.get("sector"),
+                            "industry": row.get("industry"),
+                        }
+            self.cache.set("stocks_universe_metadata.json", universe)
+        if not isinstance(universe, dict):
+            return {}
+        row = universe.get(symbol.upper())
+        return row if isinstance(row, dict) else {}
 
     def _legacy_resolve_cik(self, ticker: str) -> int:
         symbol = ticker.upper().strip()
@@ -251,6 +348,140 @@ class OpenDataProvider(OpenDataMetricProvider):
             self.cache.set(f"forward_pe_estimate_{symbol}.json", estimate.model_dump(mode="json"))
         return estimate
 
+    def fetch_market_cap_estimate(self, ticker: str) -> OpenDataMetric | None:
+        symbol = ticker.upper().strip()
+        cached = self.cache.get(f"market_cap_estimate_{symbol}.json", timedelta(hours=12))
+        if cached is not None:
+            try:
+                return OpenDataMetric.model_validate(cached)
+            except ValueError:
+                pass
+
+        estimate = self._fetch_yfinance_market_cap(symbol)
+        if estimate is not None:
+            self.cache.set(f"market_cap_estimate_{symbol}.json", estimate.model_dump(mode="json"))
+        return estimate
+
+    def fetch_statement_currency_rates(
+        self,
+        companyfacts: dict[str, Any],
+        price: LatestPrice | None,
+    ) -> dict[str, OpenDataMetric]:
+        if price is None:
+            return {}
+        target_currency = price.currency.upper()
+        currencies = self._statement_monetary_currencies(companyfacts)
+        rates: dict[str, OpenDataMetric] = {}
+        for currency in sorted(currencies):
+            if currency == target_currency:
+                continue
+            rate = self.fetch_fx_rate(currency, target_currency)
+            if rate is not None:
+                rates[currency] = rate
+        return rates
+
+    def fetch_fx_rate(self, from_currency: str, to_currency: str) -> OpenDataMetric | None:
+        source_currency = from_currency.upper()
+        target_currency = to_currency.upper()
+        if source_currency == target_currency:
+            return OpenDataMetric(
+                value=1.0,
+                source="fx:identity",
+                tier="exact_public_fact",
+                as_of=date.today().isoformat(),
+                notes=f"Identity FX rate for {source_currency}/{target_currency}.",
+            )
+        cache_name = f"fx_rate_{source_currency}_{target_currency}.json"
+        cached = self.cache.get(cache_name, timedelta(hours=12))
+        if cached is not None:
+            try:
+                return OpenDataMetric.model_validate(cached)
+            except ValueError:
+                pass
+
+        try:
+            response = self._get(
+                FRANKFURTER_LATEST_URL,
+                params={"base": source_currency, "symbols": target_currency},
+                headers={"User-Agent": "Invest OS OpenDataProvider/0.1"},
+            )
+            data = response.json()
+            value = float(data["rates"][target_currency])
+            as_of = str(data.get("date") or date.today().isoformat())
+            metric = OpenDataMetric(
+                value=value,
+                source=f"frankfurter:{source_currency}/{target_currency}",
+                tier="exact_public_fact",
+                as_of=as_of,
+                notes=f"Public reference FX rate from Frankfurter for {source_currency} to {target_currency}.",
+            )
+        except (requests.RequestException, KeyError, TypeError, ValueError) as exc:
+            logger.warning("Frankfurter FX fetch failed for %s/%s: %s", source_currency, target_currency, exc)
+            metric = self._fetch_yfinance_fx_rate(source_currency, target_currency)
+            if metric is None:
+                return None
+
+        self.cache.set(cache_name, metric.model_dump(mode="json"))
+        return metric
+
+    def _fetch_yfinance_fx_rate(self, from_currency: str, to_currency: str) -> OpenDataMetric | None:
+        try:
+            import yfinance as yf  # type: ignore[import-not-found]
+        except ImportError:
+            return None
+
+        for source_currency, target_currency, invert in (
+            (from_currency, to_currency, False),
+            (to_currency, from_currency, True),
+        ):
+            ticker = f"{source_currency}{target_currency}=X"
+            try:
+                history = yf.Ticker(ticker).history(period="5d", interval="1d", auto_adjust=False)
+            except Exception as exc:
+                logger.warning("yfinance FX fetch failed for %s: %s", ticker, exc)
+                continue
+            if history is None or history.empty or "Close" not in history:
+                continue
+            closes = history["Close"].dropna()
+            closes = closes[[math.isfinite(float(value)) for value in closes]]
+            if closes.empty:
+                continue
+            close = float(closes.iloc[-1])
+            if close <= 0:
+                continue
+            latest_index = closes.index[-1]
+            as_of = latest_index.date().isoformat() if hasattr(latest_index, "date") else date.today().isoformat()
+            value = (1 / close) if invert else close
+            return OpenDataMetric(
+                value=value,
+                source=f"yfinance_fx:{from_currency}/{to_currency}",
+                tier="proxy_estimate",
+                as_of=as_of,
+                notes=(
+                    f"Free public FX rate from Yahoo Finance for {from_currency} to {to_currency}. "
+                    "Used only when the primary Frankfurter reference feed is unavailable for the pair."
+                ),
+            )
+        return None
+
+    def _statement_monetary_currencies(self, companyfacts: dict[str, Any]) -> set[str]:
+        currencies: set[str] = set()
+        facts = companyfacts.get("facts", {})
+        if not isinstance(facts, dict):
+            return currencies
+        for taxonomy in facts.values():
+            if not isinstance(taxonomy, dict):
+                continue
+            for concept_data in taxonomy.values():
+                units = concept_data.get("units", {}) if isinstance(concept_data, dict) else {}
+                if not isinstance(units, dict):
+                    continue
+                for unit in units:
+                    currency = str(unit).split("/", 1)[0].upper()
+                    if currency in SUPPORTED_FX_CURRENCIES:
+                        currencies.add(currency)
+        return currencies
+
     def _company_context_from_submissions(self, cik: int, submissions: Any) -> OpenDataCompanyContext | None:
         if not isinstance(submissions, dict):
             return None
@@ -293,11 +524,6 @@ class OpenDataProvider(OpenDataMetricProvider):
             source="sec_submissions",
             as_of=as_of,
             recent_filings=filings,
-            known_context_gaps=[
-                "General media/news sentiment is not collected in this deterministic layer.",
-                "Earnings-call transcripts and management Q&A are not collected in this deterministic layer.",
-                "AI should ask for deterministic exhibit text, news, or transcript collection if a thesis depends on guidance, management tone, or news nuance.",
-            ],
             notes="Company context is collected from SEC submissions and filing index metadata. The app does not classify the news as good or bad.",
         )
 
@@ -415,9 +641,10 @@ class OpenDataProvider(OpenDataMetricProvider):
         return f"EX-{digits}"
 
     def _latest_price_from_history(self, ticker: str, history: list[HistoricalPricePoint]) -> LatestPrice | None:
-        if not history:
+        usable_history = [point for point in history if math.isfinite(point.close) and point.close > 0]
+        if not usable_history:
             return None
-        latest = sorted(history, key=lambda point: point.date)[-1]
+        latest = sorted(usable_history, key=lambda point: point.date)[-1]
         return LatestPrice(
             ticker=ticker.upper(),
             price=latest.close,
@@ -427,16 +654,14 @@ class OpenDataProvider(OpenDataMetricProvider):
         )
 
     def _sec_get_json(self, url: str) -> Any:
-        response = self.session.get(
+        response = self._get(
             url,
             headers={
                 "User-Agent": self.sec_user_agent,
                 "Accept": "application/json",
                 "Accept-Encoding": "gzip, deflate",
             },
-            timeout=20,
         )
-        response.raise_for_status()
         return response.json()
 
     def _fetch_yfinance_price(self, ticker: str) -> LatestPrice | None:
@@ -454,6 +679,7 @@ class OpenDataProvider(OpenDataMetricProvider):
         if history is None or history.empty or "Close" not in history:
             return None
         closes = history["Close"].dropna()
+        closes = closes[[math.isfinite(float(value)) for value in closes]]
         if closes.empty:
             return None
         latest_index = closes.index[-1]
@@ -467,19 +693,10 @@ class OpenDataProvider(OpenDataMetricProvider):
         )
 
     def _fetch_yfinance_forward_pe(self, ticker: str) -> OpenDataMetric | None:
-        try:
-            import yfinance as yf  # type: ignore[import-not-found]
-        except ImportError:
+        info = self._fetch_yfinance_info(ticker)
+        if info is None:
             return None
 
-        try:
-            info = yf.Ticker(ticker).info
-        except Exception:
-            logger.exception("yfinance forward PE fetch failed for %s", ticker)
-            return None
-
-        if not isinstance(info, dict):
-            return None
         raw_value = info.get("forwardPE")
         try:
             value = float(raw_value)
@@ -498,15 +715,59 @@ class OpenDataProvider(OpenDataMetricProvider):
             ),
         )
 
+    def _fetch_yfinance_market_cap(self, ticker: str) -> OpenDataMetric | None:
+        info = self._fetch_yfinance_info(ticker)
+        if info is None:
+            return None
+
+        raw_value = info.get("marketCap")
+        try:
+            value = float(raw_value)
+        except (TypeError, ValueError):
+            return None
+        if value <= 0:
+            return None
+        return OpenDataMetric(
+            value=value,
+            source="yfinance:marketCap",
+            tier="proxy_estimate",
+            as_of=date.today().isoformat(),
+            notes=(
+                "Free public market-cap estimate from yfinance/Yahoo Finance. "
+                "Used when SEC diluted shares are unavailable, so this is not an SEC-derived market cap."
+            ),
+        )
+
+    def _fetch_yfinance_info(self, ticker: str) -> dict[str, Any] | None:
+        symbol = ticker.upper().strip()
+        if symbol in self._yfinance_info_cache:
+            return self._yfinance_info_cache[symbol]
+        try:
+            import yfinance as yf  # type: ignore[import-not-found]
+        except ImportError:
+            self._yfinance_info_cache[symbol] = None
+            return None
+
+        try:
+            info = yf.Ticker(symbol).info
+        except Exception as exc:
+            logger.warning("yfinance info fetch failed for %s: %s", symbol, exc)
+            self._yfinance_info_cache[symbol] = None
+            return None
+        if not isinstance(info, dict):
+            self._yfinance_info_cache[symbol] = None
+            return None
+        self._yfinance_info_cache[symbol] = info
+        return info
+
     def _fetch_stooq_price(self, ticker: str) -> LatestPrice | None:
         for query_symbol in _stooq_symbols(ticker, "USD"):
             try:
-                response = self.session.get(
+                response = self._get(
                     STOOQ_URL,
                     params={"s": query_symbol, "f": "sd2t2c", "h": "", "e": "csv"},
-                    timeout=10,
+                    timeout=min(self.request_timeout, 10),
                 )
-                response.raise_for_status()
             except requests.RequestException:
                 continue
 
@@ -519,9 +780,12 @@ class OpenDataProvider(OpenDataMetricProvider):
             if not close or close == "N/D":
                 continue
             try:
+                close_value = float(close)
+                if not math.isfinite(close_value) or close_value <= 0:
+                    continue
                 return LatestPrice(
                     ticker=ticker.upper(),
-                    price=float(close),
+                    price=close_value,
                     currency="USD",
                     source=f"stooq:{query_symbol.upper()}",
                     as_of=raw_date if raw_date and raw_date != "N/D" else date.today().isoformat(),
@@ -534,16 +798,14 @@ class OpenDataProvider(OpenDataMetricProvider):
     def _fetch_stooq_history(self, ticker: str) -> list[HistoricalPricePoint]:
         for query_symbol in _stooq_symbols(ticker, "USD"):
             try:
-                response = self.session.get(
+                response = self._get(
                     STOOQ_DAILY_HISTORY_URL,
                     params={
                         "s": query_symbol,
                         "i": "d",
                         **({"apikey": self.stooq_api_key} if self.stooq_api_key else {}),
                     },
-                    timeout=20,
                 )
-                response.raise_for_status()
             except requests.RequestException:
                 continue
 
@@ -555,11 +817,16 @@ class OpenDataProvider(OpenDataMetricProvider):
                 if not raw_date or not close or close == "N/D":
                     continue
                 try:
+                    close_value = float(close)
+                    if not math.isfinite(close_value) or close_value <= 0:
+                        continue
                     volume = float(row["Volume"]) if row.get("Volume") not in (None, "", "N/D") else None
+                    if volume is not None and not math.isfinite(volume):
+                        volume = None
                     history.append(
                         HistoricalPricePoint(
                             date=raw_date,
-                            close=float(close),
+                            close=close_value,
                             volume=volume,
                             source=f"stooq_history:{query_symbol.upper()}",
                         )
@@ -596,12 +863,14 @@ class OpenDataProvider(OpenDataMetricProvider):
                 close_value = float(close)
             except (TypeError, ValueError):
                 continue
-            if not close_value:
+            if not math.isfinite(close_value) or close_value <= 0:
                 continue
             as_of = index.date().isoformat() if hasattr(index, "date") else str(index)[:10]
             volume = row.get("Volume")
             try:
                 volume_value = float(volume) if volume is not None else None
+                if volume_value is not None and not math.isfinite(volume_value):
+                    volume_value = None
             except (TypeError, ValueError):
                 volume_value = None
             history.append(

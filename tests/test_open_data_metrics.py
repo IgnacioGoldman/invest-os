@@ -12,6 +12,8 @@ sys.path.insert(0, str(ROOT / "backend"))
 from app.entry_engine.open_data_metrics import compute_open_data_snapshot  # noqa: E402
 from app.entry_engine.open_data_models import HistoricalPricePoint, LatestPrice, OpenDataMetric  # noqa: E402
 from app.entry_engine.providers.open_data_provider import JsonFileCache, OpenDataProvider  # noqa: E402
+from app.services.stock_entry_analysis import analyze_open_data_stock_entry  # noqa: E402
+from scripts.open_data_poc import _metric_coverage  # noqa: E402
 
 
 def fact(
@@ -96,6 +98,43 @@ def mocked_price_history() -> list[HistoricalPricePoint]:
         ("2026-04-26", 200),
     ]
     return [HistoricalPricePoint(date=day, close=close, source="mock_history") for day, close in rows]
+
+
+def mocked_ifrs_companyfacts() -> dict[str, object]:
+    annual_common = [
+        ("2022-01-01", "2022-12-31", 2022, "2023-03-01"),
+        ("2023-01-01", "2023-12-31", 2023, "2024-03-01"),
+        ("2024-01-01", "2024-12-31", 2024, "2025-03-01"),
+        ("2025-01-01", "2025-12-31", 2025, "2026-03-01"),
+    ]
+
+    def annual(values: list[float]) -> list[dict[str, object]]:
+        return [
+            fact(value, start, end, fy=fy, fp="FY", form="20-F", filed=filed)
+            for value, (start, end, fy, filed) in zip(values, annual_common)
+        ]
+
+    return {
+        "entityName": "Nokia Corporation",
+        "facts": {
+            "ifrs-full": {
+                "Revenue": {"units": {"EUR": annual([22000, 23000, 24000, 26000])}},
+                "ProfitLoss": {"units": {"EUR": annual([1000, 1200, 1300, 1500])}},
+                "GrossProfit": {"units": {"EUR": annual([8000, 8500, 9000, 10000])}},
+                "ProfitLossFromOperatingActivities": {"units": {"EUR": annual([1800, 2000, 2100, 2500])}},
+                "CashFlowsFromUsedInOperatingActivities": {"units": {"EUR": annual([2500, 2600, 2700, 3000])}},
+                "PurchaseOfPropertyPlantAndEquipmentIntangibleAssetsOtherThanGoodwillInvestmentPropertyAndOtherNoncurrentAssets": {
+                    "units": {"EUR": annual([400, 420, 430, 450])}
+                },
+                "AdjustedWeightedAverageShares": {"units": {"shares": annual([5000, 5000, 5000, 5000])}},
+                "DilutedEarningsLossPerShare": {"units": {"EUR/shares": annual([0.2, 0.24, 0.26, 0.3])}},
+                "CashAndCashEquivalents": {"units": {"EUR": annual([4000, 4200, 4300, 4500])}},
+                "Borrowings": {"units": {"EUR": annual([3000, 2900, 2800, 2700])}},
+                "Equity": {"units": {"EUR": annual([12000, 12500, 13000, 14000])}},
+                "DepreciationAndAmortisationExpense": {"units": {"EUR": annual([800, 820, 830, 850])}},
+            }
+        },
+    }
 
 
 class OpenDataMetricsTest(unittest.TestCase):
@@ -187,6 +226,207 @@ class OpenDataMetricsTest(unittest.TestCase):
         self.assertEqual(snapshot.metrics["forward_pe_public_estimate"].value, 42)
         self.assertFalse(any("forward PE estimate was unavailable" in gap for gap in snapshot.data_gaps))
 
+    def test_marks_eps_turnaround_as_not_meaningful_growth(self) -> None:
+        companyfacts = mocked_companyfacts()
+        eps_rows = companyfacts["facts"]["us-gaap"]["EarningsPerShareDiluted"]["units"]["USD/shares"]  # type: ignore[index]
+        for row, value in zip(eps_rows, [-1.0, -0.8, -0.5, 0.2]):
+            row["val"] = value
+
+        snapshot = compute_open_data_snapshot(
+            ticker="GOOGL",
+            cik=1652044,
+            companyfacts=companyfacts,
+            price=LatestPrice(ticker="GOOGL", price=200, source="mock_price", as_of="2026-04-26"),
+            generated_as_of="2026-04-26",
+        )
+
+        yoy = snapshot.business_health["eps_growth_yoy"]
+        cagr = snapshot.business_health["eps_cagr_3y"]
+
+        self.assertIsNone(yoy.value)
+        self.assertIn("EPS turned positive", yoy.notes)
+        self.assertIn("YoY EPS growth is not meaningful", yoy.notes)
+        self.assertIsNone(cagr.value)
+        self.assertIn("EPS turned positive", cagr.notes)
+        self.assertIn("3-year EPS CAGR is not meaningful", cagr.notes)
+
+    def test_marks_loss_making_eps_and_dependent_valuation_as_not_meaningful(self) -> None:
+        companyfacts = mocked_companyfacts()
+        eps_rows = companyfacts["facts"]["us-gaap"]["EarningsPerShareDiluted"]["units"]["USD/shares"]  # type: ignore[index]
+        income_rows = companyfacts["facts"]["us-gaap"]["NetIncomeLoss"]["units"]["USD"]  # type: ignore[index]
+        for row, value in zip(eps_rows, [-1.0, -1.2, -1.4, -2.0]):
+            row["val"] = value
+        for row in income_rows:
+            row["val"] = -abs(float(row["val"]))
+
+        snapshot = compute_open_data_snapshot(
+            ticker="RDW",
+            cik=1819810,
+            companyfacts=companyfacts,
+            price=LatestPrice(ticker="RDW", price=10, source="mock_price", as_of="2026-04-26"),
+            generated_as_of="2026-04-26",
+        )
+        coverage = _metric_coverage(snapshot)
+
+        self.assertIsNone(snapshot.business_health["eps_growth_yoy"].value)
+        self.assertIn("EPS remains loss-making", snapshot.business_health["eps_growth_yoy"].notes)
+        self.assertIsNone(snapshot.business_health["eps_cagr_3y"].value)
+        self.assertIn("EPS remains loss-making", snapshot.business_health["eps_cagr_3y"].notes)
+        self.assertIsNone(snapshot.valuation["forward_pe"].value)
+        self.assertIn("not meaningful", snapshot.valuation["forward_pe"].notes)
+        self.assertIsNone(snapshot.valuation["peg"].value)
+        self.assertIn("not meaningful", snapshot.valuation["peg"].notes)
+        self.assertNotIn("business_health.eps_growth_yoy", coverage["missing_metrics"])
+        self.assertNotIn("business_health.eps_cagr_3y", coverage["missing_metrics"])
+        self.assertIn("business_health.eps_growth_yoy", {item["metric"] for item in coverage["not_meaningful_metrics"]})
+
+    def test_reads_ifrs_eur_fundamentals_without_mixed_currency_valuation(self) -> None:
+        snapshot = compute_open_data_snapshot(
+            ticker="NOK",
+            cik=924613,
+            companyfacts=mocked_ifrs_companyfacts(),
+            price=LatestPrice(ticker="NOK", price=10, currency="USD", source="mock_us_adr_price", as_of="2026-04-26"),
+            generated_as_of="2026-04-26",
+        )
+
+        self.assertEqual(snapshot.name, "Nokia Corporation")
+        self.assertEqual(snapshot.metrics["revenue_ttm"].value, 26000)
+        self.assertIn("sec_companyfacts:ifrs-full/Revenue:EUR:20-F", snapshot.metrics["revenue_ttm"].source)
+        self.assertAlmostEqual(snapshot.business_health["revenue_growth_yoy"].value or 0, 8.3333333333)
+        self.assertAlmostEqual(snapshot.business_health["gross_margin"].value or 0, 38.4615384615)
+        self.assertEqual(snapshot.business_health["cash"].value, 4500)
+        self.assertEqual(snapshot.business_health["debt"].value, 2700)
+        self.assertEqual(snapshot.valuation["pe"].tier, "unavailable_open_free")
+        self.assertIn("Statement currency (EUR) does not match price currency (USD)", snapshot.valuation["pe"].notes)
+        self.assertTrue(any("Foreign-currency fundamentals are supported" in gap for gap in snapshot.data_gaps))
+
+    def test_stock_entry_analysis_uses_open_data_snapshot(self) -> None:
+        price_history = [
+            HistoricalPricePoint(
+                date=point.date,
+                close=90 if point.date == "2025-04-26" else point.close,
+                volume=point.volume,
+                source=point.source,
+            )
+            for point in mocked_price_history()
+        ]
+        snapshot = compute_open_data_snapshot(
+            ticker="GOOGL",
+            cik=1652044,
+            companyfacts=mocked_companyfacts(),
+            price=LatestPrice(ticker="GOOGL", price=200, source="mock_price", as_of="2026-04-26"),
+            price_history=price_history,
+            generated_as_of="2026-04-26",
+        )
+
+        analysis = analyze_open_data_stock_entry(snapshot)
+
+        self.assertEqual(analysis.ticker, "GOOGL")
+        self.assertFalse(analysis.needs_more_data)
+        self.assertEqual(analysis.opportunity_type, "Quality compounder pullback")
+        self.assertEqual(analysis.business_health.assessment, "strong")
+        self.assertEqual(analysis.price_opportunity.assessment, "pullback")
+        self.assertTrue(any("Price is down 20.00% over 1 month." in item for item in analysis.price_opportunity.evidence))
+        self.assertFalse(any("down -20.00%" in item for item in analysis.price_opportunity.evidence))
+        self.assertGreater(analysis.dca_entry.buy_now, 0)
+        payload = analysis.model_dump()
+        self.assertNotIn("bull_case", payload)
+        self.assertNotIn("bear_case", payload)
+        self.assertNotIn("risks", payload)
+        self.assertNotIn("conditions", payload["dca_entry"])
+
+    def test_stock_entry_analysis_marks_positive_ath_momentum_as_extended_not_unclear(self) -> None:
+        price_history = [
+            HistoricalPricePoint(date="2021-04-26", close=80, source="mock_history"),
+            HistoricalPricePoint(date="2024-04-26", close=120, source="mock_history"),
+            HistoricalPricePoint(date="2025-04-26", close=90, source="mock_history"),
+            HistoricalPricePoint(date="2026-01-26", close=130, source="mock_history"),
+            HistoricalPricePoint(date="2026-03-26", close=150, source="mock_history"),
+            HistoricalPricePoint(date="2026-04-19", close=185, source="mock_history"),
+            HistoricalPricePoint(date="2026-04-26", close=200, source="mock_history"),
+        ]
+        snapshot = compute_open_data_snapshot(
+            ticker="ASML",
+            cik=937966,
+            companyfacts=mocked_companyfacts(),
+            price=LatestPrice(ticker="ASML", price=200, source="mock_price", as_of="2026-04-26"),
+            price_history=price_history,
+            generated_as_of="2026-04-26",
+        )
+
+        analysis = analyze_open_data_stock_entry(snapshot)
+
+        self.assertFalse(analysis.needs_more_data)
+        self.assertEqual(analysis.opportunity_type, "Momentum continuation")
+        self.assertEqual(analysis.price_opportunity.assessment, "no_dip")
+        self.assertEqual(analysis.dca_entry.buy_now, 0)
+        self.assertEqual(analysis.dca_entry.buy_dip_1, 0)
+        self.assertEqual(analysis.dca_entry.buy_dip_2, 0)
+        self.assertFalse(any("Enough price-history facts" in item for item in analysis.missing_data))
+        self.assertTrue(any("Price is up" in item for item in analysis.price_opportunity.evidence))
+        self.assertFalse(any("Price is down" in item for item in analysis.price_opportunity.evidence))
+        self.assertTrue(any("at or near the all-time high" in item for item in analysis.price_opportunity.evidence))
+        self.assertIn(analysis.valuation.assessment, {"pricey", "very_pricey"})
+        self.assertTrue(any("high on an absolute basis" in item for item in analysis.valuation.concerns))
+
+    def test_stock_entry_analysis_marks_better_spot_with_sideways_trend_not_unclear(self) -> None:
+        snapshot = compute_open_data_snapshot(
+            ticker="META",
+            cik=1326801,
+            companyfacts=mocked_companyfacts(),
+            price=LatestPrice(ticker="META", price=170, source="mock_price", as_of="2026-04-26"),
+            price_history=[
+                HistoricalPricePoint(date="2021-04-26", close=90, source="mock_history"),
+                HistoricalPricePoint(date="2024-04-26", close=120, source="mock_history"),
+                HistoricalPricePoint(date="2025-04-26", close=182, source="mock_history"),
+                HistoricalPricePoint(date="2025-10-26", close=176, source="mock_history"),
+                HistoricalPricePoint(date="2026-01-26", close=184, source="mock_history"),
+                HistoricalPricePoint(date="2026-02-26", close=216, source="mock_history"),
+                HistoricalPricePoint(date="2026-03-26", close=166, source="mock_history"),
+                HistoricalPricePoint(date="2026-04-19", close=173, source="mock_history"),
+                HistoricalPricePoint(date="2026-04-26", close=170, source="mock_history"),
+            ],
+            generated_as_of="2026-04-26",
+        )
+
+        analysis = analyze_open_data_stock_entry(snapshot)
+
+        self.assertFalse(analysis.needs_more_data)
+        self.assertEqual(analysis.price_opportunity.assessment, "better_spot")
+        self.assertTrue(any("below the all-time high" in item for item in analysis.price_opportunity.evidence))
+        self.assertTrue(any("meaningfully off its high" in item for item in analysis.price_opportunity.concerns))
+
+    def test_stock_entry_analysis_marks_complete_but_mixed_business_as_not_needing_more_data(self) -> None:
+        companyfacts = mocked_companyfacts()
+        eps_rows = companyfacts["facts"]["us-gaap"]["EarningsPerShareDiluted"]["units"]["USD/shares"]  # type: ignore[index]
+        for row, value in zip(eps_rows, [1.0, 1.2, 2.1, 2.0]):
+            row["val"] = value
+
+        snapshot = compute_open_data_snapshot(
+            ticker="META",
+            cik=1326801,
+            companyfacts=companyfacts,
+            price=LatestPrice(ticker="META", price=170, source="mock_price", as_of="2026-04-26"),
+            price_history=[
+                HistoricalPricePoint(date="2021-04-26", close=100, source="mock_history"),
+                HistoricalPricePoint(date="2024-04-26", close=140, source="mock_history"),
+                HistoricalPricePoint(date="2025-04-26", close=180, source="mock_history"),
+                HistoricalPricePoint(date="2026-01-26", close=190, source="mock_history"),
+                HistoricalPricePoint(date="2026-03-26", close=175, source="mock_history"),
+                HistoricalPricePoint(date="2026-04-19", close=172, source="mock_history"),
+                HistoricalPricePoint(date="2026-04-26", close=170, source="mock_history"),
+            ],
+            generated_as_of="2026-04-26",
+        )
+
+        analysis = analyze_open_data_stock_entry(snapshot)
+
+        self.assertFalse(analysis.needs_more_data)
+        self.assertIn(analysis.business_health.assessment, {"mixed", "weak"})
+        self.assertEqual(analysis.missing_data, [])
+        self.assertLess(analysis.conviction, 6)
+        self.assertIn("mixed business facts", analysis.summary)
+
     def test_fills_historical_shares_and_debt_from_public_fact_fallbacks(self) -> None:
         companyfacts = mocked_companyfacts()
         us_gaap = companyfacts["facts"]["us-gaap"]  # type: ignore[index]
@@ -255,7 +495,7 @@ class OpenDataProviderCompanyContextTest(unittest.TestCase):
         self.assertEqual(context.recent_filings[0].form, "8-K")
         self.assertEqual(context.recent_filings[0].items, ["2.02", "9.01"])
         self.assertEqual(context.recent_filings[0].exhibits[0].type, "EX-99.1")
-        self.assertIn("General media/news sentiment", context.known_context_gaps[0])
+        self.assertEqual(context.known_context_gaps, [])
 
     def test_filters_static_sec_assets_from_filing_exhibits(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
