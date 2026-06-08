@@ -1,6 +1,6 @@
 import type { OpenDataCompanyContext, OpenDataMetric, OpenDataStockSnapshot, StockEntryAnalysis, StockEntryAnalysisSection } from "../api";
-import { ArrowDown, ArrowUp, ArrowUpDown, BarChart3, ChevronRight, Filter, GripVertical, Info, RefreshCcw, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ArrowDown, ArrowUp, ArrowUpDown, BarChart3, ChevronLeft, ChevronRight, Filter, GripVertical, Info, RefreshCcw, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { formatDateTime } from "../format";
 
 type Props = {
@@ -55,8 +55,13 @@ type ConvictionFilter = "all" | "strong" | "setup" | "uncertain" | "weak" | "nee
 type SortDirection = "asc" | "desc";
 type SortValue = number | string | null;
 type MetricGroup = "business_health" | "price_opportunity" | "valuation";
-type ColumnKind = "conviction" | "assessment" | "text" | "metric";
+type ColumnKind = "conviction" | "assessment" | "text" | "metric" | "derived";
 type FilterValue = { field: string; value: string };
+type DerivedMetric = {
+  value: number | null;
+  kind: MetricKind;
+  notes: string;
+};
 
 type ColumnDefinition = {
   id: string;
@@ -65,6 +70,7 @@ type ColumnDefinition = {
   group?: MetricGroup;
   key?: string;
   metricKind?: MetricKind;
+  derivedKey?: string;
 };
 
 type FilterDimension = {
@@ -202,7 +208,31 @@ const METRIC_COLUMNS: ColumnDefinition[] = COLUMNS.map(([group, key, label, metr
   metricKind,
 }));
 
-const DEFAULT_MOVABLE_COLUMNS = [...STATIC_COLUMNS, ...METRIC_COLUMNS];
+const DERIVED_COLUMNS: ColumnDefinition[] = [
+  { id: "derived:unusual_score", label: "Unusual", kind: "derived", derivedKey: "unusual_score", metricKind: "ratio" },
+  { id: "derived:pe_hist_percentile", label: "PE Hist %", kind: "derived", derivedKey: "pe_hist_percentile", metricKind: "percent" },
+  { id: "derived:pe_vs_median", label: "PE vs Med", kind: "derived", derivedKey: "pe_vs_median", metricKind: "percent" },
+  { id: "derived:ps_hist_percentile", label: "P/S Hist %", kind: "derived", derivedKey: "ps_hist_percentile", metricKind: "percent" },
+  { id: "derived:fcfy_hist_percentile", label: "FCFY Hist %", kind: "derived", derivedKey: "fcfy_hist_percentile", metricKind: "percent" },
+  { id: "derived:rev_accel", label: "Rev Accel", kind: "derived", derivedKey: "rev_accel", metricKind: "percent" },
+  { id: "derived:eps_accel", label: "EPS Accel", kind: "derived", derivedKey: "eps_accel", metricKind: "percent" },
+  { id: "derived:op_margin_yoy_delta", label: "Op dYoY", kind: "derived", derivedKey: "op_margin_yoy_delta", metricKind: "percent" },
+  { id: "derived:fcf_margin_3y_delta", label: "FCF Mgn d3Y", kind: "derived", derivedKey: "fcf_margin_3y_delta", metricKind: "percent" },
+  { id: "derived:fcf_conversion", label: "FCF / NI", kind: "derived", derivedKey: "fcf_conversion", metricKind: "percent" },
+  { id: "derived:net_cash", label: "Net Cash", kind: "derived", derivedKey: "net_cash", metricKind: "compact" },
+  { id: "derived:net_debt_to_fcf", label: "Net Debt / FCF", kind: "derived", derivedKey: "net_debt_to_fcf", metricKind: "ratio" },
+  { id: "derived:shares_3y_change", label: "Shares Δ3Y", kind: "derived", derivedKey: "shares_3y_change", metricKind: "percent" },
+  { id: "derived:pe_to_rev_cagr", label: "PE / Rev CAGR", kind: "derived", derivedKey: "pe_to_rev_cagr", metricKind: "ratio" },
+  { id: "derived:growth_plus_fcfy", label: "Growth + FCFY", kind: "derived", derivedKey: "growth_plus_fcfy", metricKind: "percent" },
+  { id: "derived:sector_rev_rank", label: "Sector Rev %", kind: "derived", derivedKey: "sector_rev_rank", metricKind: "percent" },
+  { id: "derived:sector_roic_rank", label: "Sector ROIC %", kind: "derived", derivedKey: "sector_roic_rank", metricKind: "percent" },
+  { id: "derived:sector_fcfy_rank", label: "Sector FCFY %", kind: "derived", derivedKey: "sector_fcfy_rank", metricKind: "percent" },
+  { id: "derived:sector_pe_cheap_rank", label: "Sector Cheap PE %", kind: "derived", derivedKey: "sector_pe_cheap_rank", metricKind: "percent" },
+  { id: "derived:price_fund_gap", label: "Price/Fund Gap", kind: "derived", derivedKey: "price_fund_gap", metricKind: "percent" },
+];
+
+const DEFAULT_MOVABLE_COLUMNS = [...STATIC_COLUMNS, ...DERIVED_COLUMNS, ...METRIC_COLUMNS];
+const PAGE_SIZE = 10;
 
 const CHARTS: Array<{
   title: string;
@@ -261,6 +291,153 @@ function metricValue(row: HistoricalRow, metric: string) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function finiteNumber(value?: number | null) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function snapshotMetricValue(snapshot: OpenDataStockSnapshot, group: MetricGroup, key: string) {
+  return finiteNumber(snapshot[group]?.[key]?.value);
+}
+
+function snapshotFlatMetricValue(snapshot: OpenDataStockSnapshot, key: string) {
+  return finiteNumber(snapshot.metrics?.[key]?.value);
+}
+
+function sortedHistoricalRows(snapshot: OpenDataStockSnapshot, series: string) {
+  return [...(snapshot.historical_series[series] ?? [])].sort((left, right) =>
+    left.period.localeCompare(right.period, undefined, { numeric: true, sensitivity: "base" }),
+  );
+}
+
+function historicalValues(snapshot: OpenDataStockSnapshot, series: string, metric: string) {
+  return sortedHistoricalRows(snapshot, series)
+    .map((row) => ({ period: row.period, value: metricValue(row, metric) }))
+    .filter((point): point is { period: string; value: number } => point.value != null);
+}
+
+function historicalDelta(snapshot: OpenDataStockSnapshot, series: string, metric: string, yearsBack: number) {
+  const points = historicalValues(snapshot, series, metric);
+  const latest = points[points.length - 1];
+  const prior = points[points.length - 1 - yearsBack];
+  if (!latest || !prior) return null;
+  return latest.value - prior.value;
+}
+
+function historicalPercentChange(snapshot: OpenDataStockSnapshot, series: string, metric: string, yearsBack: number) {
+  const points = historicalValues(snapshot, series, metric);
+  const latest = points[points.length - 1];
+  const prior = points[points.length - 1 - yearsBack];
+  if (!latest || !prior || prior.value === 0) return null;
+  return ((latest.value / prior.value) - 1) * 100;
+}
+
+function median(values: number[]) {
+  const clean = values.filter((value) => Number.isFinite(value)).sort((left, right) => left - right);
+  if (clean.length === 0) return null;
+  const middle = Math.floor(clean.length / 2);
+  return clean.length % 2 ? clean[middle] : (clean[middle - 1] + clean[middle]) / 2;
+}
+
+function percentileOfValue(values: number[], value: number | null) {
+  const clean = values.filter((item) => Number.isFinite(item));
+  if (value == null || clean.length < 2) return null;
+  const lowerOrEqual = clean.filter((item) => item <= value).length;
+  return (lowerOrEqual / clean.length) * 100;
+}
+
+function peerPercentile(
+  snapshots: OpenDataStockSnapshot[],
+  snapshot: OpenDataStockSnapshot,
+  valueFor: (snapshot: OpenDataStockSnapshot) => number | null,
+  higherBetter = true,
+) {
+  const sameSector = snapshots.filter((item) => item.sector && snapshot.sector && item.sector === snapshot.sector);
+  const peerSet = sameSector.length >= 3 ? sameSector : snapshots;
+  const current = valueFor(snapshot);
+  const values = peerSet.map(valueFor).filter((value): value is number => value != null);
+  if (current == null || values.length < 2) return null;
+  const betterOrEqual = values.filter((value) => (higherBetter ? value <= current : value >= current)).length;
+  return (betterOrEqual / values.length) * 100;
+}
+
+function ratio(numerator: number | null, denominator: number | null) {
+  if (numerator == null || denominator == null || denominator === 0) return null;
+  return numerator / denominator;
+}
+
+function pctChangeFromMedian(snapshot: OpenDataStockSnapshot, series: string, metric: string, current: number | null) {
+  const values = historicalValues(snapshot, series, metric).map((point) => point.value);
+  const middle = median(values);
+  if (current == null || middle == null || middle === 0) return null;
+  return ((current / middle) - 1) * 100;
+}
+
+function derivedMetric(value: number | null, kind: MetricKind, notes: string): DerivedMetric {
+  return { value, kind, notes };
+}
+
+function computeDerivedMetrics(snapshot: OpenDataStockSnapshot, snapshots: OpenDataStockSnapshot[]): Record<string, DerivedMetric> {
+  const revenueGrowth = snapshotMetricValue(snapshot, "business_health", "revenue_growth_yoy");
+  const revenueCagr = snapshotMetricValue(snapshot, "business_health", "revenue_cagr_3y");
+  const epsGrowth = snapshotMetricValue(snapshot, "business_health", "eps_growth_yoy");
+  const epsCagr = snapshotMetricValue(snapshot, "business_health", "eps_cagr_3y");
+  const cash = snapshotMetricValue(snapshot, "business_health", "cash");
+  const debt = snapshotMetricValue(snapshot, "business_health", "debt");
+  const fcf = snapshotMetricValue(snapshot, "business_health", "free_cash_flow");
+  const pe = snapshotMetricValue(snapshot, "valuation", "pe");
+  const ps = snapshotMetricValue(snapshot, "valuation", "price_to_sales");
+  const fcfYield = snapshotMetricValue(snapshot, "valuation", "fcf_yield");
+  const price1y = snapshotMetricValue(snapshot, "price_opportunity", "change_1y");
+  const distanceAth = snapshotMetricValue(snapshot, "price_opportunity", "distance_from_ath");
+  const netIncome = snapshotFlatMetricValue(snapshot, "net_income_ttm");
+  const valuationPeValues = historicalValues(snapshot, "valuation_history", "pe").map((point) => point.value);
+  const valuationPsValues = historicalValues(snapshot, "valuation_history", "price_to_sales").map((point) => point.value);
+  const valuationFcfYieldValues = historicalValues(snapshot, "valuation_history", "fcf_yield").map((point) => point.value);
+  const peHistPercentile = percentileOfValue(valuationPeValues, pe);
+  const psHistPercentile = percentileOfValue(valuationPsValues, ps);
+  const fcfyHistPercentile = percentileOfValue(valuationFcfYieldValues, fcfYield);
+  const netCash = cash == null || debt == null ? null : cash - debt;
+  const netDebt = cash == null || debt == null ? null : debt - cash;
+  const revAccel = revenueGrowth == null || revenueCagr == null ? null : revenueGrowth - revenueCagr;
+  const epsAccel = epsGrowth == null || epsCagr == null ? null : epsGrowth - epsCagr;
+  const peVsMedian = pctChangeFromMedian(snapshot, "valuation_history", "pe", pe);
+  const priceFundGap = price1y == null || revenueGrowth == null ? null : price1y - revenueGrowth;
+  const growthPlusFcfy = revenueCagr == null || fcfYield == null ? null : revenueCagr + fcfYield;
+  const fcfConversionRatio = ratio(fcf, netIncome);
+
+  const unusualInputs = [
+    peHistPercentile == null ? null : 100 - peHistPercentile,
+    fcfyHistPercentile,
+    revAccel == null ? null : Math.max(Math.min(50 + revAccel * 2, 100), 0),
+    priceFundGap == null ? null : Math.max(Math.min(50 - priceFundGap, 100), 0),
+    distanceAth == null ? null : Math.max(Math.min(Math.abs(distanceAth) * 2, 100), 0),
+  ].filter((value): value is number => value != null);
+  const unusualScore = unusualInputs.length ? unusualInputs.reduce((sum, value) => sum + value, 0) / unusualInputs.length : null;
+
+  return {
+    unusual_score: derivedMetric(unusualScore, "ratio", "Composite unusualness score from valuation compression, FCF-yield percentile, growth acceleration, price/fundamental gap, and drawdown."),
+    pe_hist_percentile: derivedMetric(peHistPercentile, "percent", "Current PE percentile against available annual valuation history. Higher means more expensive versus its own history."),
+    pe_vs_median: derivedMetric(peVsMedian, "percent", "Current PE premium or discount versus available annual valuation-history median."),
+    ps_hist_percentile: derivedMetric(psHistPercentile, "percent", "Current price/sales percentile against available annual valuation history."),
+    fcfy_hist_percentile: derivedMetric(fcfyHistPercentile, "percent", "Current FCF yield percentile against available annual valuation history. Higher means more attractive cash-flow yield versus its own history."),
+    rev_accel: derivedMetric(revAccel, "percent", "Revenue growth YoY minus 3-year revenue CAGR."),
+    eps_accel: derivedMetric(epsAccel, "percent", "EPS growth YoY minus 3-year EPS CAGR."),
+    op_margin_yoy_delta: derivedMetric(historicalDelta(snapshot, "annual_fundamentals", "operating_margin", 1), "percent", "Latest annual operating margin minus prior-year annual operating margin."),
+    fcf_margin_3y_delta: derivedMetric(historicalDelta(snapshot, "annual_fundamentals", "fcf_margin", 3), "percent", "Latest annual FCF margin minus annual FCF margin three periods earlier."),
+    fcf_conversion: derivedMetric(fcfConversionRatio == null ? null : fcfConversionRatio * 100, "percent", "TTM free cash flow divided by TTM net income."),
+    net_cash: derivedMetric(netCash, "compact", "Cash minus debt. Negative values indicate net debt."),
+    net_debt_to_fcf: derivedMetric(ratio(netDebt, fcf), "ratio", "Net debt divided by TTM free cash flow. Negative values indicate net cash."),
+    shares_3y_change: derivedMetric(historicalPercentChange(snapshot, "annual_fundamentals", "shares_diluted", 3), "percent", "Latest annual diluted shares versus three annual periods earlier. Negative suggests buybacks; positive suggests dilution."),
+    pe_to_rev_cagr: derivedMetric(ratio(pe, revenueCagr), "ratio", "Trailing PE divided by 3-year revenue CAGR percentage."),
+    growth_plus_fcfy: derivedMetric(growthPlusFcfy, "percent", "3-year revenue CAGR plus current FCF yield."),
+    sector_rev_rank: derivedMetric(peerPercentile(snapshots, snapshot, (item) => snapshotMetricValue(item, "business_health", "revenue_cagr_3y")), "percent", "Revenue CAGR percentile within sector when enough peers exist, otherwise within the loaded universe."),
+    sector_roic_rank: derivedMetric(peerPercentile(snapshots, snapshot, (item) => snapshotMetricValue(item, "business_health", "roic")), "percent", "ROIC percentile within sector when enough peers exist, otherwise within the loaded universe."),
+    sector_fcfy_rank: derivedMetric(peerPercentile(snapshots, snapshot, (item) => snapshotMetricValue(item, "valuation", "fcf_yield")), "percent", "FCF-yield percentile within sector when enough peers exist, otherwise within the loaded universe."),
+    sector_pe_cheap_rank: derivedMetric(peerPercentile(snapshots, snapshot, (item) => snapshotMetricValue(item, "valuation", "pe"), false), "percent", "Cheapness percentile by PE within sector when enough peers exist, otherwise within the loaded universe. Higher means lower PE than more peers."),
+    price_fund_gap: derivedMetric(priceFundGap, "percent", "1-year price change minus latest revenue growth YoY. Negative values can flag price weakness despite business growth."),
+  };
+}
+
 function formatByKind(value: number | null | undefined, kind: MetricKind) {
   if (kind === "percent") return formatPercent(value);
   if (kind === "compact") return formatCompact(value);
@@ -315,7 +492,12 @@ function analysisSectionFor(analysis: StockEntryAnalysis | undefined, columnId: 
   return undefined;
 }
 
-function sortValueFor(snapshot: OpenDataStockSnapshot, analysis: StockEntryAnalysis | undefined, sortKey: string): SortValue {
+function sortValueFor(
+  snapshot: OpenDataStockSnapshot,
+  analysis: StockEntryAnalysis | undefined,
+  sortKey: string,
+  derivedByTicker: Record<string, Record<string, DerivedMetric>>,
+): SortValue {
   if (sortKey === "symbol") return snapshot.ticker;
   if (sortKey === "name") return snapshot.name ?? null;
   if (sortKey === "industry") return snapshot.industry ?? null;
@@ -334,10 +516,20 @@ function sortValueFor(snapshot: OpenDataStockSnapshot, analysis: StockEntryAnaly
     return typeof value === "number" && Number.isFinite(value) ? value : null;
   }
 
+  if (sortKey.startsWith("derived:")) {
+    const key = sortKey.slice("derived:".length);
+    return derivedByTicker[snapshot.ticker]?.[key]?.value ?? null;
+  }
+
   return null;
 }
 
-function filterValueFor(snapshot: OpenDataStockSnapshot, analysis: StockEntryAnalysis | undefined, field: string) {
+function filterValueFor(
+  snapshot: OpenDataStockSnapshot,
+  analysis: StockEntryAnalysis | undefined,
+  field: string,
+  derivedByTicker: Record<string, Record<string, DerivedMetric>>,
+) {
   if (field === "symbol") return snapshot.ticker;
   if (field === "name") return snapshot.name ?? "";
   if (field === "sector") return snapshot.sector ?? "";
@@ -360,6 +552,12 @@ function filterValueFor(snapshot: OpenDataStockSnapshot, analysis: StockEntryAna
     const metric = snapshot[group]?.[key];
     if (!metric) return "";
     return metric.value == null ? formatValue(metric, "ratio") : String(metric.value);
+  }
+  if (field.startsWith("derived:")) {
+    const key = field.slice("derived:".length);
+    const metric = derivedByTicker[snapshot.ticker]?.[key];
+    if (!metric) return "";
+    return metric.value == null ? "-" : String(metric.value);
   }
   return "";
 }
@@ -726,6 +924,7 @@ export function OpenDataStockTable({
   const [legendOpen, setLegendOpen] = useState(false);
   const [sortKey, setSortKey] = useState("symbol");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [page, setPage] = useState(1);
   const [columnOrder, setColumnOrder] = useState(() => DEFAULT_MOVABLE_COLUMNS.map((column) => column.id));
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? snapshots[0] ?? null;
@@ -733,6 +932,13 @@ export function OpenDataStockTable({
   const refreshTicker = selectedSnapshot?.ticker ?? selectedTicker;
 
   const columnsById = useMemo(() => new Map(DEFAULT_MOVABLE_COLUMNS.map((column) => [column.id, column])), []);
+  const derivedByTicker = useMemo(
+    () =>
+      Object.fromEntries(
+        snapshots.map((snapshot) => [snapshot.ticker, computeDerivedMetrics(snapshot, snapshots)]),
+      ) as Record<string, Record<string, DerivedMetric>>,
+    [snapshots],
+  );
 
   const orderedColumns = useMemo(() => {
     const knownIds = new Set(DEFAULT_MOVABLE_COLUMNS.map((column) => column.id));
@@ -799,6 +1005,17 @@ export function OpenDataStockTable({
       assessmentDimension("business", "Business", (analysis) => analysis.business_health),
       assessmentDimension("price", "Price", (analysis) => analysis.price_opportunity),
       assessmentDimension("valuation", "Valuation", (analysis) => analysis.valuation),
+      ...DERIVED_COLUMNS.map((column) => ({
+        field: column.id,
+        label: column.label,
+        values: uniqueOptions(
+          snapshots.map((snapshot) => {
+            const metric = derivedByTicker[snapshot.ticker]?.[column.derivedKey ?? ""];
+            const label = formatByKind(metric?.value, column.metricKind ?? metric?.kind ?? "ratio");
+            return { value: metric?.value == null ? "-" : String(metric.value), label };
+          }),
+        ),
+      })),
       ...METRIC_COLUMNS.map((column) => ({
         field: column.id,
         label: column.label,
@@ -811,7 +1028,7 @@ export function OpenDataStockTable({
         ),
       })),
     ].filter((dimension) => dimension.values.length > 0);
-  }, [analyses, snapshots]);
+  }, [analyses, derivedByTicker, snapshots]);
 
   const activeFilterCount = activeFilters.length;
   const activeFilterDimension =
@@ -847,14 +1064,16 @@ export function OpenDataStockTable({
           [snapshot.ticker, snapshot.name, snapshot.sector, snapshot.industry, snapshot.exchange]
             .filter(Boolean)
             .some((value) => String(value).toLowerCase().includes(needle));
-        const matchesActiveFilters = activeFilters.every((filter) => filterValueFor(snapshot, analysis, filter.field) === filter.value);
+        const matchesActiveFilters = activeFilters.every(
+          (filter) => filterValueFor(snapshot, analysis, filter.field, derivedByTicker) === filter.value,
+        );
 
         return matchesQuery && matchesActiveFilters;
       })
       .sort((left, right) => {
         const comparison = compareSortValues(
-          sortValueFor(left, analyses[left.ticker], sortKey),
-          sortValueFor(right, analyses[right.ticker], sortKey),
+          sortValueFor(left, analyses[left.ticker], sortKey, derivedByTicker),
+          sortValueFor(right, analyses[right.ticker], sortKey, derivedByTicker),
           sortDirection,
         );
         return comparison || left.ticker.localeCompare(right.ticker);
@@ -863,10 +1082,21 @@ export function OpenDataStockTable({
     analyses,
     activeFilters,
     query,
+    derivedByTicker,
     snapshots,
     sortDirection,
     sortKey,
   ]);
+  const totalPages = Math.max(1, Math.ceil(visibleSnapshots.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedSnapshots = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return visibleSnapshots.slice(start, start + PAGE_SIZE);
+  }, [currentPage, visibleSnapshots]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [activeFilters, query, sortDirection, sortKey]);
 
   const toggleDetail = (ticker: string, detail: Exclude<DetailKind, null>) => {
     const isSelected = selectedSnapshot?.ticker === ticker;
@@ -997,6 +1227,20 @@ export function OpenDataStockTable({
       );
     }
 
+    if (column.kind === "derived" && column.derivedKey) {
+      const metric = derivedByTicker[snapshot.ticker]?.[column.derivedKey];
+      return (
+        <td
+          key={column.id}
+          className="derived-metric-cell"
+          title={metric ? `${column.label}: ${metric.notes}` : `${column.label}: Not enough collected facts to compute.`}
+        >
+          <strong>{formatByKind(metric?.value, column.metricKind ?? metric?.kind ?? "ratio")}</strong>
+          <small>derived</small>
+        </td>
+      );
+    }
+
     return <td key={column.id}>-</td>;
   };
 
@@ -1004,7 +1248,7 @@ export function OpenDataStockTable({
     <section className="panel open-data-stocks">
       <div className="panel-heading">
         <div className="panel-title-with-info">
-          <h2>Open Data Fundamentals</h2>
+          <h2>Stocks Insights</h2>
           <button
             type="button"
             className="info-button"
@@ -1034,7 +1278,7 @@ export function OpenDataStockTable({
           )}
         </div>
         <div className="panel-heading-actions">
-          <span>{visibleSnapshots.length} / {snapshots.length}</span>
+          <span>{pagedSnapshots.length} / {visibleSnapshots.length} / {snapshots.length}</span>
           <button
             type="button"
             onClick={() => onRefresh(refreshTicker)}
@@ -1132,6 +1376,29 @@ export function OpenDataStockTable({
               </div>
             )}
           </div>
+          {visibleSnapshots.length > PAGE_SIZE && (
+            <div className="table-pagination" aria-label="Stocks table pagination">
+              <button
+                type="button"
+                className="icon-button"
+                onClick={() => setPage((value) => Math.max(1, value - 1))}
+                disabled={currentPage === 1}
+                title="Previous page"
+              >
+                <ChevronLeft size={18} aria-hidden="true" />
+              </button>
+              <strong>{currentPage} / {totalPages}</strong>
+              <button
+                type="button"
+                className="icon-button"
+                onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+                disabled={currentPage === totalPages}
+                title="Next page"
+              >
+                <ChevronRight size={18} aria-hidden="true" />
+              </button>
+            </div>
+          )}
           <div className="table-wrap">
             <table className="open-data-table">
               <thead>
@@ -1141,7 +1408,7 @@ export function OpenDataStockTable({
                 </tr>
               </thead>
               <tbody>
-                {visibleSnapshots.map((snapshot) => {
+                {pagedSnapshots.map((snapshot) => {
                   const isSelected = selectedSnapshot?.ticker === snapshot.ticker;
                   const analysis = analyses[snapshot.ticker];
                   return (

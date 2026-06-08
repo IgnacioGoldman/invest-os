@@ -304,6 +304,95 @@ export type StockEntryAnalysis = {
   dca_entry: StockEntryDcaPlan;
 };
 
+export type StockCandidateDecision =
+  | "starter_entry_candidate"
+  | "watchlist"
+  | "wait"
+  | "tactical_candidate"
+  | "no_clean_candidate";
+
+export type StockCandidate = {
+  ticker: string;
+  name?: string | null;
+  conviction: number;
+  decision: StockCandidateDecision;
+  entry_quality: string;
+  why_now: string;
+  thesis: string;
+  evidence: string[];
+  main_risks: string[];
+  missing_data: string[];
+};
+
+export type StockRunnerUp = {
+  ticker: string;
+  name?: string | null;
+  horizon: "long_term" | "short_term" | "both";
+  reason: string;
+};
+
+export type StockRejectedCandidate = {
+  ticker: string;
+  name?: string | null;
+  reason: string;
+};
+
+export type StockCandidateAnalysis = {
+  generated_at: string;
+  as_of: string;
+  source: string;
+  skill: string;
+  deterministic_inputs: string[];
+  live_context_used: boolean;
+  best_long_term_candidate?: StockCandidate | null;
+  best_short_term_candidate?: StockCandidate | null;
+  runner_ups: StockRunnerUp[];
+  rejected_interesting_names: StockRejectedCandidate[];
+  data_quality_notes: string[];
+};
+
+export type AssetMetric = {
+  value?: number | null;
+  kind: "percent" | "ratio" | "compact" | "currency";
+  source: string;
+  as_of: string;
+  notes: string;
+};
+
+export type AssetInterestingFact = {
+  type: string;
+  severity: number;
+  text: string;
+  evidence: string[];
+};
+
+export type AssetClass = "etf" | "commodity_proxy" | "crypto";
+
+export type AssetOpportunity = {
+  symbol: string;
+  name?: string | null;
+  asset_class: AssetClass;
+  exposure: string;
+  category?: string | null;
+  currency: string;
+  generated_at: string;
+  price_metrics: Record<string, AssetMetric>;
+  native_metrics: Record<string, AssetMetric>;
+  scores: Record<string, AssetMetric>;
+  interesting_facts: AssetInterestingFact[];
+  risk_bucket?: string | null;
+  data_gaps: string[];
+};
+
+export type AssetOpportunityFile = {
+  generated_at: string;
+  source: string;
+  deterministic_inputs: string[];
+  count: number;
+  assets: AssetOpportunity[];
+  collection_errors: string[];
+};
+
 export type PortfolioSnapshot = {
   generated_at: string;
   base_currency: string;
@@ -456,6 +545,40 @@ export async function fetchOpenDataStockAnalysis(ticker = "GOOGL"): Promise<Stoc
     }
     throw error;
   }
+}
+
+export async function fetchStockCandidateAnalysis(): Promise<StockCandidateAnalysis | null> {
+  try {
+    return await requestJson<StockCandidateAnalysis>("/api/open-data/stocks/candidate-analysis");
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("No AI stock candidate analysis")) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export async function fetchAssetOpportunities(): Promise<AssetOpportunityFile | null> {
+  try {
+    return await requestJson<AssetOpportunityFile>("/api/open-data/assets");
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("No multi-asset derived signals")) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export async function fetchEtfOpportunities(): Promise<AssetOpportunity[]> {
+  return requestJson<AssetOpportunity[]>("/api/open-data/assets/etfs");
+}
+
+export async function fetchCommodityOpportunities(): Promise<AssetOpportunity[]> {
+  return requestJson<AssetOpportunity[]>("/api/open-data/assets/commodities");
+}
+
+export async function fetchCryptoOpportunities(): Promise<AssetOpportunity[]> {
+  return requestJson<AssetOpportunity[]>("/api/open-data/assets/crypto");
 }
 
 export async function refreshOpenDataStock(ticker = "GOOGL"): Promise<OpenDataStockSnapshot> {

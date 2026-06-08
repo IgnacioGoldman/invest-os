@@ -1,20 +1,27 @@
-import { AlertTriangle, DatabaseZap, RefreshCcw } from "lucide-react";
+import { AlertTriangle, ArrowLeft, BriefcaseBusiness, ChevronDown, DatabaseZap, RefreshCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
+  fetchCommodityOpportunities,
+  fetchCryptoOpportunities,
+  fetchEtfOpportunities,
   fetchOpenDataStock,
   fetchOpenDataStockAnalysis,
   fetchOpenDataStocks,
   fetchRecommendations,
   fetchSnapshot,
+  fetchStockCandidateAnalysis,
   generateRecommendations,
   refreshSnapshot,
   refreshOpenDataStock,
+  type AssetOpportunity,
   type StockEntryAnalysis,
+  type StockCandidateAnalysis,
   type OpenDataStockSnapshot,
   type PortfolioSnapshot,
   type Recommendation,
   type RefreshSource,
 } from "./api";
+import { AssetInsightsTable } from "./components/AssetInsightsTable";
 import { BinanceActivityTable } from "./components/BinanceActivityTable";
 import { BreakdownTable } from "./components/BreakdownTable";
 import { CashTable } from "./components/CashTable";
@@ -24,13 +31,13 @@ import { OrdersTable } from "./components/OrdersTable";
 import { OpenDataStockTable } from "./components/OpenDataStockTable";
 import { Recommendations } from "./components/Recommendations";
 import { SourceStatus } from "./components/SourceStatus";
+import { StockCandidateAnalysisPanel } from "./components/StockCandidateAnalysisPanel";
 import { SummaryCards } from "./components/SummaryCards";
 import "./styles.css";
 
-type DashboardView = "portfolio" | "crypto" | "stocks";
-
 const STOCK_ASSET_CLASSES = new Set(["equity", "stock", "etf", "fund"]);
 const STOCK_ANALYSIS_TAXONOMY_VERSION = "2026-06-05-v2";
+type ConnectorView = "home" | "portfolio" | "binance" | "ibkr";
 
 const addAmount = (values: Record<string, number>, key: string, amount: number) => {
   if (!Number.isFinite(amount) || Math.abs(amount) <= 0.00000001) {
@@ -46,9 +53,10 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [refreshSource, setRefreshSource] = useState<RefreshSource>("all");
   const [displayCurrency, setDisplayCurrency] = useState("EUR");
-  const [dashboardView, setDashboardView] = useState<DashboardView>("portfolio");
+  const [connectorView, setConnectorView] = useState<ConnectorView>("home");
+  const [aiInput, setAiInput] = useState("Analyze my portfolio and find stock entry candidates.");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [analyzingPortfolio, setAnalyzingPortfolio] = useState(false);
+  const [analyzingBrain, setAnalyzingBrain] = useState(false);
   const [openDataStocks, setOpenDataStocks] = useState<OpenDataStockSnapshot[]>([]);
   const [selectedOpenDataTicker, setSelectedOpenDataTicker] = useState("GOOGL");
   const [openDataStockLoading, setOpenDataStockLoading] = useState(false);
@@ -56,6 +64,14 @@ function App() {
   const [stockEntryAnalyses, setStockEntryAnalyses] = useState<Record<string, StockEntryAnalysis>>({});
   const [stockEntryAnalysesLoading, setStockEntryAnalysesLoading] = useState(false);
   const [stockEntryAnalysesLoadedKey, setStockEntryAnalysesLoadedKey] = useState("");
+  const [stockCandidateAnalysis, setStockCandidateAnalysis] = useState<StockCandidateAnalysis | null>(null);
+  const [stockCandidateAnalysisLoading, setStockCandidateAnalysisLoading] = useState(false);
+  const [stockCandidateAnalysisLoaded, setStockCandidateAnalysisLoaded] = useState(false);
+  const [etfInsights, setEtfInsights] = useState<AssetOpportunity[]>([]);
+  const [cryptoInsights, setCryptoInsights] = useState<AssetOpportunity[]>([]);
+  const [commodityInsights, setCommodityInsights] = useState<AssetOpportunity[]>([]);
+  const [assetInsightsLoading, setAssetInsightsLoading] = useState(false);
+  const [assetInsightsLoaded, setAssetInsightsLoaded] = useState(false);
 
   useEffect(() => {
     Promise.all([fetchSnapshot(), fetchRecommendations()])
@@ -68,7 +84,21 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (dashboardView !== "stocks" || openDataStocks.length > 0 || openDataStockLoading || openDataStockLoaded) {
+    if (stockCandidateAnalysisLoading || stockCandidateAnalysisLoaded) {
+      return;
+    }
+    setStockCandidateAnalysisLoading(true);
+    fetchStockCandidateAnalysis()
+      .then((analysis) => setStockCandidateAnalysis(analysis))
+      .catch((err) => setError(err instanceof Error ? err.message : "Could not load stock candidate analysis."))
+      .finally(() => {
+        setStockCandidateAnalysisLoaded(true);
+        setStockCandidateAnalysisLoading(false);
+      });
+  }, [stockCandidateAnalysisLoaded, stockCandidateAnalysisLoading]);
+
+  useEffect(() => {
+    if (openDataStocks.length > 0 || openDataStockLoading || openDataStockLoaded) {
       return;
     }
     setOpenDataStockLoading(true);
@@ -90,10 +120,28 @@ function App() {
         setOpenDataStockLoaded(true);
         setOpenDataStockLoading(false);
       });
-  }, [dashboardView, openDataStocks.length, openDataStockLoaded, openDataStockLoading]);
+  }, [openDataStocks.length, openDataStockLoaded, openDataStockLoading]);
 
   useEffect(() => {
-    if (dashboardView !== "stocks" || openDataStocks.length === 0 || stockEntryAnalysesLoading) {
+    if (assetInsightsLoading || assetInsightsLoaded) {
+      return;
+    }
+    setAssetInsightsLoading(true);
+    Promise.all([fetchEtfOpportunities(), fetchCryptoOpportunities(), fetchCommodityOpportunities()])
+      .then(([etfs, crypto, commodities]) => {
+        setEtfInsights(etfs);
+        setCryptoInsights(crypto);
+        setCommodityInsights(commodities);
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : "Could not load asset insights."))
+      .finally(() => {
+        setAssetInsightsLoaded(true);
+        setAssetInsightsLoading(false);
+      });
+  }, [assetInsightsLoaded, assetInsightsLoading]);
+
+  useEffect(() => {
+    if (openDataStocks.length === 0 || stockEntryAnalysesLoading) {
       return;
     }
     const analysisKey = `${STOCK_ANALYSIS_TAXONOMY_VERSION}:${openDataStocks
@@ -126,7 +174,6 @@ function App() {
         setStockEntryAnalysesLoading(false);
       });
   }, [
-    dashboardView,
     openDataStocks,
     stockEntryAnalysesLoadedKey,
     stockEntryAnalysesLoading,
@@ -147,16 +194,21 @@ function App() {
     }
   };
 
-  const analyzePortfolio = async () => {
-    setAnalyzingPortfolio(true);
+  const analyzeBrain = async () => {
+    setAnalyzingBrain(true);
     setError(null);
     try {
-      const recs = await generateRecommendations();
+      const [recs, candidateAnalysis] = await Promise.all([
+        generateRecommendations(),
+        fetchStockCandidateAnalysis(),
+      ]);
       setRecommendations(recs);
+      setStockCandidateAnalysis(candidateAnalysis);
+      setStockCandidateAnalysisLoaded(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not generate recommendations.");
+      setError(err instanceof Error ? err.message : "Could not run AI analysis.");
     } finally {
-      setAnalyzingPortfolio(false);
+      setAnalyzingBrain(false);
     }
   };
 
@@ -227,40 +279,45 @@ function App() {
   const warningCount = snapshot?.data_warnings.length ?? 0;
   const syncIssueCount =
     snapshot?.source_sync_status.filter((status) => status.status !== "success").length ?? 0;
+  const isLanding = connectorView === "home";
+  const connectorTitle =
+    connectorView === "portfolio" ? "Portfolio View" : connectorView === "binance" ? "Binance" : "IBKR";
 
   return (
     <main className="app-shell">
       <header className="topbar">
         <div>
-          <p>Local Portfolio Snapshot</p>
+          <p>Investment Operating System</p>
           <h1>Invest OS</h1>
         </div>
         <div className="refresh-controls">
-          <div className="segmented" aria-label="Dashboard view">
-            <button
-              type="button"
-              className={dashboardView === "portfolio" ? "active" : ""}
-              onClick={() => setDashboardView("portfolio")}
-            >
-              Portfolio
-            </button>
-            <button
-              type="button"
-              className={dashboardView === "crypto" ? "active" : ""}
-              onClick={() => setDashboardView("crypto")}
-            >
-              Crypto
-            </button>
-            <button
-              type="button"
-              className={dashboardView === "stocks" ? "active" : ""}
-              onClick={() => setDashboardView("stocks")}
-            >
-              Stocks
-            </button>
-          </div>
           {snapshot && (
             <>
+              <details className="header-menu portfolio-dropdown">
+                <summary className="header-menu-button portfolio-menu-button">
+                  <BriefcaseBusiness size={16} aria-hidden="true" />
+                  Portfolio
+                  <ChevronDown size={15} aria-hidden="true" />
+                </summary>
+                <div className="header-menu-content portfolio-menu-content">
+                  <button type="button" onClick={() => setConnectorView("home")}>
+                    Main
+                    <small>Brain, recommendations, and asset insights</small>
+                  </button>
+                  <button type="button" onClick={() => setConnectorView("portfolio")}>
+                    Portfolio View
+                    <small>Totals, allocation, and platform breakdown</small>
+                  </button>
+                  <button type="button" onClick={() => setConnectorView("ibkr")}>
+                    IBKR
+                    <small>Stock positions, orders, cash, activity</small>
+                  </button>
+                  <button type="button" onClick={() => setConnectorView("binance")}>
+                    Binance
+                    <small>Crypto positions, orders, activity</small>
+                  </button>
+                </div>
+              </details>
               <details className="header-menu">
                 <summary className={`header-menu-button ${warningCount ? "warning" : ""}`}>
                   <AlertTriangle size={16} aria-hidden="true" />
@@ -333,75 +390,136 @@ function App() {
 
       {snapshot && (
         <>
-          <Recommendations
-            recommendations={recommendations}
-            analyzing={analyzingPortfolio}
-            onAnalyze={analyzePortfolio}
-          />
-
-          {dashboardView === "portfolio" && (
+          {isLanding ? (
             <>
-              <SummaryCards snapshot={snapshot} displayCurrency={displayCurrency} displayRate={displayRate} />
+              <section className="brain-landing">
+                <div className="brain-copy">
+                  <p>Brain</p>
+                  <h2>Ask Invest OS what to do next.</h2>
+                </div>
+                <div className="brain-input-row">
+                  <input
+                    value={aiInput}
+                    onChange={(event) => setAiInput(event.target.value)}
+                    placeholder="Analyze my portfolio and find entry candidates"
+                    aria-label="AI analysis input"
+                  />
+                  <button type="button" onClick={analyzeBrain} disabled={analyzingBrain}>
+                    {analyzingBrain ? "Analyzing" : "✨ Analyze"}
+                  </button>
+                </div>
+              </section>
 
-              <BreakdownTable
-                title="Platform Breakdown"
-                items={snapshot.platform_breakdown}
-                currency={displayCurrency}
-                displayRate={displayRate}
-                holdings={snapshot.holdings}
-                cashBalances={snapshot.cash_balances}
-                openOrders={snapshot.open_orders}
-                displayRates={snapshot.display_rates}
+              <Recommendations
+                recommendations={recommendations}
+                alwaysShow
               />
+              <StockCandidateAnalysisPanel
+                analysis={stockCandidateAnalysis}
+                loading={stockCandidateAnalysisLoading}
+              />
+
+              <section className="positions-section">
+                <OpenDataStockTable
+                  snapshots={openDataStocks}
+                  selectedTicker={selectedOpenDataTicker}
+                  loading={openDataStockLoading}
+                  analyses={stockEntryAnalyses}
+                  analysisLoading={stockEntryAnalysesLoading}
+                  onSelectTicker={setSelectedOpenDataTicker}
+                  onRefresh={collectOpenDataStockFacts}
+                />
+                <AssetInsightsTable
+                  title="ETF Insights"
+                  assets={etfInsights}
+                  loading={assetInsightsLoading}
+                  kind="etf"
+                  emptyLabel="No ETF deterministic metrics loaded. Run python scripts/build_asset_derived_signals.py."
+                />
+                <AssetInsightsTable
+                  title="Crypto Insights"
+                  assets={cryptoInsights}
+                  loading={assetInsightsLoading}
+                  kind="crypto"
+                  emptyLabel="No crypto deterministic metrics loaded. Run python scripts/build_asset_derived_signals.py."
+                />
+                <AssetInsightsTable
+                  title="Commodities Insights"
+                  assets={commodityInsights}
+                  loading={assetInsightsLoading}
+                  kind="commodity_proxy"
+                  emptyLabel="No commodity-proxy deterministic metrics loaded. Run python scripts/build_asset_derived_signals.py."
+                />
+              </section>
             </>
-          )}
-
-          {dashboardView === "crypto" && (
-            <section className="positions-section">
-              <div className="section-heading">
-                <h2>Crypto</h2>
+          ) : (
+            <section className="connector-section">
+              <div className="connector-detail-heading">
+                <button
+                  type="button"
+                  className="connector-back-button"
+                  onClick={() => setConnectorView("home")}
+                  title="Return to main insights"
+                >
+                  <ArrowLeft size={17} aria-hidden="true" />
+                  Main
+                </button>
+                <div>
+                  <span>Connector</span>
+                  <h2>{connectorTitle}</h2>
+                </div>
               </div>
-              <HoldingsTable
-                title="Crypto Positions"
-                holdings={cryptoHoldings}
-                displayCurrency={displayCurrency}
-                displayRate={displayRate}
-              />
-              <OrdersTable title="Open Orders" orders={cryptoOpenOrders} cashBalances={cryptoCashBalances} />
-              <BinanceActivityTable
-                orders={cryptoOrderHistory}
-                events={cryptoLedgerEvents}
-                emptyLabel="No crypto activity loaded."
-                endTimestamp={snapshot.generated_at}
-                currentBalances={currentCryptoBalances}
-                currentAssetValues={currentCryptoAssetValues}
-              />
-            </section>
-          )}
 
-          {dashboardView === "stocks" && (
-            <section className="positions-section">
-              <div className="section-heading">
-                <h2>Stocks</h2>
-              </div>
-              <OpenDataStockTable
-                snapshots={openDataStocks}
-                selectedTicker={selectedOpenDataTicker}
-                loading={openDataStockLoading}
-                analyses={stockEntryAnalyses}
-                analysisLoading={stockEntryAnalysesLoading}
-                onSelectTicker={setSelectedOpenDataTicker}
-                onRefresh={collectOpenDataStockFacts}
-              />
-              <HoldingsTable
-                title="Stock Positions"
-                holdings={stockHoldings}
-                displayCurrency={displayCurrency}
-                displayRate={displayRate}
-              />
-              <OrdersTable title="Open Orders" orders={stockOpenOrders} cashBalances={stockCashBalances} />
-              <CashTable cash={stockCashBalances} displayCurrency={displayCurrency} displayRate={displayRate} />
-              <OrdersTable title="Activity History" orders={stockOrderHistory} />
+              {connectorView === "portfolio" && (
+                <div className="connector-body">
+                  <SummaryCards snapshot={snapshot} displayCurrency={displayCurrency} displayRate={displayRate} />
+
+                  <BreakdownTable
+                    title="Platform Breakdown"
+                    items={snapshot.platform_breakdown}
+                    currency={displayCurrency}
+                    displayRate={displayRate}
+                    holdings={snapshot.holdings}
+                    cashBalances={snapshot.cash_balances}
+                    openOrders={snapshot.open_orders}
+                    displayRates={snapshot.display_rates}
+                  />
+                </div>
+              )}
+
+              {connectorView === "binance" && (
+                <div className="connector-body">
+                  <HoldingsTable
+                    title="Crypto Positions"
+                    holdings={cryptoHoldings}
+                    displayCurrency={displayCurrency}
+                    displayRate={displayRate}
+                  />
+                  <OrdersTable title="Open Orders" orders={cryptoOpenOrders} cashBalances={cryptoCashBalances} />
+                  <BinanceActivityTable
+                    orders={cryptoOrderHistory}
+                    events={cryptoLedgerEvents}
+                    emptyLabel="No crypto activity loaded."
+                    endTimestamp={snapshot.generated_at}
+                    currentBalances={currentCryptoBalances}
+                    currentAssetValues={currentCryptoAssetValues}
+                  />
+                </div>
+              )}
+
+              {connectorView === "ibkr" && (
+                <div className="connector-body">
+                  <HoldingsTable
+                    title="Stock Positions"
+                    holdings={stockHoldings}
+                    displayCurrency={displayCurrency}
+                    displayRate={displayRate}
+                  />
+                  <OrdersTable title="Open Orders" orders={stockOpenOrders} cashBalances={stockCashBalances} />
+                  <CashTable cash={stockCashBalances} displayCurrency={displayCurrency} displayRate={displayRate} />
+                  <OrdersTable title="Activity History" orders={stockOrderHistory} />
+                </div>
+              )}
             </section>
           )}
         </>

@@ -5,6 +5,7 @@ type Props = {
   recommendations: Recommendation[];
   analyzing?: boolean;
   onAnalyze?: () => void;
+  alwaysShow?: boolean;
 };
 
 const ICON = {
@@ -23,7 +24,7 @@ const CATEGORY_LABEL = {
   theme: "Theme",
 } as const;
 
-export function Recommendations({ recommendations, analyzing = false, onAnalyze }: Props) {
+export function Recommendations({ recommendations, analyzing = false, onAnalyze, alwaysShow = false }: Props) {
   const visibleRecommendations = recommendations.filter((rec) => rec.severity !== "info");
   const groupedRecommendations = visibleRecommendations.reduce<Record<string, Recommendation[]>>((groups, rec) => {
     const category = rec.category ?? "allocation";
@@ -31,7 +32,7 @@ export function Recommendations({ recommendations, analyzing = false, onAnalyze 
     return groups;
   }, {});
 
-  if (visibleRecommendations.length === 0 && !onAnalyze) return null;
+  if (visibleRecommendations.length === 0 && !onAnalyze && !alwaysShow) return null;
 
   return (
     <section className="panel recommendations">

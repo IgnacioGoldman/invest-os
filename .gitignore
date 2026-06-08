@@ -8,3 +8,6 @@ dist/
 data/*.sqlite
 .cache/
 data/stocks/open_data/
+data/stocks/derived_signals/
+data/stocks/ai_candidate_analysis/
+data/assets/derived_signals/

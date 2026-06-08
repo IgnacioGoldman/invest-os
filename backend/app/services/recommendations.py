@@ -17,6 +17,8 @@ from app.services.storage import connect, load_recommendation_payloads, replace_
 
 PROJECT_DIR = Path(__file__).resolve().parents[3]
 PORTFOLIO_RECOMMENDATIONS_SKILL_DIR = PROJECT_DIR / "skills" / "portfolio-recommendations"
+STOCK_DERIVED_SIGNALS_PATH = PROJECT_DIR / "data" / "stocks" / "derived_signals" / "latest.json"
+ASSET_DERIVED_SIGNALS_PATH = PROJECT_DIR / "data" / "assets" / "derived_signals" / "latest.json"
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 
 
@@ -91,6 +93,81 @@ def _snapshot_payload(snapshot: PortfolioSnapshot) -> str:
     return json.dumps(snapshot.model_dump(mode="json"), indent=2, sort_keys=True)
 
 
+def _safe_load_json(path: Path) -> Any | None:
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _compact_stock_signals(limit: int = 50) -> dict[str, Any] | None:
+    payload = _safe_load_json(STOCK_DERIVED_SIGNALS_PATH)
+    if not isinstance(payload, dict):
+        return None
+    rows = payload.get("stocks")
+    if not isinstance(rows, list):
+        return None
+
+    def unusual(row: dict[str, Any]) -> float:
+        metric = row.get("derived_metrics", {}).get("unusual_score", {})
+        value = metric.get("value")
+        return float(value) if isinstance(value, (int, float)) else -1
+
+    selected = sorted((row for row in rows if isinstance(row, dict)), key=unusual, reverse=True)[:limit]
+    compact = []
+    for row in selected:
+        metrics = row.get("derived_metrics", {})
+        compact.append(
+            {
+                "ticker": row.get("ticker"),
+                "name": row.get("name"),
+                "sector": row.get("sector"),
+                "industry": row.get("industry"),
+                "derived_metrics": {
+                    key: metrics.get(key)
+                    for key in (
+                        "unusual_score",
+                        "fcfy_hist_percentile",
+                        "pe_vs_median",
+                        "rev_accel",
+                        "eps_accel",
+                        "growth_plus_fcfy",
+                        "sector_rev_rank",
+                        "sector_fcfy_rank",
+                        "sector_pe_cheap_rank",
+                        "price_fund_gap",
+                        "net_debt_to_fcf",
+                    )
+                    if key in metrics
+                },
+                "interesting_facts": row.get("interesting_facts", [])[:5],
+                "data_gaps": row.get("data_gaps", [])[:5],
+            }
+        )
+    return {
+        "source": payload.get("source"),
+        "generated_at": payload.get("generated_at"),
+        "count": payload.get("count"),
+        "selection_note": f"Top {len(compact)} stocks by deterministic unusual_score; full file remains at data/stocks/derived_signals/latest.json.",
+        "stocks": compact,
+    }
+
+
+def _deterministic_opportunity_payload() -> str:
+    context = {
+        "multi_asset_derived_signals": _safe_load_json(ASSET_DERIVED_SIGNALS_PATH),
+        "stock_derived_signals_compact": _compact_stock_signals(),
+        "missing_files": [
+            str(path.relative_to(PROJECT_DIR))
+            for path in (ASSET_DERIVED_SIGNALS_PATH, STOCK_DERIVED_SIGNALS_PATH)
+            if not path.exists()
+        ],
+    }
+    return json.dumps(context, indent=2, sort_keys=True)
+
+
 def _extract_text(response_json: dict[str, Any]) -> str:
     output_text = response_json.get("output_text")
     if isinstance(output_text, str):
@@ -131,6 +208,8 @@ def generate_recommendations(snapshot: PortfolioSnapshot, settings: Settings | N
     instructions = (
         f"{_skill_text()}\n\n"
         "Return only JSON matching the provided schema. Keep recommendations specific to the supplied snapshot. "
+        "Use deterministic opportunity signals when supplied, but do not force a new entry if portfolio fit, "
+        "risk, cash, concentration, stale data, or missing data argue for waiting. "
         "Do not use fixed portfolio thresholds unless they are explicitly present in the supplied context."
     )
     response = requests.post(
@@ -142,7 +221,10 @@ def generate_recommendations(snapshot: PortfolioSnapshot, settings: Settings | N
         json={
             "model": settings.openai_recommendation_model,
             "instructions": instructions,
-            "input": f"Portfolio snapshot JSON:\n{_snapshot_payload(snapshot)}",
+            "input": (
+                f"Portfolio snapshot JSON:\n{_snapshot_payload(snapshot)}\n\n"
+                f"Deterministic opportunity context JSON:\n{_deterministic_opportunity_payload()}"
+            ),
             "text": {
                 "format": {
                     "type": "json_schema",

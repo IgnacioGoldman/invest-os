@@ -13,7 +13,14 @@ from app.entry_engine.utils.file_storage import (
     save_open_data_stock_snapshot,
 )
 from app.models import RefreshRequest
+from app.services.asset_opportunities import (
+    AssetOpportunity,
+    AssetOpportunityFile,
+    load_asset_opportunities_by_class,
+    load_latest_asset_opportunities,
+)
 from app.services.recommendations import Recommendation, evaluate, generate_and_store
+from app.services.stock_candidate_analysis import StockCandidateAnalysis, load_latest_stock_candidate_analysis
 from app.services.stock_entry_analysis import StockEntryAnalysis, analyze_latest_open_data_stock_entry
 from app.snapshot import get_portfolio_snapshot, refresh_portfolio_snapshot
 
@@ -92,6 +99,37 @@ def generate_entry_snapshot(request: EntrySnapshotRequest) -> EntrySnapshotFile:
 @app.get("/api/open-data/stocks")
 def open_data_stocks() -> list[OpenDataSnapshot]:
     return load_latest_open_data_stock_snapshots()
+
+
+@app.get("/api/open-data/stocks/candidate-analysis")
+def open_data_stock_candidate_analysis() -> StockCandidateAnalysis:
+    analysis = load_latest_stock_candidate_analysis()
+    if analysis is None:
+        raise HTTPException(status_code=404, detail="No AI stock candidate analysis has been saved yet.")
+    return analysis
+
+
+@app.get("/api/open-data/assets")
+def open_data_assets() -> AssetOpportunityFile:
+    payload = load_latest_asset_opportunities()
+    if payload is None:
+        raise HTTPException(status_code=404, detail="No multi-asset derived signals have been generated yet.")
+    return payload
+
+
+@app.get("/api/open-data/assets/etfs")
+def open_data_etfs() -> list[AssetOpportunity]:
+    return load_asset_opportunities_by_class("etf")
+
+
+@app.get("/api/open-data/assets/commodities")
+def open_data_commodities() -> list[AssetOpportunity]:
+    return load_asset_opportunities_by_class("commodity_proxy")
+
+
+@app.get("/api/open-data/assets/crypto")
+def open_data_crypto() -> list[AssetOpportunity]:
+    return load_asset_opportunities_by_class("crypto")
 
 
 @app.get("/api/open-data/stocks/{ticker}")

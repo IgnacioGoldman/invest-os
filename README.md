@@ -59,19 +59,68 @@ by region and sector.
 #### Step 1 - Data Collection (deterministic)
 
 ```sh
-python scripts/open_data_poc.py GOOGL
+python scripts/open_data_poc.py --universe-file data/stocks/stocks.json --output data/stocks/open_data_collection_100.json
 ```
 
-#### Step 2 - Analysis (deterministic)
+Collects public facts, price history, valuation inputs, annual fundamentals,
+SEC filing context, and data gaps into `data/stocks/open_data/<TICKER>/`.
+For one symbol, run `python scripts/open_data_poc.py GOOGL`.
 
-"Analyze Stocks"
+#### Step 2 - Derived Signals (deterministic)
 
-Stock-analysis prompts live under:
+```sh
+python scripts/build_stock_derived_signals.py
+```
+
+Writes `data/stocks/derived_signals/latest.json`. It surfaces what is
+numerically unusual: valuation percentiles, growth acceleration, margin deltas,
+FCF conversion, net cash/debt, share-count change, sector ranks, and
+price/fundamental gaps. This is needed so the AI sees patterns and anomalies,
+not only raw metrics.
+
+#### Step 3 - AI Candidate Analysis (non-deterministic)
+
+Give Codex:
 
 ```text
-skills/stock-analysis/
+Analyze Stocks using skills/stock-analysis/stock-entry-analyst.md. Use data/stocks/open_data/*/latest.json and data/stocks/derived_signals/latest.json to find one long-term entry candidate and one short-term setup candidate. Use current context for finalists, return evidence-bound JSON, ask for missing data when needed, and save the result to data/stocks/ai_candidate_analysis/latest.json.
 ```
 
-The stock-analysis skill is designed for the future non-deterministic AI step.
-It should consume collected facts only, avoid guessing, identify missing data,
-and ask for more data when the supplied facts are insufficient.
+### Multi-Asset Opportunity Analysis
+
+#### Step 0 - Keep stock deterministic artifacts fresh
+
+Run the stock universe, stock open-data collection, and stock derived-signal
+steps above. Stocks keep their own richer equity-specific facts.
+
+#### Step 1 - Build ETF, commodity-proxy, and crypto signals
+
+```sh
+python scripts/build_asset_derived_signals.py
+```
+
+This writes `data/assets/derived_signals/latest.json`. It collects free/public
+deterministic market facts for:
+
+- ETFs: price returns, drawdowns, volatility, liquidity, expense ratio, yield,
+  AUM, exposure, and portfolio-fit score.
+- Commodity proxies: gold, silver, platinum, palladium, copper, broad
+  commodities, and oil proxies with price/risk/liquidity/fit metrics.
+- Crypto: Binance public price history, returns, drawdowns, volatility,
+  liquidity, 24h volume/change, and portfolio-fit score.
+
+Use `--no-portfolio-fit` if you want pure market signals without reading the
+cached portfolio snapshot.
+
+#### Step 2 - AI Portfolio Entry Analysis
+
+Use the dashboard **Analyze** button or ask Codex:
+
+```text
+Analyze Portfolio using skills/portfolio-recommendations/. Use the portfolio snapshot, data/assets/derived_signals/latest.json, data/stocks/derived_signals/latest.json, and data/stocks/open_data/*/latest.json. Decide whether the next best action is stock, ETF, commodity proxy, crypto, cash reserve, trim/exit, or wait.
+```
+
+The dashboard shows separate deterministic tables for **Stocks Insights**,
+**ETF Insights**, **Crypto Insights**, and **Commodities Insights**. The AI
+recommendation backend receives the portfolio snapshot plus deterministic
+multi-asset opportunity context when those files exist.
