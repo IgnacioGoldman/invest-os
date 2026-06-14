@@ -82,6 +82,16 @@ ADR_RATIO_BY_TICKER = {
 SUPPORTED_FX_CURRENCIES = {"USD", "EUR", "GBP", "DKK", "CHF", "CAD", "TWD", "JPY", "CNY", "HKD"}
 
 
+def _positive_float(value: Any) -> float | None:
+    if value in (None, "", "N/D"):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) and number > 0 else None
+
+
 class JsonFileCache:
     def __init__(self, cache_dir: Path | None = None) -> None:
         self.cache_dir = cache_dir or PROJECT_DIR / ".cache" / "open_data"
@@ -118,6 +128,7 @@ class OpenDataProvider(OpenDataMetricProvider):
         request_timeout: float = 20,
         retry_attempts: int = 2,
         retry_backoff: float = 0.75,
+        include_filing_details: bool = True,
     ) -> None:
         self.cache = cache or JsonFileCache()
         self.session = session or requests.Session()
@@ -128,6 +139,7 @@ class OpenDataProvider(OpenDataMetricProvider):
         self.request_timeout = request_timeout
         self.retry_attempts = max(1, retry_attempts)
         self.retry_backoff = max(0, retry_backoff)
+        self.include_filing_details = include_filing_details
         self.stooq_api_key = os.getenv("STOOQ_API_KEY") or None
         self._yfinance_info_cache: dict[str, dict[str, Any] | None] = {}
 
@@ -511,7 +523,9 @@ class OpenDataProvider(OpenDataMetricProvider):
                 primary_document=primary_document,
                 primary_document_description=self._recent_value(recent, "primaryDocDescription", index),
                 items=self._filing_items(self._recent_value(recent, "items", index)),
-                exhibits=self._fetch_filing_exhibits(cik, accession_number),
+                exhibits=self._fetch_filing_exhibits(cik, accession_number)
+                if self.include_filing_details
+                else [],
                 source_url=source_url,
                 notes="Recent company-specific SEC filing metadata. This is factual context, not an assessment.",
             )
@@ -524,7 +538,19 @@ class OpenDataProvider(OpenDataMetricProvider):
             source="sec_submissions",
             as_of=as_of,
             recent_filings=filings,
-            notes="Company context is collected from SEC submissions and filing index metadata. The app does not classify the news as good or bad.",
+            known_context_gaps=[]
+            if self.include_filing_details
+            else ["SEC filing archive exhibit details were skipped for batch collection scalability."],
+            notes=(
+                "Company context is collected from SEC submissions and filing index metadata. "
+                "The app does not classify the news as good or bad."
+                if self.include_filing_details
+                else (
+                    "Company context is collected from SEC submissions metadata. "
+                    "Per-filing archive exhibit lookups were skipped for batch collection scalability. "
+                    "The app does not classify the news as good or bad."
+                )
+            ),
         )
 
     def _recent_value(self, recent: dict[str, Any], key: str, index: int) -> str | None:
@@ -820,6 +846,8 @@ class OpenDataProvider(OpenDataMetricProvider):
                     close_value = float(close)
                     if not math.isfinite(close_value) or close_value <= 0:
                         continue
+                    high_value = _positive_float(row.get("High"))
+                    low_value = _positive_float(row.get("Low"))
                     volume = float(row["Volume"]) if row.get("Volume") not in (None, "", "N/D") else None
                     if volume is not None and not math.isfinite(volume):
                         volume = None
@@ -827,6 +855,8 @@ class OpenDataProvider(OpenDataMetricProvider):
                         HistoricalPricePoint(
                             date=raw_date,
                             close=close_value,
+                            high=high_value,
+                            low=low_value,
                             volume=volume,
                             source=f"stooq_history:{query_symbol.upper()}",
                         )
@@ -866,6 +896,8 @@ class OpenDataProvider(OpenDataMetricProvider):
             if not math.isfinite(close_value) or close_value <= 0:
                 continue
             as_of = index.date().isoformat() if hasattr(index, "date") else str(index)[:10]
+            high_value = _positive_float(row.get("High"))
+            low_value = _positive_float(row.get("Low"))
             volume = row.get("Volume")
             try:
                 volume_value = float(volume) if volume is not None else None
@@ -877,6 +909,8 @@ class OpenDataProvider(OpenDataMetricProvider):
                 HistoricalPricePoint(
                     date=as_of,
                     close=close_value,
+                    high=high_value,
+                    low=low_value,
                     volume=volume_value,
                     source="yfinance_history",
                 )

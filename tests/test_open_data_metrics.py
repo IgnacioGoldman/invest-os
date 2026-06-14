@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import tempfile
 import unittest
+from datetime import date, timedelta
 from pathlib import Path
 
 
@@ -203,6 +204,48 @@ class OpenDataMetricsTest(unittest.TestCase):
         self.assertEqual(snapshot.metrics["pe_ttm"].tier, "unavailable_open_free")
         self.assertEqual(snapshot.metrics["forward_pe_proxy"].tier, "unavailable_open_free")
 
+    def test_detects_daily_support_zone_from_repeated_swing_lows(self) -> None:
+        start = date(2025, 1, 1)
+        support_days = {40: 95.0, 92: 96.0, 144: 95.5}
+        history: list[HistoricalPricePoint] = []
+        for index in range(180):
+            day = start + timedelta(days=index)
+            close = 112 + index * 0.05
+            low = close - 1.5
+            high = close + 1.5
+            if index in support_days:
+                low = support_days[index]
+                close = low + 5
+                high = close + 2
+            if index == 179:
+                close = 99
+                low = 98
+                high = 101
+            history.append(
+                HistoricalPricePoint(
+                    date=day.isoformat(),
+                    close=close,
+                    high=high,
+                    low=low,
+                    source="mock_history",
+                )
+            )
+
+        snapshot = compute_open_data_snapshot(
+            ticker="GOOGL",
+            cik=1652044,
+            companyfacts=mocked_companyfacts(),
+            price=LatestPrice(ticker="GOOGL", price=99, source="mock_price", as_of=history[-1].date),
+            price_history=history,
+        )
+
+        support = snapshot.price_opportunity["support_1d_distance"]
+        self.assertEqual(support.tier, "computed_from_public_facts")
+        self.assertIsNotNone(support.value)
+        self.assertLess(support.value or 0, 6)
+        self.assertIn("Support zone:", support.notes)
+        self.assertIn("touches 3", support.notes)
+
     def test_uses_public_forward_pe_estimate_when_available(self) -> None:
         snapshot = compute_open_data_snapshot(
             ticker="GOOGL",
@@ -395,6 +438,89 @@ class OpenDataMetricsTest(unittest.TestCase):
         self.assertEqual(analysis.price_opportunity.assessment, "better_spot")
         self.assertTrue(any("below the all-time high" in item for item in analysis.price_opportunity.evidence))
         self.assertTrue(any("meaningfully off its high" in item for item in analysis.price_opportunity.concerns))
+
+    def test_stock_entry_analysis_withholds_cheap_label_when_valuation_history_is_distorted(self) -> None:
+        snapshot = compute_open_data_snapshot(
+            ticker="AZN",
+            cik=901832,
+            companyfacts=mocked_companyfacts(),
+            price=LatestPrice(ticker="AZN", price=170, source="mock_price", as_of="2026-04-26"),
+            price_history=[
+                HistoricalPricePoint(date="2021-04-26", close=100, source="mock_history"),
+                HistoricalPricePoint(date="2024-04-26", close=140, source="mock_history"),
+                HistoricalPricePoint(date="2025-04-26", close=180, source="mock_history"),
+                HistoricalPricePoint(date="2026-01-26", close=190, source="mock_history"),
+                HistoricalPricePoint(date="2026-03-26", close=175, source="mock_history"),
+                HistoricalPricePoint(date="2026-04-19", close=172, source="mock_history"),
+                HistoricalPricePoint(date="2026-04-26", close=170, source="mock_history"),
+            ],
+            generated_as_of="2026-04-26",
+        )
+        snapshot.valuation["pe"] = OpenDataMetric(
+            value=12,
+            source="mock",
+            tier="computed_from_public_facts",
+            as_of="2026-04-26",
+            notes="mock current PE",
+        )
+        snapshot.valuation["fcf_yield"] = OpenDataMetric(
+            value=7,
+            source="mock",
+            tier="computed_from_public_facts",
+            as_of="2026-04-26",
+            notes="mock current FCF yield",
+        )
+        snapshot.valuation["price_to_sales"] = OpenDataMetric(
+            value=2,
+            source="mock",
+            tier="computed_from_public_facts",
+            as_of="2026-04-26",
+            notes="mock current price/sales",
+        )
+        snapshot.valuation["forward_pe"] = OpenDataMetric(
+            value=20,
+            source="mock",
+            tier="proxy_estimate",
+            as_of="2026-04-26",
+            notes="mock forward PE",
+        )
+        snapshot.valuation["ev_to_ebitda"] = OpenDataMetric(
+            value=10,
+            source="mock",
+            tier="proxy_estimate",
+            as_of="2026-04-26",
+            notes="mock EV/EBITDA",
+        )
+        for row, pe in zip(snapshot.historical_series["valuation_history"], [20, 30, 40, 500]):
+            row.metrics["pe"] = OpenDataMetric(
+                value=pe,
+                source="mock",
+                tier="computed_from_public_facts",
+                as_of=row.as_of,
+                notes="mock annual PE",
+            )
+            row.metrics["price_to_sales"] = OpenDataMetric(
+                value=4,
+                source="mock",
+                tier="computed_from_public_facts",
+                as_of=row.as_of,
+                notes="mock annual price/sales",
+            )
+            row.metrics["ev_to_ebitda"] = OpenDataMetric(
+                value=15,
+                source="mock",
+                tier="proxy_estimate",
+                as_of=row.as_of,
+                notes="mock annual EV/EBITDA",
+            )
+        snapshot.data_gaps.append("Foreign-currency fundamentals are supported, while historical valuation still needs historical FX handling.")
+
+        analysis = analyze_open_data_stock_entry(snapshot)
+
+        self.assertEqual(analysis.valuation.assessment, "fair")
+        self.assertTrue(
+            any("strongest cheap label is withheld" in item for item in analysis.valuation.concerns)
+        )
 
     def test_stock_entry_analysis_marks_complete_but_mixed_business_as_not_needing_more_data(self) -> None:
         companyfacts = mocked_companyfacts()

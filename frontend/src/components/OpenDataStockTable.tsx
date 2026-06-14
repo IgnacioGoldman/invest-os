@@ -28,6 +28,7 @@ const COLUMNS = [
   ["business_health", "debt", "Debt", "compact"],
   ["business_health", "debt_to_equity", "D/E", "ratio"],
   ["price_opportunity", "current_price", "Price", "ratio"],
+  ["price_opportunity", "support_1d_distance", "Support 1D", "percent"],
   ["price_opportunity", "change_1d", "1D", "percent"],
   ["price_opportunity", "change_1w", "1W", "percent"],
   ["price_opportunity", "change_1m", "1M", "percent"],
@@ -270,6 +271,24 @@ function formatRatio(value?: number | null) {
 function formatPercent(value?: number | null) {
   if (value == null) return "-";
   return `${formatRatio(value)}%`;
+}
+
+function formatSignedPercent(value?: number | null) {
+  if (value == null) return "-";
+  const prefix = value > 0 ? "+" : "";
+  return `${prefix}${formatRatio(value)}%`;
+}
+
+function supportSignalLabel(value?: number | null) {
+  if (value == null) return "Far";
+  if (value <= 2.5) return "At support";
+  if (value <= 6) return "Near support";
+  return "Above support";
+}
+
+function formatSupportSignal(value?: number | null) {
+  if (value == null) return "Far";
+  return `${supportSignalLabel(value)} ${formatSignedPercent(value)}`;
 }
 
 function formatValue(metric: OpenDataMetric | undefined, kind: string) {
@@ -1022,7 +1041,8 @@ export function OpenDataStockTable({
         values: uniqueOptions(
           snapshots.map((snapshot) => {
             const metric = snapshot[column.group as MetricGroup]?.[column.key ?? ""];
-            const label = formatValue(metric, column.metricKind ?? "ratio");
+            const isSupportSignal = column.group === "price_opportunity" && column.key === "support_1d_distance";
+            const label = isSupportSignal ? formatSupportSignal(metric?.value) : formatValue(metric, column.metricKind ?? "ratio");
             return { value: metric?.value == null ? label : String(metric.value), label };
           }),
         ),
@@ -1213,12 +1233,13 @@ export function OpenDataStockTable({
 
     if (column.kind === "metric" && column.group && column.key) {
       const metric = snapshot[column.group][column.key];
+      const isSupportSignal = column.group === "price_opportunity" && column.key === "support_1d_distance";
       return (
         <td key={column.id} title={metric ? `${column.label}: ${metric.notes}\n${metric.source}` : column.label}>
-          <strong>{formatValue(metric, column.metricKind ?? "ratio")}</strong>
+          <strong>{isSupportSignal ? formatSupportSignal(metric?.value) : formatValue(metric, column.metricKind ?? "ratio")}</strong>
           {metric && (
             <small>
-              Latest as of {metric.as_of}
+              {isSupportSignal ? "Daily zones" : `Latest as of ${metric.as_of}`}
               <br />
               {tierLabel(metric.tier)}
             </small>

@@ -151,6 +151,17 @@ class SelectedFact:
     annual_used: bool = False
 
 
+@dataclass(frozen=True)
+class SupportZone:
+    low: float
+    high: float
+    midpoint: float
+    touches: int
+    first_touch: str
+    last_touch: str
+    tolerance_pct: float
+
+
 def compute_open_data_snapshot(
     *,
     ticker: str,
@@ -531,6 +542,7 @@ def compute_open_data_snapshot(
         "distance_from_ath": price_metrics["distance_from_ath"],
         "distance_from_52w_high": price_metrics["distance_from_52w_high"],
         "distance_from_52w_low": price_metrics["distance_from_52w_low"],
+        "support_1d_distance": price_metrics["support_1d_distance"],
     }
     valuation = {
         "pe": pe,
@@ -1158,6 +1170,7 @@ def _price_opportunity_metrics(
             "distance_from_ath",
             "distance_from_52w_high",
             "distance_from_52w_low",
+            "support_1d_distance",
         ):
             metrics[name] = _unavailable(name, "Historical open/free prices were unavailable.", fallback_as_of)
         return metrics
@@ -1185,7 +1198,153 @@ def _price_opportunity_metrics(
     metrics["distance_from_ath"] = _distance_metric("distance_from_ath", price, ath, source, as_of, "latest close to all-time high close", fallback_as_of)
     metrics["distance_from_52w_high"] = _distance_metric("distance_from_52w_high", price, high_52w, source, as_of, "latest close to 52-week high close", fallback_as_of)
     metrics["distance_from_52w_low"] = _distance_metric("distance_from_52w_low", price, low_52w, source, as_of, "latest close to 52-week low close", fallback_as_of)
+    metrics["support_1d_distance"] = _support_1d_metric(points, price, source, as_of, fallback_as_of)
     return metrics
+
+
+def _price_low(point: HistoricalPricePoint) -> float:
+    return point.low if point.low is not None and math.isfinite(point.low) and point.low > 0 else point.close
+
+
+def _daily_return_volatility(points: list[HistoricalPricePoint]) -> float | None:
+    returns: list[float] = []
+    for previous, current in zip(points, points[1:]):
+        if previous.close <= 0:
+            continue
+        change = (current.close / previous.close) - 1
+        if math.isfinite(change):
+            returns.append(change)
+    if len(returns) < 20:
+        return None
+    mean = sum(returns) / len(returns)
+    variance = sum((value - mean) ** 2 for value in returns) / len(returns)
+    return math.sqrt(variance)
+
+
+def _support_zone_tolerance(points: list[HistoricalPricePoint]) -> float:
+    volatility = _daily_return_volatility(points[-90:])
+    if volatility is None:
+        return 0.035
+    return max(0.025, min(0.06, volatility * 2.2))
+
+
+def _swing_lows(points: list[HistoricalPricePoint], radius: int = 4) -> list[HistoricalPricePoint]:
+    if len(points) < radius * 2 + 1:
+        return []
+    swings: list[HistoricalPricePoint] = []
+    for index in range(radius, len(points) - radius):
+        point = points[index]
+        low = _price_low(point)
+        window = points[index - radius : index + radius + 1]
+        if low <= min(_price_low(item) for item in window) and low < points[index - 1].close and low < points[index + 1].close:
+            swings.append(point)
+    return swings
+
+
+def _days_between(left: str, right: str) -> int:
+    left_date = _parse_date(left)
+    right_date = _parse_date(right)
+    if left_date is None or right_date is None:
+        return 0
+    return abs((right_date - left_date).days)
+
+
+def _support_zones(points: list[HistoricalPricePoint], latest_date: date) -> list[SupportZone]:
+    lookback_start = latest_date - timedelta(days=365 * 2)
+    lookback = [point for point in points if (_parse_date(point.date) or date.min) >= lookback_start]
+    if len(lookback) < 120:
+        return []
+
+    tolerance = _support_zone_tolerance(lookback)
+    clusters: list[list[HistoricalPricePoint]] = []
+    for point in sorted(_swing_lows(lookback), key=_price_low):
+        low = _price_low(point)
+        match = next(
+            (
+                cluster
+                for cluster in clusters
+                if abs(low - (sum(_price_low(item) for item in cluster) / len(cluster))) / low <= tolerance
+            ),
+            None,
+        )
+        if match is None:
+            clusters.append([point])
+        else:
+            match.append(point)
+
+    zones: list[SupportZone] = []
+    for cluster in clusters:
+        ordered = sorted(cluster, key=lambda item: item.date)
+        separated_touches: list[HistoricalPricePoint] = []
+        for point in ordered:
+            if not separated_touches or _days_between(separated_touches[-1].date, point.date) >= 15:
+                separated_touches.append(point)
+        if len(separated_touches) < 2:
+            continue
+        lows = [_price_low(point) for point in separated_touches]
+        low = min(lows) * (1 - tolerance / 2)
+        high = max(lows) * (1 + tolerance / 2)
+        zones.append(
+            SupportZone(
+                low=low,
+                high=high,
+                midpoint=(low + high) / 2,
+                touches=len(separated_touches),
+                first_touch=separated_touches[0].date,
+                last_touch=separated_touches[-1].date,
+                tolerance_pct=tolerance * 100,
+            )
+        )
+    return zones
+
+
+def _support_1d_metric(
+    points: list[HistoricalPricePoint],
+    current_price: float,
+    source: str,
+    as_of: str,
+    fallback_as_of: str,
+) -> OpenDataMetric:
+    latest_date = _parse_date(points[-1].date) if points else None
+    if latest_date is None:
+        return _unavailable("support_1d_distance", "Latest historical price date was unavailable.", fallback_as_of)
+
+    candidate_zones = [
+        zone
+        for zone in _support_zones(points, latest_date)
+        if zone.midpoint <= current_price * 1.02
+        and current_price >= zone.low * 0.995
+        and ((current_price - zone.midpoint) / zone.midpoint) * 100 <= 15
+    ]
+    if not candidate_zones:
+        return _unavailable(
+            "support_1d_distance",
+            "No repeated daily swing-low support zone was detected within 15% of the latest close using roughly two years of open/free price history.",
+            as_of,
+        )
+
+    zone = min(
+        candidate_zones,
+        key=lambda item: (
+            max((current_price / item.high) - 1, 0),
+            abs((current_price / item.midpoint) - 1),
+            -item.touches,
+        ),
+    )
+    distance = ((current_price - zone.midpoint) / zone.midpoint) * 100
+    return OpenDataMetric(
+        value=distance,
+        source=source,
+        tier="computed_from_public_facts",
+        as_of=as_of,
+        notes=(
+            "Nearest repeated daily swing-low support zone over roughly two years. "
+            f"Support zone: ${zone.low:.2f}-${zone.high:.2f}; midpoint ${zone.midpoint:.2f}; "
+            f"distance {distance:+.2f}%; touches {zone.touches}; "
+            f"first touch {zone.first_touch}; last touch {zone.last_touch}; "
+            f"cluster tolerance {zone.tolerance_pct:.1f}%."
+        ),
+    )
 
 
 def _price_on_or_before(points: list[HistoricalPricePoint], latest_date: date, days_back: int) -> float | None:

@@ -8,7 +8,11 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.entry_engine.open_data_models import OpenDataMetric, OpenDataSnapshot
-from app.entry_engine.utils.file_storage import load_latest_open_data_stock_snapshot
+from app.entry_engine.utils.file_storage import (
+    load_latest_open_data_stock_snapshot,
+    load_latest_open_data_stock_snapshots,
+)
+from app.services.stock_derived_signals import StockDerivedSignals, build_stock_derived_signals, build_stock_derived_signals_file
 
 
 OpportunityType = Literal[
@@ -199,6 +203,7 @@ def _valuation_assessment(
     fcf_yield: float | None,
     valuation_expensive: bool,
     absolute_valuation_flags: list[str],
+    valuation_history_reliable: bool,
 ) -> str:
     if needs_valuation_data:
         return "unclear"
@@ -212,8 +217,10 @@ def _valuation_assessment(
         and pe <= pe_median * 0.8
         and (fcf_yield is None or fcf_yield >= 4)
     ):
+        if not valuation_history_reliable:
+            return "fair"
         return "cheap"
-    if pe is not None and pe_median is not None and pe > pe_median * 1.1:
+    if pe is not None and pe_median is not None and pe > pe_median * 1.1 and valuation_history_reliable:
         return "slightly_expensive"
     return "fair"
 
@@ -238,6 +245,51 @@ def _valuation_range(snapshot: OpenDataSnapshot, key: str) -> float | None:
         return None
     metric = rows[0].metrics.get(key)
     return metric.value if metric else None
+
+
+def _historical_valuation_values(snapshot: OpenDataSnapshot, key: str) -> list[float]:
+    values: list[float] = []
+    for row in snapshot.historical_series.get("valuation_history", []):
+        metric = row.metrics.get(key)
+        if metric and metric.value is not None and metric.value > 0:
+            values.append(metric.value)
+    return values
+
+
+def _median(values: list[float]) -> float | None:
+    if not values:
+        return None
+    sorted_values = sorted(values)
+    midpoint = len(sorted_values) // 2
+    if len(sorted_values) % 2:
+        return sorted_values[midpoint]
+    return (sorted_values[midpoint - 1] + sorted_values[midpoint]) / 2
+
+
+def _has_historical_bridge_gap(snapshot: OpenDataSnapshot) -> bool:
+    gap_text = " ".join(snapshot.data_gaps).lower()
+    return (
+        "historical fx" in gap_text
+        or "historical valuation" in gap_text
+        or ("ifrs" in gap_text and "historical" in gap_text)
+    )
+
+
+def _valuation_history_quality(snapshot: OpenDataSnapshot) -> tuple[bool, list[str]]:
+    pe_values = _historical_valuation_values(snapshot, "pe")
+    reasons: list[str] = []
+
+    if len(pe_values) < 4:
+        reasons.append("fewer than four usable annual PE history points")
+
+    pe_median = _median(pe_values)
+    if pe_values and pe_median and max(pe_values) >= pe_median * 8:
+        reasons.append("PE history contains a severe outlier")
+
+    if _has_historical_bridge_gap(snapshot):
+        reasons.append("historical valuation bridge has IFRS/FX/ADR limitations")
+
+    return not reasons, reasons
 
 
 def _annual_metric_values(snapshot: OpenDataSnapshot, key: str) -> list[float]:
@@ -304,7 +356,131 @@ def _company_context(snapshot: OpenDataSnapshot) -> StockEntryAnalysisSection:
     )
 
 
-def analyze_open_data_stock_entry(snapshot: OpenDataSnapshot) -> StockEntryAnalysis:
+def _derived_value(signals: StockDerivedSignals | None, key: str) -> float | None:
+    if signals is None:
+        return None
+    signal = signals.derived_metrics.get(key)
+    return signal.value if signal else None
+
+
+def _derived_signal_adjustment(signals: StockDerivedSignals | None, *, valuation_history_reliable: bool) -> float:
+    if signals is None:
+        return 0.0
+
+    adjustment = 0.0
+    unusual_score = _derived_value(signals, "unusual_score")
+    pe_vs_median = _derived_value(signals, "pe_vs_median")
+    fcfy_hist = _derived_value(signals, "fcfy_hist_percentile")
+    sector_fcfy = _derived_value(signals, "sector_fcfy_rank")
+    sector_cheap = _derived_value(signals, "sector_pe_cheap_rank")
+    price_fund_gap = _derived_value(signals, "price_fund_gap")
+    net_cash = _derived_value(signals, "net_cash")
+    net_debt_to_fcf = _derived_value(signals, "net_debt_to_fcf")
+    fcf_conversion = _derived_value(signals, "fcf_conversion")
+    growth_plus_fcfy = _derived_value(signals, "growth_plus_fcfy")
+    sector_rev = _derived_value(signals, "sector_rev_rank")
+    op_margin_delta = _derived_value(signals, "op_margin_yoy_delta")
+    shares_change = _derived_value(signals, "shares_3y_change")
+
+    if unusual_score is not None:
+        if unusual_score >= 85:
+            adjustment += 0.35
+        elif unusual_score >= 70:
+            adjustment += 0.2
+        elif unusual_score <= 25:
+            adjustment -= 0.15
+
+    if pe_vs_median is not None and valuation_history_reliable:
+        if pe_vs_median <= -35:
+            adjustment += 0.3
+        elif pe_vs_median <= -20:
+            adjustment += 0.2
+        elif pe_vs_median >= 30:
+            adjustment -= 0.25
+
+    if fcfy_hist is not None and valuation_history_reliable:
+        if fcfy_hist >= 85:
+            adjustment += 0.25
+        elif fcfy_hist <= 20:
+            adjustment -= 0.15
+
+    if sector_cheap is not None:
+        if sector_cheap >= 80:
+            adjustment += 0.15
+        elif sector_cheap <= 20:
+            adjustment -= 0.15
+
+    if sector_fcfy is not None and sector_fcfy >= 80:
+        adjustment += 0.1
+
+    if price_fund_gap is not None:
+        if price_fund_gap <= -35:
+            adjustment += 0.2
+        elif price_fund_gap <= -20:
+            adjustment += 0.1
+        elif price_fund_gap >= 35:
+            adjustment -= 0.15
+
+    if net_cash is not None and net_cash > 0:
+        adjustment += 0.1
+    if net_debt_to_fcf is not None and net_debt_to_fcf >= 3:
+        adjustment -= 0.25
+
+    if fcf_conversion is not None:
+        if fcf_conversion >= 130:
+            adjustment += 0.15
+        elif fcf_conversion <= 60:
+            adjustment -= 0.2
+
+    if growth_plus_fcfy is not None:
+        if growth_plus_fcfy >= 14:
+            adjustment += 0.1
+        elif growth_plus_fcfy <= 4:
+            adjustment -= 0.1
+
+    if sector_rev is not None and sector_rev <= 20:
+        adjustment -= 0.2
+    if op_margin_delta is not None and op_margin_delta <= -3:
+        adjustment -= 0.15
+    if shares_change is not None and shares_change >= 5:
+        adjustment -= 0.2
+
+    return max(-0.8, min(1.3, adjustment))
+
+
+def _final_conviction(base: float, adjustment: float, *, needs_more_data: bool, price_assessment: str) -> float:
+    conviction = base + adjustment
+    if needs_more_data:
+        conviction = min(conviction, 5.2)
+    if price_assessment == "falling":
+        conviction = min(conviction, 6.3)
+    if price_assessment == "no_dip":
+        conviction = min(conviction, 6.0)
+    return round(max(0.0, min(10.0, conviction)), 1)
+
+
+def _support_price_adjustment(
+    *,
+    support_at: bool,
+    support_near: bool,
+    needs_more_data: bool,
+    business_assessment: str,
+    price_assessment: str,
+) -> float:
+    if needs_more_data or business_assessment == "weak" or price_assessment == "falling":
+        return 0.0
+    if support_at:
+        return 0.3
+    if support_near:
+        return 0.15
+    return 0.0
+
+
+def analyze_open_data_stock_entry(
+    snapshot: OpenDataSnapshot,
+    peer_snapshots: list[OpenDataSnapshot] | None = None,
+    derived_signals: StockDerivedSignals | None = None,
+) -> StockEntryAnalysis:
     revenue_yoy = _value(snapshot, "business_health", "revenue_growth_yoy")
     revenue_cagr = _value(snapshot, "business_health", "revenue_cagr_3y")
     eps_yoy = _value(snapshot, "business_health", "eps_growth_yoy")
@@ -325,6 +501,7 @@ def analyze_open_data_stock_entry(snapshot: OpenDataSnapshot) -> StockEntryAnaly
     change_1y = _value(snapshot, "price_opportunity", "change_1y")
     distance_ath = _value(snapshot, "price_opportunity", "distance_from_ath")
     distance_52w_low = _value(snapshot, "price_opportunity", "distance_from_52w_low")
+    support_1d_distance = _value(snapshot, "price_opportunity", "support_1d_distance")
 
     pe = _value(snapshot, "valuation", "pe")
     forward_pe = _metric(snapshot, "valuation", "forward_pe")
@@ -368,6 +545,11 @@ def analyze_open_data_stock_entry(snapshot: OpenDataSnapshot) -> StockEntryAnaly
         _distance_from_high_sentence(distance_ath),
         f"Longer-term trend: {_fmt_pct(change_3m)} over 3 months, {_fmt_pct(change_6m)} over 6 months, {_fmt_pct(change_1y)} over 1 year.",
     ]
+    support_at = support_1d_distance is not None and support_1d_distance <= 2.5
+    support_near = support_1d_distance is not None and support_1d_distance <= 6
+    if support_1d_distance is not None:
+        support_label = "at" if support_at else "near" if support_near else "above"
+        price_evidence.append(f"Daily support signal: price is {support_label} the nearest repeated support zone at {_fmt_pct(support_1d_distance)} from zone midpoint.")
     price_concerns: list[str] = []
     if distance_ath is not None and distance_ath > -20:
         price_concerns.append("This is not a deep beaten-up setup based on supplied price facts.")
@@ -400,7 +582,13 @@ def analyze_open_data_stock_entry(snapshot: OpenDataSnapshot) -> StockEntryAnaly
         longer_trend_strong=longer_trend_strong,
         price_extended=price_extended,
     )
-    price_no_clear_dip = price_data_available and not has_short_pullback
+    if support_at and price_assessment == "strong_trend":
+        price_assessment = "pullback"
+    elif support_at and price_assessment == "deep_pullback":
+        price_assessment = "better_spot"
+    elif support_near and price_assessment == "no_dip":
+        price_assessment = "better_spot"
+    price_no_clear_dip = price_data_available and not has_short_pullback and not support_near
     if price_assessment == "better_spot":
         price_concerns.append("The stock is meaningfully off its high, but the supplied trend is sideways or weak rather than a clean rising pullback.")
     if price_assessment == "deep_pullback":
@@ -429,6 +617,19 @@ def analyze_open_data_stock_entry(snapshot: OpenDataSnapshot) -> StockEntryAnaly
         valuation_concerns.append("PEG is a proxy based on public facts, not analyst-consensus PEG.")
     if ev_to_ebitda and ev_to_ebitda.tier == "proxy_estimate":
         valuation_concerns.append("EV/EBITDA is a proxy estimate from open/free public facts.")
+    valuation_history_reliable, valuation_history_quality_reasons = _valuation_history_quality(snapshot)
+    valuation_would_screen_cheap = (
+        pe is not None
+        and pe_median is not None
+        and pe <= pe_median * 0.8
+        and (fcf_yield is None or fcf_yield >= 4)
+    )
+    if valuation_would_screen_cheap and not valuation_history_reliable:
+        valuation_concerns.append(
+            "Valuation screens attractive, but the strongest cheap label is withheld because "
+            + "; ".join(valuation_history_quality_reasons)
+            + "."
+        )
 
     valuation_expensive = any(
         (
@@ -460,6 +661,7 @@ def analyze_open_data_stock_entry(snapshot: OpenDataSnapshot) -> StockEntryAnaly
         fcf_yield=fcf_yield,
         valuation_expensive=valuation_expensive,
         absolute_valuation_flags=absolute_valuation_flags,
+        valuation_history_reliable=valuation_history_reliable,
     )
     missing_data: list[str] = []
     if needs_more_data:
@@ -472,24 +674,46 @@ def analyze_open_data_stock_entry(snapshot: OpenDataSnapshot) -> StockEntryAnaly
 
     if needs_more_data:
         opportunity_type: OpportunityType = "Insufficient data"
-    elif has_short_pullback and longer_trend_strong:
+    elif (has_short_pullback or support_at) and is_quality:
         opportunity_type = "Quality compounder pullback"
     elif longer_trend_strong:
         opportunity_type = "Momentum continuation"
     else:
         opportunity_type = "Temporary selloff"
 
-    conviction = 6.8
+    base_conviction = 6.8
     if needs_more_data:
-        conviction = 4.5
+        base_conviction = 4.5
     elif not is_quality:
-        conviction = 5.0
-    elif price_extended:
-        conviction = 5.6
+        base_conviction = 5.0
+    elif price_extended and not support_near:
+        base_conviction = 5.6
     elif valuation_expensive:
-        conviction = 6.8
-    elif is_quality and has_short_pullback:
-        conviction = 7.4
+        base_conviction = 6.8
+    elif is_quality and (has_short_pullback or support_at):
+        base_conviction = 7.4
+    elif is_quality and support_near:
+        base_conviction = 7.0
+
+    if derived_signals is None:
+        derived_signals = build_stock_derived_signals(snapshot, peer_snapshots or [snapshot])
+    derived_adjustment = _derived_signal_adjustment(
+        derived_signals,
+        valuation_history_reliable=valuation_history_reliable,
+    )
+    support_adjustment = _support_price_adjustment(
+        support_at=support_at,
+        support_near=support_near,
+        needs_more_data=needs_more_data,
+        business_assessment=business_assessment,
+        price_assessment=price_assessment,
+    )
+    conviction = _final_conviction(
+        base_conviction,
+        derived_adjustment + support_adjustment,
+        needs_more_data=needs_more_data,
+        price_assessment=price_assessment,
+    )
 
     summary = (
         f"{snapshot.name or snapshot.ticker} looks like a strong business with a real short-term pullback, "
@@ -543,4 +767,20 @@ def analyze_latest_open_data_stock_entry(ticker: str) -> StockEntryAnalysis | No
     snapshot = load_latest_open_data_stock_snapshot(ticker)
     if snapshot is None:
         return None
-    return analyze_open_data_stock_entry(snapshot)
+    return analyze_open_data_stock_entry(snapshot, load_latest_open_data_stock_snapshots())
+
+
+def analyze_latest_open_data_stock_entries() -> dict[str, StockEntryAnalysis]:
+    snapshots = load_latest_open_data_stock_snapshots()
+    if not snapshots:
+        return {}
+    derived_file = build_stock_derived_signals_file(snapshots)
+    derived_by_ticker = {signals.ticker: signals for signals in derived_file.stocks}
+    return {
+        snapshot.ticker: analyze_open_data_stock_entry(
+            snapshot,
+            snapshots,
+            derived_by_ticker.get(snapshot.ticker),
+        )
+        for snapshot in snapshots
+    }

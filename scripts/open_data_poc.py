@@ -221,6 +221,7 @@ def _collect_item_with_retries(
     save: bool,
     min_coverage: float,
     include_analysis: bool,
+    include_filing_details: bool,
     ticker_retries: int,
     request_timeout: float,
     request_retries: int,
@@ -234,6 +235,7 @@ def _collect_item_with_retries(
             request_timeout=request_timeout,
             retry_attempts=request_retries,
             retry_backoff=retry_backoff,
+            include_filing_details=include_filing_details,
         )
         try:
             result = {
@@ -276,6 +278,7 @@ def _build_report(
     source: str,
     skip_tickers: set[str],
     min_coverage: float,
+    include_filing_details: bool,
     results: list[dict[str, Any]],
     skipped_low_fidelity: list[dict[str, Any]],
     failures: list[dict[str, str]],
@@ -292,6 +295,7 @@ def _build_report(
         "source": source,
         "skipped_tickers": sorted(skip_tickers),
         "min_coverage_percent": min_coverage,
+        "include_filing_details": include_filing_details,
         "collected_count": len(ordered_results),
         "failed_count": len(ordered_failures),
         "skipped_low_fidelity_count": len(ordered_skipped),
@@ -319,6 +323,14 @@ def main() -> None:
     )
     parser.add_argument("--include-googl", action="store_true", help="Do not skip GOOGL in top-volume mode.")
     parser.add_argument("--include-analysis", action="store_true", help="Include deterministic stock-entry analysis in the run output.")
+    parser.add_argument(
+        "--skip-filing-details",
+        action="store_true",
+        help=(
+            "Skip per-filing SEC archive exhibit lookups. Recent filing metadata is still collected; "
+            "this is recommended for large universe runs."
+        ),
+    )
     parser.add_argument("--no-save", action="store_true", help="Do not persist snapshots under data/stocks/open_data/.")
     parser.add_argument("--output", type=Path, help="Write the JSON run report to a file as well as stdout.")
     parser.add_argument("--workers", type=int, default=6, help="Number of tickers to collect in parallel.")
@@ -338,6 +350,7 @@ def main() -> None:
         request_timeout=args.request_timeout,
         retry_attempts=args.request_retries,
         retry_backoff=args.retry_backoff,
+        include_filing_details=not args.skip_filing_details,
     )
     save = not args.no_save
 
@@ -430,10 +443,11 @@ def main() -> None:
                 requested_count=requested_count,
                 source=source,
                 skip_tickers=skip_tickers,
-                min_coverage=args.min_coverage,
-                results=results,
-                skipped_low_fidelity=skipped_low_fidelity,
-                failures=failures,
+                    min_coverage=args.min_coverage,
+                    include_filing_details=not args.skip_filing_details,
+                    results=results,
+                    skipped_low_fidelity=skipped_low_fidelity,
+                    failures=failures,
             ),
         )
 
@@ -447,6 +461,7 @@ def main() -> None:
                     save=save,
                     min_coverage=args.min_coverage,
                     include_analysis=args.include_analysis,
+                    include_filing_details=not args.skip_filing_details,
                     ticker_retries=args.ticker_retries,
                     request_timeout=args.request_timeout,
                     request_retries=args.request_retries,
@@ -465,6 +480,7 @@ def main() -> None:
                     save=save,
                     min_coverage=args.min_coverage,
                     include_analysis=args.include_analysis,
+                    include_filing_details=not args.skip_filing_details,
                     ticker_retries=args.ticker_retries,
                     request_timeout=args.request_timeout,
                     request_retries=args.request_retries,
@@ -488,6 +504,7 @@ def main() -> None:
         source=source,
         skip_tickers=skip_tickers,
         min_coverage=args.min_coverage,
+        include_filing_details=not args.skip_filing_details,
         results=results,
         skipped_low_fidelity=skipped_low_fidelity,
         failures=failures,

@@ -37,6 +37,8 @@ class LatestPrice(BaseModel):
 class HistoricalPricePoint(BaseModel):
     date: str
     close: float
+    high: float | None = None
+    low: float | None = None
     volume: float | None = None
     source: str
 
