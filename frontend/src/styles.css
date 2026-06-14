@@ -88,6 +88,116 @@ button:disabled {
   justify-content: flex-end;
 }
 
+.refresh-job {
+  background: #ffffff;
+  border: 1px solid #dde2ea;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(24, 33, 47, 0.04);
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.refresh-job.running {
+  border-color: #b8cbe2;
+}
+
+.refresh-job.success {
+  border-color: #b9d6c4;
+}
+
+.refresh-job.error {
+  border-color: #e7b5b5;
+}
+
+.refresh-job-main {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.refresh-job-main > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.refresh-job-main strong {
+  color: #18212f;
+  font-size: 0.9rem;
+}
+
+.refresh-job-main span {
+  color: #657186;
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.refresh-job.error .refresh-job-main span {
+  color: #9d2626;
+}
+
+.refresh-job-main small {
+  color: #657186;
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.refresh-progress {
+  background: #edf0f5;
+  border-radius: 999px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.refresh-progress span {
+  background: #194f90;
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+  min-width: 8px;
+  transition: width 0.2s ease;
+}
+
+.refresh-job.running .refresh-progress span {
+  background-image: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.24) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.24) 50%,
+    rgba(255, 255, 255, 0.24) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 18px 18px;
+  animation: refresh-stripes 0.7s linear infinite;
+}
+
+.refresh-job.success .refresh-progress span {
+  background: #2e7a4d;
+}
+
+.refresh-job.error .refresh-progress span {
+  background: #b33535;
+}
+
+@keyframes refresh-stripes {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 18px 0;
+  }
+}
+
 .segmented {
   align-items: center;
   border: 1px solid #cfd6e2;
@@ -147,6 +257,11 @@ button:disabled {
   color: #7a5416;
 }
 
+.header-menu-button.active {
+  border-color: #b8cbe2;
+  color: #194f90;
+}
+
 .header-menu-button span {
   align-items: center;
   background: #edf0f5;
@@ -162,6 +277,11 @@ button:disabled {
 .header-menu-button.warning span {
   background: #fff1cf;
   color: #7a5416;
+}
+
+.header-menu-button.active span {
+  background: #e6eef8;
+  color: #194f90;
 }
 
 .header-menu-content {
@@ -187,6 +307,13 @@ button:disabled {
 
 .source-menu {
   width: 520px;
+}
+
+.sync-active-jobs {
+  border-bottom: 1px solid #edf0f5;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
 }
 
 .portfolio-menu-button svg:last-child {
@@ -744,14 +871,32 @@ table {
 
 .candidate-conviction {
   align-items: center;
-  background: #e7f0ea;
-  border: 1px solid #b9d6c4;
+  background: #edf0f5;
+  border: 1px solid #dde2ea;
   border-radius: 8px;
-  color: #24563a;
+  color: #39445a;
   display: grid;
   justify-items: center;
   min-width: 72px;
   padding: 7px 9px;
+}
+
+.candidate-conviction.good {
+  background: #e7f0ea;
+  border-color: #b9d6c4;
+  color: #24563a;
+}
+
+.candidate-conviction.watch {
+  background: #fff1cf;
+  border-color: #efd9a8;
+  color: #7a5416;
+}
+
+.candidate-conviction.bad {
+  background: #f8dada;
+  border-color: #e7b5b5;
+  color: #9d2626;
 }
 
 .candidate-conviction strong {
@@ -846,12 +991,66 @@ table {
   word-break: break-word;
 }
 
-.candidate-secondary-grid {
+.candidate-disclosure {
   border-top: 1px solid #edf0f5;
+}
+
+.candidate-disclosure summary {
+  align-items: center;
+  color: #39445a;
+  cursor: pointer;
+  display: flex;
+  font-size: 0.86rem;
+  font-weight: 850;
+  justify-content: space-between;
+  list-style: none;
+  min-height: 42px;
+  padding: 0 16px;
+}
+
+.candidate-disclosure summary::-webkit-details-marker {
+  display: none;
+}
+
+.candidate-disclosure summary::marker {
+  content: "";
+}
+
+.candidate-disclosure summary span {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.candidate-disclosure summary span::before {
+  color: #657186;
+  content: "›";
+  display: inline-block;
+  font-size: 1.1rem;
+  line-height: 1;
+  transform: translateY(-1px);
+  transition: transform 0.16s ease;
+}
+
+.candidate-disclosure[open] summary span::before {
+  transform: rotate(90deg) translateX(-1px);
+}
+
+.candidate-disclosure summary small {
+  background: #edf0f5;
+  border: 1px solid #dde2ea;
+  border-radius: 999px;
+  color: #657186;
+  font-size: 0.72rem;
+  font-weight: 850;
+  padding: 3px 8px;
+}
+
+.candidate-secondary-grid {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(2, minmax(240px, 1fr));
-  padding: 14px 16px;
+  padding: 0 16px 14px;
 }
 
 .candidate-secondary-grid h3 {
@@ -868,11 +1067,10 @@ table {
 }
 
 .candidate-data-notes {
-  border-top: 1px solid #edf0f5;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 12px 16px 14px;
+  padding: 0 16px 14px;
 }
 
 .candidate-data-notes span {

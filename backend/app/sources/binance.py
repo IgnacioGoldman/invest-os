@@ -5,7 +5,7 @@ import hmac
 import logging
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Callable
 from urllib.parse import urlencode
 
 import requests
@@ -19,7 +19,6 @@ BINANCE_BASE_URL = "https://api.binance.com"
 logger = logging.getLogger(__name__)
 QUOTE_ASSETS = ("EUR", "USDT", "USDC", "FDUSD", "BTC", "ETH")
 USD_LIKE_ASSETS = {"USD", "USDT", "USDC", "FDUSD"}
-FIAT_LEDGER_MIN_START = datetime(2025, 10, 1, tzinfo=timezone.utc)
 SPOT_WALLET = "MAIN"
 TRANSFER_TYPES = (
     "MAIN_UMFUTURE",
@@ -45,17 +44,25 @@ class BinanceClient:
     def _signed_get(self, path: str, params: dict[str, Any] | None = None) -> Any:
         if not self.api_secret:
             raise RuntimeError("Binance API secret is not configured.")
-        query = dict(params or {})
-        query["timestamp"] = int(time.time() * 1000)
-        query.setdefault("recvWindow", 5000)
-        encoded = urlencode(query)
-        signature = hmac.new(self.api_secret.encode(), encoded.encode(), hashlib.sha256).hexdigest()
+        base_query = dict(params or {})
+        base_query.setdefault("recvWindow", 5000)
         headers = {"X-MBX-APIKEY": self.api_key or ""}
-        response = requests.get(
-            f"{BINANCE_BASE_URL}{path}?{encoded}&signature={signature}",
-            headers=headers,
-            timeout=12,
-        )
+        for attempt in range(5):
+            # Throttle all signed requests; also ensures a fresh timestamp on every attempt
+            # (the signature embeds the timestamp, so retries after a long sleep need a new one).
+            time.sleep(1.5)
+            query = {**base_query, "timestamp": int(time.time() * 1000)}
+            encoded = urlencode(query)
+            signature = hmac.new(self.api_secret.encode(), encoded.encode(), hashlib.sha256).hexdigest()
+            url = f"{BINANCE_BASE_URL}{path}?{encoded}&signature={signature}"
+            response = requests.get(url, headers=headers, timeout=12)
+            if response.status_code in {418, 429} and attempt < 4:
+                retry_after = response.headers.get("Retry-After")
+                delay = float(retry_after) if retry_after and retry_after.isdigit() else min(10.0 * (2 ** attempt), 120.0)
+                time.sleep(delay)
+                continue
+            response.raise_for_status()
+            return response.json()
         response.raise_for_status()
         return response.json()
 
@@ -75,6 +82,16 @@ def _ticker_map(client: BinanceClient) -> tuple[dict[str, float], list[str]]:
         return {}, warnings
 
 
+def _binance_request_warning(exc: requests.RequestException) -> str:
+    response = getattr(exc, "response", None)
+    if response is not None:
+        status_code = response.status_code
+        if status_code in {418, 429}:
+            return f"Binance API rate limit ({status_code}). Try again later or reduce ledger backfill frequency."
+        return f"Binance API request failed with HTTP {status_code}."
+    return f"Binance API request failed: {exc.__class__.__name__}."
+
+
 def _price_asset(asset: str, tickers: dict[str, float]) -> tuple[float | None, str]:
     if asset == "EUR":
         return 1.0, "EUR"
@@ -87,13 +104,18 @@ def _price_asset(asset: str, tickers: dict[str, float]) -> tuple[float | None, s
     return None, asset
 
 
-def _symbols_for_history(assets: list[str], open_orders: list[dict[str, Any]]) -> list[str]:
+def _symbols_for_history(
+    assets: list[str],
+    open_orders: list[dict[str, Any]],
+    extra_symbols: list[str] | None = None,
+) -> list[str]:
     symbols = {str(order.get("symbol")) for order in open_orders if order.get("symbol")}
+    symbols.update(symbol.upper() for symbol in extra_symbols or [] if symbol)
     for asset in assets:
         for quote in ("EUR", "USDT", "USDC"):
             if asset != quote:
                 symbols.add(f"{asset}{quote}")
-    return sorted(symbols)[:25]
+    return sorted(symbols)
 
 
 def _split_pair(symbol: str) -> tuple[str, str | None]:
@@ -128,7 +150,32 @@ def _normalize_order(raw: dict[str, Any], is_history: bool = False) -> Order:
     )
 
 
-def fetch_binance(settings: Settings) -> SourceResult:
+def _fetch_trade_history(client: BinanceClient, symbol: str, start: datetime) -> list[dict[str, Any]]:
+    trades: list[dict[str, Any]] = []
+    params: dict[str, Any] = {
+        "symbol": symbol,
+        "limit": 1000,
+        "startTime": _milliseconds(start),
+    }
+    seen_last_id: int | None = None
+
+    while True:
+        rows = client._signed_get("/api/v3/myTrades", params)
+        if not isinstance(rows, list) or not rows:
+            break
+        trades.extend(row for row in rows if isinstance(row, dict))
+        if len(rows) < 1000:
+            break
+        last_id = rows[-1].get("id")
+        if not isinstance(last_id, int) or last_id == seen_last_id:
+            break
+        seen_last_id = last_id
+        params = {"symbol": symbol, "limit": 1000, "fromId": last_id + 1}
+
+    return trades
+
+
+def fetch_binance(settings: Settings, history_symbols: list[str] | None = None) -> SourceResult:
     client = BinanceClient(settings)
     if not client.configured:
         return SourceResult(warnings=["Binance credentials are missing; skipped Binance API collection."])
@@ -199,17 +246,10 @@ def fetch_binance(settings: Settings) -> SourceResult:
         open_orders = []
 
     order_history: list[Order] = []
-    # Binance trade history is symbol-scoped; query a conservative symbol set to avoid noisy API use.
-    for symbol in _symbols_for_history(nonzero_assets, raw_open_orders):
+    # Binance trade history is symbol-scoped; query every detected symbol so local history is not trimmed.
+    for symbol in _symbols_for_history(nonzero_assets, raw_open_orders, history_symbols):
         try:
-            trades = client._signed_get(
-                "/api/v3/myTrades",
-                {
-                    "symbol": symbol,
-                    "limit": 1000,
-                    "startTime": _milliseconds(settings.binance_ledger_start_date),
-                },
-            )
+            trades = _fetch_trade_history(client, symbol, settings.binance_ledger_start_date)
             order_history.extend(
                 order
                 for trade in trades
@@ -440,40 +480,90 @@ def _fetch_fiat_orders(
     return events
 
 
-def _fetch_transfer_events(client: BinanceClient, settings: Settings) -> tuple[list[BinanceLedgerEvent], list[str]]:
+def _latest_event_time(events: list[BinanceLedgerEvent], event_types: set[str]) -> datetime | None:
+    matching = [
+        event.created_at if event.created_at.tzinfo else event.created_at.replace(tzinfo=timezone.utc)
+        for event in events
+        if event.event_type in event_types
+    ]
+    return max(matching) if matching else None
+
+
+def _merge_ledger_events(existing_events: list[BinanceLedgerEvent], fetched_events: list[BinanceLedgerEvent]) -> list[BinanceLedgerEvent]:
+    by_id = {event.id: event for event in existing_events}
+    by_id.update({event.id: event for event in fetched_events})
+    return sorted(by_id.values(), key=lambda event: event.created_at)
+
+
+def _incremental_start(
+    latest_event: datetime | None,
+    full_start: datetime,
+    now: datetime,
+    *,
+    has_cache: bool,
+    lookback_days: int = 45,
+) -> datetime:
+    if latest_event:
+        return max(full_start, latest_event - timedelta(days=2), now - timedelta(days=lookback_days))
+    if has_cache:
+        return max(full_start, now - timedelta(days=lookback_days))
+    return full_start
+
+
+def _fetch_transfer_events(
+    client: BinanceClient,
+    settings: Settings,
+    existing_events: list[BinanceLedgerEvent] | None = None,
+    progress: Callable[[str, str, int, int], None] | None = None,
+) -> tuple[list[BinanceLedgerEvent], list[str]]:
     warnings: list[str] = []
     events: list[BinanceLedgerEvent] = []
+    existing_events = existing_events or []
     now = datetime.now(timezone.utc)
+    has_cache = bool(existing_events)
 
-    ledger_start = min(settings.binance_ledger_start_date, FIAT_LEDGER_MIN_START)
+    ledger_start = settings.binance_ledger_start_date
+    latest_capital_event = _latest_event_time(existing_events, {"deposit", "withdrawal"})
+    latest_fiat_event = _latest_event_time(existing_events, {"fiat_deposit", "fiat_withdrawal"})
+    latest_transfer_event = _latest_event_time(existing_events, {"transfer"})
+    latest_convert_event = _latest_event_time(existing_events, {"convert"})
+    capital_start = _incremental_start(latest_capital_event, ledger_start, now, has_cache=has_cache)
+    fiat_start = _incremental_start(latest_fiat_event, ledger_start, now, has_cache=has_cache)
+    universal_full_start = max(settings.binance_ledger_start_date, now - timedelta(days=179))
+    universal_start = _incremental_start(latest_transfer_event, universal_full_start, now, has_cache=has_cache)
+    convert_start = _incremental_start(latest_convert_event, settings.binance_ledger_start_date, now, has_cache=has_cache)
 
-    for start, end in _ledger_windows(ledger_start, now):
+    for start, end in _ledger_windows(capital_start, now):
         params = {"startTime": _milliseconds(start), "endTime": _milliseconds(end)}
         try:
             deposits = client._signed_get("/sapi/v1/capital/deposit/hisrec", params)
             events.extend(event for row in deposits if (event := _normalize_deposit(row)) is not None)
         except requests.RequestException as exc:
-            warnings.append(f"Binance deposit history fetch failed for {start.date()} to {end.date()}: {exc}")
+            warnings.append(f"Binance deposit history fetch failed for {start.date()} to {end.date()}: {_binance_request_warning(exc)}")
 
         try:
             withdrawals = client._signed_get("/sapi/v1/capital/withdraw/history", params)
             events.extend(event for row in withdrawals if (event := _normalize_withdrawal(row)) is not None)
         except requests.RequestException as exc:
-            warnings.append(f"Binance withdrawal history fetch failed for {start.date()} to {end.date()}: {exc}")
+            warnings.append(f"Binance withdrawal history fetch failed for {start.date()} to {end.date()}: {_binance_request_warning(exc)}")
 
+    fiat_windows = _ledger_windows(fiat_start, now)
+    total_fiat_windows = len(fiat_windows)
+    for fiat_idx, (start, end) in enumerate(fiat_windows):
+        time.sleep(2.0)  # Extra gap: fiat endpoint has a stricter rate limit than other SAPI calls
+        if progress:
+            progress("binance_ledger", f"Fiat deposits · {start.strftime('%b %Y')}", fiat_idx * 2, total_fiat_windows * 2)
         try:
             events.extend(_fetch_fiat_orders(client, start, end, transaction_type=0, label="deposits"))
         except requests.RequestException as exc:
-            warnings.append(f"Binance fiat deposit history fetch failed for {start.date()} to {end.date()}: {exc}")
-
+            warnings.append(f"Binance fiat deposit history fetch failed for {start.date()} to {end.date()}: {_binance_request_warning(exc)}")
+        if progress:
+            progress("binance_ledger", f"Fiat withdrawals · {start.strftime('%b %Y')}", fiat_idx * 2 + 1, total_fiat_windows * 2)
         try:
             events.extend(_fetch_fiat_orders(client, start, end, transaction_type=1, label="withdrawals"))
         except requests.RequestException as exc:
-            warnings.append(f"Binance fiat withdrawal history fetch failed for {start.date()} to {end.date()}: {exc}")
+            warnings.append(f"Binance fiat withdrawal history fetch failed for {start.date()} to {end.date()}: {_binance_request_warning(exc)}")
 
-    universal_start = max(settings.binance_ledger_start_date, now - timedelta(days=179))
-    if universal_start > settings.binance_ledger_start_date:
-        warnings.append("Binance universal transfer history only supports the last 6 months; older futures/funding transfers were skipped.")
     for start, end in _time_windows(universal_start, now, days=29):
         for transfer_type in TRANSFER_TYPES:
             try:
@@ -499,10 +589,10 @@ def _fetch_transfer_events(client: BinanceClient, settings: Settings) -> tuple[l
             except requests.RequestException as exc:
                 warnings.append(
                     f"Binance universal transfer history fetch failed for {transfer_type} "
-                    f"{start.date()} to {end.date()}: {exc}"
+                    f"{start.date()} to {end.date()}: {_binance_request_warning(exc)}"
                 )
 
-    for start, end in _time_windows(settings.binance_ledger_start_date, now, days=29):
+    for start, end in _time_windows(convert_start, now, days=29):
         try:
             convert_rows = client._signed_get(
                 "/sapi/v1/convert/tradeFlow",
@@ -511,7 +601,7 @@ def _fetch_transfer_events(client: BinanceClient, settings: Settings) -> tuple[l
             rows = convert_rows.get("list", convert_rows) if isinstance(convert_rows, dict) else convert_rows
             events.extend(event for row in rows if (event := _normalize_convert(row)) is not None)
         except requests.RequestException as exc:
-            warnings.append(f"Binance convert history fetch failed for {start.date()} to {end.date()}: {exc}")
+            warnings.append(f"Binance convert history fetch failed for {start.date()} to {end.date()}: {_binance_request_warning(exc)}")
 
     return events, warnings
 
@@ -551,16 +641,20 @@ def _historical_usd_price(client: BinanceClient, asset: str, priced_at: datetime
 def fetch_binance_historical_prices(
     settings: Settings,
     requirements: dict[datetime, set[str]],
+    existing_prices: dict[tuple[str, str, str], HistoricalPrice] | None = None,
 ) -> tuple[list[HistoricalPrice], list[str]]:
     client = BinanceClient(settings)
     if not client.configured:
         return [], ["Binance credentials are missing; skipped Binance historical price collection."]
 
+    existing_prices = existing_prices or {}
     historical_prices: list[HistoricalPrice] = []
     missing_price_counts: dict[str, int] = {}
     for timestamp, assets in sorted(requirements.items()):
         for asset in sorted(asset.upper() for asset in assets):
             if asset in USD_LIKE_ASSETS:
+                continue
+            if (asset, "USD", timestamp.isoformat()) in existing_prices:
                 continue
             price = _historical_usd_price(client, asset, timestamp)
             if price:
@@ -575,12 +669,20 @@ def fetch_binance_historical_prices(
     return historical_prices, warnings
 
 
-def fetch_binance_ledger(settings: Settings, orders: list[Order]) -> tuple[list[BinanceLedgerEvent], list[HistoricalPrice], list[str]]:
+def fetch_binance_ledger(
+    settings: Settings,
+    orders: list[Order],
+    existing_events: list[BinanceLedgerEvent] | None = None,
+    existing_historical_prices: dict[tuple[str, str, str], HistoricalPrice] | None = None,
+    progress: Callable[[str, str, int, int], None] | None = None,
+) -> tuple[list[BinanceLedgerEvent], list[HistoricalPrice], list[str]]:
     client = BinanceClient(settings)
     if not client.configured:
         return [], [], ["Binance credentials are missing; skipped Binance ledger collection."]
 
-    events, warnings = _fetch_transfer_events(client, settings)
+    existing_events = existing_events or []
+    fetched_events, warnings = _fetch_transfer_events(client, settings, existing_events, progress)
+    events = _merge_ledger_events(existing_events, fetched_events)
 
     assets = {event.asset.upper() for event in events}
     for event in events:
@@ -600,6 +702,7 @@ def fetch_binance_ledger(settings: Settings, orders: list[Order]) -> tuple[list[
     historical_prices, price_warnings = fetch_binance_historical_prices(
         settings,
         {timestamp: set(assets) for timestamp in timestamps},
+        existing_historical_prices,
     )
     warnings.extend(price_warnings)
 

@@ -217,8 +217,6 @@ def fetch_ibkr_history(settings: Settings) -> SourceResult:
         # full order database through the local API. This returns recent API-visible fills.
         fills = ib.reqExecutions(ExecutionFilter()) or ib.fills()
         order_history = [_normalize_fill(fill) for fill in fills]
-        if not order_history:
-            warnings.append("IBKR execution history is empty; TWS/Gateway may only expose recent session data.")
         return SourceResult(order_history=order_history, warnings=warnings)
     except Exception as exc:
         return SourceResult(warnings=[f"IBKR execution history fetch failed: {exc}"])

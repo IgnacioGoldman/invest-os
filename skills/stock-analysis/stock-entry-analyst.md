@@ -86,6 +86,45 @@ python scripts/build_stock_derived_signals.py
   averages, volume spikes, or realized volatility, list them in `missing_data`.
 - Do not force a buy candidate. `wait` or `no_clean_candidate` is valid.
 
+## Writing Style
+
+- Write like a professional equity analyst: concise, direct, evidence-bound,
+  and focused on the investment decision.
+- Treat `why_now` as a deprecated compatibility field. Leave it empty or use a
+  very short fragment only if the consuming schema requires a string; do not
+  rely on it for user-facing reasoning.
+- Put the complete recommendation narrative in `thesis`. Include timing,
+  mispricing, catalyst, and current-context points there instead of creating a
+  separate "why now" section.
+- Keep `thesis`, runner-up reasons, and rejection reasons compact. Prefer one
+  clear paragraph over a metric-by-metric recap.
+- Use only the few numbers that materially affect the call, such as current
+  price, market cap, valuation multiple, drawdown, cash-flow strength, or the
+  most relevant guidance point.
+- Do not rewrite all deterministic metrics inside the prose. Put supporting
+  facts in `evidence`, and keep each evidence item short.
+- Evidence should be market, business, valuation, price, balance-sheet, or live
+  context facts. Do not use meta-analysis facts such as deterministic
+  conviction scores, derived-signal labels, or internal screen rankings as
+  evidence bullets.
+- Do not pad `evidence`, `main_risks`, or `missing_data` to a fixed count.
+  Candidate outputs should be asymmetric when the underlying cases are
+  asymmetric.
+- Include only items that materially affect the decision. As a loose guide,
+  use 1-4 evidence items, 1-3 risks, and 0-2 missing-data items, but fewer is
+  better when fewer points are sufficient.
+- Every risk must be specific enough to explain what would make this candidate
+  wrong. Avoid generic market, macro, competition, or execution risks unless
+  that risk is unusually important for this exact candidate.
+- Avoid repeating a number in `evidence` when the same number already appears
+  in `thesis`, unless it is essential to a risk or rejection.
+- The thesis should include a brief analyst read, not just a summary of facts:
+  what the market may be mispricing, what you are not fully comfortable with,
+  and what would change your mind.
+- State the core market mispricing or setup plainly: what the market may be
+  over-punishing, under-recognizing, or already pricing in.
+- Mention missing data only when it affects confidence in the decision.
+
 ## Long-Term Candidate Standard
 
 A long-term candidate needs most of:
@@ -98,6 +137,12 @@ A long-term candidate needs most of:
 - limited dilution or evidence of buybacks
 - valuation acceptable versus quality, history, and peers
 - current risks identifiable and not thesis-breaking
+
+Do not promote a long-term candidate just because it ranks highest. If the best
+available name is only a fair entry with major valuation-history caveats,
+material unresolved business/catalyst dependency, or risks that dominate the
+thesis, set `best_long_term_candidate` to `null` and explain the watchlist case
+in `runner_ups` or `data_quality_notes`.
 
 ## Short-Term Candidate Standard
 
@@ -143,7 +188,7 @@ The JSON must match this shape:
     "conviction": 7.2,
     "decision": "starter_entry_candidate",
     "entry_quality": "quality compounder at acceptable valuation",
-    "why_now": "One-sentence reason the current entry is timely.",
+    "why_now": "",
     "thesis": "One concise thesis paragraph.",
     "evidence": [],
     "main_risks": [],
@@ -155,7 +200,7 @@ The JSON must match this shape:
     "conviction": 6.4,
     "decision": "tactical_candidate",
     "entry_quality": "temporary dislocation",
-    "why_now": "One-sentence reason a minor run could happen soon.",
+    "why_now": "",
     "thesis": "One concise setup paragraph.",
     "evidence": [],
     "main_risks": [],

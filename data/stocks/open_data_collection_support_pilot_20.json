@@ -1,0 +1,769 @@
+{
+  "mode": "universe_file",
+  "requested_count": 20,
+  "source": "data/stocks/stocks.json",
+  "skipped_tickers": [],
+  "min_coverage_percent": 80.0,
+  "include_filing_details": false,
+  "collected_count": 20,
+  "failed_count": 0,
+  "skipped_low_fidelity_count": 0,
+  "results": [
+    {
+      "ticker": "AVGO",
+      "name": "Broadcom Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 95.08,
+      "dollar_volume": 19663640178.63,
+      "cik": 1730168,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:49.733233+00:00",
+      "saved_path": "data/stocks/open_data/AVGO/2026-06-13.json",
+      "available_metrics": 30,
+      "total_metrics": 32,
+      "coverage_percent": 93.75,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 96.77,
+      "missing_metrics": [
+        "price_opportunity.support_1d_distance"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care."
+      ],
+      "duration_seconds": 0.82,
+      "attempts": 1
+    },
+    {
+      "ticker": "MRK",
+      "name": "Merck & Co., Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Pharmaceutical Preparations",
+      "composite_score": 95.08,
+      "dollar_volume": 1928365362.69,
+      "cik": 310158,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:49.825746+00:00",
+      "saved_path": "data/stocks/open_data/MRK/2026-06-13.json",
+      "available_metrics": 32,
+      "total_metrics": 32,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 32,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for operating_margin.",
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 0.99,
+      "attempts": 1
+    },
+    {
+      "ticker": "META",
+      "name": "Meta Platforms, Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Computer Software: Programming Data Processing",
+      "composite_score": 95.08,
+      "dollar_volume": 17789650130.0,
+      "cik": 1326801,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:49.696743+00:00",
+      "saved_path": "data/stocks/open_data/META/2026-06-13.json",
+      "available_metrics": 32,
+      "total_metrics": 32,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 32,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.79,
+      "attempts": 1
+    },
+    {
+      "ticker": "ASML",
+      "name": "ASML HOLDING NV",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Technology",
+      "industry": "Industrial Machinery/Components",
+      "composite_score": 95.08,
+      "dollar_volume": 4499239363.94,
+      "cik": 937966,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:50.053392+00:00",
+      "saved_path": "data/stocks/open_data/ASML/2026-06-13.json",
+      "available_metrics": 31,
+      "total_metrics": 32,
+      "coverage_percent": 96.88,
+      "collectable_metrics": 32,
+      "collectable_coverage_percent": 96.88,
+      "missing_metrics": [
+        "price_opportunity.support_1d_distance"
+      ],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 historical valuation values available for pe.",
+        "Only 0 historical valuation values available for price_to_sales.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 0 historical valuation values available for fcf_yield.",
+        "Company-specific SEC filing context was unavailable from the deterministic provider."
+      ],
+      "duration_seconds": 1.1,
+      "attempts": 1
+    },
+    {
+      "ticker": "KLAC",
+      "name": "KLA CORPORATION",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Electronic Components",
+      "composite_score": 95.08,
+      "dollar_volume": 3584135282.0,
+      "cik": 319201,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:49.945693+00:00",
+      "saved_path": "data/stocks/open_data/KLAC/2026-06-13.json",
+      "available_metrics": 31,
+      "total_metrics": 32,
+      "coverage_percent": 96.88,
+      "collectable_metrics": 32,
+      "collectable_coverage_percent": 96.88,
+      "missing_metrics": [
+        "price_opportunity.support_1d_distance"
+      ],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for operating_margin.",
+        "Only 0 historical valuation values available for ev_to_ebitda."
+      ],
+      "duration_seconds": 1.01,
+      "attempts": 1
+    },
+    {
+      "ticker": "TSM",
+      "name": "Taiwan Semiconductor Manufacturing Company Limited",
+      "exchange": "US-listed",
+      "region": "ADR",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 95.07,
+      "dollar_volume": 8129927027.88,
+      "cik": 1046179,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:50.044192+00:00",
+      "saved_path": "data/stocks/open_data/TSM/2026-06-13.json",
+      "available_metrics": 31,
+      "total_metrics": 32,
+      "coverage_percent": 96.88,
+      "collectable_metrics": 32,
+      "collectable_coverage_percent": 96.88,
+      "missing_metrics": [
+        "price_opportunity.support_1d_distance"
+      ],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "SEC companyfacts uses IFRS taxonomy. Foreign-currency fundamentals are supported; current valuation can use an explicit FX and ADR-ratio bridge, while historical valuation still needs historical FX handling.",
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care.",
+        "Only 1 historical valuation values available for pe.",
+        "Only 1 historical valuation values available for price_to_sales.",
+        "Only 1 historical valuation values available for ev_to_ebitda.",
+        "Only 1 historical valuation values available for fcf_yield.",
+        "Company-specific SEC filing context was unavailable from the deterministic provider."
+      ],
+      "duration_seconds": 1.1,
+      "attempts": 1
+    },
+    {
+      "ticker": "LRCX",
+      "name": "LAM RESEARCH CORPORATION",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Industrial Machinery/Components",
+      "composite_score": 94.97,
+      "dollar_volume": 4033267342.72,
+      "cik": 707549,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:50.018391+00:00",
+      "saved_path": "data/stocks/open_data/LRCX/2026-06-13.json",
+      "available_metrics": 30,
+      "total_metrics": 32,
+      "coverage_percent": 93.75,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 96.77,
+      "missing_metrics": [
+        "price_opportunity.support_1d_distance"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care."
+      ],
+      "duration_seconds": 1.09,
+      "attempts": 1
+    },
+    {
+      "ticker": "GILD",
+      "name": "GILEAD SCIENCES, INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Healthcare",
+      "industry": "Biotechnology: Biological Products (No Diagnostic Substances)",
+      "composite_score": 94.8,
+      "dollar_volume": 1984874695.3999999,
+      "cik": 882095,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:49.920755+00:00",
+      "saved_path": "data/stocks/open_data/GILD/2026-06-13.json",
+      "available_metrics": 32,
+      "total_metrics": 32,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 32,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Annual EPS series may cross stock-split accounting periods; use eps_diluted_computed and split-adjusted history with care."
+      ],
+      "duration_seconds": 1.0,
+      "attempts": 1
+    },
+    {
+      "ticker": "TXN",
+      "name": "TEXAS INSTRUMENTS INCORPORATED",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 94.78,
+      "dollar_volume": 3402191955.18,
+      "cik": 97476,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:51.179494+00:00",
+      "saved_path": "data/stocks/open_data/TXN/2026-06-13.json",
+      "available_metrics": 30,
+      "total_metrics": 32,
+      "coverage_percent": 93.75,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 96.77,
+      "missing_metrics": [
+        "price_opportunity.support_1d_distance"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.49,
+      "attempts": 1
+    },
+    {
+      "ticker": "T",
+      "name": "AT&T INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Communication Services",
+      "industry": "Telecommunications Equipment",
+      "composite_score": 94.65,
+      "dollar_volume": 1383311406.75,
+      "cik": 732717,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:50.897185+00:00",
+      "saved_path": "data/stocks/open_data/T/2026-06-13.json",
+      "available_metrics": 30,
+      "total_metrics": 32,
+      "coverage_percent": 93.75,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 3.04, comparison -1.13); 3-year EPS CAGR is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin."
+      ],
+      "duration_seconds": 1.27,
+      "attempts": 1
+    },
+    {
+      "ticker": "WMT",
+      "name": "WALMART INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Department/Specialty Retail Stores",
+      "composite_score": 94.63,
+      "dollar_volume": 4353508403.04,
+      "cik": 104169,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:51.276946+00:00",
+      "saved_path": "data/stocks/open_data/WMT/2026-06-13.json",
+      "available_metrics": 31,
+      "total_metrics": 32,
+      "coverage_percent": 96.88,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 4 annual values available for revenue.",
+        "Only 4 annual values available for eps_diluted.",
+        "Only 4 annual values available for gross_margin.",
+        "Only 4 annual values available for operating_margin.",
+        "Only 4 annual values available for net_margin.",
+        "Only 4 annual values available for free_cash_flow.",
+        "Only 4 annual values available for shares_diluted.",
+        "Only 4 historical valuation values available for pe.",
+        "Only 4 historical valuation values available for price_to_sales.",
+        "Only 0 historical valuation values available for ev_to_ebitda.",
+        "Only 4 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 1.47,
+      "attempts": 1
+    },
+    {
+      "ticker": "ADI",
+      "name": "ANALOG DEVICES INC",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 94.6,
+      "dollar_volume": 2906482249.77,
+      "cik": 6281,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:51.068855+00:00",
+      "saved_path": "data/stocks/open_data/ADI/2026-06-13.json",
+      "available_metrics": 30,
+      "total_metrics": 32,
+      "coverage_percent": 93.75,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 96.77,
+      "missing_metrics": [
+        "price_opportunity.support_1d_distance"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.15,
+      "attempts": 1
+    },
+    {
+      "ticker": "AMAT",
+      "name": "APPLIED MATERIALS INC /DE",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 94.56,
+      "dollar_volume": 5389403343.75,
+      "cik": 6951,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:51.163668+00:00",
+      "saved_path": "data/stocks/open_data/AMAT/2026-06-13.json",
+      "available_metrics": 31,
+      "total_metrics": 32,
+      "coverage_percent": 96.88,
+      "collectable_metrics": 32,
+      "collectable_coverage_percent": 96.88,
+      "missing_metrics": [
+        "price_opportunity.support_1d_distance"
+      ],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.18,
+      "attempts": 1
+    },
+    {
+      "ticker": "PEP",
+      "name": "PepsiCo, Inc.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Defensive",
+      "industry": "Beverages (Production/Distribution)",
+      "composite_score": 94.55,
+      "dollar_volume": 1877118930.08,
+      "cik": 77476,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:51.575172+00:00",
+      "saved_path": "data/stocks/open_data/PEP/2026-06-13.json",
+      "available_metrics": 31,
+      "total_metrics": 32,
+      "coverage_percent": 96.88,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.46,
+      "attempts": 1
+    },
+    {
+      "ticker": "KO",
+      "name": "COCA COLA CO",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Defensive",
+      "industry": "Beverages (Production/Distribution)",
+      "composite_score": 94.32,
+      "dollar_volume": 2042534186.1200001,
+      "cik": 21344,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:51.522828+00:00",
+      "saved_path": "data/stocks/open_data/KO/2026-06-13.json",
+      "available_metrics": 32,
+      "total_metrics": 32,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 32,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.46,
+      "attempts": 1
+    },
+    {
+      "ticker": "AMZN",
+      "name": "AMAZON COM INC",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Consumer Cyclical",
+      "industry": "Catalog/Specialty Distribution",
+      "composite_score": 94.26,
+      "dollar_volume": 13654070345.49,
+      "cik": 1018724,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:51.322050+00:00",
+      "saved_path": "data/stocks/open_data/AMZN/2026-06-13.json",
+      "available_metrics": 30,
+      "total_metrics": 32,
+      "coverage_percent": 93.75,
+      "collectable_metrics": 30,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 7.17, comparison -0.27); 3-year EPS CAGR is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 1.44,
+      "attempts": 1
+    },
+    {
+      "ticker": "AMD",
+      "name": "ADVANCED MICRO DEVICES INC",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "composite_score": 94.17,
+      "dollar_volume": 21794868294.48,
+      "cik": 2488,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:51.829641+00:00",
+      "saved_path": "data/stocks/open_data/AMD/2026-06-13.json",
+      "available_metrics": 31,
+      "total_metrics": 32,
+      "coverage_percent": 96.88,
+      "collectable_metrics": 32,
+      "collectable_coverage_percent": 96.88,
+      "missing_metrics": [
+        "price_opportunity.support_1d_distance"
+      ],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.7,
+      "attempts": 1
+    },
+    {
+      "ticker": "CRWD",
+      "name": "CROWDSTRIKE HOLDINGS, INC.",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Computer Software: Prepackaged Software",
+      "composite_score": 94.02,
+      "dollar_volume": 3509971416.0,
+      "cik": 1535527,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:51.858964+00:00",
+      "saved_path": "data/stocks/open_data/CRWD/2026-06-13.json",
+      "available_metrics": 28,
+      "total_metrics": 32,
+      "coverage_percent": 87.5,
+      "collectable_metrics": 29,
+      "collectable_coverage_percent": 96.55,
+      "missing_metrics": [
+        "price_opportunity.support_1d_distance"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_growth_yoy",
+          "reason": "EPS remains loss-making (latest -0.65); EPS growth is not meaningful."
+        },
+        {
+          "metric": "business_health.eps_cagr_3y",
+          "reason": "EPS remains loss-making (latest -0.65); EPS growth is not meaningful."
+        },
+        {
+          "metric": "valuation.peg",
+          "reason": "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 4 annual values available for revenue.",
+        "Only 4 annual values available for eps_diluted.",
+        "Only 4 annual values available for gross_margin.",
+        "Only 4 annual values available for operating_margin.",
+        "Only 4 annual values available for net_margin.",
+        "Only 4 annual values available for free_cash_flow.",
+        "Only 4 annual values available for shares_diluted.",
+        "Only 4 historical valuation values available for pe.",
+        "Only 4 historical valuation values available for price_to_sales.",
+        "Only 4 historical valuation values available for ev_to_ebitda.",
+        "Only 4 historical valuation values available for fcf_yield."
+      ],
+      "duration_seconds": 0.76,
+      "attempts": 1
+    },
+    {
+      "ticker": "ORCL",
+      "name": "Oracle Corporation",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Computer Software: Prepackaged Software",
+      "composite_score": 93.99,
+      "dollar_volume": 6172169022.72,
+      "cik": 1341439,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:51.965723+00:00",
+      "saved_path": "data/stocks/open_data/ORCL/2026-06-13.json",
+      "available_metrics": 32,
+      "total_metrics": 32,
+      "coverage_percent": 100.0,
+      "collectable_metrics": 32,
+      "collectable_coverage_percent": 100.0,
+      "missing_metrics": [],
+      "not_meaningful_metrics": [],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [
+        "Only 0 annual values available for gross_margin."
+      ],
+      "duration_seconds": 0.73,
+      "attempts": 1
+    },
+    {
+      "ticker": "WDC",
+      "name": "WESTERN DIGITAL CORPORATION",
+      "exchange": "US-listed",
+      "region": "US",
+      "sector": "Technology",
+      "industry": "Electronic Components",
+      "composite_score": 93.86,
+      "dollar_volume": 4600510175.360001,
+      "cik": 106040,
+      "source": "open_free_public",
+      "generated_at": "2026-06-13T17:45:51.955185+00:00",
+      "saved_path": "data/stocks/open_data/WDC/2026-06-13.json",
+      "available_metrics": 30,
+      "total_metrics": 32,
+      "coverage_percent": 93.75,
+      "collectable_metrics": 31,
+      "collectable_coverage_percent": 96.77,
+      "missing_metrics": [
+        "price_opportunity.support_1d_distance"
+      ],
+      "not_meaningful_metrics": [
+        {
+          "metric": "business_health.eps_growth_yoy",
+          "reason": "EPS turned positive from a loss-making comparison period (latest 5.12, comparison -2.61); YoY EPS growth is not meaningful."
+        }
+      ],
+      "proxy_metrics": [
+        "business_health.roic",
+        "valuation.forward_pe",
+        "valuation.peg",
+        "valuation.ev_to_ebitda"
+      ],
+      "unsupported_metric_paths": [],
+      "provider_data_gaps": [],
+      "duration_seconds": 0.65,
+      "attempts": 1
+    }
+  ],
+  "skipped_low_fidelity": [],
+  "failures": []
+}

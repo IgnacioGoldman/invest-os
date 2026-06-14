@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from typing import Callable
 
 from app.config import Settings
 from app.models import (
@@ -36,6 +37,7 @@ from app.services.storage import (
     replace_historical_prices,
     replace_ledger_events,
     replace_market_prices,
+    replace_order_history,
     replace_source_result,
     update_sync_status,
 )
@@ -48,6 +50,19 @@ from app.sources.manual import load_manual_data
 
 USD_LIKE_QUOTES = {"USD", "USDT", "USDC", "FDUSD"}
 EPSILON = 0.00000001
+RefreshProgressCallback = Callable[[str, str, int, int], None]
+
+
+REFRESH_STEP_LABELS: dict[str, str] = {
+    "manual": "Manual cash and assets",
+    "binance": "Binance balances, orders, and trades",
+    "binance_ledger": "Binance ledger and historical prices",
+    "ibkr": "IBKR positions, cash, and orders",
+    "ibkr_history": "IBKR activity history",
+    "market_data": "Market prices",
+    "fx": "FX rates",
+    "snapshot": "Rebuilding snapshot",
+}
 
 
 @dataclass
@@ -241,7 +256,7 @@ def _price_for_holding(
         if fetched_at < stale_after:
             warnings.append(
                 f"Stale market price for {symbol}: {price.fetched_at.isoformat()} from {price.source}. "
-                "Suggested action: Refresh market prices or Refresh prices & FX."
+                "Suggested action: Refresh market prices."
             )
         market_value = holding.quantity * price.price
         return (
@@ -1082,7 +1097,7 @@ def _prices_from_source_result(source: str, result: SourceResult) -> list[Market
     return prices
 
 
-def _refresh_one(conn, settings: Settings, source: RefreshSource) -> None:
+def _refresh_one(conn, settings: Settings, source: RefreshSource, progress: RefreshProgressCallback | None = None) -> None:
     if source == "manual":
         result = load_manual_data(settings.data_dir)
         replace_source_result(conn, "manual", result, open_orders=False, order_history=False)
@@ -1090,15 +1105,31 @@ def _refresh_one(conn, settings: Settings, source: RefreshSource) -> None:
         return
 
     if source == "binance":
-        result = fetch_binance(settings)
+        existing_order_history = load_order_history(conn)
+        existing_binance_orders = [order for order in existing_order_history if order.source == "binance"]
+        result = fetch_binance(settings, [order.symbol for order in existing_binance_orders])
         if not _is_failed_refresh("binance", result):
-            replace_source_result(conn, "binance", result)
+            merged_order_history = {
+                order.id: order
+                for order in [
+                    *existing_binance_orders,
+                    *result.order_history,
+                ]
+            }
+            replace_source_result(conn, "binance", result, order_history=False)
+            replace_order_history(conn, "binance", merged_order_history.values())
             replace_market_prices(conn, _prices_from_source_result("binance", result))
         update_sync_status(conn, "binance", _sync_status("binance", result), result.warnings)
         return
 
     if source == "binance_ledger":
-        events, prices, warnings = fetch_binance_ledger(settings, load_order_history(conn))
+        events, prices, warnings = fetch_binance_ledger(
+            settings,
+            load_order_history(conn),
+            load_ledger_events(conn),
+            load_historical_prices(conn),
+            progress=progress,
+        )
         replace_ledger_events(conn, "binance", events)
         replace_historical_prices(conn, prices)
         status = "error" if any("missing" in warning.lower() and "credentials" in warning.lower() for warning in warnings) else "warning" if warnings else "success"
@@ -1130,7 +1161,7 @@ def _refresh_one(conn, settings: Settings, source: RefreshSource) -> None:
 
     if source == "market_data":
         prices, warnings = fetch_market_prices(load_holdings(conn))
-        replace_market_prices(conn, prices)
+        replace_market_prices(conn, prices, clear=True)
         historical_requirements = _historical_price_requirements_from_timeline(
             load_order_history(conn),
             load_ledger_events(conn),
@@ -1152,17 +1183,43 @@ def _refresh_one(conn, settings: Settings, source: RefreshSource) -> None:
     raise ValueError(f"Unsupported refresh source: {source}")
 
 
-def refresh_snapshot(settings: Settings, source: RefreshSource) -> PortfolioSnapshot:
+def refresh_steps_for_source(source: RefreshSource) -> list[RefreshSource]:
     if source == "all":
-        sources: list[RefreshSource] = ["manual", "binance", "binance_ledger", "ibkr", "ibkr_history", "market_data", "fx"]
-    elif source == "prices_fx":
-        sources = ["market_data", "fx"]
-    else:
-        sources = [source]
+        return [
+            "manual",
+            "binance",
+            "binance_ledger",
+            "ibkr",
+            "ibkr_history",
+            "market_data",
+            "fx",
+        ]
+    if source == "prices_fx":
+        return ["market_data", "fx"]
+    if source == "binance":
+        return ["binance", "binance_ledger"]
+    if source == "ibkr":
+        return ["ibkr", "ibkr_history"]
+    if source == "market_data":
+        return ["market_data", "fx"]
+    return [source]
+
+
+def refresh_snapshot(
+    settings: Settings,
+    source: RefreshSource,
+    progress: RefreshProgressCallback | None = None,
+) -> PortfolioSnapshot:
+    sources = refresh_steps_for_source(source)
+    total_steps = len(sources) + 1
     with connect(settings.data_dir) as conn:
-        for item in sources:
-            _refresh_one(conn, settings, item)
+        for index, item in enumerate(sources, start=1):
+            if progress:
+                progress(item, REFRESH_STEP_LABELS.get(item, item), index, total_steps)
+            _refresh_one(conn, settings, item, progress)
         conn.commit()
+        if progress:
+            progress("snapshot", REFRESH_STEP_LABELS["snapshot"], total_steps, total_steps)
         return _snapshot_from_rows(
             settings,
             load_holdings(conn),

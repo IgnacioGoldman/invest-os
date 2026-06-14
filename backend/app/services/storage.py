@@ -168,6 +168,10 @@ def load_order_history(conn: sqlite3.Connection) -> list[Order]:
     return _load_rows(conn, "order_history", Order)
 
 
+def replace_order_history(conn: sqlite3.Connection, source: str, orders: Iterable[Order]) -> None:
+    _replace_rows(conn, "order_history", source, orders)
+
+
 def replace_ledger_events(conn: sqlite3.Connection, source: str, events: Iterable[BinanceLedgerEvent]) -> None:
     _replace_rows(conn, "ledger_events", source, events)
 
@@ -176,7 +180,9 @@ def load_ledger_events(conn: sqlite3.Connection) -> list[BinanceLedgerEvent]:
     return _load_rows(conn, "ledger_events", BinanceLedgerEvent)
 
 
-def replace_market_prices(conn: sqlite3.Connection, prices: Iterable[MarketPrice]) -> None:
+def replace_market_prices(conn: sqlite3.Connection, prices: Iterable[MarketPrice], *, clear: bool = False) -> None:
+    if clear:
+        conn.execute("DELETE FROM market_prices")
     conn.executemany(
         """
         INSERT INTO market_prices (symbol, currency, price, source, fetched_at)

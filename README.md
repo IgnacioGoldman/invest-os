@@ -52,19 +52,21 @@ recommendations.
 python scripts/build_stock_universe.py
 ```
 
-This writes `data/stocks/stocks.json` with 100 liquid US/ADR tickers, scored
+This writes `data/stocks/stocks.json` with 500 liquid US/ADR tickers, scored
 by liquidity, activity, size, spread, volatility, and data quality, then capped
 by region and sector.
 
 #### Step 1 - Data Collection (deterministic)
 
 ```sh
-python scripts/open_data_poc.py --universe-file data/stocks/stocks.json --output data/stocks/open_data_collection_100.json
+python scripts/open_data_poc.py --universe-file data/stocks/stocks.json --output data/stocks/open_data_collection_500.json --workers 8 --checkpoint-every 10 --skip-filing-details
 ```
 
 Collects public facts, price history, valuation inputs, annual fundamentals,
-SEC filing context, and data gaps into `data/stocks/open_data/<TICKER>/`.
-For one symbol, run `python scripts/open_data_poc.py GOOGL`.
+SEC filing metadata, and data gaps into `data/stocks/open_data/<TICKER>/`.
+The 500-ticker command skips per-filing SEC archive exhibit lookups to avoid
+archive rate limits; omit `--skip-filing-details` when you want deeper filing
+context for a smaller run. For one symbol, run `python scripts/open_data_poc.py GOOGL`.
 
 #### Step 2 - Derived Signals (deterministic)
 

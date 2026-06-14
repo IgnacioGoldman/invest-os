@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import csv
 from datetime import datetime, timezone
 from io import StringIO
@@ -37,6 +38,40 @@ def _stooq_symbols(symbol: str, currency: str) -> list[str]:
     if currency.upper() == "GBP":
         return [f"{normalized}.uk", f"{normalized}.us"]
     return [f"{normalized}.us", f"{normalized}.de", f"{normalized}.nl"]
+
+
+def _yfinance_symbols(symbol: str, currency: str) -> list[str]:
+    normalized = symbol.strip().upper()
+    if not normalized or not normalized.replace(".", "").replace("-", "").isalnum():
+        return []
+    if "." in normalized:
+        return [normalized]
+    if currency.upper() == "EUR":
+        return [f"{normalized}.DE", f"{normalized}.AS", f"{normalized}.MI", f"{normalized}.PA"]
+    if currency.upper() == "GBP":
+        return [f"{normalized}.L", normalized]
+    return [normalized, f"{normalized}.DE", f"{normalized}.AS"]
+
+
+def _fetch_yfinance_price(symbol: str, currency: str) -> tuple[float | None, str | None]:
+    try:
+        import yfinance as yf  # type: ignore[import-not-found]
+    except ImportError:
+        return None, None
+
+    for query_symbol in _yfinance_symbols(symbol, currency):
+        try:
+            with contextlib.redirect_stdout(StringIO()), contextlib.redirect_stderr(StringIO()):
+                history = yf.Ticker(query_symbol).history(period="5d", interval="1d", auto_adjust=False)
+        except Exception:
+            continue
+        if history is None or history.empty or "Close" not in history:
+            continue
+        closes = history["Close"].dropna()
+        if closes.empty:
+            continue
+        return float(closes.iloc[-1]), f"yfinance:{query_symbol}"
+    return None, None
 
 
 def _fetch_stooq_price(symbol: str, currency: str) -> tuple[float | None, str | None]:
@@ -81,6 +116,7 @@ def fetch_market_prices(holdings: list[Holding]) -> tuple[list[MarketPrice], lis
         warnings.append(ticker_warning)
 
     seen: set[tuple[str, str]] = set()
+    unavailable_symbols: set[str] = set()
     for holding in holdings:
         symbol = holding.symbol.upper()
         if not symbol or symbol == "UNKNOWN":
@@ -93,13 +129,16 @@ def fetch_market_prices(holdings: list[Holding]) -> tuple[list[MarketPrice], lis
         if holding.asset_class.lower() == "crypto" or holding.source == "binance":
             price, currency = _binance_price_for_holding(holding, tickers)
             source = "binance_public" if price is not None else None
-        elif holding.asset_class.lower() in {"stock", "equity", "etf"}:
-            price, source = _fetch_stooq_price(symbol, holding.currency)
+        elif holding.asset_class.lower() in {"stock", "equity", "etf", "fund", "rsu"}:
+            price, source = _fetch_yfinance_price(symbol, holding.currency)
+            if price is None:
+                price, source = _fetch_stooq_price(symbol, holding.currency)
             currency = holding.currency.upper() if price is not None else None
 
         if price is None or currency is None or source is None:
-            if holding.current_price is None:
+            if symbol not in unavailable_symbols:
                 warnings.append(f"Market price unavailable for {symbol}.")
+                unavailable_symbols.add(symbol)
             continue
 
         key = (symbol, currency.upper())

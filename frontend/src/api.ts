@@ -103,13 +103,33 @@ export type BreakdownItem = {
 export type RefreshSource =
   | "all"
   | "binance"
-  | "binance_ledger"
   | "ibkr"
-  | "ibkr_history"
   | "manual"
-  | "market_data"
+  | "market_data";
+
+export type RefreshJobSource =
+  | RefreshSource
+  | "binance_ledger"
+  | "ibkr_history"
   | "fx"
   | "prices_fx";
+
+export type RefreshJob = {
+  id: string;
+  source: RefreshJobSource;
+  label: string;
+  status: "queued" | "running" | "success" | "error";
+  queued_at: string;
+  started_at?: string | null;
+  completed_at?: string | null;
+  stage: string;
+  step_source?: string | null;
+  current_step: number;
+  total_steps: number;
+  error?: string | null;
+  duplicate_of?: string | null;
+  elapsed_seconds: number;
+};
 
 export type SourceSyncStatus = {
   source: string;
@@ -168,6 +188,7 @@ export type PriceOpportunity = {
   distance_from_ath?: number | null;
   distance_from_52w_high?: number | null;
   distance_from_52w_low?: number | null;
+  support_1d_distance?: number | null;
 };
 
 export type Valuation = {
@@ -412,9 +433,13 @@ export type PortfolioSnapshot = {
   display_rates: DisplayRate[];
 };
 
-async function requestSnapshot(path: string, init?: RequestInit): Promise<PortfolioSnapshot> {
+async function requestSnapshot(
+  path: string,
+  init?: RequestInit,
+  timeoutMs = REQUEST_TIMEOUT_MS,
+): Promise<PortfolioSnapshot> {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(`${API_BASE}${path}`, { ...init, signal: controller.signal });
     if (!response.ok) {
@@ -455,12 +480,16 @@ export async function fetchSnapshot(): Promise<PortfolioSnapshot> {
   return requestSnapshot("/api/snapshot");
 }
 
-export async function refreshSnapshot(source: RefreshSource): Promise<PortfolioSnapshot> {
-  return requestSnapshot("/api/refresh", {
+export async function startRefreshJob(source: RefreshSource): Promise<RefreshJob> {
+  return requestJson<RefreshJob>("/api/refresh", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ source }),
   });
+}
+
+export async function fetchRefreshJobs(): Promise<RefreshJob[]> {
+  return requestJson<RefreshJob[]>("/api/refresh/jobs");
 }
 
 export async function fetchRecommendations(): Promise<Recommendation[]> {
@@ -534,6 +563,17 @@ export async function fetchOpenDataStocks(): Promise<OpenDataStockSnapshot[]> {
 
 export async function fetchOpenDataStock(ticker = "GOOGL"): Promise<OpenDataStockSnapshot> {
   return requestJson<OpenDataStockSnapshot>(`/api/open-data/stocks/${encodeURIComponent(ticker)}`);
+}
+
+export async function fetchOpenDataStockAnalyses(): Promise<Record<string, StockEntryAnalysis>> {
+  try {
+    return await requestJson<Record<string, StockEntryAnalysis>>("/api/open-data/stocks/analysis");
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("No collected open-data stock facts")) {
+      return {};
+    }
+    throw error;
+  }
 }
 
 export async function fetchOpenDataStockAnalysis(ticker = "GOOGL"): Promise<StockEntryAnalysis | null> {

@@ -1,24 +1,27 @@
 import { AlertTriangle, ArrowLeft, BriefcaseBusiness, ChevronDown, DatabaseZap, RefreshCcw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   fetchCommodityOpportunities,
   fetchCryptoOpportunities,
   fetchEtfOpportunities,
   fetchOpenDataStock,
+  fetchOpenDataStockAnalyses,
   fetchOpenDataStockAnalysis,
   fetchOpenDataStocks,
+  fetchRefreshJobs,
   fetchRecommendations,
   fetchSnapshot,
   fetchStockCandidateAnalysis,
   generateRecommendations,
-  refreshSnapshot,
   refreshOpenDataStock,
+  startRefreshJob,
   type AssetOpportunity,
   type StockEntryAnalysis,
   type StockCandidateAnalysis,
   type OpenDataStockSnapshot,
   type PortfolioSnapshot,
   type Recommendation,
+  type RefreshJob,
   type RefreshSource,
 } from "./api";
 import { AssetInsightsTable } from "./components/AssetInsightsTable";
@@ -30,7 +33,7 @@ import { HoldingsTable } from "./components/HoldingsTable";
 import { OrdersTable } from "./components/OrdersTable";
 import { OpenDataStockTable } from "./components/OpenDataStockTable";
 import { Recommendations } from "./components/Recommendations";
-import { SourceStatus } from "./components/SourceStatus";
+import { SourceStatus, summarizeSourceStatuses } from "./components/SourceStatus";
 import { StockCandidateAnalysisPanel } from "./components/StockCandidateAnalysisPanel";
 import { SummaryCards } from "./components/SummaryCards";
 import "./styles.css";
@@ -38,6 +41,8 @@ import "./styles.css";
 const STOCK_ASSET_CLASSES = new Set(["equity", "stock", "etf", "fund"]);
 const STOCK_ANALYSIS_TAXONOMY_VERSION = "2026-06-05-v2";
 type ConnectorView = "home" | "portfolio" | "binance" | "ibkr";
+
+const isActiveRefreshJob = (job: RefreshJob) => job.status === "queued" || job.status === "running";
 
 const addAmount = (values: Record<string, number>, key: string, amount: number) => {
   if (!Number.isFinite(amount) || Math.abs(amount) <= 0.00000001) {
@@ -72,16 +77,68 @@ function App() {
   const [commodityInsights, setCommodityInsights] = useState<AssetOpportunity[]>([]);
   const [assetInsightsLoading, setAssetInsightsLoading] = useState(false);
   const [assetInsightsLoaded, setAssetInsightsLoaded] = useState(false);
+  const [refreshJobs, setRefreshJobs] = useState<RefreshJob[]>([]);
+  const [refreshStartPending, setRefreshStartPending] = useState(false);
+  const refreshJobsRef = useRef<RefreshJob[]>([]);
+
+  const loadPortfolioData = async () => {
+    const [snap, recs] = await Promise.all([fetchSnapshot(), fetchRecommendations()]);
+    setSnapshot(snap);
+    setRecommendations(recs);
+  };
+
+  const pollRefreshJobs = async (isCancelled?: () => boolean) => {
+    try {
+      const jobs = await fetchRefreshJobs();
+      if (isCancelled?.()) {
+        return;
+      }
+      const previousById = new Map(refreshJobsRef.current.map((job) => [job.id, job]));
+      const finishedSinceLastPoll = jobs.some((job) => {
+        const previous = previousById.get(job.id);
+        return previous && isActiveRefreshJob(previous) && !isActiveRefreshJob(job);
+      });
+      const successfulCompletion = jobs.some((job) => {
+        const previous = previousById.get(job.id);
+        return previous && isActiveRefreshJob(previous) && job.status === "success";
+      });
+      refreshJobsRef.current = jobs;
+      setRefreshJobs(jobs);
+      if (successfulCompletion) {
+        await loadPortfolioData();
+      }
+      if (finishedSinceLastPoll) {
+        setLoading(false);
+      }
+    } catch {
+      // Keep the dashboard usable if the transient polling endpoint misses once.
+    }
+  };
+
+  const hasActiveRefreshJob = refreshJobs.some(isActiveRefreshJob);
 
   useEffect(() => {
-    Promise.all([fetchSnapshot(), fetchRecommendations()])
-      .then(([snap, recs]) => {
-        setSnapshot(snap);
-        setRecommendations(recs);
-      })
+    let cancelled = false;
+    loadPortfolioData()
       .catch((err) => setError(err instanceof Error ? err.message : "Could not load snapshot."))
       .finally(() => setLoading(false));
+    pollRefreshJobs(() => cancelled);
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  useEffect(() => {
+    if (!hasActiveRefreshJob) {
+      return;
+    }
+    let cancelled = false;
+    const interval = window.setInterval(() => pollRefreshJobs(() => cancelled), 2500);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [hasActiveRefreshJob]);
 
   useEffect(() => {
     if (stockCandidateAnalysisLoading || stockCandidateAnalysisLoaded) {
@@ -151,22 +208,9 @@ function App() {
       return;
     }
     setStockEntryAnalysesLoading(true);
-    Promise.all(
-      openDataStocks.map(async (snapshot) => ({
-        ticker: snapshot.ticker,
-        analysis: await fetchOpenDataStockAnalysis(snapshot.ticker),
-      })),
-    )
-      .then((results) => {
-        setStockEntryAnalyses((analyses) => {
-          const next = { ...analyses };
-          results.forEach(({ ticker, analysis }) => {
-            if (analysis) {
-              next[ticker] = analysis;
-            }
-          });
-          return next;
-        });
+    fetchOpenDataStockAnalyses()
+      .then((analyses) => {
+        setStockEntryAnalyses(analyses);
         setStockEntryAnalysesLoadedKey(analysisKey);
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Could not load stock analyses."))
@@ -180,17 +224,20 @@ function App() {
   ]);
 
   const refresh = async () => {
-    setLoading(true);
+    setRefreshStartPending(true);
     setError(null);
     try {
-      await refreshSnapshot(refreshSource);
-      const [snap, recs] = await Promise.all([fetchSnapshot(), fetchRecommendations()]);
-      setSnapshot(snap);
-      setRecommendations(recs);
+      const job = await startRefreshJob(refreshSource);
+      const jobs = await fetchRefreshJobs().catch(() => [job]);
+      refreshJobsRef.current = jobs;
+      setRefreshJobs(jobs);
+      if (jobs.some((item) => item.id === job.id && item.status === "success")) {
+        await loadPortfolioData();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not refresh snapshot.");
     } finally {
-      setLoading(false);
+      setRefreshStartPending(false);
     }
   };
 
@@ -276,9 +323,11 @@ function App() {
         addAmount(currentCryptoAssetValues, cash.currency, cash.value_in_base * usdDisplayRate);
       }
     });
+  const activeRefreshJobs = refreshJobs.filter(isActiveRefreshJob);
+  const sourceSyncStatuses = summarizeSourceStatuses(snapshot?.source_sync_status ?? []);
   const warningCount = snapshot?.data_warnings.length ?? 0;
   const syncIssueCount =
-    snapshot?.source_sync_status.filter((status) => status.status !== "success").length ?? 0;
+    sourceSyncStatuses.filter((status) => status.status !== "success").length ?? 0;
   const isLanding = connectorView === "home";
   const connectorTitle =
     connectorView === "portfolio" ? "Portfolio View" : connectorView === "binance" ? "Binance" : "IBKR";
@@ -333,13 +382,13 @@ function App() {
                 </div>
               </details>
               <details className="header-menu">
-                <summary className={`header-menu-button ${syncIssueCount ? "warning" : ""}`}>
+                <summary className={`header-menu-button ${syncIssueCount ? "warning" : activeRefreshJobs.length ? "active" : ""}`}>
                   <DatabaseZap size={16} aria-hidden="true" />
                   Source Sync
-                  <span>{syncIssueCount}</span>
+                  <span>{activeRefreshJobs.length || syncIssueCount}</span>
                 </summary>
                 <div className="header-menu-content source-menu">
-                  <SourceStatus statuses={snapshot.source_sync_status} />
+                  <SourceStatus statuses={snapshot.source_sync_status} activeJobs={activeRefreshJobs} />
                 </div>
               </details>
             </>
@@ -357,7 +406,7 @@ function App() {
               className={displayCurrency === "USD" ? "active" : ""}
               onClick={() => setDisplayCurrency("USD")}
               disabled={!canShowUsd}
-              title={canShowUsd ? "Show values in USD" : "Refresh FX rates to enable USD display"}
+              title={canShowUsd ? "Show values in USD" : "Refresh market prices to enable USD display"}
             >
               USD
             </button>
@@ -370,17 +419,13 @@ function App() {
           >
             <option value="all">Refresh all</option>
             <option value="binance">Refresh Binance</option>
-            <option value="binance_ledger">Refresh Binance ledger</option>
             <option value="ibkr">Refresh IBKR</option>
-            <option value="ibkr_history">Refresh IBKR history</option>
             <option value="manual">Refresh manual cash & assets</option>
             <option value="market_data">Refresh market prices</option>
-            <option value="fx">Refresh FX rates</option>
-            <option value="prices_fx">Refresh prices & FX</option>
           </select>
-          <button onClick={refresh} disabled={loading} title="Refresh selected source">
+          <button onClick={refresh} disabled={loading || refreshStartPending} title="Refresh selected source">
             <RefreshCcw size={18} aria-hidden="true" />
-            {loading ? "Refreshing" : "Refresh"}
+            {refreshStartPending ? "Starting" : "Refresh"}
           </button>
         </div>
       </header>

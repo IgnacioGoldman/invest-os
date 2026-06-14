@@ -22,6 +22,7 @@ type ActivityRow = {
   amount: string;
   status?: string | null;
   balanceChanges: Record<string, number>;
+  walletValueBefore?: number | null;
   walletValueAfter?: number | null;
   walletValueCurrency?: string | null;
   walletValueWarning?: string | null;
@@ -320,6 +321,9 @@ const walletValueNote = (warning?: string | null) => {
   if (!warning) {
     return "estimated";
   }
+  if (warning.includes("Inferred")) {
+    return "inferred";
+  }
   if (warning.includes("negative")) {
     return "estimated, partial history";
   }
@@ -438,6 +442,59 @@ const sumValues = (values?: Record<string, number>) => {
   return entries.length ? entries.reduce((sum, value) => sum + value, 0) : null;
 };
 
+const inferredAssetValues = (
+  balances?: Record<string, number>,
+  referenceBalances?: Record<string, number>,
+  referenceValues?: Record<string, number>,
+) => {
+  const values: Record<string, number> = {};
+  Object.entries(balances ?? {}).forEach(([asset, amount]) => {
+    if (!Number.isFinite(amount) || amount <= EPSILON) {
+      return;
+    }
+    const key = asset.toUpperCase();
+    const referenceBalance = referenceBalances?.[key];
+    const referenceValue = referenceValues?.[key];
+    if (
+      referenceBalance != null &&
+      referenceValue != null &&
+      Number.isFinite(referenceBalance) &&
+      Number.isFinite(referenceValue) &&
+      Math.abs(referenceBalance) > EPSILON
+    ) {
+      values[key] = (referenceValue / referenceBalance) * amount;
+      return;
+    }
+    if (["USD", "USDT", "USDC", "FDUSD"].includes(key)) {
+      values[key] = amount;
+    }
+  });
+  return values;
+};
+
+const subtractChanges = (
+  balances?: Record<string, number>,
+  changes?: Record<string, number>,
+) => {
+  const result: Record<string, number> = {};
+  Object.entries(balances ?? {}).forEach(([asset, amount]) => {
+    if (Number.isFinite(amount)) {
+      result[asset.toUpperCase()] = amount;
+    }
+  });
+  Object.entries(changes ?? {}).forEach(([asset, amount]) => {
+    if (!Number.isFinite(amount)) {
+      return;
+    }
+    const key = asset.toUpperCase();
+    result[key] = (result[key] ?? 0) - amount;
+    if (Math.abs(result[key]) <= EPSILON) {
+      delete result[key];
+    }
+  });
+  return result;
+};
+
 const buildRows = (
   orders: Order[],
   events: BinanceLedgerEvent[],
@@ -459,6 +516,7 @@ const buildRows = (
       amount: changesLabel(changes),
       status: order.status,
       balanceChanges: changes,
+      walletValueBefore: order.account_value_before,
       walletValueAfter: order.account_value_after,
       walletValueCurrency: order.account_value_currency,
       walletValueWarning: order.account_value_warning,
@@ -500,6 +558,7 @@ const buildRows = (
       amount: changesLabel(changes),
       status: statuses.length === 1 ? statuses[0] : "FILLED",
       balanceChanges: changes,
+      walletValueBefore: firstFill?.walletValueBefore,
       walletValueAfter: lastFill?.walletValueAfter,
       walletValueCurrency: lastFill?.walletValueCurrency,
       walletValueWarning: lastFill?.walletValueWarning,
@@ -551,6 +610,41 @@ const buildRows = (
   ].sort((left, right) => String(left.createdAt ?? "").localeCompare(String(right.createdAt ?? "")));
 
   const latestRow = chronologicalRows[chronologicalRows.length - 1];
+  const earliestRow = chronologicalRows[0];
+  const startBalances = subtractChanges(earliestRow?.balancesAfter, earliestRow?.balanceChanges);
+  const startAssetValues = inferredAssetValues(
+    startBalances,
+    earliestRow?.balancesAfter,
+    earliestRow?.assetValuesAfter,
+  );
+  const inferredStartValue = earliestRow?.walletValueBefore ?? sumValues(startAssetValues);
+  const unvaluedStartAssets = Object.entries(startBalances)
+    .filter(([, amount]) => amount > EPSILON)
+    .map(([asset]) => asset.toUpperCase())
+    .filter((asset) => startAssetValues[asset] == null);
+  const startValueWarning =
+    unvaluedStartAssets.length > 0
+      ? `Inferred opening value before the earliest traceable Binance activity. Missing valuation for ${unvaluedStartAssets.join(", ")}.`
+      : "Inferred opening value before the earliest traceable Binance activity.";
+  const startRow: ActivityRow | null =
+    earliestRow
+      ? {
+          id: "synthetic-start",
+          createdAt: earliestRow.createdAt,
+          action: "Start",
+          actionKey: "start",
+          asset: "Spot",
+          amount: "-",
+          status: "inferred",
+          balanceChanges: {},
+          walletValueAfter: inferredStartValue,
+          walletValueCurrency: inferredStartValue == null ? null : earliestRow.walletValueCurrency ?? "USDT",
+          walletValueWarning: startValueWarning,
+          balancesAfter: startBalances,
+          assetValuesAfter: startAssetValues,
+          note: "inferred opening balance",
+        } satisfies ActivityRow
+      : null;
   const endBalances = currentBalances && Object.keys(currentBalances).length ? currentBalances : latestRow?.balancesAfter;
   const endAssetValues = currentAssetValues && Object.keys(currentAssetValues).length ? currentAssetValues : latestRow?.assetValuesAfter;
   const endValue = sumValues(endAssetValues);
@@ -574,7 +668,7 @@ const buildRows = (
         } satisfies ActivityRow
       : null;
 
-  return [...chronologicalRows, ...(endRow ? [endRow] : [])].sort((left, right) =>
+  return [...chronologicalRows, ...(startRow ? [startRow] : []), ...(endRow ? [endRow] : [])].sort((left, right) =>
     String(right.createdAt ?? "").localeCompare(String(left.createdAt ?? "")),
   );
 };
@@ -592,7 +686,7 @@ export function BinanceActivityTable({
   const actionOptions = Array.from(new Map(rows.map((row) => [row.actionKey, actionLabelFor(row.actionKey)])).entries());
   const [visibleActions, setVisibleActions] = useState<Record<string, boolean>>({ buy: true, sell: true });
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const visibleRows = rows.filter((row) => Boolean(visibleActions[row.actionKey]));
+  const visibleRows = rows.filter((row) => visibleActions[row.actionKey] ?? true);
 
   const toggle = (id: string) => {
     setExpanded((current) => ({ ...current, [id]: !current[id] }));

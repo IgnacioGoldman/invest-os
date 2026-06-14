@@ -24,7 +24,7 @@ class Settings:
     fx_rates: Dict[str, float] = field(default_factory=lambda: {"EUR": 1.0})
     enable_demo_fallback: bool = True
     market_price_stale_hours: int = 24
-    binance_ledger_start_date: datetime = datetime(2020, 1, 1, tzinfo=timezone.utc)
+    binance_ledger_start_date: datetime = datetime(2017, 7, 1, tzinfo=timezone.utc)
     openai_api_key: str | None = None
     openai_recommendation_model: str = "gpt-5-mini"
     fmp_api_key: str | None = None
@@ -56,7 +56,7 @@ def _load_datetime(raw: str | None, default: datetime) -> datetime:
 
 def get_settings() -> Settings:
     load_dotenv(PROJECT_DIR / ".env")
-    ledger_start = _load_datetime(os.getenv("BINANCE_LEDGER_START_DATE"), datetime(2020, 1, 1, tzinfo=timezone.utc))
+    ledger_start = _load_datetime(os.getenv("BINANCE_LEDGER_START_DATE"), datetime(2017, 7, 1, tzinfo=timezone.utc))
     return Settings(
         base_currency=os.getenv("BASE_CURRENCY", "EUR").upper(),
         binance_api_key=os.getenv("BINANCE_API_KEY") or None,

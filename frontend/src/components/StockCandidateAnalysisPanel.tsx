@@ -8,8 +8,16 @@ type Props = {
   loading: boolean;
 };
 
+type Tone = "good" | "watch" | "bad";
+
 function decisionLabel(value: string) {
   return value.replace(/_/g, " ");
+}
+
+function convictionTone(value: number): Tone {
+  if (value < 4) return "bad";
+  if (value < 8) return "watch";
+  return "good";
 }
 
 function CandidateBlock({
@@ -28,7 +36,7 @@ function CandidateBlock({
           {icon}
           <h3>{title}</h3>
         </div>
-        <p>No clean candidate saved.</p>
+        <p>{title} not found.</p>
       </article>
     );
   }
@@ -42,7 +50,7 @@ function CandidateBlock({
           <strong>{candidate.ticker}</strong>
           {candidate.name && <span>{candidate.name}</span>}
         </div>
-        <div className="candidate-conviction">
+        <div className={`candidate-conviction ${convictionTone(candidate.conviction)}`}>
           <strong>{candidate.conviction.toFixed(1)}</strong>
           <span>Conviction</span>
         </div>
@@ -52,9 +60,6 @@ function CandidateBlock({
         <span>{candidate.entry_quality}</span>
       </div>
       <p className="candidate-thesis">{candidate.thesis}</p>
-      <p>
-        <strong>Why now:</strong> {candidate.why_now}
-      </p>
       {candidate.evidence.length > 0 && (
         <ul>
           {candidate.evidence.slice(0, 4).map((item) => (
@@ -119,35 +124,49 @@ export function StockCandidateAnalysisPanel({ analysis, loading }: Props) {
             />
           </div>
           {(analysis.runner_ups.length > 0 || analysis.rejected_interesting_names.length > 0) && (
-            <div className="candidate-secondary-grid">
-              {analysis.runner_ups.length > 0 && (
-                <div>
-                  <h3>Runner-ups</h3>
-                  {analysis.runner_ups.slice(0, 4).map((item) => (
-                    <p key={`${item.ticker}-${item.horizon}`}>
-                      <strong>{item.ticker}</strong> {item.reason}
-                    </p>
-                  ))}
-                </div>
-              )}
-              {analysis.rejected_interesting_names.length > 0 && (
-                <div>
-                  <h3>Rejected</h3>
-                  {analysis.rejected_interesting_names.slice(0, 4).map((item) => (
-                    <p key={item.ticker}>
-                      <strong>{item.ticker}</strong> {item.reason}
-                    </p>
-                  ))}
-                </div>
-              )}
-            </div>
+            <details className="candidate-disclosure">
+              <summary>
+                <span>Runner-ups and rejected</span>
+                <small>
+                  {analysis.runner_ups.length + analysis.rejected_interesting_names.length} names
+                </small>
+              </summary>
+              <div className="candidate-secondary-grid">
+                {analysis.runner_ups.length > 0 && (
+                  <div>
+                    <h3>Runner-ups</h3>
+                    {analysis.runner_ups.slice(0, 4).map((item) => (
+                      <p key={`${item.ticker}-${item.horizon}`}>
+                        <strong>{item.ticker}</strong> {item.reason}
+                      </p>
+                    ))}
+                  </div>
+                )}
+                {analysis.rejected_interesting_names.length > 0 && (
+                  <div>
+                    <h3>Rejected</h3>
+                    {analysis.rejected_interesting_names.slice(0, 4).map((item) => (
+                      <p key={item.ticker}>
+                        <strong>{item.ticker}</strong> {item.reason}
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </details>
           )}
           {analysis.data_quality_notes.length > 0 && (
-            <div className="candidate-data-notes">
-              {analysis.data_quality_notes.slice(0, 3).map((note) => (
-                <span key={note}>{note}</span>
-              ))}
-            </div>
+            <details className="candidate-disclosure candidate-notes-disclosure">
+              <summary>
+                <span>Analysis notes</span>
+                <small>{analysis.data_quality_notes.length} notes</small>
+              </summary>
+              <div className="candidate-data-notes">
+                {analysis.data_quality_notes.slice(0, 3).map((note) => (
+                  <span key={note}>{note}</span>
+                ))}
+              </div>
+            </details>
           )}
         </>
       )}

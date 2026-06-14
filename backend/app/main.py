@@ -20,9 +20,10 @@ from app.services.asset_opportunities import (
     load_latest_asset_opportunities,
 )
 from app.services.recommendations import Recommendation, evaluate, generate_and_store
+from app.services.refresh_jobs import RefreshJob, list_refresh_jobs, start_refresh_job
 from app.services.stock_candidate_analysis import StockCandidateAnalysis, load_latest_stock_candidate_analysis
-from app.services.stock_entry_analysis import StockEntryAnalysis, analyze_latest_open_data_stock_entry
-from app.snapshot import get_portfolio_snapshot, refresh_portfolio_snapshot
+from app.services.stock_entry_analysis import StockEntryAnalysis, analyze_latest_open_data_stock_entries, analyze_latest_open_data_stock_entry
+from app.snapshot import get_portfolio_snapshot
 
 
 app = FastAPI(title="Invest OS", version="0.1.0")
@@ -101,6 +102,14 @@ def open_data_stocks() -> list[OpenDataSnapshot]:
     return load_latest_open_data_stock_snapshots()
 
 
+@app.get("/api/open-data/stocks/analysis")
+def open_data_stock_analyses() -> dict[str, StockEntryAnalysis]:
+    analyses = analyze_latest_open_data_stock_entries()
+    if not analyses:
+        raise HTTPException(status_code=404, detail="No collected open-data stock facts.")
+    return analyses
+
+
 @app.get("/api/open-data/stocks/candidate-analysis")
 def open_data_stock_candidate_analysis() -> StockCandidateAnalysis:
     analysis = load_latest_stock_candidate_analysis()
@@ -161,6 +170,11 @@ def refresh_open_data_stock(ticker: str) -> OpenDataSnapshot:
 
 
 @app.post("/api/refresh")
-def refresh(request: RefreshRequest):
+def refresh(request: RefreshRequest) -> RefreshJob:
     # Refresh is read-only: it fetches source data and replaces only that source's local SQLite cache.
-    return refresh_portfolio_snapshot(request.source)
+    return start_refresh_job(get_settings(), request.source)
+
+
+@app.get("/api/refresh/jobs")
+def refresh_jobs() -> list[RefreshJob]:
+    return list_refresh_jobs()
