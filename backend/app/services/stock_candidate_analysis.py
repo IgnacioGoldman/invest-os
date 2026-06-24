@@ -21,16 +21,30 @@ CandidateDecision = Literal[
     "tactical_candidate",
     "no_clean_candidate",
 ]
+CandidateHorizon = Literal[
+    "long_term_accumulation",
+    "tactical_entry",
+    "long_term",
+    "short_term",
+    "both",
+]
 
 
 class StockCandidate(BaseModel):
     ticker: str
     name: str | None = None
+    horizon: CandidateHorizon | None = None
     conviction: float = Field(ge=0, le=10)
     decision: CandidateDecision
-    entry_quality: str
-    why_now: str
-    thesis: str
+    entry_quality: str = ""
+    why_now: str = ""
+    thesis: str = ""
+    business_evidence: list[str] = Field(default_factory=list)
+    valuation_evidence: list[str] = Field(default_factory=list)
+    price_evidence: list[str] = Field(default_factory=list)
+    support_1d_evidence: list[str] = Field(default_factory=list)
+    derived_signal_evidence: list[str] = Field(default_factory=list)
+    key_risks: list[str] = Field(default_factory=list)
     evidence: list[str] = Field(default_factory=list)
     main_risks: list[str] = Field(default_factory=list)
     missing_data: list[str] = Field(default_factory=list)
@@ -39,7 +53,7 @@ class StockCandidate(BaseModel):
 class StockRunnerUp(BaseModel):
     ticker: str
     name: str | None = None
-    horizon: Literal["long_term", "short_term", "both"]
+    horizon: CandidateHorizon
     reason: str
 
 

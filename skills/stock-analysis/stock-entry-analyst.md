@@ -16,10 +16,13 @@ Analyze Stocks
 
 Find:
 
-- one best **long-term entry** candidate: a company worth considering for a
-  multi-year holding period, where current entry is reasonable.
-- one best **short-term setup** candidate: a temporary setup where a minor run
-  or bounce could plausibly happen soon.
+- one best **long-term accumulation candidate**: optimized for durable
+  ownership. Strong business, reasonable valuation, good derived signals, and
+  price not terrible. Support zone helps, but it should not dominate.
+- one best **tactical entry setup** candidate: optimized for timing. Price
+  action, support zone, pullback, near-term risk/reward, and momentum
+  stabilization. Business still cannot be awful, but this is more about "where
+  would I enter now?"
 
 These can be the same ticker only if both cases are independently supported.
 Prefer `no_clean_candidate` over weak or generic ideas.
@@ -46,11 +49,14 @@ python scripts/build_stock_derived_signals.py
 ## Workflow
 
 1. Shortlist from deterministic signals.
-   - Long-term lens: quality, growth durability, FCF conversion, margins,
-     ROIC/ROE, balance sheet, share count, valuation versus history and peers.
-   - Short-term lens: unusual score, price/fundamental gap, valuation
-     compression, recent pullback, FCF yield percentile, and visible catalyst
-     potential.
+   - Long-term accumulation lens: quality, growth durability, FCF conversion,
+     margins, ROIC/ROE, balance sheet, share count, valuation versus history
+     and peers. Price/support matters, but it is secondary to ownership
+     quality.
+   - Tactical entry lens: support zone, recent pullback, price/fundamental gap,
+     valuation compression, momentum stabilization, unusual score, FCF yield
+     percentile, and visible catalyst potential. Business quality is a gate, not
+     the main ranking variable.
    - Keep at most 5 candidates per lens before deeper analysis.
 
 2. Inspect raw snapshots for shortlisted names.
@@ -65,11 +71,12 @@ python scripts/build_stock_derived_signals.py
    - Prefer primary sources: company investor relations, SEC filings, earnings
      releases, transcripts, and reputable market/financial sources.
    - Separate supplied facts, live facts, and interpretation.
-   - Cite sources in the final response, but do not paste long excerpts.
+   - Include source names or URLs inside the relevant JSON evidence items when
+     live context materially affects the call, but do not paste long excerpts.
 
 4. Decide narrowly.
-   - Pick one best long-term candidate or `null`.
-   - Pick one best short-term candidate or `null`.
+   - Pick one best long-term accumulation candidate or `null`.
+   - Pick one best tactical entry setup candidate or `null`.
    - Include up to 4 runner-ups.
    - Include rejected interesting names when the rejection teaches something.
 
@@ -125,9 +132,9 @@ python scripts/build_stock_derived_signals.py
   over-punishing, under-recognizing, or already pricing in.
 - Mention missing data only when it affects confidence in the decision.
 
-## Long-Term Candidate Standard
+## Long-Term Accumulation Candidate Standard
 
-A long-term candidate needs most of:
+A long-term accumulation candidate needs most of:
 
 - credible multi-year growth path
 - good or improving margins
@@ -138,26 +145,28 @@ A long-term candidate needs most of:
 - valuation acceptable versus quality, history, and peers
 - current risks identifiable and not thesis-breaking
 
-Do not promote a long-term candidate just because it ranks highest. If the best
-available name is only a fair entry with major valuation-history caveats,
-material unresolved business/catalyst dependency, or risks that dominate the
-thesis, set `best_long_term_candidate` to `null` and explain the watchlist case
-in `runner_ups` or `data_quality_notes`.
+Do not promote a long-term accumulation candidate just because it ranks highest.
+If the best available name is only a fair entry with major valuation-history
+caveats, material unresolved business/catalyst dependency, or risks that
+dominate the thesis, set `best_long_term_candidate` to `null` and explain the
+watchlist case in `runner_ups` or `data_quality_notes`.
 
-## Short-Term Candidate Standard
+## Tactical Entry Setup Candidate Standard
 
-A short-term setup needs most of:
+A tactical entry setup needs most of:
 
 - recent price dislocation or valuation compression
 - fundamentals not obviously broken
 - plausible near-term catalyst or sentiment reset
 - price/fundamental gap or unusually attractive current percentile
+- support-zone proximity or a clear reason the entry is attractive without it
+- momentum stabilization, or a clear missing-data note if that cannot be checked
 - not a clear falling-knife pattern from supplied price facts
 - missing chart/volume facts called out when needed
 
 ## Output And Persistence
 
-Return a concise human summary, then save JSON to:
+Return evidence-bound JSON only, then save it to:
 
 ```text
 data/stocks/ai_candidate_analysis/latest.json
@@ -185,33 +194,43 @@ The JSON must match this shape:
   "best_long_term_candidate": {
     "ticker": "EXAMPLE",
     "name": "Example Inc.",
+    "horizon": "long_term_accumulation",
     "conviction": 7.2,
     "decision": "starter_entry_candidate",
     "entry_quality": "quality compounder at acceptable valuation",
     "why_now": "",
     "thesis": "One concise thesis paragraph.",
-    "evidence": [],
-    "main_risks": [],
+    "business_evidence": [],
+    "valuation_evidence": [],
+    "price_evidence": [],
+    "support_1d_evidence": [],
+    "derived_signal_evidence": [],
+    "key_risks": [],
     "missing_data": []
   },
   "best_short_term_candidate": {
     "ticker": "EXAMPLE",
     "name": "Example Inc.",
+    "horizon": "tactical_entry",
     "conviction": 6.4,
     "decision": "tactical_candidate",
     "entry_quality": "temporary dislocation",
     "why_now": "",
     "thesis": "One concise setup paragraph.",
-    "evidence": [],
-    "main_risks": [],
+    "business_evidence": [],
+    "valuation_evidence": [],
+    "price_evidence": [],
+    "support_1d_evidence": [],
+    "derived_signal_evidence": [],
+    "key_risks": [],
     "missing_data": []
   },
   "runner_ups": [
     {
       "ticker": "EXAMPLE",
       "name": "Example Inc.",
-      "horizon": "long_term",
-      "reason": "Why it nearly qualified."
+      "horizon": "long_term_accumulation",
+      "reason": "Why it nearly qualified and why it was not selected."
     }
   ],
   "rejected_interesting_names": [
@@ -237,3 +256,20 @@ no_clean_candidate
 
 If no clean candidate exists for a lens, set that candidate to `null` and add a
 data-quality or market-context note explaining why.
+
+Candidate evidence arrays must stay categorized:
+
+- `business_evidence`: business quality, growth, margins, FCF, balance sheet,
+  share count, or company-context facts.
+- `valuation_evidence`: absolute valuation, valuation history, peer/sector
+  comparison, FCF yield, PE, EV/EBITDA, or valuation caveats.
+- `price_evidence`: pullback, trend, drawdown, price/fundamental gap, or
+  risk/reward facts.
+- `support_1d_evidence`: daily support-zone status and distance, or a short
+  note that the signal is far/unavailable.
+- `derived_signal_evidence`: derived signal facts that materially affected the
+  choice. Do not cite internal ranking alone as evidence.
+
+Use `runner_ups` for close runners-up and include the rejection reason in
+`reason`. Use `rejected_interesting_names` for names that looked interesting but
+failed a business, valuation, price, data-quality, or current-context check.

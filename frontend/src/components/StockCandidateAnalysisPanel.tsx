@@ -1,4 +1,4 @@
-import { Brain, Clock3, Sparkles, TrendingUp } from "lucide-react";
+import { Brain, Clock3, Info, Sparkles, TrendingUp } from "lucide-react";
 import type { ReactNode } from "react";
 import type { StockCandidate, StockCandidateAnalysis } from "../api";
 import { formatDateTime } from "../format";
@@ -9,6 +9,13 @@ type Props = {
 };
 
 type Tone = "good" | "watch" | "bad";
+
+const CANDIDATE_DESCRIPTIONS = {
+  longTerm:
+    "Optimized for durable ownership. Strong business, reasonable valuation, good derived signals, and price not terrible. Support zone helps, but it should not dominate.",
+  tactical:
+    "Optimized for timing. Price action, support zone, pullback, near-term risk/reward, momentum stabilization. Business still cannot be awful, but this can be more about where would I enter now.",
+};
 
 function decisionLabel(value: string) {
   return value.replace(/_/g, " ");
@@ -22,19 +29,39 @@ function convictionTone(value: number): Tone {
 
 function CandidateBlock({
   title,
+  description,
   icon,
   candidate,
 }: {
   title: string;
+  description: string;
   icon: ReactNode;
   candidate?: StockCandidate | null;
 }) {
+  const evidenceOptions: Array<[string, string[]]> = candidate
+    ? [
+        ["Business", candidate.business_evidence ?? []],
+        ["Valuation", candidate.valuation_evidence ?? []],
+        ["Price", candidate.price_evidence ?? []],
+        ["Support 1D", candidate.support_1d_evidence ?? []],
+        ["Derived", candidate.derived_signal_evidence ?? []],
+        ["Evidence", candidate.evidence ?? []],
+      ]
+    : [];
+  const evidenceSections = evidenceOptions.filter(([, items]) => items.length > 0);
+  const risks = candidate ? (candidate.key_risks?.length ? candidate.key_risks : candidate.main_risks) : [];
+
   if (!candidate) {
     return (
       <article className="stock-candidate-block empty-candidate">
         <div className="stock-candidate-title">
           {icon}
-          <h3>{title}</h3>
+          <div className="candidate-heading-line">
+            <h3>{title}</h3>
+            <button className="candidate-info-button" type="button" aria-label={`${title} definition`} title={description}>
+              <Info size={14} aria-hidden="true" />
+            </button>
+          </div>
         </div>
         <p>{title} not found.</p>
       </article>
@@ -46,7 +73,12 @@ function CandidateBlock({
       <div className="stock-candidate-title">
         {icon}
         <div>
-          <h3>{title}</h3>
+          <div className="candidate-heading-line">
+            <h3>{title}</h3>
+            <button className="candidate-info-button" type="button" aria-label={`${title} definition`} title={description}>
+              <Info size={14} aria-hidden="true" />
+            </button>
+          </div>
           <strong>{candidate.ticker}</strong>
           {candidate.name && <span>{candidate.name}</span>}
         </div>
@@ -60,16 +92,23 @@ function CandidateBlock({
         <span>{candidate.entry_quality}</span>
       </div>
       <p className="candidate-thesis">{candidate.thesis}</p>
-      {candidate.evidence.length > 0 && (
-        <ul>
-          {candidate.evidence.slice(0, 4).map((item) => (
-            <li key={item}>{item}</li>
+      {evidenceSections.length > 0 && (
+        <div className="candidate-evidence-groups">
+          {evidenceSections.slice(0, 5).map(([label, items]) => (
+            <div className="candidate-evidence-group" key={label}>
+              <span>{label}</span>
+              <ul>
+                {items.slice(0, 2).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
-      {candidate.main_risks.length > 0 && (
+      {risks.length > 0 && (
         <div className="candidate-risks">
-          {candidate.main_risks.slice(0, 3).map((risk) => (
+          {risks.slice(0, 3).map((risk) => (
             <p key={risk}>{risk}</p>
           ))}
         </div>
@@ -104,7 +143,7 @@ export function StockCandidateAnalysisPanel({ analysis, loading }: Props) {
           <Sparkles size={18} aria-hidden="true" />
           <p>No saved candidate analysis yet.</p>
           <code>
-            Analyze Stocks using skills/stock-analysis/stock-entry-analyst.md. Use data/stocks/open_data/*/latest.json and data/stocks/derived_signals/latest.json to find interesting investment candidates. Return evidence-bound JSON and save it to data/stocks/ai_candidate_analysis/latest.json.
+            Analyze stocks using skills/stock-analysis/stock-entry-analyst.md. Use data/stocks/open_data/*/latest.json and data/stocks/derived_signals/latest.json. Find one long-term accumulation candidate and one tactical entry setup candidate. Ask for missing data only if it blocks the decision. Save the result to data/stocks/ai_candidate_analysis/latest.json.
           </code>
         </div>
       )}
@@ -113,12 +152,14 @@ export function StockCandidateAnalysisPanel({ analysis, loading }: Props) {
         <>
           <div className="stock-candidate-grid">
             <CandidateBlock
-              title="Long-term entry"
+              title="Long-term accumulation candidate"
+              description={CANDIDATE_DESCRIPTIONS.longTerm}
               icon={<TrendingUp size={18} aria-hidden="true" />}
               candidate={analysis.best_long_term_candidate}
             />
             <CandidateBlock
-              title="Short-term setup"
+              title="Tactical entry setup"
+              description={CANDIDATE_DESCRIPTIONS.tactical}
               icon={<Clock3 size={18} aria-hidden="true" />}
               candidate={analysis.best_short_term_candidate}
             />

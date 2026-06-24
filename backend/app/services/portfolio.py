@@ -1166,7 +1166,11 @@ def _refresh_one(conn, settings: Settings, source: RefreshSource, progress: Refr
             load_order_history(conn),
             load_ledger_events(conn),
         )
-        historical_prices, historical_warnings = fetch_binance_historical_prices(settings, historical_requirements)
+        historical_prices, historical_warnings = fetch_binance_historical_prices(
+            settings,
+            historical_requirements,
+            load_historical_prices(conn),
+        )
         replace_historical_prices(conn, historical_prices)
         warnings.extend(historical_warnings)
         update_sync_status(conn, "market_data", "warning" if warnings else "success", warnings)

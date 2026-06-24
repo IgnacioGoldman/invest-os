@@ -335,11 +335,18 @@ export type StockCandidateDecision =
 export type StockCandidate = {
   ticker: string;
   name?: string | null;
+  horizon?: "long_term_accumulation" | "tactical_entry" | "long_term" | "short_term" | "both" | null;
   conviction: number;
   decision: StockCandidateDecision;
   entry_quality: string;
   why_now: string;
   thesis: string;
+  business_evidence?: string[];
+  valuation_evidence?: string[];
+  price_evidence?: string[];
+  support_1d_evidence?: string[];
+  derived_signal_evidence?: string[];
+  key_risks?: string[];
   evidence: string[];
   main_risks: string[];
   missing_data: string[];
@@ -348,7 +355,7 @@ export type StockCandidate = {
 export type StockRunnerUp = {
   ticker: string;
   name?: string | null;
-  horizon: "long_term" | "short_term" | "both";
+  horizon: "long_term_accumulation" | "tactical_entry" | "long_term" | "short_term" | "both";
   reason: string;
 };
 
