@@ -9,6 +9,7 @@ import {
   fetchOpenDataStockAnalyses,
   fetchOpenDataStockAnalysis,
   fetchOpenDataStocks,
+  fetchRecommendationFollowUpResult,
   fetchRefreshJobs,
   fetchRecommendations,
   fetchSnapshot,
@@ -475,6 +476,7 @@ function App() {
                 generatedAt={recommendationsGeneratedAt}
                 latestSourceSyncedAt={latestSourceSyncedAt}
                 onAskRecommendation={askRecommendationFollowUp}
+                onPollRecommendation={fetchRecommendationFollowUpResult}
                 alwaysShow
               />
               <StockCandidateAnalysisPanel

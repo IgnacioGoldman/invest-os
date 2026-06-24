@@ -1,5 +1,5 @@
 import { AlertTriangle, Info, Send, ShieldAlert, Sparkles } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { Recommendation, RecommendationFollowUpResponse } from "../api";
 import { formatDateTime } from "../format";
 
@@ -10,6 +10,7 @@ type Props = {
   analyzing?: boolean;
   onAnalyze?: () => void;
   onAskRecommendation?: (recommendation: Recommendation, question: string) => Promise<RecommendationFollowUpResponse>;
+  onPollRecommendation?: (requestId: string) => Promise<RecommendationFollowUpResponse>;
   alwaysShow?: boolean;
 };
 
@@ -48,6 +49,16 @@ function recommendationKey(rec: Recommendation) {
   return `${rec.category}:${rec.severity}:${rec.title}:${rec.detail}`;
 }
 
+function followUpLabel(response: RecommendationFollowUpResponse) {
+  if (response.mode === "codex") {
+    return "invest-os codex";
+  }
+  if (response.mode === "codex_required") {
+    return "invest-os";
+  }
+  return "invest-os ai";
+}
+
 export function Recommendations({
   recommendations,
   generatedAt,
@@ -55,6 +66,7 @@ export function Recommendations({
   analyzing = false,
   onAnalyze,
   onAskRecommendation,
+  onPollRecommendation,
   alwaysShow = false,
 }: Props) {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -68,6 +80,58 @@ export function Recommendations({
     return groups;
   }, {});
   const shouldRerun = isSourceDataNewer(generatedAt, latestSourceSyncedAt);
+  const pendingFollowUpIds = Object.values(followUps)
+    .flatMap((turns) => turns.map((turn) => turn.response))
+    .filter((response) => response.status === "pending_codex" && response.follow_up_id)
+    .map((response) => response.follow_up_id as string);
+  const pendingFollowUpKey = [...new Set(pendingFollowUpIds)].sort().join("|");
+
+  useEffect(() => {
+    if (!onPollRecommendation || !pendingFollowUpKey) {
+      return;
+    }
+    let cancelled = false;
+    const ids = pendingFollowUpKey.split("|");
+    const poll = async () => {
+      const results = await Promise.allSettled(ids.map((id) => onPollRecommendation(id)));
+      if (cancelled) {
+        return;
+      }
+      const completed = results
+        .filter((result): result is PromiseFulfilledResult<RecommendationFollowUpResponse> => result.status === "fulfilled")
+        .map((result) => result.value)
+        .filter((response) => response.status === "complete" && response.follow_up_id);
+      if (completed.length === 0) {
+        return;
+      }
+      const completedById = new Map(completed.map((response) => [response.follow_up_id, response]));
+      setFollowUps((threads) => {
+        let changed = false;
+        const next = Object.fromEntries(
+          Object.entries(threads).map(([key, turns]) => [
+            key,
+            turns.map((turn) => {
+              const replacement = turn.response.follow_up_id
+                ? completedById.get(turn.response.follow_up_id)
+                : undefined;
+              if (!replacement) {
+                return turn;
+              }
+              changed = true;
+              return { ...turn, response: replacement };
+            }),
+          ]),
+        );
+        return changed ? next : threads;
+      });
+    };
+    poll();
+    const interval = window.setInterval(poll, 2500);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [onPollRecommendation, pendingFollowUpKey]);
 
   const askRecommendation = async (event: FormEvent, rec: Recommendation) => {
     event.preventDefault();
@@ -143,8 +207,19 @@ export function Recommendations({
                                   <p>{turn.question}</p>
                                 </div>
                                 <div className="rec-follow-up-message rec-follow-up-answer">
-                                  <span>invest-os{turn.response.mode === "local" ? " local" : ""}</span>
+                                  <span>{followUpLabel(turn.response)}</span>
                                   <p>{turn.response.answer}</p>
+                                  {turn.response.status === "pending_codex" && (
+                                    <small className="rec-follow-up-status">Waiting for Codex callback</small>
+                                  )}
+                                  {turn.response.codex_command && (
+                                    <div className="rec-follow-up-command">
+                                      <span>Codex IDE prompt</span>
+                                      <pre>
+                                        <code>{turn.response.codex_command}</code>
+                                      </pre>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             ))}

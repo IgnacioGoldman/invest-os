@@ -166,9 +166,12 @@ export type RecommendationSnapshot = {
 
 export type RecommendationFollowUpResponse = {
   generated_at: string;
-  mode: "openai" | "local";
+  mode: "openai" | "codex_required" | "codex";
+  status: "complete" | "pending_codex";
   answer: string;
   context_tickers: string[];
+  follow_up_id?: string | null;
+  codex_command?: string | null;
 };
 
 export type BusinessHealth = {
@@ -566,6 +569,10 @@ export async function askRecommendationFollowUp(
     },
     REQUEST_TIMEOUT_MS * 2,
   );
+}
+
+export async function fetchRecommendationFollowUpResult(requestId: string): Promise<RecommendationFollowUpResponse> {
+  return requestJson<RecommendationFollowUpResponse>(`/api/recommendations/follow-up/${requestId}`);
 }
 
 export async function fetchLatestEntrySnapshot(): Promise<EntrySnapshotFile | null> {

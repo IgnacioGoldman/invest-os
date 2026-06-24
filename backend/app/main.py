@@ -20,12 +20,15 @@ from app.services.asset_opportunities import (
     load_latest_asset_opportunities,
 )
 from app.services.recommendations import (
+    RecommendationFollowUpCodexResultRequest,
     RecommendationFollowUpRequest,
     RecommendationFollowUpResponse,
     RecommendationSnapshot,
     answer_recommendation_followup,
     generate_and_store,
+    load_recommendation_followup_result,
     load_saved_recommendation_snapshot,
+    submit_recommendation_followup_codex_result,
 )
 from app.services.refresh_jobs import RefreshJob, list_refresh_jobs, start_refresh_job
 from app.services.stock_candidate_analysis import StockCandidateAnalysis, load_latest_stock_candidate_analysis
@@ -91,6 +94,27 @@ def recommendation_follow_up(request: RecommendationFollowUpRequest) -> Recommen
         return answer_recommendation_followup(get_portfolio_snapshot(), request, settings)
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Recommendation follow-up failed: {exc}") from exc
+
+
+@app.get("/api/recommendations/follow-up/{request_id}")
+def recommendation_follow_up_result(request_id: str) -> RecommendationFollowUpResponse:
+    response = load_recommendation_followup_result(request_id)
+    if response is None:
+        raise HTTPException(status_code=404, detail="Recommendation follow-up request was not found.")
+    return response
+
+
+@app.post("/api/recommendations/follow-up/codex-result")
+def recommendation_follow_up_codex_result(
+    request: RecommendationFollowUpCodexResultRequest,
+) -> RecommendationFollowUpResponse:
+    try:
+        response = submit_recommendation_followup_codex_result(request)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if response is None:
+        raise HTTPException(status_code=404, detail="Recommendation follow-up request was not found.")
+    return response
 
 
 @app.get("/api/entry/snapshot")

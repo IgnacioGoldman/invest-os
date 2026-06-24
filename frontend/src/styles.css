@@ -2291,6 +2291,39 @@ td small {
   color: #1f2d3d;
 }
 
+.rec-follow-up-status {
+  color: #657186;
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 800;
+  margin-top: 6px;
+}
+
+.rec-follow-up-command {
+  background: #f6f8fb;
+  border: 1px solid #dbe2ec;
+  border-radius: 8px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.rec-follow-up-command > span {
+  border-bottom: 1px solid #dbe2ec;
+  padding: 8px 10px;
+}
+
+.rec-follow-up-command pre {
+  color: #263244;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  margin: 0;
+  max-height: 360px;
+  overflow: auto;
+  padding: 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .rec-follow-up-error {
   color: #9d2626;
   font-weight: 700;

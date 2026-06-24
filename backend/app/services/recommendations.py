@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import json
 import re
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from threading import Lock
 from typing import Any, Literal
 
 import requests
@@ -29,6 +31,8 @@ PORTFOLIO_RECOMMENDATIONS_SKILL_DIR = PROJECT_DIR / "skills" / "portfolio-recomm
 STOCK_DERIVED_SIGNALS_PATH = PROJECT_DIR / "data" / "stocks" / "derived_signals" / "latest.json"
 ASSET_DERIVED_SIGNALS_PATH = PROJECT_DIR / "data" / "assets" / "derived_signals" / "latest.json"
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
+_CODEX_FOLLOW_UPS: dict[str, "RecommendationFollowUpResponse"] = {}
+_CODEX_FOLLOW_UPS_LOCK = Lock()
 
 
 class Recommendation(BaseModel):
@@ -62,9 +66,17 @@ class RecommendationFollowUpRequest(BaseModel):
 
 class RecommendationFollowUpResponse(BaseModel):
     generated_at: datetime
-    mode: Literal["openai", "local"]
+    mode: Literal["openai", "codex_required", "codex"]
+    status: Literal["complete", "pending_codex"] = "complete"
     answer: str
     context_tickers: list[str] = Field(default_factory=list)
+    follow_up_id: str | None = None
+    codex_command: str | None = None
+
+
+class RecommendationFollowUpCodexResultRequest(BaseModel):
+    request_id: str
+    answer: str
 
 
 RECOMMENDATION_SCHEMA: dict[str, Any] = {
@@ -243,7 +255,7 @@ def _known_tickers(snapshot: PortfolioSnapshot) -> set[str]:
 
 def _extract_context_tickers(snapshot: PortfolioSnapshot, recommendation: Recommendation, question: str) -> list[str]:
     known = _known_tickers(snapshot)
-    text = f"{recommendation.title} {recommendation.detail} {question}".upper()
+    recommendation_text = f"{recommendation.title} {recommendation.detail}".upper()
     stopwords = {
         "A",
         "AI",
@@ -264,7 +276,16 @@ def _extract_context_tickers(snapshot: PortfolioSnapshot, recommendation: Recomm
         "TO",
         "USD",
     }
-    tokens = {token for token in re.findall(r"\b[A-Z][A-Z0-9.-]{0,5}\b", text) if token not in stopwords}
+    recommendation_tokens = {
+        token for token in re.findall(r"\b[A-Z][A-Z0-9.-]{0,5}\b", recommendation_text) if token not in stopwords
+    }
+    explicit_question_tokens = {
+        token.upper() for token in re.findall(r"\$([A-Za-z][A-Za-z0-9.-]{0,5})\b", question) if token.upper() not in stopwords
+    }
+    uppercase_question_tokens = {
+        token for token in re.findall(r"\b[A-Z][A-Z0-9.-]{1,5}\b", question) if token not in stopwords
+    }
+    tokens = recommendation_tokens | explicit_question_tokens | uppercase_question_tokens
     return sorted(token for token in tokens if token in known)
 
 
@@ -404,6 +425,73 @@ def _followup_context(snapshot: PortfolioSnapshot, recommendation: Recommendatio
     }
 
 
+def _codex_followup_command(request_id: str, request: RecommendationFollowUpRequest, tickers: list[str]) -> str:
+    callback_payload = json.dumps({"request_id": request_id, "answer": "REPLACE_WITH_FINAL_ANALYSIS"})
+    return (
+        f"Paste this into Codex IDE while the Invest OS backend is running from {PROJECT_DIR}:\n\n"
+        "Answer this Invest OS recommendation follow-up using AI reasoning and the local repo data. "
+        "Inspect the current portfolio snapshot, saved recommendations, and any relevant stock/asset insight files. "
+        "Do not place trades, and do not use a deterministic fallback as the final answer.\n\n"
+        f"Recommendation JSON:\n{json.dumps(request.recommendation.model_dump(mode='json'), indent=2, sort_keys=True)}\n\n"
+        f"User question:\n{request.question}\n\n"
+        f"Detected context tickers: {', '.join(tickers) if tickers else 'none'}\n\n"
+        "When you have the final answer, post it back to the app with this callback shape. "
+        "Replace REPLACE_WITH_FINAL_ANALYSIS with your final JSON-escaped answer:\n\n"
+        "curl -s -H 'Content-Type: application/json' "
+        "-X POST http://127.0.0.1:8000/api/recommendations/follow-up/codex-result "
+        f"--data '{callback_payload}'"
+    )
+
+
+def _openai_missing_followup_response(
+    request: RecommendationFollowUpRequest,
+    tickers: list[str],
+) -> RecommendationFollowUpResponse:
+    request_id = uuid.uuid4().hex
+    response = RecommendationFollowUpResponse(
+        generated_at=datetime.now(timezone.utc),
+        mode="codex_required",
+        status="pending_codex",
+        answer=(
+            "OPENAI_API_KEY is not configured, so Invest OS cannot run this conversational AI analysis in-app. "
+            "Use the Codex IDE prompt below to analyze it locally, then post the result back to this thread."
+        ),
+        context_tickers=tickers,
+        follow_up_id=request_id,
+        codex_command=_codex_followup_command(request_id, request, tickers),
+    )
+    with _CODEX_FOLLOW_UPS_LOCK:
+        _CODEX_FOLLOW_UPS[request_id] = response
+    return response
+
+
+def load_recommendation_followup_result(request_id: str) -> RecommendationFollowUpResponse | None:
+    with _CODEX_FOLLOW_UPS_LOCK:
+        return _CODEX_FOLLOW_UPS.get(request_id)
+
+
+def submit_recommendation_followup_codex_result(
+    request: RecommendationFollowUpCodexResultRequest,
+) -> RecommendationFollowUpResponse | None:
+    answer = request.answer.strip()
+    if not answer:
+        raise ValueError("Answer cannot be empty.")
+    with _CODEX_FOLLOW_UPS_LOCK:
+        existing = _CODEX_FOLLOW_UPS.get(request.request_id)
+        if existing is None:
+            return None
+        response = RecommendationFollowUpResponse(
+            generated_at=datetime.now(timezone.utc),
+            mode="codex",
+            status="complete",
+            answer=answer,
+            context_tickers=existing.context_tickers,
+            follow_up_id=request.request_id,
+        )
+        _CODEX_FOLLOW_UPS[request.request_id] = response
+        return response
+
+
 def answer_recommendation_followup(
     snapshot: PortfolioSnapshot,
     request: RecommendationFollowUpRequest,
@@ -412,12 +500,7 @@ def answer_recommendation_followup(
     settings = settings or get_settings()
     tickers = _extract_context_tickers(snapshot, request.recommendation, request.question)
     if not settings.openai_api_key:
-        return RecommendationFollowUpResponse(
-            generated_at=datetime.now(timezone.utc),
-            mode="local",
-            answer=_local_followup_answer(snapshot, request.recommendation, request.question, tickers),
-            context_tickers=tickers,
-        )
+        return _openai_missing_followup_response(request, tickers)
 
     context = _followup_context(snapshot, request.recommendation, request.question, tickers)
     response = requests.post(
@@ -441,13 +524,11 @@ def answer_recommendation_followup(
     response.raise_for_status()
     answer = _extract_text(response.json()).strip()
     if not answer:
-        answer = _local_followup_answer(snapshot, request.recommendation, request.question, tickers)
-        mode: Literal["openai", "local"] = "local"
-    else:
-        mode = "openai"
+        raise ValueError("AI follow-up returned an empty answer.")
     return RecommendationFollowUpResponse(
         generated_at=datetime.now(timezone.utc),
-        mode=mode,
+        mode="openai",
+        status="complete",
         answer=answer,
         context_tickers=tickers,
     )
