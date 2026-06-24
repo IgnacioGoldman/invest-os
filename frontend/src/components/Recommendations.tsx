@@ -10,6 +10,7 @@ type Props = {
   analyzing?: boolean;
   onAnalyze?: () => void;
   onAskRecommendation?: (recommendation: Recommendation, question: string) => Promise<RecommendationFollowUpResponse>;
+  onLoadRecommendationFollowUps?: () => Promise<RecommendationFollowUpResponse[]>;
   onPollRecommendation?: (requestId: string) => Promise<RecommendationFollowUpResponse>;
   alwaysShow?: boolean;
 };
@@ -59,6 +60,22 @@ function followUpLabel(response: RecommendationFollowUpResponse) {
   return "invest-os ai";
 }
 
+function groupFollowUps(
+  responses: RecommendationFollowUpResponse[],
+  visibleKeys: Set<string>,
+): Record<string, FollowUpTurn[]> {
+  return responses.reduce<Record<string, FollowUpTurn[]>>((groups, response) => {
+    if (!visibleKeys.has(response.recommendation_key)) {
+      return groups;
+    }
+    groups[response.recommendation_key] = [
+      ...(groups[response.recommendation_key] ?? []),
+      { question: response.question, response },
+    ];
+    return groups;
+  }, {});
+}
+
 export function Recommendations({
   recommendations,
   generatedAt,
@@ -66,6 +83,7 @@ export function Recommendations({
   analyzing = false,
   onAnalyze,
   onAskRecommendation,
+  onLoadRecommendationFollowUps,
   onPollRecommendation,
   alwaysShow = false,
 }: Props) {
@@ -80,11 +98,33 @@ export function Recommendations({
     return groups;
   }, {});
   const shouldRerun = isSourceDataNewer(generatedAt, latestSourceSyncedAt);
+  const visibleRecommendationKeys = new Set(visibleRecommendations.map(recommendationKey));
+  const visibleRecommendationKey = [...visibleRecommendationKeys].sort().join("|");
   const pendingFollowUpIds = Object.values(followUps)
     .flatMap((turns) => turns.map((turn) => turn.response))
     .filter((response) => response.status === "pending_codex" && response.follow_up_id)
     .map((response) => response.follow_up_id as string);
   const pendingFollowUpKey = [...new Set(pendingFollowUpIds)].sort().join("|");
+
+  useEffect(() => {
+    if (!onLoadRecommendationFollowUps) {
+      return;
+    }
+    let cancelled = false;
+    onLoadRecommendationFollowUps()
+      .then((responses) => {
+        if (cancelled) {
+          return;
+        }
+        setFollowUps(groupFollowUps(responses, visibleRecommendationKeys));
+      })
+      .catch(() => {
+        // The recommendation list should remain usable if thread hydration misses once.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [onLoadRecommendationFollowUps, visibleRecommendationKey]);
 
   useEffect(() => {
     if (!onPollRecommendation || !pendingFollowUpKey) {
@@ -147,9 +187,10 @@ export function Recommendations({
     setFollowUpErrors((errors) => ({ ...errors, [key]: "" }));
     try {
       const response = await onAskRecommendation(rec, question);
+      const responseKey = response.recommendation_key || key;
       setFollowUps((threads) => ({
         ...threads,
-        [key]: [...(threads[key] ?? []), { question, response }],
+        [responseKey]: [...(threads[responseKey] ?? []), { question: response.question, response }],
       }));
       setDrafts((current) => ({ ...current, [key]: "" }));
     } catch (error) {
@@ -201,7 +242,10 @@ export function Recommendations({
                         {thread.length > 0 && (
                           <div className="rec-follow-up-thread">
                             {thread.map((turn, index) => (
-                              <div className="rec-follow-up-turn" key={`${turn.response.generated_at}-${index}`}>
+                              <div
+                                className="rec-follow-up-turn"
+                                key={turn.response.follow_up_id ?? `${turn.response.generated_at}-${index}`}
+                              >
                                 <div className="rec-follow-up-message rec-follow-up-question">
                                   <span>me</span>
                                   <p>{turn.question}</p>

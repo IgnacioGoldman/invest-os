@@ -27,6 +27,7 @@ from app.services.recommendations import (
     answer_recommendation_followup,
     generate_and_store,
     load_recommendation_followup_result,
+    load_recommendation_followups,
     load_saved_recommendation_snapshot,
     submit_recommendation_followup_codex_result,
 )
@@ -96,9 +97,14 @@ def recommendation_follow_up(request: RecommendationFollowUpRequest) -> Recommen
         raise HTTPException(status_code=502, detail=f"Recommendation follow-up failed: {exc}") from exc
 
 
+@app.get("/api/recommendations/follow-ups")
+def recommendation_follow_ups() -> list[RecommendationFollowUpResponse]:
+    return load_recommendation_followups(get_settings())
+
+
 @app.get("/api/recommendations/follow-up/{request_id}")
 def recommendation_follow_up_result(request_id: str) -> RecommendationFollowUpResponse:
-    response = load_recommendation_followup_result(request_id)
+    response = load_recommendation_followup_result(request_id, get_settings())
     if response is None:
         raise HTTPException(status_code=404, detail="Recommendation follow-up request was not found.")
     return response
@@ -109,7 +115,7 @@ def recommendation_follow_up_codex_result(
     request: RecommendationFollowUpCodexResultRequest,
 ) -> RecommendationFollowUpResponse:
     try:
-        response = submit_recommendation_followup_codex_result(request)
+        response = submit_recommendation_followup_codex_result(request, get_settings())
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     if response is None:

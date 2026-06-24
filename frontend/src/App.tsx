@@ -10,6 +10,7 @@ import {
   fetchOpenDataStockAnalysis,
   fetchOpenDataStocks,
   fetchRecommendationFollowUpResult,
+  fetchRecommendationFollowUps,
   fetchRefreshJobs,
   fetchRecommendations,
   fetchSnapshot,
@@ -476,6 +477,7 @@ function App() {
                 generatedAt={recommendationsGeneratedAt}
                 latestSourceSyncedAt={latestSourceSyncedAt}
                 onAskRecommendation={askRecommendationFollowUp}
+                onLoadRecommendationFollowUps={fetchRecommendationFollowUps}
                 onPollRecommendation={fetchRecommendationFollowUpResult}
                 alwaysShow
               />

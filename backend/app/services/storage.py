@@ -100,6 +100,13 @@ def init_db(conn: sqlite3.Connection) -> None:
             position INTEGER NOT NULL,
             payload TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS recommendation_followups (
+            id TEXT PRIMARY KEY,
+            recommendation_key TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
         """
     )
     conn.commit()
@@ -342,3 +349,51 @@ def load_recommendations_generated_at(conn: sqlite3.Connection) -> datetime | No
     if row is None or row["generated_at"] is None:
         return None
     return datetime.fromisoformat(row["generated_at"])
+
+
+def save_recommendation_followup(conn: sqlite3.Connection, followup: BaseModel) -> None:
+    followup_id = getattr(followup, "follow_up_id", None)
+    recommendation_key = getattr(followup, "recommendation_key", None)
+    generated_at = getattr(followup, "generated_at", datetime.now(timezone.utc))
+    if not followup_id or not recommendation_key:
+        raise ValueError("Recommendation follow-up requires follow_up_id and recommendation_key.")
+
+    existing = conn.execute(
+        "SELECT created_at FROM recommendation_followups WHERE id = ?",
+        (followup_id,),
+    ).fetchone()
+    if existing is None:
+        conn.execute(
+            """
+            INSERT INTO recommendation_followups (id, recommendation_key, created_at, payload)
+            VALUES (?, ?, ?, ?)
+            """,
+            (followup_id, recommendation_key, generated_at.isoformat(), followup.model_dump_json()),
+        )
+        return
+
+    conn.execute(
+        """
+        UPDATE recommendation_followups
+        SET recommendation_key = ?, payload = ?
+        WHERE id = ?
+        """,
+        (recommendation_key, followup.model_dump_json(), followup_id),
+    )
+
+
+def load_recommendation_followup_payload(conn: sqlite3.Connection, followup_id: str) -> str | None:
+    row = conn.execute(
+        "SELECT payload FROM recommendation_followups WHERE id = ?",
+        (followup_id,),
+    ).fetchone()
+    return row["payload"] if row else None
+
+
+def load_recommendation_followup_payloads(conn: sqlite3.Connection) -> list[str]:
+    return [
+        row["payload"]
+        for row in conn.execute(
+            "SELECT payload FROM recommendation_followups ORDER BY created_at, id"
+        )
+    ]

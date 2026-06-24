@@ -7,7 +7,6 @@ import re
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from threading import Lock
 from typing import Any, Literal
 
 import requests
@@ -19,9 +18,12 @@ from app.entry_engine.open_data_models import OpenDataMetric, OpenDataSnapshot
 from app.entry_engine.utils.file_storage import load_latest_open_data_stock_snapshot
 from app.services.storage import (
     connect,
+    load_recommendation_followup_payload,
+    load_recommendation_followup_payloads,
     load_recommendation_payloads,
     load_recommendations_generated_at,
     replace_recommendations,
+    save_recommendation_followup,
 )
 from app.services.stock_entry_analysis import StockEntryAnalysis, analyze_latest_open_data_stock_entry
 
@@ -31,8 +33,6 @@ PORTFOLIO_RECOMMENDATIONS_SKILL_DIR = PROJECT_DIR / "skills" / "portfolio-recomm
 STOCK_DERIVED_SIGNALS_PATH = PROJECT_DIR / "data" / "stocks" / "derived_signals" / "latest.json"
 ASSET_DERIVED_SIGNALS_PATH = PROJECT_DIR / "data" / "assets" / "derived_signals" / "latest.json"
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
-_CODEX_FOLLOW_UPS: dict[str, "RecommendationFollowUpResponse"] = {}
-_CODEX_FOLLOW_UPS_LOCK = Lock()
 
 
 class Recommendation(BaseModel):
@@ -65,6 +65,8 @@ class RecommendationFollowUpRequest(BaseModel):
 
 
 class RecommendationFollowUpResponse(BaseModel):
+    recommendation_key: str
+    question: str
     generated_at: datetime
     mode: Literal["openai", "codex_required", "codex"]
     status: Literal["complete", "pending_codex"] = "complete"
@@ -77,6 +79,10 @@ class RecommendationFollowUpResponse(BaseModel):
 class RecommendationFollowUpCodexResultRequest(BaseModel):
     request_id: str
     answer: str
+
+
+def recommendation_key(recommendation: Recommendation) -> str:
+    return f"{recommendation.category}:{recommendation.severity}:{recommendation.title}:{recommendation.detail}"
 
 
 RECOMMENDATION_SCHEMA: dict[str, Any] = {
@@ -446,9 +452,12 @@ def _codex_followup_command(request_id: str, request: RecommendationFollowUpRequ
 def _openai_missing_followup_response(
     request: RecommendationFollowUpRequest,
     tickers: list[str],
+    settings: Settings,
 ) -> RecommendationFollowUpResponse:
     request_id = uuid.uuid4().hex
     response = RecommendationFollowUpResponse(
+        recommendation_key=recommendation_key(request.recommendation),
+        question=request.question,
         generated_at=datetime.now(timezone.utc),
         mode="codex_required",
         status="pending_codex",
@@ -460,36 +469,58 @@ def _openai_missing_followup_response(
         follow_up_id=request_id,
         codex_command=_codex_followup_command(request_id, request, tickers),
     )
-    with _CODEX_FOLLOW_UPS_LOCK:
-        _CODEX_FOLLOW_UPS[request_id] = response
+    _store_recommendation_followup(response, settings)
     return response
 
 
-def load_recommendation_followup_result(request_id: str) -> RecommendationFollowUpResponse | None:
-    with _CODEX_FOLLOW_UPS_LOCK:
-        return _CODEX_FOLLOW_UPS.get(request_id)
+def _store_recommendation_followup(response: RecommendationFollowUpResponse, settings: Settings) -> None:
+    with connect(settings.data_dir) as conn:
+        save_recommendation_followup(conn, response)
+        conn.commit()
+
+
+def load_recommendation_followups(settings: Settings | None = None) -> list[RecommendationFollowUpResponse]:
+    settings = settings or get_settings()
+    with connect(settings.data_dir) as conn:
+        return [
+            RecommendationFollowUpResponse.model_validate_json(payload)
+            for payload in load_recommendation_followup_payloads(conn)
+        ]
+
+
+def load_recommendation_followup_result(
+    request_id: str,
+    settings: Settings | None = None,
+) -> RecommendationFollowUpResponse | None:
+    settings = settings or get_settings()
+    with connect(settings.data_dir) as conn:
+        payload = load_recommendation_followup_payload(conn, request_id)
+    return RecommendationFollowUpResponse.model_validate_json(payload) if payload else None
 
 
 def submit_recommendation_followup_codex_result(
     request: RecommendationFollowUpCodexResultRequest,
+    settings: Settings | None = None,
 ) -> RecommendationFollowUpResponse | None:
+    settings = settings or get_settings()
     answer = request.answer.strip()
     if not answer:
         raise ValueError("Answer cannot be empty.")
-    with _CODEX_FOLLOW_UPS_LOCK:
-        existing = _CODEX_FOLLOW_UPS.get(request.request_id)
-        if existing is None:
-            return None
-        response = RecommendationFollowUpResponse(
-            generated_at=datetime.now(timezone.utc),
-            mode="codex",
-            status="complete",
-            answer=answer,
-            context_tickers=existing.context_tickers,
-            follow_up_id=request.request_id,
-        )
-        _CODEX_FOLLOW_UPS[request.request_id] = response
-        return response
+    existing = load_recommendation_followup_result(request.request_id, settings)
+    if existing is None:
+        return None
+    response = RecommendationFollowUpResponse(
+        recommendation_key=existing.recommendation_key,
+        question=existing.question,
+        generated_at=datetime.now(timezone.utc),
+        mode="codex",
+        status="complete",
+        answer=answer,
+        context_tickers=existing.context_tickers,
+        follow_up_id=request.request_id,
+    )
+    _store_recommendation_followup(response, settings)
+    return response
 
 
 def answer_recommendation_followup(
@@ -500,7 +531,7 @@ def answer_recommendation_followup(
     settings = settings or get_settings()
     tickers = _extract_context_tickers(snapshot, request.recommendation, request.question)
     if not settings.openai_api_key:
-        return _openai_missing_followup_response(request, tickers)
+        return _openai_missing_followup_response(request, tickers, settings)
 
     context = _followup_context(snapshot, request.recommendation, request.question, tickers)
     response = requests.post(
@@ -525,13 +556,18 @@ def answer_recommendation_followup(
     answer = _extract_text(response.json()).strip()
     if not answer:
         raise ValueError("AI follow-up returned an empty answer.")
-    return RecommendationFollowUpResponse(
+    followup = RecommendationFollowUpResponse(
+        recommendation_key=recommendation_key(request.recommendation),
+        question=request.question,
         generated_at=datetime.now(timezone.utc),
         mode="openai",
         status="complete",
         answer=answer,
         context_tickers=tickers,
+        follow_up_id=uuid.uuid4().hex,
     )
+    _store_recommendation_followup(followup, settings)
+    return followup
 
 
 def _breakdown_percent(snapshot: PortfolioSnapshot, name: str) -> float:
