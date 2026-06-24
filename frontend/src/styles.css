@@ -2261,42 +2261,137 @@ td small {
 }
 
 .rec-follow-up-thread {
-  border-left: 2px solid #d8e2f0;
   display: grid;
-  gap: 10px;
-  margin-top: 12px;
-  padding-left: 12px;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 2px 0 0;
 }
 
 .rec-follow-up-turn {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
-.rec-follow-up-message span {
+.rec-follow-up-message {
+  align-items: flex-end;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  max-width: min(760px, 100%);
+}
+
+.rec-follow-up-question {
+  grid-template-columns: minmax(0, 1fr) 28px;
+  justify-self: end;
+}
+
+.rec-follow-up-question .rec-chat-avatar {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.rec-follow-up-question .rec-chat-bubble {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: end;
+}
+
+.rec-chat-avatar {
+  align-items: center;
+  background: #e9eef6;
+  border: 1px solid #d5deea;
+  border-radius: 999px;
+  color: #39445a;
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.rec-follow-up-question .rec-chat-avatar {
+  background: #e8f3f0;
+  border-color: #cbe1db;
+  color: #2d7f6f;
+}
+
+.rec-chat-bubble {
+  background: #f6f8fb;
+  border: 1px solid #dfe5ee;
+  border-radius: 8px;
+  min-width: 0;
+  padding: 10px 12px;
+}
+
+.rec-follow-up-question .rec-chat-bubble {
+  background: #194f90;
+  border-color: #194f90;
+  color: white;
+  max-width: min(560px, 100%);
+}
+
+.rec-chat-meta {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.rec-chat-meta span {
   color: #657186;
   display: block;
-  font-size: 0.72rem;
-  font-weight: 800;
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
+.rec-chat-meta time {
+  color: #7a8495;
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.rec-follow-up-question .rec-chat-meta span,
+.rec-follow-up-question .rec-chat-meta time {
+  color: rgba(255, 255, 255, 0.78);
+}
+
 .rec-follow-up-message p {
-  color: #39445a;
-  margin-top: 2px;
+  color: inherit;
+  font-size: 0.86rem;
+  line-height: 1.48;
+  margin: 0;
   white-space: pre-line;
 }
 
-.rec-follow-up-answer p {
+.rec-follow-up-answer .rec-chat-bubble {
   color: #1f2d3d;
 }
 
 .rec-follow-up-status {
+  align-items: center;
   color: #657186;
-  display: block;
+  display: inline-flex;
   font-size: 0.76rem;
   font-weight: 800;
+  gap: 7px;
   margin-top: 6px;
+}
+
+.rec-follow-up-status span {
+  animation: rec-pulse 1.4s ease-in-out infinite;
+  background: #2d7f6f;
+  border-radius: 999px;
+  display: inline-block;
+  height: 7px;
+  width: 7px;
+}
+
+@keyframes rec-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1); }
 }
 
 .rec-follow-up-command {
@@ -2307,8 +2402,12 @@ td small {
   overflow: hidden;
 }
 
-.rec-follow-up-command > span {
+.rec-follow-up-command summary {
   border-bottom: 1px solid #dbe2ec;
+  color: #39445a;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 850;
   padding: 8px 10px;
 }
 
@@ -2330,19 +2429,39 @@ td small {
 }
 
 .rec-follow-up-form {
+  align-items: end;
+  background: #f8fafc;
+  border: 1px solid #dfe5ee;
+  border-radius: 8px;
   display: grid;
-  gap: 8px;
+  gap: 6px;
   grid-template-columns: minmax(0, 1fr) auto;
-  margin-top: 12px;
+  margin-top: 14px;
+  padding: 6px;
 }
 
-.rec-follow-up-form input {
+.rec-follow-up-form textarea {
+  background: transparent;
+  border: 0;
+  color: #18212f;
+  font: inherit;
+  line-height: 1.4;
+  max-height: 120px;
+  min-height: 34px;
   min-width: 0;
+  outline: none;
+  padding: 7px 8px;
+  resize: vertical;
 }
 
 .rec-follow-up-form button {
-  min-width: 88px;
+  align-self: end;
+  border-radius: 6px;
+  height: 34px;
   justify-content: center;
+  min-height: 34px;
+  padding: 0;
+  width: 38px;
 }
 
 .rec-info .rec-icon {  color: #2d7f6f; }
@@ -2731,14 +2850,6 @@ td small {
 
   .brain-input-row button {
     justify-content: center;
-    width: 100%;
-  }
-
-  .rec-follow-up-form {
-    grid-template-columns: 1fr;
-  }
-
-  .rec-follow-up-form button {
     width: 100%;
   }
 

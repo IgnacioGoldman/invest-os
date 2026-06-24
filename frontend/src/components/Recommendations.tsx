@@ -1,4 +1,4 @@
-import { AlertTriangle, Info, Send, ShieldAlert, Sparkles } from "lucide-react";
+import { AlertTriangle, Bot, Info, SendHorizontal, ShieldAlert, Sparkles, UserRound } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import type { Recommendation, RecommendationFollowUpResponse } from "../api";
 import { formatDateTime } from "../format";
@@ -48,16 +48,6 @@ function isSourceDataNewer(generatedAt?: string | null, latestSourceSyncedAt?: s
 
 function recommendationKey(rec: Recommendation) {
   return `${rec.category}:${rec.severity}:${rec.title}:${rec.detail}`;
-}
-
-function followUpLabel(response: RecommendationFollowUpResponse) {
-  if (response.mode === "codex") {
-    return "invest-os codex";
-  }
-  if (response.mode === "codex_required") {
-    return "invest-os";
-  }
-  return "invest-os ai";
 }
 
 function groupFollowUps(
@@ -247,23 +237,43 @@ export function Recommendations({
                                 key={turn.response.follow_up_id ?? `${turn.response.generated_at}-${index}`}
                               >
                                 <div className="rec-follow-up-message rec-follow-up-question">
-                                  <span>me</span>
-                                  <p>{turn.question}</p>
+                                  <span className="rec-chat-avatar" aria-hidden="true">
+                                    <UserRound size={14} />
+                                  </span>
+                                  <div className="rec-chat-bubble">
+                                    <div className="rec-chat-meta">
+                                      <span>me</span>
+                                    </div>
+                                    <p>{turn.question}</p>
+                                  </div>
                                 </div>
                                 <div className="rec-follow-up-message rec-follow-up-answer">
-                                  <span>{followUpLabel(turn.response)}</span>
-                                  <p>{turn.response.answer}</p>
-                                  {turn.response.status === "pending_codex" && (
-                                    <small className="rec-follow-up-status">Waiting for Codex callback</small>
-                                  )}
-                                  {turn.response.codex_command && (
-                                    <div className="rec-follow-up-command">
-                                      <span>Codex IDE prompt</span>
-                                      <pre>
-                                        <code>{turn.response.codex_command}</code>
-                                      </pre>
+                                  <span className="rec-chat-avatar" aria-hidden="true">
+                                    <Bot size={14} />
+                                  </span>
+                                  <div className="rec-chat-bubble">
+                                    <div className="rec-chat-meta">
+                                      <span>invest-os</span>
+                                      <time dateTime={turn.response.generated_at}>
+                                        {formatDateTime(turn.response.generated_at)}
+                                      </time>
                                     </div>
-                                  )}
+                                    <p>{turn.response.answer}</p>
+                                    {turn.response.status === "pending_codex" && (
+                                      <small className="rec-follow-up-status">
+                                        <span aria-hidden="true" />
+                                        Waiting for Codex callback
+                                      </small>
+                                    )}
+                                    {turn.response.codex_command && (
+                                      <details className="rec-follow-up-command">
+                                        <summary>Codex IDE prompt</summary>
+                                        <pre>
+                                          <code>{turn.response.codex_command}</code>
+                                        </pre>
+                                      </details>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             ))}
@@ -276,21 +286,27 @@ export function Recommendations({
                         )}
                         {onAskRecommendation && (
                           <form className="rec-follow-up-form" onSubmit={(event) => askRecommendation(event, rec)}>
-                            <input
+                            <textarea
                               value={draft}
                               onChange={(event) =>
                                 setDrafts((current) => ({ ...current, [key]: event.target.value }))
                               }
-                              placeholder="Ask about this recommendation"
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter" && !event.shiftKey) {
+                                  event.preventDefault();
+                                  event.currentTarget.form?.requestSubmit();
+                                }
+                              }}
+                              placeholder="Ask invest-os about this recommendation"
                               aria-label={`Ask about ${rec.title}`}
+                              rows={1}
                             />
                             <button
                               type="submit"
                               disabled={isPending || !draft.trim()}
-                              title="Analyze this recommendation"
+                              title={isPending ? "Waiting for Invest OS" : "Send question"}
                             >
-                              <Send size={15} aria-hidden="true" />
-                              {isPending ? "Thinking" : "Ask"}
+                              <SendHorizontal size={16} aria-hidden="true" />
                             </button>
                           </form>
                         )}
