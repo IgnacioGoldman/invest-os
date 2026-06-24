@@ -1,0 +1,36 @@
+{
+  "ticker": "DT",
+  "name": "Dynatrace, Inc.",
+  "cik": 1773383,
+  "source": "open_free_public",
+  "generated_at": "2026-06-24T10:57:04.559189+00:00",
+  "saved_path": "data/stocks/open_data/DT/2026-06-24.json",
+  "analysis": {
+    "needs_more_data": false,
+    "conviction": 6.0,
+    "opportunity_type": "Temporary selloff",
+    "business": "mixed",
+    "price": "better_spot",
+    "valuation": "very_pricey",
+    "missing_data": []
+  },
+  "available_metrics": 31,
+  "total_metrics": 32,
+  "coverage_percent": 96.88,
+  "collectable_metrics": 32,
+  "collectable_coverage_percent": 96.88,
+  "missing_metrics": [
+    "valuation.ev_to_ebitda"
+  ],
+  "not_meaningful_metrics": [],
+  "proxy_metrics": [
+    "business_health.roic",
+    "valuation.forward_pe",
+    "valuation.peg"
+  ],
+  "unsupported_metric_paths": [],
+  "provider_data_gaps": [
+    "Only 3 annual values available for debt.",
+    "Only 3 historical valuation values available for ev_to_ebitda."
+  ]
+}

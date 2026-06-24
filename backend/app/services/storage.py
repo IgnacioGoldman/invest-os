@@ -335,3 +335,10 @@ def load_recommendation_payloads(conn: sqlite3.Connection) -> list[str]:
         row["payload"]
         for row in conn.execute("SELECT payload FROM recommendations ORDER BY position, id")
     ]
+
+
+def load_recommendations_generated_at(conn: sqlite3.Connection) -> datetime | None:
+    row = conn.execute("SELECT MAX(generated_at) AS generated_at FROM recommendations").fetchone()
+    if row is None or row["generated_at"] is None:
+        return None
+    return datetime.fromisoformat(row["generated_at"])

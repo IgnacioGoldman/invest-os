@@ -378,6 +378,7 @@ def select_balanced_universe(
     adr_target: int,
     max_per_sector: int,
     min_major_sectors: int,
+    forced_candidates: list[StockCandidate] | None = None,
 ) -> list[StockCandidate]:
     sorted_candidates = sorted(candidates, key=lambda item: item.composite_score, reverse=True)
     selected: list[StockCandidate] = []
@@ -408,6 +409,15 @@ def select_balanced_universe(
         sector_counts[candidate.sector] = sector_counts.get(candidate.sector, 0) + 1
         region_counts[candidate.region] = region_counts.get(candidate.region, 0) + 1
         return True
+
+    for candidate in sorted(forced_candidates or [], key=lambda item: item.composite_score, reverse=True):
+        if candidate.symbol in selected_symbols or _issuer_key(candidate) in selected_issuers or len(selected) >= count:
+            continue
+        selected.append(candidate)
+        selected_symbols.add(candidate.symbol)
+        selected_issuers.add(_issuer_key(candidate))
+        sector_counts[candidate.sector] = sector_counts.get(candidate.sector, 0) + 1
+        region_counts[candidate.region] = region_counts.get(candidate.region, 0) + 1
 
     sector_order = sorted(
         MAJOR_SECTORS,
@@ -442,9 +452,14 @@ def select_balanced_universe(
 
 def build_universe(args: argparse.Namespace) -> dict[str, Any]:
     session = requests.Session()
+    forced_symbols = {symbol.strip().upper() for symbol in args.force_tickers.split(",") if symbol.strip()}
     raw_candidates = fetch_nasdaq_candidates(session, limit=args.nasdaq_limit)
     raw_candidates.sort(key=lambda item: ((item.dollar_volume or 0), (item.market_cap or 0)), reverse=True)
     candidates = raw_candidates[: args.candidate_pool]
+    missing_forced_candidates = [
+        candidate for candidate in raw_candidates if candidate.symbol in forced_symbols and candidate.symbol not in {item.symbol for item in candidates}
+    ]
+    candidates.extend(missing_forced_candidates)
     enrich_history(candidates, chunk_size=args.history_chunk_size)
     score_candidates(candidates)
     spread_pool = sorted(candidates, key=lambda item: item.composite_score, reverse=True)
@@ -464,6 +479,8 @@ def build_universe(args: argparse.Namespace) -> dict[str, Any]:
         min_avg_dollar_volume=args.min_avg_dollar_volume,
         min_data_quality=args.min_data_quality,
     )
+    forced_candidates = [candidate for candidate in candidates if candidate.symbol in forced_symbols]
+    forced_missing = sorted(forced_symbols - {candidate.symbol for candidate in forced_candidates})
     selected = select_balanced_universe(
         eligible,
         count=args.count,
@@ -471,6 +488,7 @@ def build_universe(args: argparse.Namespace) -> dict[str, Any]:
         adr_target=args.adr_target,
         max_per_sector=args.max_per_sector,
         min_major_sectors=args.min_major_sectors,
+        forced_candidates=forced_candidates,
     )
     selected.sort(key=lambda item: item.composite_score, reverse=True)
     rows = [asdict(item) for item in selected]
@@ -495,6 +513,7 @@ def build_universe(args: argparse.Namespace) -> dict[str, Any]:
             "min_data_quality": args.min_data_quality,
             "spread_enrich_limit": args.spread_enrich_limit,
             "quote_timeout": args.quote_timeout,
+            "force_tickers": sorted(forced_symbols),
         },
         "methodology": (
             "Build a broad US-listed candidate pool, compute liquidity/activity/size/volatility/data-quality scores, "
@@ -507,6 +526,8 @@ def build_universe(args: argparse.Namespace) -> dict[str, Any]:
             "scored_candidates": len(candidates),
             "eligible_candidates": len(eligible),
             "selected_count": len(selected),
+            "forced_selected": sorted(symbol for symbol in forced_symbols if symbol in {item.symbol for item in selected}),
+            "forced_missing": forced_missing,
             "region_counts": _counts(item.region for item in selected),
             "sector_counts": _counts(item.sector for item in selected),
         },
@@ -539,6 +560,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--history-chunk-size", type=int, default=80)
     parser.add_argument("--quote-delay", type=float, default=0.02)
     parser.add_argument("--quote-timeout", type=float, default=5)
+    parser.add_argument(
+        "--force-tickers",
+        default="DT",
+        help="Comma-separated ticker symbols to force into the output universe when present in the source pool.",
+    )
     return parser.parse_args(argv)
 
 

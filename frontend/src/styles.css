@@ -2165,6 +2165,41 @@ td small {
   margin-bottom: 18px;
 }
 
+.recommendations-run-time {
+  color: #657186;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.recommendations-stale-alert {
+  align-items: flex-start;
+  background: #fff8e8;
+  border-top: 1px solid #f1dfb7;
+  color: #7a5412;
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+}
+
+.recommendations-stale-alert svg {
+  color: #b08218;
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.recommendations-stale-alert strong {
+  color: #5d3e0d;
+  display: block;
+  font-size: 0.9rem;
+}
+
+.recommendations-stale-alert p {
+  color: #7a5412;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  margin: 3px 0 0;
+}
+
 .rec-groups {
   display: grid;
   gap: 1px;
@@ -2208,6 +2243,11 @@ td small {
   margin-top: 2px;
 }
 
+.rec-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .rec-item strong {
   display: block;
   font-size: 0.92rem;
@@ -2218,6 +2258,58 @@ td small {
   font-size: 0.86rem;
   line-height: 1.45;
   margin: 3px 0 0;
+}
+
+.rec-follow-up-thread {
+  border-left: 2px solid #d8e2f0;
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding-left: 12px;
+}
+
+.rec-follow-up-turn {
+  display: grid;
+  gap: 8px;
+}
+
+.rec-follow-up-message span {
+  color: #657186;
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.rec-follow-up-message p {
+  color: #39445a;
+  margin-top: 2px;
+  white-space: pre-line;
+}
+
+.rec-follow-up-answer p {
+  color: #1f2d3d;
+}
+
+.rec-follow-up-error {
+  color: #9d2626;
+  font-weight: 700;
+}
+
+.rec-follow-up-form {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: 12px;
+}
+
+.rec-follow-up-form input {
+  min-width: 0;
+}
+
+.rec-follow-up-form button {
+  min-width: 88px;
+  justify-content: center;
 }
 
 .rec-info .rec-icon {  color: #2d7f6f; }
@@ -2606,6 +2698,14 @@ td small {
 
   .brain-input-row button {
     justify-content: center;
+    width: 100%;
+  }
+
+  .rec-follow-up-form {
+    grid-template-columns: 1fr;
+  }
+
+  .rec-follow-up-form button {
     width: 100%;
   }
 

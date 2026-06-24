@@ -19,7 +19,14 @@ from app.services.asset_opportunities import (
     load_asset_opportunities_by_class,
     load_latest_asset_opportunities,
 )
-from app.services.recommendations import Recommendation, evaluate, generate_and_store
+from app.services.recommendations import (
+    RecommendationFollowUpRequest,
+    RecommendationFollowUpResponse,
+    RecommendationSnapshot,
+    answer_recommendation_followup,
+    generate_and_store,
+    load_saved_recommendation_snapshot,
+)
 from app.services.refresh_jobs import RefreshJob, list_refresh_jobs, start_refresh_job
 from app.services.stock_candidate_analysis import StockCandidateAnalysis, load_latest_stock_candidate_analysis
 from app.services.stock_entry_analysis import StockEntryAnalysis, analyze_latest_open_data_stock_entries, analyze_latest_open_data_stock_entry
@@ -63,19 +70,27 @@ def order_history():
 
 
 @app.get("/api/recommendations")
-def recommendations() -> list[Recommendation]:
-    return evaluate(get_portfolio_snapshot())
+def recommendations() -> RecommendationSnapshot:
+    return load_saved_recommendation_snapshot()
 
 
 @app.post("/api/recommendations")
-def generate_recommendations() -> list[Recommendation]:
+def generate_recommendations() -> RecommendationSnapshot:
     settings = get_settings()
-    if not settings.openai_api_key:
-        raise HTTPException(status_code=400, detail="OPENAI_API_KEY is not configured.")
     try:
-        return generate_and_store(get_portfolio_snapshot(), settings)
+        generate_and_store(get_portfolio_snapshot(), settings)
+        return load_saved_recommendation_snapshot(settings)
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"AI recommendations failed: {exc}") from exc
+
+
+@app.post("/api/recommendations/follow-up")
+def recommendation_follow_up(request: RecommendationFollowUpRequest) -> RecommendationFollowUpResponse:
+    settings = get_settings()
+    try:
+        return answer_recommendation_followup(get_portfolio_snapshot(), request, settings)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Recommendation follow-up failed: {exc}") from exc
 
 
 @app.get("/api/entry/snapshot")

@@ -159,6 +159,18 @@ export type Recommendation = {
   detail: string;
 };
 
+export type RecommendationSnapshot = {
+  generated_at?: string | null;
+  recommendations: Recommendation[];
+};
+
+export type RecommendationFollowUpResponse = {
+  generated_at: string;
+  mode: "openai" | "local";
+  answer: string;
+  context_tickers: string[];
+};
+
 export type BusinessHealth = {
   revenue_growth_yoy?: number | null;
   revenue_cagr_3y?: number | null;
@@ -499,7 +511,7 @@ export async function fetchRefreshJobs(): Promise<RefreshJob[]> {
   return requestJson<RefreshJob[]>("/api/refresh/jobs");
 }
 
-export async function fetchRecommendations(): Promise<Recommendation[]> {
+export async function fetchRecommendations(): Promise<RecommendationSnapshot> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
@@ -518,7 +530,7 @@ export async function fetchRecommendations(): Promise<Recommendation[]> {
   }
 }
 
-export async function generateRecommendations(): Promise<Recommendation[]> {
+export async function generateRecommendations(): Promise<RecommendationSnapshot> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS * 3);
   try {
@@ -539,6 +551,21 @@ export async function generateRecommendations(): Promise<Recommendation[]> {
   } finally {
     window.clearTimeout(timeout);
   }
+}
+
+export async function askRecommendationFollowUp(
+  recommendation: Recommendation,
+  question: string,
+): Promise<RecommendationFollowUpResponse> {
+  return requestJson<RecommendationFollowUpResponse>(
+    "/api/recommendations/follow-up",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ recommendation, question }),
+    },
+    REQUEST_TIMEOUT_MS * 2,
+  );
 }
 
 export async function fetchLatestEntrySnapshot(): Promise<EntrySnapshotFile | null> {

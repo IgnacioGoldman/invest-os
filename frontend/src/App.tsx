@@ -1,6 +1,7 @@
 import { AlertTriangle, ArrowLeft, BriefcaseBusiness, ChevronDown, DatabaseZap, RefreshCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
+  askRecommendationFollowUp,
   fetchCommodityOpportunities,
   fetchCryptoOpportunities,
   fetchEtfOpportunities,
@@ -52,6 +53,16 @@ const addAmount = (values: Record<string, number>, key: string, amount: number) 
   values[normalized] = (values[normalized] ?? 0) + amount;
 };
 
+const latestSourceSyncTimestamp = (snapshot: PortfolioSnapshot | null) => {
+  const timestamps = (snapshot?.source_sync_status ?? [])
+    .map((status) => (status.last_synced_at ? new Date(status.last_synced_at).getTime() : Number.NaN))
+    .filter(Number.isFinite);
+  if (timestamps.length === 0) {
+    return null;
+  }
+  return new Date(Math.max(...timestamps)).toISOString();
+};
+
 function App() {
   const [snapshot, setSnapshot] = useState<PortfolioSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +72,7 @@ function App() {
   const [connectorView, setConnectorView] = useState<ConnectorView>("home");
   const [aiInput, setAiInput] = useState("Analyze my portfolio and find stock entry candidates.");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [recommendationsGeneratedAt, setRecommendationsGeneratedAt] = useState<string | null>(null);
   const [analyzingBrain, setAnalyzingBrain] = useState(false);
   const [openDataStocks, setOpenDataStocks] = useState<OpenDataStockSnapshot[]>([]);
   const [selectedOpenDataTicker, setSelectedOpenDataTicker] = useState("GOOGL");
@@ -82,9 +94,10 @@ function App() {
   const refreshJobsRef = useRef<RefreshJob[]>([]);
 
   const loadPortfolioData = async () => {
-    const [snap, recs] = await Promise.all([fetchSnapshot(), fetchRecommendations()]);
+    const [snap, recommendationSnapshot] = await Promise.all([fetchSnapshot(), fetchRecommendations()]);
     setSnapshot(snap);
-    setRecommendations(recs);
+    setRecommendations(recommendationSnapshot.recommendations);
+    setRecommendationsGeneratedAt(recommendationSnapshot.generated_at ?? null);
   };
 
   const pollRefreshJobs = async (isCancelled?: () => boolean) => {
@@ -245,11 +258,12 @@ function App() {
     setAnalyzingBrain(true);
     setError(null);
     try {
-      const [recs, candidateAnalysis] = await Promise.all([
+      const [recommendationSnapshot, candidateAnalysis] = await Promise.all([
         generateRecommendations(),
         fetchStockCandidateAnalysis(),
       ]);
-      setRecommendations(recs);
+      setRecommendations(recommendationSnapshot.recommendations);
+      setRecommendationsGeneratedAt(recommendationSnapshot.generated_at ?? null);
       setStockCandidateAnalysis(candidateAnalysis);
       setStockCandidateAnalysisLoaded(true);
     } catch (err) {
@@ -325,6 +339,7 @@ function App() {
     });
   const activeRefreshJobs = refreshJobs.filter(isActiveRefreshJob);
   const sourceSyncStatuses = summarizeSourceStatuses(snapshot?.source_sync_status ?? []);
+  const latestSourceSyncedAt = latestSourceSyncTimestamp(snapshot);
   const warningCount = snapshot?.data_warnings.length ?? 0;
   const syncIssueCount =
     sourceSyncStatuses.filter((status) => status.status !== "success").length ?? 0;
@@ -457,6 +472,9 @@ function App() {
 
               <Recommendations
                 recommendations={recommendations}
+                generatedAt={recommendationsGeneratedAt}
+                latestSourceSyncedAt={latestSourceSyncedAt}
+                onAskRecommendation={askRecommendationFollowUp}
                 alwaysShow
               />
               <StockCandidateAnalysisPanel

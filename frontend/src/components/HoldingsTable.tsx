@@ -8,6 +8,15 @@ type Props = {
   displayRate: number;
 };
 
+const formatPercent = (value: number) => new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value);
+
+function pnlPercent(holding: Holding) {
+  if (holding.unrealized_pnl == null || holding.cost_basis == null || holding.cost_basis <= 0) {
+    return null;
+  }
+  return (holding.unrealized_pnl / holding.cost_basis) * 100;
+}
+
 export function HoldingsTable({ title, holdings, displayCurrency, displayRate }: Props) {
   const aggregate = holdings.reduce(
     (totals, holding) => {
@@ -56,28 +65,38 @@ export function HoldingsTable({ title, holdings, displayCurrency, displayRate }:
             </tr>
           </thead>
           <tbody>
-            {holdings.map((holding) => (
-              <tr key={holding.id}>
-                <td>
-                  <strong>{holding.symbol}</strong>
-                  <small>{holding.name}</small>
-                </td>
-                <td>{holding.platform}</td>
-                <td>{holding.asset_class}</td>
-                <td>{formatNumber(holding.quantity)}</td>
-                <td>{holding.current_price == null ? "-" : formatMoney(holding.current_price, holding.currency)}</td>
-                <td>{formatMoney(holding.market_value, holding.currency)}</td>
-                <td>{holding.value_in_base == null ? "-" : formatMoney(holding.value_in_base * displayRate, displayCurrency)}</td>
-                <td>
-                  <span>{holding.valuation_source ?? "-"}</span>
-                  <small>{formatDateTime(holding.valuation_timestamp)}</small>
-                </td>
-                <td className={(holding.unrealized_pnl ?? 0) >= 0 ? "positive" : "negative"}>
-                  {holding.unrealized_pnl == null ? "-" : formatMoney(holding.unrealized_pnl, holding.currency)}
-                </td>
-                <td>{holding.confidence}</td>
-              </tr>
-            ))}
+            {holdings.map((holding) => {
+              const roiPercent = pnlPercent(holding);
+              return (
+                <tr key={holding.id}>
+                  <td>
+                    <strong>{holding.symbol}</strong>
+                    <small>{holding.name}</small>
+                  </td>
+                  <td>{holding.platform}</td>
+                  <td>{holding.asset_class}</td>
+                  <td>{formatNumber(holding.quantity)}</td>
+                  <td>{holding.current_price == null ? "-" : formatMoney(holding.current_price, holding.currency)}</td>
+                  <td>{formatMoney(holding.market_value, holding.currency)}</td>
+                  <td>{holding.value_in_base == null ? "-" : formatMoney(holding.value_in_base * displayRate, displayCurrency)}</td>
+                  <td>
+                    <span>{holding.valuation_source ?? "-"}</span>
+                    <small>{formatDateTime(holding.valuation_timestamp)}</small>
+                  </td>
+                  <td className={(holding.unrealized_pnl ?? 0) >= 0 ? "positive" : "negative"}>
+                    {holding.unrealized_pnl == null ? (
+                      "-"
+                    ) : (
+                      <>
+                        {formatMoney(holding.unrealized_pnl, holding.currency)}
+                        {roiPercent != null && <small>{formatPercent(roiPercent)}%</small>}
+                      </>
+                    )}
+                  </td>
+                  <td>{holding.confidence}</td>
+                </tr>
+              );
+            })}
             {holdings.length === 0 && (
               <tr>
                 <td colSpan={10} className="empty">No holdings loaded.</td>
