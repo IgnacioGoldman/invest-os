@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, memo, useMemo, useState } from "react";
 import type { CashBalance, Order } from "../api";
 import { formatDateTime, formatMoney, formatNumber } from "../format";
 
@@ -7,6 +7,7 @@ type Props = {
   title: string;
   orders: Order[];
   cashBalances?: CashBalance[];
+  emptyLabel?: string;
 };
 
 type OrderGroup = {
@@ -128,14 +129,18 @@ const unrealizedRoiFor = (row: Order | OrderGroup) =>
 const remainingCostBasisFor = (row: Order | OrderGroup) =>
   (isOrderGroup(row) ? row.remainingCostBasis : row.remaining_cost_basis) ?? null;
 
-const pnlFor = (row: Order | OrderGroup) => (row.side === "SELL" ? realizedPnlFor(row) : unrealizedPnlFor(row));
+const pnlFor = (row: Order | OrderGroup) =>
+  row.side === "SELL" ? realizedPnlFor(row) : unrealizedPnlFor(row) ?? realizedPnlFor(row);
 
-const roiFor = (row: Order | OrderGroup) => (row.side === "SELL" ? realizedRoiFor(row) : unrealizedRoiFor(row));
+const roiFor = (row: Order | OrderGroup) =>
+  row.side === "SELL" ? realizedRoiFor(row) : unrealizedRoiFor(row) ?? realizedRoiFor(row);
 
 const costBasisFor = (row: Order | OrderGroup) =>
   row.side === "SELL"
     ? (isOrderGroup(row) ? row.costBasisAmount : row.cost_basis_amount) ?? null
-    : remainingCostBasisFor(row);
+    : unrealizedPnlFor(row) != null
+      ? remainingCostBasisFor(row)
+      : (isOrderGroup(row) ? row.costBasisAmount : row.cost_basis_amount) ?? null;
 
 const statusFor = (row: Order | OrderGroup) =>
   isOrderGroup(row) ? row.positionStatus ?? row.status : row.position_status ?? row.status;
@@ -144,7 +149,7 @@ const roiLabelFor = (row: Order | OrderGroup) => {
   if (roiFor(row) == null) {
     return null;
   }
-  return row.side === "SELL" ? "realized" : "unrealized";
+  return row.side === "SELL" || unrealizedPnlFor(row) == null ? "realized" : "unrealized";
 };
 
 const accountValueLabel = (value?: number | null, currency?: string | null, warning?: string | null) => {
@@ -256,7 +261,12 @@ const groupHistoryOrders = (orders: Order[]): OrderGroup[] => {
     .sort((a, b) => String(b.date ?? "").localeCompare(String(a.date ?? "")));
 };
 
-export function OrdersTable({ title, orders, cashBalances = [] }: Props) {
+export const OrdersTable = memo(function OrdersTable({
+  title,
+  orders,
+  cashBalances = [],
+  emptyLabel = "No orders loaded.",
+}: Props) {
   const isHistory = title.toLowerCase().includes("history");
   const accountValueHeading =
     orders.length > 0 && orders.every((order) => order.source === "binance") ? "Binance Value" : "Account Value";
@@ -430,7 +440,7 @@ export function OrdersTable({ title, orders, cashBalances = [] }: Props) {
               ))}
             {(isHistory ? groupedOrders.length : orders.length) === 0 && (
               <tr>
-                <td colSpan={isHistory ? 15 : 9} className="empty">No orders loaded.</td>
+                <td colSpan={isHistory ? 15 : 9} className="empty">{emptyLabel}</td>
               </tr>
             )}
           </tbody>
@@ -455,4 +465,4 @@ export function OrdersTable({ title, orders, cashBalances = [] }: Props) {
       )}
     </section>
   );
-}
+});

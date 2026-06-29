@@ -21,6 +21,8 @@ class Settings:
     ibkr_host: str = "127.0.0.1"
     ibkr_port: int = 7497
     ibkr_client_id: int = 1
+    ibkr_flex_token: str | None = None
+    ibkr_flex_query_id: str = "1554875"
     fx_rates: Dict[str, float] = field(default_factory=lambda: {"EUR": 1.0})
     enable_demo_fallback: bool = True
     market_price_stale_hours: int = 24
@@ -64,6 +66,8 @@ def get_settings() -> Settings:
         ibkr_host=os.getenv("IBKR_HOST", "127.0.0.1"),
         ibkr_port=int(os.getenv("IBKR_PORT", "7497")),
         ibkr_client_id=int(os.getenv("IBKR_CLIENT_ID", "1")),
+        ibkr_flex_token=os.getenv("IBKR_FLEX_TOKEN") or None,
+        ibkr_flex_query_id=os.getenv("IBKR_FLEX_QUERY_ID", "1554875"),
         fx_rates=_load_fx_rates(os.getenv("FX_RATES_JSON")),
         enable_demo_fallback=os.getenv("ENABLE_DEMO_FALLBACK", "true").lower() == "true",
         market_price_stale_hours=int(os.getenv("MARKET_PRICE_STALE_HOURS", "24")),

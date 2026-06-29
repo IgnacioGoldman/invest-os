@@ -26,6 +26,12 @@ from app.services.storage import (
     save_recommendation_followup,
 )
 from app.services.stock_entry_analysis import StockEntryAnalysis, analyze_latest_open_data_stock_entry
+from app.services.user_profile import (
+    InvestorProfile,
+    active_allocation,
+    investor_profile_context,
+    load_investor_profile,
+)
 
 
 PROJECT_DIR = Path(__file__).resolve().parents[3]
@@ -135,6 +141,10 @@ def _skill_text() -> str:
 
 def _snapshot_payload(snapshot: PortfolioSnapshot) -> str:
     return json.dumps(snapshot.model_dump(mode="json"), indent=2, sort_keys=True)
+
+
+def _profile_payload(profile: InvestorProfile) -> str:
+    return json.dumps(investor_profile_context(profile), indent=2, sort_keys=True)
 
 
 def _safe_load_json(path: Path) -> Any | None:
@@ -413,7 +423,13 @@ def _local_followup_answer(snapshot: PortfolioSnapshot, recommendation: Recommen
     )
 
 
-def _followup_context(snapshot: PortfolioSnapshot, recommendation: Recommendation, question: str, tickers: list[str]) -> dict[str, Any]:
+def _followup_context(
+    snapshot: PortfolioSnapshot,
+    profile: InvestorProfile,
+    recommendation: Recommendation,
+    question: str,
+    tickers: list[str],
+) -> dict[str, Any]:
     stock_context: dict[str, Any] = {}
     for ticker in tickers:
         stock_snapshot, stock_analysis, derived = _stock_context_summary(ticker)
@@ -426,18 +442,26 @@ def _followup_context(snapshot: PortfolioSnapshot, recommendation: Recommendatio
         "recommendation": recommendation.model_dump(mode="json"),
         "question": question,
         "context_tickers": tickers,
+        "investor_profile": investor_profile_context(profile),
         "portfolio_snapshot": snapshot.model_dump(mode="json"),
         "stock_context": stock_context,
     }
 
 
-def _codex_followup_command(request_id: str, request: RecommendationFollowUpRequest, tickers: list[str]) -> str:
+def _codex_followup_command(
+    request_id: str,
+    request: RecommendationFollowUpRequest,
+    tickers: list[str],
+    profile: InvestorProfile,
+) -> str:
     callback_payload = json.dumps({"request_id": request_id, "answer": "REPLACE_WITH_FINAL_ANALYSIS"})
     return (
         f"Paste this into Codex IDE while the Invest OS backend is running from {PROJECT_DIR}:\n\n"
         "Answer this Invest OS recommendation follow-up using AI reasoning and the local repo data. "
-        "Inspect the current portfolio snapshot, saved recommendations, and any relevant stock/asset insight files. "
+        "Inspect the current portfolio snapshot, saved investor profile, saved recommendations, "
+        "and any relevant stock/asset insight files. "
         "Do not place trades, and do not use a deterministic fallback as the final answer.\n\n"
+        f"Saved investor profile JSON:\n{_profile_payload(profile)}\n\n"
         f"Recommendation JSON:\n{json.dumps(request.recommendation.model_dump(mode='json'), indent=2, sort_keys=True)}\n\n"
         f"User question:\n{request.question}\n\n"
         f"Detected context tickers: {', '.join(tickers) if tickers else 'none'}\n\n"
@@ -452,6 +476,7 @@ def _codex_followup_command(request_id: str, request: RecommendationFollowUpRequ
 def _openai_missing_followup_response(
     request: RecommendationFollowUpRequest,
     tickers: list[str],
+    profile: InvestorProfile,
     settings: Settings,
 ) -> RecommendationFollowUpResponse:
     request_id = uuid.uuid4().hex
@@ -467,7 +492,7 @@ def _openai_missing_followup_response(
         ),
         context_tickers=tickers,
         follow_up_id=request_id,
-        codex_command=_codex_followup_command(request_id, request, tickers),
+        codex_command=_codex_followup_command(request_id, request, tickers, profile),
     )
     _store_recommendation_followup(response, settings)
     return response
@@ -529,11 +554,12 @@ def answer_recommendation_followup(
     settings: Settings | None = None,
 ) -> RecommendationFollowUpResponse:
     settings = settings or get_settings()
+    profile = load_investor_profile(settings)
     tickers = _extract_context_tickers(snapshot, request.recommendation, request.question)
     if not settings.openai_api_key:
-        return _openai_missing_followup_response(request, tickers, settings)
+        return _openai_missing_followup_response(request, tickers, profile, settings)
 
-    context = _followup_context(snapshot, request.recommendation, request.question, tickers)
+    context = _followup_context(snapshot, profile, request.recommendation, request.question, tickers)
     response = requests.post(
         OPENAI_RESPONSES_URL,
         headers={
@@ -545,7 +571,8 @@ def answer_recommendation_followup(
             "instructions": (
                 f"{_skill_text()}\n\n"
                 "Answer the user's follow-up conversationally and concisely. Use the supplied portfolio snapshot, "
-                "recommendation, and stock insight context. Give concrete staged actions or decision thresholds when useful. "
+                "saved investor profile, recommendation, and stock insight context. Give concrete staged actions or decision thresholds when useful. "
+                "Treat the saved investor profile as the user's preferred risk target. "
                 "Do not claim certainty and do not say you placed or will place trades."
             ),
             "input": json.dumps(context, indent=2, sort_keys=True),
@@ -639,9 +666,13 @@ def _format_percent(value: float) -> str:
     return f"{value:.1f}%"
 
 
-def _local_recommendations(snapshot: PortfolioSnapshot) -> list[Recommendation]:
+def _local_recommendations(snapshot: PortfolioSnapshot, profile: InvestorProfile) -> list[Recommendation]:
     recommendations: list[Recommendation] = []
     net_worth = snapshot.total_net_worth
+    target_allocation = active_allocation(profile)
+    target_cash_percent = target_allocation.cash_bonds
+    target_crypto_percent = target_allocation.crypto
+    target_stock_percent = target_allocation.individual_stocks
     top_holding = max(snapshot.holdings, key=lambda item: item.value_in_base or 0, default=None)
     direct_crypto_value = _breakdown_value(snapshot, "crypto")
     direct_crypto_percent = _breakdown_percent(snapshot, "crypto")
@@ -661,6 +692,9 @@ def _local_recommendations(snapshot: PortfolioSnapshot) -> list[Recommendation]:
         for cash in snapshot.cash_balances
         if cash.purpose in {"emergency_fund", "monthly_spending"}
     )
+    unreserved_deployable_cash = max(deployable_cash - open_buy_reserve, 0)
+    crypto_above_target = crypto_linked_percent > target_crypto_percent + 2
+    cash_above_target = cash_percent > target_cash_percent + 5
 
     if top_holding and top_holding.value_in_base:
         top_percent = _holding_percent(snapshot, top_holding.value_in_base)
@@ -672,17 +706,19 @@ def _local_recommendations(snapshot: PortfolioSnapshot) -> list[Recommendation]:
                     title=f"Set {top_holding.symbol} cap before adding risk",
                     detail=(
                         f"{top_holding.symbol} is about {_format_base(snapshot, top_holding.value_in_base)} "
-                        f"or {_format_percent(top_percent)} of net worth. Decide whether this is a hold, "
+                        f"or {_format_percent(top_percent)} of net worth. Your saved profile targets "
+                        f"{_format_percent(target_stock_percent)} in individual stocks overall. Decide whether this is a hold, "
                         "capped exposure, staged trim, or no-new-buy sleeve before funding another concentrated entry."
                     ),
                 )
             )
 
-    if crypto_linked_percent >= 10:
+    if crypto_linked_percent >= 10 and crypto_above_target:
         detail = (
             f"Direct crypto is {_format_percent(direct_crypto_percent)} of net worth"
             f" and crypto-linked exposure is about {_format_percent(crypto_linked_percent)}"
-            " after counting MSTR and open buy-order reserve."
+            " after counting MSTR and open buy-order reserve. "
+            f"Your saved profile targets {_format_percent(target_crypto_percent)} crypto."
         )
         if open_buy_reserve > 0:
             detail += f" Open BUY orders reserve roughly {_format_base(snapshot, open_buy_reserve)}."
@@ -710,17 +746,25 @@ def _local_recommendations(snapshot: PortfolioSnapshot) -> list[Recommendation]:
             )
         )
 
-    if defensive_cash > 0 and deployable_cash > 0:
+    if deployable_cash > 0 and (open_buy_reserve > 0 or cash_above_target):
+        reserve_detail = ""
+        if open_buy_reserve > 0:
+            reserve_detail = (
+                f" Existing open BUY orders already claim {_format_base(snapshot, open_buy_reserve)}, "
+                f"leaving about {_format_base(snapshot, unreserved_deployable_cash)} not tied to an order."
+            )
         recommendations.append(
             Recommendation(
                 severity="warning",
                 category="capital_move",
-                title="Separate defensive cash from deployable cash",
+                title="Assign the remaining deployable cash",
                 detail=(
-                    f"Cash is {_format_percent(cash_percent)} of net worth, with about "
-                    f"{_format_base(snapshot, defensive_cash)} marked defensive and "
-                    f"{_format_base(snapshot, deployable_cash)} deployable. Use broker or exchange deployable cash first; "
-                    "move bank cash only if the defensive buffer is explicitly larger than needed."
+                    f"Cash is {_format_percent(cash_percent)} of net worth versus your saved "
+                    f"{_format_percent(target_cash_percent)} cash/bonds target: "
+                    f"{_format_base(snapshot, defensive_cash)} is defensive and "
+                    f"{_format_base(snapshot, deployable_cash)} is deployable.{reserve_detail} "
+                    "The useful decision is how much of the unreserved deployable cash is a stock drawdown reserve, "
+                    "how much is crypto drawdown reserve, and how much can be used for near-term entries."
                 ),
             )
         )
@@ -744,7 +788,8 @@ def _local_recommendations(snapshot: PortfolioSnapshot) -> list[Recommendation]:
             category="theme",
             title="Only research entries after rebalance checks",
             detail=(
-                "After concentration, crypto-sleeve, and reserve decisions are clear, research new entries in underrepresented "
+                f"Using your saved {profile.personality.replace('_', ' ')} profile, after concentration, crypto-sleeve, "
+                "and reserve decisions are clear, research new entries in underrepresented "
                 "areas such as healthcare, energy/grid/utilities, industrial automation, defense/cyber resilience, or selective "
                 "non-US exposure rather than another tech-like single name."
             ),
@@ -785,14 +830,18 @@ def save_recommendations(recommendations: list[Recommendation], settings: Settin
 
 def generate_recommendations(snapshot: PortfolioSnapshot, settings: Settings | None = None) -> list[Recommendation]:
     settings = settings or get_settings()
+    profile = load_investor_profile(settings)
     if not settings.openai_api_key:
-        return _local_recommendations(snapshot)
+        return _local_recommendations(snapshot, profile)
 
     instructions = (
         f"{_skill_text()}\n\n"
         "Return only JSON matching the provided schema. Keep recommendations specific to the supplied snapshot. "
+        "Use the saved investor profile as the user's active risk target and target allocation. "
         "Use deterministic opportunity signals when supplied, but do not force a new entry if portfolio fit, "
         "risk, cash, concentration, stale data, or missing data argue for waiting. "
+        "Do not warn about an exposure merely because it is high if it is still within the saved profile target; "
+        "do warn about single-name concentration, stale data, duplicated risk sleeves, or cash reserved for open orders. "
         "Do not use fixed portfolio thresholds unless they are explicitly present in the supplied context."
     )
     response = requests.post(
@@ -806,6 +855,7 @@ def generate_recommendations(snapshot: PortfolioSnapshot, settings: Settings | N
             "instructions": instructions,
             "input": (
                 f"Portfolio snapshot JSON:\n{_snapshot_payload(snapshot)}\n\n"
+                f"Investor profile JSON:\n{_profile_payload(profile)}\n\n"
                 f"Deterministic opportunity context JSON:\n{_deterministic_opportunity_payload()}"
             ),
             "text": {

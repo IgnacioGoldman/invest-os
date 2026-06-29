@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { BreakdownItem, CashBalance, DisplayRate, Holding, Order } from "../api";
 import { formatMoney } from "../format";
 
@@ -88,7 +89,7 @@ function segmentWidth(value: number, total: number) {
   return `${Math.max(2, (value / total) * 100)}%`;
 }
 
-export function BreakdownTable({
+export const BreakdownTable = memo(function BreakdownTable({
   title,
   items,
   currency,
@@ -123,7 +124,7 @@ export function BreakdownTable({
       </div>
     </section>
   );
-}
+});
 
 type BreakdownRowProps = {
   item: BreakdownItem;

@@ -1,3 +1,5 @@
+import { memo, useMemo } from "react";
+
 type Props = {
   warnings: string[];
 };
@@ -8,7 +10,9 @@ const splitSuggestion = (warning: string) => {
   return { message, suggestion };
 };
 
-export function DataWarnings({ warnings }: Props) {
+export const DataWarnings = memo(function DataWarnings({ warnings }: Props) {
+  const rows = useMemo(() => warnings.map((warning) => ({ warning, ...splitSuggestion(warning) })), [warnings]);
+
   if (warnings.length === 0) {
     return null;
   }
@@ -17,8 +21,7 @@ export function DataWarnings({ warnings }: Props) {
     <section className="warnings">
       <h2>Data Warnings</h2>
       <ul>
-        {warnings.map((warning) => {
-          const { message, suggestion } = splitSuggestion(warning);
+        {rows.map(({ warning, message, suggestion }) => {
           return (
             <li key={warning}>
               <span>{message}</span>
@@ -29,4 +32,4 @@ export function DataWarnings({ warnings }: Props) {
       </ul>
     </section>
   );
-}
+});

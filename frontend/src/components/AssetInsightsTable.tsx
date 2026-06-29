@@ -1,5 +1,5 @@
 import { AlertTriangle, BarChart3, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import type { AssetMetric, AssetOpportunity } from "../api";
 import { formatDateTime } from "../format";
 
@@ -86,10 +86,10 @@ function columnsFor(kind: AssetInsightKind) {
   return [...SHARED_COLUMNS, ...ETF_COLUMNS];
 }
 
-export function AssetInsightsTable({ title, assets, loading, kind, emptyLabel }: Props) {
+export const AssetInsightsTable = memo(function AssetInsightsTable({ title, assets, loading, kind, emptyLabel }: Props) {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
-  const columns = columnsFor(kind);
+  const columns = useMemo(() => columnsFor(kind), [kind]);
   const visibleAssets = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return assets
@@ -249,4 +249,4 @@ export function AssetInsightsTable({ title, assets, loading, kind, emptyLabel }:
       )}
     </section>
   );
-}
+});

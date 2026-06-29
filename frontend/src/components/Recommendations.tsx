@@ -1,5 +1,16 @@
-import { AlertTriangle, Bot, Info, SendHorizontal, ShieldAlert, Sparkles, UserRound } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  AlertTriangle,
+  ArchiveX,
+  Bot,
+  ChevronDown,
+  Info,
+  SendHorizontal,
+  ShieldAlert,
+  Sparkles,
+  Undo2,
+  UserRound,
+} from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import type { Recommendation, RecommendationFollowUpResponse } from "../api";
 import { formatDateTime } from "../format";
 
@@ -20,6 +31,21 @@ type FollowUpTurn = {
   response: RecommendationFollowUpResponse;
 };
 
+type RecommendationItemProps = {
+  rec: Recommendation;
+  recKey: string;
+  chatId: string;
+  thread: FollowUpTurn[];
+  isPending: boolean;
+  followUpError?: string;
+  chatIsOpen: boolean;
+  isDiscarded?: boolean;
+  onAsk?: (recommendation: Recommendation, question: string) => Promise<boolean>;
+  onDiscard?: (key: string) => void;
+  onRestore?: (key: string) => void;
+  onToggleChat: (key: string) => void;
+};
+
 const ICON = {
   info: <Info size={16} />,
   warning: <AlertTriangle size={16} />,
@@ -31,10 +57,39 @@ const CATEGORY_LABEL = {
   drawdown_reserve: "Drawdown reserve",
   trim_or_exit: "Trim / exit",
   capital_move: "Capital move",
-  entry: "Entry",
+  entry: "Entry candidates",
   concentration: "Concentration",
   theme: "Theme",
 } as const;
+
+const DISCARDED_RECOMMENDATIONS_STORAGE_KEY = "invest-os:discarded-recommendation-keys";
+
+function loadDiscardedRecommendationKeys() {
+  if (typeof window === "undefined") {
+    return new Set<string>();
+  }
+  try {
+    const raw = window.localStorage.getItem(DISCARDED_RECOMMENDATIONS_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) {
+      return new Set<string>();
+    }
+    return new Set(parsed.filter((key): key is string => typeof key === "string"));
+  } catch {
+    return new Set<string>();
+  }
+}
+
+function saveDiscardedRecommendationKeys(keys: Set<string>) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.localStorage.setItem(DISCARDED_RECOMMENDATIONS_STORAGE_KEY, JSON.stringify([...keys]));
+  } catch {
+    // Keep discard usable even if browser storage is unavailable.
+  }
+}
 
 function isSourceDataNewer(generatedAt?: string | null, latestSourceSyncedAt?: string | null) {
   if (!latestSourceSyncedAt) {
@@ -66,7 +121,168 @@ function groupFollowUps(
   }, {});
 }
 
-export function Recommendations({
+const RecommendationItem = memo(function RecommendationItem({
+  rec,
+  recKey,
+  chatId,
+  thread,
+  isPending,
+  followUpError,
+  chatIsOpen,
+  isDiscarded = false,
+  onAsk,
+  onDiscard,
+  onRestore,
+  onToggleChat,
+}: RecommendationItemProps) {
+  const [draft, setDraft] = useState("");
+  const hasAsk = Boolean(onAsk);
+
+  const askRecommendation = async (event: FormEvent) => {
+    event.preventDefault();
+    const question = draft.trim();
+    if (!onAsk || !question) {
+      return;
+    }
+    const didSend = await onAsk(rec, question);
+    if (didSend) {
+      setDraft("");
+    }
+  };
+
+  return (
+    <li className={`rec-item rec-${rec.severity}`}>
+      <span className="rec-icon">{ICON[rec.severity]}</span>
+      <div className="rec-content">
+        <strong>{rec.title}</strong>
+        <p>{rec.detail}</p>
+        {isDiscarded ? (
+          <div className="rec-discarded-actions">
+            <button type="button" onClick={() => onRestore?.(recKey)} title="Restore recommendation">
+              <Undo2 size={15} aria-hidden="true" />
+              Restore
+            </button>
+          </div>
+        ) : (
+          <div className="rec-action-row">
+            {(thread.length > 0 || hasAsk) && (
+              <div className="rec-chat-dropdown">
+                <button
+                  type="button"
+                  className="rec-chat-toggle"
+                  aria-expanded={chatIsOpen}
+                  aria-controls={chatId}
+                  onClick={() => onToggleChat(recKey)}
+                >
+                  <span>
+                    <Bot size={15} aria-hidden="true" />
+                    {thread.length > 0 ? `Chat (${thread.length})` : "Ask follow-up"}
+                  </span>
+                  <ChevronDown size={16} aria-hidden="true" />
+                </button>
+
+                {chatIsOpen && (
+                  <div className="rec-chat-panel" id={chatId}>
+                    {thread.length > 0 && (
+                      <div className="rec-follow-up-thread">
+                        {thread.map((turn, turnIndex) => (
+                          <div
+                            className="rec-follow-up-turn"
+                            key={turn.response.follow_up_id ?? `${turn.response.generated_at}-${turnIndex}`}
+                          >
+                            <div className="rec-follow-up-message rec-follow-up-question">
+                              <span className="rec-chat-avatar" aria-hidden="true">
+                                <UserRound size={14} />
+                              </span>
+                              <div className="rec-chat-bubble">
+                                <div className="rec-chat-meta">
+                                  <span>me</span>
+                                </div>
+                                <p>{turn.question}</p>
+                              </div>
+                            </div>
+                            <div className="rec-follow-up-message rec-follow-up-answer">
+                              <span className="rec-chat-avatar" aria-hidden="true">
+                                <Bot size={14} />
+                              </span>
+                              <div className="rec-chat-bubble">
+                                <div className="rec-chat-meta">
+                                  <span>invest-os</span>
+                                  <time dateTime={turn.response.generated_at}>
+                                    {formatDateTime(turn.response.generated_at)}
+                                  </time>
+                                </div>
+                                <p>{turn.response.answer}</p>
+                                {turn.response.status === "pending_codex" && (
+                                  <small className="rec-follow-up-status">
+                                    <span aria-hidden="true" />
+                                    Waiting for Codex callback
+                                  </small>
+                                )}
+                                {turn.response.codex_command && (
+                                  <details className="rec-follow-up-command">
+                                    <summary>Codex IDE prompt</summary>
+                                    <pre>
+                                      <code>{turn.response.codex_command}</code>
+                                    </pre>
+                                  </details>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {followUpError && (
+                      <p className="rec-follow-up-error" role="alert">
+                        {followUpError}
+                      </p>
+                    )}
+                    {onAsk && (
+                      <form className="rec-follow-up-form" onSubmit={askRecommendation}>
+                        <textarea
+                          value={draft}
+                          onChange={(event) => setDraft(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" && !event.shiftKey) {
+                              event.preventDefault();
+                              event.currentTarget.form?.requestSubmit();
+                            }
+                          }}
+                          placeholder="Ask invest-os about this recommendation"
+                          aria-label={`Ask about ${rec.title}`}
+                          rows={1}
+                        />
+                        <button
+                          type="submit"
+                          disabled={isPending || !draft.trim()}
+                          title={isPending ? "Waiting for Invest OS" : "Send question"}
+                        >
+                          <SendHorizontal size={16} aria-hidden="true" />
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            <button
+              type="button"
+              className="rec-discard-button"
+              onClick={() => onDiscard?.(recKey)}
+              title="Discard recommendation"
+            >
+              <ArchiveX size={15} aria-hidden="true" />
+              Discard
+            </button>
+          </div>
+        )}
+      </div>
+    </li>
+  );
+});
+
+export const Recommendations = memo(function Recommendations({
   recommendations,
   generatedAt,
   latestSourceSyncedAt,
@@ -77,24 +293,52 @@ export function Recommendations({
   onPollRecommendation,
   alwaysShow = false,
 }: Props) {
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [followUps, setFollowUps] = useState<Record<string, FollowUpTurn[]>>({});
+  const [openChatKeys, setOpenChatKeys] = useState<Record<string, boolean>>({});
+  const [discardedKeys, setDiscardedKeys] = useState<Set<string>>(loadDiscardedRecommendationKeys);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [followUpErrors, setFollowUpErrors] = useState<Record<string, string>>({});
-  const visibleRecommendations = recommendations.filter((rec) => rec.severity !== "info");
-  const groupedRecommendations = visibleRecommendations.reduce<Record<string, Recommendation[]>>((groups, rec) => {
-    const category = rec.category ?? "allocation";
-    groups[category] = [...(groups[category] ?? []), rec];
-    return groups;
-  }, {});
+  const actionableRecommendations = useMemo(
+    () => recommendations.filter((rec) => rec.severity !== "info"),
+    [recommendations],
+  );
+  const visibleRecommendations = useMemo(
+    () => actionableRecommendations.filter((rec) => !discardedKeys.has(recommendationKey(rec))),
+    [actionableRecommendations, discardedKeys],
+  );
+  const discardedRecommendations = useMemo(
+    () => actionableRecommendations.filter((rec) => discardedKeys.has(recommendationKey(rec))),
+    [actionableRecommendations, discardedKeys],
+  );
+  const groupedRecommendations = useMemo(
+    () =>
+      visibleRecommendations.reduce<Record<string, Recommendation[]>>((groups, rec) => {
+        const category = rec.category ?? "allocation";
+        groups[category] = [...(groups[category] ?? []), rec];
+        return groups;
+      }, {}),
+    [visibleRecommendations],
+  );
   const shouldRerun = isSourceDataNewer(generatedAt, latestSourceSyncedAt);
-  const visibleRecommendationKeys = new Set(visibleRecommendations.map(recommendationKey));
-  const visibleRecommendationKey = [...visibleRecommendationKeys].sort().join("|");
-  const pendingFollowUpIds = Object.values(followUps)
-    .flatMap((turns) => turns.map((turn) => turn.response))
-    .filter((response) => response.status === "pending_codex" && response.follow_up_id)
-    .map((response) => response.follow_up_id as string);
-  const pendingFollowUpKey = [...new Set(pendingFollowUpIds)].sort().join("|");
+  const visibleRecommendationKeys = useMemo(
+    () => new Set(actionableRecommendations.map(recommendationKey)),
+    [actionableRecommendations],
+  );
+  const visibleRecommendationKey = useMemo(
+    () => [...visibleRecommendationKeys].sort().join("|"),
+    [visibleRecommendationKeys],
+  );
+  const pendingFollowUpKey = useMemo(() => {
+    const ids = Object.values(followUps)
+      .flatMap((turns) => turns.map((turn) => turn.response))
+      .filter((response) => response.status === "pending_codex" && response.follow_up_id)
+      .map((response) => response.follow_up_id as string);
+    return [...new Set(ids)].sort().join("|");
+  }, [followUps]);
+
+  useEffect(() => {
+    saveDiscardedRecommendationKeys(discardedKeys);
+  }, [discardedKeys]);
 
   useEffect(() => {
     if (!onLoadRecommendationFollowUps) {
@@ -137,21 +381,24 @@ export function Recommendations({
       const completedById = new Map(completed.map((response) => [response.follow_up_id, response]));
       setFollowUps((threads) => {
         let changed = false;
-        const next = Object.fromEntries(
-          Object.entries(threads).map(([key, turns]) => [
-            key,
-            turns.map((turn) => {
-              const replacement = turn.response.follow_up_id
-                ? completedById.get(turn.response.follow_up_id)
-                : undefined;
-              if (!replacement) {
-                return turn;
-              }
-              changed = true;
-              return { ...turn, response: replacement };
-            }),
-          ]),
-        );
+        const next = { ...threads };
+        Object.entries(threads).forEach(([key, turns]) => {
+          let threadChanged = false;
+          const nextTurns = turns.map((turn) => {
+            const replacement = turn.response.follow_up_id
+              ? completedById.get(turn.response.follow_up_id)
+              : undefined;
+            if (!replacement) {
+              return turn;
+            }
+            threadChanged = true;
+            return { ...turn, response: replacement };
+          });
+          if (threadChanged) {
+            next[key] = nextTurns;
+            changed = true;
+          }
+        });
         return changed ? next : threads;
       });
     };
@@ -163,37 +410,52 @@ export function Recommendations({
     };
   }, [onPollRecommendation, pendingFollowUpKey]);
 
-  const askRecommendation = async (event: FormEvent, rec: Recommendation) => {
-    event.preventDefault();
+  const askRecommendation = useCallback(async (rec: Recommendation, question: string) => {
     if (!onAskRecommendation) {
-      return;
+      return false;
     }
     const key = recommendationKey(rec);
-    const question = (drafts[key] ?? "").trim();
-    if (!question) {
-      return;
-    }
+    setOpenChatKeys((current) => ({ ...current, [key]: true }));
     setPendingKey(key);
     setFollowUpErrors((errors) => ({ ...errors, [key]: "" }));
     try {
       const response = await onAskRecommendation(rec, question);
       const responseKey = response.recommendation_key || key;
+      setOpenChatKeys((current) => ({ ...current, [key]: true, [responseKey]: true }));
       setFollowUps((threads) => ({
         ...threads,
         [responseKey]: [...(threads[responseKey] ?? []), { question: response.question, response }],
       }));
-      setDrafts((current) => ({ ...current, [key]: "" }));
+      return true;
     } catch (error) {
       setFollowUpErrors((errors) => ({
         ...errors,
         [key]: error instanceof Error ? error.message : "Could not analyze this recommendation.",
       }));
+      return false;
     } finally {
       setPendingKey(null);
     }
-  };
+  }, [onAskRecommendation]);
 
-  if (visibleRecommendations.length === 0 && !onAnalyze && !alwaysShow) return null;
+  const toggleChat = useCallback((key: string) => {
+    setOpenChatKeys((current) => ({ ...current, [key]: !(current[key] ?? false) }));
+  }, []);
+
+  const discardRecommendation = useCallback((key: string) => {
+    setDiscardedKeys((current) => new Set(current).add(key));
+    setOpenChatKeys((current) => ({ ...current, [key]: false }));
+  }, []);
+
+  const restoreRecommendation = useCallback((key: string) => {
+    setDiscardedKeys((current) => {
+      const next = new Set(current);
+      next.delete(key);
+      return next;
+    });
+  }, []);
+
+  if (actionableRecommendations.length === 0 && !onAnalyze && !alwaysShow) return null;
 
   return (
     <section className="panel recommendations">
@@ -218,100 +480,24 @@ export function Recommendations({
             <div className="rec-group" key={category}>
               <h3>{CATEGORY_LABEL[category as keyof typeof CATEGORY_LABEL] ?? category}</h3>
               <ul className="rec-list">
-                {recs.map((rec) => {
+                {recs.map((rec, index) => {
                   const key = recommendationKey(rec);
-                  const draft = drafts[key] ?? "";
                   const thread = followUps[key] ?? [];
-                  const isPending = pendingKey === key;
+                  const chatId = `rec-chat-${category.replace(/[^a-zA-Z0-9_-]/g, "-")}-${index}`;
                   return (
-                    <li key={key} className={`rec-item rec-${rec.severity}`}>
-                      <span className="rec-icon">{ICON[rec.severity]}</span>
-                      <div className="rec-content">
-                        <strong>{rec.title}</strong>
-                        <p>{rec.detail}</p>
-                        {thread.length > 0 && (
-                          <div className="rec-follow-up-thread">
-                            {thread.map((turn, index) => (
-                              <div
-                                className="rec-follow-up-turn"
-                                key={turn.response.follow_up_id ?? `${turn.response.generated_at}-${index}`}
-                              >
-                                <div className="rec-follow-up-message rec-follow-up-question">
-                                  <span className="rec-chat-avatar" aria-hidden="true">
-                                    <UserRound size={14} />
-                                  </span>
-                                  <div className="rec-chat-bubble">
-                                    <div className="rec-chat-meta">
-                                      <span>me</span>
-                                    </div>
-                                    <p>{turn.question}</p>
-                                  </div>
-                                </div>
-                                <div className="rec-follow-up-message rec-follow-up-answer">
-                                  <span className="rec-chat-avatar" aria-hidden="true">
-                                    <Bot size={14} />
-                                  </span>
-                                  <div className="rec-chat-bubble">
-                                    <div className="rec-chat-meta">
-                                      <span>invest-os</span>
-                                      <time dateTime={turn.response.generated_at}>
-                                        {formatDateTime(turn.response.generated_at)}
-                                      </time>
-                                    </div>
-                                    <p>{turn.response.answer}</p>
-                                    {turn.response.status === "pending_codex" && (
-                                      <small className="rec-follow-up-status">
-                                        <span aria-hidden="true" />
-                                        Waiting for Codex callback
-                                      </small>
-                                    )}
-                                    {turn.response.codex_command && (
-                                      <details className="rec-follow-up-command">
-                                        <summary>Codex IDE prompt</summary>
-                                        <pre>
-                                          <code>{turn.response.codex_command}</code>
-                                        </pre>
-                                      </details>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {followUpErrors[key] && (
-                          <p className="rec-follow-up-error" role="alert">
-                            {followUpErrors[key]}
-                          </p>
-                        )}
-                        {onAskRecommendation && (
-                          <form className="rec-follow-up-form" onSubmit={(event) => askRecommendation(event, rec)}>
-                            <textarea
-                              value={draft}
-                              onChange={(event) =>
-                                setDrafts((current) => ({ ...current, [key]: event.target.value }))
-                              }
-                              onKeyDown={(event) => {
-                                if (event.key === "Enter" && !event.shiftKey) {
-                                  event.preventDefault();
-                                  event.currentTarget.form?.requestSubmit();
-                                }
-                              }}
-                              placeholder="Ask invest-os about this recommendation"
-                              aria-label={`Ask about ${rec.title}`}
-                              rows={1}
-                            />
-                            <button
-                              type="submit"
-                              disabled={isPending || !draft.trim()}
-                              title={isPending ? "Waiting for Invest OS" : "Send question"}
-                            >
-                              <SendHorizontal size={16} aria-hidden="true" />
-                            </button>
-                          </form>
-                        )}
-                      </div>
-                    </li>
+                    <RecommendationItem
+                      key={key}
+                      rec={rec}
+                      recKey={key}
+                      chatId={chatId}
+                      thread={thread}
+                      isPending={pendingKey === key}
+                      followUpError={followUpErrors[key]}
+                      chatIsOpen={openChatKeys[key] ?? false}
+                      onAsk={onAskRecommendation ? askRecommendation : undefined}
+                      onDiscard={discardRecommendation}
+                      onToggleChat={toggleChat}
+                    />
                   );
                 })}
               </ul>
@@ -319,7 +505,38 @@ export function Recommendations({
           ))}
         </div>
       ) : (
-        <p className="empty block">No warning recommendations yet.</p>
+        <p className="empty block">No active recommendations.</p>
+      )}
+      {discardedRecommendations.length > 0 && (
+        <details className="rec-discarded-pile">
+          <summary>
+            <span>
+              <ArchiveX size={15} aria-hidden="true" />
+              Discarded recommendations
+            </span>
+            <strong>{discardedRecommendations.length}</strong>
+          </summary>
+          <ul className="rec-list rec-discarded-list">
+            {discardedRecommendations.map((rec, index) => {
+              const key = recommendationKey(rec);
+              return (
+                <RecommendationItem
+                  key={key}
+                  rec={rec}
+                  recKey={key}
+                  chatId={`rec-discarded-${index}`}
+                  thread={followUps[key] ?? []}
+                  isPending={false}
+                  followUpError={followUpErrors[key]}
+                  chatIsOpen={false}
+                  isDiscarded
+                  onRestore={restoreRecommendation}
+                  onToggleChat={toggleChat}
+                />
+              );
+            })}
+          </ul>
+        </details>
       )}
       {shouldRerun && (
         <div className="recommendations-stale-alert" role="alert">
@@ -336,4 +553,4 @@ export function Recommendations({
       )}
     </section>
   );
-}
+});

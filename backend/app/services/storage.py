@@ -107,6 +107,26 @@ def init_db(conn: sqlite3.Connection) -> None:
             created_at TEXT NOT NULL,
             payload TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS user_profile (
+            id TEXT PRIMARY KEY,
+            updated_at TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS user_notes (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS user_preferences (
+            id TEXT PRIMARY KEY,
+            updated_at TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
         """
     )
     conn.commit()
@@ -397,3 +417,49 @@ def load_recommendation_followup_payloads(conn: sqlite3.Connection) -> list[str]
             "SELECT payload FROM recommendation_followups ORDER BY created_at, id"
         )
     ]
+
+
+def save_user_profile_payload(conn: sqlite3.Connection, profile_id: str, updated_at: datetime, payload: str) -> None:
+    conn.execute(
+        """
+        INSERT INTO user_profile (id, updated_at, payload)
+        VALUES (?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+            updated_at = excluded.updated_at,
+            payload = excluded.payload
+        """,
+        (profile_id, updated_at.isoformat(), payload),
+    )
+
+
+def load_user_profile_payload(conn: sqlite3.Connection, profile_id: str) -> tuple[str, datetime] | None:
+    row = conn.execute(
+        "SELECT payload, updated_at FROM user_profile WHERE id = ?",
+        (profile_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return row["payload"], datetime.fromisoformat(row["updated_at"])
+
+
+def save_user_preferences_payload(conn: sqlite3.Connection, preferences_id: str, updated_at: datetime, payload: str) -> None:
+    conn.execute(
+        """
+        INSERT INTO user_preferences (id, updated_at, payload)
+        VALUES (?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+            updated_at = excluded.updated_at,
+            payload = excluded.payload
+        """,
+        (preferences_id, updated_at.isoformat(), payload),
+    )
+
+
+def load_user_preferences_payload(conn: sqlite3.Connection, preferences_id: str) -> tuple[str, datetime] | None:
+    row = conn.execute(
+        "SELECT payload, updated_at FROM user_preferences WHERE id = ?",
+        (preferences_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return row["payload"], datetime.fromisoformat(row["updated_at"])

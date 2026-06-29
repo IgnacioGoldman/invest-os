@@ -301,6 +301,16 @@ def _split_pair(symbol: str) -> tuple[str, str | None]:
     return symbol.upper(), None
 
 
+def _order_base_and_quote(order: Order) -> tuple[str, str | None]:
+    base, quote = _split_pair(order.symbol)
+    if quote:
+        return base, quote
+    if order.quote_currency:
+        return base, order.quote_currency.upper()
+    raw_currency = order.raw.get("currency") or order.raw.get("quoteCurrency")
+    return base, str(raw_currency).upper() if raw_currency else None
+
+
 def _value_bucket(currency: str | None) -> str | None:
     if currency is None:
         return None
@@ -313,7 +323,7 @@ def _same_value_bucket(left: str | None, right: str | None) -> bool:
 
 
 def _price_for_order(order: Order, market_prices: dict[tuple[str, str], MarketPrice]) -> MarketPrice | None:
-    base, quote = _split_pair(order.symbol)
+    base, quote = _order_base_and_quote(order)
     candidates = []
     if quote:
         candidates.append((base, quote))
@@ -336,7 +346,7 @@ def _order_quote_amount(order: Order) -> float | None:
 
 
 def _pnl_base_quantity_and_quote_amount(order: Order) -> tuple[float, float | None]:
-    base, quote = _split_pair(order.symbol)
+    base, quote = _order_base_and_quote(order)
     quote_amount = _order_quote_amount(order)
     commission_asset, commission_amount = _commission(order)
     base_quantity = order.quantity
@@ -445,13 +455,14 @@ def _enrich_binance_order_history(
 ) -> list[Order]:
     lots: dict[tuple[str, str], list[_CostLot]] = defaultdict(list)
     updates: dict[str, dict[str, object]] = {}
+    lot_realized_costs: dict[str, float] = defaultdict(float)
     ordered = sorted(orders, key=_order_sort_time)
     orders_by_id = {order.id: order for order in orders}
 
     for order in ordered:
         quote_amount = _order_quote_amount(order)
         pnl_quantity, pnl_quote_amount = _pnl_base_quantity_and_quote_amount(order)
-        base, quote = _split_pair(order.symbol)
+        base, quote = _order_base_and_quote(order)
         quote_bucket = _value_bucket(quote)
         lot_key = (base, quote_bucket or quote or "")
         update = _base_order_update(order, quote_amount, quote)
@@ -491,11 +502,20 @@ def _enrich_binance_order_history(
 
             consumed_quantity = min(remaining_to_match, lot.remaining_quantity)
             consumed_cost = lot.remaining_cost * (consumed_quantity / lot.remaining_quantity)
+            consumed_proceeds = pnl_quote_amount * (consumed_quantity / pnl_quantity)
             lot.remaining_quantity -= consumed_quantity
             lot.remaining_cost -= consumed_cost
             remaining_to_match -= consumed_quantity
             matched_quantity += consumed_quantity
             matched_cost += consumed_cost
+            lot_update = updates[lot.order_id]
+            lot_realized_costs[lot.order_id] += consumed_cost
+            lot_realized_pnl = consumed_proceeds - consumed_cost
+            lot_update["realized_pnl"] = float(lot_update.get("realized_pnl") or 0.0) + lot_realized_pnl
+            if lot_realized_costs[lot.order_id] > EPSILON:
+                lot_update["realized_roi_percent"] = (
+                    float(lot_update["realized_pnl"]) / lot_realized_costs[lot.order_id]
+                ) * 100
 
         matched_proceeds = pnl_quote_amount * (matched_quantity / pnl_quantity) if matched_quantity > EPSILON else None
         realized_pnl = matched_proceeds - matched_cost if matched_proceeds is not None else None
@@ -525,8 +545,10 @@ def _enrich_binance_order_history(
             remaining_quantity = max(lot.remaining_quantity, 0.0)
             remaining_cost = max(lot.remaining_cost, 0.0)
             if remaining_quantity <= EPSILON:
+                realized_roi = update.get("realized_roi_percent")
                 update.update(
                     {
+                        "roi_percent": realized_roi,
                         "remaining_quantity": 0.0,
                         "remaining_cost_basis": 0.0,
                         "position_status": "closed",
@@ -858,22 +880,13 @@ def _enrich_binance_capital_values(
     )
 
 
-def _enrich_generic_order_history(orders: list[Order]) -> list[Order]:
-    enriched: list[Order] = []
-    for order in orders:
-        quote_amount = _order_quote_amount(order)
-        _base, quote = _split_pair(order.symbol)
-        enriched.append(
-            order.model_copy(
-                update={
-                    "quote_currency": quote,
-                    "purchase_amount": quote_amount,
-                    "cost_basis_amount": quote_amount if order.side == "BUY" else None,
-                    "position_status": "unknown",
-                }
-            )
-        )
-    return enriched
+def _enrich_generic_order_history(
+    orders: list[Order],
+    market_prices: dict[tuple[str, str], MarketPrice],
+    settings: Settings,
+    fx_rates: dict[str, FxRate],
+) -> list[Order]:
+    return _enrich_binance_order_history(orders, market_prices, settings, fx_rates)
 
 
 def _enrich_order_history(
@@ -900,7 +913,7 @@ def _enrich_order_history(
         order.id: order
         for order in [
             *enriched_binance_orders,
-            *_enrich_generic_order_history(other_orders),
+            *_enrich_generic_order_history(other_orders, market_prices, settings, fx_rates),
         ]
     }
     return [enriched_by_id.get(order.id, order) for order in orders], enriched_ledger_events
@@ -1074,6 +1087,17 @@ def _is_failed_refresh(source: str, result: SourceResult) -> bool:
     return any(any(marker in warning.lower() for marker in failure_markers) for warning in result.warnings)
 
 
+def _is_transient_ibkr_history_warning(warnings: list[str]) -> bool:
+    transient_markers = (
+        "1001",
+        "1019",
+        "could not be generated",
+        "generation in progress",
+        "try again shortly",
+    )
+    return any(any(marker in warning.lower() for marker in transient_markers) for warning in warnings)
+
+
 def _sync_status(source: str, result: SourceResult) -> str:
     if _is_failed_refresh(source, result):
         return "error"
@@ -1146,6 +1170,26 @@ def _refresh_one(conn, settings: Settings, source: RefreshSource, progress: Refr
 
     if source == "ibkr_history":
         result = fetch_ibkr_history(settings)
+        existing_ibkr_history = [order for order in load_order_history(conn) if order.source == "ibkr"]
+        warnings = list(result.warnings)
+        if result.order_history:
+            replace_source_result(
+                conn,
+                "ibkr",
+                result,
+                holdings=False,
+                cash_balances=False,
+                open_orders=False,
+                order_history=True,
+            )
+            update_sync_status(conn, "ibkr_history", _sync_status("ibkr_history", result), warnings)
+            return
+
+        if _is_transient_ibkr_history_warning(warnings) and existing_ibkr_history:
+            warnings.append(f"Kept {len(existing_ibkr_history)} cached IBKR activity-history rows.")
+            update_sync_status(conn, "ibkr_history", "warning", warnings)
+            return
+
         if not _is_failed_refresh("ibkr_history", result):
             replace_source_result(
                 conn,
@@ -1156,7 +1200,7 @@ def _refresh_one(conn, settings: Settings, source: RefreshSource, progress: Refr
                 open_orders=False,
                 order_history=True,
             )
-        update_sync_status(conn, "ibkr_history", _sync_status("ibkr_history", result), result.warnings)
+        update_sync_status(conn, "ibkr_history", _sync_status("ibkr_history", result), warnings)
         return
 
     if source == "market_data":

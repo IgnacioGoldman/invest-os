@@ -1,4 +1,5 @@
 import { Brain, Clock3, Info, Sparkles, TrendingUp } from "lucide-react";
+import { memo } from "react";
 import type { ReactNode } from "react";
 import type { StockCandidate, StockCandidateAnalysis } from "../api";
 import { formatDateTime } from "../format";
@@ -117,7 +118,7 @@ function CandidateBlock({
   );
 }
 
-export function StockCandidateAnalysisPanel({ analysis, loading }: Props) {
+export const StockCandidateAnalysisPanel = memo(function StockCandidateAnalysisPanel({ analysis, loading }: Props) {
   return (
     <section className="panel stock-candidate-panel">
       <div className="panel-heading">
@@ -143,7 +144,7 @@ export function StockCandidateAnalysisPanel({ analysis, loading }: Props) {
           <Sparkles size={18} aria-hidden="true" />
           <p>No saved candidate analysis yet.</p>
           <code>
-            Analyze stocks using skills/stock-analysis/stock-entry-analyst.md. Use data/stocks/open_data/*/latest.json and data/stocks/derived_signals/latest.json. Find one long-term accumulation candidate and one tactical entry setup candidate. Ask for missing data only if it blocks the decision. Save the result to data/stocks/ai_candidate_analysis/latest.json.
+            Analyze stocks using skills/stock-analysis/stock-entry-analyst.md. Use /api/user-profile, data/stocks/open_data/*/latest.json, and data/stocks/derived_signals/latest.json. Apply the saved investor personality and target allocation when choosing candidates. Find one long-term accumulation candidate and one tactical entry setup candidate. Ask for missing data only if it blocks the decision. Save the result to data/stocks/ai_candidate_analysis/latest.json.
           </code>
         </div>
       )}
@@ -213,4 +214,4 @@ export function StockCandidateAnalysisPanel({ analysis, loading }: Props) {
       )}
     </section>
   );
-}
+});

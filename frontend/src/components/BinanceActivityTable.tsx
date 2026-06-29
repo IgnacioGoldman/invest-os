@@ -1,13 +1,15 @@
-import { ChevronDown, ChevronRight } from "lucide-react";
-import { Fragment, useState } from "react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Fragment, memo, useMemo, useState, type ReactNode } from "react";
 import type { BinanceLedgerEvent, Order } from "../api";
-import { formatDateTime } from "../format";
+import { formatDateTime, formatMoney } from "../format";
 
 type Props = {
   orders: Order[];
   events: BinanceLedgerEvent[];
   emptyLabel?: string;
   title?: string;
+  controls?: ReactNode;
+  compact?: boolean;
   endTimestamp?: string | null;
   currentBalances?: Record<string, number>;
   currentAssetValues?: Record<string, number>;
@@ -65,6 +67,11 @@ const FIAT_OR_STABLE_ASSETS = new Set([
   "JPY",
 ]);
 const EPSILON = 0.00000001;
+const ACTIVITY_PAGE_SIZE = 75;
+const assetAmountFormatters = new Map<string, Intl.NumberFormat>();
+const percentFormatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+const compactPercentFormatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+const compactDateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
 
 const asNumber = (value: unknown) => {
   if (typeof value === "number") {
@@ -107,7 +114,8 @@ const addChange = (changes: Record<string, number>, asset?: string | null, amoun
 
 const orderChanges = (order: Order) => {
   const changes: Record<string, number> = {};
-  const [base, quote] = splitPair(order.symbol);
+  const [base, pairQuote] = splitPair(order.symbol);
+  const quote = pairQuote ?? order.quote_currency ?? null;
   const quoteAmount = quoteAmountFor(order);
 
   if (order.side === "BUY") {
@@ -119,7 +127,7 @@ const orderChanges = (order: Order) => {
   }
 
   const commissionAsset = typeof order.raw.commissionAsset === "string" ? order.raw.commissionAsset : null;
-  addChange(changes, commissionAsset, -asNumber(order.raw.commission));
+  addChange(changes, commissionAsset, -Math.abs(asNumber(order.raw.commission)));
   return changes;
 };
 
@@ -132,17 +140,30 @@ const valueAsString = (value: unknown) => {
 
 const minuteKey = (value?: string | null) => value?.slice(0, 16) ?? "unknown-time";
 
-const rawOrderId = (order: Order) => valueAsString(order.raw.orderId) ?? valueAsString(order.raw.order_id);
+const rawOrderId = (order: Order) =>
+  valueAsString(order.raw.orderId) ??
+  valueAsString(order.raw.order_id) ??
+  valueAsString(order.raw.ibOrderID) ??
+  valueAsString(order.raw.orderID);
 
 const orderGroupKey = (order: Order) =>
   [order.source, order.platform, order.symbol, order.side, rawOrderId(order) ?? minuteKey(order.created_at)].join("|");
 
 const formatAssetAmount = (asset: string, value: number) => {
   const upper = asset.toUpperCase();
-  const options = FIAT_OR_STABLE_ASSETS.has(upper)
-    ? { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-    : { maximumFractionDigits: 10 };
-  return new Intl.NumberFormat(undefined, options).format(value);
+  const formatterKey = FIAT_OR_STABLE_ASSETS.has(upper) ? "fiat" : "asset";
+  const cached = assetAmountFormatters.get(formatterKey);
+  if (cached) {
+    return cached.format(value);
+  }
+  const formatter = new Intl.NumberFormat(
+    undefined,
+    FIAT_OR_STABLE_ASSETS.has(upper)
+      ? { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+      : { maximumFractionDigits: 10 },
+  );
+  assetAmountFormatters.set(formatterKey, formatter);
+  return formatter.format(value);
 };
 
 const signedAssetAmount = (asset: string, amount: number) =>
@@ -156,16 +177,18 @@ const orderLotQuantities = (order: Order) => {
     return { quantityAsset: base, openQuantity: null, realizedQuantity: null };
   }
   const commissionAsset = typeof order.raw.commissionAsset === "string" ? order.raw.commissionAsset.toUpperCase() : null;
-  const netQuantity = commissionAsset === base ? Math.max(order.quantity - asNumber(order.raw.commission), 0) : order.quantity;
+  const commissionAmount = Math.abs(asNumber(order.raw.commission));
+  const netQuantity = commissionAsset === base ? Math.max(order.quantity - commissionAmount, 0) : order.quantity;
   const openQuantity = order.remaining_quantity ?? null;
   const realizedQuantity = openQuantity == null ? null : Math.max(netQuantity - openQuantity, 0);
   return { quantityAsset: base, openQuantity, realizedQuantity };
 };
 
 const orderNetAmounts = (order: Order) => {
-  const [base, quote] = splitPair(order.symbol);
+  const [base, pairQuote] = splitPair(order.symbol);
+  const quote = pairQuote ?? order.quote_currency ?? null;
   const commissionAsset = typeof order.raw.commissionAsset === "string" ? order.raw.commissionAsset.toUpperCase() : null;
-  const commissionAmount = asNumber(order.raw.commission);
+  const commissionAmount = Math.abs(asNumber(order.raw.commission));
   let baseQuantity = order.quantity;
   let quoteAmount = quoteAmountFor(order);
 
@@ -222,33 +245,21 @@ const orderPriceDetails = (order: Order) => {
   };
 };
 
-const genericOrderRow = (order: Order): ActivityRow => {
-  const quoteAmount = quoteAmountFor(order);
-  const quoteCurrency = order.quote_currency;
-  const amount =
-    quoteAmount > 0 && quoteCurrency
-      ? `${order.side === "BUY" ? "-" : "+"}${formatAssetValue(quoteCurrency, quoteAmount)}`
-      : `${order.side === "BUY" ? "+" : "-"}${formatAssetAmount(order.symbol, order.quantity)} ${order.symbol}`;
+const orderDisplayPnl = (order: Order) =>
+  order.side === "SELL" ? order.realized_pnl : order.unrealized_pnl ?? order.realized_pnl;
 
-  return {
-    id: order.id,
-    createdAt: order.created_at,
-    action: order.side,
-    actionKey: actionKeyFor(order.side),
-    asset: order.symbol,
-    amount,
-    status: order.status,
-    balanceChanges: {},
-    pnl: order.side === "SELL" ? order.realized_pnl : order.unrealized_pnl,
-    roiPercent: order.side === "SELL" ? order.realized_roi_percent : order.unrealized_roi_percent,
-    pnlCurrency: quoteCurrency,
-    pnlBasis: order.side === "SELL" ? order.cost_basis_amount : order.remaining_cost_basis,
-    pnlLabel: order.side === "SELL" ? "realized" : "unrealized",
-    ...orderPriceDetails(order),
-    ...orderLotQuantities(order),
-    note: `${order.platform}${order.order_type ? `, ${order.order_type}` : ""}`,
-  };
-};
+const orderDisplayRoi = (order: Order) =>
+  order.side === "SELL" ? order.realized_roi_percent : order.unrealized_roi_percent ?? order.realized_roi_percent;
+
+const orderDisplayPnlBasis = (order: Order) =>
+  order.side === "SELL"
+    ? order.cost_basis_amount
+    : order.unrealized_pnl != null
+      ? order.remaining_cost_basis
+      : order.cost_basis_amount;
+
+const orderDisplayPnlLabel = (order: Order): "realized" | "unrealized" =>
+  order.side === "SELL" || (order.unrealized_pnl == null && order.realized_pnl != null) ? "realized" : "unrealized";
 
 const eventChanges = (event: BinanceLedgerEvent) => {
   if (event.balance_changes && Object.keys(event.balance_changes).length > 0) {
@@ -298,8 +309,7 @@ const sumNullable = (values: Array<number | null | undefined>) => {
   return valid.length ? valid.reduce((sum, value) => sum + value, 0) : null;
 };
 
-const formatPercent = (value: number) =>
-  new Intl.NumberFormat(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(value);
+const formatPercent = (value: number) => percentFormatter.format(value);
 
 const walletValueLabel = (row: ActivityRow) => {
   if (
@@ -437,6 +447,66 @@ const roiLabel = (row: ActivityRow) => {
   );
 };
 
+const compactDateLabel = (value?: string | null) => {
+  if (!value) {
+    return "-";
+  }
+  return compactDateFormatter.format(new Date(value));
+};
+
+const compactMoneyLabel = (value?: number | null, currency?: string | null) => {
+  if (value == null || !Number.isFinite(value) || !currency) {
+    return "-";
+  }
+  return formatMoney(value, currency);
+};
+
+const compactOperationCost = (row: ActivityRow) =>
+  row.pnlBasis ?? row.purchasePriceBasis ?? null;
+
+const compactOperationNow = (row: ActivityRow) => {
+  const cost = compactOperationCost(row);
+  if (cost != null && row.pnl != null) {
+    return cost + row.pnl;
+  }
+  if (row.sellPriceProceeds != null) {
+    return row.sellPriceProceeds;
+  }
+  return row.walletValueAfter ?? null;
+};
+
+const compactOperationCurrency = (row: ActivityRow) =>
+  row.pnlCurrency ?? row.priceCurrency ?? row.walletValueCurrency ?? null;
+
+const compactOperationAsset = (row: ActivityRow) => {
+  if (row.priceAsset && row.priceQuantity != null && row.priceQuantity > EPSILON) {
+    return (
+      <>
+        <strong>{row.asset}</strong>
+        <small>
+          {formatAssetAmount(row.priceAsset, row.priceQuantity)} {row.priceAsset}
+        </small>
+      </>
+    );
+  }
+  return <strong>{row.asset}</strong>;
+};
+
+const compactOperationPnl = (row: ActivityRow) => {
+  if (row.roiPercent == null && (row.pnl == null || !row.pnlCurrency)) {
+    return "-";
+  }
+  const toneValue = row.roiPercent ?? row.pnl ?? 0;
+  return (
+    <span className={toneValue >= 0 ? "positive" : "negative"}>
+      {row.roiPercent == null
+        ? compactMoneyLabel(row.pnl, row.pnlCurrency)
+        : `${row.roiPercent >= 0 ? "+" : ""}${compactPercentFormatter.format(row.roiPercent)}%`}
+      {row.pnl != null && row.pnlCurrency && <small>{formatMoney(row.pnl, row.pnlCurrency)}</small>}
+    </span>
+  );
+};
+
 const sumValues = (values?: Record<string, number>) => {
   const entries = Object.values(values ?? {}).filter((value) => Number.isFinite(value));
   return entries.length ? entries.reduce((sum, value) => sum + value, 0) : null;
@@ -502,10 +572,8 @@ const buildRows = (
   currentBalances?: Record<string, number>,
   currentAssetValues?: Record<string, number>,
 ) => {
-  const binanceOrders = orders.filter((order) => order.source === "binance");
-  const otherOrders = orders.filter((order) => order.source !== "binance");
   const orderGroups = new Map<string, ActivityRow[]>();
-  binanceOrders.forEach((order) => {
+  orders.forEach((order) => {
     const changes = orderChanges(order);
     const row: ActivityRow = {
       id: order.id,
@@ -523,11 +591,11 @@ const buildRows = (
       balancesAfter: order.account_balances_after,
       assetValuesAfter: order.account_asset_values_after,
       ...orderPriceDetails(order),
-      pnl: order.side === "SELL" ? order.realized_pnl : order.unrealized_pnl,
-      roiPercent: order.side === "SELL" ? order.realized_roi_percent : order.unrealized_roi_percent,
+      pnl: orderDisplayPnl(order),
+      roiPercent: orderDisplayRoi(order),
       pnlCurrency: order.quote_currency,
-      pnlBasis: order.side === "SELL" ? order.cost_basis_amount : order.remaining_cost_basis,
-      pnlLabel: order.side === "SELL" ? "realized" : "unrealized",
+      pnlBasis: orderDisplayPnlBasis(order),
+      pnlLabel: orderDisplayPnlLabel(order),
       ...orderLotQuantities(order),
       note: order.order_type,
     };
@@ -575,7 +643,7 @@ const buildRows = (
       roiPercent,
       pnlCurrency: firstFill?.pnlCurrency,
       pnlBasis,
-      pnlLabel: firstFill?.action === "SELL" ? "realized" : "unrealized",
+      pnlLabel: firstFill?.pnlLabel ?? (firstFill?.action === "SELL" ? "realized" : "unrealized"),
       quantityAsset: firstFill?.quantityAsset,
       openQuantity,
       realizedQuantity,
@@ -586,7 +654,6 @@ const buildRows = (
 
   const chronologicalRows: ActivityRow[] = [
     ...groupedOrders,
-    ...otherOrders.map(genericOrderRow),
     ...events.map((event): ActivityRow => {
       const changes = eventChanges(event);
       const action = eventLabel(event);
@@ -611,6 +678,11 @@ const buildRows = (
 
   const latestRow = chronologicalRows[chronologicalRows.length - 1];
   const earliestRow = chronologicalRows[0];
+  const hasBalanceTimeline =
+    events.length > 0 ||
+    orders.some((order) => order.source === "binance") ||
+    Boolean(currentBalances && Object.keys(currentBalances).length > 0) ||
+    Boolean(currentAssetValues && Object.keys(currentAssetValues).length > 0);
   const startBalances = subtractChanges(earliestRow?.balancesAfter, earliestRow?.balanceChanges);
   const startAssetValues = inferredAssetValues(
     startBalances,
@@ -624,10 +696,10 @@ const buildRows = (
     .filter((asset) => startAssetValues[asset] == null);
   const startValueWarning =
     unvaluedStartAssets.length > 0
-      ? `Inferred opening value before the earliest traceable Binance activity. Missing valuation for ${unvaluedStartAssets.join(", ")}.`
-      : "Inferred opening value before the earliest traceable Binance activity.";
+      ? `Inferred opening value before the earliest traceable activity. Missing valuation for ${unvaluedStartAssets.join(", ")}.`
+      : "Inferred opening value before the earliest traceable activity.";
   const startRow: ActivityRow | null =
-    earliestRow
+    hasBalanceTimeline && earliestRow
       ? {
           id: "synthetic-start",
           createdAt: earliestRow.createdAt,
@@ -649,7 +721,7 @@ const buildRows = (
   const endAssetValues = currentAssetValues && Object.keys(currentAssetValues).length ? currentAssetValues : latestRow?.assetValuesAfter;
   const endValue = sumValues(endAssetValues);
   const endRow: ActivityRow | null =
-    endTimestamp && latestRow
+    hasBalanceTimeline && endTimestamp && latestRow
       ? {
           id: "synthetic-end",
           createdAt: endTimestamp,
@@ -673,30 +745,65 @@ const buildRows = (
   );
 };
 
-export function BinanceActivityTable({
+export const BinanceActivityTable = memo(function BinanceActivityTable({
   orders,
   events,
   emptyLabel = "No activity loaded.",
-  title = "Activity History",
+  title = "Operations",
+  controls,
+  compact = false,
   endTimestamp,
   currentBalances,
   currentAssetValues,
 }: Props) {
-  const rows = buildRows(orders, events, endTimestamp, currentBalances, currentAssetValues);
-  const actionOptions = Array.from(new Map(rows.map((row) => [row.actionKey, actionLabelFor(row.actionKey)])).entries());
+  const rows = useMemo(
+    () => buildRows(orders, events, endTimestamp, currentBalances, currentAssetValues),
+    [currentAssetValues, currentBalances, endTimestamp, events, orders],
+  );
+  const actionOptions = useMemo(
+    () => Array.from(new Map(rows.map((row) => [row.actionKey, actionLabelFor(row.actionKey)])).entries()),
+    [rows],
+  );
+  const showBalanceColumns = useMemo(
+    () =>
+      rows.some(
+        (row) =>
+          row.walletValueAfter != null ||
+          Object.keys(row.balancesAfter ?? {}).length > 0 ||
+          Object.keys(row.assetValuesAfter ?? {}).length > 0,
+      ),
+    [rows],
+  );
   const [visibleActions, setVisibleActions] = useState<Record<string, boolean>>({ buy: true, sell: true });
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const visibleRows = rows.filter((row) => visibleActions[row.actionKey] ?? true);
+  const [page, setPage] = useState(1);
+  const visibleRows = useMemo(
+    () => rows.filter((row) => visibleActions[row.actionKey] ?? true),
+    [rows, visibleActions],
+  );
+  const totalPages = Math.max(1, Math.ceil(visibleRows.length / ACTIVITY_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageStart = (currentPage - 1) * ACTIVITY_PAGE_SIZE;
+  const pagedRows = useMemo(
+    () => visibleRows.slice(pageStart, pageStart + ACTIVITY_PAGE_SIZE),
+    [pageStart, visibleRows],
+  );
+  const paginationLabel =
+    visibleRows.length === 0
+      ? "0"
+      : `${pageStart + 1}-${Math.min(pageStart + ACTIVITY_PAGE_SIZE, visibleRows.length)} of ${visibleRows.length}`;
 
   const toggle = (id: string) => {
     setExpanded((current) => ({ ...current, [id]: !current[id] }));
   };
 
   const toggleAction = (actionKey: string) => {
+    setPage(1);
     setVisibleActions((current) => ({ ...current, [actionKey]: !current[actionKey] }));
   };
 
   const showAllActions = () => {
+    setPage(1);
     setVisibleActions(Object.fromEntries(actionOptions.map(([actionKey]) => [actionKey, true])));
   };
 
@@ -704,7 +811,10 @@ export function BinanceActivityTable({
     <section className="panel">
       <div className="panel-heading">
         <h2>{title}</h2>
-        <span>{visibleRows.length}</span>
+        <div className="panel-heading-actions">
+          {controls}
+          <span>{visibleRows.length}</span>
+        </div>
       </div>
       <div className="activity-controls">
         <button type="button" className="filter-chip" onClick={showAllActions}>
@@ -721,76 +831,142 @@ export function BinanceActivityTable({
           </button>
         ))}
       </div>
-      <div className="table-wrap">
-        <table className="activity-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Action</th>
-              <th>Asset / Pair</th>
-              <th>Purchase Price</th>
-              <th>Spot Change</th>
-              <th>P/L</th>
-              <th>ROI</th>
-              <th>Estimated Wallet Value</th>
-              <th>Status</th>
-              <th>Wallet Assets After</th>
-              <th>Asset Values</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visibleRows.map((row) => (
-              <Fragment key={row.id}>
-                <tr>
-                  <td>{formatDateTime(row.createdAt)}</td>
-                  <td>
-                    {row.fills && row.fills.length > 1 && (
-                      <button type="button" className="icon-button row-toggle" onClick={() => toggle(row.id)} title="Show fills">
-                        {expanded[row.id] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                      </button>
-                    )}
-                    <strong>{row.action}</strong>
-                    {row.note && <small>{row.note}</small>}
-                  </td>
-                  <td>{row.asset}</td>
-                  <td>{purchasePriceLabel(row)}</td>
-                  <td className="activity-list-cell">{changesList(row.balanceChanges, row.amount)}</td>
-                  <td>{pnlLabel(row)}</td>
-                  <td>{roiLabel(row)}</td>
-                  <td>{walletValueLabel(row)}</td>
-                  <td>{row.status ?? "-"}</td>
-                  <td className="activity-list-cell wide">{balancesLabel(row.balancesAfter)}</td>
-                  <td className="activity-list-cell wide">{assetValuesLabel(row.assetValuesAfter)}</td>
-                </tr>
-                {expanded[row.id] &&
-                  row.fills?.map((fill) => (
-                    <tr className="child-row" key={fill.id}>
-                      <td>{formatDateTime(fill.createdAt)}</td>
-                      <td>
-                        <strong>{fill.action}</strong>
-                        {fill.note && <small>{fill.note}</small>}
-                      </td>
-                      <td>{fill.asset}</td>
-                      <td>{purchasePriceLabel(fill)}</td>
-                      <td className="activity-list-cell">{changesList(fill.balanceChanges, fill.amount)}</td>
-                      <td>{pnlLabel(fill)}</td>
-                      <td>{roiLabel(fill)}</td>
-                      <td>{walletValueLabel(fill)}</td>
-                      <td>{fill.status ?? "-"}</td>
-                      <td className="activity-list-cell wide">{balancesLabel(fill.balancesAfter)}</td>
-                      <td className="activity-list-cell wide">{assetValuesLabel(fill.assetValuesAfter)}</td>
-                    </tr>
-                  ))}
-              </Fragment>
-            ))}
-            {visibleRows.length === 0 && (
+      {compact ? (
+        <div className="table-wrap compact-table-wrap">
+          <table className="compact-operations-table">
+            <thead>
               <tr>
-                <td colSpan={11} className="empty">{emptyLabel}</td>
+                <th>Date</th>
+                <th>Action</th>
+                <th>Asset / Pair</th>
+                <th>Cost</th>
+                <th>Cost Now</th>
+                <th>P/L</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {pagedRows.map((row) => {
+                const currency = compactOperationCurrency(row);
+                return (
+                  <tr key={row.id}>
+                    <td>{compactDateLabel(row.createdAt)}</td>
+                    <td>
+                      <strong>{row.action}</strong>
+                      {row.note && <small>{row.note}</small>}
+                    </td>
+                    <td className="compact-operation-asset">{compactOperationAsset(row)}</td>
+                    <td>{compactMoneyLabel(compactOperationCost(row), currency)}</td>
+                    <td>{compactMoneyLabel(compactOperationNow(row), currency)}</td>
+                    <td>{compactOperationPnl(row)}</td>
+                  </tr>
+                );
+              })}
+              {visibleRows.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="empty">{emptyLabel}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="table-wrap">
+          <table className={`activity-table ${showBalanceColumns ? "" : "compact"}`}>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Action</th>
+                <th>Asset / Pair</th>
+                <th>Purchase Price</th>
+                <th>Spot Change</th>
+                <th>P/L</th>
+                <th>ROI</th>
+                {showBalanceColumns && <th>Estimated Wallet Value</th>}
+                <th>Status</th>
+                {showBalanceColumns && <th>Wallet Assets After</th>}
+                {showBalanceColumns && <th>Asset Values</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {pagedRows.map((row) => (
+                <Fragment key={row.id}>
+                  <tr>
+                    <td>{formatDateTime(row.createdAt)}</td>
+                    <td>
+                      {row.fills && row.fills.length > 1 && (
+                        <button type="button" className="icon-button row-toggle" onClick={() => toggle(row.id)} title="Show fills">
+                          {expanded[row.id] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                        </button>
+                      )}
+                      <strong>{row.action}</strong>
+                      {row.note && <small>{row.note}</small>}
+                    </td>
+                    <td>{row.asset}</td>
+                    <td>{purchasePriceLabel(row)}</td>
+                    <td className="activity-list-cell">{changesList(row.balanceChanges, row.amount)}</td>
+                    <td>{pnlLabel(row)}</td>
+                    <td>{roiLabel(row)}</td>
+                    {showBalanceColumns && <td>{walletValueLabel(row)}</td>}
+                    <td>{row.status ?? "-"}</td>
+                    {showBalanceColumns && <td className="activity-list-cell wide">{balancesLabel(row.balancesAfter)}</td>}
+                    {showBalanceColumns && <td className="activity-list-cell wide">{assetValuesLabel(row.assetValuesAfter)}</td>}
+                  </tr>
+                  {expanded[row.id] &&
+                    row.fills?.map((fill) => (
+                      <tr className="child-row" key={fill.id}>
+                        <td>{formatDateTime(fill.createdAt)}</td>
+                        <td>
+                          <strong>{fill.action}</strong>
+                          {fill.note && <small>{fill.note}</small>}
+                        </td>
+                        <td>{fill.asset}</td>
+                        <td>{purchasePriceLabel(fill)}</td>
+                        <td className="activity-list-cell">{changesList(fill.balanceChanges, fill.amount)}</td>
+                        <td>{pnlLabel(fill)}</td>
+                        <td>{roiLabel(fill)}</td>
+                        {showBalanceColumns && <td>{walletValueLabel(fill)}</td>}
+                        <td>{fill.status ?? "-"}</td>
+                        {showBalanceColumns && <td className="activity-list-cell wide">{balancesLabel(fill.balancesAfter)}</td>}
+                        {showBalanceColumns && <td className="activity-list-cell wide">{assetValuesLabel(fill.assetValuesAfter)}</td>}
+                      </tr>
+                    ))}
+                </Fragment>
+              ))}
+              {visibleRows.length === 0 && (
+                <tr>
+                  <td colSpan={showBalanceColumns ? 11 : 8} className="empty">{emptyLabel}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {visibleRows.length > ACTIVITY_PAGE_SIZE && (
+        <div className="table-pagination" aria-label={`${title} pagination`}>
+          <span>{paginationLabel}</span>
+          <button
+            type="button"
+            className="icon-button"
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+            disabled={currentPage <= 1}
+            title="Previous page"
+          >
+            <ChevronLeft size={16} aria-hidden="true" />
+          </button>
+          <strong>
+            {currentPage} / {totalPages}
+          </strong>
+          <button
+            type="button"
+            className="icon-button"
+            onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+            disabled={currentPage >= totalPages}
+            title="Next page"
+          >
+            <ChevronRight size={16} aria-hidden="true" />
+          </button>
+        </div>
+      )}
     </section>
   );
-}
+});

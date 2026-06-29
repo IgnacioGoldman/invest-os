@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { CashBalance } from "../api";
 import { formatMoney, formatNumber } from "../format";
 
@@ -7,7 +8,7 @@ type Props = {
   displayRate: number;
 };
 
-export function CashTable({ cash, displayCurrency, displayRate }: Props) {
+export const CashTable = memo(function CashTable({ cash, displayCurrency, displayRate }: Props) {
   return (
     <section className="panel">
       <div className="panel-heading">
@@ -50,4 +51,4 @@ export function CashTable({ cash, displayCurrency, displayRate }: Props) {
       </div>
     </section>
   );
-}
+});

@@ -1,18 +1,26 @@
+import { memo, useMemo } from "react";
 import type { RefreshJob, SourceSyncStatus } from "../api";
 
-type Props = {
-  statuses: SourceSyncStatus[];
-  activeJobs?: RefreshJob[];
+export type SummarizedSourceStatus = SourceSyncStatus & {
+  label?: string;
 };
+
+type Props = {
+  statuses: SummarizedSourceStatus[];
+  activeJobs?: RefreshJob[];
+  summarized?: boolean;
+};
+
+const dateFormatter = new Intl.DateTimeFormat(undefined, {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
 
 const formatDate = (value?: string | null) => {
   if (!value) {
     return "Never";
   }
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+  return dateFormatter.format(new Date(value));
 };
 
 const SOURCE_GROUPS = [
@@ -80,15 +88,15 @@ const progressPercent = (job: RefreshJob) => {
   return Math.max(8, Math.min(96, (job.current_step / Math.max(1, job.total_steps)) * 100));
 };
 
-export function SourceStatus({ statuses, activeJobs = [] }: Props) {
-  const summarized = summarizeSourceStatuses(statuses);
-  const visibleJobs = activeJobs.filter(isActiveRefreshJob);
+export const SourceStatus = memo(function SourceStatus({ statuses, activeJobs = [], summarized = false }: Props) {
+  const rows = useMemo(
+    () => (summarized ? statuses : summarizeSourceStatuses(statuses)),
+    [statuses, summarized],
+  );
+  const visibleJobs = useMemo(() => activeJobs.filter(isActiveRefreshJob), [activeJobs]);
 
   return (
-    <section className="panel">
-      <div className="panel-heading">
-        <h2>Source Sync</h2>
-      </div>
+    <div className="source-status-content">
       {visibleJobs.length > 0 && (
         <div className="sync-active-jobs">
           {visibleJobs.map((job) => (
@@ -108,14 +116,14 @@ export function SourceStatus({ statuses, activeJobs = [] }: Props) {
         </div>
       )}
       <div className="sync-list">
-        {summarized.map((status) => (
+        {rows.map((status) => (
           <div className="sync-row" key={status.source}>
-            <strong>{status.label}</strong>
+            <strong>{status.label ?? status.source}</strong>
             <span className={`sync-badge ${status.status}`}>{status.status}</span>
             <span>{formatDate(status.last_synced_at)}</span>
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
-}
+});

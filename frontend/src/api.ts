@@ -145,6 +145,73 @@ export type DisplayRate = {
   fetched_at?: string | null;
 };
 
+export type InvestorPersonalityId = "low_risk" | "high_risk" | "custom";
+
+export type InvestorAllocation = {
+  vwce: number;
+  cashBonds: number;
+  individualStocks: number;
+  crypto: number;
+};
+
+export type InvestorProfile = {
+  personality: InvestorPersonalityId;
+  customAllocation: InvestorAllocation;
+  updated_at?: string | null;
+};
+
+export type SidebarView = "personality" | "capital" | "consultancy" | "exploration" | "eye" | "notes";
+
+export type UserPreferences = {
+  sidebar_order: SidebarView[];
+  updated_at?: string | null;
+};
+
+export type ManualCapitalEntryKind = "bank_cash" | "stock" | "other_asset";
+
+export type ManualCapitalEntryRequest = {
+  kind: ManualCapitalEntryKind;
+  platform: string;
+  currency: string;
+  account_name?: string | null;
+  balance?: number | null;
+  purpose?: string | null;
+  symbol?: string | null;
+  name?: string | null;
+  asset_class?: string | null;
+  quantity?: number | null;
+  estimated_price?: number | null;
+  cost_basis?: number | null;
+  sector?: string | null;
+  vertical?: string | null;
+  geography?: string | null;
+  notes?: string | null;
+};
+
+export type ManualCapitalSnapshot = {
+  cash: Record<string, unknown>[];
+  assets: Record<string, unknown>[];
+  cash_path: string;
+  assets_path: string;
+};
+
+export type Note = {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type NoteRequest = {
+  title: string;
+  content: string;
+};
+
+type RawInvestorProfile = InvestorProfile & {
+  custom_allocation?: InvestorAllocation;
+};
+
 export type Recommendation = {
   severity: "info" | "warning" | "critical";
   category:
@@ -489,6 +556,9 @@ async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = REQU
       const detail = await response.json().catch(() => null);
       throw new Error(detail?.detail ?? `Request failed: ${response.status}`);
     }
+    if (response.status === 204) {
+      return undefined as T;
+    }
     return response.json();
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
@@ -502,6 +572,84 @@ async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = REQU
 
 export async function fetchSnapshot(): Promise<PortfolioSnapshot> {
   return requestSnapshot("/api/snapshot");
+}
+
+const normalizeInvestorProfile = (profile: RawInvestorProfile): InvestorProfile => ({
+  personality: profile.personality,
+  customAllocation: profile.customAllocation ?? profile.custom_allocation ?? {
+    vwce: 60,
+    cashBonds: 20,
+    individualStocks: 15,
+    crypto: 5,
+  },
+  updated_at: profile.updated_at ?? null,
+});
+
+export async function fetchInvestorProfile(): Promise<InvestorProfile> {
+  const profile = await requestJson<RawInvestorProfile>("/api/user-profile");
+  return normalizeInvestorProfile(profile);
+}
+
+export async function saveInvestorProfile(profile: InvestorProfile): Promise<InvestorProfile> {
+  const saved = await requestJson<RawInvestorProfile>("/api/user-profile", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      personality: profile.personality,
+      customAllocation: profile.customAllocation,
+    }),
+  });
+  return normalizeInvestorProfile(saved);
+}
+
+export async function fetchUserPreferences(): Promise<UserPreferences> {
+  return requestJson<UserPreferences>("/api/user-preferences");
+}
+
+export async function saveUserPreferences(preferences: Pick<UserPreferences, "sidebar_order">): Promise<UserPreferences> {
+  return requestJson<UserPreferences>("/api/user-preferences", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(preferences),
+  });
+}
+
+export async function fetchManualCapital(): Promise<ManualCapitalSnapshot> {
+  return requestJson<ManualCapitalSnapshot>("/api/capital/manual");
+}
+
+export async function addManualCapitalEntry(entry: ManualCapitalEntryRequest): Promise<ManualCapitalSnapshot> {
+  return requestJson<ManualCapitalSnapshot>("/api/capital/manual", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(entry),
+  });
+}
+
+export async function fetchNotes(): Promise<Note[]> {
+  return requestJson<Note[]>("/api/notes");
+}
+
+export async function createNote(note: NoteRequest): Promise<Note> {
+  return requestJson<Note>("/api/notes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(note),
+  });
+}
+
+export async function updateNote(noteId: string, note: NoteRequest): Promise<Note> {
+  return requestJson<Note>(`/api/notes/${encodeURIComponent(noteId)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(note),
+  });
+}
+
+export async function deleteNote(noteId: string): Promise<void> {
+  await requestJson<void>(`/api/notes/${encodeURIComponent(noteId)}`, {
+    method: "DELETE",
+  });
 }
 
 export async function startRefreshJob(source: RefreshSource): Promise<RefreshJob> {

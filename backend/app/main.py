@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
@@ -19,6 +19,8 @@ from app.services.asset_opportunities import (
     load_asset_opportunities_by_class,
     load_latest_asset_opportunities,
 )
+from app.services.capital import ManualCapitalEntryRequest, ManualCapitalSnapshot, add_manual_capital_entry, load_manual_capital
+from app.services.notes import Note, NoteRequest, create_note, delete_note, load_notes, update_note
 from app.services.recommendations import (
     RecommendationFollowUpCodexResultRequest,
     RecommendationFollowUpRequest,
@@ -34,6 +36,8 @@ from app.services.recommendations import (
 from app.services.refresh_jobs import RefreshJob, list_refresh_jobs, start_refresh_job
 from app.services.stock_candidate_analysis import StockCandidateAnalysis, load_latest_stock_candidate_analysis
 from app.services.stock_entry_analysis import StockEntryAnalysis, analyze_latest_open_data_stock_entries, analyze_latest_open_data_stock_entry
+from app.services.user_profile import InvestorProfile, load_investor_profile, save_investor_profile
+from app.services.user_preferences import UserPreferences, load_user_preferences, save_user_preferences
 from app.snapshot import get_portfolio_snapshot
 
 
@@ -71,6 +75,67 @@ def open_orders():
 @app.get("/api/orders/history")
 def order_history():
     return get_portfolio_snapshot().order_history
+
+
+@app.get("/api/user-profile")
+def user_profile() -> InvestorProfile:
+    return load_investor_profile(get_settings())
+
+
+@app.put("/api/user-profile")
+def update_user_profile(request: InvestorProfile) -> InvestorProfile:
+    try:
+        return save_investor_profile(request, get_settings())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/api/user-preferences")
+def user_preferences() -> UserPreferences:
+    return load_user_preferences(get_settings())
+
+
+@app.put("/api/user-preferences")
+def update_user_preferences(request: UserPreferences) -> UserPreferences:
+    return save_user_preferences(request, get_settings())
+
+
+@app.get("/api/capital/manual")
+def manual_capital() -> ManualCapitalSnapshot:
+    return load_manual_capital(get_settings().data_dir)
+
+
+@app.post("/api/capital/manual")
+def add_manual_capital(request: ManualCapitalEntryRequest) -> ManualCapitalSnapshot:
+    try:
+        return add_manual_capital_entry(get_settings().data_dir, request)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/api/notes")
+def notes() -> list[Note]:
+    return load_notes(get_settings())
+
+
+@app.post("/api/notes")
+def create_user_note(request: NoteRequest) -> Note:
+    return create_note(request, get_settings())
+
+
+@app.put("/api/notes/{note_id}")
+def update_user_note(note_id: str, request: NoteRequest) -> Note:
+    note = update_note(note_id, request, get_settings())
+    if note is None:
+        raise HTTPException(status_code=404, detail="Note was not found.")
+    return note
+
+
+@app.delete("/api/notes/{note_id}")
+def delete_user_note(note_id: str) -> Response:
+    if not delete_note(note_id, get_settings()):
+        raise HTTPException(status_code=404, detail="Note was not found.")
+    return Response(status_code=204)
 
 
 @app.get("/api/recommendations")

@@ -1,6 +1,6 @@
 import type { OpenDataCompanyContext, OpenDataMetric, OpenDataStockSnapshot, StockEntryAnalysis, StockEntryAnalysisSection } from "../api";
 import { ArrowDown, ArrowUp, ArrowUpDown, BarChart3, ChevronLeft, ChevronRight, Filter, GripVertical, Info, RefreshCcw, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { formatDateTime } from "../format";
 
 type Props = {
@@ -62,6 +62,14 @@ type DerivedMetric = {
   value: number | null;
   kind: MetricKind;
   notes: string;
+};
+type PeerMetricKey = "revenue_cagr_3y" | "roic" | "fcf_yield" | "pe";
+type PeerDistribution = {
+  all: number[];
+  bySector: Map<string, number[]>;
+};
+type DerivedMetricContext = {
+  peerDistributions: Record<PeerMetricKey, PeerDistribution>;
 };
 
 type ColumnDefinition = {
@@ -364,18 +372,81 @@ function percentileOfValue(values: number[], value: number | null) {
   return (lowerOrEqual / clean.length) * 100;
 }
 
+function upperBound(values: number[], target: number) {
+  let low = 0;
+  let high = values.length;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if (values[middle] <= target) {
+      low = middle + 1;
+    } else {
+      high = middle;
+    }
+  }
+  return low;
+}
+
+function lowerBound(values: number[], target: number) {
+  let low = 0;
+  let high = values.length;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if (values[middle] < target) {
+      low = middle + 1;
+    } else {
+      high = middle;
+    }
+  }
+  return low;
+}
+
+function sortedNumbers(values: number[]) {
+  return values.filter((value) => Number.isFinite(value)).sort((left, right) => left - right);
+}
+
+const PEER_METRIC_GETTERS: Record<PeerMetricKey, (snapshot: OpenDataStockSnapshot) => number | null> = {
+  revenue_cagr_3y: (snapshot) => snapshotMetricValue(snapshot, "business_health", "revenue_cagr_3y"),
+  roic: (snapshot) => snapshotMetricValue(snapshot, "business_health", "roic"),
+  fcf_yield: (snapshot) => snapshotMetricValue(snapshot, "valuation", "fcf_yield"),
+  pe: (snapshot) => snapshotMetricValue(snapshot, "valuation", "pe"),
+};
+
+function buildDerivedMetricContext(snapshots: OpenDataStockSnapshot[]): DerivedMetricContext {
+  const peerDistributions = Object.fromEntries(
+    (Object.keys(PEER_METRIC_GETTERS) as PeerMetricKey[]).map((key) => {
+      const getter = PEER_METRIC_GETTERS[key];
+      const all: number[] = [];
+      const bySector = new Map<string, number[]>();
+      snapshots.forEach((snapshot) => {
+        const value = getter(snapshot);
+        if (value == null) {
+          return;
+        }
+        all.push(value);
+        if (snapshot.sector) {
+          bySector.set(snapshot.sector, [...(bySector.get(snapshot.sector) ?? []), value]);
+        }
+      });
+      bySector.forEach((values, sector) => bySector.set(sector, sortedNumbers(values)));
+      return [key, { all: sortedNumbers(all), bySector }];
+    }),
+  ) as Record<PeerMetricKey, PeerDistribution>;
+  return { peerDistributions };
+}
+
 function peerPercentile(
-  snapshots: OpenDataStockSnapshot[],
+  context: DerivedMetricContext,
   snapshot: OpenDataStockSnapshot,
-  valueFor: (snapshot: OpenDataStockSnapshot) => number | null,
+  key: PeerMetricKey,
+  current: number | null,
   higherBetter = true,
 ) {
-  const sameSector = snapshots.filter((item) => item.sector && snapshot.sector && item.sector === snapshot.sector);
-  const peerSet = sameSector.length >= 3 ? sameSector : snapshots;
-  const current = valueFor(snapshot);
-  const values = peerSet.map(valueFor).filter((value): value is number => value != null);
-  if (current == null || values.length < 2) return null;
-  const betterOrEqual = values.filter((value) => (higherBetter ? value <= current : value >= current)).length;
+  if (current == null) return null;
+  const distribution = context.peerDistributions[key];
+  const sectorValues = snapshot.sector ? distribution.bySector.get(snapshot.sector) : null;
+  const values = sectorValues && sectorValues.length >= 3 ? sectorValues : distribution.all;
+  if (values.length < 2) return null;
+  const betterOrEqual = higherBetter ? upperBound(values, current) : values.length - lowerBound(values, current);
   return (betterOrEqual / values.length) * 100;
 }
 
@@ -395,7 +466,7 @@ function derivedMetric(value: number | null, kind: MetricKind, notes: string): D
   return { value, kind, notes };
 }
 
-function computeDerivedMetrics(snapshot: OpenDataStockSnapshot, snapshots: OpenDataStockSnapshot[]): Record<string, DerivedMetric> {
+function computeDerivedMetrics(snapshot: OpenDataStockSnapshot, context: DerivedMetricContext): Record<string, DerivedMetric> {
   const revenueGrowth = snapshotMetricValue(snapshot, "business_health", "revenue_growth_yoy");
   const revenueCagr = snapshotMetricValue(snapshot, "business_health", "revenue_cagr_3y");
   const epsGrowth = snapshotMetricValue(snapshot, "business_health", "eps_growth_yoy");
@@ -449,10 +520,10 @@ function computeDerivedMetrics(snapshot: OpenDataStockSnapshot, snapshots: OpenD
     shares_3y_change: derivedMetric(historicalPercentChange(snapshot, "annual_fundamentals", "shares_diluted", 3), "percent", "Latest annual diluted shares versus three annual periods earlier. Negative suggests buybacks; positive suggests dilution."),
     pe_to_rev_cagr: derivedMetric(ratio(pe, revenueCagr), "ratio", "Trailing PE divided by 3-year revenue CAGR percentage."),
     growth_plus_fcfy: derivedMetric(growthPlusFcfy, "percent", "3-year revenue CAGR plus current FCF yield."),
-    sector_rev_rank: derivedMetric(peerPercentile(snapshots, snapshot, (item) => snapshotMetricValue(item, "business_health", "revenue_cagr_3y")), "percent", "Revenue CAGR percentile within sector when enough peers exist, otherwise within the loaded universe."),
-    sector_roic_rank: derivedMetric(peerPercentile(snapshots, snapshot, (item) => snapshotMetricValue(item, "business_health", "roic")), "percent", "ROIC percentile within sector when enough peers exist, otherwise within the loaded universe."),
-    sector_fcfy_rank: derivedMetric(peerPercentile(snapshots, snapshot, (item) => snapshotMetricValue(item, "valuation", "fcf_yield")), "percent", "FCF-yield percentile within sector when enough peers exist, otherwise within the loaded universe."),
-    sector_pe_cheap_rank: derivedMetric(peerPercentile(snapshots, snapshot, (item) => snapshotMetricValue(item, "valuation", "pe"), false), "percent", "Cheapness percentile by PE within sector when enough peers exist, otherwise within the loaded universe. Higher means lower PE than more peers."),
+    sector_rev_rank: derivedMetric(peerPercentile(context, snapshot, "revenue_cagr_3y", revenueCagr), "percent", "Revenue CAGR percentile within sector when enough peers exist, otherwise within the loaded universe."),
+    sector_roic_rank: derivedMetric(peerPercentile(context, snapshot, "roic", snapshotMetricValue(snapshot, "business_health", "roic")), "percent", "ROIC percentile within sector when enough peers exist, otherwise within the loaded universe."),
+    sector_fcfy_rank: derivedMetric(peerPercentile(context, snapshot, "fcf_yield", fcfYield), "percent", "FCF-yield percentile within sector when enough peers exist, otherwise within the loaded universe."),
+    sector_pe_cheap_rank: derivedMetric(peerPercentile(context, snapshot, "pe", pe, false), "percent", "Cheapness percentile by PE within sector when enough peers exist, otherwise within the loaded universe. Higher means lower PE than more peers."),
     price_fund_gap: derivedMetric(priceFundGap, "percent", "1-year price change minus latest revenue growth YoY. Negative values can flag price weakness despite business growth."),
   };
 }
@@ -926,7 +997,7 @@ function CompanyContextPanel({ context }: { context: OpenDataCompanyContext }) {
   );
 }
 
-export function OpenDataStockTable({
+export const OpenDataStockTable = memo(function OpenDataStockTable({
   snapshots,
   selectedTicker,
   loading,
@@ -951,12 +1022,13 @@ export function OpenDataStockTable({
   const refreshTicker = selectedSnapshot?.ticker ?? selectedTicker;
 
   const columnsById = useMemo(() => new Map(DEFAULT_MOVABLE_COLUMNS.map((column) => [column.id, column])), []);
+  const derivedContext = useMemo(() => buildDerivedMetricContext(snapshots), [snapshots]);
   const derivedByTicker = useMemo(
     () =>
       Object.fromEntries(
-        snapshots.map((snapshot) => [snapshot.ticker, computeDerivedMetrics(snapshot, snapshots)]),
+        snapshots.map((snapshot) => [snapshot.ticker, computeDerivedMetrics(snapshot, derivedContext)]),
       ) as Record<string, Record<string, DerivedMetric>>,
-    [snapshots],
+    [derivedContext, snapshots],
   );
 
   const orderedColumns = useMemo(() => {
@@ -970,6 +1042,10 @@ export function OpenDataStockTable({
   }, [columnOrder, columnsById]);
 
   const filterDimensions = useMemo<FilterDimension[]>(() => {
+    if (!filterMenuOpen && activeFilters.length === 0) {
+      return [];
+    }
+
     const analysesList = snapshots
       .map((snapshot) => analyses[snapshot.ticker])
       .filter((analysis): analysis is StockEntryAnalysis => Boolean(analysis));
@@ -1048,7 +1124,7 @@ export function OpenDataStockTable({
         ),
       })),
     ].filter((dimension) => dimension.values.length > 0);
-  }, [analyses, derivedByTicker, snapshots]);
+  }, [activeFilters.length, analyses, derivedByTicker, filterMenuOpen, snapshots]);
 
   const activeFilterCount = activeFilters.length;
   const activeFilterDimension =
@@ -1500,4 +1576,4 @@ export function OpenDataStockTable({
       )}
     </section>
   );
-}
+});
