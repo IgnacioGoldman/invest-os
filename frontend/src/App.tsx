@@ -1,9 +1,9 @@
 import {
   AlertTriangle,
-  ArrowRight,
   Brain,
   DatabaseZap,
   Eye,
+  EyeOff,
   LogOut,
   NotebookPen,
   RefreshCcw,
@@ -32,31 +32,36 @@ import {
   fetchRefreshJobs,
   fetchRecommendations,
   fetchSnapshot,
-  fetchStockCandidateAnalysis,
+  fetchUserConnections,
   fetchUserPreferences,
   generateRecommendations,
   refreshOpenDataStock,
   saveInvestorProfile as persistInvestorProfile,
+  saveUserConnection,
   saveUserPreferences,
   startRefreshJob,
   createNote,
   updateNote,
   deleteNote,
+  deleteManualCapitalEntry,
+  deleteUserConnection,
+  updateManualCapitalEntry,
   type BinanceLedgerEvent,
   type AssetOpportunity,
   type InvestorProfile,
   type ManualCapitalEntryRequest,
   type ManualCapitalSnapshot,
   type Note,
-  type StockCandidate,
   type StockEntryAnalysis,
-  type StockCandidateAnalysis,
   type OpenDataStockSnapshot,
   type PortfolioSnapshot,
   type Recommendation,
   type RefreshJob,
   type RefreshSource,
   type SidebarView,
+  type UserConnection,
+  type UserConnectionSource,
+  type UserConnectionUpdate,
 } from "./api";
 import { AssetInsightsTable } from "./components/AssetInsightsTable";
 import { BinanceActivityTable } from "./components/BinanceActivityTable";
@@ -71,6 +76,7 @@ import {
   DEFAULT_CUSTOM_ALLOCATION,
   DEFAULT_INVESTOR_PERSONALITY,
   InvestorPersonalityPanel,
+  normalizeInvestorPersonalityId,
   type InvestorAllocation,
   type InvestorAllocationKey,
   type InvestorPersonalityId,
@@ -151,7 +157,17 @@ const FrozenPage = memo(
   (previous, next) => !previous.active && !next.active && previous.className === next.className,
 );
 
-const INVESTOR_PERSONALITY_IDS = new Set<InvestorPersonalityId>(["low_risk", "high_risk", "custom"]);
+const INVESTOR_PERSONALITY_IDS = new Set<InvestorPersonalityId>([
+  "capital_preservation",
+  "steady_growth",
+  "balanced_conviction",
+  "aggressive_growth",
+  "high_risk_explorer",
+  "starter",
+  "custom",
+  "low_risk",
+  "high_risk",
+]);
 
 const clampAllocationValue = (value: unknown, fallback: number) => {
   const numeric = typeof value === "number" ? value : Number(value);
@@ -173,63 +189,6 @@ const normalizeCustomAllocation = (allocation?: Partial<Record<InvestorAllocatio
 
 const allocationTotal = (allocation: InvestorAllocation) =>
   Object.values(allocation).reduce((total, value) => total + value, 0);
-
-const stockCandidateDecisionLabel = (value: string) => value.replace(/_/g, " ");
-
-const stockCandidateRecommendation = (
-  candidate: StockCandidate | null | undefined,
-  title: string,
-  analysis: StockCandidateAnalysis,
-): Recommendation | null => {
-  if (!candidate) {
-    return null;
-  }
-  const evidence = [
-    ...(candidate.business_evidence ?? []),
-    ...(candidate.valuation_evidence ?? []),
-    ...(candidate.price_evidence ?? []),
-    ...(candidate.support_1d_evidence ?? []),
-    ...(candidate.derived_signal_evidence ?? []),
-    ...(candidate.evidence ?? []),
-  ];
-  const risks = candidate.key_risks?.length ? candidate.key_risks : candidate.main_risks;
-  const name = candidate.name ? ` (${candidate.name})` : "";
-  const detail = [
-    `${candidate.ticker}${name}: ${stockCandidateDecisionLabel(candidate.decision)} with ${candidate.conviction.toFixed(1)}/10 conviction and ${candidate.entry_quality} entry quality.`,
-    candidate.why_now ? `Why now: ${candidate.why_now}` : "",
-    candidate.thesis ? `Thesis: ${candidate.thesis}` : "",
-    evidence.length ? `Evidence: ${evidence.slice(0, 3).join(" ")}` : "",
-    risks.length ? `Risks: ${risks.slice(0, 2).join(" ")}` : "",
-    `Candidate analysis as of ${analysis.as_of}; ${analysis.live_context_used ? "live context used" : "local facts only"}.`,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  return {
-    category: "entry",
-    severity: "warning",
-    title,
-    detail,
-  };
-};
-
-const stockCandidateRecommendations = (analysis: StockCandidateAnalysis | null): Recommendation[] => {
-  if (!analysis) {
-    return [];
-  }
-  return [
-    stockCandidateRecommendation(
-      analysis.best_long_term_candidate,
-      "AI Entry Candidate: Long-term accumulation",
-      analysis,
-    ),
-    stockCandidateRecommendation(
-      analysis.best_short_term_candidate,
-      "AI Entry Candidate: Tactical setup",
-      analysis,
-    ),
-  ].filter((item): item is Recommendation => item != null);
-};
 
 const balanceCustomAllocation = (allocation: InvestorAllocation): InvestorAllocation => {
   const next = normalizeCustomAllocation(allocation);
@@ -278,7 +237,7 @@ const loadInvestorPersonality = (): InvestorPersonalityState => {
     return {
       personality:
         parsed.personality && INVESTOR_PERSONALITY_IDS.has(parsed.personality)
-          ? parsed.personality
+          ? normalizeInvestorPersonalityId(parsed.personality)
           : DEFAULT_INVESTOR_PERSONALITY,
       customAllocation: normalizeCustomAllocation(parsed.customAllocation),
     };
@@ -291,7 +250,9 @@ const loadInvestorPersonality = (): InvestorPersonalityState => {
 };
 
 const investorProfileToState = (profile: Pick<InvestorProfile, "personality" | "customAllocation">) => ({
-  personality: INVESTOR_PERSONALITY_IDS.has(profile.personality) ? profile.personality : DEFAULT_INVESTOR_PERSONALITY,
+  personality: INVESTOR_PERSONALITY_IDS.has(profile.personality)
+    ? normalizeInvestorPersonalityId(profile.personality)
+    : DEFAULT_INVESTOR_PERSONALITY,
   customAllocation: normalizeCustomAllocation(profile.customAllocation),
 });
 
@@ -388,6 +349,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   const [eyeActivityView, setEyeActivityView] = useState<EyeAssetView>("stocks");
   const [eyePositionsCompact, setEyePositionsCompact] = useState(true);
   const [eyeOperationsCompact, setEyeOperationsCompact] = useState(true);
+  const [eyeHideAbsoluteValues, setEyeHideAbsoluteValues] = useState(true);
   const [savedInvestorPersonality, setSavedInvestorPersonality] =
     useState<InvestorPersonalityState>(loadInvestorPersonality);
   const [investorPersonalityDraft, setInvestorPersonalityDraft] =
@@ -397,13 +359,15 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   const [manualCapital, setManualCapital] = useState<ManualCapitalSnapshot | null>(null);
   const [manualCapitalSaving, setManualCapitalSaving] = useState(false);
   const [manualCapitalStatus, setManualCapitalStatus] = useState<string | null>(null);
+  const [userConnections, setUserConnections] = useState<UserConnection[]>([]);
+  const [connectionSaving, setConnectionSaving] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<string | null>(null);
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [noteTitleDraft, setNoteTitleDraft] = useState("");
   const [noteContentDraft, setNoteContentDraft] = useState("");
   const [noteSaving, setNoteSaving] = useState(false);
   const [noteStatus, setNoteStatus] = useState<string | null>(null);
-  const [brainInput, setBrainInput] = useState("");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [recommendationsGeneratedAt, setRecommendationsGeneratedAt] = useState<string | null>(null);
   const [analyzingBrain, setAnalyzingBrain] = useState(false);
@@ -414,9 +378,6 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   const [stockEntryAnalyses, setStockEntryAnalyses] = useState<Record<string, StockEntryAnalysis>>({});
   const [stockEntryAnalysesLoading, setStockEntryAnalysesLoading] = useState(false);
   const [stockEntryAnalysesLoadedKey, setStockEntryAnalysesLoadedKey] = useState("");
-  const [stockCandidateAnalysis, setStockCandidateAnalysis] = useState<StockCandidateAnalysis | null>(null);
-  const [stockCandidateAnalysisLoading, setStockCandidateAnalysisLoading] = useState(false);
-  const [stockCandidateAnalysisLoaded, setStockCandidateAnalysisLoaded] = useState(false);
   const [etfInsights, setEtfInsights] = useState<AssetOpportunity[]>([]);
   const [cryptoInsights, setCryptoInsights] = useState<AssetOpportunity[]>([]);
   const [commodityInsights, setCommodityInsights] = useState<AssetOpportunity[]>([]);
@@ -494,7 +455,6 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
       return null;
     });
   }, [persistSidebarOrder]);
-  const consultancyVisited = visitedViews.has("consultancy");
   const explorationVisited = visitedViews.has("exploration");
 
   const selectInvestorPersonality = useCallback((personality: InvestorPersonalityId) => {
@@ -563,9 +523,50 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
       const jobs = await fetchRefreshJobs().catch(() => [job]);
       refreshJobsRef.current = jobs;
       setRefreshJobs(jobs);
-      setManualCapitalStatus("Saved to manual YAML. Refresh started.");
+      setManualCapitalStatus("Saved. Manual refresh started.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save manual capital entry.");
+    } finally {
+      setManualCapitalSaving(false);
+    }
+  }, []);
+
+  const updateCapitalEntry = useCallback(async (entryId: string, entry: ManualCapitalEntryRequest) => {
+    setManualCapitalSaving(true);
+    setManualCapitalStatus(null);
+    setError(null);
+    try {
+      const updated = await updateManualCapitalEntry(entryId, entry);
+      setManualCapital(updated);
+      const job = await startRefreshJob("manual");
+      const jobs = await fetchRefreshJobs().catch(() => [job]);
+      refreshJobsRef.current = jobs;
+      setRefreshJobs(jobs);
+      setManualCapitalStatus("Updated. Manual refresh started.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update capital entry.");
+    } finally {
+      setManualCapitalSaving(false);
+    }
+  }, []);
+
+  const deleteCapitalEntry = useCallback(async (entryId: string, label: string) => {
+    if (!window.confirm(`Delete ${label}?`)) {
+      return;
+    }
+    setManualCapitalSaving(true);
+    setManualCapitalStatus(null);
+    setError(null);
+    try {
+      const updated = await deleteManualCapitalEntry(entryId);
+      setManualCapital(updated);
+      const job = await startRefreshJob("manual");
+      const jobs = await fetchRefreshJobs().catch(() => [job]);
+      refreshJobsRef.current = jobs;
+      setRefreshJobs(jobs);
+      setManualCapitalStatus("Deleted. Manual refresh started.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete capital entry.");
     } finally {
       setManualCapitalSaving(false);
     }
@@ -575,6 +576,61 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     setRefreshSource(source);
     showView("settings");
   }, [showView]);
+
+  const saveCapitalConnection = useCallback(async (source: UserConnectionSource, connection: UserConnectionUpdate) => {
+    setConnectionSaving(true);
+    setConnectionStatus(null);
+    setError(null);
+    try {
+      const saved = await saveUserConnection(source, connection);
+      setUserConnections((current) => {
+        const without = current.filter((item) => item.source !== saved.source);
+        return [...without, saved].sort((left, right) => left.source.localeCompare(right.source));
+      });
+      setConnectionStatus(`${saved.label} saved.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save connection.");
+    } finally {
+      setConnectionSaving(false);
+    }
+  }, []);
+
+  const deleteCapitalConnection = useCallback(async (source: UserConnectionSource, label: string) => {
+    if (!window.confirm(`Delete ${label}? This disconnects the source and removes its cached capital from the app.`)) {
+      return;
+    }
+    setConnectionSaving(true);
+    setConnectionStatus(null);
+    setError(null);
+    try {
+      const deleted = await deleteUserConnection(source);
+      setUserConnections((current) => {
+        const without = current.filter((item) => item.source !== deleted.source);
+        return [...without, deleted].sort((left, right) => left.source.localeCompare(right.source));
+      });
+      await loadPortfolioData();
+      setConnectionStatus(`${deleted.label} deleted.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete connection.");
+    } finally {
+      setConnectionSaving(false);
+    }
+  }, [loadPortfolioData]);
+
+  const refreshCapitalConnection = useCallback(async (source: UserConnectionSource) => {
+    setConnectionStatus(null);
+    setError(null);
+    try {
+      const job = await startRefreshJob(source);
+      const jobs = await fetchRefreshJobs().catch(() => [job]);
+      refreshJobsRef.current = jobs;
+      setRefreshJobs(jobs);
+      setRefreshSource(source);
+      setConnectionStatus(`${source === "ibkr" ? "IBKR" : "Binance"} refresh started.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not refresh connection.");
+    }
+  }, []);
 
   const selectedNote = useMemo(
     () => notes.find((note) => note.id === selectedNoteId) ?? null,
@@ -709,6 +765,24 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
 
   useEffect(() => {
     let cancelled = false;
+    fetchUserConnections()
+      .then((connections) => {
+        if (!cancelled) {
+          setUserConnections(connections);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Could not load connections.");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
     fetchUserPreferences()
       .then((preferences) => {
         if (!cancelled) {
@@ -768,20 +842,6 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
       window.clearInterval(interval);
     };
   }, [hasActiveRefreshJob, pollRefreshJobs]);
-
-  useEffect(() => {
-    if (!consultancyVisited || stockCandidateAnalysisLoading || stockCandidateAnalysisLoaded) {
-      return;
-    }
-    setStockCandidateAnalysisLoading(true);
-    fetchStockCandidateAnalysis()
-      .then((analysis) => setStockCandidateAnalysis(analysis))
-      .catch((err) => setError(err instanceof Error ? err.message : "Could not load stock candidate analysis."))
-      .finally(() => {
-        setStockCandidateAnalysisLoaded(true);
-        setStockCandidateAnalysisLoading(false);
-      });
-  }, [consultancyVisited, stockCandidateAnalysisLoaded, stockCandidateAnalysisLoading]);
 
   useEffect(() => {
     if (!explorationVisited || openDataStocks.length > 0 || openDataStockLoading || openDataStockLoaded) {
@@ -875,14 +935,9 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     setAnalyzingBrain(true);
     setError(null);
     try {
-      const [recommendationSnapshot, candidateAnalysis] = await Promise.all([
-        generateRecommendations(),
-        fetchStockCandidateAnalysis().catch(() => null),
-      ]);
+      const recommendationSnapshot = await generateRecommendations();
       setRecommendations(recommendationSnapshot.recommendations);
       setRecommendationsGeneratedAt(recommendationSnapshot.generated_at ?? null);
-      setStockCandidateAnalysis(candidateAnalysis);
-      setStockCandidateAnalysisLoaded(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not run consultancy analysis.");
     } finally {
@@ -1007,10 +1062,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     });
     return values;
   }, [cryptoHoldings, snapshot?.cash_balances, usdDisplayRate]);
-  const consultancyRecommendations = useMemo(
-    () => [...recommendations, ...stockCandidateRecommendations(stockCandidateAnalysis)],
-    [recommendations, stockCandidateAnalysis],
-  );
+  const consultancyRecommendations = recommendations;
   const activeEyePositionLabel = eyePositionsView === "stocks" ? "Stocks" : "Crypto";
   const activeEyeHoldings = eyePositionsView === "stocks" ? stockHoldings : cryptoHoldings;
   const activeEyeOpenOrders = eyePositionsView === "stocks" ? stockOpenOrders : cryptoOpenOrders;
@@ -1072,6 +1124,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     },
   } satisfies Record<AppView, { title: string; subtitle: string }>;
   const settingsNotificationCount = activeRefreshJobs.length + syncIssueCount + warningCount;
+  const showPageHeader = activeView !== "capital" && activeView !== "personality" && activeView !== "consultancy";
 
   return (
     <div className="invest-app">
@@ -1145,13 +1198,15 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
       </aside>
 
       <main className="invest-main">
-        <header className="topbar invest-page-header">
-          <div>
-            <p>Investment Operating System</p>
-            <h1>{pageMeta[activeView].title}</h1>
-            <span>{pageMeta[activeView].subtitle}</span>
-          </div>
-        </header>
+        {showPageHeader && (
+          <header className="topbar invest-page-header">
+            <div>
+              <p>Investment Operating System</p>
+              <h1>{pageMeta[activeView].title}</h1>
+              <span>{pageMeta[activeView].subtitle}</span>
+            </div>
+          </header>
+        )}
 
         {error && <section className="error">{error}</section>}
         {!snapshot && !error && <section className="loading">Loading portfolio snapshot...</section>}
@@ -1177,43 +1232,31 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
           <FrozenPage className="app-page capital-page" active={activeView === "capital"}>
             <CapitalPanel
               manualCapital={manualCapital}
+              snapshot={snapshot}
+              connections={userConnections}
               saving={manualCapitalSaving}
               status={manualCapitalStatus}
+              connectionSaving={connectionSaving}
+              connectionStatus={connectionStatus}
               onSaveManualEntry={saveManualCapitalEntry}
+              onUpdateManualEntry={updateCapitalEntry}
+              onDeleteManualEntry={deleteCapitalEntry}
               onConfigureConnection={configureCapitalConnection}
+              onSaveConnection={saveCapitalConnection}
+              onDeleteConnection={deleteCapitalConnection}
+              onRefreshConnection={refreshCapitalConnection}
             />
           </FrozenPage>
         )}
 
         {snapshot && visitedViews.has("consultancy") && (
           <FrozenPage className="app-page consultancy-page" active={activeView === "consultancy"}>
-            <section className="brain-command-section">
-              <div className="brain-command-card">
-                <div className="brain-command-inner">
-                  <Sparkles size={20} aria-hidden="true" />
-                  <input
-                    value={brainInput}
-                    onChange={(event) => setBrainInput(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        analyzeBrain();
-                      }
-                    }}
-                    placeholder="Ask Brain…"
-                    className="brain-command-input flex-1 bg-transparent text-[16px] text-foreground placeholder:text-muted-foreground/60 outline-none"
-                  />
-                  <button type="button" onClick={analyzeBrain} disabled={analyzingBrain}>
-                    {analyzingBrain ? "Analyzing" : "Analyze"}
-                    {!analyzingBrain && <ArrowRight size={16} aria-hidden="true" />}
-                  </button>
-                </div>
-              </div>
-            </section>
-
             <Recommendations
               recommendations={consultancyRecommendations}
               generatedAt={recommendationsGeneratedAt}
               latestSourceSyncedAt={latestSourceSyncedAt}
+              analyzing={analyzingBrain}
+              onAnalyze={analyzeBrain}
               onAskRecommendation={askRecommendationFollowUp}
               onLoadRecommendationFollowUps={fetchRecommendationFollowUps}
               onPollRecommendation={fetchRecommendationFollowUpResult}
@@ -1262,13 +1305,40 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
         {snapshot && visitedViews.has("eye") && (
           <FrozenPage className="app-page eye-page" active={activeView === "eye"}>
             <div className="connector-body">
-              <SummaryCards snapshot={snapshot} displayCurrency={displayCurrency} displayRate={displayRate} />
+              <section className="eye-privacy-toolbar" aria-label="Eye privacy controls">
+                <div>
+                  <strong>{eyeHideAbsoluteValues ? "Relative view" : "Full values"}</strong>
+                  <span>
+                    {eyeHideAbsoluteValues
+                      ? "Absolute money values are hidden. Percentages, counts, bars, ROI, and quantities stay visible."
+                      : "Show absolute money values across Eye."}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className={`eye-privacy-toggle ${eyeHideAbsoluteValues ? "active" : ""}`}
+                  onClick={() => setEyeHideAbsoluteValues((current) => !current)}
+                  aria-pressed={eyeHideAbsoluteValues}
+                  title={eyeHideAbsoluteValues ? "Show absolute money values" : "Hide absolute money values"}
+                >
+                  {eyeHideAbsoluteValues ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
+                  {eyeHideAbsoluteValues ? "Show totals" : "Hide totals"}
+                </button>
+              </section>
+
+              <SummaryCards
+                snapshot={snapshot}
+                displayCurrency={displayCurrency}
+                displayRate={displayRate}
+                hideAbsoluteValues={eyeHideAbsoluteValues}
+              />
 
               <BreakdownTable
                 title="Platform Breakdown"
                 items={snapshot.platform_breakdown}
                 currency={displayCurrency}
                 displayRate={displayRate}
+                hideAbsoluteValues={eyeHideAbsoluteValues}
                 holdings={snapshot.holdings}
                 cashBalances={snapshot.cash_balances}
                 openOrders={snapshot.open_orders}
@@ -1282,6 +1352,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
                   displayCurrency={displayCurrency}
                   displayRate={displayRate}
                   compact={eyePositionsCompact}
+                  hideAbsoluteValues={eyeHideAbsoluteValues}
                   controls={
                     <div className="eye-panel-controls">
                       <div className="segmented segmented-compact" aria-label="Position asset type">
@@ -1320,6 +1391,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
                   endTimestamp={eyeActivityView === "crypto" ? snapshot.generated_at : undefined}
                   currentBalances={eyeActivityView === "crypto" ? currentCryptoBalances : undefined}
                   currentAssetValues={eyeActivityView === "crypto" ? currentCryptoAssetValues : undefined}
+                  hideAbsoluteValues={eyeHideAbsoluteValues}
                   controls={
                     <div className="eye-panel-controls">
                       <div className="segmented segmented-compact" aria-label="Operations asset type">
@@ -1352,8 +1424,14 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
                   title={`${activeEyePositionLabel} Open Orders`}
                   orders={activeEyeOpenOrders}
                   cashBalances={activeEyeCashBalances}
+                  hideAbsoluteValues={eyeHideAbsoluteValues}
                 />
-                <CashTable cash={activeEyeCashBalances} displayCurrency={displayCurrency} displayRate={displayRate} />
+                <CashTable
+                  cash={activeEyeCashBalances}
+                  displayCurrency={displayCurrency}
+                  displayRate={displayRate}
+                  hideAbsoluteValues={eyeHideAbsoluteValues}
+                />
               </section>
             </div>
           </FrozenPage>

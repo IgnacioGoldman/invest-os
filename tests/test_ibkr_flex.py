@@ -3,15 +3,26 @@ from __future__ import annotations
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.config import Settings  # noqa: E402
-from app.models import MarketPrice, Order  # noqa: E402
-from app.services.portfolio import _enrich_generic_order_history, _is_transient_ibkr_history_warning  # noqa: E402
-from app.sources.ibkr import _parse_flex_trades, _flex_retryable_error, _flex_statement_url  # noqa: E402
+from app.models import MarketPrice, Order, SourceResult  # noqa: E402
+from app.services.portfolio import (  # noqa: E402
+    _enrich_generic_order_history,
+    _is_partial_ibkr_api_history,
+    _is_transient_ibkr_history_warning,
+)
+from app.sources.ibkr import (  # noqa: E402
+    _flex_retryable_error,
+    _flex_statement_url,
+    _parse_flex_trades,
+    _redact_flex_token,
+    fetch_ibkr_history,
+)
 
 
 class IbkrFlexImportTest(unittest.TestCase):
@@ -76,6 +87,45 @@ class IbkrFlexImportTest(unittest.TestCase):
             )
         )
         self.assertFalse(_is_transient_ibkr_history_warning(["IBKR Flex request failed: 1012: Invalid token"]))
+
+    def test_redacts_flex_token_from_transport_errors(self) -> None:
+        settings = Settings(ibkr_flex_token="secret-token-123")
+
+        redacted = _redact_flex_token(
+            "Max retries exceeded with url: /SendRequest?t=secret-token-123&q=1554875&v=3",
+            settings,
+        )
+
+        self.assertNotIn("secret-token-123", redacted)
+        self.assertIn("<redacted>", redacted)
+
+    def test_falls_back_to_local_execution_history_when_flex_fails(self) -> None:
+        fallback_order = Order(
+            id="tsla-sell",
+            source="ibkr",
+            platform="Interactive Brokers",
+            symbol="TSLA",
+            side="SELL",
+            quantity=3,
+            limit_price=420,
+            quote_currency="USD",
+            created_at="2026-07-02T08:30:00Z",
+        )
+
+        with (
+            patch(
+                "app.sources.ibkr.fetch_ibkr_flex_history",
+                return_value=SourceResult(warnings=["IBKR Flex history fetch failed: DNS"]),
+            ),
+            patch(
+                "app.sources.ibkr.fetch_ibkr_api_history",
+                return_value=SourceResult(order_history=[fallback_order]),
+            ),
+        ):
+            result = fetch_ibkr_history(Settings(ibkr_flex_token="token"))
+
+        self.assertEqual(result.order_history, [fallback_order])
+        self.assertTrue(_is_partial_ibkr_api_history(result.warnings))
 
     def test_enriches_flex_symbol_without_quote_suffix(self) -> None:
         orders = [

@@ -127,6 +127,19 @@ def init_db(conn: sqlite3.Connection) -> None:
             updated_at TEXT NOT NULL,
             payload TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS user_capital_entries (
+            id TEXT PRIMARY KEY,
+            entry_type TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS user_connections (
+            source TEXT PRIMARY KEY,
+            updated_at TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
         """
     )
     conn.commit()
@@ -158,6 +171,21 @@ def replace_source_result(
         _replace_rows(conn, "open_orders", source, result.open_orders)
     if order_history:
         _replace_rows(conn, "order_history", source, result.order_history)
+
+
+def clear_source_cache(conn: sqlite3.Connection, source: str) -> None:
+    for table in ("holdings", "cash_balances", "open_orders", "order_history"):
+        conn.execute(f"DELETE FROM {table} WHERE source = ?", (source,))
+    if source == "binance":
+        conn.execute("DELETE FROM ledger_events WHERE source = ?", (source,))
+        conn.execute("DELETE FROM source_sync_status WHERE source IN (?, ?)", ("binance", "binance_ledger"))
+        conn.execute("DELETE FROM market_prices WHERE source IN (?, ?)", ("binance", "binance_public"))
+        return
+    if source == "ibkr":
+        conn.execute("DELETE FROM source_sync_status WHERE source IN (?, ?)", ("ibkr", "ibkr_history"))
+        conn.execute("DELETE FROM market_prices WHERE source = ?", ("ibkr",))
+        return
+    conn.execute("DELETE FROM source_sync_status WHERE source = ?", (source,))
 
 
 def update_sync_status(conn: sqlite3.Connection, source: str, status: str, warnings: list[str]) -> None:
@@ -463,3 +491,75 @@ def load_user_preferences_payload(conn: sqlite3.Connection, preferences_id: str)
     if row is None:
         return None
     return row["payload"], datetime.fromisoformat(row["updated_at"])
+
+
+def save_user_capital_entry_payload(
+    conn: sqlite3.Connection,
+    entry_id: str,
+    entry_type: str,
+    updated_at: datetime,
+    payload: str,
+) -> None:
+    conn.execute(
+        """
+        INSERT INTO user_capital_entries (id, entry_type, updated_at, payload)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+            entry_type = excluded.entry_type,
+            updated_at = excluded.updated_at,
+            payload = excluded.payload
+        """,
+        (entry_id, entry_type, updated_at.isoformat(), payload),
+    )
+
+
+def load_user_capital_entry_payloads(conn: sqlite3.Connection) -> list[tuple[str, str, datetime, str]]:
+    return [
+        (row["id"], row["entry_type"], datetime.fromisoformat(row["updated_at"]), row["payload"])
+        for row in conn.execute("SELECT id, entry_type, updated_at, payload FROM user_capital_entries ORDER BY updated_at, id")
+    ]
+
+
+def load_user_capital_entry_payload(conn: sqlite3.Connection, entry_id: str) -> tuple[str, str, datetime, str] | None:
+    row = conn.execute(
+        "SELECT id, entry_type, updated_at, payload FROM user_capital_entries WHERE id = ?",
+        (entry_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return row["id"], row["entry_type"], datetime.fromisoformat(row["updated_at"]), row["payload"]
+
+
+def delete_user_capital_entry_payload(conn: sqlite3.Connection, entry_id: str) -> bool:
+    cursor = conn.execute("DELETE FROM user_capital_entries WHERE id = ?", (entry_id,))
+    return cursor.rowcount > 0
+
+
+def save_user_connection_payload(conn: sqlite3.Connection, source: str, updated_at: datetime, payload: str) -> None:
+    conn.execute(
+        """
+        INSERT INTO user_connections (source, updated_at, payload)
+        VALUES (?, ?, ?)
+        ON CONFLICT(source) DO UPDATE SET
+            updated_at = excluded.updated_at,
+            payload = excluded.payload
+        """,
+        (source, updated_at.isoformat(), payload),
+    )
+
+
+def load_user_connection_payload(conn: sqlite3.Connection, source: str) -> tuple[str, datetime] | None:
+    row = conn.execute(
+        "SELECT payload, updated_at FROM user_connections WHERE source = ?",
+        (source,),
+    ).fetchone()
+    if row is None:
+        return None
+    return row["payload"], datetime.fromisoformat(row["updated_at"])
+
+
+def load_user_connection_payloads(conn: sqlite3.Connection) -> list[tuple[str, datetime, str]]:
+    return [
+        (row["source"], datetime.fromisoformat(row["updated_at"]), row["payload"])
+        for row in conn.execute("SELECT source, updated_at, payload FROM user_connections ORDER BY source")
+    ]

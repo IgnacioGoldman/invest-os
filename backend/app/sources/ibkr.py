@@ -158,6 +158,12 @@ def _flex_retryable_error(error: str | None) -> bool:
     )
 
 
+def _redact_flex_token(text: str, settings: Settings) -> str:
+    if settings.ibkr_flex_token:
+        text = text.replace(settings.ibkr_flex_token, "<redacted>")
+    return text
+
+
 def _flex_attr(attrs: dict[str, str], *names: str) -> str | None:
     lowered = {key.lower(): value for key, value in attrs.items()}
     for name in names:
@@ -306,7 +312,7 @@ def fetch_ibkr_flex_history(settings: Settings) -> SourceResult:
             return SourceResult(warnings=["IBKR Flex statement returned no Trade rows. Check query 1554875 includes Trades."])
         return SourceResult(order_history=order_history)
     except Exception as exc:
-        detail = str(exc) or exc.__class__.__name__
+        detail = _redact_flex_token(str(exc) or exc.__class__.__name__, settings)
         return SourceResult(warnings=[f"IBKR Flex history fetch failed: {detail}"])
 
 
@@ -532,10 +538,7 @@ def fetch_ibkr(settings: Settings) -> SourceResult:
             ib.disconnect()
 
 
-def fetch_ibkr_history(settings: Settings) -> SourceResult:
-    if settings.ibkr_flex_token:
-        return fetch_ibkr_flex_history(settings)
-
+def fetch_ibkr_api_history(settings: Settings) -> SourceResult:
     ib, ExecutionFilter, error = _connect(settings)
     if error:
         return error
@@ -576,3 +579,25 @@ def fetch_ibkr_history(settings: Settings) -> SourceResult:
     finally:
         if ib.isConnected():
             ib.disconnect()
+
+
+def fetch_ibkr_history(settings: Settings) -> SourceResult:
+    if not settings.ibkr_flex_token:
+        return fetch_ibkr_api_history(settings)
+
+    flex_result = fetch_ibkr_flex_history(settings)
+    if flex_result.order_history:
+        return flex_result
+
+    api_result = fetch_ibkr_api_history(settings)
+    if api_result.order_history:
+        return SourceResult(
+            order_history=api_result.order_history,
+            warnings=[
+                *flex_result.warnings,
+                "IBKR Flex history failed; used recent TWS/Gateway execution history instead.",
+                *api_result.warnings,
+            ],
+        )
+
+    return SourceResult(warnings=[*flex_result.warnings, *api_result.warnings])

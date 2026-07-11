@@ -19,7 +19,21 @@ from app.services.asset_opportunities import (
     load_asset_opportunities_by_class,
     load_latest_asset_opportunities,
 )
-from app.services.capital import ManualCapitalEntryRequest, ManualCapitalSnapshot, add_manual_capital_entry, load_manual_capital
+from app.services.capital import (
+    ManualCapitalEntryRequest,
+    ManualCapitalSnapshot,
+    add_manual_capital_entry,
+    delete_manual_capital_entry,
+    load_manual_capital,
+    update_manual_capital_entry,
+)
+from app.services.connections import (
+    UserConnectionPublic,
+    UserConnectionUpdate,
+    disconnect_user_connection,
+    load_user_connections,
+    save_user_connection,
+)
 from app.services.notes import Note, NoteRequest, create_note, delete_note, load_notes, update_note
 from app.services.recommendations import (
     RecommendationFollowUpCodexResultRequest,
@@ -111,6 +125,46 @@ def add_manual_capital(request: ManualCapitalEntryRequest) -> ManualCapitalSnaps
         return add_manual_capital_entry(get_settings().data_dir, request)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.put("/api/capital/manual/{entry_id}")
+def update_manual_capital(entry_id: str, request: ManualCapitalEntryRequest) -> ManualCapitalSnapshot:
+    try:
+        return update_manual_capital_entry(get_settings().data_dir, entry_id, request)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Manual capital entry was not found.") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.delete("/api/capital/manual/{entry_id}")
+def delete_manual_capital(entry_id: str) -> ManualCapitalSnapshot:
+    try:
+        return delete_manual_capital_entry(get_settings().data_dir, entry_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Manual capital entry was not found.") from exc
+
+
+@app.get("/api/connections")
+def connections() -> list[UserConnectionPublic]:
+    return load_user_connections(get_settings())
+
+
+@app.put("/api/connections/{source}")
+def update_connection(source: str, request: UserConnectionUpdate) -> UserConnectionPublic:
+    if source not in {"ibkr", "binance"}:
+        raise HTTPException(status_code=404, detail="Connection source was not found.")
+    try:
+        return save_user_connection(get_settings(), source, request)  # type: ignore[arg-type]
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.delete("/api/connections/{source}")
+def delete_connection(source: str) -> UserConnectionPublic:
+    if source not in {"ibkr", "binance"}:
+        raise HTTPException(status_code=404, detail="Connection source was not found.")
+    return disconnect_user_connection(get_settings(), source)  # type: ignore[arg-type]
 
 
 @app.get("/api/notes")

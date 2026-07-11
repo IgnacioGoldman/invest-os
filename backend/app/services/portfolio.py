@@ -1098,6 +1098,10 @@ def _is_transient_ibkr_history_warning(warnings: list[str]) -> bool:
     return any(any(marker in warning.lower() for marker in transient_markers) for warning in warnings)
 
 
+def _is_partial_ibkr_api_history(warnings: list[str]) -> bool:
+    return any("used recent tws/gateway execution history" in warning.lower() for warning in warnings)
+
+
 def _sync_status(source: str, result: SourceResult) -> str:
     if _is_failed_refresh(source, result):
         return "error"
@@ -1173,10 +1177,21 @@ def _refresh_one(conn, settings: Settings, source: RefreshSource, progress: Refr
         existing_ibkr_history = [order for order in load_order_history(conn) if order.source == "ibkr"]
         warnings = list(result.warnings)
         if result.order_history:
+            order_history = result.order_history
+            if _is_partial_ibkr_api_history(warnings):
+                merged_order_history = {
+                    order.id: order
+                    for order in [
+                        *existing_ibkr_history,
+                        *result.order_history,
+                    ]
+                }
+                order_history = list(merged_order_history.values())
+                warnings.append(f"Merged recent IBKR execution rows with {len(existing_ibkr_history)} cached rows.")
             replace_source_result(
                 conn,
                 "ibkr",
-                result,
+                result.model_copy(update={"order_history": order_history}),
                 holdings=False,
                 cash_balances=False,
                 open_orders=False,

@@ -1,13 +1,14 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Fragment, memo, useMemo, useState } from "react";
 import type { CashBalance, Order } from "../api";
-import { formatDateTime, formatMoney, formatNumber } from "../format";
+import { HIDDEN_ABSOLUTE_VALUE, formatDateTime, formatMoneyPrivacy, formatNumber } from "../format";
 
 type Props = {
   title: string;
   orders: Order[];
   cashBalances?: CashBalance[];
   emptyLabel?: string;
+  hideAbsoluteValues?: boolean;
 };
 
 type OrderGroup = {
@@ -152,7 +153,12 @@ const roiLabelFor = (row: Order | OrderGroup) => {
   return row.side === "SELL" || unrealizedPnlFor(row) == null ? "realized" : "unrealized";
 };
 
-const accountValueLabel = (value?: number | null, currency?: string | null, warning?: string | null) => {
+const accountValueLabel = (
+  value?: number | null,
+  currency?: string | null,
+  warning?: string | null,
+  hideAbsoluteValues = false,
+) => {
   if (value == null || !currency) {
     return (
       <>
@@ -163,7 +169,7 @@ const accountValueLabel = (value?: number | null, currency?: string | null, warn
   }
   return (
     <>
-      {formatMoney(value, currency)}
+      {formatMoneyPrivacy(value, currency, hideAbsoluteValues)}
       <small>{warning ? "estimated, warning" : "estimated"}</small>
     </>
   );
@@ -266,6 +272,7 @@ export const OrdersTable = memo(function OrdersTable({
   orders,
   cashBalances = [],
   emptyLabel = "No orders loaded.",
+  hideAbsoluteValues = false,
 }: Props) {
   const isHistory = title.toLowerCase().includes("history");
   const accountValueHeading =
@@ -338,10 +345,10 @@ export const OrdersTable = memo(function OrdersTable({
                   <td>
                     {(() => {
                       const remaining = remainingNotionalFor(order);
-                      return remaining ? formatMoney(remaining.amount, remaining.currency) : "-";
+                      return remaining ? formatMoneyPrivacy(remaining.amount, remaining.currency, hideAbsoluteValues) : "-";
                     })()}
                   </td>
-                  <td>{order.limit_price == null ? "-" : formatNumber(order.limit_price)}</td>
+                  <td>{order.limit_price == null ? "-" : hideAbsoluteValues ? HIDDEN_ABSOLUTE_VALUE : formatNumber(order.limit_price)}</td>
                   <td>{order.status ?? "-"}</td>
                   <td>{order.platform}</td>
                 </tr>
@@ -366,31 +373,35 @@ export const OrdersTable = memo(function OrdersTable({
                     <td>
                       {group.purchaseAmount == null || !group.quoteCurrency
                         ? "-"
-                        : formatMoney(group.purchaseAmount, group.quoteCurrency)}
+                        : formatMoneyPrivacy(group.purchaseAmount, group.quoteCurrency, hideAbsoluteValues)}
                     </td>
                     <td>
                       {costBasisFor(group) == null || !group.quoteCurrency
                         ? "-"
-                        : formatMoney(costBasisFor(group) ?? 0, group.quoteCurrency)}
+                        : formatMoneyPrivacy(costBasisFor(group) ?? 0, group.quoteCurrency, hideAbsoluteValues)}
                     </td>
                     <td>
                       {group.currentValue == null || !group.quoteCurrency
                         ? "-"
-                        : formatMoney(group.currentValue, group.quoteCurrency)}
+                        : formatMoneyPrivacy(group.currentValue, group.quoteCurrency, hideAbsoluteValues)}
                       {group.valuationSource && <small>{group.valuationSource}</small>}
                     </td>
                     <td className={(pnlFor(group) ?? 0) >= 0 ? "positive" : "negative"}>
-                      {pnlFor(group) == null || !group.quoteCurrency ? "-" : formatMoney(pnlFor(group) ?? 0, group.quoteCurrency)}
+                      {pnlFor(group) == null || !group.quoteCurrency
+                        ? "-"
+                        : hideAbsoluteValues && roiFor(group) != null
+                          ? `${roiFor(group)?.toFixed(2)}%`
+                          : formatMoneyPrivacy(pnlFor(group) ?? 0, group.quoteCurrency, hideAbsoluteValues)}
                     </td>
                     <td className={(roiFor(group) ?? 0) >= 0 ? "positive" : "negative"}>
                       {roiFor(group) == null ? "-" : `${roiFor(group)?.toFixed(2)}%`}
                       {roiLabelFor(group) && <small>{roiLabelFor(group)}</small>}
                     </td>
                     <td title={group.accountValueWarning ?? undefined}>
-                      {accountValueLabel(group.accountValueBefore, group.accountValueCurrency, group.accountValueWarning)}
+                      {accountValueLabel(group.accountValueBefore, group.accountValueCurrency, group.accountValueWarning, hideAbsoluteValues)}
                     </td>
                     <td title={group.accountValueWarning ?? undefined}>
-                      {accountValueLabel(group.accountValueAfter, group.accountValueCurrency, group.accountValueWarning)}
+                      {accountValueLabel(group.accountValueAfter, group.accountValueCurrency, group.accountValueWarning, hideAbsoluteValues)}
                     </td>
                     <td>{normalizeStatus(statusFor(group)) ?? "-"}</td>
                     <td>{group.platform}</td>
@@ -407,30 +418,34 @@ export const OrdersTable = memo(function OrdersTable({
                         <td>
                           {order.purchase_amount == null || !order.quote_currency
                             ? "-"
-                            : formatMoney(order.purchase_amount, order.quote_currency)}
+                            : formatMoneyPrivacy(order.purchase_amount, order.quote_currency, hideAbsoluteValues)}
                         </td>
                         <td>
                           {costBasisFor(order) == null || !order.quote_currency
                             ? "-"
-                            : formatMoney(costBasisFor(order) ?? 0, order.quote_currency)}
+                            : formatMoneyPrivacy(costBasisFor(order) ?? 0, order.quote_currency, hideAbsoluteValues)}
                         </td>
                         <td>
                           {order.current_value == null || !order.quote_currency
                             ? "-"
-                            : formatMoney(order.current_value, order.quote_currency)}
+                            : formatMoneyPrivacy(order.current_value, order.quote_currency, hideAbsoluteValues)}
                         </td>
                         <td className={(pnlFor(order) ?? 0) >= 0 ? "positive" : "negative"}>
-                          {pnlFor(order) == null || !order.quote_currency ? "-" : formatMoney(pnlFor(order) ?? 0, order.quote_currency)}
+                          {pnlFor(order) == null || !order.quote_currency
+                            ? "-"
+                            : hideAbsoluteValues && roiFor(order) != null
+                              ? `${roiFor(order)?.toFixed(2)}%`
+                              : formatMoneyPrivacy(pnlFor(order) ?? 0, order.quote_currency, hideAbsoluteValues)}
                         </td>
                         <td className={(roiFor(order) ?? 0) >= 0 ? "positive" : "negative"}>
                           {roiFor(order) == null ? "-" : `${roiFor(order)?.toFixed(2)}%`}
                           {roiLabelFor(order) && <small>{roiLabelFor(order)}</small>}
                         </td>
                         <td title={order.account_value_warning ?? undefined}>
-                          {accountValueLabel(order.account_value_before, order.account_value_currency, order.account_value_warning)}
+                          {accountValueLabel(order.account_value_before, order.account_value_currency, order.account_value_warning, hideAbsoluteValues)}
                         </td>
                         <td title={order.account_value_warning ?? undefined}>
-                          {accountValueLabel(order.account_value_after, order.account_value_currency, order.account_value_warning)}
+                          {accountValueLabel(order.account_value_after, order.account_value_currency, order.account_value_warning, hideAbsoluteValues)}
                         </td>
                         <td>{normalizeStatus(statusFor(order)) ?? "-"}</td>
                         <td>{order.platform}</td>
@@ -455,9 +470,9 @@ export const OrdersTable = memo(function OrdersTable({
             return (
               <div className="open-order-summary-row" key={cash.id}>
                 <strong>{currency} Cash</strong>
-                <span>{formatMoney(cash.balance, currency)}</span>
-                <small>open orders {formatMoney(reserved, currency)}</small>
-                <small>remaining {formatMoney(availableAfterOrders, currency)}</small>
+                <span>{formatMoneyPrivacy(cash.balance, currency, hideAbsoluteValues)}</span>
+                <small>open orders {formatMoneyPrivacy(reserved, currency, hideAbsoluteValues)}</small>
+                <small>remaining {formatMoneyPrivacy(availableAfterOrders, currency, hideAbsoluteValues)}</small>
               </div>
             );
           })}

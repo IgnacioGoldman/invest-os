@@ -1,6 +1,6 @@
 import { memo, useMemo, type ReactNode } from "react";
 import type { Holding } from "../api";
-import { formatDateTime, formatMoney, formatNumber } from "../format";
+import { HIDDEN_ABSOLUTE_VALUE, formatDateTime, formatMoney, formatMoneyPrivacy, formatNumber } from "../format";
 
 type Props = {
   title: string;
@@ -9,6 +9,7 @@ type Props = {
   displayRate: number;
   controls?: ReactNode;
   compact?: boolean;
+  hideAbsoluteValues?: boolean;
 };
 
 const formatPercent = (value: number) => new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value);
@@ -27,6 +28,7 @@ export const HoldingsTable = memo(function HoldingsTable({
   displayRate,
   controls,
   compact = false,
+  hideAbsoluteValues = false,
 }: Props) {
   const aggregate = useMemo(
     () =>
@@ -57,8 +59,16 @@ export const HoldingsTable = memo(function HoldingsTable({
           <div className="panel-heading-meta">
             {aggregatePnl != null && (
               <strong className={aggregatePnl >= 0 ? "positive" : "negative"}>
-                {formatMoney(aggregatePnl * displayRate, displayCurrency)}
-                <small>{aggregateRoi == null ? "" : `${new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(aggregateRoi)}%`}</small>
+                {hideAbsoluteValues
+                  ? aggregateRoi == null
+                    ? HIDDEN_ABSOLUTE_VALUE
+                    : `${formatPercent(aggregateRoi)}%`
+                  : formatMoney(aggregatePnl * displayRate, displayCurrency)}
+                <small>
+                  {aggregateRoi == null || hideAbsoluteValues
+                    ? ""
+                    : `${new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(aggregateRoi)}%`}
+                </small>
               </strong>
             )}
             <span>{holdings.length}</span>
@@ -86,13 +96,17 @@ export const HoldingsTable = memo(function HoldingsTable({
                       <small>{holding.name || holding.platform}</small>
                     </td>
                     <td>{formatNumber(holding.quantity)}</td>
-                    <td>{holding.current_price == null ? "-" : formatMoney(holding.current_price, holding.currency)}</td>
+                    <td>{holding.current_price == null ? "-" : formatMoneyPrivacy(holding.current_price, holding.currency, hideAbsoluteValues)}</td>
                     <td className={(holding.unrealized_pnl ?? 0) >= 0 ? "positive" : "negative"}>
                       {holding.unrealized_pnl == null ? (
                         "-"
                       ) : (
                         <>
-                          {formatMoney(holding.unrealized_pnl, holding.currency)}
+                          {hideAbsoluteValues
+                            ? roiPercent == null
+                              ? HIDDEN_ABSOLUTE_VALUE
+                              : `${formatPercent(roiPercent)}%`
+                            : formatMoney(holding.unrealized_pnl, holding.currency)}
                           {roiPercent != null && <small>{formatPercent(roiPercent)}%</small>}
                         </>
                       )}
@@ -137,9 +151,9 @@ export const HoldingsTable = memo(function HoldingsTable({
                     <td>{holding.platform}</td>
                     <td>{holding.asset_class}</td>
                     <td>{formatNumber(holding.quantity)}</td>
-                    <td>{holding.current_price == null ? "-" : formatMoney(holding.current_price, holding.currency)}</td>
-                    <td>{formatMoney(holding.market_value, holding.currency)}</td>
-                    <td>{holding.value_in_base == null ? "-" : formatMoney(holding.value_in_base * displayRate, displayCurrency)}</td>
+                    <td>{holding.current_price == null ? "-" : formatMoneyPrivacy(holding.current_price, holding.currency, hideAbsoluteValues)}</td>
+                    <td>{formatMoneyPrivacy(holding.market_value, holding.currency, hideAbsoluteValues)}</td>
+                    <td>{holding.value_in_base == null ? "-" : formatMoneyPrivacy(holding.value_in_base * displayRate, displayCurrency, hideAbsoluteValues)}</td>
                     <td>
                       <span>{holding.valuation_source ?? "-"}</span>
                       <small>{formatDateTime(holding.valuation_timestamp)}</small>
@@ -149,7 +163,11 @@ export const HoldingsTable = memo(function HoldingsTable({
                         "-"
                       ) : (
                         <>
-                          {formatMoney(holding.unrealized_pnl, holding.currency)}
+                          {hideAbsoluteValues
+                            ? roiPercent == null
+                              ? HIDDEN_ABSOLUTE_VALUE
+                              : `${formatPercent(roiPercent)}%`
+                            : formatMoney(holding.unrealized_pnl, holding.currency)}
                           {roiPercent != null && <small>{formatPercent(roiPercent)}%</small>}
                         </>
                       )}

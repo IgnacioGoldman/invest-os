@@ -59,7 +59,7 @@ def _load_datetime(raw: str | None, default: datetime) -> datetime:
 def get_settings() -> Settings:
     load_dotenv(PROJECT_DIR / ".env")
     ledger_start = _load_datetime(os.getenv("BINANCE_LEDGER_START_DATE"), datetime(2017, 7, 1, tzinfo=timezone.utc))
-    return Settings(
+    settings = Settings(
         base_currency=os.getenv("BASE_CURRENCY", "EUR").upper(),
         binance_api_key=os.getenv("BINANCE_API_KEY") or None,
         binance_api_secret=os.getenv("BINANCE_API_SECRET") or None,
@@ -75,4 +75,43 @@ def get_settings() -> Settings:
         openai_api_key=os.getenv("OPENAI_API_KEY") or None,
         openai_recommendation_model=os.getenv("OPENAI_RECOMMENDATION_MODEL", "gpt-5-mini"),
         fmp_api_key=os.getenv("FMP_API_KEY") or None,
+    )
+    try:
+        from app.services.connections import load_connection_overrides
+
+        overrides = load_connection_overrides(settings.data_dir)
+    except Exception:
+        return settings
+
+    ibkr = overrides.get("ibkr")
+    binance = overrides.get("binance")
+    ibkr_enabled = ibkr is None or not ibkr.disabled
+    binance_enabled = binance is None or not binance.disabled
+    return Settings(
+        base_currency=settings.base_currency,
+        data_dir=settings.data_dir,
+        binance_api_key=binance.binance_api_key
+        if binance_enabled and binance and binance.binance_api_key is not None
+        else settings.binance_api_key if binance_enabled else None,
+        binance_api_secret=binance.binance_api_secret
+        if binance_enabled and binance and binance.binance_api_secret is not None
+        else settings.binance_api_secret if binance_enabled else None,
+        ibkr_host=ibkr.ibkr_host if ibkr_enabled and ibkr and ibkr.ibkr_host is not None else "127.0.0.1" if not ibkr_enabled else settings.ibkr_host,
+        ibkr_port=ibkr.ibkr_port if ibkr_enabled and ibkr and ibkr.ibkr_port is not None else 7497 if not ibkr_enabled else settings.ibkr_port,
+        ibkr_client_id=ibkr.ibkr_client_id if ibkr_enabled and ibkr and ibkr.ibkr_client_id is not None else 1 if not ibkr_enabled else settings.ibkr_client_id,
+        ibkr_flex_token=ibkr.ibkr_flex_token
+        if ibkr_enabled and ibkr and ibkr.ibkr_flex_token is not None
+        else settings.ibkr_flex_token if ibkr_enabled else None,
+        ibkr_flex_query_id=ibkr.ibkr_flex_query_id
+        if ibkr_enabled and ibkr and ibkr.ibkr_flex_query_id is not None
+        else "1554875" if not ibkr_enabled else settings.ibkr_flex_query_id,
+        fx_rates=settings.fx_rates,
+        enable_demo_fallback=settings.enable_demo_fallback,
+        market_price_stale_hours=settings.market_price_stale_hours,
+        binance_ledger_start_date=binance.binance_ledger_start_date
+        if binance_enabled and binance and binance.binance_ledger_start_date is not None
+        else settings.binance_ledger_start_date,
+        openai_api_key=settings.openai_api_key,
+        openai_recommendation_model=settings.openai_recommendation_model,
+        fmp_api_key=settings.fmp_api_key,
     )

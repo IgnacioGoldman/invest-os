@@ -2,15 +2,17 @@ import {
   AlertTriangle,
   ArchiveX,
   Bot,
-  ChevronDown,
+  Check,
   Info,
+  MessageSquare,
+  RotateCcw,
   SendHorizontal,
   ShieldAlert,
   Sparkles,
   Undo2,
   UserRound,
 } from "lucide-react";
-import { memo, useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { Recommendation, RecommendationFollowUpResponse } from "../api";
 import { formatDateTime } from "../format";
 
@@ -31,20 +33,18 @@ type FollowUpTurn = {
   response: RecommendationFollowUpResponse;
 };
 
-type RecommendationItemProps = {
+type RecommendationTab = "working" | "accepted" | "discarded";
+
+type RecommendationRecord = {
+  key: string;
   rec: Recommendation;
-  recKey: string;
-  chatId: string;
+  status: RecommendationTab;
   thread: FollowUpTurn[];
-  isPending: boolean;
-  followUpError?: string;
-  chatIsOpen: boolean;
-  isDiscarded?: boolean;
-  onAsk?: (recommendation: Recommendation, question: string) => Promise<boolean>;
-  onDiscard?: (key: string) => void;
-  onRestore?: (key: string) => void;
-  onToggleChat: (key: string) => void;
 };
+
+const EMPTY_THREAD: FollowUpTurn[] = [];
+const DISCARDED_RECOMMENDATIONS_STORAGE_KEY = "invest-os:discarded-recommendation-keys";
+const ACCEPTED_RECOMMENDATIONS_STORAGE_KEY = "invest-os:accepted-recommendation-keys";
 
 const ICON = {
   info: <Info size={16} />,
@@ -62,14 +62,12 @@ const CATEGORY_LABEL = {
   theme: "Theme",
 } as const;
 
-const DISCARDED_RECOMMENDATIONS_STORAGE_KEY = "invest-os:discarded-recommendation-keys";
-
-function loadDiscardedRecommendationKeys() {
+function loadStoredKeys(storageKey: string) {
   if (typeof window === "undefined") {
     return new Set<string>();
   }
   try {
-    const raw = window.localStorage.getItem(DISCARDED_RECOMMENDATIONS_STORAGE_KEY);
+    const raw = window.localStorage.getItem(storageKey);
     const parsed = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(parsed)) {
       return new Set<string>();
@@ -80,14 +78,14 @@ function loadDiscardedRecommendationKeys() {
   }
 }
 
-function saveDiscardedRecommendationKeys(keys: Set<string>) {
+function saveStoredKeys(storageKey: string, keys: Set<string>) {
   if (typeof window === "undefined") {
     return;
   }
   try {
-    window.localStorage.setItem(DISCARDED_RECOMMENDATIONS_STORAGE_KEY, JSON.stringify([...keys]));
+    window.localStorage.setItem(storageKey, JSON.stringify([...keys]));
   } catch {
-    // Keep discard usable even if browser storage is unavailable.
+    // Keep the UI usable even if browser storage is unavailable.
   }
 }
 
@@ -121,166 +119,31 @@ function groupFollowUps(
   }, {});
 }
 
-const RecommendationItem = memo(function RecommendationItem({
-  rec,
-  recKey,
-  chatId,
-  thread,
-  isPending,
-  followUpError,
-  chatIsOpen,
-  isDiscarded = false,
-  onAsk,
-  onDiscard,
-  onRestore,
-  onToggleChat,
-}: RecommendationItemProps) {
-  const [draft, setDraft] = useState("");
-  const hasAsk = Boolean(onAsk);
+function statusForKey(key: string, acceptedKeys: Set<string>, discardedKeys: Set<string>): RecommendationTab {
+  if (discardedKeys.has(key)) {
+    return "discarded";
+  }
+  if (acceptedKeys.has(key)) {
+    return "accepted";
+  }
+  return "working";
+}
 
-  const askRecommendation = async (event: FormEvent) => {
-    event.preventDefault();
-    const question = draft.trim();
-    if (!onAsk || !question) {
-      return;
-    }
-    const didSend = await onAsk(rec, question);
-    if (didSend) {
-      setDraft("");
-    }
-  };
+function tabLabel(tab: RecommendationTab) {
+  if (tab === "working") return "Working";
+  if (tab === "accepted") return "Accepted";
+  return "Discarded";
+}
 
-  return (
-    <li className={`rec-item rec-${rec.severity}`}>
-      <span className="rec-icon">{ICON[rec.severity]}</span>
-      <div className="rec-content">
-        <strong>{rec.title}</strong>
-        <p>{rec.detail}</p>
-        {isDiscarded ? (
-          <div className="rec-discarded-actions">
-            <button type="button" onClick={() => onRestore?.(recKey)} title="Restore recommendation">
-              <Undo2 size={15} aria-hidden="true" />
-              Restore
-            </button>
-          </div>
-        ) : (
-          <div className="rec-action-row">
-            {(thread.length > 0 || hasAsk) && (
-              <div className="rec-chat-dropdown">
-                <button
-                  type="button"
-                  className="rec-chat-toggle"
-                  aria-expanded={chatIsOpen}
-                  aria-controls={chatId}
-                  onClick={() => onToggleChat(recKey)}
-                >
-                  <span>
-                    <Bot size={15} aria-hidden="true" />
-                    {thread.length > 0 ? `Chat (${thread.length})` : "Ask follow-up"}
-                  </span>
-                  <ChevronDown size={16} aria-hidden="true" />
-                </button>
+function categoryLabel(rec: Recommendation) {
+  return CATEGORY_LABEL[rec.category] ?? rec.category;
+}
 
-                {chatIsOpen && (
-                  <div className="rec-chat-panel" id={chatId}>
-                    {thread.length > 0 && (
-                      <div className="rec-follow-up-thread">
-                        {thread.map((turn, turnIndex) => (
-                          <div
-                            className="rec-follow-up-turn"
-                            key={turn.response.follow_up_id ?? `${turn.response.generated_at}-${turnIndex}`}
-                          >
-                            <div className="rec-follow-up-message rec-follow-up-question">
-                              <span className="rec-chat-avatar" aria-hidden="true">
-                                <UserRound size={14} />
-                              </span>
-                              <div className="rec-chat-bubble">
-                                <div className="rec-chat-meta">
-                                  <span>me</span>
-                                </div>
-                                <p>{turn.question}</p>
-                              </div>
-                            </div>
-                            <div className="rec-follow-up-message rec-follow-up-answer">
-                              <span className="rec-chat-avatar" aria-hidden="true">
-                                <Bot size={14} />
-                              </span>
-                              <div className="rec-chat-bubble">
-                                <div className="rec-chat-meta">
-                                  <span>invest-os</span>
-                                  <time dateTime={turn.response.generated_at}>
-                                    {formatDateTime(turn.response.generated_at)}
-                                  </time>
-                                </div>
-                                <p>{turn.response.answer}</p>
-                                {turn.response.status === "pending_codex" && (
-                                  <small className="rec-follow-up-status">
-                                    <span aria-hidden="true" />
-                                    Waiting for Codex callback
-                                  </small>
-                                )}
-                                {turn.response.codex_command && (
-                                  <details className="rec-follow-up-command">
-                                    <summary>Codex IDE prompt</summary>
-                                    <pre>
-                                      <code>{turn.response.codex_command}</code>
-                                    </pre>
-                                  </details>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {followUpError && (
-                      <p className="rec-follow-up-error" role="alert">
-                        {followUpError}
-                      </p>
-                    )}
-                    {onAsk && (
-                      <form className="rec-follow-up-form" onSubmit={askRecommendation}>
-                        <textarea
-                          value={draft}
-                          onChange={(event) => setDraft(event.target.value)}
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter" && !event.shiftKey) {
-                              event.preventDefault();
-                              event.currentTarget.form?.requestSubmit();
-                            }
-                          }}
-                          placeholder="Ask invest-os about this recommendation"
-                          aria-label={`Ask about ${rec.title}`}
-                          rows={1}
-                        />
-                        <button
-                          type="submit"
-                          disabled={isPending || !draft.trim()}
-                          title={isPending ? "Waiting for Invest OS" : "Send question"}
-                        >
-                          <SendHorizontal size={16} aria-hidden="true" />
-                        </button>
-                      </form>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-            <button
-              type="button"
-              className="rec-discard-button"
-              onClick={() => onDiscard?.(recKey)}
-              title="Discard recommendation"
-            >
-              <ArchiveX size={15} aria-hidden="true" />
-              Discard
-            </button>
-          </div>
-        )}
-      </div>
-    </li>
-  );
-});
+function severityLabel(severity: Recommendation["severity"]) {
+  if (severity === "critical") return "High priority";
+  if (severity === "warning") return "Watch";
+  return "Info";
+}
 
 export const Recommendations = memo(function Recommendations({
   recommendations,
@@ -293,33 +156,24 @@ export const Recommendations = memo(function Recommendations({
   onPollRecommendation,
   alwaysShow = false,
 }: Props) {
+  const [tab, setTab] = useState<RecommendationTab>("working");
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
   const [followUps, setFollowUps] = useState<Record<string, FollowUpTurn[]>>({});
-  const [openChatKeys, setOpenChatKeys] = useState<Record<string, boolean>>({});
-  const [discardedKeys, setDiscardedKeys] = useState<Set<string>>(loadDiscardedRecommendationKeys);
+  const [acceptedKeys, setAcceptedKeys] = useState<Set<string>>(() =>
+    loadStoredKeys(ACCEPTED_RECOMMENDATIONS_STORAGE_KEY),
+  );
+  const [discardedKeys, setDiscardedKeys] = useState<Set<string>>(() =>
+    loadStoredKeys(DISCARDED_RECOMMENDATIONS_STORAGE_KEY),
+  );
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [followUpErrors, setFollowUpErrors] = useState<Record<string, string>>({});
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   const actionableRecommendations = useMemo(
     () => recommendations.filter((rec) => rec.severity !== "info"),
     [recommendations],
   );
-  const visibleRecommendations = useMemo(
-    () => actionableRecommendations.filter((rec) => !discardedKeys.has(recommendationKey(rec))),
-    [actionableRecommendations, discardedKeys],
-  );
-  const discardedRecommendations = useMemo(
-    () => actionableRecommendations.filter((rec) => discardedKeys.has(recommendationKey(rec))),
-    [actionableRecommendations, discardedKeys],
-  );
-  const groupedRecommendations = useMemo(
-    () =>
-      visibleRecommendations.reduce<Record<string, Recommendation[]>>((groups, rec) => {
-        const category = rec.category ?? "allocation";
-        groups[category] = [...(groups[category] ?? []), rec];
-        return groups;
-      }, {}),
-    [visibleRecommendations],
-  );
-  const shouldRerun = isSourceDataNewer(generatedAt, latestSourceSyncedAt);
   const visibleRecommendationKeys = useMemo(
     () => new Set(actionableRecommendations.map(recommendationKey)),
     [actionableRecommendations],
@@ -328,6 +182,38 @@ export const Recommendations = memo(function Recommendations({
     () => [...visibleRecommendationKeys].sort().join("|"),
     [visibleRecommendationKeys],
   );
+  const records = useMemo<RecommendationRecord[]>(
+    () =>
+      actionableRecommendations.map((rec) => {
+        const key = recommendationKey(rec);
+        return {
+          key,
+          rec,
+          status: statusForKey(key, acceptedKeys, discardedKeys),
+          thread: followUps[key] ?? EMPTY_THREAD,
+        };
+      }),
+    [acceptedKeys, actionableRecommendations, discardedKeys, followUps],
+  );
+  const filteredRecords = useMemo(
+    () => records.filter((record) => record.status === tab),
+    [records, tab],
+  );
+  const activeRecord = useMemo(
+    () => records.find((record) => record.key === activeKey) ?? null,
+    [activeKey, records],
+  );
+  const activeThread = activeRecord?.thread ?? EMPTY_THREAD;
+  const activeError = activeRecord ? followUpErrors[activeRecord.key] : undefined;
+  const counts = useMemo(
+    () => ({
+      working: records.filter((record) => record.status === "working").length,
+      accepted: records.filter((record) => record.status === "accepted").length,
+      discarded: records.filter((record) => record.status === "discarded").length,
+    }),
+    [records],
+  );
+  const shouldRerun = isSourceDataNewer(generatedAt, latestSourceSyncedAt);
   const pendingFollowUpKey = useMemo(() => {
     const ids = Object.values(followUps)
       .flatMap((turns) => turns.map((turn) => turn.response))
@@ -337,8 +223,27 @@ export const Recommendations = memo(function Recommendations({
   }, [followUps]);
 
   useEffect(() => {
-    saveDiscardedRecommendationKeys(discardedKeys);
+    saveStoredKeys(ACCEPTED_RECOMMENDATIONS_STORAGE_KEY, acceptedKeys);
+  }, [acceptedKeys]);
+
+  useEffect(() => {
+    saveStoredKeys(DISCARDED_RECOMMENDATIONS_STORAGE_KEY, discardedKeys);
   }, [discardedKeys]);
+
+  useEffect(() => {
+    if (activeKey && filteredRecords.some((record) => record.key === activeKey)) {
+      return;
+    }
+    setActiveKey(filteredRecords[0]?.key ?? null);
+  }, [activeKey, filteredRecords]);
+
+  useEffect(() => {
+    setDraft("");
+  }, [activeKey]);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [activeKey, activeThread.length, pendingKey]);
 
   useEffect(() => {
     if (!onLoadRecommendationFollowUps) {
@@ -347,10 +252,9 @@ export const Recommendations = memo(function Recommendations({
     let cancelled = false;
     onLoadRecommendationFollowUps()
       .then((responses) => {
-        if (cancelled) {
-          return;
+        if (!cancelled) {
+          setFollowUps(groupFollowUps(responses, visibleRecommendationKeys));
         }
-        setFollowUps(groupFollowUps(responses, visibleRecommendationKeys));
       })
       .catch(() => {
         // The recommendation list should remain usable if thread hydration misses once.
@@ -410,41 +314,26 @@ export const Recommendations = memo(function Recommendations({
     };
   }, [onPollRecommendation, pendingFollowUpKey]);
 
-  const askRecommendation = useCallback(async (rec: Recommendation, question: string) => {
-    if (!onAskRecommendation) {
-      return false;
-    }
-    const key = recommendationKey(rec);
-    setOpenChatKeys((current) => ({ ...current, [key]: true }));
-    setPendingKey(key);
-    setFollowUpErrors((errors) => ({ ...errors, [key]: "" }));
-    try {
-      const response = await onAskRecommendation(rec, question);
-      const responseKey = response.recommendation_key || key;
-      setOpenChatKeys((current) => ({ ...current, [key]: true, [responseKey]: true }));
-      setFollowUps((threads) => ({
-        ...threads,
-        [responseKey]: [...(threads[responseKey] ?? []), { question: response.question, response }],
-      }));
-      return true;
-    } catch (error) {
-      setFollowUpErrors((errors) => ({
-        ...errors,
-        [key]: error instanceof Error ? error.message : "Could not analyze this recommendation.",
-      }));
-      return false;
-    } finally {
-      setPendingKey(null);
-    }
-  }, [onAskRecommendation]);
-
-  const toggleChat = useCallback((key: string) => {
-    setOpenChatKeys((current) => ({ ...current, [key]: !(current[key] ?? false) }));
+  const acceptRecommendation = useCallback((key: string) => {
+    setAcceptedKeys((current) => new Set(current).add(key));
+    setDiscardedKeys((current) => {
+      const next = new Set(current);
+      next.delete(key);
+      return next;
+    });
+    setTab("accepted");
+    setActiveKey(key);
   }, []);
 
   const discardRecommendation = useCallback((key: string) => {
     setDiscardedKeys((current) => new Set(current).add(key));
-    setOpenChatKeys((current) => ({ ...current, [key]: false }));
+    setAcceptedKeys((current) => {
+      const next = new Set(current);
+      next.delete(key);
+      return next;
+    });
+    setTab("discarded");
+    setActiveKey(key);
   }, []);
 
   const restoreRecommendation = useCallback((key: string) => {
@@ -453,104 +342,335 @@ export const Recommendations = memo(function Recommendations({
       next.delete(key);
       return next;
     });
+    setAcceptedKeys((current) => {
+      const next = new Set(current);
+      next.delete(key);
+      return next;
+    });
+    setTab("working");
+    setActiveKey(key);
   }, []);
+
+  const askRecommendation = useCallback(async (event: FormEvent) => {
+    event.preventDefault();
+    if (!onAskRecommendation || !activeRecord) {
+      return;
+    }
+    const question = draft.trim();
+    if (!question) {
+      return;
+    }
+    const key = activeRecord.key;
+    setDraft("");
+    setPendingKey(key);
+    setFollowUpErrors((errors) => ({ ...errors, [key]: "" }));
+    try {
+      const response = await onAskRecommendation(activeRecord.rec, question);
+      const responseKey = response.recommendation_key || key;
+      setFollowUps((threads) => ({
+        ...threads,
+        [responseKey]: [...(threads[responseKey] ?? []), { question: response.question, response }],
+      }));
+    } catch (error) {
+      setFollowUpErrors((errors) => ({
+        ...errors,
+        [key]: error instanceof Error ? error.message : "Could not analyze this recommendation.",
+      }));
+    } finally {
+      setPendingKey(null);
+    }
+  }, [activeRecord, draft, onAskRecommendation]);
 
   if (actionableRecommendations.length === 0 && !onAnalyze && !alwaysShow) return null;
 
   return (
-    <section className="panel recommendations">
-      <div className="panel-heading">
-        <h2>Recommendations</h2>
-        <div className="panel-heading-actions">
-          <small className="recommendations-run-time">
-            Last run {generatedAt ? formatDateTime(generatedAt) : "never"}
-          </small>
-          <span>{visibleRecommendations.length}</span>
+    <div className="advice-shell recommendations">
+      <header className="advice-hero">
+        <div>
+          <h2>Recommendations</h2>
+          <p>Review portfolio advice, keep what you accept, discard the noise, and ask follow-up questions in context.</p>
+        </div>
+        <div className="advice-run-card">
+          <span>Last run</span>
+          <strong>{generatedAt ? formatDateTime(generatedAt) : "Never"}</strong>
           {onAnalyze && (
             <button type="button" onClick={onAnalyze} disabled={analyzing} title="Analyze portfolio with AI">
               <Sparkles size={16} aria-hidden="true" />
-              {analyzing ? "Analyzing" : "Analyze Portfolio"}
+              {analyzing ? "Analyzing" : "Analyze"}
             </button>
           )}
         </div>
-      </div>
-      {visibleRecommendations.length ? (
-        <div className="rec-groups">
-          {Object.entries(groupedRecommendations).map(([category, recs]) => (
-            <div className="rec-group" key={category}>
-              <h3>{CATEGORY_LABEL[category as keyof typeof CATEGORY_LABEL] ?? category}</h3>
-              <ul className="rec-list">
-                {recs.map((rec, index) => {
-                  const key = recommendationKey(rec);
-                  const thread = followUps[key] ?? [];
-                  const chatId = `rec-chat-${category.replace(/[^a-zA-Z0-9_-]/g, "-")}-${index}`;
-                  return (
-                    <RecommendationItem
-                      key={key}
-                      rec={rec}
-                      recKey={key}
-                      chatId={chatId}
-                      thread={thread}
-                      isPending={pendingKey === key}
-                      followUpError={followUpErrors[key]}
-                      chatIsOpen={openChatKeys[key] ?? false}
-                      onAsk={onAskRecommendation ? askRecommendation : undefined}
-                      onDiscard={discardRecommendation}
-                      onToggleChat={toggleChat}
-                    />
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="empty block">No active recommendations.</p>
-      )}
-      {discardedRecommendations.length > 0 && (
-        <details className="rec-discarded-pile">
-          <summary>
-            <span>
-              <ArchiveX size={15} aria-hidden="true" />
-              Discarded recommendations
-            </span>
-            <strong>{discardedRecommendations.length}</strong>
-          </summary>
-          <ul className="rec-list rec-discarded-list">
-            {discardedRecommendations.map((rec, index) => {
-              const key = recommendationKey(rec);
-              return (
-                <RecommendationItem
-                  key={key}
-                  rec={rec}
-                  recKey={key}
-                  chatId={`rec-discarded-${index}`}
-                  thread={followUps[key] ?? []}
-                  isPending={false}
-                  followUpError={followUpErrors[key]}
-                  chatIsOpen={false}
-                  isDiscarded
-                  onRestore={restoreRecommendation}
-                  onToggleChat={toggleChat}
-                />
-              );
-            })}
-          </ul>
-        </details>
-      )}
+      </header>
+
       {shouldRerun && (
-        <div className="recommendations-stale-alert" role="alert">
+        <div className="recommendations-stale-alert advice-stale-alert" role="alert">
           <AlertTriangle size={16} aria-hidden="true" />
           <div>
             <strong>New portfolio data is available.</strong>
             <p>
-              Analyze Portfolio should be run again. Last run{" "}
-              {generatedAt ? formatDateTime(generatedAt) : "never"}
+              Analyze should be run again. Last run {generatedAt ? formatDateTime(generatedAt) : "never"}
               {latestSourceSyncedAt ? `; latest source sync ${formatDateTime(latestSourceSyncedAt)}.` : "."}
             </p>
           </div>
         </div>
       )}
-    </section>
+
+      <div className="advice-workspace">
+        <aside className="advice-sidebar" aria-label="Recommendations">
+          <div className="advice-sidebar-heading">
+            <div>
+              <strong>Inbox</strong>
+              <span>{records.length} items</span>
+            </div>
+            {onAnalyze && (
+              <button type="button" onClick={onAnalyze} disabled={analyzing} title="Run a new recommendation analysis">
+                <Sparkles size={15} aria-hidden="true" />
+                New run
+              </button>
+            )}
+          </div>
+
+          <div className="advice-tab-list" role="tablist" aria-label="Recommendation status">
+            {(["working", "accepted", "discarded"] as RecommendationTab[]).map((item) => (
+              <TabButton
+                key={item}
+                active={tab === item}
+                count={counts[item]}
+                label={tabLabel(item)}
+                onClick={() => setTab(item)}
+              />
+            ))}
+          </div>
+
+          <div className="advice-rec-list">
+            {filteredRecords.length === 0 ? (
+              <div className="advice-list-empty">
+                {tab === "working" ? "No working recommendations. Run a fresh analysis when you are ready." : `Nothing ${tabLabel(tab).toLowerCase()} yet.`}
+              </div>
+            ) : (
+              filteredRecords.map((record) => (
+                <button
+                  type="button"
+                  className={`advice-rec-button ${activeKey === record.key ? "active" : ""}`}
+                  key={record.key}
+                  onClick={() => setActiveKey(record.key)}
+                  aria-pressed={activeKey === record.key}
+                >
+                  <span className={`advice-rec-severity severity-${record.rec.severity}`}>{ICON[record.rec.severity]}</span>
+                  <span>
+                    <strong>{record.rec.title}</strong>
+                    <small>
+                      <MessageSquare size={12} aria-hidden="true" />
+                      {record.thread.length}
+                      <em>{categoryLabel(record.rec)}</em>
+                    </small>
+                  </span>
+                </button>
+              ))
+            )}
+          </div>
+        </aside>
+
+        <section className="advice-pane">
+          {!activeRecord ? (
+            <div className="advice-empty-state">
+              <span className="advice-empty-icon">
+                <Sparkles size={22} aria-hidden="true" />
+              </span>
+              <strong>{records.length ? "Pick a recommendation" : "No recommendations yet"}</strong>
+              <p>
+                {records.length
+                  ? "Select an item from the inbox to review the reasoning and ask questions."
+                  : "Run an analysis to create your first recommendation set."}
+              </p>
+              {onAnalyze && (
+                <button type="button" onClick={onAnalyze} disabled={analyzing}>
+                  <Sparkles size={16} aria-hidden="true" />
+                  {analyzing ? "Analyzing" : "Analyze portfolio"}
+                </button>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="advice-pane-header">
+                <div className="advice-title-block">
+                  <small>{categoryLabel(activeRecord.rec)}</small>
+                  <div className="advice-title-row">
+                    <h3>{activeRecord.rec.title}</h3>
+                    <StatusBadge status={activeRecord.status} severity={activeRecord.rec.severity} />
+                  </div>
+                  <p>{activeRecord.rec.detail}</p>
+                </div>
+
+                <div className="advice-action-row">
+                  {activeRecord.status !== "accepted" && (
+                    <button
+                      type="button"
+                      className="advice-action-button accept"
+                      onClick={() => acceptRecommendation(activeRecord.key)}
+                    >
+                      <Check size={15} aria-hidden="true" />
+                      Accept
+                    </button>
+                  )}
+                  {activeRecord.status !== "discarded" && (
+                    <button
+                      type="button"
+                      className="advice-action-button discard"
+                      onClick={() => discardRecommendation(activeRecord.key)}
+                    >
+                      <ArchiveX size={15} aria-hidden="true" />
+                      Discard
+                    </button>
+                  )}
+                  {activeRecord.status !== "working" && (
+                    <button
+                      type="button"
+                      className="advice-action-button restore"
+                      onClick={() => restoreRecommendation(activeRecord.key)}
+                    >
+                      {activeRecord.status === "discarded" ? <Undo2 size={15} aria-hidden="true" /> : <RotateCcw size={15} aria-hidden="true" />}
+                      Working
+                    </button>
+                  )}
+                </div>
+
+                <div className="advice-context-card">
+                  <strong>Why this matters</strong>
+                  <p>
+                    This is a {severityLabel(activeRecord.rec.severity).toLowerCase()} {categoryLabel(activeRecord.rec).toLowerCase()} item.
+                    Use the chat below to test assumptions before acting.
+                  </p>
+                </div>
+              </div>
+
+              <div className="advice-chat-body" ref={scrollRef}>
+                {activeThread.length === 0 && (
+                  <div className="advice-chat-empty">
+                    Ask anything about this recommendation, for example: "Why this now?", "What is the safer version?", or "What changes if I add cash?"
+                  </div>
+                )}
+                {activeThread.map((turn, index) => (
+                  <div className="advice-chat-turn" key={turn.response.follow_up_id ?? `${turn.response.generated_at}-${index}`}>
+                    <div className="advice-chat-message user">
+                      <span className="advice-chat-avatar" aria-hidden="true">
+                        <UserRound size={14} />
+                      </span>
+                      <div className="advice-chat-bubble">
+                        <div className="advice-chat-meta">
+                          <span>me</span>
+                        </div>
+                        <p>{turn.question}</p>
+                      </div>
+                    </div>
+                    <div className="advice-chat-message assistant">
+                      <span className="advice-chat-avatar" aria-hidden="true">
+                        <Bot size={14} />
+                      </span>
+                      <div className="advice-chat-bubble">
+                        <div className="advice-chat-meta">
+                          <span>invest-os</span>
+                          <time dateTime={turn.response.generated_at}>{formatDateTime(turn.response.generated_at)}</time>
+                        </div>
+                        <p>{turn.response.answer}</p>
+                        {turn.response.status === "pending_codex" && (
+                          <small className="rec-follow-up-status">
+                            <span aria-hidden="true" />
+                            Waiting for Codex callback
+                          </small>
+                        )}
+                        {turn.response.codex_command && (
+                          <details className="rec-follow-up-command">
+                            <summary>Codex IDE prompt</summary>
+                            <pre>
+                              <code>{turn.response.codex_command}</code>
+                            </pre>
+                          </details>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {pendingKey === activeRecord.key && (
+                  <div className="advice-thinking">
+                    <Sparkles size={14} aria-hidden="true" />
+                    Thinking...
+                  </div>
+                )}
+                {activeError && (
+                  <div className="advice-follow-up-error" role="alert">
+                    {activeError}
+                  </div>
+                )}
+              </div>
+
+              {onAskRecommendation && activeRecord.status !== "discarded" && (
+                <form className="advice-composer" onSubmit={askRecommendation}>
+                  <div className="advice-composer-box">
+                    <textarea
+                      value={draft}
+                      onChange={(event) => setDraft(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && !event.shiftKey) {
+                          event.preventDefault();
+                          event.currentTarget.form?.requestSubmit();
+                        }
+                      }}
+                      placeholder={`Ask about "${activeRecord.rec.title}"...`}
+                      aria-label={`Ask about ${activeRecord.rec.title}`}
+                      rows={1}
+                    />
+                    <button
+                      type="submit"
+                      disabled={pendingKey === activeRecord.key || !draft.trim()}
+                      title={pendingKey === activeRecord.key ? "Waiting for Invest OS" : "Send question"}
+                    >
+                      <SendHorizontal size={17} aria-hidden="true" />
+                    </button>
+                  </div>
+                  <p>Educational only, not financial advice.</p>
+                </form>
+              )}
+            </>
+          )}
+        </section>
+      </div>
+    </div>
   );
 });
+
+function TabButton({
+  active,
+  count,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  count: number;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button type="button" className={`advice-tab-button ${active ? "active" : ""}`} onClick={onClick}>
+      {label}
+      <span>{count}</span>
+    </button>
+  );
+}
+
+function StatusBadge({
+  status,
+  severity,
+}: {
+  status: RecommendationTab;
+  severity: Recommendation["severity"];
+}) {
+  const Icon = status === "accepted" ? Check : status === "discarded" ? ArchiveX : Sparkles;
+  const label = status === "working" ? severityLabel(severity) : tabLabel(status);
+  return (
+    <span className={`advice-status-badge status-${status} severity-${severity}`}>
+      <Icon size={12} aria-hidden="true" />
+      {label}
+    </span>
+  );
+}

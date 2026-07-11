@@ -1,7 +1,7 @@
-import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Fragment, memo, useMemo, useState, type ReactNode } from "react";
 import type { BinanceLedgerEvent, Order } from "../api";
-import { formatDateTime, formatMoney } from "../format";
+import { HIDDEN_ABSOLUTE_VALUE, formatDateTime, formatMoney } from "../format";
 
 type Props = {
   orders: Order[];
@@ -13,6 +13,7 @@ type Props = {
   endTimestamp?: string | null;
   currentBalances?: Record<string, number>;
   currentAssetValues?: Record<string, number>;
+  hideAbsoluteValues?: boolean;
 };
 
 type ActivityRow = {
@@ -49,6 +50,63 @@ type ActivityRow = {
   fills?: ActivityRow[];
 };
 
+type TradeSummary = {
+  id: string;
+  source: string;
+  platform: string;
+  side: "BUY" | "SELL";
+  asset: string;
+  baseAsset: string;
+  quoteCurrency: string | null;
+  createdAt?: string | null;
+  status?: string | null;
+  note?: string | null;
+  quantity: number;
+  quoteAmount: number;
+  costBasisAmount?: number | null;
+  currentValue?: number | null;
+  remainingQuantity?: number | null;
+  remainingCostBasis?: number | null;
+  realizedPnl?: number | null;
+  unrealizedPnl?: number | null;
+  lotId?: string | null;
+  fills: Order[];
+};
+
+type LotChildRow = {
+  id: string;
+  type: "Initial buy" | "Partial sell" | "Remaining position";
+  date?: string | null;
+  shares: number;
+  price?: number | null;
+  costBasis?: number | null;
+  value?: number | null;
+  pnl?: number | null;
+  status?: string | null;
+};
+
+type LotRow = {
+  id: string;
+  asset: string;
+  lotDate?: string | null;
+  lotId?: string | null;
+  quantityAsset: string;
+  currency: string | null;
+  initialQty: number;
+  currentQty: number;
+  soldQty: number;
+  avgBuy?: number | null;
+  initialCost?: number | null;
+  remainingCost?: number | null;
+  soldCost?: number | null;
+  openValue?: number | null;
+  openPnl?: number | null;
+  realizedPnl?: number | null;
+  totalPnl?: number | null;
+  status: "open" | "partial" | "closed";
+  children: LotChildRow[];
+};
+
 const QUOTES = ["USDT", "USDC", "FDUSD", "EUR", "USD", "BTC", "ETH"];
 const FIAT_OR_STABLE_ASSETS = new Set([
   "USD",
@@ -70,7 +128,6 @@ const EPSILON = 0.00000001;
 const ACTIVITY_PAGE_SIZE = 75;
 const assetAmountFormatters = new Map<string, Intl.NumberFormat>();
 const percentFormatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 });
-const compactPercentFormatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
 const compactDateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
 
 const asNumber = (value: unknown) => {
@@ -84,7 +141,7 @@ const asNumber = (value: unknown) => {
   return 0;
 };
 
-const splitPair = (symbol: string) => {
+const splitPair = (symbol: string): [string, string | null] => {
   const upper = symbol.toUpperCase();
   const quote = QUOTES.find((item) => upper.endsWith(item) && upper.length > item.length);
   return quote ? [upper.slice(0, -quote.length), quote] : [upper, null];
@@ -146,8 +203,28 @@ const rawOrderId = (order: Order) =>
   valueAsString(order.raw.ibOrderID) ??
   valueAsString(order.raw.orderID);
 
+const rawLotId = (order: Order) =>
+  valueAsString(order.raw.lotId) ??
+  valueAsString(order.raw.lotID) ??
+  valueAsString(order.raw.lot_id) ??
+  rawOrderId(order) ??
+  valueAsString(order.raw.brokerageOrderID) ??
+  valueAsString(order.raw.tradeID) ??
+  valueAsString(order.raw.ibExecID);
+
+const lotDateKey = (value?: string | null) => value?.slice(0, 10) ?? "unknown-date";
+
 const orderGroupKey = (order: Order) =>
   [order.source, order.platform, order.symbol, order.side, rawOrderId(order) ?? minuteKey(order.created_at)].join("|");
+
+const buyLotGroupKey = (order: Order) =>
+  [
+    order.source,
+    order.platform,
+    order.symbol,
+    lotDateKey(order.created_at),
+    rawLotId(order) ?? order.id,
+  ].join("|");
 
 const formatAssetAmount = (asset: string, value: number) => {
   const upper = asset.toUpperCase();
@@ -311,7 +388,7 @@ const sumNullable = (values: Array<number | null | undefined>) => {
 
 const formatPercent = (value: number) => percentFormatter.format(value);
 
-const walletValueLabel = (row: ActivityRow) => {
+const walletValueLabel = (row: ActivityRow, hideAbsoluteValues = false) => {
   if (
     row.walletValueAfter == null ||
     row.walletValueAfter < 0 ||
@@ -321,7 +398,7 @@ const walletValueLabel = (row: ActivityRow) => {
   }
   return (
     <span title={row.walletValueWarning ?? undefined}>
-      {formatAssetValue(row.walletValueCurrency, row.walletValueAfter)}
+      {hideAbsoluteValues ? HIDDEN_ABSOLUTE_VALUE : formatAssetValue(row.walletValueCurrency, row.walletValueAfter)}
       <small>{walletValueNote(row.walletValueWarning)}</small>
     </span>
   );
@@ -367,7 +444,7 @@ const balancesLabel = (balances?: Record<string, number>) => {
   );
 };
 
-const assetValuesLabel = (values?: Record<string, number>) => {
+const assetValuesLabel = (values?: Record<string, number>, hideAbsoluteValues = false) => {
   const entries = Object.entries(values ?? {})
     .filter(([, value]) => Math.abs(value) > EPSILON)
     .sort(([left], [right]) => left.localeCompare(right));
@@ -381,7 +458,7 @@ const assetValuesLabel = (values?: Record<string, number>) => {
       {entries.map(([asset, value]) => (
         <span key={asset}>
           <strong>{asset}</strong>
-          <em>{formatAssetAmount("USDT", value)} USDT</em>
+          <em>{hideAbsoluteValues ? HIDDEN_ABSOLUTE_VALUE : `${formatAssetAmount("USDT", value)} USDT`}</em>
         </span>
       ))}
     </div>
@@ -406,27 +483,33 @@ const changesList = (changes: Record<string, number>, fallback = "-") => {
   );
 };
 
-const purchasePriceLabel = (row: ActivityRow) => {
+const purchasePriceLabel = (row: ActivityRow, hideAbsoluteValues = false) => {
   if (row.purchasePrice == null || !row.priceCurrency || !row.priceAsset) {
     return "-";
   }
   return (
     <span>
-      {formatAssetValue(row.priceCurrency, row.purchasePrice)} / {row.priceAsset}
+      {hideAbsoluteValues ? HIDDEN_ABSOLUTE_VALUE : formatAssetValue(row.priceCurrency, row.purchasePrice)} / {row.priceAsset}
       {row.sellPrice != null && (
-        <small>sold at {formatAssetValue(row.priceCurrency, row.sellPrice)} / {row.priceAsset}</small>
+        <small>
+          sold at {hideAbsoluteValues ? HIDDEN_ABSOLUTE_VALUE : formatAssetValue(row.priceCurrency, row.sellPrice)} / {row.priceAsset}
+        </small>
       )}
     </span>
   );
 };
 
-const pnlLabel = (row: ActivityRow) => {
+const pnlLabel = (row: ActivityRow, hideAbsoluteValues = false) => {
   if (row.pnl == null || !row.pnlCurrency) {
     return "-";
   }
   return (
     <span className={row.pnl >= 0 ? "positive" : "negative"}>
-      {formatAssetValue(row.pnlCurrency, row.pnl)}
+      {hideAbsoluteValues
+        ? row.roiPercent == null
+          ? HIDDEN_ABSOLUTE_VALUE
+          : `${formatPercent(row.roiPercent)}%`
+        : formatAssetValue(row.pnlCurrency, row.pnl)}
       {row.pnlLabel && <small>{row.pnlLabel}</small>}
       {row.realizedQuantity != null && row.realizedQuantity > EPSILON && row.quantityAsset && (
         <small>{formatAssetAmount(row.quantityAsset, row.realizedQuantity)} {row.quantityAsset} realized</small>
@@ -454,55 +537,396 @@ const compactDateLabel = (value?: string | null) => {
   return compactDateFormatter.format(new Date(value));
 };
 
-const compactMoneyLabel = (value?: number | null, currency?: string | null) => {
+const operationSearchText = (row: ActivityRow) =>
+  [
+    row.action,
+    row.actionKey,
+    row.asset,
+    row.amount,
+    row.status,
+    row.note,
+    row.createdAt,
+    row.priceAsset,
+    row.priceCurrency,
+    row.pnlCurrency,
+    Object.keys(row.balanceChanges).join(" "),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+const operationStatusTone = (status?: string | null) => {
+  const normalized = status?.toLowerCase() ?? "";
+  if (["filled", "success", "successful", "current"].some((item) => normalized.includes(item))) {
+    return "good";
+  }
+  if (["cancel", "reject", "fail", "error"].some((item) => normalized.includes(item))) {
+    return "bad";
+  }
+  if (["inferred", "pending", "new"].some((item) => normalized.includes(item))) {
+    return "watch";
+  }
+  return "neutral";
+};
+
+const actionCounts = (rows: ActivityRow[]) => {
+  let buys = 0;
+  let sells = 0;
+  rows.forEach((row) => {
+    if (row.actionKey === "buy") {
+      buys += 1;
+    } else if (row.actionKey === "sell") {
+      sells += 1;
+    }
+  });
+  return { buys, sells, other: Math.max(0, rows.length - buys - sells) };
+};
+
+const mergeStatuses = (orders: Order[]) => {
+  const statuses = Array.from(new Set(orders.map((order) => order.status).filter(Boolean)));
+  if (statuses.length === 0) {
+    return null;
+  }
+  if (statuses.length === 1) {
+    return statuses[0] ?? null;
+  }
+  if (statuses.every((status) => String(status).toUpperCase() === "FILLED")) {
+    return "FILLED";
+  }
+  return statuses.join(", ");
+};
+
+const summarizeOrders = (id: string, fills: Order[]): TradeSummary | null => {
+  const sortedFills = [...fills].sort((left, right) => String(left.created_at ?? "").localeCompare(String(right.created_at ?? "")));
+  const first = sortedFills[0];
+  if (!first) {
+    return null;
+  }
+  const netAmounts = sortedFills.map(orderNetAmounts);
+  const quantity = netAmounts.reduce((sum, amount) => sum + amount.baseQuantity, 0);
+  const quoteAmount = netAmounts.reduce((sum, amount) => sum + amount.quoteAmount, 0);
+  const costBasisAmount = sumNullable(sortedFills.map((order) => order.cost_basis_amount));
+  const currentValue = sumNullable(sortedFills.map((order) => order.current_value));
+  const remainingQuantity = sumNullable(sortedFills.map((order) => order.remaining_quantity));
+  const remainingCostBasis = sumNullable(sortedFills.map((order) => order.remaining_cost_basis));
+  const realizedPnl = sumNullable(sortedFills.map((order) => order.realized_pnl));
+  const unrealizedPnl = sumNullable(sortedFills.map((order) => order.unrealized_pnl));
+  const [base, pairQuote] = splitPair(first.symbol);
+  return {
+    id,
+    source: first.source,
+    platform: first.platform,
+    side: first.side,
+    asset: first.symbol,
+    baseAsset: base,
+    quoteCurrency: pairQuote ?? first.quote_currency ?? null,
+    createdAt: first.created_at,
+    status: mergeStatuses(sortedFills),
+    note: `${first.order_type ?? "trade"}${sortedFills.length > 1 ? `, ${sortedFills.length} fills` : ""}`,
+    quantity,
+    quoteAmount,
+    costBasisAmount,
+    currentValue,
+    remainingQuantity,
+    remainingCostBasis,
+    realizedPnl,
+    unrealizedPnl,
+    lotId: rawLotId(first),
+    fills: sortedFills,
+  };
+};
+
+const buildTradeSummaries = (orders: Order[]) => {
+  const grouped = new Map<string, Order[]>();
+  orders.forEach((order) => {
+    const key = order.side === "BUY" ? buyLotGroupKey(order) : orderGroupKey(order);
+    grouped.set(key, [...(grouped.get(key) ?? []), order]);
+  });
+  return Array.from(grouped.entries())
+    .map(([id, fills]) => summarizeOrders(id, fills))
+    .filter((summary): summary is TradeSummary => summary != null)
+    .sort((left, right) => String(left.createdAt ?? "").localeCompare(String(right.createdAt ?? "")));
+};
+
+type MutableLot = LotRow & {
+  allocationRemainingQty: number;
+  allocatedSoldQty: number;
+};
+
+const lotBucketKey = (summary: TradeSummary) =>
+  [summary.source, summary.platform, summary.asset, summary.quoteCurrency ?? ""].join("|");
+
+const childPrice = (value: number | null | undefined, shares: number) =>
+  value != null && shares > EPSILON ? value / shares : null;
+
+const buildLotRows = (orders: Order[]) => {
+  const summaries = buildTradeSummaries(orders);
+  const buySummaries = summaries.filter((summary) => summary.side === "BUY" && summary.quantity > EPSILON);
+  const sellSummaries = summaries.filter((summary) => summary.side === "SELL" && summary.quantity > EPSILON);
+  const lotsByBucket = new Map<string, MutableLot[]>();
+
+  buySummaries.forEach((summary) => {
+    const initialQty = summary.quantity;
+    const initialCost = summary.costBasisAmount ?? summary.quoteAmount;
+    const avgBuy = childPrice(initialCost, initialQty);
+    const knownCurrentQty = summary.remainingQuantity;
+    const currentQty = knownCurrentQty == null ? initialQty : Math.max(knownCurrentQty, 0);
+    const soldQty = Math.max(initialQty - currentQty, 0);
+    const remainingCost = summary.remainingCostBasis ?? (avgBuy == null ? null : currentQty * avgBuy);
+    const soldCost =
+      initialCost != null && remainingCost != null
+        ? Math.max(initialCost - remainingCost, 0)
+        : soldQty > EPSILON && avgBuy != null
+          ? soldQty * avgBuy
+          : null;
+    const openValue =
+      summary.currentValue ??
+      (summary.unrealizedPnl != null && remainingCost != null ? remainingCost + summary.unrealizedPnl : null);
+    const openPnl =
+      summary.unrealizedPnl ?? (openValue != null && remainingCost != null ? openValue - remainingCost : null);
+    const realizedPnl = summary.realizedPnl ?? null;
+    const totalPnl =
+      openPnl == null && realizedPnl == null
+        ? null
+        : (openPnl ?? 0) + (realizedPnl ?? 0);
+    const status = currentQty <= EPSILON ? "closed" : soldQty > EPSILON ? "partial" : "open";
+    const lot: MutableLot = {
+      id: summary.id,
+      asset: summary.asset,
+      lotDate: summary.createdAt,
+      lotId: summary.lotId,
+      quantityAsset: summary.baseAsset,
+      currency: summary.quoteCurrency,
+      initialQty,
+      currentQty,
+      soldQty,
+      avgBuy,
+      initialCost,
+      remainingCost,
+      soldCost,
+      openValue,
+      openPnl,
+      realizedPnl,
+      totalPnl,
+      status,
+      allocationRemainingQty: initialQty,
+      allocatedSoldQty: 0,
+      children: [
+        {
+          id: `${summary.id}:buy`,
+          type: "Initial buy",
+          date: summary.createdAt,
+          shares: initialQty,
+          price: avgBuy,
+          costBasis: initialCost,
+          value: initialCost,
+          pnl: null,
+          status: summary.status,
+        },
+      ],
+    };
+    const bucket = lotBucketKey(summary);
+    lotsByBucket.set(bucket, [...(lotsByBucket.get(bucket) ?? []), lot]);
+  });
+
+  Array.from(lotsByBucket.values()).forEach((lots) => {
+    lots.sort((left, right) => String(left.lotDate ?? "").localeCompare(String(right.lotDate ?? "")));
+  });
+
+  sellSummaries.forEach((sell) => {
+    const bucketLots = lotsByBucket.get(lotBucketKey(sell));
+    if (!bucketLots?.length) {
+      return;
+    }
+    let remainingSellQty = sell.quantity;
+    const allocations: Array<{ lot: MutableLot; shares: number; rawCost: number }> = [];
+    for (const lot of bucketLots) {
+      if (remainingSellQty <= EPSILON) {
+        break;
+      }
+      if (lot.allocationRemainingQty <= EPSILON) {
+        continue;
+      }
+      if (lot.lotDate && sell.createdAt && String(lot.lotDate) > String(sell.createdAt)) {
+        continue;
+      }
+      const shares = Math.min(remainingSellQty, lot.allocationRemainingQty);
+      const rawCost = (lot.avgBuy ?? 0) * shares;
+      allocations.push({ lot, shares, rawCost });
+      lot.allocationRemainingQty -= shares;
+      lot.allocatedSoldQty += shares;
+      remainingSellQty -= shares;
+    }
+    if (allocations.length === 0) {
+      return;
+    }
+    const rawCostTotal = allocations.reduce((sum, allocation) => sum + allocation.rawCost, 0);
+    const targetCost = sell.costBasisAmount ?? rawCostTotal;
+    const totalProceeds = sell.realizedPnl != null && targetCost != null ? targetCost + sell.realizedPnl : sell.quoteAmount;
+    allocations.forEach((allocation, index) => {
+      const costBasis =
+        rawCostTotal > EPSILON
+          ? (allocation.rawCost / rawCostTotal) * targetCost
+          : (allocation.shares / sell.quantity) * targetCost;
+      const proceeds = (allocation.shares / sell.quantity) * totalProceeds;
+      allocation.lot.children.push({
+        id: `${sell.id}:sell:${index}`,
+        type: "Partial sell",
+        date: sell.createdAt,
+        shares: allocation.shares,
+        price: childPrice(proceeds, allocation.shares),
+        costBasis,
+        value: proceeds,
+        pnl: proceeds - costBasis,
+        status: sell.status,
+      });
+    });
+  });
+
+  return Array.from(lotsByBucket.values())
+    .flat()
+    .map((lot) => {
+      const currentQty = lot.remainingCost == null && lot.openValue == null
+        ? Math.max(lot.initialQty - lot.allocatedSoldQty, 0)
+        : lot.currentQty;
+      const soldQty = Math.max(lot.initialQty - currentQty, 0);
+      const realizedFromChildren = sumNullable(
+        lot.children.filter((child) => child.type === "Partial sell").map((child) => child.pnl),
+      );
+      const realizedPnl = lot.realizedPnl ?? realizedFromChildren;
+      const totalPnl =
+        lot.openPnl == null && realizedPnl == null
+          ? null
+          : (lot.openPnl ?? 0) + (realizedPnl ?? 0);
+      const status = currentQty <= EPSILON ? "closed" : soldQty > EPSILON ? "partial" : "open";
+      const remainingCost = lot.remainingCost ?? (lot.avgBuy == null ? null : currentQty * lot.avgBuy);
+      const soldCost =
+        lot.initialCost != null && remainingCost != null
+          ? Math.max(lot.initialCost - remainingCost, 0)
+          : soldQty > EPSILON && lot.avgBuy != null
+            ? soldQty * lot.avgBuy
+            : null;
+      const openValue =
+        lot.openValue ??
+        (lot.openPnl != null && remainingCost != null ? remainingCost + lot.openPnl : null);
+      const remainingChild: LotChildRow = {
+        id: `${lot.id}:remaining`,
+        type: "Remaining position",
+        date: null,
+        shares: currentQty,
+        price: childPrice(openValue, currentQty),
+        costBasis: remainingCost,
+        value: openValue,
+        pnl: lot.openPnl,
+        status,
+      };
+      return {
+        ...lot,
+        currentQty,
+        soldQty,
+        realizedPnl,
+        totalPnl,
+        status,
+        remainingCost,
+        soldCost,
+        openValue,
+        children: [...lot.children, remainingChild],
+      } satisfies LotRow;
+    })
+    .sort((left, right) => String(right.lotDate ?? "").localeCompare(String(left.lotDate ?? "")));
+};
+
+const lotSearchText = (lot: LotRow) =>
+  [
+    lot.asset,
+    lot.quantityAsset,
+    lot.currency,
+    lot.lotDate,
+    lot.lotId,
+    lot.status,
+    ...lot.children.flatMap((child) => [child.type, child.date, child.status]),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+const lotCounts = (lots: LotRow[]) => {
+  let open = 0;
+  let partial = 0;
+  let closed = 0;
+  lots.forEach((lot) => {
+    if (lot.status === "open") {
+      open += 1;
+    } else if (lot.status === "partial") {
+      partial += 1;
+    } else {
+      closed += 1;
+    }
+  });
+  return { open, partial, closed };
+};
+
+const lotStatusTone = (status: LotRow["status"]) => {
+  if (status === "open") {
+    return "good";
+  }
+  if (status === "partial") {
+    return "watch";
+  }
+  return "neutral";
+};
+
+const lotQuantityText = (value: number, asset: string) => `${formatAssetAmount(asset, value)} ${asset}`;
+
+const lotMoneyText = (value?: number | null, currency?: string | null, hideAbsoluteValues = false) => {
   if (value == null || !Number.isFinite(value) || !currency) {
     return "-";
   }
-  return formatMoney(value, currency);
+  return hideAbsoluteValues ? HIDDEN_ABSOLUTE_VALUE : formatMoney(value, currency);
 };
 
-const compactOperationCost = (row: ActivityRow) =>
-  row.pnlBasis ?? row.purchasePriceBasis ?? null;
-
-const compactOperationNow = (row: ActivityRow) => {
-  const cost = compactOperationCost(row);
-  if (cost != null && row.pnl != null) {
-    return cost + row.pnl;
-  }
-  if (row.sellPriceProceeds != null) {
-    return row.sellPriceProceeds;
-  }
-  return row.walletValueAfter ?? null;
-};
-
-const compactOperationCurrency = (row: ActivityRow) =>
-  row.pnlCurrency ?? row.priceCurrency ?? row.walletValueCurrency ?? null;
-
-const compactOperationAsset = (row: ActivityRow) => {
-  if (row.priceAsset && row.priceQuantity != null && row.priceQuantity > EPSILON) {
-    return (
-      <>
-        <strong>{row.asset}</strong>
-        <small>
-          {formatAssetAmount(row.priceAsset, row.priceQuantity)} {row.priceAsset}
-        </small>
-      </>
-    );
-  }
-  return <strong>{row.asset}</strong>;
-};
-
-const compactOperationPnl = (row: ActivityRow) => {
-  if (row.roiPercent == null && (row.pnl == null || !row.pnlCurrency)) {
+const lotMoneyCell = (
+  value: number | null | undefined,
+  currency: string | null | undefined,
+  label?: string,
+  hideAbsoluteValues = false,
+) => {
+  if (value == null || !Number.isFinite(value) || !currency) {
     return "-";
   }
-  const toneValue = row.roiPercent ?? row.pnl ?? 0;
   return (
-    <span className={toneValue >= 0 ? "positive" : "negative"}>
-      {row.roiPercent == null
-        ? compactMoneyLabel(row.pnl, row.pnlCurrency)
-        : `${row.roiPercent >= 0 ? "+" : ""}${compactPercentFormatter.format(row.roiPercent)}%`}
-      {row.pnl != null && row.pnlCurrency && <small>{formatMoney(row.pnl, row.pnlCurrency)}</small>}
+    <span className="operation-money-cell">
+      <strong>{lotMoneyText(value, currency, hideAbsoluteValues)}</strong>
+      {label && <small>{label}</small>}
+    </span>
+  );
+};
+
+const pnlPercentText = (value: number | null | undefined, basis: number | null | undefined) => {
+  if (value == null || basis == null || !Number.isFinite(value) || !Number.isFinite(basis) || Math.abs(basis) <= EPSILON) {
+    return null;
+  }
+  const percent = (value / basis) * 100;
+  return `${percent >= 0 ? "+" : ""}${formatPercent(percent)}%`;
+};
+
+const lotPnlCell = (
+  value: number | null | undefined,
+  currency: string | null | undefined,
+  label?: string,
+  basis?: number | null,
+  hideAbsoluteValues = false,
+) => {
+  if (value == null || !Number.isFinite(value) || !currency) {
+    return "-";
+  }
+  const tone = value >= 0 ? "positive" : "negative";
+  const percent = pnlPercentText(value, basis);
+  return (
+    <span className={`operation-pnl-cell ${tone}`}>
+      <strong>{hideAbsoluteValues ? percent ?? HIDDEN_ABSOLUTE_VALUE : formatMoney(value, currency)}</strong>
+      {percent && !hideAbsoluteValues && <em>{percent}</em>}
+      {label && <small>{label}</small>}
     </span>
   );
 };
@@ -755,6 +1179,7 @@ export const BinanceActivityTable = memo(function BinanceActivityTable({
   endTimestamp,
   currentBalances,
   currentAssetValues,
+  hideAbsoluteValues = false,
 }: Props) {
   const rows = useMemo(
     () => buildRows(orders, events, endTimestamp, currentBalances, currentAssetValues),
@@ -774,24 +1199,61 @@ export const BinanceActivityTable = memo(function BinanceActivityTable({
       ),
     [rows],
   );
+  const lotRows = useMemo(() => buildLotRows(orders), [orders]);
+  const lotYearOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          lotRows
+            .map((lot) => (lot.lotDate ? new Date(lot.lotDate).getFullYear() : null))
+            .filter((year): year is number => year != null && Number.isFinite(year)),
+        ),
+      ).sort((left, right) => right - left),
+    [lotRows],
+  );
   const [visibleActions, setVisibleActions] = useState<Record<string, boolean>>({ buy: true, sell: true });
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [expandedLots, setExpandedLots] = useState<Record<string, boolean>>({});
   const [page, setPage] = useState(1);
+  const [query, setQuery] = useState("");
+  const [lotYearFilter, setLotYearFilter] = useState("all");
+  const normalizedQuery = query.trim().toLowerCase();
   const visibleRows = useMemo(
-    () => rows.filter((row) => visibleActions[row.actionKey] ?? true),
-    [rows, visibleActions],
+    () =>
+      rows.filter((row) => {
+        const actionVisible = visibleActions[row.actionKey] ?? true;
+        return actionVisible && (!normalizedQuery || operationSearchText(row).includes(normalizedQuery));
+      }),
+    [normalizedQuery, rows, visibleActions],
   );
-  const totalPages = Math.max(1, Math.ceil(visibleRows.length / ACTIVITY_PAGE_SIZE));
+  const visibleLotRows = useMemo(
+    () =>
+      lotRows.filter((lot) => {
+        const lotYear = lot.lotDate ? new Date(lot.lotDate).getFullYear() : null;
+        const yearVisible = lotYearFilter === "all" || String(lotYear) === lotYearFilter;
+        return yearVisible && (!normalizedQuery || lotSearchText(lot).includes(normalizedQuery));
+      }),
+    [lotRows, lotYearFilter, normalizedQuery],
+  );
+  const visibleActionCounts = useMemo(() => actionCounts(visibleRows), [visibleRows]);
+  const visibleLotCounts = useMemo(() => lotCounts(visibleLotRows), [visibleLotRows]);
+  const allActionsVisible = actionOptions.every(([actionKey]) => visibleActions[actionKey] ?? true);
+  const activeRowCount = compact ? visibleLotRows.length : visibleRows.length;
+  const totalPages = Math.max(1, Math.ceil(activeRowCount / ACTIVITY_PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const pageStart = (currentPage - 1) * ACTIVITY_PAGE_SIZE;
   const pagedRows = useMemo(
     () => visibleRows.slice(pageStart, pageStart + ACTIVITY_PAGE_SIZE),
     [pageStart, visibleRows],
   );
+  const pagedLotRows = useMemo(
+    () => visibleLotRows.slice(pageStart, pageStart + ACTIVITY_PAGE_SIZE),
+    [pageStart, visibleLotRows],
+  );
   const paginationLabel =
-    visibleRows.length === 0
+    activeRowCount === 0
       ? "0"
-      : `${pageStart + 1}-${Math.min(pageStart + ACTIVITY_PAGE_SIZE, visibleRows.length)} of ${visibleRows.length}`;
+      : `${pageStart + 1}-${Math.min(pageStart + ACTIVITY_PAGE_SIZE, activeRowCount)} of ${activeRowCount}`;
 
   const toggle = (id: string) => {
     setExpanded((current) => ({ ...current, [id]: !current[id] }));
@@ -807,63 +1269,199 @@ export const BinanceActivityTable = memo(function BinanceActivityTable({
     setVisibleActions(Object.fromEntries(actionOptions.map(([actionKey]) => [actionKey, true])));
   };
 
+  const toggleLot = (id: string) => {
+    setExpandedLots((current) => ({ ...current, [id]: !current[id] }));
+  };
+
   return (
     <section className="panel">
       <div className="panel-heading">
         <h2>{title}</h2>
         <div className="panel-heading-actions">
           {controls}
-          <span>{visibleRows.length}</span>
+          <span>{compact ? `${visibleLotRows.length} / ${lotRows.length}` : `${visibleRows.length} / ${rows.length}`}</span>
         </div>
       </div>
-      <div className="activity-controls">
-        <button type="button" className="filter-chip" onClick={showAllActions}>
-          All
-        </button>
-        {actionOptions.map(([actionKey, label]) => (
-          <button
-            type="button"
-            className={`filter-chip ${visibleActions[actionKey] ? "active" : ""}`}
-            key={actionKey}
-            onClick={() => toggleAction(actionKey)}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="operations-toolbar">
+        <label className="operations-search">
+          <Search size={16} aria-hidden="true" />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => {
+              setPage(1);
+              setQuery(event.target.value);
+            }}
+            placeholder="Search symbol, action, status"
+            aria-label="Search operations"
+          />
+        </label>
+        {compact ? (
+          <>
+            <label className="lot-entry-filter">
+              <span>Entry date</span>
+              <select
+                value={lotYearFilter}
+                onChange={(event) => {
+                  setPage(1);
+                  setLotYearFilter(event.target.value);
+                }}
+              >
+                <option value="all">All years</option>
+                {lotYearOptions.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="operations-summary-pills" aria-label="Visible lot summary">
+              <span>{visibleLotCounts.open} open</span>
+              <span>{visibleLotCounts.partial} partial</span>
+              <span>{visibleLotCounts.closed} closed</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="activity-controls operations-action-controls" aria-label="Operation action filters">
+              <button type="button" className={`filter-chip ${allActionsVisible ? "active" : ""}`} onClick={showAllActions}>
+                All
+              </button>
+              {actionOptions.map(([actionKey, label]) => (
+                <button
+                  type="button"
+                  className={`filter-chip ${visibleActions[actionKey] ? "active" : ""}`}
+                  key={actionKey}
+                  onClick={() => toggleAction(actionKey)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="operations-summary-pills" aria-label="Visible operations summary">
+              <span>{visibleActionCounts.buys} buys</span>
+              <span>{visibleActionCounts.sells} sells</span>
+              {visibleActionCounts.other > 0 && <span>{visibleActionCounts.other} other</span>}
+            </div>
+          </>
+        )}
       </div>
       {compact ? (
         <div className="table-wrap compact-table-wrap">
-          <table className="compact-operations-table">
+          <table className="compact-operations-table lot-operations-table">
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Action</th>
-                <th>Asset / Pair</th>
-                <th>Cost</th>
-                <th>Cost Now</th>
-                <th>P/L</th>
+                <th>Asset</th>
+                <th>Lot Date</th>
+                <th>Initial Qty</th>
+                <th>Current Qty</th>
+                <th>Sold Qty</th>
+                <th>Avg Buy</th>
+                <th>Initial Cost</th>
+                <th>Open Value</th>
+                <th>Open P/L</th>
+                <th>Realized P/L</th>
+                <th>Total P/L</th>
               </tr>
             </thead>
             <tbody>
-              {pagedRows.map((row) => {
-                const currency = compactOperationCurrency(row);
-                return (
-                  <tr key={row.id}>
-                    <td>{compactDateLabel(row.createdAt)}</td>
-                    <td>
-                      <strong>{row.action}</strong>
-                      {row.note && <small>{row.note}</small>}
+              {pagedLotRows.map((lot) => (
+                <Fragment key={lot.id}>
+                  <tr>
+                    <td className="operation-main-cell lot-asset-cell">
+                      <span className="operation-main-content">
+                        <button
+                          type="button"
+                          className="icon-button row-toggle"
+                          onClick={() => toggleLot(lot.id)}
+                          title={expandedLots[lot.id] ? "Hide lot lifecycle" : "Show lot lifecycle"}
+                          aria-expanded={expandedLots[lot.id]}
+                        >
+                          {expandedLots[lot.id] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                        </button>
+                        <span>
+                          <strong>{lot.asset}</strong>
+                          <small>{lot.lotId ? `Lot ${lot.lotId}` : "Buy lot"}</small>
+                        </span>
+                        <span className={`operation-status-pill ${lotStatusTone(lot.status)}`}>{lot.status}</span>
+                      </span>
                     </td>
-                    <td className="compact-operation-asset">{compactOperationAsset(row)}</td>
-                    <td>{compactMoneyLabel(compactOperationCost(row), currency)}</td>
-                    <td>{compactMoneyLabel(compactOperationNow(row), currency)}</td>
-                    <td>{compactOperationPnl(row)}</td>
+                    <td>{compactDateLabel(lot.lotDate)}</td>
+                    <td>
+                      <strong>{lotQuantityText(lot.initialQty, lot.quantityAsset)}</strong>
+                    </td>
+                    <td>
+                      <strong>{formatAssetAmount(lot.quantityAsset, lot.currentQty)} / {formatAssetAmount(lot.quantityAsset, lot.initialQty)} left</strong>
+                      <small>{lot.currentQty <= EPSILON ? "closed" : "active quantity"}</small>
+                    </td>
+                    <td>
+                      <strong>{formatAssetAmount(lot.quantityAsset, lot.soldQty)} sold</strong>
+                      <small>{lotQuantityText(lot.currentQty, lot.quantityAsset)} open</small>
+                    </td>
+                    <td>{lotMoneyCell(lot.avgBuy, lot.currency, undefined, hideAbsoluteValues)}</td>
+                    <td>{lotMoneyCell(lot.initialCost, lot.currency, undefined, hideAbsoluteValues)}</td>
+                    <td>{lotMoneyCell(lot.openValue, lot.currency, "remaining position", hideAbsoluteValues)}</td>
+                    <td>{lotPnlCell(lot.openPnl, lot.currency, "open", lot.remainingCost, hideAbsoluteValues)}</td>
+                    <td>{lotPnlCell(lot.realizedPnl, lot.currency, "realized", lot.soldCost, hideAbsoluteValues)}</td>
+                    <td>{lotPnlCell(lot.totalPnl, lot.currency, "open + realized", lot.initialCost, hideAbsoluteValues)}</td>
                   </tr>
-                );
-              })}
-              {visibleRows.length === 0 && (
+                  {expandedLots[lot.id] && (
+                    <tr className="lot-lifecycle-row">
+                      <td colSpan={11}>
+                        <div className="lot-lifecycle-panel">
+                          <div className="lot-lifecycle-heading">
+                            <strong>All activity for this lot</strong>
+                            <span>
+                              {formatAssetAmount(lot.quantityAsset, lot.initialQty)} =
+                              {" "}
+                              {formatAssetAmount(lot.quantityAsset, lot.currentQty)} current +
+                              {" "}
+                              {formatAssetAmount(lot.quantityAsset, lot.soldQty)} sold
+                            </span>
+                          </div>
+                          <table className="lot-lifecycle-table">
+                            <thead>
+                              <tr>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Shares</th>
+                                <th>Price</th>
+                                <th>Cost Basis</th>
+                                <th>Value / Proceeds</th>
+                                <th>P/L</th>
+                                <th>Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {lot.children.map((child) => (
+                                <tr key={child.id}>
+                                  <td>
+                                    <strong>{child.type}</strong>
+                                  </td>
+                                  <td>{child.date ? compactDateLabel(child.date) : "Current"}</td>
+                                  <td>{lotQuantityText(child.shares, lot.quantityAsset)}</td>
+                                  <td>{lotMoneyText(child.price, lot.currency, hideAbsoluteValues)}</td>
+                                  <td>{lotMoneyText(child.costBasis, lot.currency, hideAbsoluteValues)}</td>
+                                  <td>{lotMoneyText(child.value, lot.currency, hideAbsoluteValues)}</td>
+                                  <td>{lotPnlCell(child.pnl, lot.currency, undefined, child.costBasis, hideAbsoluteValues)}</td>
+                                  <td>
+                                    <span className={`operation-status-pill ${operationStatusTone(child.status)}`}>
+                                      {child.status ?? "-"}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              ))}
+              {visibleLotRows.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="empty">{emptyLabel}</td>
+                  <td colSpan={11} className="empty">{emptyLabel}</td>
                 </tr>
               )}
             </tbody>
@@ -902,14 +1500,14 @@ export const BinanceActivityTable = memo(function BinanceActivityTable({
                       {row.note && <small>{row.note}</small>}
                     </td>
                     <td>{row.asset}</td>
-                    <td>{purchasePriceLabel(row)}</td>
+                    <td>{purchasePriceLabel(row, hideAbsoluteValues)}</td>
                     <td className="activity-list-cell">{changesList(row.balanceChanges, row.amount)}</td>
-                    <td>{pnlLabel(row)}</td>
+                    <td>{pnlLabel(row, hideAbsoluteValues)}</td>
                     <td>{roiLabel(row)}</td>
-                    {showBalanceColumns && <td>{walletValueLabel(row)}</td>}
+                    {showBalanceColumns && <td>{walletValueLabel(row, hideAbsoluteValues)}</td>}
                     <td>{row.status ?? "-"}</td>
                     {showBalanceColumns && <td className="activity-list-cell wide">{balancesLabel(row.balancesAfter)}</td>}
-                    {showBalanceColumns && <td className="activity-list-cell wide">{assetValuesLabel(row.assetValuesAfter)}</td>}
+                    {showBalanceColumns && <td className="activity-list-cell wide">{assetValuesLabel(row.assetValuesAfter, hideAbsoluteValues)}</td>}
                   </tr>
                   {expanded[row.id] &&
                     row.fills?.map((fill) => (
@@ -920,14 +1518,14 @@ export const BinanceActivityTable = memo(function BinanceActivityTable({
                           {fill.note && <small>{fill.note}</small>}
                         </td>
                         <td>{fill.asset}</td>
-                        <td>{purchasePriceLabel(fill)}</td>
+                        <td>{purchasePriceLabel(fill, hideAbsoluteValues)}</td>
                         <td className="activity-list-cell">{changesList(fill.balanceChanges, fill.amount)}</td>
-                        <td>{pnlLabel(fill)}</td>
+                        <td>{pnlLabel(fill, hideAbsoluteValues)}</td>
                         <td>{roiLabel(fill)}</td>
-                        {showBalanceColumns && <td>{walletValueLabel(fill)}</td>}
+                        {showBalanceColumns && <td>{walletValueLabel(fill, hideAbsoluteValues)}</td>}
                         <td>{fill.status ?? "-"}</td>
                         {showBalanceColumns && <td className="activity-list-cell wide">{balancesLabel(fill.balancesAfter)}</td>}
-                        {showBalanceColumns && <td className="activity-list-cell wide">{assetValuesLabel(fill.assetValuesAfter)}</td>}
+                        {showBalanceColumns && <td className="activity-list-cell wide">{assetValuesLabel(fill.assetValuesAfter, hideAbsoluteValues)}</td>}
                       </tr>
                     ))}
                 </Fragment>
@@ -941,7 +1539,7 @@ export const BinanceActivityTable = memo(function BinanceActivityTable({
           </table>
         </div>
       )}
-      {visibleRows.length > ACTIVITY_PAGE_SIZE && (
+      {activeRowCount > ACTIVITY_PAGE_SIZE && (
         <div className="table-pagination" aria-label={`${title} pagination`}>
           <span>{paginationLabel}</span>
           <button

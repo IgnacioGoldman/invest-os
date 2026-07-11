@@ -1,6 +1,6 @@
 import { memo } from "react";
 import type { BreakdownItem, CashBalance, DisplayRate, Holding, Order } from "../api";
-import { formatMoney } from "../format";
+import { formatMoneyPrivacy } from "../format";
 
 type Props = {
   title: string;
@@ -11,6 +11,7 @@ type Props = {
   cashBalances?: CashBalance[];
   openOrders?: Order[];
   displayRates?: DisplayRate[];
+  hideAbsoluteValues?: boolean;
 };
 
 type PlatformSegments = {
@@ -98,6 +99,7 @@ export const BreakdownTable = memo(function BreakdownTable({
   cashBalances = [],
   openOrders = [],
   displayRates = [],
+  hideAbsoluteValues = false,
 }: Props) {
   const showPlatformSegments = holdings.length > 0 || cashBalances.length > 0 || openOrders.length > 0;
 
@@ -113,6 +115,7 @@ export const BreakdownTable = memo(function BreakdownTable({
             item={item}
             currency={currency}
             displayRate={displayRate}
+            hideAbsoluteValues={hideAbsoluteValues}
             segments={
               showPlatformSegments
                 ? platformSegments(item.name, holdings, cashBalances, openOrders, displayRates)
@@ -131,16 +134,17 @@ type BreakdownRowProps = {
   currency: string;
   displayRate: number;
   segments?: PlatformSegments;
+  hideAbsoluteValues: boolean;
 };
 
-function BreakdownRow({ item, currency, displayRate, segments }: BreakdownRowProps) {
+function BreakdownRow({ item, currency, displayRate, segments, hideAbsoluteValues }: BreakdownRowProps) {
   const total = item.value;
 
   return (
     <div className="breakdown-row">
       <div>
         <strong>{item.name}</strong>
-        <span>{formatMoney(item.value * displayRate, currency)}</span>
+        <span>{formatMoneyPrivacy(item.value * displayRate, currency, hideAbsoluteValues)}</span>
       </div>
       <div>
         <div className="bar" aria-hidden="true" style={{ width: `${Math.max(2, item.percent)}%` }}>
@@ -156,11 +160,15 @@ function BreakdownRow({ item, currency, displayRate, segments }: BreakdownRowPro
         </div>
         {segments && (
           <div className="breakdown-segments">
-            <span className="segment-label invested">Invested {formatMoney(segments.invested * displayRate, currency)}</span>
-            <span className="segment-label open-orders">
-              Open orders {formatMoney(segments.openOrders * displayRate, currency)}
+            <span className="segment-label invested">
+              Invested {formatMoneyPrivacy(segments.invested * displayRate, currency, hideAbsoluteValues)}
             </span>
-            <span className="segment-label cash">Cash {formatMoney(segments.cash * displayRate, currency)}</span>
+            <span className="segment-label open-orders">
+              Open orders {formatMoneyPrivacy(segments.openOrders * displayRate, currency, hideAbsoluteValues)}
+            </span>
+            <span className="segment-label cash">
+              Cash {formatMoneyPrivacy(segments.cash * displayRate, currency, hideAbsoluteValues)}
+            </span>
           </div>
         )}
       </div>

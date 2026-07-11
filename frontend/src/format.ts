@@ -4,6 +4,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
   timeStyle: "short",
 });
+export const HIDDEN_ABSOLUTE_VALUE = "••••";
 
 function getNumberFormatter(maximumFractionDigits: number, minimumFractionDigits = 0) {
   const key = `${minimumFractionDigits}:${maximumFractionDigits}`;
@@ -37,6 +38,10 @@ export function formatMoney(value: number, currency: string) {
     return formatter.format(value);
   }
   return `${getNumberFormatter(8).format(value)} ${currency}`;
+}
+
+export function formatMoneyPrivacy(value: number, currency: string, hideAbsoluteValues = false) {
+  return hideAbsoluteValues ? HIDDEN_ABSOLUTE_VALUE : formatMoney(value, currency);
 }
 
 export function formatNumber(value: number) {

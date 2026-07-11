@@ -1,24 +1,42 @@
 import { Banknote, BriefcaseBusiness, Layers, ListOrdered, WalletCards } from "lucide-react";
 import { memo, useMemo } from "react";
 import type { PortfolioSnapshot } from "../api";
-import { formatMoney } from "../format";
+import { formatMoneyPrivacy } from "../format";
 
 type Props = {
   snapshot: PortfolioSnapshot;
   displayCurrency: string;
   displayRate: number;
+  hideAbsoluteValues?: boolean;
 };
 
-export const SummaryCards = memo(function SummaryCards({ snapshot, displayCurrency, displayRate }: Props) {
+export const SummaryCards = memo(function SummaryCards({
+  snapshot,
+  displayCurrency,
+  displayRate,
+  hideAbsoluteValues = false,
+}: Props) {
   const cards = useMemo(
     () => [
-      { label: "Net Worth", value: formatMoney(snapshot.total_net_worth * displayRate, displayCurrency), icon: WalletCards },
-      { label: "Invested", value: formatMoney(snapshot.total_invested * displayRate, displayCurrency), icon: BriefcaseBusiness },
-      { label: "Cash", value: formatMoney(snapshot.total_cash * displayRate, displayCurrency), icon: Banknote },
+      {
+        label: "Net Worth",
+        value: formatMoneyPrivacy(snapshot.total_net_worth * displayRate, displayCurrency, hideAbsoluteValues),
+        icon: WalletCards,
+      },
+      {
+        label: "Invested",
+        value: formatMoneyPrivacy(snapshot.total_invested * displayRate, displayCurrency, hideAbsoluteValues),
+        icon: BriefcaseBusiness,
+      },
+      {
+        label: "Cash",
+        value: formatMoneyPrivacy(snapshot.total_cash * displayRate, displayCurrency, hideAbsoluteValues),
+        icon: Banknote,
+      },
       { label: "Holdings", value: snapshot.holdings.length.toString(), icon: Layers },
       { label: "Open Orders", value: snapshot.open_orders.length.toString(), icon: ListOrdered },
     ],
-    [displayCurrency, displayRate, snapshot],
+    [displayCurrency, displayRate, hideAbsoluteValues, snapshot],
   );
 
   return (

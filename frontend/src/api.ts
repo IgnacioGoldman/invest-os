@@ -145,7 +145,16 @@ export type DisplayRate = {
   fetched_at?: string | null;
 };
 
-export type InvestorPersonalityId = "low_risk" | "high_risk" | "custom";
+export type InvestorPersonalityId =
+  | "capital_preservation"
+  | "steady_growth"
+  | "balanced_conviction"
+  | "aggressive_growth"
+  | "high_risk_explorer"
+  | "starter"
+  | "custom"
+  | "low_risk"
+  | "high_risk";
 
 export type InvestorAllocation = {
   vwce: number;
@@ -193,6 +202,37 @@ export type ManualCapitalSnapshot = {
   assets: Record<string, unknown>[];
   cash_path: string;
   assets_path: string;
+};
+
+export type UserConnectionSource = "ibkr" | "binance";
+
+export type UserConnection = {
+  source: UserConnectionSource;
+  label: string;
+  configured: boolean;
+  updated_at?: string | null;
+  ibkr_host?: string | null;
+  ibkr_port?: number | null;
+  ibkr_client_id?: number | null;
+  ibkr_flex_query_id?: string | null;
+  ibkr_flex_token_configured?: boolean;
+  ibkr_flex_token_preview?: string | null;
+  binance_api_key_configured?: boolean;
+  binance_api_key_preview?: string | null;
+  binance_api_secret_configured?: boolean;
+  binance_api_secret_preview?: string | null;
+  binance_ledger_start_date?: string | null;
+};
+
+export type UserConnectionUpdate = {
+  ibkr_host?: string | null;
+  ibkr_port?: number | null;
+  ibkr_client_id?: number | null;
+  ibkr_flex_query_id?: string | null;
+  ibkr_flex_token?: string | null;
+  binance_api_key?: string | null;
+  binance_api_secret?: string | null;
+  binance_ledger_start_date?: string | null;
 };
 
 export type Note = {
@@ -577,9 +617,9 @@ export async function fetchSnapshot(): Promise<PortfolioSnapshot> {
 const normalizeInvestorProfile = (profile: RawInvestorProfile): InvestorProfile => ({
   personality: profile.personality,
   customAllocation: profile.customAllocation ?? profile.custom_allocation ?? {
-    vwce: 60,
-    cashBonds: 20,
-    individualStocks: 15,
+    vwce: 55,
+    cashBonds: 15,
+    individualStocks: 25,
     crypto: 5,
   },
   updated_at: profile.updated_at ?? null,
@@ -623,6 +663,44 @@ export async function addManualCapitalEntry(entry: ManualCapitalEntryRequest): P
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(entry),
+  });
+}
+
+export async function updateManualCapitalEntry(
+  entryId: string,
+  entry: ManualCapitalEntryRequest,
+): Promise<ManualCapitalSnapshot> {
+  return requestJson<ManualCapitalSnapshot>(`/api/capital/manual/${encodeURIComponent(entryId)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(entry),
+  });
+}
+
+export async function deleteManualCapitalEntry(entryId: string): Promise<ManualCapitalSnapshot> {
+  return requestJson<ManualCapitalSnapshot>(`/api/capital/manual/${encodeURIComponent(entryId)}`, {
+    method: "DELETE",
+  });
+}
+
+export async function fetchUserConnections(): Promise<UserConnection[]> {
+  return requestJson<UserConnection[]>("/api/connections");
+}
+
+export async function saveUserConnection(
+  source: UserConnectionSource,
+  connection: UserConnectionUpdate,
+): Promise<UserConnection> {
+  return requestJson<UserConnection>(`/api/connections/${encodeURIComponent(source)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(connection),
+  });
+}
+
+export async function deleteUserConnection(source: UserConnectionSource): Promise<UserConnection> {
+  return requestJson<UserConnection>(`/api/connections/${encodeURIComponent(source)}`, {
+    method: "DELETE",
   });
 }
 

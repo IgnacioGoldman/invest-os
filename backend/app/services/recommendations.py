@@ -760,7 +760,7 @@ def _local_recommendations(snapshot: PortfolioSnapshot, profile: InvestorProfile
                 title="Assign the remaining deployable cash",
                 detail=(
                     f"Cash is {_format_percent(cash_percent)} of net worth versus your saved "
-                    f"{_format_percent(target_cash_percent)} cash/bonds target: "
+                    f"{_format_percent(target_cash_percent)} defensive assets target: "
                     f"{_format_base(snapshot, defensive_cash)} is defensive and "
                     f"{_format_base(snapshot, deployable_cash)} is deployable.{reserve_detail} "
                     "The useful decision is how much of the unreserved deployable cash is a stock drawdown reserve, "

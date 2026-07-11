@@ -1,14 +1,20 @@
 import { memo } from "react";
 import type { CashBalance } from "../api";
-import { formatMoney, formatNumber } from "../format";
+import { HIDDEN_ABSOLUTE_VALUE, formatMoneyPrivacy, formatNumber } from "../format";
 
 type Props = {
   cash: CashBalance[];
   displayCurrency: string;
   displayRate: number;
+  hideAbsoluteValues?: boolean;
 };
 
-export const CashTable = memo(function CashTable({ cash, displayCurrency, displayRate }: Props) {
+export const CashTable = memo(function CashTable({
+  cash,
+  displayCurrency,
+  displayRate,
+  hideAbsoluteValues = false,
+}: Props) {
   return (
     <section className="panel">
       <div className="panel-heading">
@@ -31,10 +37,10 @@ export const CashTable = memo(function CashTable({ cash, displayCurrency, displa
             {cash.map((item) => (
               <tr key={item.id}>
                 <td>{item.platform}</td>
-                <td>{item.value_in_base == null ? "-" : formatMoney(item.value_in_base * displayRate, displayCurrency)}</td>
+                <td>{item.value_in_base == null ? "-" : formatMoneyPrivacy(item.value_in_base * displayRate, displayCurrency, hideAbsoluteValues)}</td>
                 <td>
-                  <strong>{formatNumber(item.balance)}</strong>
-                  <small>{formatMoney(item.balance, item.currency)}</small>
+                  <strong>{hideAbsoluteValues ? HIDDEN_ABSOLUTE_VALUE : formatNumber(item.balance)}</strong>
+                  <small>{formatMoneyPrivacy(item.balance, item.currency, hideAbsoluteValues)}</small>
                 </td>
                 <td>{item.currency}</td>
                 <td>{item.purpose}</td>
