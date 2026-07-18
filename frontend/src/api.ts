@@ -799,6 +799,17 @@ export async function askRecommendationFollowUp(
   );
 }
 
+export async function deleteRecommendation(recommendation: Recommendation): Promise<RecommendationSnapshot> {
+  return requestJson<RecommendationSnapshot>(
+    "/api/recommendations/delete",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ recommendation }),
+    },
+  );
+}
+
 export async function fetchRecommendationFollowUpResult(requestId: string): Promise<RecommendationFollowUpResponse> {
   return requestJson<RecommendationFollowUpResponse>(`/api/recommendations/follow-up/${requestId}`);
 }

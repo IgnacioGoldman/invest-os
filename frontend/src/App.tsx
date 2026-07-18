@@ -1,12 +1,10 @@
 import {
   AlertTriangle,
   Brain,
-  DatabaseZap,
   Eye,
   EyeOff,
   LogOut,
   NotebookPen,
-  RefreshCcw,
   Settings as SettingsIcon,
   Sparkles,
   Telescope,
@@ -34,7 +32,6 @@ import {
   fetchSnapshot,
   fetchUserConnections,
   fetchUserPreferences,
-  generateRecommendations,
   refreshOpenDataStock,
   saveInvestorProfile as persistInvestorProfile,
   saveUserConnection,
@@ -44,6 +41,7 @@ import {
   updateNote,
   deleteNote,
   deleteManualCapitalEntry,
+  deleteRecommendation,
   deleteUserConnection,
   updateManualCapitalEntry,
   type BinanceLedgerEvent,
@@ -57,7 +55,6 @@ import {
   type PortfolioSnapshot,
   type Recommendation,
   type RefreshJob,
-  type RefreshSource,
   type SidebarView,
   type UserConnection,
   type UserConnectionSource,
@@ -84,7 +81,7 @@ import {
 import { OrdersTable } from "./components/OrdersTable";
 import { OpenDataStockTable } from "./components/OpenDataStockTable";
 import { Recommendations } from "./components/Recommendations";
-import { SourceStatus, summarizeSourceStatuses } from "./components/SourceStatus";
+import { summarizeSourceStatuses } from "./components/SourceStatus";
 import { SummaryCards } from "./components/SummaryCards";
 import "./styles.css";
 
@@ -92,10 +89,13 @@ const STOCK_ASSET_CLASSES = new Set(["equity", "stock", "etf", "fund"]);
 const STOCK_ANALYSIS_TAXONOMY_VERSION = "2026-06-05-v2";
 const APP_SESSION_STORAGE_KEY = "invest-os:logged-in";
 const INVESTOR_PERSONALITY_STORAGE_KEY = "invest-os:investor-personality";
+const DEFAULT_EYE_OPERATIONS_COMPACT = true;
 const EMPTY_LEDGER_EVENTS: BinanceLedgerEvent[] = [];
 const DEFAULT_SIDEBAR_ORDER: SidebarView[] = ["personality", "capital", "consultancy", "exploration", "eye", "notes"];
 type AppView = "personality" | "capital" | "consultancy" | "exploration" | "eye" | "notes" | "settings";
 type EyeAssetView = "stocks" | "crypto";
+
+const isActiveRefreshJob = (job: RefreshJob) => job.status === "queued" || job.status === "running";
 
 const SIDEBAR_ITEM_META = {
   personality: {
@@ -304,8 +304,6 @@ const reorderSidebarOrder = (order: SidebarView[], from: SidebarView, to: Sideba
   return next;
 };
 
-const isActiveRefreshJob = (job: RefreshJob) => job.status === "queued" || job.status === "running";
-
 const addAmount = (values: Record<string, number>, key: string, amount: number) => {
   if (!Number.isFinite(amount) || Math.abs(amount) <= 0.00000001) {
     return;
@@ -339,7 +337,6 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   const [snapshot, setSnapshot] = useState<PortfolioSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshSource, setRefreshSource] = useState<RefreshSource>("all");
   const [displayCurrency, setDisplayCurrency] = useState("EUR");
   const [activeView, setActiveView] = useState<AppView>("personality");
   const [visitedViews, setVisitedViews] = useState<Set<AppView>>(() => new Set(["personality"]));
@@ -348,7 +345,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   const [eyePositionsView, setEyePositionsView] = useState<EyeAssetView>("stocks");
   const [eyeActivityView, setEyeActivityView] = useState<EyeAssetView>("stocks");
   const [eyePositionsCompact, setEyePositionsCompact] = useState(true);
-  const [eyeOperationsCompact, setEyeOperationsCompact] = useState(true);
+  const [eyeOperationsCompact, setEyeOperationsCompact] = useState(DEFAULT_EYE_OPERATIONS_COMPACT);
   const [eyeHideAbsoluteValues, setEyeHideAbsoluteValues] = useState(true);
   const [savedInvestorPersonality, setSavedInvestorPersonality] =
     useState<InvestorPersonalityState>(loadInvestorPersonality);
@@ -370,7 +367,6 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   const [noteStatus, setNoteStatus] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [recommendationsGeneratedAt, setRecommendationsGeneratedAt] = useState<string | null>(null);
-  const [analyzingBrain, setAnalyzingBrain] = useState(false);
   const [openDataStocks, setOpenDataStocks] = useState<OpenDataStockSnapshot[]>([]);
   const [selectedOpenDataTicker, setSelectedOpenDataTicker] = useState("GOOGL");
   const [openDataStockLoading, setOpenDataStockLoading] = useState(false);
@@ -384,7 +380,6 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   const [assetInsightsLoading, setAssetInsightsLoading] = useState(false);
   const [assetInsightsLoaded, setAssetInsightsLoaded] = useState(false);
   const [refreshJobs, setRefreshJobs] = useState<RefreshJob[]>([]);
-  const [refreshStartPending, setRefreshStartPending] = useState(false);
   const refreshJobsRef = useRef<RefreshJob[]>([]);
 
   const loadPortfolioData = useCallback(async () => {
@@ -572,11 +567,6 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     }
   }, []);
 
-  const configureCapitalConnection = useCallback((source: "ibkr" | "binance") => {
-    setRefreshSource(source);
-    showView("settings");
-  }, [showView]);
-
   const saveCapitalConnection = useCallback(async (source: UserConnectionSource, connection: UserConnectionUpdate) => {
     setConnectionSaving(true);
     setConnectionStatus(null);
@@ -625,7 +615,6 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
       const jobs = await fetchRefreshJobs().catch(() => [job]);
       refreshJobsRef.current = jobs;
       setRefreshJobs(jobs);
-      setRefreshSource(source);
       setConnectionStatus(`${source === "ibkr" ? "IBKR" : "Binance"} refresh started.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not refresh connection.");
@@ -719,6 +708,18 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
       setNoteSaving(false);
     }
   }, [selectedNoteId]);
+
+  const removeRecommendation = useCallback(async (recommendation: Recommendation) => {
+    setError(null);
+    try {
+      const recommendationSnapshot = await deleteRecommendation(recommendation);
+      setRecommendations(recommendationSnapshot.recommendations);
+      setRecommendationsGeneratedAt(recommendationSnapshot.generated_at ?? null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete recommendation.");
+      throw err;
+    }
+  }, []);
 
   const hasActiveRefreshJob = useMemo(() => refreshJobs.some(isActiveRefreshJob), [refreshJobs]);
 
@@ -913,38 +914,6 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     stockEntryAnalysesLoading,
   ]);
 
-  const refresh = useCallback(async () => {
-    setRefreshStartPending(true);
-    setError(null);
-    try {
-      const job = await startRefreshJob(refreshSource);
-      const jobs = await fetchRefreshJobs().catch(() => [job]);
-      refreshJobsRef.current = jobs;
-      setRefreshJobs(jobs);
-      if (jobs.some((item) => item.id === job.id && item.status === "success")) {
-        await loadPortfolioData();
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not refresh snapshot.");
-    } finally {
-      setRefreshStartPending(false);
-    }
-  }, [loadPortfolioData, refreshSource]);
-
-  const analyzeBrain = useCallback(async () => {
-    setAnalyzingBrain(true);
-    setError(null);
-    try {
-      const recommendationSnapshot = await generateRecommendations();
-      setRecommendations(recommendationSnapshot.recommendations);
-      setRecommendationsGeneratedAt(recommendationSnapshot.generated_at ?? null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not run consultancy analysis.");
-    } finally {
-      setAnalyzingBrain(false);
-    }
-  }, []);
-
   const collectOpenDataStockFacts = useCallback(async (ticker: string) => {
     setOpenDataStockLoading(true);
     setStockEntryAnalysesLoading(true);
@@ -1073,26 +1042,12 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     eyeActivityView === "stocks"
       ? "No IBKR executions cached yet. Refresh IBKR to import Flex history; if it stays empty, check that the Flex query includes Trades and IBKR can generate the statement."
       : "No crypto activity loaded.";
-  const activeRefreshJobs = useMemo(() => refreshJobs.filter(isActiveRefreshJob), [refreshJobs]);
   const sourceSyncStatuses = useMemo(
     () => summarizeSourceStatuses(snapshot?.source_sync_status ?? []),
     [snapshot?.source_sync_status],
   );
   const latestSourceSyncedAt = useMemo(() => latestSourceSyncTimestamp(snapshot), [snapshot]);
   const warningCount = snapshot?.data_warnings.length ?? 0;
-  const syncIssueCount = useMemo(
-    () => sourceSyncStatuses.filter((status) => status.status !== "success").length ?? 0,
-    [sourceSyncStatuses],
-  );
-  const hasIbkrFlex1001Warning = useMemo(
-    () =>
-      (snapshot?.source_sync_status ?? []).some(
-        (status) =>
-          status.source === "ibkr_history" &&
-          status.warning?.toLowerCase().includes("1001"),
-      ),
-    [snapshot?.source_sync_status],
-  );
   const pageMeta = {
     personality: {
       title: "Personality",
@@ -1120,10 +1075,10 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     },
     settings: {
       title: "Settings",
-      subtitle: "Refresh, source sync, warnings, and display preferences.",
+      subtitle: "Display preferences and data warnings.",
     },
   } satisfies Record<AppView, { title: string; subtitle: string }>;
-  const settingsNotificationCount = activeRefreshJobs.length + syncIssueCount + warningCount;
+  const settingsNotificationCount = warningCount;
   const showPageHeader = activeView !== "capital" && activeView !== "personality" && activeView !== "consultancy";
 
   return (
@@ -1234,6 +1189,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
               manualCapital={manualCapital}
               snapshot={snapshot}
               connections={userConnections}
+              sourceSyncStatuses={sourceSyncStatuses}
               saving={manualCapitalSaving}
               status={manualCapitalStatus}
               connectionSaving={connectionSaving}
@@ -1241,7 +1197,6 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
               onSaveManualEntry={saveManualCapitalEntry}
               onUpdateManualEntry={updateCapitalEntry}
               onDeleteManualEntry={deleteCapitalEntry}
-              onConfigureConnection={configureCapitalConnection}
               onSaveConnection={saveCapitalConnection}
               onDeleteConnection={deleteCapitalConnection}
               onRefreshConnection={refreshCapitalConnection}
@@ -1255,9 +1210,8 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
               recommendations={consultancyRecommendations}
               generatedAt={recommendationsGeneratedAt}
               latestSourceSyncedAt={latestSourceSyncedAt}
-              analyzing={analyzingBrain}
-              onAnalyze={analyzeBrain}
               onAskRecommendation={askRecommendationFollowUp}
+              onDeleteRecommendation={removeRecommendation}
               onLoadRecommendationFollowUps={fetchRecommendationFollowUps}
               onPollRecommendation={fetchRecommendationFollowUpResult}
               alwaysShow
@@ -1461,10 +1415,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
           <FrozenPage className="app-page settings-page" active={activeView === "settings"}>
             <section className="panel settings-panel">
               <div className="panel-heading">
-                <h2>Refresh</h2>
-                <div className="panel-heading-actions">
-                  <span>{activeRefreshJobs.length ? `${activeRefreshJobs.length} active` : "Idle"}</span>
-                </div>
+                <h2>Display</h2>
               </div>
               <div className="settings-controls">
                 <div className="settings-field">
@@ -1488,44 +1439,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
                     </button>
                   </div>
                 </div>
-                <label className="settings-field">
-                  <span>Refresh source</span>
-                  <select
-                    value={refreshSource}
-                    onChange={(event) => setRefreshSource(event.target.value as RefreshSource)}
-                    disabled={loading}
-                    title="Choose source to refresh"
-                  >
-                    <option value="all">Refresh all</option>
-                    <option value="binance">Refresh Binance</option>
-                    <option value="ibkr">Refresh IBKR</option>
-                    <option value="manual">Refresh manual cash & assets</option>
-                    <option value="market_data">Refresh market prices</option>
-                  </select>
-                </label>
-                <button onClick={refresh} disabled={loading || refreshStartPending} title="Refresh selected source">
-                  <RefreshCcw size={18} aria-hidden="true" />
-                  {refreshStartPending ? "Starting" : "Refresh"}
-                </button>
               </div>
-            </section>
-
-            <section className="panel settings-panel">
-              <div className="panel-heading">
-                <div className="panel-title-with-info">
-                  <DatabaseZap size={17} aria-hidden="true" />
-                  <h2>Source Sync</h2>
-                </div>
-                <div className="panel-heading-actions">
-                  <span>{activeRefreshJobs.length || syncIssueCount}</span>
-                </div>
-              </div>
-              <SourceStatus statuses={sourceSyncStatuses} activeJobs={activeRefreshJobs} summarized />
-              {hasIbkrFlex1001Warning && (
-                <p className="settings-note">
-                  Wait 30-60 minutes and click Refresh IBKR again. If it still returns 1001, try tomorrow morning.
-                </p>
-              )}
             </section>
 
             <section className="panel settings-panel">

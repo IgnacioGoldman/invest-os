@@ -19,15 +19,15 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type {
-  CashBalance,
-  Holding,
   ManualCapitalEntryRequest,
   ManualCapitalSnapshot,
   PortfolioSnapshot,
+  SourceSyncStatus,
   UserConnection,
   UserConnectionSource,
   UserConnectionUpdate,
 } from "../api";
+import { formatDateTime } from "../format";
 
 type Method = "connect" | "form" | "csv";
 type ManualKind = "bank" | "cash" | "broker" | "crypto";
@@ -36,6 +36,7 @@ type Props = {
   manualCapital: ManualCapitalSnapshot | null;
   snapshot: PortfolioSnapshot | null;
   connections: UserConnection[];
+  sourceSyncStatuses: SourceSyncStatus[];
   saving: boolean;
   status: string | null;
   connectionSaving: boolean;
@@ -43,7 +44,6 @@ type Props = {
   onSaveManualEntry: (entry: ManualCapitalEntryRequest) => Promise<void>;
   onUpdateManualEntry: (entryId: string, entry: ManualCapitalEntryRequest) => Promise<void>;
   onDeleteManualEntry: (entryId: string, label: string) => Promise<void>;
-  onConfigureConnection: (source: "ibkr" | "binance") => void;
   onSaveConnection: (source: UserConnectionSource, connection: UserConnectionUpdate) => Promise<void>;
   onDeleteConnection: (source: UserConnectionSource, label: string) => Promise<void>;
   onRefreshConnection: (source: UserConnectionSource) => Promise<void>;
@@ -55,18 +55,11 @@ type CapitalSource = {
   method: Method;
   kind: string;
   name: string;
-  amount?: number | null;
   currency: string;
   note?: string | null;
   meta?: string;
   entry: Record<string, unknown>;
   connectionSource?: UserConnectionSource;
-};
-
-type Valuation = {
-  amount: number | null;
-  currency: string;
-  meta?: string;
 };
 
 const CONNECT_OPTIONS: Array<{
@@ -79,11 +72,6 @@ const CONNECT_OPTIONS: Array<{
   { id: "ibkr", name: "Interactive Brokers", kind: "Broker", icon: Building2, meta: "Positions, cash, orders, activity" },
   { id: "binance", name: "Binance", kind: "Crypto", icon: Bitcoin, meta: "Crypto balances, orders, ledger" },
 ];
-
-const CONNECTION_PLATFORM_NAMES: Record<UserConnectionSource, string[]> = {
-  ibkr: ["Interactive Brokers"],
-  binance: ["Binance"],
-};
 
 const FORM_KINDS: Array<{ id: ManualKind; name: string; icon: LucideIcon }> = [
   { id: "bank", name: "Bank account", icon: Landmark },
@@ -119,19 +107,6 @@ const optionalText = (value: string) => {
   return trimmed ? trimmed : null;
 };
 
-const money = (amount: number | null | undefined, currency: string) => {
-  if (amount == null || !Number.isFinite(amount)) return currency;
-  try {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency || "EUR",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  } catch {
-    return `${currency || "EUR"} ${amount.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-  }
-};
-
 const rowString = (row: Record<string, unknown>, key: string, fallback = "") => {
   const value = row[key];
   return typeof value === "string" && value.trim() ? value : fallback;
@@ -146,106 +121,50 @@ const rowNumber = (row: Record<string, unknown>, key: string) => {
 
 const rowId = (row: Record<string, unknown>, fallback: string) => rowString(row, "id", fallback);
 
-const sourceAmount = (row: Record<string, unknown>) => {
-  const balance = rowNumber(row, "balance");
-  if (balance != null) return balance;
-  const quantity = rowNumber(row, "quantity");
-  const price = rowNumber(row, "estimated_price");
-  if (quantity != null && price != null) return quantity * price;
-  const costBasis = rowNumber(row, "cost_basis");
-  if (costBasis != null) return costBasis;
-  return null;
-};
-
-const matchingCash = (row: Record<string, unknown>, cashBalances: CashBalance[]) => {
-  const id = rowString(row, "id");
-  const platform = rowString(row, "platform").toLowerCase();
-  const account = rowString(row, "account_name").toLowerCase();
-  return cashBalances.find((cash) => {
-    if (cash.source !== "manual") return false;
-    if (id && cash.id === id) return true;
-    return cash.platform.toLowerCase() === platform && account !== "";
-  }) ?? null;
-};
-
-const matchingHolding = (row: Record<string, unknown>, holdings: Holding[]) => {
-  const id = rowString(row, "id");
-  const platform = rowString(row, "platform").toLowerCase();
-  const symbol = rowString(row, "symbol").toUpperCase();
-  return holdings.find((holding) => {
-    if (holding.source !== "manual") return false;
-    if (id && holding.id === id) return true;
-    return holding.platform.toLowerCase() === platform && holding.symbol.toUpperCase() === symbol;
-  }) ?? null;
-};
-
-const valuationForRow = (
-  row: Record<string, unknown>,
-  snapshot: PortfolioSnapshot | null,
-  fallbackCurrency: string,
-): Valuation => {
-  if (!snapshot) return { amount: sourceAmount(row), currency: fallbackCurrency };
-
-  if (rowString(row, "kind") === "bank_cash" || rowNumber(row, "balance") != null) {
-    const cash = matchingCash(row, snapshot.cash_balances);
-    if (cash) {
-      return {
-        amount: cash.value_in_base ?? cash.balance,
-        currency: cash.value_in_base != null ? snapshot.base_currency : cash.currency,
-        meta: cash.value_in_base != null ? "Tracked in portfolio" : undefined,
-      };
-    }
+const syncSourceForCapitalSource = (source: CapitalSource) => {
+  if (source.sourceType === "connection") {
+    return source.connectionSource;
   }
-
-  const holding = matchingHolding(row, snapshot.holdings);
-  if (holding && (holding.value_in_base != null || holding.market_value > 0)) {
-    return {
-      amount: holding.value_in_base ?? holding.market_value,
-      currency: holding.value_in_base != null ? snapshot.base_currency : holding.currency,
-      meta: holding.valuation_source ? `Valued from ${holding.valuation_source}` : "Tracked in portfolio",
-    };
-  }
-
-  return { amount: sourceAmount(row), currency: fallbackCurrency };
+  return "manual";
 };
 
-const manualSourcesFromCapital = (
-  manualCapital: ManualCapitalSnapshot | null,
-  snapshot: PortfolioSnapshot | null,
-): CapitalSource[] => {
+const syncStatusForSource = (
+  source: CapitalSource,
+  sourceSyncStatuses: SourceSyncStatus[],
+) => {
+  const syncSource = syncSourceForCapitalSource(source);
+  return sourceSyncStatuses.find((status) => status.source === syncSource) ?? null;
+};
+
+const manualSourcesFromCapital = (manualCapital: ManualCapitalSnapshot | null): CapitalSource[] => {
   if (!manualCapital) return [];
   const cashSources = manualCapital.cash.map((row, index) => {
     const currency = rowString(row, "currency", "EUR");
-    const valuation = valuationForRow(row, snapshot, currency);
     return {
       id: rowId(row, `cash-${index}`),
       sourceType: "manual" as const,
       method: "form" as Method,
       kind: rowString(row, "purpose", "Cash"),
       name: rowString(row, "account_name", rowString(row, "platform", "Cash account")),
-      amount: valuation.amount,
-      currency: valuation.currency,
+      currency,
       note: rowString(row, "notes"),
-      meta: valuation.meta ?? rowString(row, "platform", "Manual cash"),
+      meta: rowString(row, "platform", "Manual cash"),
       entry: row,
     };
   });
   const assetSources = manualCapital.assets.map((row, index) => {
     const currency = rowString(row, "currency", "EUR");
-    const valuation = valuationForRow(row, snapshot, currency);
     return {
       id: rowId(row, `asset-${index}`),
       sourceType: "manual" as const,
       method: "form" as Method,
       kind: rowString(row, "asset_class", "Asset"),
       name: rowString(row, "name", rowString(row, "symbol", "Manual asset")),
-      amount: valuation.amount,
-      currency: valuation.currency,
+      currency,
       note: rowString(row, "notes"),
-      meta: valuation.meta ?? ([
+      meta: ([
         rowString(row, "platform"),
         rowString(row, "symbol"),
-        rowNumber(row, "quantity") != null ? `${rowNumber(row, "quantity")} units` : "",
       ].filter(Boolean).join(" · ") || "Manual asset"),
       entry: row,
     };
@@ -259,7 +178,6 @@ const connectionValue = (
 ) => {
   if (!snapshot) {
     return {
-      amount: null,
       holdings: 0,
       cash: 0,
       currency: "EUR",
@@ -267,22 +185,7 @@ const connectionValue = (
   }
   const holdings = snapshot.holdings.filter((holding) => holding.source === source);
   const cashBalances = snapshot.cash_balances.filter((cash) => cash.source === source);
-  const platformNames = CONNECTION_PLATFORM_NAMES[source];
-  const platformValue = snapshot.platform_breakdown
-    .filter((item) => platformNames.includes(item.name))
-    .reduce((total, item) => total + item.value, 0);
-  const holdingValue = holdings.reduce((total, holding) => {
-    if (holding.value_in_base != null) return total + holding.value_in_base;
-    if (holding.currency === snapshot.base_currency) return total + holding.market_value;
-    return total;
-  }, 0);
-  const cashValue = cashBalances.reduce((total, cash) => {
-    if (cash.value_in_base != null) return total + cash.value_in_base;
-    if (cash.currency === snapshot.base_currency) return total + cash.balance;
-    return total;
-  }, 0);
   return {
-    amount: platformValue || holdingValue + cashValue,
     holdings: holdings.length,
     cash: cashBalances.length,
     currency: snapshot.base_currency,
@@ -310,7 +213,6 @@ const connectionSourcesFromSnapshot = (
       method: "connect" as Method,
       kind: option.kind,
       name: connection?.label ?? option.name,
-      amount: hasSnapshotRows ? value.amount : null,
       currency: value.currency,
       meta: pieces.join(" · "),
       entry: {},
@@ -325,7 +227,7 @@ const sourcesFromCapital = (
   connections: UserConnection[],
 ): CapitalSource[] => [
   ...connectionSourcesFromSnapshot(connections, snapshot),
-  ...manualSourcesFromCapital(manualCapital, snapshot),
+  ...manualSourcesFromCapital(manualCapital),
 ];
 
 const connectionForSource = (
@@ -342,21 +244,11 @@ const connectionForSource = (
   };
 };
 
-function sourceTotals(sources: CapitalSource[]) {
-  const totals = new Map<string, number>();
-  sources.forEach((source) => {
-    if (source.amount == null) return;
-    totals.set(source.currency, (totals.get(source.currency) ?? 0) + source.amount);
-  });
-  return [...totals.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([currency, amount]) => money(amount, currency));
-}
-
 export const CapitalPanel = memo(function CapitalPanel({
   manualCapital,
   snapshot,
   connections,
+  sourceSyncStatuses,
   saving,
   status,
   connectionSaving,
@@ -364,7 +256,6 @@ export const CapitalPanel = memo(function CapitalPanel({
   onSaveManualEntry,
   onUpdateManualEntry,
   onDeleteManualEntry,
-  onConfigureConnection,
   onSaveConnection,
   onDeleteConnection,
   onRefreshConnection,
@@ -377,7 +268,8 @@ export const CapitalPanel = memo(function CapitalPanel({
     () => sourcesFromCapital(manualCapital, snapshot, connections),
     [connections, manualCapital, snapshot],
   );
-  const totals = useMemo(() => sourceTotals(sources), [sources]);
+  const connectionCount = sources.filter((source) => source.sourceType === "connection").length;
+  const manualCount = sources.length - connectionCount;
   const activeConnectionEditor = editingConnection ? connectionForSource(connections, editingConnection) : null;
 
   const closeFlow = () => {
@@ -396,6 +288,13 @@ export const CapitalPanel = memo(function CapitalPanel({
     setMethod("form");
   };
 
+  const configureConnection = (source: UserConnectionSource) => {
+    setAdding(false);
+    setMethod(null);
+    setEditingSource(null);
+    setEditingConnection(source);
+  };
+
   return (
     <div className="capital-shell">
       <header className="capital-hero">
@@ -404,9 +303,11 @@ export const CapitalPanel = memo(function CapitalPanel({
           <p>Add everything you own. Connect a platform, type it in, or import a file.</p>
         </div>
         <div className="capital-total-card">
-          <span>Tracked capital</span>
-          <strong>{totals.length ? totals.join(" · ") : "No tracked capital"}</strong>
-          <small>{sources.length} sources</small>
+          <span>Source setup</span>
+          <strong>{sources.length ? `${sources.length} sources` : "No sources yet"}</strong>
+          <small>
+            {connectionCount} connections · {manualCount} manual
+          </small>
         </div>
       </header>
 
@@ -453,7 +354,7 @@ export const CapitalPanel = memo(function CapitalPanel({
       )}
 
       {adding && method === "connect" && (
-        <ConnectFlow onCancel={() => setMethod(null)} onConfigureConnection={onConfigureConnection} />
+        <ConnectFlow onCancel={() => setMethod(null)} onConfigureConnection={configureConnection} />
       )}
       {adding && method === "form" && (
         <FormFlow
@@ -471,7 +372,7 @@ export const CapitalPanel = memo(function CapitalPanel({
           }}
         />
       )}
-      {adding && method === "csv" && <CsvFlow onCancel={() => setMethod(null)} onConfigureConnection={onConfigureConnection} />}
+      {adding && method === "csv" && <CsvFlow onCancel={() => setMethod(null)} onConfigureConnection={configureConnection} />}
 
       {activeConnectionEditor && (
         <ConnectionEditor
@@ -502,6 +403,7 @@ export const CapitalPanel = memo(function CapitalPanel({
               <SourceRow
                 key={source.id}
                 source={source}
+                syncStatus={syncStatusForSource(source, sourceSyncStatuses)}
                 refreshing={connectionSaving}
                 onEdit={() => editSource(source)}
                 onRefresh={source.connectionSource ? () => onRefreshConnection(source.connectionSource as UserConnectionSource) : undefined}
@@ -779,7 +681,7 @@ function CsvFlow({
       <label className="capital-csv-dropzone">
         <FileSpreadsheet size={24} aria-hidden="true" />
         <strong>{fileName || "Drop your CSV or click to browse"}</strong>
-        <span>Fallback for broker exports. Current import setup continues in Settings.</span>
+        <span>Fallback for broker exports. Use the source editor to keep connected imports configured.</span>
         <input type="file" accept=".csv,text/csv" onChange={selectFile} />
       </label>
       <div className="capital-flow-actions">
@@ -836,12 +738,14 @@ function formToEntry(
 
 function SourceRow({
   source,
+  syncStatus,
   refreshing,
   onEdit,
   onRefresh,
   onDelete,
 }: {
   source: CapitalSource;
+  syncStatus: SourceSyncStatus | null;
   refreshing: boolean;
   onEdit: () => void;
   onRefresh?: () => void;
@@ -870,7 +774,10 @@ function SourceRow({
         <span>{source.meta ?? source.note ?? methodLabel(source.method)}</span>
       </div>
       <em>{source.kind}</em>
-      <strong>{money(source.amount, source.currency)}</strong>
+      <span className="capital-source-sync">
+        <span className={`sync-badge ${syncStatus?.status ?? "never"}`}>{syncStatus?.status ?? "never"}</span>
+        <small>{syncStatus?.last_synced_at ? formatDateTime(syncStatus.last_synced_at) : "Never synced"}</small>
+      </span>
       <span className="capital-source-actions">
         <button
           type="button"

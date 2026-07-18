@@ -36,11 +36,13 @@ from app.services.connections import (
 )
 from app.services.notes import Note, NoteRequest, create_note, delete_note, load_notes, update_note
 from app.services.recommendations import (
+    RecommendationDeleteRequest,
     RecommendationFollowUpCodexResultRequest,
     RecommendationFollowUpRequest,
     RecommendationFollowUpResponse,
     RecommendationSnapshot,
     answer_recommendation_followup,
+    delete_saved_recommendation,
     generate_and_store,
     load_recommendation_followup_result,
     load_recommendation_followups,
@@ -205,6 +207,14 @@ def generate_recommendations() -> RecommendationSnapshot:
         return load_saved_recommendation_snapshot(settings)
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"AI recommendations failed: {exc}") from exc
+
+
+@app.post("/api/recommendations/delete")
+def delete_recommendation(request: RecommendationDeleteRequest) -> RecommendationSnapshot:
+    snapshot = delete_saved_recommendation(request, get_settings())
+    if snapshot is None:
+        raise HTTPException(status_code=404, detail="Recommendation was not found.")
+    return snapshot
 
 
 @app.post("/api/recommendations/follow-up")

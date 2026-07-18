@@ -2127,7 +2127,7 @@ button:disabled {
   cursor: pointer;
   display: grid;
   gap: 12px;
-  grid-template-columns: 44px minmax(0, 1fr) minmax(88px, auto) minmax(120px, auto) auto;
+  grid-template-columns: 44px minmax(0, 1fr) minmax(88px, auto) minmax(150px, auto) auto;
   justify-items: start;
   min-height: 74px;
   padding: 12px 14px;
@@ -2179,17 +2179,27 @@ button:disabled {
   white-space: nowrap;
 }
 
-.capital-source-row strong {
-  color: var(--app-foreground);
-  justify-self: end;
-  overflow-wrap: anywhere;
-  text-align: right;
-}
-
 .capital-source-actions {
   display: flex;
   gap: 8px;
   justify-self: end;
+}
+
+.capital-source-sync {
+  align-items: flex-end;
+  display: grid;
+  gap: 5px;
+  justify-items: end;
+  justify-self: end;
+  text-align: right;
+}
+
+.capital-source-sync small {
+  color: var(--app-muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 .capital-source-icon {
@@ -2487,7 +2497,7 @@ button:disabled {
   align-items: end;
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(180px, 0.8fr) minmax(240px, 1fr) auto;
+  grid-template-columns: minmax(180px, 280px);
   padding: 16px;
 }
 
@@ -5138,7 +5148,6 @@ td small {
 .capital-actions button,
 .capital-import-panel button,
 .notes-save-button,
-.settings-controls > button,
 .recommendations-header button,
 .personality-save-button {
   background: linear-gradient(135deg, var(--app-primary), var(--app-secondary));
@@ -5942,10 +5951,11 @@ tbody tr:hover td {
   gap: 6px;
   justify-items: end;
   padding: 16px;
+  position: relative;
   text-align: right;
 }
 
-.advice-run-card span {
+.advice-run-card > span {
   color: var(--app-muted);
   font-size: 0.72rem;
   font-weight: 850;
@@ -5953,14 +5963,13 @@ tbody tr:hover td {
   text-transform: uppercase;
 }
 
-.advice-run-card strong {
+.advice-run-card > strong {
   color: var(--app-foreground);
   font-size: 0.92rem;
   line-height: 1.2;
 }
 
-.advice-run-card button,
-.advice-sidebar-heading button,
+.advice-run-card > button,
 .advice-empty-state button,
 .advice-composer-box button {
   background: linear-gradient(135deg, var(--app-primary), var(--app-secondary));
@@ -5969,11 +5978,76 @@ tbody tr:hover td {
   color: #111520;
 }
 
-.advice-run-card button,
-.advice-sidebar-heading button {
+.advice-run-card > button {
   font-size: 0.82rem;
   min-height: 36px;
   padding: 0 11px;
+}
+
+.advice-analysis-picker {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(109, 143, 255, 0.16), transparent 48%),
+    rgba(27, 32, 49, 0.98);
+  border: 1px solid rgba(109, 143, 255, 0.22);
+  border-radius: 12px;
+  box-shadow: 0 22px 70px -24px rgba(0, 0, 0, 0.82);
+  display: grid;
+  gap: 8px;
+  margin-top: 0;
+  padding: 8px;
+  position: absolute;
+  right: 0;
+  text-align: left;
+  top: calc(100% + 8px);
+  width: min(340px, calc(100vw - 36px));
+  z-index: 30;
+}
+
+.advice-analysis-picker button {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--app-border);
+  box-shadow: none;
+  color: var(--app-muted-strong);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 30px minmax(0, 1fr);
+  justify-content: start;
+  min-height: 58px;
+  padding: 9px 10px;
+  text-align: left;
+  width: 100%;
+}
+
+.advice-analysis-picker button:hover,
+.advice-analysis-picker button:focus-visible {
+  background: rgba(109, 143, 255, 0.12);
+  border-color: rgba(109, 143, 255, 0.34);
+  color: var(--app-foreground);
+}
+
+.advice-analysis-picker button > svg {
+  color: var(--app-primary);
+  justify-self: center;
+}
+
+.advice-analysis-picker button span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.advice-analysis-picker button strong {
+  color: inherit;
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.advice-analysis-picker button small {
+  color: var(--app-muted);
+  font-size: 0.7rem;
+  font-weight: 750;
+  line-height: 1.3;
 }
 
 .advice-stale-alert {
@@ -6272,6 +6346,17 @@ tbody tr:hover td {
 
 .advice-action-button.discard {
   color: #ff9ba6;
+}
+
+.advice-action-button.delete {
+  background: rgba(255, 125, 139, 0.13);
+  border-color: rgba(255, 125, 139, 0.3);
+  color: #ff9ba6;
+}
+
+.advice-action-button.delete:hover {
+  background: rgba(255, 125, 139, 0.18);
+  color: #ffd1d6;
 }
 
 .advice-context-card,
@@ -6966,7 +7051,7 @@ tbody tr:hover td {
   }
 
   .settings-controls {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(180px, 280px);
   }
 
   .capital-manual-grid {
@@ -6985,6 +7070,12 @@ tbody tr:hover td {
     justify-items: start;
     justify-content: flex-start;
     text-align: left;
+  }
+
+  .advice-analysis-picker {
+    left: 0;
+    right: auto;
+    width: min(100%, 340px);
   }
 
   .advice-workspace {
@@ -7030,11 +7121,6 @@ tbody tr:hover td {
 
   .personality-info-grid {
     grid-template-columns: 1fr;
-  }
-
-  .settings-controls > button {
-    justify-content: center;
-    width: 100%;
   }
 
   .app-shell {
@@ -7192,15 +7278,16 @@ tbody tr:hover td {
   }
 
   .capital-source-row em,
-  .capital-source-row strong,
+  .capital-source-sync,
   .capital-source-actions {
     grid-column: 2;
     justify-self: start;
     text-align: left;
   }
 
-  .capital-source-row strong {
-    font-size: 1rem;
+  .capital-source-sync {
+    align-items: flex-start;
+    justify-items: start;
   }
 
   .capital-flow-actions > span {

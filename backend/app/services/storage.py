@@ -392,6 +392,27 @@ def load_recommendation_payloads(conn: sqlite3.Connection) -> list[str]:
     ]
 
 
+def load_recommendation_records(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return list(conn.execute("SELECT id, payload FROM recommendations ORDER BY position, id"))
+
+
+def delete_recommendation_records(conn: sqlite3.Connection, ids: Iterable[int], recommendation_key: str) -> int:
+    row_ids = list(ids)
+    deleted = 0
+    if row_ids:
+        placeholders = ",".join("?" for _ in row_ids)
+        cursor = conn.execute(f"DELETE FROM recommendations WHERE id IN ({placeholders})", row_ids)
+        deleted = cursor.rowcount
+
+    conn.execute("DELETE FROM recommendation_followups WHERE recommendation_key = ?", (recommendation_key,))
+    rows = conn.execute("SELECT id FROM recommendations ORDER BY position, id").fetchall()
+    conn.executemany(
+        "UPDATE recommendations SET position = ? WHERE id = ?",
+        [(position, row["id"]) for position, row in enumerate(rows)],
+    )
+    return deleted
+
+
 def load_recommendations_generated_at(conn: sqlite3.Connection) -> datetime | None:
     row = conn.execute("SELECT MAX(generated_at) AS generated_at FROM recommendations").fetchone()
     if row is None or row["generated_at"] is None:

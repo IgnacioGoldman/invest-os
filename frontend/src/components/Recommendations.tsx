@@ -5,24 +5,31 @@ import {
   Check,
   Info,
   MessageSquare,
+  PieChart,
   RotateCcw,
   SendHorizontal,
   ShieldAlert,
   Sparkles,
+  TrendingDown,
+  TrendingUp,
+  Trash2,
   Undo2,
   UserRound,
+  type LucideIcon,
 } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { Recommendation, RecommendationFollowUpResponse } from "../api";
+import allocationPrompt from "../content/recommendation-prompts/allocation.md?raw";
+import buyPrompt from "../content/recommendation-prompts/buy.md?raw";
+import sellPrompt from "../content/recommendation-prompts/sell.md?raw";
 import { formatDateTime } from "../format";
 
 type Props = {
   recommendations: Recommendation[];
   generatedAt?: string | null;
   latestSourceSyncedAt?: string | null;
-  analyzing?: boolean;
-  onAnalyze?: () => void;
   onAskRecommendation?: (recommendation: Recommendation, question: string) => Promise<RecommendationFollowUpResponse>;
+  onDeleteRecommendation?: (recommendation: Recommendation) => Promise<void>;
   onLoadRecommendationFollowUps?: () => Promise<RecommendationFollowUpResponse[]>;
   onPollRecommendation?: (requestId: string) => Promise<RecommendationFollowUpResponse>;
   alwaysShow?: boolean;
@@ -42,9 +49,64 @@ type RecommendationRecord = {
   thread: FollowUpTurn[];
 };
 
+type AnalysisWorkflow = "allocation" | "buy" | "sell";
+
+type LocalRecommendation = {
+  id: string;
+  kind: AnalysisWorkflow;
+  createdAt: string;
+  recommendation: Recommendation;
+};
+
 const EMPTY_THREAD: FollowUpTurn[] = [];
 const DISCARDED_RECOMMENDATIONS_STORAGE_KEY = "invest-os:discarded-recommendation-keys";
 const ACCEPTED_RECOMMENDATIONS_STORAGE_KEY = "invest-os:accepted-recommendation-keys";
+const DELETED_RECOMMENDATIONS_STORAGE_KEY = "invest-os:deleted-recommendation-keys";
+const LOCAL_RECOMMENDATIONS_STORAGE_KEY = "invest-os:local-codex-recommendations";
+
+const WORKFLOW_ORDER: AnalysisWorkflow[] = ["allocation", "buy", "sell"];
+
+const WORKFLOW_OPTIONS: Record<AnalysisWorkflow, {
+  label: string;
+  description: string;
+  icon: LucideIcon;
+  severity: Recommendation["severity"];
+  category: Recommendation["category"];
+  title: string;
+  detail: string;
+  prompt: string;
+}> = {
+  allocation: {
+    label: "Allocation",
+    description: "Portfolio mix, reserves, concentration, and next action.",
+    icon: PieChart,
+    severity: "warning",
+    category: "allocation",
+    title: "Codex allocation review",
+    detail: "Use the portfolio recommendation skills to review allocation, reserves, concentration, and the next best portfolio action.",
+    prompt: allocationPrompt.trim(),
+  },
+  buy: {
+    label: "Buy",
+    description: "Find one accumulation idea and one tactical entry setup.",
+    icon: TrendingUp,
+    severity: "warning",
+    category: "entry",
+    title: "Codex buy candidate search",
+    detail: "Use stock open-data and derived signals to find buy candidates that fit the current portfolio.",
+    prompt: buyPrompt.trim(),
+  },
+  sell: {
+    label: "Sell",
+    description: "Audit current holdings for trim, exit, and watchlist risk.",
+    icon: TrendingDown,
+    severity: "critical",
+    category: "trim_or_exit",
+    title: "Codex sell / trim review",
+    detail: "Inspect current holdings for concentration, thesis deterioration, valuation risk, and better uses of capital.",
+    prompt: sellPrompt.trim(),
+  },
+};
 
 const ICON = {
   info: <Info size={16} />,
@@ -86,6 +148,55 @@ function saveStoredKeys(storageKey: string, keys: Set<string>) {
     window.localStorage.setItem(storageKey, JSON.stringify([...keys]));
   } catch {
     // Keep the UI usable even if browser storage is unavailable.
+  }
+}
+
+function isAnalysisWorkflow(value: unknown): value is AnalysisWorkflow {
+  return typeof value === "string" && WORKFLOW_ORDER.includes(value as AnalysisWorkflow);
+}
+
+function loadLocalRecommendations() {
+  if (typeof window === "undefined") {
+    return [];
+  }
+  try {
+    const raw = window.localStorage.getItem(LOCAL_RECOMMENDATIONS_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.flatMap((item): LocalRecommendation[] => {
+      if (
+        typeof item?.id !== "string" ||
+        !isAnalysisWorkflow(item?.kind) ||
+        typeof item?.createdAt !== "string" ||
+        typeof item?.recommendation?.severity !== "string" ||
+        typeof item?.recommendation?.category !== "string" ||
+        typeof item?.recommendation?.title !== "string" ||
+        typeof item?.recommendation?.detail !== "string"
+      ) {
+        return [];
+      }
+      return [{
+        id: item.id,
+        kind: item.kind,
+        createdAt: item.createdAt,
+        recommendation: item.recommendation,
+      }];
+    });
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalRecommendations(items: LocalRecommendation[]) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.localStorage.setItem(LOCAL_RECOMMENDATIONS_STORAGE_KEY, JSON.stringify(items.slice(0, 25)));
+  } catch {
+    // Local prompts are convenience state; the app should remain usable if storage fails.
   }
 }
 
@@ -145,19 +256,58 @@ function severityLabel(severity: Recommendation["severity"]) {
   return "Info";
 }
 
+function starterTurnForLocalRecommendation(item: LocalRecommendation): FollowUpTurn {
+  const option = WORKFLOW_OPTIONS[item.kind];
+  const key = recommendationKey(item.recommendation);
+  const question = `Start ${option.label.toLowerCase()} recommendation workflow.`;
+  return {
+    question,
+    response: {
+      recommendation_key: key,
+      question,
+      generated_at: item.createdAt,
+      mode: "codex_required",
+      status: "complete",
+      answer: "This working recommendation is ready for Codex. Open the Codex IDE prompt below, run it locally, then continue the analysis in this thread.",
+      context_tickers: [],
+      follow_up_id: `local-${item.id}`,
+      codex_command: option.prompt,
+    },
+  };
+}
+
+function createWorkflowRecommendation(kind: AnalysisWorkflow): LocalRecommendation {
+  const option = WORKFLOW_OPTIONS[kind];
+  const createdAt = new Date().toISOString();
+  const id = `${kind}-${createdAt}-${Math.random().toString(36).slice(2, 8)}`;
+  const recommendation: Recommendation = {
+    severity: option.severity,
+    category: option.category,
+    title: option.title,
+    detail: `${option.detail} Created ${formatDateTime(createdAt)}.`,
+  };
+  return {
+    id,
+    kind,
+    createdAt,
+    recommendation,
+  };
+}
+
 export const Recommendations = memo(function Recommendations({
   recommendations,
   generatedAt,
   latestSourceSyncedAt,
-  analyzing = false,
-  onAnalyze,
   onAskRecommendation,
+  onDeleteRecommendation,
   onLoadRecommendationFollowUps,
   onPollRecommendation,
   alwaysShow = false,
 }: Props) {
   const [tab, setTab] = useState<RecommendationTab>("working");
   const [activeKey, setActiveKey] = useState<string | null>(null);
+  const [analysisPickerOpen, setAnalysisPickerOpen] = useState(false);
+  const [localRecommendations, setLocalRecommendations] = useState<LocalRecommendation[]>(loadLocalRecommendations);
   const [draft, setDraft] = useState("");
   const [followUps, setFollowUps] = useState<Record<string, FollowUpTurn[]>>({});
   const [acceptedKeys, setAcceptedKeys] = useState<Set<string>>(() =>
@@ -166,13 +316,33 @@ export const Recommendations = memo(function Recommendations({
   const [discardedKeys, setDiscardedKeys] = useState<Set<string>>(() =>
     loadStoredKeys(DISCARDED_RECOMMENDATIONS_STORAGE_KEY),
   );
+  const [deletedKeys, setDeletedKeys] = useState<Set<string>>(() =>
+    loadStoredKeys(DELETED_RECOMMENDATIONS_STORAGE_KEY),
+  );
   const [pendingKey, setPendingKey] = useState<string | null>(null);
+  const [deletingKey, setDeletingKey] = useState<string | null>(null);
   const [followUpErrors, setFollowUpErrors] = useState<Record<string, string>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
+  const analysisMenuRef = useRef<HTMLDivElement>(null);
 
   const actionableRecommendations = useMemo(
-    () => recommendations.filter((rec) => rec.severity !== "info"),
-    [recommendations],
+    () => [
+      ...localRecommendations.map((item) => item.recommendation),
+      ...recommendations.filter((rec) => rec.severity !== "info"),
+    ].filter((rec) => !deletedKeys.has(recommendationKey(rec))),
+    [deletedKeys, localRecommendations, recommendations],
+  );
+  const localRecommendationKeys = useMemo(
+    () => new Set(localRecommendations.map((item) => recommendationKey(item.recommendation))),
+    [localRecommendations],
+  );
+  const starterTurns = useMemo(
+    () => localRecommendations.reduce<Record<string, FollowUpTurn[]>>((groups, item) => {
+      const key = recommendationKey(item.recommendation);
+      groups[key] = [...(groups[key] ?? []), starterTurnForLocalRecommendation(item)];
+      return groups;
+    }, {}),
+    [localRecommendations],
   );
   const visibleRecommendationKeys = useMemo(
     () => new Set(actionableRecommendations.map(recommendationKey)),
@@ -190,10 +360,10 @@ export const Recommendations = memo(function Recommendations({
           key,
           rec,
           status: statusForKey(key, acceptedKeys, discardedKeys),
-          thread: followUps[key] ?? EMPTY_THREAD,
+          thread: [...(starterTurns[key] ?? EMPTY_THREAD), ...(followUps[key] ?? EMPTY_THREAD)],
         };
       }),
-    [acceptedKeys, actionableRecommendations, discardedKeys, followUps],
+    [acceptedKeys, actionableRecommendations, discardedKeys, followUps, starterTurns],
   );
   const filteredRecords = useMemo(
     () => records.filter((record) => record.status === tab),
@@ -213,7 +383,8 @@ export const Recommendations = memo(function Recommendations({
     }),
     [records],
   );
-  const shouldRerun = isSourceDataNewer(generatedAt, latestSourceSyncedAt);
+  const latestAnalysisAt = localRecommendations[0]?.createdAt ?? generatedAt ?? null;
+  const shouldRerun = isSourceDataNewer(latestAnalysisAt, latestSourceSyncedAt);
   const pendingFollowUpKey = useMemo(() => {
     const ids = Object.values(followUps)
       .flatMap((turns) => turns.map((turn) => turn.response))
@@ -229,6 +400,37 @@ export const Recommendations = memo(function Recommendations({
   useEffect(() => {
     saveStoredKeys(DISCARDED_RECOMMENDATIONS_STORAGE_KEY, discardedKeys);
   }, [discardedKeys]);
+
+  useEffect(() => {
+    saveStoredKeys(DELETED_RECOMMENDATIONS_STORAGE_KEY, deletedKeys);
+  }, [deletedKeys]);
+
+  useEffect(() => {
+    saveLocalRecommendations(localRecommendations);
+  }, [localRecommendations]);
+
+  useEffect(() => {
+    if (!analysisPickerOpen) {
+      return;
+    }
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (analysisMenuRef.current?.contains(event.target as Node)) {
+        return;
+      }
+      setAnalysisPickerOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setAnalysisPickerOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [analysisPickerOpen]);
 
   useEffect(() => {
     if (activeKey && filteredRecords.some((record) => record.key === activeKey)) {
@@ -314,6 +516,39 @@ export const Recommendations = memo(function Recommendations({
     };
   }, [onPollRecommendation, pendingFollowUpKey]);
 
+  const startWorkflowRecommendation = useCallback((kind: AnalysisWorkflow) => {
+    const item = createWorkflowRecommendation(kind);
+    const key = recommendationKey(item.recommendation);
+    setLocalRecommendations((current) => [item, ...current]);
+    setDiscardedKeys((current) => {
+      const next = new Set(current);
+      next.delete(key);
+      return next;
+    });
+    setAcceptedKeys((current) => {
+      const next = new Set(current);
+      next.delete(key);
+      return next;
+    });
+    setDeletedKeys((current) => {
+      const next = new Set(current);
+      next.delete(key);
+      return next;
+    });
+    setTab("working");
+    setActiveKey(key);
+    setAnalysisPickerOpen(false);
+  }, []);
+
+  const moveToNextRecordInCurrentTab = useCallback((key: string) => {
+    setActiveKey((current) => {
+      if (current !== key) {
+        return current;
+      }
+      return filteredRecords.find((record) => record.key !== key)?.key ?? null;
+    });
+  }, [filteredRecords]);
+
   const acceptRecommendation = useCallback((key: string) => {
     setAcceptedKeys((current) => new Set(current).add(key));
     setDiscardedKeys((current) => {
@@ -321,9 +556,8 @@ export const Recommendations = memo(function Recommendations({
       next.delete(key);
       return next;
     });
-    setTab("accepted");
-    setActiveKey(key);
-  }, []);
+    moveToNextRecordInCurrentTab(key);
+  }, [moveToNextRecordInCurrentTab]);
 
   const discardRecommendation = useCallback((key: string) => {
     setDiscardedKeys((current) => new Set(current).add(key));
@@ -332,9 +566,8 @@ export const Recommendations = memo(function Recommendations({
       next.delete(key);
       return next;
     });
-    setTab("discarded");
-    setActiveKey(key);
-  }, []);
+    moveToNextRecordInCurrentTab(key);
+  }, [moveToNextRecordInCurrentTab]);
 
   const restoreRecommendation = useCallback((key: string) => {
     setDiscardedKeys((current) => {
@@ -347,9 +580,48 @@ export const Recommendations = memo(function Recommendations({
       next.delete(key);
       return next;
     });
-    setTab("working");
-    setActiveKey(key);
-  }, []);
+    moveToNextRecordInCurrentTab(key);
+  }, [moveToNextRecordInCurrentTab]);
+
+  const deleteDiscardedRecommendation = useCallback(async (record: RecommendationRecord) => {
+    if (!window.confirm(`Permanently delete "${record.rec.title}"?`)) {
+      return;
+    }
+    const isLocalRecommendation = localRecommendationKeys.has(record.key);
+    setDeletingKey(record.key);
+    try {
+      if (!isLocalRecommendation && onDeleteRecommendation) {
+        await onDeleteRecommendation(record.rec);
+      }
+      setLocalRecommendations((current) =>
+        current.filter((item) => recommendationKey(item.recommendation) !== record.key),
+      );
+      setDeletedKeys((current) => new Set(current).add(record.key));
+      setDiscardedKeys((current) => {
+        const next = new Set(current);
+        next.delete(record.key);
+        return next;
+      });
+      setAcceptedKeys((current) => {
+        const next = new Set(current);
+        next.delete(record.key);
+        return next;
+      });
+      setFollowUps((threads) => {
+        const next = { ...threads };
+        delete next[record.key];
+        return next;
+      });
+      setFollowUpErrors((errors) => {
+        const next = { ...errors };
+        delete next[record.key];
+        return next;
+      });
+      moveToNextRecordInCurrentTab(record.key);
+    } finally {
+      setDeletingKey(null);
+    }
+  }, [localRecommendationKeys, moveToNextRecordInCurrentTab, onDeleteRecommendation]);
 
   const askRecommendation = useCallback(async (event: FormEvent) => {
     event.preventDefault();
@@ -381,7 +653,7 @@ export const Recommendations = memo(function Recommendations({
     }
   }, [activeRecord, draft, onAskRecommendation]);
 
-  if (actionableRecommendations.length === 0 && !onAnalyze && !alwaysShow) return null;
+  if (actionableRecommendations.length === 0 && !alwaysShow) return null;
 
   return (
     <div className="advice-shell recommendations">
@@ -390,14 +662,34 @@ export const Recommendations = memo(function Recommendations({
           <h2>Recommendations</h2>
           <p>Review portfolio advice, keep what you accept, discard the noise, and ask follow-up questions in context.</p>
         </div>
-        <div className="advice-run-card">
+        <div className="advice-run-card" ref={analysisMenuRef}>
           <span>Last run</span>
-          <strong>{generatedAt ? formatDateTime(generatedAt) : "Never"}</strong>
-          {onAnalyze && (
-            <button type="button" onClick={onAnalyze} disabled={analyzing} title="Analyze portfolio with AI">
-              <Sparkles size={16} aria-hidden="true" />
-              {analyzing ? "Analyzing" : "Analyze"}
-            </button>
+          <strong>{latestAnalysisAt ? formatDateTime(latestAnalysisAt) : "Never"}</strong>
+          <button
+            type="button"
+            onClick={() => setAnalysisPickerOpen((open) => !open)}
+            title="Start a recommendation workflow"
+            aria-expanded={analysisPickerOpen}
+          >
+            <Sparkles size={16} aria-hidden="true" />
+            Analyze
+          </button>
+          {analysisPickerOpen && (
+            <div className="advice-analysis-picker" role="menu" aria-label="Recommendation type">
+              {WORKFLOW_ORDER.map((kind) => {
+                const option = WORKFLOW_OPTIONS[kind];
+                const Icon = option.icon;
+                return (
+                  <button type="button" role="menuitem" key={kind} onClick={() => startWorkflowRecommendation(kind)}>
+                    <Icon size={16} aria-hidden="true" />
+                    <span>
+                      <strong>{option.label}</strong>
+                      <small>{option.description}</small>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           )}
         </div>
       </header>
@@ -408,7 +700,7 @@ export const Recommendations = memo(function Recommendations({
           <div>
             <strong>New portfolio data is available.</strong>
             <p>
-              Analyze should be run again. Last run {generatedAt ? formatDateTime(generatedAt) : "never"}
+              Analyze should be run again. Last run {latestAnalysisAt ? formatDateTime(latestAnalysisAt) : "never"}
               {latestSourceSyncedAt ? `; latest source sync ${formatDateTime(latestSourceSyncedAt)}.` : "."}
             </p>
           </div>
@@ -422,12 +714,6 @@ export const Recommendations = memo(function Recommendations({
               <strong>Inbox</strong>
               <span>{records.length} items</span>
             </div>
-            {onAnalyze && (
-              <button type="button" onClick={onAnalyze} disabled={analyzing} title="Run a new recommendation analysis">
-                <Sparkles size={15} aria-hidden="true" />
-                New run
-              </button>
-            )}
           </div>
 
           <div className="advice-tab-list" role="tablist" aria-label="Recommendation status">
@@ -481,14 +767,8 @@ export const Recommendations = memo(function Recommendations({
               <p>
                 {records.length
                   ? "Select an item from the inbox to review the reasoning and ask questions."
-                  : "Run an analysis to create your first recommendation set."}
+                  : "Use Analyze to create your first working recommendation."}
               </p>
-              {onAnalyze && (
-                <button type="button" onClick={onAnalyze} disabled={analyzing}>
-                  <Sparkles size={16} aria-hidden="true" />
-                  {analyzing ? "Analyzing" : "Analyze portfolio"}
-                </button>
-              )}
             </div>
           ) : (
             <>
@@ -531,6 +811,17 @@ export const Recommendations = memo(function Recommendations({
                     >
                       {activeRecord.status === "discarded" ? <Undo2 size={15} aria-hidden="true" /> : <RotateCcw size={15} aria-hidden="true" />}
                       Working
+                    </button>
+                  )}
+                  {activeRecord.status === "discarded" && (
+                    <button
+                      type="button"
+                      className="advice-action-button delete"
+                      onClick={() => deleteDiscardedRecommendation(activeRecord)}
+                      disabled={deletingKey === activeRecord.key}
+                    >
+                      <Trash2 size={15} aria-hidden="true" />
+                      {deletingKey === activeRecord.key ? "Deleting" : "Delete"}
                     </button>
                   )}
                 </div>

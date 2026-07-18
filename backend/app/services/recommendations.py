@@ -18,9 +18,11 @@ from app.entry_engine.open_data_models import OpenDataMetric, OpenDataSnapshot
 from app.entry_engine.utils.file_storage import load_latest_open_data_stock_snapshot
 from app.services.storage import (
     connect,
+    delete_recommendation_records,
     load_recommendation_followup_payload,
     load_recommendation_followup_payloads,
     load_recommendation_payloads,
+    load_recommendation_records,
     load_recommendations_generated_at,
     replace_recommendations,
     save_recommendation_followup,
@@ -68,6 +70,10 @@ class RecommendationSnapshot(BaseModel):
 class RecommendationFollowUpRequest(BaseModel):
     recommendation: Recommendation
     question: str
+
+
+class RecommendationDeleteRequest(BaseModel):
+    recommendation: Recommendation
 
 
 class RecommendationFollowUpResponse(BaseModel):
@@ -811,6 +817,31 @@ def load_saved_recommendations(settings: Settings | None = None) -> list[Recomme
 def load_saved_recommendation_snapshot(settings: Settings | None = None) -> RecommendationSnapshot:
     settings = settings or get_settings()
     with connect(settings.data_dir) as conn:
+        return RecommendationSnapshot(
+            generated_at=load_recommendations_generated_at(conn),
+            recommendations=[
+                Recommendation.model_validate_json(payload)
+                for payload in load_recommendation_payloads(conn)
+            ],
+        )
+
+
+def delete_saved_recommendation(request: RecommendationDeleteRequest, settings: Settings | None = None) -> RecommendationSnapshot | None:
+    settings = settings or get_settings()
+    key = recommendation_key(request.recommendation)
+    with connect(settings.data_dir) as conn:
+        row_ids: list[int] = []
+        for row in load_recommendation_records(conn):
+            try:
+                recommendation = Recommendation.model_validate_json(row["payload"])
+            except ValidationError:
+                continue
+            if recommendation_key(recommendation) == key:
+                row_ids.append(row["id"])
+        if not row_ids:
+            return None
+        delete_recommendation_records(conn, row_ids, key)
+        conn.commit()
         return RecommendationSnapshot(
             generated_at=load_recommendations_generated_at(conn),
             recommendations=[
