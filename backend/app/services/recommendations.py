@@ -38,12 +38,14 @@ from app.services.user_profile import (
 
 PROJECT_DIR = Path(__file__).resolve().parents[3]
 PORTFOLIO_RECOMMENDATIONS_SKILL_DIR = PROJECT_DIR / "skills" / "portfolio-recommendations"
+RECOMMENDATION_OUTPUT_GUIDE_PATH = PROJECT_DIR / "skills" / "how-to-write-recommendation" / "write-recommendation.md"
 STOCK_DERIVED_SIGNALS_PATH = PROJECT_DIR / "data" / "stocks" / "derived_signals" / "latest.json"
 ASSET_DERIVED_SIGNALS_PATH = PROJECT_DIR / "data" / "assets" / "derived_signals" / "latest.json"
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 
 
 class Recommendation(BaseModel):
+    id: str | None = None
     severity: Literal["info", "warning", "critical"]
     category: Literal[
         "allocation",
@@ -72,6 +74,12 @@ class RecommendationFollowUpRequest(BaseModel):
     question: str
 
 
+class RecommendationCodexRequest(BaseModel):
+    recommendation: Recommendation
+    question: str
+    prompt: str
+
+
 class RecommendationDeleteRequest(BaseModel):
     recommendation: Recommendation
 
@@ -94,6 +102,8 @@ class RecommendationFollowUpCodexResultRequest(BaseModel):
 
 
 def recommendation_key(recommendation: Recommendation) -> str:
+    if recommendation.id:
+        return f"id:{recommendation.id}"
     return f"{recommendation.category}:{recommendation.severity}:{recommendation.title}:{recommendation.detail}"
 
 
@@ -142,6 +152,23 @@ def _skill_text() -> str:
     return (
         "Analyze the portfolio snapshot as a read-only portfolio advisor. "
         "Return concise, actionable recommendations without placing trades."
+    )
+
+
+def _recommendation_output_guide_text() -> str:
+    if not RECOMMENDATION_OUTPUT_GUIDE_PATH.exists():
+        return ""
+    return RECOMMENDATION_OUTPUT_GUIDE_PATH.read_text(encoding="utf-8").strip()
+
+
+def _recommendation_output_guide_block() -> str:
+    guide = _recommendation_output_guide_text()
+    if not guide:
+        return ""
+    return (
+        "\n\n---\n\n"
+        "Frontend recommendation writing guide. Use this when writing the final answer that Invest OS will display:\n\n"
+        f"{guide}"
     )
 
 
@@ -471,12 +498,55 @@ def _codex_followup_command(
         f"Recommendation JSON:\n{json.dumps(request.recommendation.model_dump(mode='json'), indent=2, sort_keys=True)}\n\n"
         f"User question:\n{request.question}\n\n"
         f"Detected context tickers: {', '.join(tickers) if tickers else 'none'}\n\n"
+        f"{_recommendation_output_guide_block()}\n\n"
         "When you have the final answer, post it back to the app with this callback shape. "
         "Replace REPLACE_WITH_FINAL_ANALYSIS with your final JSON-escaped answer:\n\n"
         "curl -s -H 'Content-Type: application/json' "
         "-X POST http://127.0.0.1:8000/api/recommendations/follow-up/codex-result "
         f"--data '{callback_payload}'"
     )
+
+
+def _codex_callback_footer(request_id: str) -> str:
+    callback_payload = json.dumps({"request_id": request_id, "answer": "REPLACE_WITH_FINAL_ANALYSIS"})
+    return (
+        "\n\n---\n\n"
+        f"Correlation ID: {request_id}\n\n"
+        "When done, POST the answer to:\n"
+        "POST http://127.0.0.1:8000/api/recommendations/follow-up/codex-result\n"
+        f"with request_id: {request_id}\n\n"
+        "Payload:\n"
+        f"{json.dumps({'request_id': request_id, 'answer': 'YOUR_FINAL_ANSWER'}, indent=2)}\n\n"
+        "Ready-to-run callback. Replace REPLACE_WITH_FINAL_ANALYSIS with your final JSON-escaped answer:\n\n"
+        "curl -s -H 'Content-Type: application/json' "
+        "-X POST http://127.0.0.1:8000/api/recommendations/follow-up/codex-result "
+        f"--data '{callback_payload}'"
+    )
+
+
+def _codex_workflow_command(request_id: str, request: RecommendationCodexRequest) -> str:
+    return f"{request.prompt.strip()}{_recommendation_output_guide_block()}{_codex_callback_footer(request_id)}"
+
+
+def create_recommendation_codex_request(
+    request: RecommendationCodexRequest,
+    settings: Settings | None = None,
+) -> RecommendationFollowUpResponse:
+    settings = settings or get_settings()
+    request_id = uuid.uuid4().hex
+    response = RecommendationFollowUpResponse(
+        recommendation_key=recommendation_key(request.recommendation),
+        question=request.question,
+        generated_at=datetime.now(timezone.utc),
+        mode="codex_required",
+        status="pending_codex",
+        answer="This working recommendation is ready for Codex. Open the Codex IDE prompt below, run it locally, then the result will post back to this thread.",
+        context_tickers=[],
+        follow_up_id=request_id,
+        codex_command=_codex_workflow_command(request_id, request),
+    )
+    _store_recommendation_followup(response, settings)
+    return response
 
 
 def _openai_missing_followup_response(

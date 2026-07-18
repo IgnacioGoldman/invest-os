@@ -36,12 +36,14 @@ from app.services.connections import (
 )
 from app.services.notes import Note, NoteRequest, create_note, delete_note, load_notes, update_note
 from app.services.recommendations import (
+    RecommendationCodexRequest,
     RecommendationDeleteRequest,
     RecommendationFollowUpCodexResultRequest,
     RecommendationFollowUpRequest,
     RecommendationFollowUpResponse,
     RecommendationSnapshot,
     answer_recommendation_followup,
+    create_recommendation_codex_request,
     delete_saved_recommendation,
     generate_and_store,
     load_recommendation_followup_result,
@@ -224,6 +226,14 @@ def recommendation_follow_up(request: RecommendationFollowUpRequest) -> Recommen
         return answer_recommendation_followup(get_portfolio_snapshot(), request, settings)
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Recommendation follow-up failed: {exc}") from exc
+
+
+@app.post("/api/recommendations/follow-up/codex-request")
+def recommendation_follow_up_codex_request(request: RecommendationCodexRequest) -> RecommendationFollowUpResponse:
+    try:
+        return create_recommendation_codex_request(request, get_settings())
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Recommendation Codex request failed: {exc}") from exc
 
 
 @app.get("/api/recommendations/follow-ups")

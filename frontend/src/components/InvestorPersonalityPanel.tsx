@@ -1,5 +1,5 @@
-import { memo, useMemo } from "react";
-import { Flame, Gauge, Leaf, Save, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Flame, Gauge, Leaf, Save, ShieldCheck, SlidersHorizontal, X } from "lucide-react";
 
 export type InvestorPersonalityId =
   | "capital_preservation"
@@ -25,7 +25,6 @@ type Persona = {
   vibe: string;
   goodFor: string[];
   tradeoffs: string[];
-  example: string;
 };
 
 type Bucket = {
@@ -34,7 +33,6 @@ type Bucket = {
   label: string;
   short: string;
   tone: "primary" | "success" | "accent" | "warning";
-  plain: string;
 };
 
 type Props = {
@@ -101,7 +99,6 @@ const PERSONAS: Persona[] = [
     vibe: "You care more about not losing money than about hitting home runs. Slow, steady, boring in the best way.",
     goodFor: ["Nearing a big purchase", "You panic when markets drop 10%", "Money you cannot afford to lose"],
     tradeoffs: ["Growth will feel slow in bull markets", "Inflation is your main enemy, not crashes"],
-    example: "Think of a retired teacher who wants their savings to last 25 years, not double in 5.",
   },
   {
     id: "steady_growth",
@@ -112,7 +109,6 @@ const PERSONAS: Persona[] = [
     vibe: "You want the market's long-term growth without the drama. Most of your money quietly compounds in global index funds.",
     goodFor: ["10+ year horizon", "You check your portfolio monthly, not daily", "Building wealth alongside a career"],
     tradeoffs: ["You will not beat the market, but you probably will not lose to it either", "Occasional 20% drawdowns are the price of admission"],
-    example: "Think of a 35-year-old software engineer buying VWCE every month and ignoring the news.",
   },
   {
     id: "balanced_conviction",
@@ -123,7 +119,6 @@ const PERSONAS: Persona[] = [
     vibe: "The core is on autopilot, but you also back a handful of companies or themes you genuinely believe in.",
     goodFor: ["You enjoy researching stocks", "You have opinions on specific companies", "You can stomach single-stock volatility"],
     tradeoffs: ["Your bets might underperform the index", "Requires ongoing attention and honest self-review"],
-    example: "Think of someone who owns a global index, plus meaningful positions in Nvidia and ASML because they work in tech.",
   },
   {
     id: "aggressive_growth",
@@ -134,7 +129,6 @@ const PERSONAS: Persona[] = [
     vibe: "You are playing offense. Long horizon, high tolerance for pain, chasing serious upside.",
     goodFor: ["20+ year horizon", "Stable income you do not need to touch", "You have lived through a 50% drawdown and stayed invested"],
     tradeoffs: ["Expect brutal years, including 30% drawdowns or worse", "Concentration risk is real"],
-    example: "Think of a 28-year-old with no dependents who kept buying through the 2022 crypto crash.",
   },
 ];
 
@@ -145,7 +139,6 @@ const BUCKETS: Bucket[] = [
     label: "Core global equities",
     short: "Your growth engine",
     tone: "primary",
-    plain: "Broad, boring index funds like a global stock ETF that quietly compound over decades.",
   },
   {
     key: "cashBonds",
@@ -153,7 +146,6 @@ const BUCKETS: Bucket[] = [
     label: "Defensive assets",
     short: "Your shock absorbers",
     tone: "success",
-    plain: "Cash, bonds, gold, or similar diversifiers that help you avoid selling stocks at a bad time.",
   },
   {
     key: "individualStocks",
@@ -161,7 +153,6 @@ const BUCKETS: Bucket[] = [
     label: "Active equities",
     short: "Your conviction bets",
     tone: "accent",
-    plain: "Individual stocks or focused funds you believe in. Higher effort, higher variance.",
   },
   {
     key: "crypto",
@@ -169,7 +160,6 @@ const BUCKETS: Bucket[] = [
     label: "Crypto / speculative",
     short: "High-volatility sleeve",
     tone: "warning",
-    plain: "Bitcoin, ETH, and other high-volatility bets. Small slice, huge swings.",
   },
 ];
 
@@ -242,6 +232,8 @@ export const InvestorPersonalityPanel = memo(function InvestorPersonalityPanel({
   canSave,
   savedAt,
 }: Props) {
+  const customEditorRef = useRef<HTMLDivElement>(null);
+  const [customEditorOpen, setCustomEditorOpen] = useState(false);
   const normalizedPersonality = normalizeInvestorPersonalityId(personality);
   const activeAllocation = useMemo(
     () => allocationForPersonality(personality, customAllocation),
@@ -250,12 +242,56 @@ export const InvestorPersonalityPanel = memo(function InvestorPersonalityPanel({
   const selectedPersona = normalizedPersonality === "custom"
     ? null
     : PERSONA_BY_ID.get(normalizedPersonality as PersonaId) ?? PERSONAS[1];
-  const total = allocationTotal(activeAllocation);
   const customTotal = allocationTotal(customAllocation);
   const isCustom = normalizedPersonality === "custom";
   const saveDisabled = saving || !dirty || !canSave;
   const saveTitle = !canSave ? "Balance custom allocation to 100% before saving" : "Save investor personality";
   const saveStatus = dirty ? "Unsaved" : savedAt ? "Saved" : "Default";
+
+  useEffect(() => {
+    if (!isCustom) {
+      setCustomEditorOpen(false);
+    }
+  }, [isCustom]);
+
+  useEffect(() => {
+    if (!isCustom || !customEditorOpen) {
+      return;
+    }
+
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (customEditorRef.current?.contains(event.target as Node)) {
+        return;
+      }
+      setCustomEditorOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setCustomEditorOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [customEditorOpen, isCustom]);
+
+  const selectPreset = useCallback((nextPersonality: PersonaId) => {
+    setCustomEditorOpen(false);
+    onPersonalityChange(nextPersonality);
+  }, [onPersonalityChange]);
+
+  const toggleCustomEditor = useCallback(() => {
+    if (isCustom) {
+      setCustomEditorOpen((open) => !open);
+      return;
+    }
+    setCustomEditorOpen(true);
+    onPersonalityChange("custom");
+  }, [isCustom, onPersonalityChange]);
 
   return (
     <div className="personality-shell">
@@ -263,24 +299,6 @@ export const InvestorPersonalityPanel = memo(function InvestorPersonalityPanel({
         <div>
           <h2>Investor Personality</h2>
           <p>Pick the style that fits you. Everything else in Invest OS adapts to it.</p>
-        </div>
-        <div className="personality-status-card">
-          <div className="personality-status-pills">
-            <span className={`personality-save-status ${dirty ? "dirty" : ""}`}>{saveStatus}</span>
-            <span className={isCustom && customTotal !== 100 ? "allocation-total-pill needs-balance" : "allocation-total-pill"}>
-              {isCustom ? `${customTotal}%` : `${total}%`}
-            </span>
-          </div>
-          <button
-            type="button"
-            className="personality-save-button"
-            onClick={onSave}
-            disabled={saveDisabled}
-            title={saveTitle}
-          >
-            <Save size={15} aria-hidden="true" />
-            {saving ? "Saving" : "Save"}
-          </button>
         </div>
       </header>
 
@@ -293,7 +311,7 @@ export const InvestorPersonalityPanel = memo(function InvestorPersonalityPanel({
               type="button"
               className={`personality-card ${isSelected ? "active" : ""}`}
               key={persona.id}
-              onClick={() => onPersonalityChange(persona.id)}
+              onClick={() => selectPreset(persona.id)}
               aria-pressed={isSelected}
             >
               <div className="personality-card-header">
@@ -319,78 +337,100 @@ export const InvestorPersonalityPanel = memo(function InvestorPersonalityPanel({
           );
         })}
 
-        <button
-          type="button"
-          className={`personality-card personality-custom-card ${isCustom ? "active" : ""}`}
-          onClick={() => onPersonalityChange("custom")}
-          aria-pressed={isCustom}
-        >
-          <div className="personality-card-header">
-            <span className="personality-card-icon">
-              <SlidersHorizontal size={18} aria-hidden="true" />
-            </span>
-            <span>
-              <strong>Custom</strong>
-              <small>Set your own targets below</small>
-            </span>
-          </div>
-          <div className="personality-mini-grid">
-            {BUCKETS.map((bucket) => (
-              <MiniBar
-                key={bucket.key}
-                label={bucket.miniLabel}
-                pct={customAllocation[bucket.key]}
-                tone={bucket.tone}
-              />
-            ))}
-          </div>
-        </button>
-      </div>
-
-      {isCustom && (
-        <div className="personality-target-panel">
-          <div className="personality-section-heading">
-            <div>
-              <small>Your target mix</small>
-              <strong>Custom</strong>
+        <div className="personality-custom-wrap" ref={customEditorRef} role="listitem">
+          <button
+            type="button"
+            className={`personality-card personality-custom-card ${isCustom ? "active" : ""}`}
+            onClick={toggleCustomEditor}
+            aria-pressed={isCustom}
+            aria-expanded={isCustom && customEditorOpen}
+          >
+            <div className="personality-card-header">
+              <span className="personality-card-icon">
+                <SlidersHorizontal size={18} aria-hidden="true" />
+              </span>
+              <span>
+                <strong>Custom</strong>
+                <small>Set your own targets</small>
+              </span>
             </div>
-            <span>Must add up to 100%</span>
-          </div>
-          <div className="custom-allocation-grid">
-            {BUCKETS.map((bucket) => (
-              <label className={`allocation-control tone-${bucket.tone}`} key={bucket.key}>
-                <span>
-                  <strong>{bucket.label}</strong>
-                  <em>{activeAllocation[bucket.key]}%</em>
-                </span>
-                <small>{bucket.short}</small>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  step={5}
-                  value={activeAllocation[bucket.key]}
-                  onChange={(event) => onCustomAllocationChange(bucket.key, Number(event.target.value))}
+            <div className="personality-mini-grid">
+              {BUCKETS.map((bucket) => (
+                <MiniBar
+                  key={bucket.key}
+                  label={bucket.miniLabel}
+                  pct={customAllocation[bucket.key]}
+                  tone={bucket.tone}
                 />
-                <p>{bucket.plain}</p>
-              </label>
-            ))}
-            {customTotal !== 100 && (
-              <div className={`allocation-validation ${customTotal > 100 ? "over" : "under"}`} role="status">
-                <div className="allocation-total-status">
-                  <strong>{customTotal > 100 ? `${customTotal - 100}% over target` : `${100 - customTotal}% left to assign`}</strong>
-                  <div className={`allocation-total-meter ${customTotal > 100 ? "over" : ""}`} aria-hidden="true">
-                    <i style={{ width: `${Math.min(100, customTotal)}%` }} />
-                  </div>
-                </div>
-                <button type="button" onClick={onCustomAllocationBalance}>
-                  Auto-balance
+              ))}
+            </div>
+          </button>
+
+          {isCustom && customEditorOpen && (
+            <div className="personality-custom-editor" role="dialog" aria-label="Custom target mix">
+              <div className="personality-custom-editor-header">
+                <span>
+                  <strong>Custom target mix</strong>
+                  <small>Must add up to 100%</small>
+                </span>
+                <em className={customTotal === 100 ? "balanced" : "needs-balance"}>{customTotal}%</em>
+                <button
+                  type="button"
+                  className="personality-custom-close"
+                  onClick={() => setCustomEditorOpen(false)}
+                  title="Close custom target mix"
+                  aria-label="Close custom target mix"
+                >
+                  <X size={15} aria-hidden="true" />
                 </button>
               </div>
-            )}
-          </div>
+
+              <div className="personality-custom-slider-list">
+                {BUCKETS.map((bucket) => (
+                  <label className={`personality-custom-slider tone-${bucket.tone}`} key={bucket.key}>
+                    <span>
+                      <strong>{bucket.label}</strong>
+                      <em>{customAllocation[bucket.key]}%</em>
+                    </span>
+                    <small>{bucket.short}</small>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={customAllocation[bucket.key]}
+                      onChange={(event) => onCustomAllocationChange(bucket.key, Number(event.target.value))}
+                    />
+                  </label>
+                ))}
+              </div>
+
+              {customTotal !== 100 && (
+                <div className={`personality-custom-validation ${customTotal > 100 ? "over" : "under"}`} role="status">
+                  <strong>{customTotal > 100 ? `${customTotal - 100}% over target` : `${100 - customTotal}% left to assign`}</strong>
+                  <button type="button" onClick={onCustomAllocationBalance}>
+                    Auto-balance
+                  </button>
+                </div>
+              )}
+
+              <div className="personality-custom-actions">
+                <span className={`personality-save-status ${dirty ? "dirty" : ""}`}>{saveStatus}</span>
+                <button
+                  type="button"
+                  className="personality-save-button"
+                  onClick={onSave}
+                  disabled={saveDisabled}
+                  title={saveTitle}
+                >
+                  <Save size={15} aria-hidden="true" />
+                  {saving ? "Saving" : "Save"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       <div className="personality-explanation-panel">
         <div className="personality-section-heading">
@@ -407,16 +447,6 @@ export const InvestorPersonalityPanel = memo(function InvestorPersonalityPanel({
             <InfoBlock title="What you are accepting" items={selectedPersona.tradeoffs} tone="warning" />
           </div>
         )}
-
-        <div className="personality-example-box">
-          <small>Real-life example</small>
-          <p>
-            {isCustom
-              ? "Adjust the sliders to match a persona above and the app will use your custom target mix."
-              : selectedPersona?.example}
-          </p>
-        </div>
-        <footer>Not financial advice. Personalities are frameworks; your real plan depends on goals, income, and time horizon.</footer>
       </div>
     </div>
   );

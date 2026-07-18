@@ -253,6 +253,7 @@ type RawInvestorProfile = InvestorProfile & {
 };
 
 export type Recommendation = {
+  id?: string | null;
   severity: "info" | "warning" | "critical";
   category:
     | "allocation"
@@ -796,6 +797,21 @@ export async function askRecommendationFollowUp(
       body: JSON.stringify({ recommendation, question }),
     },
     REQUEST_TIMEOUT_MS * 2,
+  );
+}
+
+export async function createRecommendationCodexRequest(
+  recommendation: Recommendation,
+  question: string,
+  prompt: string,
+): Promise<RecommendationFollowUpResponse> {
+  return requestJson<RecommendationFollowUpResponse>(
+    "/api/recommendations/follow-up/codex-request",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ recommendation, question, prompt }),
+    },
   );
 }
 

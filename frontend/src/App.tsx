@@ -5,6 +5,7 @@ import {
   EyeOff,
   LogOut,
   NotebookPen,
+  RefreshCcw,
   Settings as SettingsIcon,
   Sparkles,
   Telescope,
@@ -37,6 +38,7 @@ import {
   saveUserConnection,
   saveUserPreferences,
   startRefreshJob,
+  createRecommendationCodexRequest,
   createNote,
   updateNote,
   deleteNote,
@@ -83,19 +85,28 @@ import { OpenDataStockTable } from "./components/OpenDataStockTable";
 import { Recommendations } from "./components/Recommendations";
 import { summarizeSourceStatuses } from "./components/SourceStatus";
 import { SummaryCards } from "./components/SummaryCards";
+import { formatDateTime } from "./format";
 import "./styles.css";
 
 const STOCK_ASSET_CLASSES = new Set(["equity", "stock", "etf", "fund"]);
 const STOCK_ANALYSIS_TAXONOMY_VERSION = "2026-06-05-v2";
 const APP_SESSION_STORAGE_KEY = "invest-os:logged-in";
+const APP_ACTIVE_VIEW_STORAGE_KEY = "invest-os:active-view";
 const INVESTOR_PERSONALITY_STORAGE_KEY = "invest-os:investor-personality";
 const DEFAULT_EYE_OPERATIONS_COMPACT = true;
 const EMPTY_LEDGER_EVENTS: BinanceLedgerEvent[] = [];
 const DEFAULT_SIDEBAR_ORDER: SidebarView[] = ["personality", "capital", "consultancy", "exploration", "eye", "notes"];
-type AppView = "personality" | "capital" | "consultancy" | "exploration" | "eye" | "notes" | "settings";
+const APP_VIEWS = ["personality", "capital", "consultancy", "exploration", "eye", "notes", "settings"] as const;
+type AppView = (typeof APP_VIEWS)[number];
 type EyeAssetView = "stocks" | "crypto";
 
 const isActiveRefreshJob = (job: RefreshJob) => job.status === "queued" || job.status === "running";
+const isMarketDataRefreshJob = (job: RefreshJob) =>
+  job.source === "market_data" ||
+  job.source === "prices_fx" ||
+  job.source === "fx" ||
+  job.step_source === "market_data" ||
+  job.step_source === "fx";
 
 const SIDEBAR_ITEM_META = {
   personality: {
@@ -333,13 +344,40 @@ const loadAppSession = () => {
   }
 };
 
+const isAppView = (value: unknown): value is AppView =>
+  typeof value === "string" && APP_VIEWS.includes(value as AppView);
+
+const loadActiveView = (): AppView => {
+  if (typeof window === "undefined") {
+    return "personality";
+  }
+  try {
+    const savedView = window.localStorage.getItem(APP_ACTIVE_VIEW_STORAGE_KEY);
+    return isAppView(savedView) ? savedView : "personality";
+  } catch {
+    return "personality";
+  }
+};
+
+const cacheActiveView = (view: AppView) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.localStorage.setItem(APP_ACTIVE_VIEW_STORAGE_KEY, view);
+  } catch {
+    // Keep navigation working when browser storage is unavailable.
+  }
+};
+
 function DashboardApp({ onLogout }: { onLogout: () => void }) {
   const [snapshot, setSnapshot] = useState<PortfolioSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [displayCurrency, setDisplayCurrency] = useState("EUR");
-  const [activeView, setActiveView] = useState<AppView>("personality");
-  const [visitedViews, setVisitedViews] = useState<Set<AppView>>(() => new Set(["personality"]));
+  const initialActiveView = useMemo(loadActiveView, []);
+  const [activeView, setActiveView] = useState<AppView>(initialActiveView);
+  const [visitedViews, setVisitedViews] = useState<Set<AppView>>(() => new Set([initialActiveView]));
   const [sidebarOrder, setSidebarOrder] = useState<SidebarView[]>(DEFAULT_SIDEBAR_ORDER);
   const [draggedSidebarView, setDraggedSidebarView] = useState<SidebarView | null>(null);
   const [eyePositionsView, setEyePositionsView] = useState<EyeAssetView>("stocks");
@@ -380,6 +418,8 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   const [assetInsightsLoading, setAssetInsightsLoading] = useState(false);
   const [assetInsightsLoaded, setAssetInsightsLoaded] = useState(false);
   const [refreshJobs, setRefreshJobs] = useState<RefreshJob[]>([]);
+  const [marketDataRefreshing, setMarketDataRefreshing] = useState(false);
+  const [marketDataRefreshStatus, setMarketDataRefreshStatus] = useState<string | null>(null);
   const refreshJobsRef = useRef<RefreshJob[]>([]);
 
   const loadPortfolioData = useCallback(async () => {
@@ -420,6 +460,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   }, [loadPortfolioData]);
 
   const showView = useCallback((view: AppView) => {
+    cacheActiveView(view);
     setVisitedViews((current) => {
       if (current.has(view)) {
         return current;
@@ -452,9 +493,44 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   }, [persistSidebarOrder]);
   const explorationVisited = visitedViews.has("exploration");
 
-  const selectInvestorPersonality = useCallback((personality: InvestorPersonalityId) => {
-    setInvestorPersonalityDraft((current) => ({ ...current, personality }));
+  const persistInvestorPersonalityState = useCallback(async (profile: InvestorPersonalityState) => {
+    setInvestorProfileSaving(true);
+    setError(null);
+    try {
+      const saved = await persistInvestorProfile({
+        personality: profile.personality,
+        customAllocation: profile.customAllocation,
+      });
+      const next = investorProfileToState(saved);
+      setSavedInvestorPersonality(next);
+      setInvestorPersonalityDraft(next);
+      setInvestorProfileUpdatedAt(saved.updated_at ?? null);
+      cacheInvestorPersonality(next);
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save investor personality.");
+      return false;
+    } finally {
+      setInvestorProfileSaving(false);
+    }
   }, []);
+
+  const selectInvestorPersonality = useCallback((personality: InvestorPersonalityId) => {
+    const normalized = normalizeInvestorPersonalityId(personality);
+    if (normalized === "custom") {
+      setInvestorPersonalityDraft((current) => ({ ...current, personality: normalized }));
+      return;
+    }
+
+    const next: InvestorPersonalityState = {
+      personality: normalized,
+      customAllocation: savedInvestorPersonality.customAllocation,
+    };
+    setInvestorPersonalityDraft(next);
+    if (!investorPersonalitiesEqual(savedInvestorPersonality, next)) {
+      void persistInvestorPersonalityState(next);
+    }
+  }, [persistInvestorPersonalityState, savedInvestorPersonality]);
 
   const updateCustomAllocation = useCallback((key: InvestorAllocationKey, value: number) => {
     setInvestorPersonalityDraft((current) => ({
@@ -488,24 +564,8 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     if (!investorProfileCanSave || !investorProfileDirty) {
       return;
     }
-    setInvestorProfileSaving(true);
-    setError(null);
-    try {
-      const saved = await persistInvestorProfile({
-        personality: investorPersonalityDraft.personality,
-        customAllocation: investorPersonalityDraft.customAllocation,
-      });
-      const next = investorProfileToState(saved);
-      setSavedInvestorPersonality(next);
-      setInvestorPersonalityDraft(next);
-      setInvestorProfileUpdatedAt(saved.updated_at ?? null);
-      cacheInvestorPersonality(next);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save investor personality.");
-    } finally {
-      setInvestorProfileSaving(false);
-    }
-  }, [investorPersonalityDraft, investorProfileCanSave, investorProfileDirty]);
+    await persistInvestorPersonalityState(investorPersonalityDraft);
+  }, [investorPersonalityDraft, investorProfileCanSave, investorProfileDirty, persistInvestorPersonalityState]);
 
   const saveManualCapitalEntry = useCallback(async (entry: ManualCapitalEntryRequest) => {
     setManualCapitalSaving(true);
@@ -621,6 +681,30 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     }
   }, []);
 
+  const refreshMarketData = useCallback(async () => {
+    setMarketDataRefreshing(true);
+    setMarketDataRefreshStatus(null);
+    setError(null);
+    try {
+      const job = await startRefreshJob("market_data");
+      const jobs = await fetchRefreshJobs().catch(() => [job]);
+      const latestJob = jobs.find((item) => item.id === job.id) ?? job;
+      refreshJobsRef.current = jobs;
+      setRefreshJobs(jobs);
+      if (latestJob.status === "success") {
+        await loadPortfolioData();
+        setMarketDataRefreshStatus("Market prices refreshed.");
+        return;
+      }
+      setMarketDataRefreshStatus(latestJob.duplicate_of ? "Market price refresh is already running." : "Market price refresh started.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not refresh market prices.");
+      setMarketDataRefreshStatus("Could not refresh market prices.");
+    } finally {
+      setMarketDataRefreshing(false);
+    }
+  }, [loadPortfolioData]);
+
   const selectedNote = useMemo(
     () => notes.find((note) => note.id === selectedNoteId) ?? null,
     [notes, selectedNoteId],
@@ -722,6 +806,10 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   }, []);
 
   const hasActiveRefreshJob = useMemo(() => refreshJobs.some(isActiveRefreshJob), [refreshJobs]);
+  const activeMarketDataRefreshJob = useMemo(
+    () => refreshJobs.find((job) => isActiveRefreshJob(job) && isMarketDataRefreshJob(job)) ?? null,
+    [refreshJobs],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -1046,6 +1134,10 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     () => summarizeSourceStatuses(snapshot?.source_sync_status ?? []),
     [snapshot?.source_sync_status],
   );
+  const marketDataSyncStatus = useMemo(
+    () => sourceSyncStatuses.find((status) => status.source === "market_data") ?? null,
+    [sourceSyncStatuses],
+  );
   const latestSourceSyncedAt = useMemo(() => latestSourceSyncTimestamp(snapshot), [snapshot]);
   const warningCount = snapshot?.data_warnings.length ?? 0;
   const pageMeta = {
@@ -1090,7 +1182,6 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
           </div>
           <div>
             <strong>Invest OS</strong>
-            <span>AI investing</span>
           </div>
         </div>
 
@@ -1211,6 +1302,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
               generatedAt={recommendationsGeneratedAt}
               latestSourceSyncedAt={latestSourceSyncedAt}
               onAskRecommendation={askRecommendationFollowUp}
+              onCreateCodexRecommendation={createRecommendationCodexRequest}
               onDeleteRecommendation={removeRecommendation}
               onLoadRecommendationFollowUps={fetchRecommendationFollowUps}
               onPollRecommendation={fetchRecommendationFollowUpResult}
@@ -1439,6 +1531,43 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
                     </button>
                   </div>
                 </div>
+              </div>
+            </section>
+
+            <section className="panel settings-panel">
+              <div className="panel-heading">
+                <div className="panel-title-with-info">
+                  <RefreshCcw size={17} aria-hidden="true" />
+                  <h2>Market prices</h2>
+                </div>
+                <div className="panel-heading-actions">
+                  <span className={`sync-badge ${marketDataSyncStatus?.status ?? "never"}`}>
+                    {marketDataSyncStatus?.status ?? "never"}
+                  </span>
+                </div>
+              </div>
+              <div className="settings-market-refresh">
+                <div>
+                  <strong>Prices, symbols, and EUR/USD</strong>
+                  <span>
+                    {activeMarketDataRefreshJob
+                      ? `${activeMarketDataRefreshJob.status === "queued" ? "Queued" : activeMarketDataRefreshJob.stage} · ${activeMarketDataRefreshJob.current_step}/${activeMarketDataRefreshJob.total_steps}`
+                      : marketDataRefreshStatus ??
+                        (marketDataSyncStatus?.last_synced_at
+                          ? `Last refreshed ${formatDateTime(marketDataSyncStatus.last_synced_at)}`
+                          : "Never refreshed from Settings.")}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="settings-market-refresh-button"
+                  onClick={refreshMarketData}
+                  disabled={marketDataRefreshing || Boolean(activeMarketDataRefreshJob)}
+                  title="Refresh market prices, symbols, and EUR/USD rates"
+                >
+                  <RefreshCcw size={16} aria-hidden="true" />
+                  {marketDataRefreshing || activeMarketDataRefreshJob ? "Refreshing" : "Refresh"}
+                </button>
               </div>
             </section>
 

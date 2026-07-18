@@ -3,7 +3,10 @@ import {
   ArchiveX,
   Bot,
   Check,
+  ChevronDown,
+  ChevronUp,
   Info,
+  ListChecks,
   MessageSquare,
   PieChart,
   RotateCcw,
@@ -29,6 +32,11 @@ type Props = {
   generatedAt?: string | null;
   latestSourceSyncedAt?: string | null;
   onAskRecommendation?: (recommendation: Recommendation, question: string) => Promise<RecommendationFollowUpResponse>;
+  onCreateCodexRecommendation?: (
+    recommendation: Recommendation,
+    question: string,
+    prompt: string,
+  ) => Promise<RecommendationFollowUpResponse>;
   onDeleteRecommendation?: (recommendation: Recommendation) => Promise<void>;
   onLoadRecommendationFollowUps?: () => Promise<RecommendationFollowUpResponse[]>;
   onPollRecommendation?: (requestId: string) => Promise<RecommendationFollowUpResponse>;
@@ -47,6 +55,12 @@ type RecommendationRecord = {
   rec: Recommendation;
   status: RecommendationTab;
   thread: FollowUpTurn[];
+};
+
+type RecommendationSummary = {
+  headline: string;
+  bullets: string[];
+  source: "ai" | "pending" | "fallback";
 };
 
 type AnalysisWorkflow = "allocation" | "buy" | "sell";
@@ -82,8 +96,8 @@ const WORKFLOW_OPTIONS: Record<AnalysisWorkflow, {
     icon: PieChart,
     severity: "warning",
     category: "allocation",
-    title: "Codex allocation review",
-    detail: "Use the portfolio recommendation skills to review allocation, reserves, concentration, and the next best portfolio action.",
+    title: "Allocation Review",
+    detail: "Allocation workflow ready.",
     prompt: allocationPrompt.trim(),
   },
   buy: {
@@ -92,8 +106,8 @@ const WORKFLOW_OPTIONS: Record<AnalysisWorkflow, {
     icon: TrendingUp,
     severity: "warning",
     category: "entry",
-    title: "Codex buy candidate search",
-    detail: "Use stock open-data and derived signals to find buy candidates that fit the current portfolio.",
+    title: "Buy Candidate Search",
+    detail: "Buy workflow ready.",
     prompt: buyPrompt.trim(),
   },
   sell: {
@@ -102,8 +116,8 @@ const WORKFLOW_OPTIONS: Record<AnalysisWorkflow, {
     icon: TrendingDown,
     severity: "critical",
     category: "trim_or_exit",
-    title: "Codex sell / trim review",
-    detail: "Inspect current holdings for concentration, thesis deterioration, valuation risk, and better uses of capital.",
+    title: "Sell / Trim Review",
+    detail: "Sell workflow ready.",
     prompt: sellPrompt.trim(),
   },
 };
@@ -181,7 +195,10 @@ function loadLocalRecommendations() {
         id: item.id,
         kind: item.kind,
         createdAt: item.createdAt,
-        recommendation: item.recommendation,
+        recommendation: {
+          ...item.recommendation,
+          id: typeof item.recommendation.id === "string" ? item.recommendation.id : undefined,
+        },
       }];
     });
   } catch {
@@ -211,6 +228,9 @@ function isSourceDataNewer(generatedAt?: string | null, latestSourceSyncedAt?: s
 }
 
 function recommendationKey(rec: Recommendation) {
+  if (rec.id) {
+    return `id:${rec.id}`;
+  }
   return `${rec.category}:${rec.severity}:${rec.title}:${rec.detail}`;
 }
 
@@ -250,29 +270,106 @@ function categoryLabel(rec: Recommendation) {
   return CATEGORY_LABEL[rec.category] ?? rec.category;
 }
 
-function severityLabel(severity: Recommendation["severity"]) {
-  if (severity === "critical") return "High priority";
-  if (severity === "warning") return "Watch";
-  return "Info";
+function recommendationTitle(rec: Recommendation) {
+  if (rec.title === "Codex allocation review") return "Allocation Review";
+  if (rec.title === "Codex buy candidate search") return "Buy Candidate Search";
+  if (rec.title === "Codex sell / trim review") return "Sell / Trim Review";
+  return rec.title.replace(/^Codex\s+/i, "");
 }
 
-function starterTurnForLocalRecommendation(item: LocalRecommendation): FollowUpTurn {
-  const option = WORKFLOW_OPTIONS[item.kind];
-  const key = recommendationKey(item.recommendation);
-  const question = `Start ${option.label.toLowerCase()} recommendation workflow.`;
+function cleanSummaryText(value: string) {
+  return value
+    .replace(/^[-*\d.\s]+/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function splitSentences(value: string) {
+  return value
+    .replace(/\s+/g, " ")
+    .split(/(?:\.\s+|\?\s+|!\s+)/)
+    .map(cleanSummaryText)
+    .filter(Boolean);
+}
+
+function firstSentence(value: string) {
+  return splitSentences(value)[0] ?? cleanSummaryText(value);
+}
+
+function sectionAfter(label: string, answer: string) {
+  const match = answer.match(new RegExp(`${label}:\\s*([\\s\\S]*?)(?:\\n\\n|$)`, "i"));
+  return match?.[1]?.trim() ?? "";
+}
+
+function extractNumberedActions(answer: string) {
+  const actions = sectionAfter("Recommended actions", answer);
+  if (!actions) {
+    return [];
+  }
+  return actions
+    .split(/\s+(?=\d+\.\s+)/)
+    .map((item) => item.replace(/^Recommended actions:\s*/i, ""))
+    .map(cleanSummaryText)
+    .filter(Boolean);
+}
+
+function extractMarkdownBullets(answer: string) {
+  return answer
+    .split("\n")
+    .map((line) => line.match(/^\s*(?:[-*]|\d+\.)\s+(.+)$/)?.[1] ?? "")
+    .map(cleanSummaryText)
+    .filter(Boolean);
+}
+
+function extractSummaryBullets(answer: string) {
+  const actions = extractNumberedActions(answer);
+  if (actions.length > 0) {
+    return actions.slice(0, 4);
+  }
+  const markdownBullets = extractMarkdownBullets(answer);
+  if (markdownBullets.length > 0) {
+    return markdownBullets.slice(0, 4);
+  }
+  return splitSentences(answer).slice(0, 4);
+}
+
+function latestCompletedResponse(thread: FollowUpTurn[]) {
+  return [...thread].reverse().find((turn) => turn.response.status === "complete" && turn.response.answer.trim())?.response ?? null;
+}
+
+function latestPendingResponse(thread: FollowUpTurn[]) {
+  return [...thread].reverse().find((turn) => turn.response.status === "pending_codex")?.response ?? null;
+}
+
+function buildRecommendationSummary(record: RecommendationRecord): RecommendationSummary {
+  const completed = latestCompletedResponse(record.thread);
+  if (completed) {
+    const mainDiagnosis = sectionAfter("Main diagnosis", completed.answer);
+    const bottomLine = sectionAfter("Bottom line", completed.answer);
+    const headline = firstSentence(mainDiagnosis || bottomLine || completed.answer);
+    return {
+      headline,
+      bullets: extractSummaryBullets(completed.answer),
+      source: "ai",
+    };
+  }
+  if (latestPendingResponse(record.thread)) {
+    return {
+      headline: "Waiting for the Codex result.",
+      bullets: [
+        "Copy the prompt from chat if you have not run it yet.",
+        "This summary updates when the callback arrives.",
+      ],
+      source: "pending",
+    };
+  }
   return {
-    question,
-    response: {
-      recommendation_key: key,
-      question,
-      generated_at: item.createdAt,
-      mode: "codex_required",
-      status: "complete",
-      answer: "This working recommendation is ready for Codex. Open the Codex IDE prompt below, run it locally, then continue the analysis in this thread.",
-      context_tickers: [],
-      follow_up_id: `local-${item.id}`,
-      codex_command: option.prompt,
-    },
+    headline: "Ready for analysis.",
+    bullets: [
+      "Open chat to copy the Codex prompt.",
+      "Accept, discard, or ask a follow-up once the answer is back.",
+    ],
+    source: "fallback",
   };
 }
 
@@ -281,10 +378,11 @@ function createWorkflowRecommendation(kind: AnalysisWorkflow): LocalRecommendati
   const createdAt = new Date().toISOString();
   const id = `${kind}-${createdAt}-${Math.random().toString(36).slice(2, 8)}`;
   const recommendation: Recommendation = {
+    id,
     severity: option.severity,
     category: option.category,
     title: option.title,
-    detail: `${option.detail} Created ${formatDateTime(createdAt)}.`,
+    detail: option.detail,
   };
   return {
     id,
@@ -299,6 +397,7 @@ export const Recommendations = memo(function Recommendations({
   generatedAt,
   latestSourceSyncedAt,
   onAskRecommendation,
+  onCreateCodexRecommendation,
   onDeleteRecommendation,
   onLoadRecommendationFollowUps,
   onPollRecommendation,
@@ -320,8 +419,10 @@ export const Recommendations = memo(function Recommendations({
     loadStoredKeys(DELETED_RECOMMENDATIONS_STORAGE_KEY),
   );
   const [pendingKey, setPendingKey] = useState<string | null>(null);
+  const [startingWorkflow, setStartingWorkflow] = useState<AnalysisWorkflow | null>(null);
   const [deletingKey, setDeletingKey] = useState<string | null>(null);
   const [followUpErrors, setFollowUpErrors] = useState<Record<string, string>>({});
+  const [expandedThreadKeys, setExpandedThreadKeys] = useState<Set<string>>(() => new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
   const analysisMenuRef = useRef<HTMLDivElement>(null);
 
@@ -334,14 +435,6 @@ export const Recommendations = memo(function Recommendations({
   );
   const localRecommendationKeys = useMemo(
     () => new Set(localRecommendations.map((item) => recommendationKey(item.recommendation))),
-    [localRecommendations],
-  );
-  const starterTurns = useMemo(
-    () => localRecommendations.reduce<Record<string, FollowUpTurn[]>>((groups, item) => {
-      const key = recommendationKey(item.recommendation);
-      groups[key] = [...(groups[key] ?? []), starterTurnForLocalRecommendation(item)];
-      return groups;
-    }, {}),
     [localRecommendations],
   );
   const visibleRecommendationKeys = useMemo(
@@ -360,10 +453,10 @@ export const Recommendations = memo(function Recommendations({
           key,
           rec,
           status: statusForKey(key, acceptedKeys, discardedKeys),
-          thread: [...(starterTurns[key] ?? EMPTY_THREAD), ...(followUps[key] ?? EMPTY_THREAD)],
+          thread: followUps[key] ?? EMPTY_THREAD,
         };
       }),
-    [acceptedKeys, actionableRecommendations, discardedKeys, followUps, starterTurns],
+    [acceptedKeys, actionableRecommendations, discardedKeys, followUps],
   );
   const filteredRecords = useMemo(
     () => records.filter((record) => record.status === tab),
@@ -374,6 +467,11 @@ export const Recommendations = memo(function Recommendations({
     [activeKey, records],
   );
   const activeThread = activeRecord?.thread ?? EMPTY_THREAD;
+  const activeSummary = useMemo(
+    () => activeRecord ? buildRecommendationSummary(activeRecord) : null,
+    [activeRecord],
+  );
+  const activeThreadExpanded = activeRecord ? expandedThreadKeys.has(activeRecord.key) : false;
   const activeError = activeRecord ? followUpErrors[activeRecord.key] : undefined;
   const counts = useMemo(
     () => ({
@@ -444,8 +542,10 @@ export const Recommendations = memo(function Recommendations({
   }, [activeKey]);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [activeKey, activeThread.length, pendingKey]);
+    if (activeThreadExpanded) {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    }
+  }, [activeKey, activeThread.length, pendingKey, activeThreadExpanded]);
 
   useEffect(() => {
     if (!onLoadRecommendationFollowUps) {
@@ -516,9 +616,11 @@ export const Recommendations = memo(function Recommendations({
     };
   }, [onPollRecommendation, pendingFollowUpKey]);
 
-  const startWorkflowRecommendation = useCallback((kind: AnalysisWorkflow) => {
+  const startWorkflowRecommendation = useCallback(async (kind: AnalysisWorkflow) => {
     const item = createWorkflowRecommendation(kind);
+    const option = WORKFLOW_OPTIONS[kind];
     const key = recommendationKey(item.recommendation);
+    const question = `Start ${option.label.toLowerCase()} recommendation workflow.`;
     setLocalRecommendations((current) => [item, ...current]);
     setDiscardedKeys((current) => {
       const next = new Set(current);
@@ -538,7 +640,33 @@ export const Recommendations = memo(function Recommendations({
     setTab("working");
     setActiveKey(key);
     setAnalysisPickerOpen(false);
-  }, []);
+    setFollowUpErrors((errors) => ({ ...errors, [key]: "" }));
+    if (!onCreateCodexRecommendation) {
+      setFollowUpErrors((errors) => ({
+        ...errors,
+        [key]: "Could not create a Codex callback request.",
+      }));
+      return;
+    }
+    setStartingWorkflow(kind);
+    setPendingKey(key);
+    try {
+      const response = await onCreateCodexRecommendation(item.recommendation, question, option.prompt);
+      const responseKey = response.recommendation_key || key;
+      setFollowUps((threads) => ({
+        ...threads,
+        [responseKey]: [...(threads[responseKey] ?? []), { question: response.question, response }],
+      }));
+    } catch (error) {
+      setFollowUpErrors((errors) => ({
+        ...errors,
+        [key]: error instanceof Error ? error.message : "Could not create a Codex callback request.",
+      }));
+    } finally {
+      setStartingWorkflow(null);
+      setPendingKey((current) => (current === key ? null : current));
+    }
+  }, [onCreateCodexRecommendation]);
 
   const moveToNextRecordInCurrentTab = useCallback((key: string) => {
     setActiveKey((current) => {
@@ -584,7 +712,7 @@ export const Recommendations = memo(function Recommendations({
   }, [moveToNextRecordInCurrentTab]);
 
   const deleteDiscardedRecommendation = useCallback(async (record: RecommendationRecord) => {
-    if (!window.confirm(`Permanently delete "${record.rec.title}"?`)) {
+    if (!window.confirm(`Permanently delete "${recommendationTitle(record.rec)}"?`)) {
       return;
     }
     const isLocalRecommendation = localRecommendationKeys.has(record.key);
@@ -635,6 +763,7 @@ export const Recommendations = memo(function Recommendations({
     const key = activeRecord.key;
     setDraft("");
     setPendingKey(key);
+    setExpandedThreadKeys((current) => new Set(current).add(key));
     setFollowUpErrors((errors) => ({ ...errors, [key]: "" }));
     try {
       const response = await onAskRecommendation(activeRecord.rec, question);
@@ -652,6 +781,21 @@ export const Recommendations = memo(function Recommendations({
       setPendingKey(null);
     }
   }, [activeRecord, draft, onAskRecommendation]);
+
+  const toggleActiveThread = useCallback(() => {
+    if (!activeRecord) {
+      return;
+    }
+    setExpandedThreadKeys((current) => {
+      const next = new Set(current);
+      if (next.has(activeRecord.key)) {
+        next.delete(activeRecord.key);
+      } else {
+        next.add(activeRecord.key);
+      }
+      return next;
+    });
+  }, [activeRecord]);
 
   if (actionableRecommendations.length === 0 && !alwaysShow) return null;
 
@@ -680,11 +824,19 @@ export const Recommendations = memo(function Recommendations({
                 const option = WORKFLOW_OPTIONS[kind];
                 const Icon = option.icon;
                 return (
-                  <button type="button" role="menuitem" key={kind} onClick={() => startWorkflowRecommendation(kind)}>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    key={kind}
+                    onClick={() => {
+                      void startWorkflowRecommendation(kind);
+                    }}
+                    disabled={startingWorkflow !== null}
+                  >
                     <Icon size={16} aria-hidden="true" />
                     <span>
                       <strong>{option.label}</strong>
-                      <small>{option.description}</small>
+                      <small>{startingWorkflow === kind ? "Creating Codex request..." : option.description}</small>
                     </span>
                   </button>
                 );
@@ -744,7 +896,7 @@ export const Recommendations = memo(function Recommendations({
                 >
                   <span className={`advice-rec-severity severity-${record.rec.severity}`}>{ICON[record.rec.severity]}</span>
                   <span>
-                    <strong>{record.rec.title}</strong>
+                    <strong>{recommendationTitle(record.rec)}</strong>
                     <small>
                       <MessageSquare size={12} aria-hidden="true" />
                       {record.thread.length}
@@ -774,13 +926,16 @@ export const Recommendations = memo(function Recommendations({
             <>
               <div className="advice-pane-header">
                 <div className="advice-title-block">
-                  <small>{categoryLabel(activeRecord.rec)}</small>
                   <div className="advice-title-row">
-                    <h3>{activeRecord.rec.title}</h3>
+                    <div className="advice-title-main">
+                      <h3>{recommendationTitle(activeRecord.rec)}</h3>
+                      <span className="advice-category-tag">{categoryLabel(activeRecord.rec)}</span>
+                    </div>
                     <StatusBadge status={activeRecord.status} severity={activeRecord.rec.severity} />
                   </div>
-                  <p>{activeRecord.rec.detail}</p>
                 </div>
+
+                {activeSummary && <RecommendationSummaryCard summary={activeSummary} />}
 
                 <div className="advice-action-row">
                   {activeRecord.status !== "accepted" && (
@@ -826,68 +981,6 @@ export const Recommendations = memo(function Recommendations({
                   )}
                 </div>
 
-                <div className="advice-context-card">
-                  <strong>Why this matters</strong>
-                  <p>
-                    This is a {severityLabel(activeRecord.rec.severity).toLowerCase()} {categoryLabel(activeRecord.rec).toLowerCase()} item.
-                    Use the chat below to test assumptions before acting.
-                  </p>
-                </div>
-              </div>
-
-              <div className="advice-chat-body" ref={scrollRef}>
-                {activeThread.length === 0 && (
-                  <div className="advice-chat-empty">
-                    Ask anything about this recommendation, for example: "Why this now?", "What is the safer version?", or "What changes if I add cash?"
-                  </div>
-                )}
-                {activeThread.map((turn, index) => (
-                  <div className="advice-chat-turn" key={turn.response.follow_up_id ?? `${turn.response.generated_at}-${index}`}>
-                    <div className="advice-chat-message user">
-                      <span className="advice-chat-avatar" aria-hidden="true">
-                        <UserRound size={14} />
-                      </span>
-                      <div className="advice-chat-bubble">
-                        <div className="advice-chat-meta">
-                          <span>me</span>
-                        </div>
-                        <p>{turn.question}</p>
-                      </div>
-                    </div>
-                    <div className="advice-chat-message assistant">
-                      <span className="advice-chat-avatar" aria-hidden="true">
-                        <Bot size={14} />
-                      </span>
-                      <div className="advice-chat-bubble">
-                        <div className="advice-chat-meta">
-                          <span>invest-os</span>
-                          <time dateTime={turn.response.generated_at}>{formatDateTime(turn.response.generated_at)}</time>
-                        </div>
-                        <p>{turn.response.answer}</p>
-                        {turn.response.status === "pending_codex" && (
-                          <small className="rec-follow-up-status">
-                            <span aria-hidden="true" />
-                            Waiting for Codex callback
-                          </small>
-                        )}
-                        {turn.response.codex_command && (
-                          <details className="rec-follow-up-command">
-                            <summary>Codex IDE prompt</summary>
-                            <pre>
-                              <code>{turn.response.codex_command}</code>
-                            </pre>
-                          </details>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {pendingKey === activeRecord.key && (
-                  <div className="advice-thinking">
-                    <Sparkles size={14} aria-hidden="true" />
-                    Thinking...
-                  </div>
-                )}
                 {activeError && (
                   <div className="advice-follow-up-error" role="alert">
                     {activeError}
@@ -895,33 +988,108 @@ export const Recommendations = memo(function Recommendations({
                 )}
               </div>
 
-              {onAskRecommendation && activeRecord.status !== "discarded" && (
-                <form className="advice-composer" onSubmit={askRecommendation}>
-                  <div className="advice-composer-box">
-                    <textarea
-                      value={draft}
-                      onChange={(event) => setDraft(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" && !event.shiftKey) {
-                          event.preventDefault();
-                          event.currentTarget.form?.requestSubmit();
-                        }
-                      }}
-                      placeholder={`Ask about "${activeRecord.rec.title}"...`}
-                      aria-label={`Ask about ${activeRecord.rec.title}`}
-                      rows={1}
-                    />
-                    <button
-                      type="submit"
-                      disabled={pendingKey === activeRecord.key || !draft.trim()}
-                      title={pendingKey === activeRecord.key ? "Waiting for Invest OS" : "Send question"}
-                    >
-                      <SendHorizontal size={17} aria-hidden="true" />
-                    </button>
-                  </div>
-                  <p>Educational only, not financial advice.</p>
-                </form>
-              )}
+              <section className="advice-thread-panel">
+                <button
+                  type="button"
+                  className="advice-thread-toggle"
+                  onClick={toggleActiveThread}
+                  aria-expanded={activeThreadExpanded}
+                >
+                  <MessageSquare size={16} aria-hidden="true" />
+                  <span>
+                    <strong>Chat & Codex prompt</strong>
+                    <small>{activeThread.length} {activeThread.length === 1 ? "turn" : "turns"}</small>
+                  </span>
+                  {activeThreadExpanded ? <ChevronUp size={16} aria-hidden="true" /> : <ChevronDown size={16} aria-hidden="true" />}
+                </button>
+
+                {activeThreadExpanded && (
+                  <>
+                    <div className="advice-chat-body" ref={scrollRef}>
+                      {activeThread.length === 0 && (
+                        <div className="advice-chat-empty">
+                          Ask anything about this recommendation, for example: "Why this now?", "What is the safer version?", or "What changes if I add cash?"
+                        </div>
+                      )}
+                      {activeThread.map((turn, index) => (
+                        <div className="advice-chat-turn" key={turn.response.follow_up_id ?? `${turn.response.generated_at}-${index}`}>
+                          <div className="advice-chat-message user">
+                            <span className="advice-chat-avatar" aria-hidden="true">
+                              <UserRound size={14} />
+                            </span>
+                            <div className="advice-chat-bubble">
+                              <div className="advice-chat-meta">
+                                <span>me</span>
+                              </div>
+                              <p>{turn.question}</p>
+                            </div>
+                          </div>
+                          <div className="advice-chat-message assistant">
+                            <span className="advice-chat-avatar" aria-hidden="true">
+                              <Bot size={14} />
+                            </span>
+                            <div className="advice-chat-bubble">
+                              <div className="advice-chat-meta">
+                                <span>invest-os</span>
+                                <time dateTime={turn.response.generated_at}>{formatDateTime(turn.response.generated_at)}</time>
+                              </div>
+                              <p>{turn.response.answer}</p>
+                              {turn.response.status === "pending_codex" && (
+                                <small className="rec-follow-up-status">
+                                  <span aria-hidden="true" />
+                                  Waiting for Codex callback
+                                </small>
+                              )}
+                              {turn.response.codex_command && (
+                                <details className="rec-follow-up-command">
+                                  <summary>Codex IDE prompt</summary>
+                                  <pre>
+                                    <code>{turn.response.codex_command}</code>
+                                  </pre>
+                                </details>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {pendingKey === activeRecord.key && (
+                        <div className="advice-thinking">
+                          <Sparkles size={14} aria-hidden="true" />
+                          Thinking...
+                        </div>
+                      )}
+                    </div>
+
+                    {onAskRecommendation && activeRecord.status !== "discarded" && (
+                      <form className="advice-composer" onSubmit={askRecommendation}>
+                        <div className="advice-composer-box">
+                          <textarea
+                            value={draft}
+                            onChange={(event) => setDraft(event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" && !event.shiftKey) {
+                                event.preventDefault();
+                                event.currentTarget.form?.requestSubmit();
+                              }
+                            }}
+                            placeholder={`Ask about "${recommendationTitle(activeRecord.rec)}"...`}
+                            aria-label={`Ask about ${recommendationTitle(activeRecord.rec)}`}
+                            rows={1}
+                          />
+                          <button
+                            type="submit"
+                            disabled={pendingKey === activeRecord.key || !draft.trim()}
+                            title={pendingKey === activeRecord.key ? "Waiting for Invest OS" : "Send question"}
+                          >
+                            <SendHorizontal size={17} aria-hidden="true" />
+                          </button>
+                        </div>
+                        <p>Educational only, not financial advice.</p>
+                      </form>
+                    )}
+                  </>
+                )}
+              </section>
             </>
           )}
         </section>
@@ -957,11 +1125,34 @@ function StatusBadge({
   severity: Recommendation["severity"];
 }) {
   const Icon = status === "accepted" ? Check : status === "discarded" ? ArchiveX : Sparkles;
-  const label = status === "working" ? severityLabel(severity) : tabLabel(status);
+  const label = status === "working" ? "Working" : tabLabel(status);
   return (
     <span className={`advice-status-badge status-${status} severity-${severity}`}>
       <Icon size={12} aria-hidden="true" />
       {label}
     </span>
+  );
+}
+
+function RecommendationSummaryCard({ summary }: { summary: RecommendationSummary }) {
+  return (
+    <div className={`advice-summary-card source-${summary.source}`}>
+      <div className="advice-summary-main">
+        <span className="advice-summary-icon" aria-hidden="true">
+          <ListChecks size={17} />
+        </span>
+        <div>
+          <p>{summary.headline}</p>
+        </div>
+      </div>
+
+      {summary.bullets.length > 0 && (
+        <ul className="advice-summary-bullets">
+          {summary.bullets.map((bullet) => (
+            <li key={bullet}>{bullet}</li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
