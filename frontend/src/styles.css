@@ -2696,6 +2696,14 @@ button:disabled {
   line-height: 1.4;
 }
 
+.settings-market-refresh small {
+  color: #7c8798;
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1.45;
+  max-width: 720px;
+}
+
 .settings-market-refresh-button {
   align-items: center;
   border: 1px solid #d7dde7;
@@ -5421,6 +5429,7 @@ tbody tr:hover td {
 .notes-footer span,
 .settings-note,
 .settings-market-refresh span,
+.settings-market-refresh small,
 .connector-detail-heading span,
 .breakdown-row div:first-child span,
 .breakdown-row em,
@@ -5666,6 +5675,640 @@ tbody tr:hover td {
   background: rgba(255, 125, 139, 0.12);
   border-color: rgba(255, 125, 139, 0.26);
   color: #ff9ba6;
+}
+
+/* ── Exploration visual polish ── */
+
+.exploration-page {
+  max-width: 1360px;
+  min-width: 0;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+.exploration-insights {
+  gap: 16px;
+  min-width: 0;
+  width: 100%;
+}
+
+.exploration-insights > * {
+  min-width: 0;
+}
+
+.exploration-page .panel {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(109, 143, 255, 0.1), transparent 42%),
+    var(--app-surface);
+  border-color: var(--app-border);
+  box-shadow: 0 18px 56px -32px rgba(0, 0, 0, 0.76);
+  margin-bottom: 0;
+  max-width: 100%;
+  min-width: 0;
+  overflow: visible;
+  width: 100%;
+}
+
+.exploration-page .panel-heading {
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 10px 14px;
+}
+
+.exploration-page .panel-title-with-info {
+  gap: 8px;
+  min-width: 0;
+}
+
+.exploration-page .panel-title-with-info h2 {
+  font-size: 0.98rem;
+}
+
+.exploration-page .panel-heading-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.exploration-page .panel-heading-actions button,
+.exploration-page .filter-menu-trigger,
+.exploration-page .table-icon-button,
+.exploration-page .table-pagination .icon-button {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: var(--app-border);
+  border-radius: 8px;
+  color: var(--app-muted-strong);
+}
+
+.exploration-page .panel-heading-actions button:hover,
+.exploration-page .filter-menu-trigger.active,
+.exploration-page .filter-menu-trigger:hover,
+.exploration-page .table-icon-button.active,
+.exploration-page .table-icon-button:hover,
+.exploration-page .table-pagination .icon-button:hover {
+  background: rgba(109, 143, 255, 0.12);
+  border-color: rgba(109, 143, 255, 0.36);
+  color: var(--app-foreground);
+}
+
+.exploration-page .panel-heading-actions > span,
+.exploration-page .asset-insights-count,
+.exploration-page .candidate-source,
+.exploration-page .latest-badge {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  color: var(--app-muted-strong);
+  font-size: 0.72rem;
+  font-weight: 850;
+  line-height: 1.15;
+  padding: 4px 8px;
+}
+
+.exploration-page .open-data-filters {
+  align-items: center;
+  background: rgba(21, 24, 34, 0.22);
+  border-color: var(--app-border);
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.exploration-page .open-data-filters input,
+.exploration-page .asset-insights-search {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: var(--app-border);
+  border-radius: 8px;
+  color: var(--app-muted-strong);
+}
+
+.exploration-page .asset-insights-search input {
+  color: var(--app-foreground);
+}
+
+.exploration-page .active-filter-list {
+  gap: 7px;
+}
+
+.exploration-page .active-filter-chip {
+  min-height: 30px;
+}
+
+.exploration-page .column-menu {
+  position: relative;
+}
+
+.exploration-page .column-popover {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(109, 143, 255, 0.12), transparent 44%),
+    rgba(27, 32, 49, 0.98);
+  border: 1px solid rgba(109, 143, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 22px 70px -24px rgba(0, 0, 0, 0.82);
+  display: grid;
+  gap: 8px;
+  max-height: min(520px, calc(100vh - 220px));
+  min-width: 260px;
+  overflow: auto;
+  padding: 8px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 24;
+}
+
+.exploration-page .open-data-filters .column-popover {
+  left: 0;
+  right: auto;
+}
+
+.exploration-page .column-option-list {
+  display: grid;
+  gap: 4px;
+}
+
+.exploration-page .column-option {
+  align-items: center;
+  border-radius: 8px;
+  color: var(--app-muted-strong);
+  cursor: pointer;
+  display: grid;
+  font-size: 0.82rem;
+  font-weight: 800;
+  gap: 9px;
+  grid-template-columns: auto minmax(0, 1fr);
+  min-height: 34px;
+  padding: 7px 8px;
+}
+
+.exploration-page .column-option:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--app-foreground);
+}
+
+.exploration-page .column-option input {
+  accent-color: var(--app-primary);
+  height: 15px;
+  margin: 0;
+  width: 15px;
+}
+
+.exploration-page .column-option span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exploration-page .filter-popover,
+.exploration-page .assessment-legend {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(109, 143, 255, 0.12), transparent 44%),
+    rgba(27, 32, 49, 0.98);
+  border-color: rgba(109, 143, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 22px 70px -24px rgba(0, 0, 0, 0.82);
+}
+
+.exploration-page .filter-clear {
+  border-color: var(--app-border);
+  color: #ff9ba6;
+}
+
+.exploration-page .table-pagination {
+  background: rgba(21, 24, 34, 0.22);
+  border-color: var(--app-border);
+  padding: 10px 14px;
+}
+
+.exploration-page .table-pagination strong {
+  color: var(--app-muted-strong);
+}
+
+.exploration-page .table-wrap {
+  border-top: 1px solid var(--app-border);
+  border-radius: 0 0 18px 18px;
+  max-width: 100%;
+  min-width: 0;
+  overflow: auto;
+  scrollbar-color: rgba(109, 143, 255, 0.38) rgba(255, 255, 255, 0.05);
+  width: 100%;
+}
+
+.exploration-page .table-wrap::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+.exploration-page .table-wrap::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.exploration-page .table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(109, 143, 255, 0.32);
+  border-radius: 999px;
+}
+
+.exploration-page .exploration-metrics-table {
+  min-width: 760px;
+}
+
+.exploration-page .exploration-asset-table {
+  min-width: 820px;
+}
+
+.exploration-page table {
+  color: var(--app-muted-strong);
+}
+
+.exploration-page th {
+  background: rgba(21, 24, 34, 0.9);
+  color: var(--app-muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  padding: 10px 12px;
+}
+
+.exploration-page td {
+  background: rgba(255, 255, 255, 0.018);
+  border-color: rgba(255, 255, 255, 0.055);
+  color: var(--app-muted-strong);
+  padding: 11px 12px;
+}
+
+.exploration-page tbody tr:hover td {
+  background: rgba(109, 143, 255, 0.055);
+}
+
+.exploration-page .open-data-table .sticky-symbol-column {
+  background: rgba(27, 32, 49, 0.98);
+  box-shadow: 1px 0 0 var(--app-border), 14px 0 30px -26px rgba(0, 0, 0, 0.9);
+}
+
+.exploration-page .open-data-table thead .sticky-symbol-column {
+  background: rgba(21, 24, 34, 0.98);
+}
+
+.exploration-page .exploration-row-expanded td {
+  background: rgba(109, 143, 255, 0.06);
+}
+
+.exploration-page .exploration-row-toggle {
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  flex: 0 0 28px;
+  height: 28px;
+  justify-content: center;
+  margin: 0;
+  min-height: 28px;
+  width: 28px;
+}
+
+.exploration-page .exploration-detail-row td {
+  background: rgba(21, 24, 34, 0.44);
+  padding: 0;
+  white-space: normal;
+}
+
+.exploration-page .exploration-detail-panel {
+  border-top: 1px solid var(--app-border);
+  display: grid;
+  gap: 12px;
+  padding: 13px 14px 15px 54px;
+}
+
+.exploration-page .exploration-metric-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.exploration-page .exploration-metric-card {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 10px;
+}
+
+.exploration-page .exploration-metric-card.derived {
+  background: rgba(215, 160, 58, 0.05);
+}
+
+.exploration-page .exploration-metric-card > span {
+  color: var(--app-muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.exploration-page .exploration-metric-card strong {
+  color: var(--app-foreground);
+  font-size: 0.94rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}
+
+.exploration-page .exploration-metric-card small {
+  color: var(--app-muted);
+  font-size: 0.74rem;
+  font-weight: 750;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.exploration-page .exploration-metric-value {
+  align-items: center;
+  display: flex;
+  min-height: 27px;
+}
+
+.exploration-page .exploration-facts-card {
+  grid-column: 1 / -1;
+}
+
+.exploration-page .exploration-facts-card ul {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.exploration-page .exploration-facts-card li {
+  color: var(--app-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.exploration-page .exploration-warning-line {
+  align-items: center;
+  color: #ff9ba6;
+  display: inline-flex;
+  gap: 6px;
+}
+
+.exploration-page .ticker-cell-main strong,
+.exploration-page .open-data-table td strong,
+.exploration-page .stock-candidate-title strong {
+  color: var(--app-foreground);
+}
+
+.exploration-page td small,
+.exploration-page .asset-facts-cell li,
+.exploration-page .asset-facts-cell small,
+.exploration-page .stock-candidate-title span,
+.exploration-page .stock-candidate-block li,
+.exploration-page .stock-candidate-block p,
+.exploration-page .candidate-secondary-grid p {
+  color: var(--app-muted);
+}
+
+.exploration-page .sort-header {
+  border-radius: 6px;
+  min-height: 26px;
+  padding: 3px 5px;
+}
+
+.exploration-page .sort-header:hover,
+.exploration-page .sort-header.active {
+  background: rgba(109, 143, 255, 0.12);
+  color: var(--app-foreground);
+}
+
+.exploration-page .sort-header.active svg,
+.exploration-page .draggable-header > svg {
+  color: var(--app-primary);
+}
+
+.exploration-page .derived-metric-cell {
+  background: rgba(215, 160, 58, 0.045);
+}
+
+.exploration-page .derived-metric-cell small {
+  color: #f0c66e;
+}
+
+.exploration-page .table-conviction,
+.exploration-page .table-assessment-tag,
+.exploration-page .tone-pill,
+.exploration-page .analysis-tag {
+  border: 1px solid var(--app-border);
+}
+
+.exploration-page .table-conviction.neutral,
+.exploration-page .tone-pill.neutral,
+.exploration-page .analysis-tag.neutral {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--app-muted-strong);
+}
+
+.exploration-page .table-conviction.active {
+  box-shadow: 0 0 0 2px rgba(109, 143, 255, 0.22);
+}
+
+.exploration-page .asset-insights {
+  margin-top: 0;
+}
+
+.exploration-page .asset-insights .panel-heading {
+  flex-wrap: wrap;
+}
+
+.exploration-page .asset-insights-controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.exploration-page .asset-insights-search {
+  min-width: min(100%, 260px);
+}
+
+.exploration-page .asset-facts-cell {
+  white-space: normal;
+}
+
+.exploration-page .stock-candidate-grid,
+.exploration-page .candidate-secondary-grid {
+  gap: 12px;
+  padding: 14px;
+}
+
+.exploration-page .stock-candidate-block {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.035)),
+    rgba(21, 24, 34, 0.22);
+  border-color: var(--app-border);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.exploration-page .stock-candidate-title > svg {
+  color: var(--app-primary);
+}
+
+.exploration-page .candidate-thesis {
+  color: var(--app-muted-strong);
+}
+
+.exploration-page .candidate-risks {
+  border-color: var(--app-border);
+}
+
+.exploration-page .candidate-risks p,
+.exploration-page .asset-facts-cell > span {
+  color: #ff9ba6;
+}
+
+.exploration-page .candidate-disclosure {
+  border-color: var(--app-border);
+}
+
+.exploration-page .candidate-disclosure summary {
+  color: var(--app-muted-strong);
+}
+
+.exploration-page .candidate-disclosure summary:hover {
+  color: var(--app-foreground);
+}
+
+.exploration-page .candidate-secondary-grid h3,
+.exploration-page .candidate-evidence-group > span,
+.exploration-page .stock-candidate-title h3 {
+  color: var(--app-muted);
+  letter-spacing: 0.04em;
+}
+
+.exploration-page .detail-modal-backdrop {
+  background: rgba(5, 7, 12, 0.62);
+  backdrop-filter: blur(12px);
+}
+
+.exploration-page .detail-modal {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(109, 143, 255, 0.12), transparent 42%),
+    rgba(27, 32, 49, 0.98);
+  border-color: rgba(109, 143, 255, 0.2);
+  border-radius: 14px;
+  box-shadow: 0 30px 90px -24px rgba(0, 0, 0, 0.92);
+}
+
+.exploration-page .detail-modal-heading {
+  background: rgba(21, 24, 34, 0.86);
+  border-color: var(--app-border);
+}
+
+.exploration-page .detail-modal-heading strong,
+.exploration-page .open-data-detail-heading h3,
+.exploration-page .entry-analysis-title strong,
+.exploration-page .entry-analysis-section h4,
+.exploration-page .company-context-heading h4,
+.exploration-page .filing-title strong {
+  color: var(--app-foreground);
+}
+
+.exploration-page .detail-modal-heading span,
+.exploration-page .open-data-detail-heading p,
+.exploration-page .entry-analysis-hero p,
+.exploration-page .company-context-heading p,
+.exploration-page .filing-item p,
+.exploration-page .filing-meta span {
+  color: var(--app-muted);
+}
+
+.exploration-page .open-data-detail {
+  border-color: var(--app-border);
+}
+
+.exploration-page .open-data-detail-heading span,
+.exploration-page .company-context-heading span,
+.exploration-page .filing-meta span,
+.exploration-page .exhibit-list a {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  color: var(--app-muted-strong);
+}
+
+.exploration-page .mini-chart,
+.exploration-page .filing-item,
+.exploration-page .entry-analysis-section,
+.exploration-page .dca-plan {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: var(--app-border);
+  border-radius: 10px;
+}
+
+.exploration-page .mini-chart-heading strong,
+.exploration-page .mini-chart.empty-chart strong,
+.exploration-page .data-gaps strong {
+  color: var(--app-foreground);
+}
+
+.exploration-page .mini-chart-heading small,
+.exploration-page .mini-chart.empty-chart small,
+.exploration-page .mini-chart text,
+.exploration-page .data-gaps ul {
+  color: var(--app-muted);
+  fill: var(--app-muted);
+}
+
+.exploration-page .mini-chart line {
+  stroke: rgba(255, 255, 255, 0.12);
+}
+
+.exploration-page .mini-chart polyline {
+  stroke: var(--app-secondary);
+}
+
+.exploration-page .mini-chart circle {
+  fill: #151822;
+  stroke: var(--app-secondary);
+}
+
+.exploration-page .company-context,
+.exploration-page .data-gaps,
+.exploration-page .entry-analysis-concerns {
+  border-color: var(--app-border);
+}
+
+.exploration-page .filing-title a,
+.exploration-page .exhibit-list a {
+  color: var(--app-primary);
+}
+
+.exploration-page .entry-analysis-card {
+  border-color: var(--app-border);
+}
+
+.exploration-page .conviction-meter {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: var(--app-border);
+  border-radius: 12px;
+}
+
+.exploration-page .conviction-meter strong {
+  color: var(--app-foreground);
+}
+
+.exploration-page .conviction-meter span {
+  color: var(--app-muted);
+}
+
+.exploration-page .dca-bars span {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: var(--app-border);
+  color: var(--app-muted-strong);
+}
+
+.exploration-page .entry-analysis-missing {
+  border-radius: 10px;
 }
 
 /* ── Recommendations ── */

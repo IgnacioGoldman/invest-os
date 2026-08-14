@@ -344,7 +344,7 @@ def open_data_stock_analysis(ticker: str) -> StockEntryAnalysis:
 @app.post("/api/open-data/stocks/{ticker}/refresh")
 def refresh_open_data_stock(ticker: str) -> OpenDataSnapshot:
     try:
-        snapshot = OpenDataProvider().get_open_data_snapshot(ticker)
+        snapshot = OpenDataProvider(force_refresh=True).get_open_data_snapshot(ticker)
         save_open_data_stock_snapshot(snapshot)
         return snapshot
     except ValueError as exc:

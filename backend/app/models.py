@@ -16,6 +16,7 @@ RefreshSource = Literal[
     "ibkr_history",
     "manual",
     "market_data",
+    "exploration",
     "fx",
     "prices_fx",
 ]

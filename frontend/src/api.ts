@@ -105,7 +105,8 @@ export type RefreshSource =
   | "binance"
   | "ibkr"
   | "manual"
-  | "market_data";
+  | "market_data"
+  | "exploration";
 
 export type RefreshJobSource =
   | RefreshSource
@@ -919,12 +920,4 @@ export async function fetchCommodityOpportunities(): Promise<AssetOpportunity[]>
 
 export async function fetchCryptoOpportunities(): Promise<AssetOpportunity[]> {
   return requestJson<AssetOpportunity[]>("/api/open-data/assets/crypto");
-}
-
-export async function refreshOpenDataStock(ticker = "GOOGL"): Promise<OpenDataStockSnapshot> {
-  return requestJson<OpenDataStockSnapshot>(
-    `/api/open-data/stocks/${encodeURIComponent(ticker)}/refresh`,
-    { method: "POST" },
-    ENTRY_BUILD_TIMEOUT_MS,
-  );
 }

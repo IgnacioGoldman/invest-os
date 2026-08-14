@@ -1,6 +1,6 @@
 import type { OpenDataCompanyContext, OpenDataMetric, OpenDataStockSnapshot, StockEntryAnalysis, StockEntryAnalysisSection } from "../api";
-import { ArrowDown, ArrowUp, ArrowUpDown, BarChart3, ChevronLeft, ChevronRight, Filter, GripVertical, Info, RefreshCcw, X } from "lucide-react";
-import { memo, useEffect, useMemo, useState } from "react";
+import { ArrowDown, ArrowUp, ArrowUpDown, BarChart3, ChevronDown, ChevronLeft, ChevronRight, Filter, GripVertical, Info, SlidersHorizontal, X } from "lucide-react";
+import { Fragment, memo, useEffect, useMemo, useState } from "react";
 import { formatDateTime } from "../format";
 
 type Props = {
@@ -10,7 +10,6 @@ type Props = {
   analyses: Record<string, StockEntryAnalysis>;
   analysisLoading: boolean;
   onSelectTicker: (ticker: string) => void;
-  onRefresh: (ticker: string) => void;
 };
 
 const COLUMNS = [
@@ -241,6 +240,7 @@ const DERIVED_COLUMNS: ColumnDefinition[] = [
 ];
 
 const DEFAULT_MOVABLE_COLUMNS = [...STATIC_COLUMNS, ...DERIVED_COLUMNS, ...METRIC_COLUMNS];
+const DEFAULT_VISIBLE_COLUMN_IDS = ["conviction", "business", "price", "valuation"];
 const PAGE_SIZE = 10;
 
 const CHARTS: Array<{
@@ -1004,7 +1004,6 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
   analyses,
   analysisLoading,
   onSelectTicker,
-  onRefresh,
 }: Props) {
   const [openDetail, setOpenDetail] = useState<DetailKind>(null);
   const [query, setQuery] = useState("");
@@ -1016,11 +1015,12 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [page, setPage] = useState(1);
   const [columnOrder, setColumnOrder] = useState(() => DEFAULT_MOVABLE_COLUMNS.map((column) => column.id));
+  const [visibleColumnIds, setVisibleColumnIds] = useState(() => DEFAULT_VISIBLE_COLUMN_IDS);
+  const [columnMenuOpen, setColumnMenuOpen] = useState(false);
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? snapshots[0] ?? null;
   const selectedAnalysis = selectedSnapshot ? analyses[selectedSnapshot.ticker] ?? null : null;
-  const refreshTicker = selectedSnapshot?.ticker ?? selectedTicker;
-
   const columnsById = useMemo(() => new Map(DEFAULT_MOVABLE_COLUMNS.map((column) => [column.id, column])), []);
   const derivedContext = useMemo(() => buildDerivedMetricContext(snapshots), [snapshots]);
   const derivedByTicker = useMemo(
@@ -1040,6 +1040,14 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
     const missing = DEFAULT_MOVABLE_COLUMNS.filter((column) => !columnOrder.includes(column.id));
     return [...ordered, ...missing];
   }, [columnOrder, columnsById]);
+  const visibleColumns = useMemo(
+    () => orderedColumns.filter((column) => visibleColumnIds.includes(column.id)),
+    [orderedColumns, visibleColumnIds],
+  );
+  const hiddenColumns = useMemo(
+    () => orderedColumns.filter((column) => !visibleColumnIds.includes(column.id)),
+    [orderedColumns, visibleColumnIds],
+  );
 
   const filterDimensions = useMemo<FilterDimension[]>(() => {
     if (!filterMenuOpen && activeFilters.length === 0) {
@@ -1215,6 +1223,24 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
     setDraggedColumn(null);
   };
 
+  const toggleColumnVisibility = (columnId: string) => {
+    setVisibleColumnIds((ids) => {
+      if (ids.includes(columnId)) {
+        return ids.length === 1 ? ids : ids.filter((id) => id !== columnId);
+      }
+      return [...ids, columnId];
+    });
+  };
+
+  const resetVisibleColumns = () => setVisibleColumnIds(DEFAULT_VISIBLE_COLUMN_IDS);
+
+  const toggleExpandedRow = (ticker: string) => {
+    setExpandedRows((rows) => ({
+      ...rows,
+      [ticker]: !rows[ticker],
+    }));
+  };
+
   const renderSortHeader = (key: string, label: string) => {
     const active = key === sortKey;
     const Icon = active ? (sortDirection === "asc" ? ArrowUp : ArrowDown) : ArrowUpDown;
@@ -1315,7 +1341,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
           <strong>{isSupportSignal ? formatSupportSignal(metric?.value) : formatValue(metric, column.metricKind ?? "ratio")}</strong>
           {metric && (
             <small>
-              {isSupportSignal ? "Daily zones" : `Latest as of ${metric.as_of}`}
+              {isSupportSignal ? "Daily zones" : `Source period ${metric.as_of}`}
               <br />
               {tierLabel(metric.tier)}
             </small>
@@ -1339,6 +1365,86 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
     }
 
     return <td key={column.id}>-</td>;
+  };
+
+  const renderColumnDetail = (snapshot: OpenDataStockSnapshot, analysis: StockEntryAnalysis | undefined, column: ColumnDefinition) => {
+    if (column.id === "conviction") {
+      return (
+        <article className="exploration-metric-card" key={column.id}>
+          <span>{column.label}</span>
+          <strong>{analysis ? analysis.conviction.toFixed(1) : analysisLoading ? "..." : "-"}</strong>
+          <small>AI analysis</small>
+        </article>
+      );
+    }
+
+    if (column.id === "business" || column.id === "price" || column.id === "valuation") {
+      const section = analysisSectionFor(analysis, column.id);
+      const firstNote = section?.evidence[0] ?? section?.concerns[0] ?? "AI assessment";
+      return (
+        <article className="exploration-metric-card" key={column.id}>
+          <span>{column.label}</span>
+          <div className="exploration-metric-value">
+            <AssessmentTag section={section} />
+          </div>
+          <small>{firstNote}</small>
+        </article>
+      );
+    }
+
+    if (column.id === "sector") {
+      return (
+        <article className="exploration-metric-card" key={column.id}>
+          <span>{column.label}</span>
+          <strong>{snapshot.sector ?? "-"}</strong>
+          <small>{snapshot.industry ?? snapshot.exchange ?? "-"}</small>
+        </article>
+      );
+    }
+
+    if (column.kind === "metric" && column.group && column.key) {
+      const metric = snapshot[column.group][column.key];
+      const isSupportSignal = column.group === "price_opportunity" && column.key === "support_1d_distance";
+      return (
+        <article
+          className="exploration-metric-card"
+          key={column.id}
+          title={metric ? `${column.label}: ${metric.notes}\n${metric.source}` : column.label}
+        >
+          <span>{column.label}</span>
+          <strong>{isSupportSignal ? formatSupportSignal(metric?.value) : formatValue(metric, column.metricKind ?? "ratio")}</strong>
+          {metric && (
+            <small>
+              {tierLabel(metric.tier)}
+              <br />
+              {isSupportSignal ? "Daily zones" : `Source period ${metric.as_of}`}
+            </small>
+          )}
+        </article>
+      );
+    }
+
+    if (column.kind === "derived" && column.derivedKey) {
+      const metric = derivedByTicker[snapshot.ticker]?.[column.derivedKey];
+      return (
+        <article
+          className="exploration-metric-card derived"
+          key={column.id}
+          title={metric ? `${column.label}: ${metric.notes}` : `${column.label}: Not enough collected facts to compute.`}
+        >
+          <span>{column.label}</span>
+          <strong>{formatByKind(metric?.value, column.metricKind ?? metric?.kind ?? "ratio")}</strong>
+          <small>derived</small>
+        </article>
+      );
+    }
+
+    return (
+      <article className="exploration-metric-card" key={column.id}>
+        <span>{column.label}</span>
+        <strong>-</strong>
+      </article>
+    );
   };
 
   return (
@@ -1376,15 +1482,6 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
         </div>
         <div className="panel-heading-actions">
           <span>{pagedSnapshots.length} / {visibleSnapshots.length} / {snapshots.length}</span>
-          <button
-            type="button"
-            onClick={() => onRefresh(refreshTicker)}
-            disabled={loading}
-            title={`Collect fresh deterministic facts for ${refreshTicker}`}
-          >
-            <RefreshCcw size={16} aria-hidden="true" />
-            {loading ? "Collecting" : "Collect Facts"}
-          </button>
         </div>
       </div>
 
@@ -1405,7 +1502,10 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
               <button
                 type="button"
                 className={`filter-menu-trigger ${activeFilterCount > 0 ? "active" : ""}`}
-                onClick={() => setFilterMenuOpen((open) => !open)}
+                onClick={() => {
+                  setColumnMenuOpen(false);
+                  setFilterMenuOpen((open) => !open);
+                }}
                 aria-expanded={filterMenuOpen}
               >
                 <Filter size={16} aria-hidden="true" />
@@ -1456,6 +1556,44 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
                 </div>
               )}
             </div>
+            <div className="column-menu">
+              <button
+                type="button"
+                className={`filter-menu-trigger ${columnMenuOpen ? "active" : ""}`}
+                onClick={() => {
+                  setFilterMenuOpen(false);
+                  setColumnMenuOpen((open) => !open);
+                }}
+                aria-expanded={columnMenuOpen}
+              >
+                <SlidersHorizontal size={16} aria-hidden="true" />
+                Columns
+                <span>{visibleColumns.length}</span>
+              </button>
+              {columnMenuOpen && (
+                <div className="column-popover">
+                  <div className="column-option-list">
+                    {orderedColumns.map((column) => {
+                      const checked = visibleColumnIds.includes(column.id);
+                      return (
+                        <label className="column-option" key={column.id}>
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            disabled={checked && visibleColumns.length === 1}
+                            onChange={() => toggleColumnVisibility(column.id)}
+                          />
+                          <span>{column.label}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                  <button type="button" className="filter-clear" onClick={resetVisibleColumns}>
+                    Default columns
+                  </button>
+                </div>
+              )}
+            </div>
             {activeFilters.length > 0 && (
               <div className="active-filter-list" aria-label="Active filters">
                 {activeFilters.map((filter) => (
@@ -1497,42 +1635,76 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
             </div>
           )}
           <div className="table-wrap">
-            <table className="open-data-table">
+            <table
+              className="open-data-table exploration-metrics-table"
+              style={{ minWidth: Math.max(760, 230 + visibleColumns.length * 132) }}
+            >
               <thead>
                 <tr>
                   <th className="sticky-symbol-column">{renderSortHeader("symbol", "Symbol")}</th>
-                  {orderedColumns.map((column) => renderDraggableHeader(column))}
+                  {visibleColumns.map((column) => renderDraggableHeader(column))}
                 </tr>
               </thead>
               <tbody>
                 {pagedSnapshots.map((snapshot) => {
                   const isSelected = selectedSnapshot?.ticker === snapshot.ticker;
                   const analysis = analyses[snapshot.ticker];
+                  const rowExpanded = Boolean(expandedRows[snapshot.ticker]);
                   return (
-                    <tr key={snapshot.ticker}>
-                      <td className="sticky-symbol-column">
-                        <div className="ticker-cell-main">
-                          <strong>{snapshot.ticker}</strong>
-                          <button
-                            type="button"
-                            className={`table-icon-button ${isSelected && openDetail === "charts" ? "active" : ""}`}
-                            onClick={() => toggleDetail(snapshot.ticker, "charts")}
-                            aria-expanded={isSelected && openDetail === "charts"}
-                            title="Show over-time charts for collected facts"
-                          >
-                            <BarChart3 size={15} aria-hidden="true" />
-                          </button>
-                        </div>
-                        <small>{snapshot.name ?? `CIK ${snapshot.cik ?? "-"}`}</small>
-                        <span className="latest-badge">Latest snapshot values</span>
-                      </td>
-                      {orderedColumns.map((column) => renderColumnCell(snapshot, analysis, column))}
-                    </tr>
+                    <Fragment key={snapshot.ticker}>
+                      <tr className={rowExpanded ? "exploration-row-expanded" : ""}>
+                        <td className="sticky-symbol-column">
+                          <div className="ticker-cell-main">
+                            <button
+                              type="button"
+                              className="icon-button row-toggle exploration-row-toggle"
+                              onClick={() => toggleExpandedRow(snapshot.ticker)}
+                              title={rowExpanded ? "Hide hidden values" : "Show hidden values"}
+                              aria-expanded={rowExpanded}
+                            >
+                              {rowExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                            </button>
+                            <strong>{snapshot.ticker}</strong>
+                            <button
+                              type="button"
+                              className={`table-icon-button ${isSelected && openDetail === "charts" ? "active" : ""}`}
+                              onClick={() => toggleDetail(snapshot.ticker, "charts")}
+                              aria-expanded={isSelected && openDetail === "charts"}
+                              title="Show over-time charts for collected facts"
+                            >
+                              <BarChart3 size={15} aria-hidden="true" />
+                            </button>
+                          </div>
+                          <small>{snapshot.name ?? `CIK ${snapshot.cik ?? "-"}`}</small>
+                          <span className="latest-badge">Fetched {formatDateTime(snapshot.generated_at)}</span>
+                        </td>
+                        {visibleColumns.map((column) => renderColumnCell(snapshot, analysis, column))}
+                      </tr>
+                      {rowExpanded && (
+                        <tr className="exploration-detail-row">
+                          <td colSpan={visibleColumns.length + 1}>
+                            <div className="exploration-detail-panel">
+                              <div className="lot-lifecycle-heading">
+                                <strong>All hidden values for {snapshot.ticker}</strong>
+                                <span>Fetched {formatDateTime(snapshot.generated_at)}</span>
+                              </div>
+                              {hiddenColumns.length > 0 ? (
+                                <div className="exploration-metric-grid">
+                                  {hiddenColumns.map((column) => renderColumnDetail(snapshot, analysis, column))}
+                                </div>
+                              ) : (
+                                <p className="empty block">No hidden columns.</p>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   );
                 })}
                 {visibleSnapshots.length === 0 && (
                   <tr>
-                    <td colSpan={orderedColumns.length + 1}>
+                    <td colSpan={visibleColumns.length + 1}>
                       <p className="empty block">No stocks match the current filters.</p>
                     </td>
                   </tr>

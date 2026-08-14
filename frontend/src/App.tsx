@@ -24,7 +24,6 @@ import {
   fetchNotes,
   fetchOpenDataStock,
   fetchOpenDataStockAnalyses,
-  fetchOpenDataStockAnalysis,
   fetchOpenDataStocks,
   fetchRecommendationFollowUpResult,
   fetchRecommendationFollowUps,
@@ -33,7 +32,6 @@ import {
   fetchSnapshot,
   fetchUserConnections,
   fetchUserPreferences,
-  refreshOpenDataStock,
   saveInvestorProfile as persistInvestorProfile,
   saveUserConnection,
   saveUserPreferences,
@@ -107,6 +105,8 @@ const isMarketDataRefreshJob = (job: RefreshJob) =>
   job.source === "fx" ||
   job.step_source === "market_data" ||
   job.step_source === "fx";
+const isExplorationRefreshJob = (job: RefreshJob) =>
+  job.source === "exploration" || job.step_source === "exploration" || Boolean(job.step_source?.startsWith("exploration_"));
 
 const SIDEBAR_ITEM_META = {
   personality: {
@@ -420,6 +420,8 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   const [refreshJobs, setRefreshJobs] = useState<RefreshJob[]>([]);
   const [marketDataRefreshing, setMarketDataRefreshing] = useState(false);
   const [marketDataRefreshStatus, setMarketDataRefreshStatus] = useState<string | null>(null);
+  const [explorationRefreshing, setExplorationRefreshing] = useState(false);
+  const [explorationRefreshStatus, setExplorationRefreshStatus] = useState<string | null>(null);
   const refreshJobsRef = useRef<RefreshJob[]>([]);
 
   const loadPortfolioData = useCallback(async () => {
@@ -429,6 +431,42 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
       setRecommendations(recommendationSnapshot.recommendations);
       setRecommendationsGeneratedAt(recommendationSnapshot.generated_at ?? null);
     });
+  }, []);
+
+  const loadExplorationData = useCallback(async () => {
+    setOpenDataStockLoading(true);
+    setAssetInsightsLoading(true);
+    setError(null);
+    try {
+      const [stockSnapshots, assetSnapshots] = await Promise.all([
+        fetchOpenDataStocks().then(async (snapshots) => {
+          if (snapshots.length > 0) {
+            return snapshots;
+          }
+          return [await fetchOpenDataStock("GOOGL")];
+        }),
+        Promise.all([fetchEtfOpportunities(), fetchCryptoOpportunities(), fetchCommodityOpportunities()]),
+      ]);
+      const [etfs, crypto, commodities] = assetSnapshots;
+      startTransition(() => {
+        setOpenDataStocks(stockSnapshots);
+        setSelectedOpenDataTicker((ticker) =>
+          stockSnapshots.some((snapshot) => snapshot.ticker === ticker) ? ticker : stockSnapshots[0]?.ticker ?? "GOOGL",
+        );
+        setStockEntryAnalyses({});
+        setStockEntryAnalysesLoadedKey("");
+        setEtfInsights(etfs);
+        setCryptoInsights(crypto);
+        setCommodityInsights(commodities);
+        setOpenDataStockLoaded(true);
+        setAssetInsightsLoaded(true);
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load exploration data.");
+    } finally {
+      setOpenDataStockLoading(false);
+      setAssetInsightsLoading(false);
+    }
   }, []);
 
   const pollRefreshJobs = useCallback(async (isCancelled?: () => boolean) => {
@@ -446,10 +484,18 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
         const previous = previousById.get(job.id);
         return previous && isActiveRefreshJob(previous) && job.status === "success";
       });
+      const explorationCompletion = jobs.some((job) => {
+        const previous = previousById.get(job.id);
+        return previous && isActiveRefreshJob(previous) && job.status === "success" && isExplorationRefreshJob(job);
+      });
       refreshJobsRef.current = jobs;
       setRefreshJobs(jobs);
       if (successfulCompletion) {
         await loadPortfolioData();
+      }
+      if (explorationCompletion) {
+        await loadExplorationData();
+        setExplorationRefreshStatus("Exploration refreshed.");
       }
       if (finishedSinceLastPoll) {
         setLoading(false);
@@ -457,7 +503,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     } catch {
       // Keep the dashboard usable if the transient polling endpoint misses once.
     }
-  }, [loadPortfolioData]);
+  }, [loadExplorationData, loadPortfolioData]);
 
   const showView = useCallback((view: AppView) => {
     cacheActiveView(view);
@@ -705,6 +751,30 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     }
   }, [loadPortfolioData]);
 
+  const refreshExplorationData = useCallback(async () => {
+    setExplorationRefreshing(true);
+    setExplorationRefreshStatus(null);
+    setError(null);
+    try {
+      const job = await startRefreshJob("exploration");
+      const jobs = await fetchRefreshJobs().catch(() => [job]);
+      const latestJob = jobs.find((item) => item.id === job.id) ?? job;
+      refreshJobsRef.current = jobs;
+      setRefreshJobs(jobs);
+      if (latestJob.status === "success") {
+        await Promise.all([loadPortfolioData(), loadExplorationData()]);
+        setExplorationRefreshStatus("Exploration refreshed.");
+        return;
+      }
+      setExplorationRefreshStatus(latestJob.duplicate_of ? "Exploration refresh is already running." : "Exploration refresh started.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not refresh exploration data.");
+      setExplorationRefreshStatus("Could not refresh exploration data.");
+    } finally {
+      setExplorationRefreshing(false);
+    }
+  }, [loadExplorationData, loadPortfolioData]);
+
   const selectedNote = useMemo(
     () => notes.find((note) => note.id === selectedNoteId) ?? null,
     [notes, selectedNoteId],
@@ -808,6 +878,10 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   const hasActiveRefreshJob = useMemo(() => refreshJobs.some(isActiveRefreshJob), [refreshJobs]);
   const activeMarketDataRefreshJob = useMemo(
     () => refreshJobs.find((job) => isActiveRefreshJob(job) && isMarketDataRefreshJob(job)) ?? null,
+    [refreshJobs],
+  );
+  const activeExplorationRefreshJob = useMemo(
+    () => refreshJobs.find((job) => isActiveRefreshJob(job) && isExplorationRefreshJob(job)) ?? null,
     [refreshJobs],
   );
 
@@ -1002,31 +1076,6 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     stockEntryAnalysesLoading,
   ]);
 
-  const collectOpenDataStockFacts = useCallback(async (ticker: string) => {
-    setOpenDataStockLoading(true);
-    setStockEntryAnalysesLoading(true);
-    setError(null);
-    try {
-      const snapshot = await refreshOpenDataStock(ticker);
-      const analysis = await fetchOpenDataStockAnalysis(ticker);
-      setOpenDataStocks((snapshots) => {
-        const next = snapshots.filter((item) => item.ticker !== snapshot.ticker);
-        next.push(snapshot);
-        next.sort((left, right) => left.ticker.localeCompare(right.ticker));
-        return next;
-      });
-      setSelectedOpenDataTicker(snapshot.ticker);
-      setStockEntryAnalyses((analyses) => (analysis ? { ...analyses, [snapshot.ticker]: analysis } : analyses));
-      setStockEntryAnalysesLoadedKey("");
-      setOpenDataStockLoaded(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : `Could not collect ${ticker} facts.`);
-    } finally {
-      setOpenDataStockLoading(false);
-      setStockEntryAnalysesLoading(false);
-    }
-  }, []);
-
   const displayRate = useMemo(
     () => snapshot?.display_rates.find((rate) => rate.currency === displayCurrency)?.rate_from_base ?? 1,
     [displayCurrency, snapshot?.display_rates],
@@ -1137,6 +1186,10 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   const marketDataSyncStatus = useMemo(
     () => sourceSyncStatuses.find((status) => status.source === "market_data") ?? null,
     [sourceSyncStatuses],
+  );
+  const explorationSyncStatus = useMemo(
+    () => snapshot?.source_sync_status.find((status) => status.source === "exploration") ?? null,
+    [snapshot?.source_sync_status],
   );
   const latestSourceSyncedAt = useMemo(() => latestSourceSyncTimestamp(snapshot), [snapshot]);
   const warningCount = snapshot?.data_warnings.length ?? 0;
@@ -1321,7 +1374,6 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
                 analyses={stockEntryAnalyses}
                 analysisLoading={stockEntryAnalysesLoading}
                 onSelectTicker={setSelectedOpenDataTicker}
-                onRefresh={collectOpenDataStockFacts}
               />
               <AssetInsightsTable
                 title="ETF Insights"
@@ -1531,6 +1583,46 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
                     </button>
                   </div>
                 </div>
+              </div>
+            </section>
+
+            <section className="panel settings-panel">
+              <div className="panel-heading">
+                <div className="panel-title-with-info">
+                  <Telescope size={17} aria-hidden="true" />
+                  <h2>Exploration data</h2>
+                </div>
+                <div className="panel-heading-actions">
+                  <span className={`sync-badge ${explorationSyncStatus?.status ?? "never"}`}>
+                    {explorationSyncStatus?.status ?? "never"}
+                  </span>
+                </div>
+              </div>
+              <div className="settings-market-refresh">
+                <div>
+                  <strong>Stale stocks, ETFs, crypto, and commodities</strong>
+                  <span>
+                    {activeExplorationRefreshJob
+                      ? `${activeExplorationRefreshJob.status === "queued" ? "Queued" : activeExplorationRefreshJob.stage} · ${activeExplorationRefreshJob.current_step}/${activeExplorationRefreshJob.total_steps}`
+                      : explorationRefreshStatus ??
+                        (explorationSyncStatus?.last_synced_at
+                          ? `Last refreshed ${formatDateTime(explorationSyncStatus.last_synced_at)}`
+                          : "Never refreshed from Settings.")}
+                  </span>
+                  <small>
+                    Skips stock symbols fetched today, refreshes stale symbols in parallel, then rebuilds derived signals. Expect about 10-30 minutes for a large stale table. Nightly automatic refresh is planned; this is manual for now.
+                  </small>
+                </div>
+                <button
+                  type="button"
+                  className="settings-market-refresh-button"
+                  onClick={refreshExplorationData}
+                  disabled={explorationRefreshing || Boolean(activeExplorationRefreshJob)}
+                  title="Refresh stale Exploration stock rows and rebuild ETF, crypto, and commodity signals"
+                >
+                  <RefreshCcw size={16} aria-hidden="true" />
+                  {explorationRefreshing || activeExplorationRefreshJob ? "Refreshing" : "Refresh stale"}
+                </button>
               </div>
             </section>
 

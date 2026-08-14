@@ -60,6 +60,7 @@ REFRESH_STEP_LABELS: dict[str, str] = {
     "ibkr": "IBKR positions, cash, and orders",
     "ibkr_history": "IBKR activity history",
     "market_data": "Market prices",
+    "exploration": "Exploration data",
     "fx": "FX rates",
     "snapshot": "Rebuilding snapshot",
 }
@@ -331,6 +332,49 @@ def _price_for_order(order: Order, market_prices: dict[tuple[str, str], MarketPr
             candidates.append((base, "USD"))
     candidates.extend([(base, "EUR"), (base, "USDT"), (base, "USDC"), (base, "USD")])
     return next((market_prices[key] for key in candidates if key in market_prices), None)
+
+
+def _order_market_price_target(order: Order) -> Holding | None:
+    if order.source == "binance" or order.side != "BUY":
+        return None
+    if (order.remaining_quantity or 0.0) <= EPSILON:
+        return None
+
+    symbol, quote = _order_base_and_quote(order)
+    if not symbol or symbol == "UNKNOWN" or not quote:
+        return None
+
+    return Holding(
+        id=stable_id("order-market-price-target", order.id, symbol, quote),
+        source=order.source,
+        platform=order.platform,
+        symbol=symbol,
+        name=str(order.raw.get("description") or order.symbol),
+        asset_class="equity",
+        quantity=order.remaining_quantity or order.quantity,
+        currency=quote,
+        market_value=0.0,
+        cost_basis=order.remaining_cost_basis,
+        confidence="api",
+    )
+
+
+def _market_price_targets_from_orders(holdings: list[Holding], orders: list[Order], settings: Settings) -> list[Holding]:
+    targets = list(holdings)
+    seen = {(holding.symbol.upper(), holding.currency.upper()) for holding in targets}
+
+    enriched_orders = _enrich_generic_order_history(orders, {}, settings, {})
+    for order in enriched_orders:
+        target = _order_market_price_target(order)
+        if target is None:
+            continue
+        key = (target.symbol.upper(), target.currency.upper())
+        if key in seen:
+            continue
+        seen.add(key)
+        targets.append(target)
+
+    return targets
 
 
 def _order_quote_amount(order: Order) -> float | None:
@@ -1219,7 +1263,9 @@ def _refresh_one(conn, settings: Settings, source: RefreshSource, progress: Refr
         return
 
     if source == "market_data":
-        prices, warnings = fetch_market_prices(load_holdings(conn))
+        prices, warnings = fetch_market_prices(
+            _market_price_targets_from_orders(load_holdings(conn), load_order_history(conn), settings)
+        )
         replace_market_prices(conn, prices, clear=True)
         historical_requirements = _historical_price_requirements_from_timeline(
             load_order_history(conn),
@@ -1241,6 +1287,13 @@ def _refresh_one(conn, settings: Settings, source: RefreshSource, progress: Refr
         rates, warnings = fetch_fx_rates(settings, currencies)
         replace_fx_rates(conn, rates)
         update_sync_status(conn, "fx", "warning" if warnings else "success", warnings)
+        return
+
+    if source == "exploration":
+        from app.services.exploration_refresh import refresh_exploration_data
+
+        warnings = refresh_exploration_data(settings, progress=progress)
+        update_sync_status(conn, "exploration", "warning" if warnings else "success", warnings)
         return
 
     raise ValueError(f"Unsupported refresh source: {source}")

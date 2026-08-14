@@ -129,6 +129,7 @@ class OpenDataProvider(OpenDataMetricProvider):
         retry_attempts: int = 2,
         retry_backoff: float = 0.75,
         include_filing_details: bool = True,
+        force_refresh: bool = False,
     ) -> None:
         self.cache = cache or JsonFileCache()
         self.session = session or requests.Session()
@@ -140,6 +141,7 @@ class OpenDataProvider(OpenDataMetricProvider):
         self.retry_attempts = max(1, retry_attempts)
         self.retry_backoff = max(0, retry_backoff)
         self.include_filing_details = include_filing_details
+        self.force_refresh = force_refresh
         self.stooq_api_key = os.getenv("STOOQ_API_KEY") or None
         self._yfinance_info_cache: dict[str, dict[str, Any] | None] = {}
 
@@ -300,7 +302,7 @@ class OpenDataProvider(OpenDataMetricProvider):
 
     def fetch_companyfacts(self, cik: int) -> dict[str, Any]:
         cache_name = f"sec_companyfacts_CIK{cik:010d}.json"
-        cached = self.cache.get(cache_name, timedelta(hours=12))
+        cached = None if self.force_refresh else self.cache.get(cache_name, timedelta(hours=12))
         if cached is not None:
             return cached
         data = self._sec_get_json(SEC_COMPANYFACTS_URL.format(cik=cik))
@@ -309,7 +311,7 @@ class OpenDataProvider(OpenDataMetricProvider):
 
     def fetch_company_context(self, cik: int) -> OpenDataCompanyContext | None:
         cache_name = f"sec_submissions_CIK{cik:010d}.json"
-        submissions = self.cache.get(cache_name, timedelta(hours=12))
+        submissions = None if self.force_refresh else self.cache.get(cache_name, timedelta(hours=12))
         if submissions is None:
             try:
                 submissions = self._sec_get_json(SEC_SUBMISSIONS_URL.format(cik=cik))
@@ -320,7 +322,7 @@ class OpenDataProvider(OpenDataMetricProvider):
         return self._company_context_from_submissions(cik, submissions)
 
     def fetch_latest_price(self, ticker: str) -> LatestPrice | None:
-        cached = self.cache.get(f"latest_price_{ticker.upper()}.json", timedelta(minutes=45))
+        cached = None if self.force_refresh else self.cache.get(f"latest_price_{ticker.upper()}.json", timedelta(minutes=45))
         if cached is not None:
             try:
                 return LatestPrice.model_validate(cached)
@@ -334,7 +336,7 @@ class OpenDataProvider(OpenDataMetricProvider):
 
     def fetch_price_history(self, ticker: str) -> list[HistoricalPricePoint]:
         symbol = ticker.upper().strip()
-        cached = self.cache.get(f"price_history_{symbol}.json", timedelta(hours=12))
+        cached = None if self.force_refresh else self.cache.get(f"price_history_{symbol}.json", timedelta(hours=12))
         if cached is not None:
             try:
                 return [HistoricalPricePoint.model_validate(row) for row in cached]
@@ -348,7 +350,7 @@ class OpenDataProvider(OpenDataMetricProvider):
 
     def fetch_forward_pe_estimate(self, ticker: str) -> OpenDataMetric | None:
         symbol = ticker.upper().strip()
-        cached = self.cache.get(f"forward_pe_estimate_{symbol}.json", timedelta(hours=12))
+        cached = None if self.force_refresh else self.cache.get(f"forward_pe_estimate_{symbol}.json", timedelta(hours=12))
         if cached is not None:
             try:
                 return OpenDataMetric.model_validate(cached)
@@ -362,7 +364,7 @@ class OpenDataProvider(OpenDataMetricProvider):
 
     def fetch_market_cap_estimate(self, ticker: str) -> OpenDataMetric | None:
         symbol = ticker.upper().strip()
-        cached = self.cache.get(f"market_cap_estimate_{symbol}.json", timedelta(hours=12))
+        cached = None if self.force_refresh else self.cache.get(f"market_cap_estimate_{symbol}.json", timedelta(hours=12))
         if cached is not None:
             try:
                 return OpenDataMetric.model_validate(cached)
@@ -404,7 +406,7 @@ class OpenDataProvider(OpenDataMetricProvider):
                 notes=f"Identity FX rate for {source_currency}/{target_currency}.",
             )
         cache_name = f"fx_rate_{source_currency}_{target_currency}.json"
-        cached = self.cache.get(cache_name, timedelta(hours=12))
+        cached = None if self.force_refresh else self.cache.get(cache_name, timedelta(hours=12))
         if cached is not None:
             try:
                 return OpenDataMetric.model_validate(cached)
@@ -574,7 +576,7 @@ class OpenDataProvider(OpenDataMetricProvider):
     def _fetch_filing_exhibits(self, cik: int, accession_number: str) -> list[OpenDataFilingExhibit]:
         accession = accession_number.replace("-", "")
         cache_name = f"sec_filing_index_CIK{cik:010d}_{accession}.json"
-        index_json = self.cache.get(cache_name, timedelta(days=7))
+        index_json = None if self.force_refresh else self.cache.get(cache_name, timedelta(days=7))
         if index_json is None:
             try:
                 index_json = self._sec_get_json(f"{SEC_ARCHIVES_BASE_URL}/{cik}/{accession}/index.json")
@@ -728,7 +730,7 @@ class OpenDataProvider(OpenDataMetricProvider):
             value = float(raw_value)
         except (TypeError, ValueError):
             return None
-        if value <= 0:
+        if not math.isfinite(value) or value <= 0:
             return None
         return OpenDataMetric(
             value=value,

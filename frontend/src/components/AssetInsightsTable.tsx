@@ -1,5 +1,5 @@
-import { AlertTriangle, BarChart3, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { memo, useEffect, useMemo, useState } from "react";
+import { AlertTriangle, BarChart3, ChevronDown, ChevronLeft, ChevronRight, Search, SlidersHorizontal } from "lucide-react";
+import { Fragment, memo, useEffect, useMemo, useState } from "react";
 import type { AssetMetric, AssetOpportunity } from "../api";
 import { formatDateTime } from "../format";
 
@@ -43,7 +43,15 @@ const CRYPTO_COLUMNS: MetricColumn[] = [
   { group: "native_metrics", key: "price_change_24h", label: "24H", fallbackKind: "percent" },
   { group: "native_metrics", key: "quote_volume_24h", label: "24H Vol", fallbackKind: "compact" },
 ];
+const DEFAULT_VISIBLE_ASSET_COLUMN_IDS = [
+  "scores:overall_opportunity_score",
+  "scores:portfolio_fit_score",
+  "scores:momentum_score",
+  "scores:drawdown_score",
+];
 const PAGE_SIZE = 10;
+
+const assetColumnId = (column: MetricColumn) => `${column.group}:${column.key}`;
 
 function formatNumber(value?: number | null, maximumFractionDigits = 1) {
   if (value == null || !Number.isFinite(value)) return "-";
@@ -89,7 +97,18 @@ function columnsFor(kind: AssetInsightKind) {
 export const AssetInsightsTable = memo(function AssetInsightsTable({ title, assets, loading, kind, emptyLabel }: Props) {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [columnMenuOpen, setColumnMenuOpen] = useState(false);
+  const [visibleColumnIds, setVisibleColumnIds] = useState(() => DEFAULT_VISIBLE_ASSET_COLUMN_IDS);
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const columns = useMemo(() => columnsFor(kind), [kind]);
+  const visibleColumns = useMemo(
+    () => columns.filter((column) => visibleColumnIds.includes(assetColumnId(column))),
+    [columns, visibleColumnIds],
+  );
+  const hiddenColumns = useMemo(
+    () => columns.filter((column) => !visibleColumnIds.includes(assetColumnId(column))),
+    [columns, visibleColumnIds],
+  );
   const visibleAssets = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return assets
@@ -116,6 +135,66 @@ export const AssetInsightsTable = memo(function AssetInsightsTable({ title, asse
     setPage(1);
   }, [query, kind]);
 
+  const toggleColumnVisibility = (column: MetricColumn) => {
+    const id = assetColumnId(column);
+    setVisibleColumnIds((ids) => {
+      if (ids.includes(id)) {
+        return ids.length === 1 ? ids : ids.filter((item) => item !== id);
+      }
+      return [...ids, id];
+    });
+  };
+
+  const resetVisibleColumns = () => setVisibleColumnIds(DEFAULT_VISIBLE_ASSET_COLUMN_IDS);
+
+  const toggleExpandedRow = (asset: AssetOpportunity) => {
+    const id = `${asset.asset_class}:${asset.symbol}`;
+    setExpandedRows((rows) => ({
+      ...rows,
+      [id]: !rows[id],
+    }));
+  };
+
+  const renderMetricDetail = (asset: AssetOpportunity, column: MetricColumn) => {
+    const metric = metricFor(asset, column);
+    const isRisk = column.key === "volatility_risk_score";
+    const tone = column.group === "scores" ? scoreTone(metric?.value, isRisk) : "neutral";
+    return (
+      <article
+        className={`exploration-metric-card ${column.group === "scores" ? "derived" : ""}`}
+        key={assetColumnId(column)}
+        title={metric?.notes || metric?.source || column.label}
+      >
+        <span>{column.label}</span>
+        <strong className={column.group === "scores" ? `metric-tone ${tone}` : undefined}>
+          {formatMetric(metric, column.fallbackKind)}
+        </strong>
+        {metric && <small>{metric.source ?? column.group.replace(/_/g, " ")}</small>}
+      </article>
+    );
+  };
+
+  const renderFactsDetail = (asset: AssetOpportunity) => (
+    <article className="exploration-metric-card exploration-facts-card" key="facts">
+      <span>Facts</span>
+      {asset.data_gaps.length > 0 && (
+        <small className="exploration-warning-line">
+          <AlertTriangle size={13} aria-hidden="true" />
+          {asset.data_gaps.join(", ")}
+        </small>
+      )}
+      {asset.interesting_facts.length > 0 ? (
+        <ul>
+          {asset.interesting_facts.map((fact) => (
+            <li key={`${asset.symbol}:${fact.type}`}>{fact.text}</li>
+          ))}
+        </ul>
+      ) : (
+        <small>No unusual deterministic facts.</small>
+      )}
+    </article>
+  );
+
   return (
     <section className="panel asset-insights">
       <div className="panel-heading">
@@ -123,15 +202,53 @@ export const AssetInsightsTable = memo(function AssetInsightsTable({ title, asse
           <h2>{title}</h2>
           <span className="asset-insights-count">{pagedAssets.length} / {visibleAssets.length} / {assets.length}</span>
         </div>
-        <div className="asset-insights-search">
-          <Search size={15} aria-hidden="true" />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search symbol, exposure, category"
-            aria-label={`Search ${title}`}
-          />
+        <div className="asset-insights-controls">
+          <div className="asset-insights-search">
+            <Search size={15} aria-hidden="true" />
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search symbol, exposure, category"
+              aria-label={`Search ${title}`}
+            />
+          </div>
+          <div className="column-menu">
+            <button
+              type="button"
+              className={`filter-menu-trigger ${columnMenuOpen ? "active" : ""}`}
+              onClick={() => setColumnMenuOpen((open) => !open)}
+              aria-expanded={columnMenuOpen}
+            >
+              <SlidersHorizontal size={16} aria-hidden="true" />
+              Columns
+              <span>{visibleColumns.length}</span>
+            </button>
+            {columnMenuOpen && (
+              <div className="column-popover">
+                <div className="column-option-list">
+                  {columns.map((column) => {
+                    const id = assetColumnId(column);
+                    const checked = visibleColumnIds.includes(id);
+                    return (
+                      <label className="column-option" key={id}>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          disabled={checked && visibleColumns.length === 1}
+                          onChange={() => toggleColumnVisibility(column)}
+                        />
+                        <span>{column.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                <button type="button" className="filter-clear" onClick={resetVisibleColumns}>
+                  Default columns
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -164,80 +281,97 @@ export const AssetInsightsTable = memo(function AssetInsightsTable({ title, asse
             </div>
           )}
           <div className="table-wrap">
-            <table className="open-data-table asset-insights-table">
+            <table
+              className="open-data-table asset-insights-table exploration-asset-table"
+              style={{ minWidth: Math.max(820, 430 + visibleColumns.length * 122) }}
+            >
             <thead>
               <tr>
                 <th className="sticky-symbol-column">Symbol</th>
                 <th>Exposure</th>
                 <th>Risk Bucket</th>
-                {columns.map((column) => (
+                {visibleColumns.map((column) => (
                   <th key={`${column.group}:${column.key}`}>{column.label}</th>
                 ))}
-                <th>Facts</th>
               </tr>
             </thead>
             <tbody>
-              {pagedAssets.map((asset) => (
-                <tr key={`${asset.asset_class}:${asset.symbol}`}>
-                  <td className="sticky-symbol-column">
-                    <div className="ticker-cell-main">
-                      <strong>{asset.symbol}</strong>
-                      <BarChart3 size={15} aria-hidden="true" />
-                    </div>
-                    <small>{asset.name ?? asset.exposure}</small>
-                    <span className="latest-badge">{formatDateTime(asset.generated_at)}</span>
-                  </td>
-                  <td>
-                    <strong>{asset.exposure}</strong>
-                    <small>{asset.category?.replace(/_/g, " ") ?? asset.currency}</small>
-                  </td>
-                  <td>
-                    <span className={`tone-pill ${scoreTone(asset.scores.volatility_risk_score?.value, true)}`}>
-                      {asset.risk_bucket?.replace(/_/g, " ") ?? "-"}
-                    </span>
-                  </td>
-                  {columns.map((column) => {
-                    const metric = metricFor(asset, column);
-                    const isRisk = column.key === "volatility_risk_score";
-                    const tone = column.group === "scores" ? scoreTone(metric?.value, isRisk) : "neutral";
-                    return (
-                      <td
-                        key={`${asset.symbol}:${column.group}:${column.key}`}
-                        className={column.group === "scores" ? "derived-metric-cell" : undefined}
-                        title={metric?.notes || metric?.source || column.label}
-                      >
-                        {column.group === "scores" ? (
-                          <>
-                            <strong className={`metric-tone ${tone}`}>{formatMetric(metric, column.fallbackKind)}</strong>
-                            <small>score</small>
-                          </>
-                        ) : (
-                          formatMetric(metric, column.fallbackKind)
-                        )}
+              {pagedAssets.map((asset) => {
+                const rowId = `${asset.asset_class}:${asset.symbol}`;
+                const rowExpanded = Boolean(expandedRows[rowId]);
+                return (
+                  <Fragment key={rowId}>
+                    <tr className={rowExpanded ? "exploration-row-expanded" : ""}>
+                      <td className="sticky-symbol-column">
+                        <div className="ticker-cell-main">
+                          <button
+                            type="button"
+                            className="icon-button row-toggle exploration-row-toggle"
+                            onClick={() => toggleExpandedRow(asset)}
+                            title={rowExpanded ? "Hide hidden values" : "Show hidden values"}
+                            aria-expanded={rowExpanded}
+                          >
+                            {rowExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                          </button>
+                          <strong>{asset.symbol}</strong>
+                          <BarChart3 size={15} aria-hidden="true" />
+                        </div>
+                        <small>{asset.name ?? asset.exposure}</small>
+                        <span className="latest-badge">{formatDateTime(asset.generated_at)}</span>
                       </td>
-                    );
-                  })}
-                  <td className="asset-facts-cell">
-                    {asset.data_gaps.length > 0 && (
-                      <span title={asset.data_gaps.join("\n")}>
-                        <AlertTriangle size={14} aria-hidden="true" />
-                      </span>
+                      <td>
+                        <strong>{asset.exposure}</strong>
+                        <small>{asset.category?.replace(/_/g, " ") ?? asset.currency}</small>
+                      </td>
+                      <td>
+                        <span className={`tone-pill ${scoreTone(asset.scores.volatility_risk_score?.value, true)}`}>
+                          {asset.risk_bucket?.replace(/_/g, " ") ?? "-"}
+                        </span>
+                      </td>
+                      {visibleColumns.map((column) => {
+                        const metric = metricFor(asset, column);
+                        const isRisk = column.key === "volatility_risk_score";
+                        const tone = column.group === "scores" ? scoreTone(metric?.value, isRisk) : "neutral";
+                        return (
+                          <td
+                            key={`${asset.symbol}:${column.group}:${column.key}`}
+                            className={column.group === "scores" ? "derived-metric-cell" : undefined}
+                            title={metric?.notes || metric?.source || column.label}
+                          >
+                            {column.group === "scores" ? (
+                              <>
+                                <strong className={`metric-tone ${tone}`}>{formatMetric(metric, column.fallbackKind)}</strong>
+                                <small>score</small>
+                              </>
+                            ) : (
+                              formatMetric(metric, column.fallbackKind)
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                    {rowExpanded && (
+                      <tr className="exploration-detail-row">
+                        <td colSpan={visibleColumns.length + 3}>
+                          <div className="exploration-detail-panel">
+                            <div className="lot-lifecycle-heading">
+                              <strong>All hidden values for {asset.symbol}</strong>
+                              <span>{hiddenColumns.length + 1} sections</span>
+                            </div>
+                            <div className="exploration-metric-grid">
+                              {hiddenColumns.map((column) => renderMetricDetail(asset, column))}
+                              {renderFactsDetail(asset)}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
                     )}
-                    {asset.interesting_facts.length > 0 ? (
-                      <ul>
-                        {asset.interesting_facts.slice(0, 2).map((fact) => (
-                          <li key={`${asset.symbol}:${fact.type}`}>{fact.text}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <small>No unusual deterministic facts.</small>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                  </Fragment>
+                );
+              })}
               {visibleAssets.length === 0 && (
                 <tr>
-                  <td colSpan={columns.length + 4}>
+                  <td colSpan={visibleColumns.length + 3}>
                     <p className="empty block">No assets match the current filters.</p>
                   </td>
                 </tr>

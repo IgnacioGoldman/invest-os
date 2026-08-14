@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import math
 from datetime import datetime, timezone
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 MetricTier = Literal[
@@ -24,6 +25,13 @@ class OpenDataMetric(BaseModel):
     tier: MetricTier
     as_of: str
     notes: str
+
+    @field_validator("value", mode="before")
+    @classmethod
+    def finite_value_or_none(cls, value: object) -> object:
+        if isinstance(value, (int, float)) and not math.isfinite(float(value)):
+            return None
+        return value
 
 
 class LatestPrice(BaseModel):

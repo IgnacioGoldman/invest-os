@@ -15,6 +15,7 @@ from app.services.portfolio import (  # noqa: E402
     _enrich_generic_order_history,
     _is_partial_ibkr_api_history,
     _is_transient_ibkr_history_warning,
+    _market_price_targets_from_orders,
 )
 from app.sources.ibkr import (  # noqa: E402
     _flex_retryable_error,
@@ -183,6 +184,30 @@ class IbkrFlexImportTest(unittest.TestCase):
         self.assertAlmostEqual(enriched["sell-1"].cost_basis_amount or 0, 800)
         self.assertAlmostEqual(enriched["sell-1"].realized_pnl or 0, 240)
         self.assertAlmostEqual(enriched["sell-1"].realized_roi_percent or 0, 30)
+
+    def test_open_flex_lots_are_market_price_targets(self) -> None:
+        orders = [
+            Order(
+                id="amzn-buy",
+                source="ibkr",
+                platform="Interactive Brokers",
+                symbol="AMZN",
+                side="BUY",
+                quantity=11,
+                limit_price=229.1695,
+                quote_currency="USD",
+                raw={"quoteQty": 2520.8645, "commission": 1.000033, "commissionAsset": "USD"},
+                created_at="2026-07-28T11:07:19Z",
+            )
+        ]
+
+        targets = _market_price_targets_from_orders([], orders, Settings())
+
+        self.assertEqual(len(targets), 1)
+        self.assertEqual(targets[0].symbol, "AMZN")
+        self.assertEqual(targets[0].currency, "USD")
+        self.assertEqual(targets[0].quantity, 11)
+        self.assertAlmostEqual(targets[0].cost_basis or 0, 2521.864533)
 
 
 if __name__ == "__main__":

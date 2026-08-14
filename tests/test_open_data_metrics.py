@@ -139,6 +139,22 @@ def mocked_ifrs_companyfacts() -> dict[str, object]:
 
 
 class OpenDataMetricsTest(unittest.TestCase):
+    def test_open_data_metric_normalizes_non_json_finite_values(self) -> None:
+        metric = OpenDataMetric(
+            value=float("inf"),
+            source="yfinance:forwardPE",
+            tier="proxy_estimate",
+            as_of="2026-08-14",
+            notes="non-finite source value",
+        )
+        loaded = OpenDataMetric.model_validate_json(
+            '{"value": Infinity, "source": "yfinance:forwardPE", "tier": "proxy_estimate", '
+            '"as_of": "2026-08-14", "notes": "cached non-finite source value"}'
+        )
+
+        self.assertIsNone(metric.value)
+        self.assertIsNone(loaded.value)
+
     def test_computes_ttm_valuation_and_proxy_metrics_from_public_inputs(self) -> None:
         snapshot = compute_open_data_snapshot(
             ticker="GOOGL",
