@@ -5911,6 +5911,104 @@ tbody tr:hover td {
   min-width: 760px;
 }
 
+.exploration-page .exploration-temp-table {
+  min-width: 520px;
+}
+
+.exploration-page .exploration-temp-table th,
+.exploration-page .exploration-temp-table td {
+  width: 33.333%;
+}
+
+.exploration-page .temp-chart-row td {
+  padding: 0;
+}
+
+.exploration-page .temp-bar-chart {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px 16px 54px;
+}
+
+.exploration-page .temp-bar-chart.empty-chart {
+  min-height: 88px;
+  place-content: center start;
+}
+
+.exploration-page .temp-bar-chart-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+}
+
+.exploration-page .temp-bar-chart svg {
+  display: block;
+  min-height: 220px;
+}
+
+.exploration-page .temp-bar-chart line {
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 1;
+}
+
+.exploration-page .temp-bar-chart .zero-line {
+  stroke: rgba(255, 255, 255, 0.34);
+}
+
+.exploration-page .temp-bar-chart rect.positive {
+  fill: rgba(87, 206, 139, 0.78);
+}
+
+.exploration-page .temp-bar-chart rect.negative {
+  fill: rgba(255, 111, 111, 0.78);
+}
+
+.exploration-page .temp-bar-chart .bar-hit-area {
+  cursor: pointer;
+  fill: transparent;
+}
+
+.exploration-page .temp-bar-chart .bar-hit-area:focus {
+  outline: none;
+}
+
+.exploration-page .temp-bar-chart .temp-bar-tooltip rect {
+  fill: rgba(8, 11, 18, 0.98);
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 1;
+}
+
+.exploration-page .temp-bar-chart .temp-bar-tooltip text {
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.72);
+  stroke-linejoin: round;
+  stroke-width: 2px;
+}
+
+.exploration-page .temp-bar-chart .temp-bar-tooltip .tooltip-period {
+  fill: #ffffff;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.exploration-page .temp-bar-chart .temp-bar-tooltip .tooltip-value {
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.exploration-page .temp-bar-chart .temp-bar-tooltip .tooltip-value.positive {
+  fill: #7ff0ad;
+}
+
+.exploration-page .temp-bar-chart .temp-bar-tooltip .tooltip-value.negative {
+  fill: #ff9d9d;
+}
+
+.exploration-page .temp-bar-chart text {
+  fill: var(--app-muted);
+  font-size: 10px;
+}
+
 .exploration-page .exploration-asset-table {
   min-width: 820px;
 }

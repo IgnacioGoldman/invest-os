@@ -417,7 +417,7 @@ def _local_ticker_followup(snapshot: PortfolioSnapshot, recommendation: Recommen
     if current_price:
         evidence.append(f"Latest price in the snapshot is ${current_price:.2f}.")
     if revenue_growth is not None:
-        evidence.append(f"Revenue growth is {_format_percent(revenue_growth)} YoY.")
+        evidence.append(f"Latest-quarter revenue growth is {_format_percent(revenue_growth)} YoY.")
     if fcf_yield is not None:
         evidence.append(f"FCF yield is {_format_percent(fcf_yield)}.")
     if pe is not None:

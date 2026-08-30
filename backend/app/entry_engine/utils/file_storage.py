@@ -10,6 +10,7 @@ from app.entry_engine.open_data_models import OpenDataSnapshot
 
 ENTRY_DATA_DIR = DATA_DIR / "entry"
 OPEN_DATA_STOCK_DIR = DATA_DIR / "stocks" / "open_data"
+OPEN_DATA_STOCK_UNIVERSE_PATH = DATA_DIR / "stocks" / "stocks.json"
 OPEN_DATA_REQUIRED_GROUPS = ("business_health", "price_opportunity", "valuation")
 OPEN_DATA_DISPLAY_MIN_COVERAGE = 80.0
 
@@ -90,6 +91,39 @@ def open_data_stock_snapshot_coverage(snapshot: OpenDataSnapshot) -> float:
     return (available / total * 100) if total else 0
 
 
+def load_open_data_active_tickers(path: Path = OPEN_DATA_STOCK_UNIVERSE_PATH) -> list[str]:
+    if not path.exists():
+        return []
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return []
+
+    raw_rows: object
+    if isinstance(payload, dict):
+        raw_rows = payload.get("tickers") or payload.get("rows") or []
+    else:
+        raw_rows = payload
+
+    if not isinstance(raw_rows, list):
+        return []
+
+    tickers: list[str] = []
+    seen: set[str] = set()
+    for row in raw_rows:
+        if isinstance(row, str):
+            ticker = row
+        elif isinstance(row, dict):
+            ticker = str(row.get("symbol") or row.get("ticker") or "")
+        else:
+            continue
+        normalized = ticker.strip().upper()
+        if normalized and normalized not in seen:
+            seen.add(normalized)
+            tickers.append(normalized)
+    return tickers
+
+
 def is_displayable_open_data_stock_snapshot(
     snapshot: OpenDataSnapshot,
     min_coverage: float = OPEN_DATA_DISPLAY_MIN_COVERAGE,
@@ -101,12 +135,19 @@ def load_latest_open_data_stock_snapshots(
     data_dir: Path = OPEN_DATA_STOCK_DIR,
     *,
     include_low_fidelity: bool = False,
+    active_tickers: set[str] | None = None,
 ) -> list[OpenDataSnapshot]:
     if not data_dir.exists():
         return []
 
+    if active_tickers is None:
+        configured_tickers = load_open_data_active_tickers()
+        active_tickers = set(configured_tickers) if configured_tickers else None
+
     snapshots: list[OpenDataSnapshot] = []
     for ticker_dir in sorted(path for path in data_dir.iterdir() if path.is_dir()):
+        if active_tickers is not None and ticker_dir.name.upper() not in active_tickers:
+            continue
         snapshot = load_latest_open_data_stock_snapshot(ticker_dir.name, data_dir)
         if snapshot is not None and (include_low_fidelity or is_displayable_open_data_stock_snapshot(snapshot)):
             snapshots.append(snapshot)

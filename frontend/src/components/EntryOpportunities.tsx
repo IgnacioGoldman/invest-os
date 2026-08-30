@@ -349,7 +349,7 @@ export function EntryOpportunities({
                   <th>Sector</th>
                   <th>Market Cap</th>
                   <th>Avg Volume</th>
-                  <th>Rev YoY</th>
+                  <th>Q Rev YoY</th>
                   <th>Rev CAGR 3Y</th>
                   <th>EPS YoY</th>
                   <th>EPS CAGR 3Y</th>

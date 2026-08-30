@@ -137,31 +137,15 @@ def _absolute_valuation_flags(
 def _business_assessment(
     business_data_available: bool,
     revenue_yoy: float | None,
-    eps_yoy: float | None,
-    operating_margin: float | None,
-    roe: float | None,
 ) -> str:
     if not business_data_available:
         return "unclear"
-    if (
-        (revenue_yoy or 0) >= 8
-        and (eps_yoy or 0) >= 10
-        and (operating_margin or 0) >= 20
-        and (roe or 0) >= 20
-    ):
+    if (revenue_yoy or 0) >= 20:
         return "strong"
-    weak_signals = sum(
-        (
-            (revenue_yoy or 0) < 0,
-            (eps_yoy or 0) < 0,
-            (operating_margin or 0) < 10,
-            (roe or 0) < 5,
-        )
-    )
-    if weak_signals >= 2 or (operating_margin or 0) < 5 or (roe or 0) < 0:
-        return "weak"
-    if (revenue_yoy or 0) >= 4 and (eps_yoy or 0) >= 0 and (operating_margin or 0) >= 15 and (roe or 0) >= 10:
+    if (revenue_yoy or 0) >= 8:
         return "solid"
+    if (revenue_yoy or 0) < 0:
+        return "weak"
     return "mixed"
 
 
@@ -518,26 +502,15 @@ def analyze_open_data_stock_entry(
     fcf_yield_max = _valuation_range(snapshot, "fcf_yield_max")
 
     business_evidence = [
-        f"Revenue growth YoY is {_fmt_pct(revenue_yoy)} and 3-year revenue CAGR is {_fmt_pct(revenue_cagr)}.",
-        f"Diluted EPS growth YoY is {_fmt_pct(eps_yoy)} and 3-year EPS CAGR is {_fmt_pct(eps_cagr)}.",
-        f"Latest margins are gross {_fmt_pct(gross_margin)}, operating {_fmt_pct(operating_margin)}, net {_fmt_pct(net_margin)}.",
-        f"TTM free cash flow is {_fmt_money(fcf)}; ROE is {_fmt_pct(roe)}; debt-to-equity is {_fmt_ratio(debt_to_equity)}.",
+        f"Business assessment currently uses only latest-quarter revenue growth YoY: {_fmt_pct(revenue_yoy)}.",
     ]
     business_concerns: list[str] = []
-    if roic and roic.tier == "proxy_estimate":
-        business_concerns.append("ROIC is a proxy estimate, not a fully tax-adjusted exact figure.")
-    fcf_margins = _annual_metric_values(snapshot, "fcf_margin")
-    if len(fcf_margins) >= 2 and fcf_margins[-1] < fcf_margins[0]:
-        business_concerns.append(
-            f"Annual FCF margin declined from {_fmt_pct(fcf_margins[0])} to {_fmt_pct(fcf_margins[-1])} across supplied annual history."
-        )
+    if revenue_yoy is None:
+        business_concerns.append("Comparable quarterly SEC revenue facts were unavailable.")
+    elif revenue_yoy < 0:
+        business_concerns.append(f"Latest-quarter revenue is down {_fmt_abs_pct(revenue_yoy)} year over year.")
 
-    is_quality = (
-        (revenue_yoy or 0) >= 8
-        and (eps_yoy or 0) >= 10
-        and (operating_margin or 0) >= 20
-        and (roe or 0) >= 20
-    )
+    is_quality = revenue_yoy is not None and revenue_yoy >= 8
 
     price_evidence = [
         f"Latest close is {_fmt_money(current_price)}.",
@@ -640,19 +613,10 @@ def analyze_open_data_stock_entry(
         )
     )
 
-    business_data_available = (
-        revenue_yoy is not None
-        and revenue_cagr is not None
-        and gross_margin is not None
-        and operating_margin is not None
-        and net_margin is not None
-        and fcf is not None
-        and roe is not None
-        and debt_to_equity is not None
-    )
+    business_data_available = revenue_yoy is not None
     needs_valuation_data = pe is None or price_to_sales is None
     needs_more_data = not business_data_available or needs_valuation_data or not price_data_available
-    business_assessment = _business_assessment(business_data_available, revenue_yoy, eps_yoy, operating_margin, roe)
+    business_assessment = _business_assessment(business_data_available, revenue_yoy)
     valuation_assessment = _valuation_assessment(
         needs_valuation_data=needs_valuation_data,
         pe=pe,
@@ -668,7 +632,7 @@ def analyze_open_data_stock_entry(
         if needs_valuation_data:
             missing_data.append("Historical and current valuation facts before judging whether the entry price is attractive.")
         if not business_data_available:
-            missing_data.append("Enough business-health facts to judge growth, margins, returns, cash generation, and balance-sheet quality.")
+            missing_data.append("Comparable latest-quarter revenue YoY from SEC facts before judging Business.")
         if not price_data_available:
             missing_data.append("Enough price-history facts to judge whether the stock is actually offering a useful pullback.")
 

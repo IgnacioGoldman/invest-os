@@ -105,7 +105,7 @@ def _fetch_top_volume_stocks(limit: int, skip_tickers: set[str]) -> list[dict[st
 
 def _load_universe_stocks(path: Path, limit: int | None, skip_tickers: set[str]) -> list[dict[str, Any]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
-    raw_rows = payload.get("rows") if isinstance(payload, dict) else payload
+    raw_rows = (payload.get("rows") or payload.get("tickers")) if isinstance(payload, dict) else payload
     if not isinstance(raw_rows, list):
         raise ValueError(f"Universe file {path} must contain a list or a 'rows' list.")
 

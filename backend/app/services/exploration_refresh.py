@@ -9,6 +9,7 @@ from typing import Callable
 from app.config import DATA_DIR, Settings
 from app.entry_engine.providers.open_data_provider import OpenDataProvider
 from app.entry_engine.utils.file_storage import (
+    load_open_data_active_tickers,
     load_latest_open_data_stock_snapshots,
     save_open_data_stock_snapshot,
 )
@@ -65,13 +66,17 @@ def refresh_exploration_data(
     progress: ExplorationProgressCallback | None = None,
 ) -> list[str]:
     warnings: list[str] = []
+    active_tickers = load_open_data_active_tickers()
     current_stock_snapshots = load_latest_open_data_stock_snapshots()
-    stale_tickers = [
+    current_by_ticker = {snapshot.ticker: snapshot for snapshot in current_stock_snapshots}
+    missing_tickers = [ticker for ticker in active_tickers if ticker not in current_by_ticker]
+    stale_existing_tickers = [
         snapshot.ticker
         for snapshot in current_stock_snapshots
         if not _is_snapshot_fresh_today(snapshot.generated_at)
     ]
-    skipped_fresh = len(current_stock_snapshots) - len(stale_tickers)
+    stale_tickers = [*missing_tickers, *stale_existing_tickers]
+    skipped_fresh = len(current_stock_snapshots) - len(stale_existing_tickers)
     total_steps = max(1, len(stale_tickers)) + 2
 
     if progress:

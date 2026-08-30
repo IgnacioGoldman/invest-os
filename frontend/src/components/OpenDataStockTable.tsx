@@ -13,16 +13,16 @@ type Props = {
 };
 
 const COLUMNS = [
-  ["business_health", "revenue_growth_yoy", "Rev YoY", "percent"],
-  ["business_health", "revenue_cagr_3y", "Rev CAGR 3Y", "percent"],
-  ["business_health", "eps_growth_yoy", "EPS YoY", "percent"],
-  ["business_health", "eps_cagr_3y", "EPS CAGR 3Y", "percent"],
-  ["business_health", "gross_margin", "Gross", "percent"],
-  ["business_health", "operating_margin", "Operating", "percent"],
-  ["business_health", "net_margin", "Net", "percent"],
-  ["business_health", "free_cash_flow", "FCF", "compact"],
-  ["business_health", "roe", "ROE", "percent"],
-  ["business_health", "roic", "ROIC", "percent"],
+  ["business_health", "revenue_growth_yoy", "Q Rev YoY", "percent"],
+  ["business_health", "revenue_cagr_3y", "Q Rev CAGR 3Y", "percent"],
+  ["business_health", "eps_growth_yoy", "Q EPS YoY", "percent"],
+  ["business_health", "eps_cagr_3y", "Q EPS CAGR 3Y", "percent"],
+  ["business_health", "gross_margin", "Q Gross", "percent"],
+  ["business_health", "operating_margin", "Q Operating", "percent"],
+  ["business_health", "net_margin", "Q Net", "percent"],
+  ["business_health", "free_cash_flow", "Q FCF", "compact"],
+  ["business_health", "roe", "Q ROE", "percent"],
+  ["business_health", "roic", "Q ROIC", "percent"],
   ["business_health", "cash", "Cash", "compact"],
   ["business_health", "debt", "Debt", "compact"],
   ["business_health", "debt_to_equity", "D/E", "ratio"],
@@ -240,7 +240,14 @@ const DERIVED_COLUMNS: ColumnDefinition[] = [
 ];
 
 const DEFAULT_MOVABLE_COLUMNS = [...STATIC_COLUMNS, ...DERIVED_COLUMNS, ...METRIC_COLUMNS];
-const DEFAULT_VISIBLE_COLUMN_IDS = ["conviction", "business", "price", "valuation"];
+const DEFAULT_VISIBLE_COLUMN_IDS = [
+  "conviction",
+  "business",
+  "price",
+  "valuation",
+  "sector",
+  "metric:price_opportunity:support_1d_distance",
+];
 const PAGE_SIZE = 10;
 
 const CHARTS: Array<{
@@ -249,14 +256,14 @@ const CHARTS: Array<{
   metric: string;
   kind: MetricKind;
 }> = [
-  { title: "Revenue", series: "annual_fundamentals", metric: "revenue", kind: "compact" },
-  { title: "EPS", series: "annual_fundamentals", metric: "eps_diluted", kind: "ratio" },
-  { title: "Gross Margin", series: "annual_fundamentals", metric: "gross_margin", kind: "percent" },
-  { title: "Operating Margin", series: "annual_fundamentals", metric: "operating_margin", kind: "percent" },
-  { title: "Net Margin", series: "annual_fundamentals", metric: "net_margin", kind: "percent" },
-  { title: "FCF Margin", series: "annual_fundamentals", metric: "fcf_margin", kind: "percent" },
-  { title: "Cash", series: "annual_fundamentals", metric: "cash", kind: "compact" },
-  { title: "Debt", series: "annual_fundamentals", metric: "debt", kind: "compact" },
+  { title: "Quarterly Revenue", series: "quarterly_fundamentals", metric: "revenue", kind: "compact" },
+  { title: "Quarterly EPS", series: "quarterly_fundamentals", metric: "eps_diluted", kind: "ratio" },
+  { title: "Quarterly Gross Margin", series: "quarterly_fundamentals", metric: "gross_margin", kind: "percent" },
+  { title: "Quarterly Operating Margin", series: "quarterly_fundamentals", metric: "operating_margin", kind: "percent" },
+  { title: "Quarterly Net Margin", series: "quarterly_fundamentals", metric: "net_margin", kind: "percent" },
+  { title: "Quarterly FCF Margin", series: "quarterly_fundamentals", metric: "fcf_margin", kind: "percent" },
+  { title: "Quarterly Cash", series: "quarterly_fundamentals", metric: "cash", kind: "compact" },
+  { title: "Quarterly Debt", series: "quarterly_fundamentals", metric: "debt", kind: "compact" },
   { title: "PE", series: "valuation_history", metric: "pe", kind: "ratio" },
   { title: "Price / Sales", series: "valuation_history", metric: "price_to_sales", kind: "ratio" },
   { title: "EV / EBITDA", series: "valuation_history", metric: "ev_to_ebitda", kind: "ratio" },
@@ -510,7 +517,7 @@ function computeDerivedMetrics(snapshot: OpenDataStockSnapshot, context: Derived
     pe_vs_median: derivedMetric(peVsMedian, "percent", "Current PE premium or discount versus available annual valuation-history median."),
     ps_hist_percentile: derivedMetric(psHistPercentile, "percent", "Current price/sales percentile against available annual valuation history."),
     fcfy_hist_percentile: derivedMetric(fcfyHistPercentile, "percent", "Current FCF yield percentile against available annual valuation history. Higher means more attractive cash-flow yield versus its own history."),
-    rev_accel: derivedMetric(revAccel, "percent", "Revenue growth YoY minus 3-year revenue CAGR."),
+    rev_accel: derivedMetric(revAccel, "percent", "Latest-quarter revenue growth YoY minus 3-year revenue CAGR."),
     eps_accel: derivedMetric(epsAccel, "percent", "EPS growth YoY minus 3-year EPS CAGR."),
     op_margin_yoy_delta: derivedMetric(historicalDelta(snapshot, "annual_fundamentals", "operating_margin", 1), "percent", "Latest annual operating margin minus prior-year annual operating margin."),
     fcf_margin_3y_delta: derivedMetric(historicalDelta(snapshot, "annual_fundamentals", "fcf_margin", 3), "percent", "Latest annual FCF margin minus annual FCF margin three periods earlier."),
@@ -524,7 +531,7 @@ function computeDerivedMetrics(snapshot: OpenDataStockSnapshot, context: Derived
     sector_roic_rank: derivedMetric(peerPercentile(context, snapshot, "roic", snapshotMetricValue(snapshot, "business_health", "roic")), "percent", "ROIC percentile within sector when enough peers exist, otherwise within the loaded universe."),
     sector_fcfy_rank: derivedMetric(peerPercentile(context, snapshot, "fcf_yield", fcfYield), "percent", "FCF-yield percentile within sector when enough peers exist, otherwise within the loaded universe."),
     sector_pe_cheap_rank: derivedMetric(peerPercentile(context, snapshot, "pe", pe, false), "percent", "Cheapness percentile by PE within sector when enough peers exist, otherwise within the loaded universe. Higher means lower PE than more peers."),
-    price_fund_gap: derivedMetric(priceFundGap, "percent", "1-year price change minus latest revenue growth YoY. Negative values can flag price weakness despite business growth."),
+    price_fund_gap: derivedMetric(priceFundGap, "percent", "1-year price change minus latest-quarter revenue growth YoY. Negative values can flag price weakness despite business growth."),
   };
 }
 
@@ -743,6 +750,285 @@ function AssessmentTag({ section }: { section?: StockEntryAnalysisSection }) {
     <span className={`analysis-tag table-assessment-tag ${tag.tone}`} title={detail}>
       {tag.label}
     </span>
+  );
+}
+
+function quarterlyRevenueGrowthPoints(snapshot: OpenDataStockSnapshot) {
+  return sortedHistoricalRows(snapshot, "quarterly_revenue")
+    .map((row) => ({ period: row.period, value: metricValue(row, "revenue_growth_yoy") }))
+    .filter((point): point is { period: string; value: number } => point.value != null);
+}
+
+function revenueGrowthSignal(value?: number | null): { label: string; tone: Tone; detail: string } {
+  if (value == null) return { label: "Unclear", tone: "neutral", detail: "Comparable quarterly revenue YoY is unavailable." };
+  if (value >= 20) return { label: "Strong", tone: "good", detail: "Latest-quarter revenue YoY is at least 20%." };
+  if (value >= 8) return { label: "Solid", tone: "good", detail: "Latest-quarter revenue YoY is at least 8%." };
+  if (value >= 0) return { label: "Mixed", tone: "watch", detail: "Latest-quarter revenue YoY is positive but below 8%." };
+  return { label: "Weak", tone: "caution", detail: "Latest-quarter revenue YoY is negative." };
+}
+
+function formatSignedPp(value?: number | null) {
+  if (value == null) return "-";
+  const prefix = value > 0 ? "+" : "";
+  return `${prefix}${formatRatio(value)} pp`;
+}
+
+function revenueGrowthMomentum(snapshot: OpenDataStockSnapshot): {
+  label: string;
+  tone: Tone;
+  change: number | null;
+  latest?: { period: string; value: number };
+  previous?: { period: string; value: number };
+  detail: string;
+} {
+  const points = quarterlyRevenueGrowthPoints(snapshot);
+  const latest = points[points.length - 1];
+  const previous = points[points.length - 2];
+  if (!latest || !previous) {
+    return {
+      label: "Unclear",
+      tone: "neutral",
+      change: null,
+      detail: "Needs at least two comparable quarterly revenue YoY points.",
+    };
+  }
+
+  const change = latest.value - previous.value;
+  if (change >= 3) {
+    return {
+      label: "Accelerating",
+      tone: "good",
+      change,
+      latest,
+      previous,
+      detail: `${latest.period} revenue YoY is ${formatSignedPp(change)} above ${previous.period}.`,
+    };
+  }
+  if (change <= -3) {
+    return {
+      label: "Decelerating",
+      tone: "caution",
+      change,
+      latest,
+      previous,
+      detail: `${latest.period} revenue YoY is ${formatSignedPp(change)} below ${previous.period}.`,
+    };
+  }
+  return {
+    label: "Stable",
+    tone: "watch",
+    change,
+    latest,
+    previous,
+    detail: `${latest.period} revenue YoY is within 3 pp of ${previous.period}.`,
+  };
+}
+
+function QuarterlyRevenueGrowthBarChart({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
+  const points = quarterlyRevenueGrowthPoints(snapshot);
+  const [hoveredPoint, setHoveredPoint] = useState<{ period: string; value: number; x: number; y: number } | null>(null);
+  if (points.length === 0) {
+    return (
+      <div className="temp-bar-chart empty-chart">
+        <strong>Latest-quarter revenue YoY</strong>
+        <small>No comparable quarterly revenue growth history from SEC facts.</small>
+      </div>
+    );
+  }
+
+  const width = Math.max(620, points.length * 22 + 80);
+  const height = 220;
+  const left = 52;
+  const right = 18;
+  const top = 18;
+  const bottom = 42;
+  const plotWidth = width - left - right;
+  const plotHeight = height - top - bottom;
+  const values = points.map((point) => point.value);
+  const min = Math.min(0, ...values);
+  const max = Math.max(0, ...values);
+  const spread = max - min || 1;
+  const yFor = (value: number) => top + ((max - value) / spread) * plotHeight;
+  const zeroY = yFor(0);
+  const gap = 4;
+  const barWidth = Math.max(6, plotWidth / points.length - gap);
+  const slotWidth = plotWidth / points.length;
+  const tooltipWidth = 118;
+  const tooltipHeight = 44;
+  const tooltipX = hoveredPoint ? Math.min(width - right - tooltipWidth, Math.max(left, hoveredPoint.x - tooltipWidth / 2)) : 0;
+  const tooltipY = hoveredPoint ? Math.max(top, hoveredPoint.y - tooltipHeight - 8) : 0;
+
+  return (
+    <div className="temp-bar-chart">
+      <div className="mini-chart-heading">
+        <strong>Latest-quarter revenue YoY</strong>
+        <small>
+          {points.length} comparable quarters, latest {points[points.length - 1].period}{" "}
+          {formatPercent(points[points.length - 1].value)}
+        </small>
+      </div>
+      <div className="temp-bar-chart-scroll">
+        <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${snapshot.ticker} quarterly revenue growth YoY`}>
+          <line x1={left} x2={width - right} y1={zeroY} y2={zeroY} className="zero-line" />
+          <text x={left - 8} y={top + 4} textAnchor="end">
+            {formatPercent(max)}
+          </text>
+          <text x={left - 8} y={zeroY + 4} textAnchor="end">
+            0%
+          </text>
+          <text x={left - 8} y={top + plotHeight} textAnchor="end">
+            {formatPercent(min)}
+          </text>
+          {points.map((point, index) => {
+            const x = left + index * slotWidth + gap / 2;
+            const y = point.value >= 0 ? yFor(point.value) : zeroY;
+            const barHeight = Math.max(1, Math.abs(zeroY - yFor(point.value)));
+            const labelEvery = Math.max(1, Math.ceil(points.length / 6));
+            const labelVisible =
+              index === 0 || index === points.length - 1 || (index % labelEvery === 0 && index < points.length - 2);
+            const [yearLabel, quarterLabel] = point.period.replace("FY", "").split(" ");
+            const tooltipPoint = {
+              period: point.period,
+              value: point.value,
+              x: x + barWidth / 2,
+              y: Math.min(y, zeroY),
+            };
+            return (
+              <g key={point.period}>
+                <rect
+                  x={x}
+                  y={y}
+                  width={barWidth}
+                  height={barHeight}
+                  rx={2}
+                  className={point.value >= 0 ? "positive" : "negative"}
+                />
+                <rect
+                  x={left + index * slotWidth}
+                  y={top}
+                  width={slotWidth}
+                  height={plotHeight}
+                  className="bar-hit-area"
+                  tabIndex={0}
+                  aria-label={`${point.period}: ${formatPercent(point.value)}`}
+                  onFocus={() => setHoveredPoint(tooltipPoint)}
+                  onBlur={() => setHoveredPoint(null)}
+                  onMouseEnter={() => setHoveredPoint(tooltipPoint)}
+                  onMouseLeave={() => setHoveredPoint(null)}
+                />
+                {labelVisible && (
+                  <text x={x + barWidth / 2} y={height - 18} textAnchor="middle">
+                    <tspan x={x + barWidth / 2}>{yearLabel}</tspan>
+                    <tspan x={x + barWidth / 2} dy="11">
+                      {quarterLabel}
+                    </tspan>
+                  </text>
+                )}
+              </g>
+            );
+          })}
+          {hoveredPoint && (
+            <g className="temp-bar-tooltip" transform={`translate(${tooltipX} ${tooltipY})`} pointerEvents="none">
+              <rect width={tooltipWidth} height={tooltipHeight} rx={6} />
+              <text x={10} y={17} className="tooltip-period">
+                {hoveredPoint.period}
+              </text>
+              <text x={10} y={34} className={`tooltip-value ${hoveredPoint.value >= 0 ? "positive" : "negative"}`}>
+                {formatPercent(hoveredPoint.value)}
+              </text>
+            </g>
+          )}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+function StocksInsightsTempTable({
+  snapshots,
+}: {
+  snapshots: OpenDataStockSnapshot[];
+}) {
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const rows = [...snapshots].sort((left, right) => left.ticker.localeCompare(right.ticker));
+  const toggleExpandedRow = (ticker: string) => {
+    setExpandedRows((current) => ({ ...current, [ticker]: !current[ticker] }));
+  };
+
+  return (
+    <section className="panel open-data-stocks-temp">
+      <div className="panel-heading">
+        <div className="panel-title-with-info">
+          <h2>Stocks Insights temp</h2>
+        </div>
+        <div className="panel-heading-actions">
+          <span>{rows.length}</span>
+        </div>
+      </div>
+      {rows.length === 0 ? (
+        <p className="empty block">No open-data stock metrics loaded.</p>
+      ) : (
+        <div className="table-wrap">
+          <table className="open-data-table exploration-temp-table">
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Latest revenue growth YoY</th>
+                <th>Momentum revenue growth YoY</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((snapshot) => {
+                const revenueGrowth = snapshot.business_health.revenue_growth_yoy;
+                const growthSignal = revenueGrowthSignal(revenueGrowth?.value);
+                const momentum = revenueGrowthMomentum(snapshot);
+                const rowExpanded = Boolean(expandedRows[snapshot.ticker]);
+                return (
+                  <Fragment key={snapshot.ticker}>
+                    <tr className={rowExpanded ? "exploration-row-expanded" : ""}>
+                      <td>
+                        <div className="ticker-cell-main">
+                          <button
+                            type="button"
+                            className="icon-button row-toggle exploration-row-toggle"
+                            onClick={() => toggleExpandedRow(snapshot.ticker)}
+                            title={rowExpanded ? "Hide quarterly revenue chart" : "Show quarterly revenue chart"}
+                            aria-expanded={rowExpanded}
+                          >
+                            {rowExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                          </button>
+                          <strong>{snapshot.ticker}</strong>
+                        </div>
+                        <small>{snapshot.name ?? `CIK ${snapshot.cik ?? "-"}`}</small>
+                      </td>
+                      <td title={revenueGrowth ? `${growthSignal.detail}\n${revenueGrowth.notes}\n${revenueGrowth.source}` : growthSignal.detail}>
+                        <span className={`analysis-tag table-assessment-tag ${growthSignal.tone}`}>{growthSignal.label}</span>
+                        <small>{formatValue(revenueGrowth, "percent")}</small>
+                      </td>
+                      <td title={momentum.detail}>
+                        <span className={`analysis-tag table-assessment-tag ${momentum.tone}`}>{momentum.label}</span>
+                        <small>
+                          {momentum.change == null
+                            ? "Needs 2 quarters"
+                            : `${formatSignedPp(momentum.change)} vs ${momentum.previous?.period ?? "previous quarter"}`}
+                        </small>
+                      </td>
+                    </tr>
+                    {rowExpanded && (
+                      <tr className="exploration-detail-row temp-chart-row">
+                        <td colSpan={3}>
+                          <QuarterlyRevenueGrowthBarChart snapshot={snapshot} />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -1448,6 +1734,8 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
   };
 
   return (
+    <>
+    <StocksInsightsTempTable snapshots={snapshots} />
     <section className="panel open-data-stocks">
       <div className="panel-heading">
         <div className="panel-title-with-info">
@@ -1747,5 +2035,6 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
         </>
       )}
     </section>
+    </>
   );
 });

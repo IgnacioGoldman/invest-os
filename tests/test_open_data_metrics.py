@@ -177,21 +177,43 @@ class OpenDataMetricsTest(unittest.TestCase):
         self.assertAlmostEqual(metrics["pe_ttm"].value or 0, 87.8260869565)
         self.assertAlmostEqual(metrics["price_to_sales_ttm"].value or 0, 11.5428571429)
         self.assertAlmostEqual(metrics["fcf_yield"].value or 0, 1.1633663366)
-        self.assertAlmostEqual(snapshot.business_health["gross_margin"].value or 0, 62.2857142857)
+        self.assertAlmostEqual(snapshot.business_health["revenue_growth_yoy"].value or 0, 42.8571428571)
+        self.assertIn("Latest-quarter YoY growth", snapshot.business_health["revenue_growth_yoy"].notes)
+        self.assertAlmostEqual(snapshot.business_health["gross_margin"].value or 0, 68.0)
+        self.assertAlmostEqual(snapshot.business_health["operating_margin"].value or 0, 30.0)
+        self.assertAlmostEqual(snapshot.business_health["net_margin"].value or 0, 14.0)
+        self.assertEqual(snapshot.business_health["free_cash_flow"].value, 65)
+        self.assertAlmostEqual(snapshot.business_health["roe"].value or 0, 28.0)
+        self.assertAlmostEqual(snapshot.business_health["roic"].value or 0, 75.0)
+        self.assertAlmostEqual(snapshot.business_health["eps_growth_yoy"].value or 0, 73.2673267327)
         self.assertAlmostEqual(snapshot.price_opportunity["change_1d"].value or 0, 1.0101010101)
         self.assertAlmostEqual(snapshot.price_opportunity["change_1m"].value or 0, -20)
         self.assertAlmostEqual(snapshot.price_opportunity["distance_from_ath"].value or 0, -20)
-        self.assertAlmostEqual(metrics["eps_growth_3y_proxy"].value or 0, 25.9921049895)
-        self.assertAlmostEqual(metrics["forward_pe_proxy"].value or 0, 69.7076114125)
-        self.assertAlmostEqual(metrics["peg_proxy"].value or 0, 3.3789524547)
+        self.assertIsNone(metrics["eps_growth_3y_proxy"].value)
+        self.assertIsNone(metrics["forward_pe_proxy"].value)
+        self.assertIsNone(metrics["peg_proxy"].value)
 
         self.assertEqual(metrics["revenue_ttm"].tier, "computed_from_public_facts")
         self.assertEqual(metrics["shares_diluted"].tier, "exact_public_fact")
         self.assertEqual(snapshot.valuation["ev_to_ebitda"].tier, "proxy_estimate")
-        self.assertEqual(metrics["forward_pe_proxy"].tier, "proxy_estimate")
-        self.assertIn("not analyst consensus", metrics["forward_pe_proxy"].notes)
+        self.assertEqual(metrics["forward_pe_proxy"].tier, "unavailable_open_free")
+        self.assertIn("3-year EPS CAGR", metrics["forward_pe_proxy"].notes)
         self.assertIn("annual_fundamentals", snapshot.historical_series)
+        self.assertIn("quarterly_revenue", snapshot.historical_series)
+        self.assertIn("quarterly_fundamentals", snapshot.historical_series)
         self.assertIn("valuation_history", snapshot.historical_series)
+        self.assertEqual([row.period for row in snapshot.historical_series["quarterly_revenue"]], [
+            "FY2025 Q1",
+            "FY2026 Q1",
+        ])
+        self.assertAlmostEqual(
+            snapshot.historical_series["quarterly_revenue"][-1].metrics["revenue_growth_yoy"].value or 0,
+            42.8571428571,
+        )
+        latest_quarter = snapshot.historical_series["quarterly_fundamentals"][-1]
+        self.assertEqual(latest_quarter.period, "FY2026 Q1")
+        self.assertAlmostEqual(latest_quarter.metrics["eps_diluted"].value or 0, 0.6930693069)
+        self.assertAlmostEqual(latest_quarter.metrics["gross_margin"].value or 0, 68.0)
         self.assertEqual([row.period for row in snapshot.historical_series["annual_fundamentals"]], [
             "2022",
             "2023",
@@ -205,6 +227,69 @@ class OpenDataMetricsTest(unittest.TestCase):
         self.assertEqual(latest_valuation.metrics["year_end_price"].value, 180)
         self.assertAlmostEqual(latest_valuation.metrics["pe"].value or 0, 90)
         self.assertTrue(snapshot.data_gaps)
+
+    def test_derives_quarterly_revenue_growth_from_ytd_sec_facts(self) -> None:
+        companyfacts = mocked_companyfacts()
+        revenue_rows = companyfacts["facts"]["us-gaap"]["Revenues"]["units"]["USD"]  # type: ignore[index]
+        revenue_rows.extend(
+            [
+                fact(700, "2025-01-01", "2025-06-30", fy=2025, fp="Q2", form="10-Q", filed="2025-07-25"),
+                fact(1100, "2026-01-01", "2026-06-30", fy=2026, fp="Q2", form="10-Q", filed="2026-07-25"),
+            ]
+        )
+
+        snapshot = compute_open_data_snapshot(
+            ticker="GOOGL",
+            cik=1652044,
+            companyfacts=companyfacts,
+            price=LatestPrice(ticker="GOOGL", price=200, source="mock_price", as_of="2026-07-26"),
+            generated_as_of="2026-07-26",
+        )
+
+        revenue_growth = snapshot.business_health["revenue_growth_yoy"]
+        self.assertAlmostEqual(revenue_growth.value or 0, 71.4285714286)
+        self.assertIn("Q2", revenue_growth.notes)
+        self.assertIn("minus Q1", revenue_growth.notes)
+        self.assertEqual([row.period for row in snapshot.historical_series["quarterly_revenue"]], [
+            "FY2025 Q1",
+            "FY2025 Q2",
+            "FY2026 Q1",
+            "FY2026 Q2",
+        ])
+
+    def test_quarterly_revenue_history_merges_revenue_concept_changes(self) -> None:
+        companyfacts = mocked_companyfacts()
+        us_gaap = companyfacts["facts"]["us-gaap"]  # type: ignore[index]
+        us_gaap["SalesRevenueNet"] = {
+            "units": {
+                "USD": [
+                    fact(100, "2024-01-01", "2024-03-31", fy=2024, fp="Q1", form="10-Q", filed="2024-04-25"),
+                    fact(400, "2024-01-01", "2024-12-31", fy=2024, fp="FY", form="10-K", filed="2025-02-03"),
+                ]
+            }
+        }
+        us_gaap["RevenueFromContractWithCustomerExcludingAssessedTax"] = {
+            "units": {
+                "USD": [
+                    fact(120, "2025-01-01", "2025-03-31", fy=2025, fp="Q1", form="10-Q", filed="2025-04-25"),
+                    fact(600, "2025-01-01", "2025-12-31", fy=2025, fp="FY", form="10-K", filed="2026-02-03"),
+                    fact(180, "2026-01-01", "2026-03-31", fy=2026, fp="Q1", form="10-Q", filed="2026-04-25"),
+                ]
+            }
+        }
+        del us_gaap["Revenues"]
+
+        snapshot = compute_open_data_snapshot(
+            ticker="GOOGL",
+            cik=1652044,
+            companyfacts=companyfacts,
+            price=LatestPrice(ticker="GOOGL", price=200, source="mock_price", as_of="2026-04-26"),
+            generated_as_of="2026-04-26",
+        )
+
+        rows = snapshot.historical_series["quarterly_revenue"]
+        self.assertEqual([row.period for row in rows], ["FY2024 Q1", "FY2025 Q1", "FY2026 Q1"])
+        self.assertAlmostEqual(snapshot.business_health["revenue_growth_yoy"].value or 0, 50.0)
 
     def test_marks_price_derived_metrics_unavailable_without_open_price(self) -> None:
         snapshot = compute_open_data_snapshot(
@@ -262,6 +347,56 @@ class OpenDataMetricsTest(unittest.TestCase):
         self.assertIn("Support zone:", support.notes)
         self.assertIn("touches 3", support.notes)
 
+    def test_does_not_count_former_support_retested_from_below_as_at_support(self) -> None:
+        start = date(2025, 1, 1)
+        former_support_days = {35: 80.0, 78: 81.0}
+        lower_support_days = {150: 58.0, 195: 58.5}
+        history: list[HistoricalPricePoint] = []
+        for index in range(240):
+            day = start + timedelta(days=index)
+            close = 91 + index * 0.02 if index < 95 else 69 + (index % 7) * 0.3
+            low = close - 1.4
+            high = close + 1.4
+            if index in former_support_days:
+                low = former_support_days[index]
+                close = low + 4
+                high = close + 2
+            if index in lower_support_days:
+                low = lower_support_days[index]
+                close = low + 3
+                high = close + 2
+            if index >= 210:
+                close = 72 + (index % 4) * 0.4
+                low = close - 1.2
+                high = close + 1.2
+            if index == 239:
+                close = 82
+                low = 81
+                high = 83
+            history.append(
+                HistoricalPricePoint(
+                    date=day.isoformat(),
+                    close=close,
+                    high=high,
+                    low=low,
+                    source="mock_history",
+                )
+            )
+
+        snapshot = compute_open_data_snapshot(
+            ticker="GOOGL",
+            cik=1652044,
+            companyfacts=mocked_companyfacts(),
+            price=LatestPrice(ticker="GOOGL", price=82, source="mock_price", as_of=history[-1].date),
+            price_history=history,
+        )
+
+        support = snapshot.price_opportunity["support_1d_distance"]
+        self.assertEqual(support.tier, "computed_from_public_facts")
+        self.assertIsNotNone(support.value)
+        self.assertGreater(support.value or 0, 6)
+        self.assertNotIn("midpoint $80", support.notes)
+
     def test_uses_public_forward_pe_estimate_when_available(self) -> None:
         snapshot = compute_open_data_snapshot(
             ticker="GOOGL",
@@ -287,9 +422,12 @@ class OpenDataMetricsTest(unittest.TestCase):
 
     def test_marks_eps_turnaround_as_not_meaningful_growth(self) -> None:
         companyfacts = mocked_companyfacts()
-        eps_rows = companyfacts["facts"]["us-gaap"]["EarningsPerShareDiluted"]["units"]["USD/shares"]  # type: ignore[index]
-        for row, value in zip(eps_rows, [-1.0, -0.8, -0.5, 0.2]):
-            row["val"] = value
+        income_rows = companyfacts["facts"]["us-gaap"]["NetIncomeLoss"]["units"]["USD"]  # type: ignore[index]
+        for row in income_rows:
+            if row["fp"] == "Q1" and row["fy"] == 2025:
+                row["val"] = -40
+            if row["fp"] == "Q1" and row["fy"] == 2026:
+                row["val"] = 70
 
         snapshot = compute_open_data_snapshot(
             ticker="GOOGL",
@@ -306,8 +444,7 @@ class OpenDataMetricsTest(unittest.TestCase):
         self.assertIn("EPS turned positive", yoy.notes)
         self.assertIn("YoY EPS growth is not meaningful", yoy.notes)
         self.assertIsNone(cagr.value)
-        self.assertIn("EPS turned positive", cagr.notes)
-        self.assertIn("3-year EPS CAGR is not meaningful", cagr.notes)
+        self.assertIn("Comparable 3-year prior quarterly SEC diluted EPS fact was unavailable", cagr.notes)
 
     def test_marks_loss_making_eps_and_dependent_valuation_as_not_meaningful(self) -> None:
         companyfacts = mocked_companyfacts()
@@ -330,13 +467,13 @@ class OpenDataMetricsTest(unittest.TestCase):
         self.assertIsNone(snapshot.business_health["eps_growth_yoy"].value)
         self.assertIn("EPS remains loss-making", snapshot.business_health["eps_growth_yoy"].notes)
         self.assertIsNone(snapshot.business_health["eps_cagr_3y"].value)
-        self.assertIn("EPS remains loss-making", snapshot.business_health["eps_cagr_3y"].notes)
+        self.assertIn("Comparable 3-year prior quarterly SEC diluted EPS fact was unavailable", snapshot.business_health["eps_cagr_3y"].notes)
         self.assertIsNone(snapshot.valuation["forward_pe"].value)
         self.assertIn("not meaningful", snapshot.valuation["forward_pe"].notes)
         self.assertIsNone(snapshot.valuation["peg"].value)
         self.assertIn("not meaningful", snapshot.valuation["peg"].notes)
         self.assertNotIn("business_health.eps_growth_yoy", coverage["missing_metrics"])
-        self.assertNotIn("business_health.eps_cagr_3y", coverage["missing_metrics"])
+        self.assertIn("business_health.eps_cagr_3y", coverage["missing_metrics"])
         self.assertIn("business_health.eps_growth_yoy", {item["metric"] for item in coverage["not_meaningful_metrics"]})
 
     def test_reads_ifrs_eur_fundamentals_without_mixed_currency_valuation(self) -> None:
@@ -351,8 +488,10 @@ class OpenDataMetricsTest(unittest.TestCase):
         self.assertEqual(snapshot.name, "Nokia Corporation")
         self.assertEqual(snapshot.metrics["revenue_ttm"].value, 26000)
         self.assertIn("sec_companyfacts:ifrs-full/Revenue:EUR:20-F", snapshot.metrics["revenue_ttm"].source)
-        self.assertAlmostEqual(snapshot.business_health["revenue_growth_yoy"].value or 0, 8.3333333333)
-        self.assertAlmostEqual(snapshot.business_health["gross_margin"].value or 0, 38.4615384615)
+        self.assertIsNone(snapshot.business_health["revenue_growth_yoy"].value)
+        self.assertIn("quarterly SEC revenue facts", snapshot.business_health["revenue_growth_yoy"].notes)
+        self.assertIsNone(snapshot.business_health["gross_margin"].value)
+        self.assertIn("Quarterly SEC facts were unavailable", snapshot.business_health["gross_margin"].notes)
         self.assertEqual(snapshot.business_health["cash"].value, 4500)
         self.assertEqual(snapshot.business_health["debt"].value, 2700)
         self.assertEqual(snapshot.valuation["pe"].tier, "unavailable_open_free")
@@ -538,7 +677,7 @@ class OpenDataMetricsTest(unittest.TestCase):
             any("strongest cheap label is withheld" in item for item in analysis.valuation.concerns)
         )
 
-    def test_stock_entry_analysis_marks_complete_but_mixed_business_as_not_needing_more_data(self) -> None:
+    def test_stock_entry_analysis_business_uses_only_latest_quarter_revenue_yoy(self) -> None:
         companyfacts = mocked_companyfacts()
         eps_rows = companyfacts["facts"]["us-gaap"]["EarningsPerShareDiluted"]["units"]["USD/shares"]  # type: ignore[index]
         for row, value in zip(eps_rows, [1.0, 1.2, 2.1, 2.0]):
@@ -564,10 +703,9 @@ class OpenDataMetricsTest(unittest.TestCase):
         analysis = analyze_open_data_stock_entry(snapshot)
 
         self.assertFalse(analysis.needs_more_data)
-        self.assertIn(analysis.business_health.assessment, {"mixed", "weak"})
+        self.assertEqual(analysis.business_health.assessment, "strong")
+        self.assertTrue(any("uses only latest-quarter revenue growth YoY" in item for item in analysis.business_health.evidence))
         self.assertEqual(analysis.missing_data, [])
-        self.assertLess(analysis.conviction, 6)
-        self.assertIn("mixed business facts", analysis.summary)
 
     def test_fills_historical_shares_and_debt_from_public_fact_fallbacks(self) -> None:
         companyfacts = mocked_companyfacts()

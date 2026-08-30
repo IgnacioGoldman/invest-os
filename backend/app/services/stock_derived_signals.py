@@ -211,7 +211,7 @@ def _interesting_facts(snapshot: OpenDataSnapshot, metrics: dict[str, DerivedSig
             InterestingFact(
                 type="revenue_acceleration",
                 severity=_severity(rev_accel, 25),
-                text=f"Revenue growth is {label}: YoY growth differs from 3-year CAGR by {_fmt_pct(rev_accel)}.",
+                text=f"Latest-quarter revenue growth is {label}: YoY growth differs from 3-year CAGR by {_fmt_pct(rev_accel)}.",
                 evidence=["business_health.revenue_growth_yoy", "business_health.revenue_cagr_3y"],
             )
         )
@@ -375,7 +375,7 @@ def build_stock_derived_signals(
         "pe_vs_median": _signal(pe_vs_median, "percent", "Current PE premium or discount versus available annual valuation-history median."),
         "ps_hist_percentile": _signal(ps_hist, "percent", "Current price/sales percentile against available annual valuation history."),
         "fcfy_hist_percentile": _signal(fcfy_hist, "percent", "Current FCF yield percentile against available annual valuation history. Higher means more attractive cash-flow yield versus its own history."),
-        "rev_accel": _signal(rev_accel, "percent", "Revenue growth YoY minus 3-year revenue CAGR."),
+        "rev_accel": _signal(rev_accel, "percent", "Latest-quarter revenue growth YoY minus 3-year revenue CAGR."),
         "eps_accel": _signal(eps_accel, "percent", "EPS growth YoY minus 3-year EPS CAGR."),
         "op_margin_yoy_delta": _signal(_historical_delta(snapshot, "annual_fundamentals", "operating_margin", 1), "percent", "Latest annual operating margin minus prior-year annual operating margin."),
         "fcf_margin_3y_delta": _signal(_historical_delta(snapshot, "annual_fundamentals", "fcf_margin", 3), "percent", "Latest annual FCF margin minus annual FCF margin three periods earlier."),
@@ -389,7 +389,7 @@ def build_stock_derived_signals(
         "sector_roic_rank": _signal(_peer_percentile(snapshots, snapshot, lambda item: _metric(item, "business_health", "roic")), "percent", "ROIC percentile within sector when enough peers exist, otherwise within the loaded universe."),
         "sector_fcfy_rank": _signal(_peer_percentile(snapshots, snapshot, lambda item: _metric(item, "valuation", "fcf_yield")), "percent", "FCF-yield percentile within sector when enough peers exist, otherwise within the loaded universe."),
         "sector_pe_cheap_rank": _signal(_peer_percentile(snapshots, snapshot, lambda item: _metric(item, "valuation", "pe"), higher_better=False), "percent", "Cheapness percentile by PE within sector when enough peers exist, otherwise within the loaded universe. Higher means lower PE than more peers."),
-        "price_fund_gap": _signal(price_fund_gap, "percent", "1-year price change minus latest revenue growth YoY. Negative values can flag price weakness despite business growth."),
+        "price_fund_gap": _signal(price_fund_gap, "percent", "1-year price change minus latest-quarter revenue growth YoY. Negative values can flag price weakness despite business growth."),
     }
 
     return StockDerivedSignals(

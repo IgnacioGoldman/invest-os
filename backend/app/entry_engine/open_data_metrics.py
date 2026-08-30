@@ -117,6 +117,10 @@ USD_UNITS = MONETARY_UNITS
 SHARE_UNITS = ("shares",)
 EPS_UNITS = tuple(f"{currency}/shares" for currency in MONETARY_UNITS)
 
+SUPPORT_ZONE_MAX_TOLERANCE = 0.04
+SUPPORT_ZONE_MAX_AGE_DAYS = 365
+SUPPORT_RECLAIM_LOOKBACK_SESSIONS = 30
+
 
 @dataclass(frozen=True)
 class FactPoint:
@@ -160,6 +164,17 @@ class SupportZone:
     first_touch: str
     last_touch: str
     tolerance_pct: float
+
+
+@dataclass(frozen=True)
+class QuarterlyFact:
+    fy: int | None
+    fp: str
+    value: float
+    end: date
+    filed: date | None
+    source: str
+    notes: str
 
 
 def compute_open_data_snapshot(
@@ -264,10 +279,25 @@ def compute_open_data_snapshot(
             }
         )
 
-    revenue_growth_yoy = _growth_metric(companyfacts, REVENUE_CONCEPTS, USD_UNITS, "revenue_growth_yoy", 1, as_of)
-    revenue_cagr_3y = _growth_metric(companyfacts, REVENUE_CONCEPTS, USD_UNITS, "revenue_cagr_3y", 3, as_of)
-    eps_growth_yoy = _eps_growth_metric(companyfacts, "eps_growth_yoy", 1, as_of)
-    eps_cagr_3y = _eps_growth_metric(companyfacts, "eps_cagr_3y", 3, as_of)
+    revenue_growth_yoy = _quarterly_growth_metric(
+        companyfacts,
+        REVENUE_CONCEPTS,
+        USD_UNITS,
+        "revenue_growth_yoy",
+        as_of,
+        fact_label="revenue",
+    )
+    revenue_cagr_3y = _quarterly_growth_metric(
+        companyfacts,
+        REVENUE_CONCEPTS,
+        USD_UNITS,
+        "revenue_cagr_3y",
+        as_of,
+        years=3,
+        fact_label="revenue",
+    )
+    eps_growth_yoy = _quarterly_eps_growth_metric(companyfacts, "eps_growth_yoy", 1, as_of)
+    eps_cagr_3y = _quarterly_eps_growth_metric(companyfacts, "eps_cagr_3y", 3, as_of)
 
     shares = _shares_diluted_metric(companyfacts, as_of)
     cash = _latest_fact_metric(
@@ -513,18 +543,60 @@ def compute_open_data_snapshot(
     )
     historical_series = _historical_series(companyfacts, price_history or [], as_of)
     data_gaps = _data_gaps(historical_series, forward_pe_estimate, company_context, companyfacts)
+    gross_margin_quarterly = _latest_historical_metric(
+        historical_series,
+        "quarterly_fundamentals",
+        "gross_margin",
+        "gross_margin",
+        as_of,
+    )
+    operating_margin_quarterly = _latest_historical_metric(
+        historical_series,
+        "quarterly_fundamentals",
+        "operating_margin",
+        "operating_margin",
+        as_of,
+    )
+    net_margin_quarterly = _latest_historical_metric(
+        historical_series,
+        "quarterly_fundamentals",
+        "net_margin",
+        "net_margin",
+        as_of,
+    )
+    free_cash_flow_quarterly = _latest_historical_metric(
+        historical_series,
+        "quarterly_fundamentals",
+        "free_cash_flow",
+        "free_cash_flow",
+        as_of,
+    )
+    roe_quarterly = _latest_historical_metric(
+        historical_series,
+        "quarterly_fundamentals",
+        "roe",
+        "roe",
+        as_of,
+    )
+    roic_quarterly = _latest_historical_metric(
+        historical_series,
+        "quarterly_fundamentals",
+        "roic",
+        "roic",
+        as_of,
+    )
 
     business_health = {
         "revenue_growth_yoy": revenue_growth_yoy,
         "revenue_cagr_3y": revenue_cagr_3y,
         "eps_growth_yoy": eps_growth_yoy,
         "eps_cagr_3y": eps_cagr_3y,
-        "gross_margin": gross_margin,
-        "operating_margin": operating_margin,
-        "net_margin": net_margin,
-        "free_cash_flow": free_cash_flow,
-        "roe": roe,
-        "roic": roic,
+        "gross_margin": gross_margin_quarterly,
+        "operating_margin": operating_margin_quarterly,
+        "net_margin": net_margin_quarterly,
+        "free_cash_flow": free_cash_flow_quarterly,
+        "roe": roe_quarterly,
+        "roic": roic_quarterly,
         "cash": cash,
         "debt": debt,
         "debt_to_equity": debt_to_equity,
@@ -708,6 +780,80 @@ def _growth_metric(
     )
 
 
+def _quarterly_growth_metric(
+    companyfacts: dict[str, Any],
+    concepts: tuple[str, ...],
+    units: tuple[str, ...],
+    metric_name: str,
+    fallback_as_of: str,
+    *,
+    years: int = 1,
+    fact_label: str = "metric",
+) -> OpenDataMetric:
+    best: OpenDataMetric | None = None
+    quarters = _quarterly_metric_facts(companyfacts, concepts, units)
+    for latest in sorted(quarters, key=_quarterly_sort_key, reverse=True):
+        prior = _matching_prior_year_quarter(quarters, latest, years=years)
+        if prior is None:
+            continue
+        if prior.value == 0 or latest.value <= 0 or prior.value <= 0:
+            continue
+        value = (
+            ((latest.value - prior.value) / abs(prior.value)) * 100
+            if years == 1
+            else (((latest.value / prior.value) ** (1 / years)) - 1) * 100
+        )
+        label = "Latest-quarter YoY growth" if years == 1 else f"Latest-quarter {years}-year CAGR"
+        metric = OpenDataMetric(
+            value=value,
+            source=f"{latest.source}; {prior.source}",
+            tier="computed_from_public_facts",
+            as_of=latest.end.isoformat(),
+            notes=(
+                f"{label} computed from SEC {latest.fp} {fact_label} facts. "
+                f"Latest quarter: {latest.notes} Prior-year quarter: {prior.notes} "
+                "Q2/Q3 single-quarter values may be derived from year-to-date 10-Q/6-K facts; "
+                "Q4 may be derived from annual facts minus Q3 year-to-date facts."
+            ),
+        )
+        if best is None or metric.as_of > best.as_of:
+            best = metric
+        break
+    if best is not None:
+        return best
+    return _unavailable(
+        metric_name,
+        f"Comparable quarterly SEC {fact_label} facts were unavailable for latest-quarter growth.",
+        fallback_as_of,
+    )
+
+
+def _quarterly_eps_growth_metric(companyfacts: dict[str, Any], metric_name: str, years: int, fallback_as_of: str) -> OpenDataMetric:
+    eps_quarters = _quarterly_eps_facts(companyfacts)
+    if not eps_quarters:
+        return _unavailable(metric_name, "Quarterly SEC diluted EPS facts were unavailable.", fallback_as_of)
+
+    latest = max(eps_quarters, key=_quarterly_sort_key)
+    prior = _matching_prior_year_quarter(eps_quarters, latest, years=years)
+    if prior is None:
+        return _unavailable(metric_name, f"Comparable {years}-year prior quarterly SEC diluted EPS fact was unavailable.", fallback_as_of)
+    if latest.value > 0 and prior.value > 0:
+        value = (
+            ((latest.value - prior.value) / abs(prior.value)) * 100
+            if years == 1
+            else (((latest.value / prior.value) ** (1 / years)) - 1) * 100
+        )
+        label = "Latest-quarter diluted EPS YoY growth" if years == 1 else f"Latest-quarter diluted EPS {years}-year CAGR"
+        return OpenDataMetric(
+            value=value,
+            source=f"{latest.source}; {prior.source}",
+            tier="computed_from_public_facts",
+            as_of=latest.end.isoformat(),
+            notes=f"{label} computed from comparable SEC quarterly diluted EPS facts.",
+        )
+    return _eps_not_meaningful_metric(metric_name, latest.value, prior.value, latest.source, prior.source, latest.end.isoformat(), years)
+
+
 def _eps_growth_metric(companyfacts: dict[str, Any], metric_name: str, years: int, fallback_as_of: str) -> OpenDataMetric:
     eps_points = _annual_points(companyfacts, DILUTED_EPS_CONCEPTS, EPS_UNITS)
     if len(eps_points) > years:
@@ -859,13 +1005,263 @@ def _historical_series(
     fallback_as_of: str,
 ) -> dict[str, list[OpenDataPeriodMetrics]]:
     annual = _annual_fundamental_rows(companyfacts, fallback_as_of)
+    quarterly_fundamentals = _quarterly_fundamental_rows(companyfacts, fallback_as_of)
+    quarterly_revenue = _quarterly_revenue_rows(companyfacts, fallback_as_of)
     valuations = _annual_valuation_rows(companyfacts, price_history, annual, fallback_as_of)
     ranges = _valuation_range_rows(valuations, fallback_as_of)
     return {
+        "quarterly_revenue": quarterly_revenue,
+        "quarterly_fundamentals": quarterly_fundamentals,
         "annual_fundamentals": annual,
         "valuation_history": valuations,
         "valuation_ranges": ranges,
     }
+
+
+def _latest_historical_metric(
+    historical_series: dict[str, list[OpenDataPeriodMetrics]],
+    series_name: str,
+    metric_name: str,
+    output_metric_name: str,
+    fallback_as_of: str,
+) -> OpenDataMetric:
+    for row in sorted(historical_series.get(series_name, []), key=lambda item: item.as_of, reverse=True):
+        metric = row.metrics.get(metric_name)
+        if metric is not None and metric.value is not None:
+            return metric.model_copy(update={"notes": f"Latest-quarter {output_metric_name}: {metric.notes}"})
+    return _unavailable(output_metric_name, f"Quarterly SEC facts were unavailable for {output_metric_name}.", fallback_as_of)
+
+
+def _quarterly_revenue_rows(companyfacts: dict[str, Any], fallback_as_of: str) -> list[OpenDataPeriodMetrics]:
+    best_quarters = _quarterly_metric_facts(companyfacts, REVENUE_CONCEPTS, USD_UNITS)
+
+    rows: list[OpenDataPeriodMetrics] = []
+    for quarter in sorted(best_quarters, key=_quarterly_sort_key):
+        revenue = OpenDataMetric(
+            value=quarter.value,
+            source=quarter.source,
+            tier="computed_from_public_facts" if "derived" in quarter.notes else "exact_public_fact",
+            as_of=quarter.end.isoformat(),
+            notes=quarter.notes,
+        )
+        prior = _matching_prior_year_quarter(best_quarters, quarter)
+        if prior is None or prior.value == 0 or quarter.value <= 0 or prior.value <= 0:
+            growth = _unavailable(
+                "revenue_growth_yoy",
+                f"Comparable prior-year {quarter.fp} revenue was unavailable.",
+                fallback_as_of,
+            )
+        else:
+            growth = OpenDataMetric(
+                value=((quarter.value - prior.value) / abs(prior.value)) * 100,
+                source=f"{quarter.source}; {prior.source}",
+                tier="computed_from_public_facts",
+                as_of=quarter.end.isoformat(),
+                notes=f"Quarterly revenue YoY growth for {quarter.fp} versus the same fiscal quarter last year.",
+            )
+        period = f"FY{quarter.fy} {quarter.fp}" if quarter.fy is not None else f"{quarter.end.isoformat()} {quarter.fp}"
+        rows.append(
+            OpenDataPeriodMetrics(
+                period=period,
+                as_of=quarter.end.isoformat(),
+                metrics={
+                    "revenue": revenue,
+                    "revenue_growth_yoy": growth,
+                },
+            )
+        )
+    return rows
+
+
+def _quarterly_fundamental_rows(companyfacts: dict[str, Any], fallback_as_of: str) -> list[OpenDataPeriodMetrics]:
+    revenue = _quarterly_fact_map(companyfacts, REVENUE_CONCEPTS, USD_UNITS)
+    cost_of_revenue = _quarterly_fact_map(companyfacts, COST_OF_REVENUE_CONCEPTS, USD_UNITS)
+    gross_profit = _quarterly_fact_map(companyfacts, GROSS_PROFIT_CONCEPTS, USD_UNITS)
+    operating_income = _quarterly_fact_map(companyfacts, OPERATING_INCOME_CONCEPTS, USD_UNITS)
+    operating_expenses = _quarterly_fact_map(companyfacts, OPERATING_EXPENSES_CONCEPTS, USD_UNITS)
+    research_development = _quarterly_fact_map(companyfacts, RESEARCH_DEVELOPMENT_EXPENSE_CONCEPTS, USD_UNITS)
+    selling_general_admin = _quarterly_fact_map(companyfacts, SELLING_GENERAL_ADMINISTRATIVE_EXPENSE_CONCEPTS, USD_UNITS)
+    net_income = _quarterly_fact_map(companyfacts, NET_INCOME_CONCEPTS, USD_UNITS)
+    operating_cash_flow = _quarterly_fact_map(companyfacts, OPERATING_CASH_FLOW_CONCEPTS, USD_UNITS)
+    capex = _quarterly_fact_map(companyfacts, CAPEX_CONCEPTS, USD_UNITS)
+    eps = _quarterly_fact_map(companyfacts, DILUTED_EPS_CONCEPTS, EPS_UNITS)
+    shares = _quarterly_fact_map(companyfacts, DILUTED_SHARES_CONCEPTS, SHARE_UNITS)
+    cash = _quarterly_instant_fact_map(companyfacts, CASH_CONCEPTS, USD_UNITS)
+    equity = _quarterly_instant_fact_map(companyfacts, EQUITY_CONCEPTS, USD_UNITS)
+    debt = _quarterly_debt_metrics(companyfacts, fallback_as_of)
+
+    periods = (
+        set(revenue)
+        | set(cost_of_revenue)
+        | set(gross_profit)
+        | set(operating_income)
+        | set(net_income)
+        | set(operating_cash_flow)
+        | set(capex)
+        | set(eps)
+        | set(shares)
+        | set(cash)
+        | set(equity)
+        | set(debt)
+    )
+    facts_by_period = [revenue, cost_of_revenue, gross_profit, operating_income, operating_expenses, research_development, selling_general_admin, net_income, operating_cash_flow, capex, eps, shares, cash, equity]
+
+    def sort_period(key: tuple[int | None, str]) -> tuple[date, date, str]:
+        facts = [mapping[key] for mapping in facts_by_period if key in mapping]
+        if key in debt:
+            return (date.fromisoformat(debt[key].as_of), date.min, key[1])
+        if not facts:
+            return (date.min, date.min, key[1])
+        return max((_quarterly_sort_key(fact) for fact in facts))
+
+    rows: list[OpenDataPeriodMetrics] = []
+    for key in sorted(periods, key=sort_period):
+        fy, fp = key
+        period = f"FY{fy} {fp}" if fy is not None else fp
+        row: dict[str, OpenDataMetric] = {}
+        row["revenue"] = _metric_from_quarterly_fact(revenue.get(key), "revenue", fallback_as_of)
+        row["cost_of_revenue"] = _metric_from_quarterly_fact(cost_of_revenue.get(key), "cost_of_revenue", fallback_as_of)
+        row["net_income"] = _metric_from_quarterly_fact(net_income.get(key), "net_income", fallback_as_of)
+        row["operating_income"] = _metric_from_quarterly_fact(operating_income.get(key), "operating_income", fallback_as_of)
+        row["operating_cash_flow"] = _metric_from_quarterly_fact(operating_cash_flow.get(key), "operating_cash_flow", fallback_as_of)
+        normalized_capex = _metric_from_quarterly_fact(capex.get(key), "capex", fallback_as_of)
+        if normalized_capex.value is not None and normalized_capex.value < 0:
+            normalized_capex = normalized_capex.model_copy(update={"value": abs(normalized_capex.value)})
+        row["capex"] = normalized_capex
+        row["eps_diluted"] = _metric_from_quarterly_fact(eps.get(key), "eps_diluted", fallback_as_of)
+        row["shares_diluted"] = _metric_from_quarterly_fact(shares.get(key), "shares_diluted", fallback_as_of)
+        row["cash"] = _metric_from_quarterly_fact(cash.get(key), "cash", fallback_as_of)
+        row["debt"] = debt.get(key) or _unavailable("debt", "Quarterly debt fact was unavailable.", fallback_as_of)
+        row["equity"] = _metric_from_quarterly_fact(equity.get(key), "equity", fallback_as_of)
+
+        if gross_profit.get(key) is not None:
+            row["gross_profit"] = _metric_from_quarterly_fact(gross_profit.get(key), "gross_profit", fallback_as_of)
+        else:
+            row["gross_profit"] = _computed_from_metrics(
+                "gross_profit",
+                row["revenue"],
+                row["cost_of_revenue"],
+                lambda sales, cost: sales - cost,
+                "Quarterly gross profit computed as revenue minus cost of revenue.",
+                fallback_as_of,
+            )
+        if row["operating_income"].value is None and operating_expenses.get(key) is not None:
+            row["operating_income"] = _computed_from_metrics(
+                "operating_income",
+                row["gross_profit"],
+                _metric_from_quarterly_fact(operating_expenses.get(key), "operating_expenses", fallback_as_of),
+                lambda profit, expenses: profit - expenses,
+                "Quarterly operating income computed as gross profit minus operating expenses.",
+                fallback_as_of,
+            )
+        if row["operating_income"].value is None and research_development.get(key) is not None and selling_general_admin.get(key) is not None:
+            rd = _metric_from_quarterly_fact(research_development.get(key), "research_development_expense", fallback_as_of)
+            sga = _metric_from_quarterly_fact(selling_general_admin.get(key), "selling_general_administrative_expense", fallback_as_of)
+            rd_sga = _computed_from_metrics(
+                "operating_expense_components",
+                rd,
+                sga,
+                lambda rd_value, sga_value: rd_value + sga_value,
+                "Quarterly R&D plus SG&A.",
+                fallback_as_of,
+                tier="proxy_estimate",
+            )
+            row["operating_income"] = _computed_from_metrics(
+                "operating_income",
+                row["gross_profit"],
+                rd_sga,
+                lambda profit, expenses: profit - expenses,
+                "Proxy quarterly operating income computed as gross profit minus R&D and SG&A.",
+                fallback_as_of,
+                tier="proxy_estimate",
+            )
+        row["free_cash_flow"] = _computed_from_metrics(
+            "free_cash_flow",
+            row["operating_cash_flow"],
+            row["capex"],
+            lambda ocf, capex_outflow: ocf - capex_outflow,
+            "Quarterly free cash flow computed as operating cash flow minus capex.",
+            fallback_as_of,
+        )
+        if row["eps_diluted"].value is None:
+            row["eps_diluted"] = _computed_from_metrics(
+                "eps_diluted",
+                row["net_income"],
+                row["shares_diluted"],
+                lambda income, share_count: income / share_count,
+                "Quarterly EPS computed as net income divided by diluted shares.",
+                fallback_as_of,
+                tier="proxy_estimate",
+            )
+        row["gross_margin"] = _computed_from_metrics(
+            "gross_margin",
+            row["gross_profit"],
+            row["revenue"],
+            lambda profit, sales: (profit / sales) * 100,
+            "Quarterly gross margin.",
+            fallback_as_of,
+        )
+        row["operating_margin"] = _computed_from_metrics(
+            "operating_margin",
+            row["operating_income"],
+            row["revenue"],
+            lambda income, sales: (income / sales) * 100,
+            "Quarterly operating margin.",
+            fallback_as_of,
+        )
+        row["net_margin"] = _computed_from_metrics(
+            "net_margin",
+            row["net_income"],
+            row["revenue"],
+            lambda income, sales: (income / sales) * 100,
+            "Quarterly net margin.",
+            fallback_as_of,
+        )
+        row["fcf_margin"] = _computed_from_metrics(
+            "fcf_margin",
+            row["free_cash_flow"],
+            row["revenue"],
+            lambda fcf, sales: (fcf / sales) * 100,
+            "Quarterly free cash flow margin.",
+            fallback_as_of,
+        )
+        row["roe"] = _computed_from_metrics(
+            "roe",
+            row["net_income"],
+            row["equity"],
+            lambda income, book_equity: ((income * 4) / book_equity) * 100,
+            "Annualized quarterly net income divided by quarter-end equity.",
+            fallback_as_of,
+        )
+        row["debt_to_equity"] = _computed_from_metrics(
+            "debt_to_equity",
+            row["debt"],
+            row["equity"],
+            lambda total_debt, book_equity: total_debt / book_equity,
+            "Quarter-end debt divided by quarter-end equity.",
+            fallback_as_of,
+        )
+        invested_capital_value = None
+        if row["debt"].value is not None and row["equity"].value is not None:
+            invested_capital_value = row["debt"].value + row["equity"].value - (row["cash"].value or 0)
+        invested_capital = OpenDataMetric(
+            value=invested_capital_value,
+            source=f"{row['debt'].source}; {row['equity'].source}; {row['cash'].source}",
+            tier="proxy_estimate" if invested_capital_value is not None else "unavailable_open_free",
+            as_of=_max_as_of(row["debt"].as_of, row["equity"].as_of, row["cash"].as_of),
+            notes="Quarter-end proxy invested capital: debt plus equity minus cash.",
+        )
+        row["roic"] = _computed_from_metrics(
+            "roic",
+            row["operating_income"],
+            invested_capital,
+            lambda income, capital: ((income * 4) / capital) * 100,
+            "Proxy annualized quarterly ROIC: operating income divided by quarter-end invested capital. No tax adjustment is applied.",
+            fallback_as_of,
+            tier="proxy_estimate",
+        )
+        rows.append(OpenDataPeriodMetrics(period=period, as_of=sort_period(key)[0].isoformat(), metrics=row))
+    return rows
 
 
 def _annual_fundamental_rows(companyfacts: dict[str, Any], fallback_as_of: str) -> list[OpenDataPeriodMetrics]:
@@ -1225,7 +1621,7 @@ def _support_zone_tolerance(points: list[HistoricalPricePoint]) -> float:
     volatility = _daily_return_volatility(points[-90:])
     if volatility is None:
         return 0.035
-    return max(0.025, min(0.06, volatility * 2.2))
+    return max(0.025, min(SUPPORT_ZONE_MAX_TOLERANCE, volatility * 2.2))
 
 
 def _swing_lows(points: list[HistoricalPricePoint], radius: int = 4) -> list[HistoricalPricePoint]:
@@ -1298,6 +1694,50 @@ def _support_zones(points: list[HistoricalPricePoint], latest_date: date) -> lis
     return zones
 
 
+def _zone_age_days(zone: SupportZone, latest_date: date) -> int:
+    last_touch = _parse_date(zone.last_touch)
+    if last_touch is None:
+        return SUPPORT_ZONE_MAX_AGE_DAYS + 1
+    return max(0, (latest_date - last_touch).days)
+
+
+def _is_reclaim_or_resistance_test(
+    points: list[HistoricalPricePoint],
+    zone: SupportZone,
+    current_price: float,
+) -> bool:
+    if current_price > zone.high * 1.01:
+        return False
+    if current_price < zone.low * 0.995:
+        return True
+
+    recent = points[-SUPPORT_RECLAIM_LOOKBACK_SESSIONS:]
+    previous = recent[:-1]
+    if len(previous) < 10:
+        return False
+
+    below_count = sum(1 for point in previous if point.close < zone.low)
+    above_count = sum(1 for point in previous if point.close > zone.high)
+    return below_count >= max(6, int(len(previous) * 0.45)) and above_count <= 2
+
+
+def _valid_support_zones(
+    points: list[HistoricalPricePoint],
+    latest_date: date,
+    current_price: float,
+) -> list[SupportZone]:
+    zones: list[SupportZone] = []
+    for zone in _support_zones(points, latest_date):
+        if _zone_age_days(zone, latest_date) > SUPPORT_ZONE_MAX_AGE_DAYS:
+            continue
+        if zone.midpoint > current_price * 1.005:
+            continue
+        if _is_reclaim_or_resistance_test(points, zone, current_price):
+            continue
+        zones.append(zone)
+    return zones
+
+
 def _support_1d_metric(
     points: list[HistoricalPricePoint],
     current_price: float,
@@ -1309,17 +1749,12 @@ def _support_1d_metric(
     if latest_date is None:
         return _unavailable("support_1d_distance", "Latest historical price date was unavailable.", fallback_as_of)
 
-    candidate_zones = [
-        zone
-        for zone in _support_zones(points, latest_date)
-        if zone.midpoint <= current_price * 1.02
-        and current_price >= zone.low * 0.995
-        and ((current_price - zone.midpoint) / zone.midpoint) * 100 <= 15
-    ]
+    candidate_zones = _valid_support_zones(points, latest_date, current_price)
     if not candidate_zones:
         return _unavailable(
             "support_1d_distance",
-            "No repeated daily swing-low support zone was detected within 15% of the latest close using roughly two years of open/free price history.",
+            "No recent repeated daily swing-low support zone was detected below the latest close using roughly two years of open/free price history. "
+            "Zones that were stale, above price, or recently approached from below are ignored.",
             as_of,
         )
 
@@ -1329,6 +1764,7 @@ def _support_1d_metric(
             max((current_price / item.high) - 1, 0),
             abs((current_price / item.midpoint) - 1),
             -item.touches,
+            _zone_age_days(item, latest_date),
         ),
     )
     distance = ((current_price - zone.midpoint) / zone.midpoint) * 100
@@ -1338,7 +1774,7 @@ def _support_1d_metric(
         tier="computed_from_public_facts",
         as_of=as_of,
         notes=(
-            "Nearest repeated daily swing-low support zone over roughly two years. "
+            "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. "
             f"Support zone: ${zone.low:.2f}-${zone.high:.2f}; midpoint ${zone.midpoint:.2f}; "
             f"distance {distance:+.2f}%; touches {zone.touches}; "
             f"first touch {zone.first_touch}; last touch {zone.last_touch}; "
@@ -1755,6 +2191,206 @@ def _is_prior_year(point: FactPoint, latest_quarter: FactPoint) -> bool:
     return False
 
 
+def _quarterly_facts(points: list[FactPoint]) -> list[QuarterlyFact]:
+    by_period: dict[tuple[int | None, str], QuarterlyFact] = {}
+    ytd_by_period: dict[tuple[int | None, str], FactPoint] = {}
+    annual_by_fy: dict[int, FactPoint] = {}
+
+    for point in points:
+        if _is_direct_quarter(point):
+            key = (point.fy, point.fp or "")
+            by_period[key] = _better_quarterly_fact(
+                by_period.get(key),
+                QuarterlyFact(
+                    fy=point.fy,
+                    fp=point.fp or "",
+                    value=point.value,
+                    end=point.end,
+                    filed=point.filed,
+                    source=_source(point),
+                    notes="Single-quarter SEC fact.",
+                ),
+            )
+            if point.fp == "Q1":
+                current = ytd_by_period.get(key)
+                if current is None or _point_sort_key(point) > _point_sort_key(current):
+                    ytd_by_period[key] = point
+        elif _is_ytd_quarter(point) and _is_quarterly_form(point):
+            key = (point.fy, point.fp or "")
+            current = ytd_by_period.get(key)
+            if current is None or _point_sort_key(point) > _point_sort_key(current):
+                ytd_by_period[key] = point
+        elif _is_annual(point) and point.fy is not None:
+            current = annual_by_fy.get(point.fy)
+            if current is None or _point_sort_key(point) > _point_sort_key(current):
+                annual_by_fy[point.fy] = point
+
+    for key, point in ytd_by_period.items():
+        if key in by_period:
+            continue
+        fy, fp = key
+        if fp == "Q1":
+            by_period[key] = QuarterlyFact(
+                fy=fy,
+                fp=fp,
+                value=point.value,
+                end=point.end,
+                filed=point.filed,
+                source=_source(point),
+                notes="Q1 uses the SEC Q1 year-to-date fact, which equals the single quarter.",
+            )
+            continue
+        previous_fp = "Q1" if fp == "Q2" else "Q2" if fp == "Q3" else None
+        previous = ytd_by_period.get((fy, previous_fp)) if previous_fp else None
+        if previous is None:
+            continue
+        by_period[key] = QuarterlyFact(
+            fy=fy,
+            fp=fp,
+            value=point.value - previous.value,
+            end=point.end,
+            filed=point.filed,
+            source=f"{_source(point)}; {_source(previous)}",
+            notes=f"{fp} value derived as {fp} year-to-date value minus {previous_fp} year-to-date value.",
+        )
+
+    for fy, annual in annual_by_fy.items():
+        key = (fy, "Q4")
+        if key in by_period:
+            continue
+        q3 = ytd_by_period.get((fy, "Q3"))
+        if q3 is None:
+            continue
+        by_period[key] = QuarterlyFact(
+            fy=fy,
+            fp="Q4",
+            value=annual.value - q3.value,
+            end=annual.end,
+            filed=annual.filed,
+            source=f"{_source(annual)}; {_source(q3)}",
+            notes="Q4 value derived as annual value minus Q3 year-to-date value.",
+        )
+
+    return sorted(by_period.values(), key=_quarterly_sort_key, reverse=True)
+
+
+def _quarterly_metric_facts(
+    companyfacts: dict[str, Any],
+    concepts: tuple[str, ...],
+    units: tuple[str, ...],
+) -> list[QuarterlyFact]:
+    by_period: dict[tuple[int | None, str], QuarterlyFact] = {}
+    for concept in concepts:
+        for quarter in _quarterly_facts(_fact_points(companyfacts, concept, units)):
+            key = (quarter.fy, quarter.fp)
+            current = by_period.get(key)
+            if current is None or _quarterly_sort_key(quarter) >= _quarterly_sort_key(current):
+                by_period[key] = quarter
+    return sorted(by_period.values(), key=_quarterly_sort_key, reverse=True)
+
+
+def _quarterly_fact_map(
+    companyfacts: dict[str, Any],
+    concepts: tuple[str, ...],
+    units: tuple[str, ...],
+) -> dict[tuple[int | None, str], QuarterlyFact]:
+    return {(quarter.fy, quarter.fp): quarter for quarter in _quarterly_metric_facts(companyfacts, concepts, units)}
+
+
+def _quarterly_instant_fact_map(
+    companyfacts: dict[str, Any],
+    concepts: tuple[str, ...],
+    units: tuple[str, ...],
+) -> dict[tuple[int | None, str], QuarterlyFact]:
+    by_period: dict[tuple[int | None, str], QuarterlyFact] = {}
+    for concept in concepts:
+        for point in _fact_points(companyfacts, concept, units):
+            if point.fp in {"Q1", "Q2", "Q3", "Q4"} and _is_quarterly_form(point):
+                key = (point.fy, point.fp or "")
+                candidate = QuarterlyFact(
+                    fy=point.fy,
+                    fp=point.fp or "",
+                    value=point.value,
+                    end=point.end,
+                    filed=point.filed,
+                    source=_source(point),
+                    notes="Quarter-end SEC fact.",
+                )
+            elif _is_annual(point) and point.fy is not None:
+                key = (point.fy, "Q4")
+                candidate = QuarterlyFact(
+                    fy=point.fy,
+                    fp="Q4",
+                    value=point.value,
+                    end=point.end,
+                    filed=point.filed,
+                    source=_source(point),
+                    notes="Fiscal year-end SEC fact used as Q4 quarter-end value.",
+                )
+            else:
+                continue
+            current = by_period.get(key)
+            if current is None or _quarterly_sort_key(candidate) >= _quarterly_sort_key(current):
+                by_period[key] = candidate
+    return by_period
+
+
+def _quarterly_eps_facts(companyfacts: dict[str, Any]) -> list[QuarterlyFact]:
+    by_period = _quarterly_fact_map(companyfacts, DILUTED_EPS_CONCEPTS, EPS_UNITS)
+    net_income = _quarterly_fact_map(companyfacts, NET_INCOME_CONCEPTS, USD_UNITS)
+    shares = _quarterly_fact_map(companyfacts, DILUTED_SHARES_CONCEPTS, SHARE_UNITS)
+    for key in set(net_income) & set(shares):
+        if key in by_period or shares[key].value == 0:
+            continue
+        income = net_income[key]
+        share_count = shares[key]
+        by_period[key] = QuarterlyFact(
+            fy=income.fy,
+            fp=income.fp,
+            value=income.value / share_count.value,
+            end=max(income.end, share_count.end),
+            filed=max(income.filed or date.min, share_count.filed or date.min),
+            source=f"{income.source}; {share_count.source}",
+            notes="Quarterly EPS computed as net income divided by diluted shares.",
+        )
+    return sorted(by_period.values(), key=_quarterly_sort_key, reverse=True)
+
+
+def _better_quarterly_fact(current: QuarterlyFact | None, candidate: QuarterlyFact) -> QuarterlyFact:
+    if current is None or _quarterly_sort_key(candidate) > _quarterly_sort_key(current):
+        return candidate
+    return current
+
+
+def _quarterly_sort_key(point: QuarterlyFact) -> tuple[date, date, str]:
+    return (point.end, point.filed or date.min, point.fp)
+
+
+def _matching_prior_year_quarter(quarters: list[QuarterlyFact], latest: QuarterlyFact, *, years: int = 1) -> QuarterlyFact | None:
+    candidates = [
+        point
+        for point in quarters
+        if point.fp == latest.fp
+        and (
+            (point.fy is not None and latest.fy is not None and point.fy == latest.fy - years)
+            or (point.fy is None or latest.fy is None) and point.end.year == latest.end.year - years
+        )
+    ]
+    if not candidates:
+        return None
+    return max(candidates, key=_quarterly_sort_key)
+
+
+def _is_direct_quarter(point: FactPoint) -> bool:
+    return point.fp in {"Q1", "Q2", "Q3", "Q4"} and _is_quarterly_form(point) and _is_single_quarter(point)
+
+
+def _is_single_quarter(point: FactPoint) -> bool:
+    if point.duration_days is None:
+        return False
+    return 60 <= point.duration_days <= 130
+
+
 def _is_annual(point: FactPoint) -> bool:
     return point.fp == "FY" and _is_10k(point) and (point.duration_days is None or point.duration_days >= 300)
 
@@ -1776,6 +2412,11 @@ def _is_10k(point: FactPoint) -> bool:
 
 def _is_10q(point: FactPoint) -> bool:
     return point.form.upper().startswith("10-Q")
+
+
+def _is_quarterly_form(point: FactPoint) -> bool:
+    form = point.form.upper()
+    return form.startswith("10-Q") or form.startswith("6-K")
 
 
 def _annual_points(companyfacts: dict[str, Any], concepts: tuple[str, ...], units: tuple[str, ...]) -> list[FactPoint]:
@@ -1876,6 +2517,47 @@ def _annual_debt_metrics(companyfacts: dict[str, Any], fallback_as_of: str) -> d
     return result
 
 
+def _quarterly_debt_metrics(companyfacts: dict[str, Any], fallback_as_of: str) -> dict[tuple[int | None, str], OpenDataMetric]:
+    result: dict[tuple[int | None, str], OpenDataMetric] = {}
+    for group in DEBT_COMPONENT_GROUPS:
+        component_maps = [_quarterly_instant_fact_map(companyfacts, (concept,), USD_UNITS) for concept in group]
+        common_periods = set(component_maps[0]) if component_maps else set()
+        for component_map in component_maps[1:]:
+            common_periods &= set(component_map)
+        for key in sorted(common_periods, key=lambda period: (period[0] or 0, period[1]), reverse=True):
+            if key in result:
+                continue
+            points = [component_map[key] for component_map in component_maps]
+            end_dates = {point.end for point in points}
+            statement_currencies = {
+                currency
+                for point in points
+                for currency in _source_statement_currencies(point.source)
+            }
+            if len(end_dates) != 1 or len(statement_currencies) > 1:
+                continue
+            result[key] = OpenDataMetric(
+                value=sum(point.value for point in points),
+                source="; ".join(point.source for point in points),
+                tier="computed_from_public_facts",
+                as_of=points[0].end.isoformat(),
+                notes=f"Quarterly debt computed as sum of SEC debt components: {', '.join(group)}.",
+            )
+
+    direct = _quarterly_instant_fact_map(companyfacts, DEBT_DIRECT_CONCEPTS, USD_UNITS)
+    for key, point in direct.items():
+        if key in result:
+            continue
+        result[key] = OpenDataMetric(
+            value=point.value,
+            source=point.source,
+            tier="exact_public_fact",
+            as_of=point.end.isoformat(),
+            notes="Quarterly debt SEC fact. This may include capital/finance lease obligations depending on the SEC tag.",
+        )
+    return result
+
+
 def _period_year(point: FactPoint) -> int | None:
     if point.frame and point.frame.startswith("CY") and len(point.frame) >= 6:
         try:
@@ -1894,6 +2576,18 @@ def _metric_from_point(point: FactPoint | None, metric_name: str, fallback_as_of
         tier="exact_public_fact",
         as_of=point.end.isoformat(),
         notes=f"Annual {metric_name} SEC fact.",
+    )
+
+
+def _metric_from_quarterly_fact(point: QuarterlyFact | None, metric_name: str, fallback_as_of: str) -> OpenDataMetric:
+    if point is None:
+        return _unavailable(metric_name, "Quarterly SEC fact was unavailable.", fallback_as_of)
+    return OpenDataMetric(
+        value=point.value,
+        source=point.source,
+        tier="computed_from_public_facts" if "derived" in point.notes else "exact_public_fact",
+        as_of=point.end.isoformat(),
+        notes=f"Quarterly {metric_name} SEC fact. {point.notes}",
     )
 
 
