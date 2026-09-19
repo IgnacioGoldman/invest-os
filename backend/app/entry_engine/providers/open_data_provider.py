@@ -231,6 +231,18 @@ class OpenDataProvider:
             }
             return metadata
 
+        universe_metadata = self._universe_metadata(symbol)
+        if universe_metadata.get("cik") is not None:
+            return {
+                "ticker": symbol,
+                "name": universe_metadata.get("name") or GOOGL_FALLBACK_METADATA["name"],
+                "cik": int(universe_metadata["cik"]),
+                "exchange": universe_metadata.get("exchange") or GOOGL_FALLBACK_METADATA["exchange"],
+                "country": universe_metadata.get("country") or universe_metadata.get("region") or "US",
+                "sector": universe_metadata.get("sector") or GOOGL_FALLBACK_METADATA["sector"],
+                "industry": universe_metadata.get("industry") or GOOGL_FALLBACK_METADATA["industry"],
+            }
+
         if symbol == "GOOGL":
             return dict(GOOGL_FALLBACK_METADATA)
         raise ValueError(f"Could not resolve metadata for {symbol}.")
@@ -277,7 +289,10 @@ class OpenDataProvider:
                             continue
                         universe[row_symbol] = {
                             "name": row.get("name"),
+                            "cik": row.get("cik"),
+                            "exchange": row.get("exchange"),
                             "region": row.get("region"),
+                            "country": row.get("country"),
                             "sector": row.get("sector"),
                             "industry": row.get("industry"),
                         }

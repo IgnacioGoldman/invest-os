@@ -501,6 +501,8 @@ def main() -> None:
     output = json.dumps(report, indent=2, sort_keys=False)
     _write_report(args.output, report)
     print(output)
+    if save and work_items and not results:
+        raise SystemExit("No stock snapshots were collected; refusing to continue with an empty saved dataset.")
 
 
 if __name__ == "__main__":
