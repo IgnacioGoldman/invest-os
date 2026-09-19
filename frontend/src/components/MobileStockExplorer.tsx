@@ -1476,7 +1476,7 @@ export function MobileStockExplorer({
         <header className="mobile-stock-header">
           <div>
             <h1>{signedIn ? "Watchlist" : "Stocks"}</h1>
-            <p>{signedIn ? "My stocks" : "Insights"}{dateLabel ? ` · ${dateLabel}` : ""}</p>
+            <p>{signedIn ? `My stocks${dateLabel ? ` · ${dateLabel}` : ""}` : dateLabel}</p>
           </div>
           <div className="mobile-header-actions">
             {headerActions?.(openDetail)}
