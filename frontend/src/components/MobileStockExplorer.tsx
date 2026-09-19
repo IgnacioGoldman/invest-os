@@ -5,9 +5,11 @@ import {
   BarChart3,
   Check,
   ChevronRight,
+  Plus,
   RotateCcw,
   Search,
   SlidersHorizontal,
+  Trash2,
   X,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -39,9 +41,23 @@ type FilterKey =
   | "support_6m"
   | "support_2y"
   | "support_5y";
-type SortKey = "symbol" | FilterKey;
+type SortKey = "symbol" | "support_best" | FilterKey;
 type SortDirection = "asc" | "desc";
-type FilterState = Partial<Record<FilterKey, string[]>>;
+type LogicOperator = "and" | "or";
+type FilterCondition = {
+  id: string;
+  field: FilterKey;
+  value: string;
+};
+type FilterGroup = {
+  id: string;
+  operator: LogicOperator;
+  conditions: FilterCondition[];
+};
+type FilterExpression = {
+  operator: LogicOperator;
+  groups: FilterGroup[];
+};
 type ChartRange = "1D" | "1W" | "1M" | "3M" | "6M" | "1Y" | "2Y" | "5Y" | "ALL";
 type MetricKind = "percent" | "ratio" | "compact" | "price";
 
@@ -65,6 +81,8 @@ const SUPPORT_KEYS: Record<Extract<FilterKey, `support_${string}`>, string> = {
   support_2y: "support_2y_distance",
   support_5y: "support_5y_distance",
 };
+
+const SUPPORT_FILTER_KEYS = ["support_1m", "support_6m", "support_2y", "support_5y"] as const;
 
 const FILTER_DEFINITIONS: FilterDefinition[] = [
   {
@@ -125,6 +143,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
 
 const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
   { key: "symbol", label: "Symbol" },
+  { key: "support_best", label: "Closest support" },
   ...FILTER_DEFINITIONS.map(({ key, shortLabel }) => ({ key, label: shortLabel })),
 ];
 
@@ -306,8 +325,20 @@ function signalFor(snapshot: OpenDataStockSnapshot, key: FilterKey): Signal {
   return supportSignal(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
 }
 
+function closestSupport(snapshot: OpenDataStockSnapshot) {
+  return SUPPORT_FILTER_KEYS
+    .map((key) => ({
+      key,
+      label: FILTER_DEFINITIONS.find((definition) => definition.key === key)?.shortLabel ?? key,
+      value: finiteNumber(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value),
+    }))
+    .filter((item): item is { key: typeof SUPPORT_FILTER_KEYS[number]; label: string; value: number } => item.value != null)
+    .sort((left, right) => left.value - right.value)[0] ?? null;
+}
+
 function sortValue(snapshot: OpenDataStockSnapshot, key: SortKey): number | string | null {
   if (key === "symbol") return snapshot.ticker;
+  if (key === "support_best") return closestSupport(snapshot)?.value ?? null;
   if (key === "revenue") return finiteNumber(snapshot.business_health.revenue_growth_yoy?.value);
   if (key === "eps") return finiteNumber(snapshot.business_health.eps_growth_yoy?.value);
   if (key === "momentum") return revenueMomentum(snapshot).change;
@@ -342,12 +373,84 @@ function rowMetric(snapshot: OpenDataStockSnapshot, key: SortKey) {
       secondary: null,
     };
   }
+  if (key === "support_best") {
+    const support = closestSupport(snapshot);
+    return {
+      value: formatPercent(support?.value, true),
+      signal: supportSignal(support?.value),
+      secondary: support?.label ?? null,
+    };
+  }
   const value = snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value;
   return { value: formatPercent(value, true), signal: supportSignal(value), secondary: null };
 }
 
-function activeFilterCount(filters: FilterState) {
-  return Object.values(filters).reduce((total, values) => total + (values?.length ?? 0), 0);
+let filterId = 0;
+
+function nextFilterId(prefix: "group" | "condition") {
+  filterId += 1;
+  return `${prefix}-${filterId}`;
+}
+
+function createCondition(field: FilterKey = "revenue", value?: string): FilterCondition {
+  const definition = FILTER_DEFINITIONS.find((item) => item.key === field) ?? FILTER_DEFINITIONS[0];
+  return {
+    id: nextFilterId("condition"),
+    field: definition.key,
+    value: value ?? definition.options[0].label,
+  };
+}
+
+function createFilterGroup(field: FilterKey = "revenue"): FilterGroup {
+  return {
+    id: nextFilterId("group"),
+    operator: "or",
+    conditions: [createCondition(field)],
+  };
+}
+
+function createStrongYoySupportExpression(): FilterExpression {
+  return {
+    operator: "and",
+    groups: [
+      {
+        id: nextFilterId("group"),
+        operator: "or",
+        conditions: SUPPORT_FILTER_KEYS.map((field) => createCondition(field, "At support")),
+      },
+      {
+        id: nextFilterId("group"),
+        operator: "or",
+        conditions: [createCondition("revenue", "Strong"), createCondition("revenue", "Solid")],
+      },
+    ],
+  };
+}
+
+function activeFilterCount(expression: FilterExpression) {
+  return expression.groups.reduce((total, group) => total + group.conditions.length, 0);
+}
+
+function filterExpressionMatches(snapshot: OpenDataStockSnapshot, expression: FilterExpression) {
+  if (expression.groups.length === 0) return true;
+  const groupMatches = expression.groups.map((group) => {
+    if (group.conditions.length === 0) return true;
+    const matches = group.conditions.map((condition) => signalFor(snapshot, condition.field).label === condition.value);
+    return group.operator === "and" ? matches.every(Boolean) : matches.some(Boolean);
+  });
+  return expression.operator === "and" ? groupMatches.every(Boolean) : groupMatches.some(Boolean);
+}
+
+function isStrongYoySupportExpression(expression: FilterExpression) {
+  if (expression.operator !== "and" || expression.groups.length !== 2) return false;
+  const signatures = expression.groups.map((group) => ({
+    operator: group.operator,
+    conditions: group.conditions.map((condition) => `${condition.field}:${condition.value}`).sort(),
+  }));
+  const supportSignature = SUPPORT_FILTER_KEYS.map((key) => `${key}:At support`).sort();
+  const growthSignature = ["revenue:Solid", "revenue:Strong"];
+  return signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature.join("|"))
+    && signatures.some((group) => group.operator === "or" && group.conditions.join("|") === growthSignature.join("|"));
 }
 
 function StockStatus({ signal }: { signal: Signal }) {
@@ -356,23 +459,25 @@ function StockStatus({ signal }: { signal: Signal }) {
 
 function FilterSheet({
   open,
-  filters,
+  expression,
   sortKey,
   sortDirection,
   actions,
   onClose,
-  onToggleFilter,
+  onExpressionChange,
+  onApplyPreset,
   onSortKeyChange,
   onSortDirectionChange,
   onClear,
 }: {
   open: boolean;
-  filters: FilterState;
+  expression: FilterExpression;
   sortKey: SortKey;
   sortDirection: SortDirection;
   actions?: ReactNode;
   onClose: () => void;
-  onToggleFilter: (key: FilterKey, value: string) => void;
+  onExpressionChange: (expression: FilterExpression) => void;
+  onApplyPreset: () => void;
   onSortKeyChange: (key: SortKey) => void;
   onSortDirectionChange: (direction: SortDirection) => void;
   onClear: () => void;
@@ -387,7 +492,55 @@ function FilterSheet({
   }, [onClose, open]);
 
   if (!open) return null;
-  const count = activeFilterCount(filters);
+  const count = activeFilterCount(expression);
+  const presetActive = isStrongYoySupportExpression(expression);
+
+  const updateGroup = (groupId: string, update: (group: FilterGroup) => FilterGroup) => {
+    onExpressionChange({
+      ...expression,
+      groups: expression.groups.map((group) => group.id === groupId ? update(group) : group),
+    });
+  };
+
+  const addGroup = () => {
+    onExpressionChange({ ...expression, groups: [...expression.groups, createFilterGroup()] });
+  };
+
+  const removeGroup = (groupId: string) => {
+    onExpressionChange({ ...expression, groups: expression.groups.filter((group) => group.id !== groupId) });
+  };
+
+  const addCondition = (group: FilterGroup) => {
+    const nextField = FILTER_DEFINITIONS.find(
+      (definition) => !group.conditions.some((condition) => condition.field === definition.key),
+    )?.key ?? "revenue";
+    updateGroup(group.id, (current) => ({
+      ...current,
+      conditions: [...current.conditions, createCondition(nextField)],
+    }));
+  };
+
+  const updateCondition = (groupId: string, conditionId: string, field: FilterKey, value?: string) => {
+    const definition = FILTER_DEFINITIONS.find((item) => item.key === field) ?? FILTER_DEFINITIONS[0];
+    updateGroup(groupId, (group) => ({
+      ...group,
+      conditions: group.conditions.map((condition) => condition.id === conditionId
+        ? { ...condition, field, value: value ?? definition.options[0].label }
+        : condition),
+    }));
+  };
+
+  const removeCondition = (groupId: string, conditionId: string) => {
+    const group = expression.groups.find((item) => item.id === groupId);
+    if (!group || group.conditions.length === 1) {
+      removeGroup(groupId);
+      return;
+    }
+    updateGroup(groupId, (current) => ({
+      ...current,
+      conditions: current.conditions.filter((condition) => condition.id !== conditionId),
+    }));
+  };
 
   return (
     <div className="mobile-sheet-backdrop" role="presentation" onMouseDown={(event) => {
@@ -445,38 +598,151 @@ function FilterSheet({
             </div>
           </section>
 
-          {(["Growth", "Support"] as const).map((section) => (
-            <section className="mobile-filter-section" key={section}>
-              <h3>{section}</h3>
-              <div className="mobile-filter-group">
-                {FILTER_DEFINITIONS.filter((definition) => definition.section === section).map((definition) => (
-                  <div className="mobile-filter-row" key={definition.key}>
+          <section className="mobile-filter-section mobile-logic-section">
+            <div className="mobile-filter-title-row">
+              <h3>Conditions</h3>
+              {count > 0 && <span>{count} condition{count === 1 ? "" : "s"}</span>}
+            </div>
+
+            <div className="mobile-filter-name">
+              <span>{presetActive ? "Saved filter" : "Filter"}</span>
+              <strong>{presetActive ? "Strong YoY and on support" : count > 0 ? "Custom filter" : "No filter selected"}</strong>
+            </div>
+
+            {expression.groups.length > 0 ? (
+              <>
+                {expression.groups.length > 1 && (
+                  <div className="mobile-logic-scope">
                     <div>
-                      <strong>{definition.label}</strong>
-                      <p>{definition.description}</p>
+                      <strong>Between groups</strong>
+                      <span>{expression.operator === "and" ? "Every group must match" : "At least one group must match"}</span>
                     </div>
-                    <div className="mobile-filter-options">
-                      {definition.options.map((option) => {
-                        const active = filters[definition.key]?.includes(option.label) ?? false;
-                        return (
-                          <button
-                            type="button"
-                            key={option.label}
-                            className={`mobile-filter-pill ${option.tone} ${active ? "active" : ""}`}
-                            onClick={() => onToggleFilter(definition.key, option.label)}
-                            aria-pressed={active}
-                          >
-                            {active && <Check size={13} />}
-                            {option.label}
-                          </button>
-                        );
-                      })}
+                    <div className="mobile-logic-toggle" aria-label="Logic between condition groups">
+                      <button
+                        type="button"
+                        className={expression.operator === "and" ? "active" : ""}
+                        onClick={() => onExpressionChange({ ...expression, operator: "and" })}
+                      >
+                        AND
+                      </button>
+                      <button
+                        type="button"
+                        className={expression.operator === "or" ? "active" : ""}
+                        onClick={() => onExpressionChange({ ...expression, operator: "or" })}
+                      >
+                        OR
+                      </button>
                     </div>
                   </div>
-                ))}
+                )}
+
+                <div className="mobile-condition-builder">
+                  {expression.groups.map((group, groupIndex) => (
+                    <div className="mobile-condition-block" key={group.id}>
+                      {groupIndex > 0 && <div className="mobile-logic-connector"><span>{expression.operator.toUpperCase()}</span></div>}
+                      <article className="mobile-condition-group">
+                        <header>
+                          <div>
+                            <span>Group {groupIndex + 1}</span>
+                            <strong>{group.operator === "or" ? "Match any condition" : "Match every condition"}</strong>
+                          </div>
+                          <button
+                            type="button"
+                            className="mobile-delete-group"
+                            onClick={() => removeGroup(group.id)}
+                            aria-label={`Delete group ${groupIndex + 1}`}
+                            title="Delete group"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </header>
+
+                        <div className="mobile-group-logic">
+                          <span>Inside this group</span>
+                          <div className="mobile-logic-toggle" aria-label={`Logic inside group ${groupIndex + 1}`}>
+                            <button
+                              type="button"
+                              className={group.operator === "or" ? "active" : ""}
+                              onClick={() => updateGroup(group.id, (current) => ({ ...current, operator: "or" }))}
+                            >
+                              OR
+                            </button>
+                            <button
+                              type="button"
+                              className={group.operator === "and" ? "active" : ""}
+                              onClick={() => updateGroup(group.id, (current) => ({ ...current, operator: "and" }))}
+                            >
+                              AND
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="mobile-condition-list">
+                          {group.conditions.map((condition, conditionIndex) => {
+                            const definition = FILTER_DEFINITIONS.find((item) => item.key === condition.field) ?? FILTER_DEFINITIONS[0];
+                            return (
+                              <div className="mobile-condition-wrap" key={condition.id}>
+                                {conditionIndex > 0 && <div className="mobile-condition-connector"><span>{group.operator.toUpperCase()}</span></div>}
+                                <div className="mobile-condition-row">
+                                  <label>
+                                    <span>Metric</span>
+                                    <select
+                                      value={condition.field}
+                                      onChange={(event) => updateCondition(group.id, condition.id, event.target.value as FilterKey)}
+                                    >
+                                      {FILTER_DEFINITIONS.map((item) => <option key={item.key} value={item.key}>{item.shortLabel}</option>)}
+                                    </select>
+                                  </label>
+                                  <label>
+                                    <span>Condition</span>
+                                    <select
+                                      value={condition.value}
+                                      onChange={(event) => updateCondition(group.id, condition.id, condition.field, event.target.value)}
+                                    >
+                                      {definition.options.map((option) => <option key={option.label} value={option.label}>{option.label}</option>)}
+                                    </select>
+                                  </label>
+                                  <button
+                                    type="button"
+                                    className="mobile-delete-condition"
+                                    onClick={() => removeCondition(group.id, condition.id)}
+                                    aria-label={`Remove ${definition.shortLabel} condition`}
+                                    title="Remove condition"
+                                  >
+                                    <X size={16} />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <button type="button" className="mobile-add-condition" onClick={() => addCondition(group)}>
+                          <Plus size={16} />
+                          Add condition to group
+                        </button>
+                      </article>
+                    </div>
+                  ))}
+                </div>
+
+                <button type="button" className="mobile-add-group" onClick={addGroup}>
+                  <Plus size={17} />
+                  Add another group
+                </button>
+              </>
+            ) : (
+              <div className="mobile-filter-empty">
+                <SlidersHorizontal size={22} />
+                <strong>Build a filter with clear logic</strong>
+                <p>Use groups for parentheses, then choose whether groups and conditions use AND or OR.</p>
+                <div>
+                  <button type="button" onClick={addGroup}><Plus size={16} />New filter</button>
+                  <button type="button" onClick={onApplyPreset}>Use Strong YoY preset</button>
+                </div>
               </div>
-            </section>
-          ))}
+            )}
+          </section>
 
           {actions && (
             <section className="mobile-filter-section mobile-list-management">
@@ -492,7 +758,7 @@ function FilterSheet({
             Clear
           </button>
           <button type="button" className="mobile-done-button" onClick={onClose}>
-            Show stocks{count > 0 ? ` (${count} filters)` : ""}
+            Show stocks{count > 0 ? ` (${count} condition${count === 1 ? "" : "s"})` : ""}
           </button>
         </footer>
       </section>
@@ -814,7 +1080,7 @@ export function MobileStockExplorer({
   onRemoveStock,
 }: Props) {
   const [query, setQuery] = useState("");
-  const [filters, setFilters] = useState<FilterState>({});
+  const [filterExpression, setFilterExpression] = useState<FilterExpression>({ operator: "and", groups: [] });
   const [sortKey, setSortKey] = useState<SortKey>("support_1m");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -828,10 +1094,7 @@ export function MobileStockExplorer({
         const matchesSearch = !needle || [snapshot.ticker, snapshot.name, snapshot.sector, snapshot.industry]
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(needle));
-        const matchesFilters = (Object.entries(filters) as Array<[FilterKey, string[]]>).every(([key, values]) =>
-          values.length === 0 || values.includes(signalFor(snapshot, key).label),
-        );
-        return matchesSearch && matchesFilters;
+        return matchesSearch && filterExpressionMatches(snapshot, filterExpression);
       })
       .sort((left, right) => {
         const leftValue = sortValue(left, sortKey);
@@ -844,44 +1107,25 @@ export function MobileStockExplorer({
           : String(leftValue).localeCompare(String(rightValue), undefined, { numeric: true, sensitivity: "base" });
         return (sortDirection === "asc" ? comparison : -comparison) || left.ticker.localeCompare(right.ticker);
       });
-  }, [filters, query, snapshots, sortDirection, sortKey]);
+  }, [filterExpression, query, snapshots, sortDirection, sortKey]);
 
-  const filterCount = activeFilterCount(filters);
+  const filterCount = activeFilterCount(filterExpression);
+  const presetActive = isStrongYoySupportExpression(filterExpression);
   const sortLabel = SORT_OPTIONS.find((option) => option.key === sortKey)?.label ?? "Symbol";
+  const sortSummary = sortKey === "support_best"
+    ? sortDirection === "asc" ? "Closest support" : "Farthest support"
+    : `${sortDirection === "asc" ? "Lowest" : "Highest"} ${sortLabel}`;
   const latestGeneratedAt = snapshots.reduce((latest, snapshot) => snapshot.generated_at > latest ? snapshot.generated_at : latest, "");
   const dateLabel = latestGeneratedAt
     ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(latestGeneratedAt))
     : "";
 
-  const toggleFilter = (key: FilterKey, value: string) => {
-    setFilters((current) => {
-      const values = current[key] ?? [];
-      const nextValues = values.includes(value) ? values.filter((item) => item !== value) : [...values, value];
-      const next = { ...current, [key]: nextValues };
-      if (nextValues.length === 0) delete next[key];
-      return next;
-    });
-  };
-
-  const setQuickFilter = (preset: "eps" | "support" | "momentum" | "strong_support") => {
-    if (preset === "eps") {
-      setSortKey("eps");
-      setSortDirection("desc");
-    } else if (preset === "support") {
-      setSortKey("support_1m");
-      setSortDirection("asc");
-    } else if (preset === "momentum") {
-      setFilters((current) => current.momentum?.includes("Accelerating") ? { ...current, momentum: [] } : { ...current, momentum: ["Accelerating"] });
-      setSortKey("momentum");
-      setSortDirection("desc");
-    } else {
-      const active = filters.revenue?.includes("Strong") && filters.support_1m?.includes("At support");
-      setFilters((current) => active
-        ? { ...current, revenue: [], support_1m: [] }
-        : { ...current, revenue: ["Strong", "Solid"], support_1m: ["At support"] });
-      setSortKey("support_1m");
-      setSortDirection("asc");
-    }
+  const toggleStrongYoySupportPreset = () => {
+    setFilterExpression(presetActive
+      ? { operator: "and", groups: [] }
+      : createStrongYoySupportExpression());
+    setSortKey("support_best");
+    setSortDirection("asc");
   };
 
   const openDetail = (ticker: string) => {
@@ -933,26 +1177,37 @@ export function MobileStockExplorer({
         </label>
 
         <div className="mobile-quick-filters" aria-label="Quick filters">
-          <button type="button" className={sortKey === "eps" && sortDirection === "desc" ? "active" : ""} onClick={() => setQuickFilter("eps")}>Best EPS</button>
-          <button type="button" className={sortKey === "support_1m" && sortDirection === "asc" ? "active" : ""} onClick={() => setQuickFilter("support")}>Nearest support</button>
-          <button type="button" className={filters.momentum?.includes("Accelerating") ? "active" : ""} onClick={() => setQuickFilter("momentum")}>Accelerating</button>
-          <button type="button" className={filters.revenue?.includes("Strong") && filters.support_1m?.includes("At support") ? "active" : ""} onClick={() => setQuickFilter("strong_support")}>Strong &amp; at support</button>
+          <button type="button" className={presetActive ? "active" : ""} onClick={toggleStrongYoySupportPreset}>
+            {presetActive && <Check size={15} />}
+            Strong YoY and on support
+          </button>
         </div>
 
         {filterCount > 0 && (
-          <div className="mobile-active-filters" aria-label="Active filters">
-            {(Object.entries(filters) as Array<[FilterKey, string[] | undefined]>).flatMap(([key, values]) => (values ?? []).map((value) => (
-              <button type="button" key={`${key}-${value}`} onClick={() => toggleFilter(key, value)}>
-                {value}<X size={13} />
-              </button>
-            )))}
+          <div className="mobile-filter-expression-summary" aria-label="Active filter logic">
+            <button type="button" onClick={() => setSheetOpen(true)}>
+              <span>{presetActive ? "Strong YoY and on support" : "Custom filter"}</span>
+              <small>
+                {filterExpression.groups.length} group{filterExpression.groups.length === 1 ? "" : "s"}
+                {filterExpression.groups.length > 1 ? ` joined by ${filterExpression.operator.toUpperCase()}` : ""}
+                {` · ${filterCount} condition${filterCount === 1 ? "" : "s"}`}
+              </small>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterExpression({ operator: "and", groups: [] })}
+              aria-label="Clear filter"
+              title="Clear filter"
+            >
+              <X size={16} />
+            </button>
           </div>
         )}
 
         <div className="mobile-list-summary">
           <span>{visibleSnapshots.length} of {snapshots.length} stocks</span>
           <button type="button" onClick={() => setSheetOpen(true)}>
-            {sortDirection === "asc" ? "Lowest" : "Highest"} {sortLabel}
+            {sortSummary}
           </button>
         </div>
 
@@ -1001,15 +1256,16 @@ export function MobileStockExplorer({
 
       <FilterSheet
         open={sheetOpen}
-        filters={filters}
+        expression={filterExpression}
         sortKey={sortKey}
         sortDirection={sortDirection}
         actions={actions}
         onClose={() => setSheetOpen(false)}
-        onToggleFilter={toggleFilter}
+        onExpressionChange={setFilterExpression}
+        onApplyPreset={toggleStrongYoySupportPreset}
         onSortKeyChange={setSortKey}
         onSortDirectionChange={setSortDirection}
-        onClear={() => setFilters({})}
+        onClear={() => setFilterExpression({ operator: "and", groups: [] })}
       />
     </div>
   );
