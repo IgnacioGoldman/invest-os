@@ -1,3 +1,4 @@
+import type { Session } from "@supabase/supabase-js";
 import { Pencil, Plus, RefreshCcw, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -13,6 +14,19 @@ import {
   type StockUniverseItem,
 } from "./api";
 import { MobileStockExplorer } from "./components/MobileStockExplorer";
+import { PersonalizationControls } from "./components/PersonalizationControls";
+import {
+  deleteSavedFilter,
+  fetchNotifications,
+  fetchSavedFilters,
+  markAllNotificationsRead,
+  markNotificationRead,
+  saveFilter,
+  type SavedFilter,
+  type SaveFilterInput,
+  type StockNotification,
+} from "./personalization";
+import { isSupabaseConfigured, signInWithGoogle, signOut, supabase } from "./supabase";
 import "./styles.css";
 
 const isActiveRefreshJob = (job: RefreshJob) => job.status === "queued" || job.status === "running";
@@ -29,6 +43,9 @@ export default function App() {
   const [stockSearch, setStockSearch] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [mutatingTicker, setMutatingTicker] = useState<string | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
+  const [notifications, setNotifications] = useState<StockNotification[]>([]);
 
   const loadStocks = useCallback(async () => {
     setLoading(true);
@@ -65,6 +82,50 @@ export default function App() {
     void loadJobs();
     void loadUniverse();
   }, [loadJobs, loadStocks, loadUniverse]);
+
+  useEffect(() => {
+    if (!supabase) return undefined;
+    let mounted = true;
+    void supabase.auth.getSession().then(({ data, error: authError }) => {
+      if (!mounted) return;
+      if (authError) setError(authError.message);
+      setSession(data.session);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (mounted) setSession(nextSession);
+    });
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const loadPersonalization = useCallback(async (userId: string) => {
+    try {
+      const [filters, items] = await Promise.all([
+        fetchSavedFilters(userId),
+        fetchNotifications(userId),
+      ]);
+      setSavedFilters(filters);
+      setNotifications(items);
+    } catch (exc) {
+      setError(exc instanceof Error ? exc.message : "Failed to load your saved filters.");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!session) {
+      setSavedFilters([]);
+      setNotifications([]);
+      return undefined;
+    }
+    void loadPersonalization(session.user.id);
+    const refreshOnFocus = () => {
+      if (document.visibilityState === "visible") void loadPersonalization(session.user.id);
+    };
+    document.addEventListener("visibilitychange", refreshOnFocus);
+    return () => document.removeEventListener("visibilitychange", refreshOnFocus);
+  }, [loadPersonalization, session]);
 
   const activeRefresh = useMemo(
     () => refreshJobs.find((job) => isExplorationBetaRefreshJob(job) && isActiveRefreshJob(job)) ?? null,
@@ -126,6 +187,32 @@ export default function App() {
     } finally {
       setMutatingTicker(null);
     }
+  };
+
+  const persistFilter = async (input: Omit<SaveFilterInput, "userId">) => {
+    if (!session) throw new Error("Sign in before saving a filter.");
+    const saved = await saveFilter({ ...input, userId: session.user.id });
+    setSavedFilters((current) => [saved, ...current.filter((item) => item.id !== saved.id)]);
+    return saved;
+  };
+
+  const removeSavedFilter = async (filterId: string) => {
+    await deleteSavedFilter(filterId);
+    setSavedFilters((current) => current.filter((item) => item.id !== filterId));
+    setNotifications((current) => current.filter((item) => item.filter_id !== filterId));
+  };
+
+  const readNotification = async (notificationId: string) => {
+    await markNotificationRead(notificationId);
+    const readAt = new Date().toISOString();
+    setNotifications((current) => current.map((item) => item.id === notificationId ? { ...item, read_at: readAt } : item));
+  };
+
+  const readAllNotifications = async () => {
+    if (!session) return;
+    await markAllNotificationsRead(session.user.id);
+    const readAt = new Date().toISOString();
+    setNotifications((current) => current.map((item) => ({ ...item, read_at: item.read_at ?? readAt })));
   };
 
   const stockSearchNeedle = stockSearch.trim().toLowerCase();
@@ -231,6 +318,25 @@ export default function App() {
           loading={loading}
           onSelectTicker={setSelectedTicker}
           actions={betaActions}
+          headerActions={(openTicker) => (
+            <PersonalizationControls
+              configured={isSupabaseConfigured}
+              session={session}
+              notifications={notifications}
+              onSignIn={signInWithGoogle}
+              onSignOut={signOut}
+              onReadNotification={readNotification}
+              onReadAllNotifications={readAllNotifications}
+              onOpenTicker={openTicker}
+            />
+          )}
+          personalization={isSupabaseConfigured ? {
+            signedIn: Boolean(session),
+            savedFilters,
+            onRequestSignIn: signInWithGoogle,
+            onSaveFilter: persistFilter,
+            onDeleteFilter: removeSavedFilter,
+          } : undefined}
           editMode={STATIC_DATA_MODE ? false : editMode}
           removingTicker={mutatingTicker}
           onRemoveStock={removeStock}

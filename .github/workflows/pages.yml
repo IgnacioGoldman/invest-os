@@ -21,6 +21,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      SUPABASE_ALERTS_CONFIGURED: ${{ secrets.SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -41,7 +43,16 @@ jobs:
         env:
           VITE_DATA_MODE: static
           VITE_BASE_PATH: /invest-os/
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
         run: npm run build
+
+      - name: Evaluate saved-filter alerts
+        if: ${{ env.SUPABASE_ALERTS_CONFIGURED == 'true' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/evaluate_saved_filters.py
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

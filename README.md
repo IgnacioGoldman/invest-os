@@ -16,6 +16,21 @@ The app serves cached stock fundamentals, derived metrics, support-distance metr
 
 Open http://localhost:5173/.
 
+## Personal Accounts
+
+Supabase is optional. Without its environment values, the public stock explorer works exactly as before. With Supabase configured, users can sign in with Google, save private filter views, enable alerts, and see new matching symbols in the notification inbox.
+
+1. Create a Supabase project and run `supabase/migrations/202609190001_personalization.sql` in its SQL Editor.
+2. In Supabase Authentication, enable Google and configure the Google OAuth client. Use `https://<project-ref>.supabase.co/auth/v1/callback` as the Google client's authorized redirect URI, then add these app redirect URLs to the Supabase allow list:
+   - `http://localhost:5173/**`
+   - `https://ignaciogoldman.github.io/invest-os/**`
+3. Copy `frontend/.env.example` to `frontend/.env.local`, then set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`.
+4. For GitHub Pages, add repository Actions secrets named `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`.
+
+The publishable key is intentionally used by the browser; row-level security keeps each user's data private. Never expose `SUPABASE_SERVICE_ROLE_KEY` to Vite or any `VITE_*` variable.
+
+The Pages workflow evaluates saved filters after each push, manual deployment, and daily scheduled run. A filter's first evaluation establishes its baseline without sending notifications. Later symbols entering an alert-enabled filter create in-app notifications.
+
 ## Kept Data
 
 - `data/invest_os.sqlite`: local SQLite cache for stock snapshots, metric series, derived signals, and price history.
@@ -50,6 +65,6 @@ Exports active SQLite stock snapshots, the universe, and price history into `fro
 
 ## GitHub Pages
 
-The `.github/workflows/pages.yml` workflow refreshes `data/stocks/stocks.json`, exports static JSON, builds the Vite app with `VITE_DATA_MODE=static`, and deploys `frontend/dist` to GitHub Pages.
+The `.github/workflows/pages.yml` workflow builds the Vite app from the committed static JSON with `VITE_DATA_MODE=static`, evaluates saved-filter alerts when Supabase secrets are configured, and deploys `frontend/dist` to GitHub Pages.
 
 It runs on pushes to `main`, manual dispatches, and daily at `00:00` in `Europe/Stockholm`. In the repository settings, set Pages source to GitHub Actions.

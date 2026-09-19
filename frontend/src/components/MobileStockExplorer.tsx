@@ -3,10 +3,14 @@ import {
   ArrowLeft,
   ArrowUp,
   BarChart3,
+  BellRing,
+  Bookmark,
   Check,
   ChevronRight,
+  LogIn,
   Plus,
   RotateCcw,
+  Save,
   Search,
   SlidersHorizontal,
   Trash2,
@@ -20,6 +24,7 @@ import {
   type OpenDataPricePoint,
   type OpenDataStockSnapshot,
 } from "../api";
+import type { SavedFilter, SaveFilterInput } from "../personalization";
 
 type Props = {
   snapshots: OpenDataStockSnapshot[];
@@ -27,13 +32,21 @@ type Props = {
   loading: boolean;
   onSelectTicker: (ticker: string) => void;
   actions?: ReactNode;
+  headerActions?: (openTicker: (ticker: string) => void) => ReactNode;
   editMode?: boolean;
   removingTicker?: string | null;
   onRemoveStock?: (ticker: string) => void;
+  personalization?: {
+    signedIn: boolean;
+    savedFilters: SavedFilter[];
+    onRequestSignIn: () => Promise<void>;
+    onSaveFilter: (input: Omit<SaveFilterInput, "userId">) => Promise<SavedFilter>;
+    onDeleteFilter: (filterId: string) => Promise<void>;
+  };
 };
 
 type Tone = "positive" | "warning" | "negative" | "neutral" | "info";
-type FilterKey =
+export type FilterKey =
   | "revenue"
   | "momentum"
   | "eps"
@@ -41,20 +54,20 @@ type FilterKey =
   | "support_6m"
   | "support_2y"
   | "support_5y";
-type SortKey = "symbol" | "support_best" | FilterKey;
-type SortDirection = "asc" | "desc";
-type LogicOperator = "and" | "or";
-type FilterCondition = {
+export type SortKey = "symbol" | "support_best" | FilterKey;
+export type SortDirection = "asc" | "desc";
+export type LogicOperator = "and" | "or";
+export type FilterCondition = {
   id: string;
   field: FilterKey;
   value: string;
 };
-type FilterGroup = {
+export type FilterGroup = {
   id: string;
   operator: LogicOperator;
   conditions: FilterCondition[];
 };
-type FilterExpression = {
+export type FilterExpression = {
   operator: LogicOperator;
   groups: FilterGroup[];
 };
@@ -463,25 +476,38 @@ function FilterSheet({
   sortKey,
   sortDirection,
   actions,
+  personalization,
+  activeSavedFilterId,
   onClose,
   onExpressionChange,
   onApplyPreset,
   onSortKeyChange,
   onSortDirectionChange,
   onClear,
+  onSelectSavedFilter,
+  onSavedFilter,
 }: {
   open: boolean;
   expression: FilterExpression;
   sortKey: SortKey;
   sortDirection: SortDirection;
   actions?: ReactNode;
+  personalization?: Props["personalization"];
+  activeSavedFilterId: string | null;
   onClose: () => void;
   onExpressionChange: (expression: FilterExpression) => void;
   onApplyPreset: () => void;
   onSortKeyChange: (key: SortKey) => void;
   onSortDirectionChange: (direction: SortDirection) => void;
   onClear: () => void;
+  onSelectSavedFilter: (filter: SavedFilter) => void;
+  onSavedFilter: (filter: SavedFilter | null) => void;
 }) {
+  const [saveFormOpen, setSaveFormOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [alertsEnabled, setAlertsEnabled] = useState(false);
+  const [saveBusy, setSaveBusy] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   useEffect(() => {
     if (!open) return undefined;
     const onKeyDown = (event: KeyboardEvent) => {
@@ -494,6 +520,63 @@ function FilterSheet({
   if (!open) return null;
   const count = activeFilterCount(expression);
   const presetActive = isStrongYoySupportExpression(expression);
+  const activeSavedFilter = personalization?.savedFilters.find((item) => item.id === activeSavedFilterId) ?? null;
+
+  const openSaveForm = () => {
+    setSaveName(activeSavedFilter?.name ?? (presetActive ? "Strong YoY and on support" : "My stock filter"));
+    setAlertsEnabled(activeSavedFilter?.notifications_enabled ?? false);
+    setSaveError(null);
+    setSaveFormOpen(true);
+  };
+
+  const submitSavedFilter = async () => {
+    if (!personalization || !saveName.trim() || count === 0) return;
+    setSaveBusy(true);
+    setSaveError(null);
+    try {
+      const saved = await personalization.onSaveFilter({
+        id: activeSavedFilter?.id,
+        name: saveName.trim(),
+        expression,
+        sortKey,
+        sortDirection,
+        notificationsEnabled: alertsEnabled,
+      });
+      onSavedFilter(saved);
+      setSaveFormOpen(false);
+    } catch (exc) {
+      setSaveError(exc instanceof Error ? exc.message : "Could not save this filter.");
+    } finally {
+      setSaveBusy(false);
+    }
+  };
+
+  const requestSignIn = async () => {
+    if (!personalization) return;
+    setSaveBusy(true);
+    setSaveError(null);
+    try {
+      await personalization.onRequestSignIn();
+    } catch (exc) {
+      setSaveError(exc instanceof Error ? exc.message : "Could not start Google sign-in.");
+      setSaveBusy(false);
+    }
+  };
+
+  const removeSavedFilter = async () => {
+    if (!personalization || !activeSavedFilter) return;
+    setSaveBusy(true);
+    setSaveError(null);
+    try {
+      await personalization.onDeleteFilter(activeSavedFilter.id);
+      onSavedFilter(null);
+      setSaveFormOpen(false);
+    } catch (exc) {
+      setSaveError(exc instanceof Error ? exc.message : "Could not delete this filter.");
+    } finally {
+      setSaveBusy(false);
+    }
+  };
 
   const updateGroup = (groupId: string, update: (group: FilterGroup) => FilterGroup) => {
     onExpressionChange({
@@ -559,6 +642,86 @@ function FilterSheet({
         </header>
 
         <div className="mobile-sheet-scroll">
+          {personalization && (
+            <section className="mobile-filter-section mobile-saved-filter-section">
+              <div className="mobile-filter-title-row">
+                <h3>Saved filters</h3>
+                {personalization.signedIn && count > 0 && (
+                  <button type="button" className="mobile-save-filter-trigger" onClick={openSaveForm}>
+                    <Save size={15} />{activeSavedFilter ? "Save changes" : "Save current"}
+                  </button>
+                )}
+              </div>
+
+              {!personalization.signedIn ? (
+                <>
+                  <button type="button" className="mobile-signin-filter" disabled={saveBusy} onClick={() => void requestSignIn()}>
+                    <LogIn size={18} />
+                    <span><strong>Sign in to save filters</strong><small>Sync views and get new-match alerts.</small></span>
+                    <ChevronRight size={17} />
+                  </button>
+                  {saveError && <p className="mobile-personal-error">{saveError}</p>}
+                </>
+              ) : (
+                <>
+                  {personalization.savedFilters.length > 0 ? (
+                    <div className="mobile-saved-filter-list">
+                      {personalization.savedFilters.map((filter) => (
+                        <button
+                          type="button"
+                          key={filter.id}
+                          className={activeSavedFilterId === filter.id ? "active" : ""}
+                          onClick={() => onSelectSavedFilter(filter)}
+                        >
+                          <Bookmark size={15} fill={activeSavedFilterId === filter.id ? "currentColor" : "none"} />
+                          <span>{filter.name}</span>
+                          {filter.notifications_enabled && <BellRing size={14} />}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mobile-saved-filter-hint">Build conditions below, then save the view for quick access.</p>
+                  )}
+
+                  {saveFormOpen && (
+                    <div className="mobile-save-filter-form">
+                      <label>
+                        <span>Filter name</span>
+                        <input
+                          type="text"
+                          value={saveName}
+                          onChange={(event) => setSaveName(event.target.value)}
+                          maxLength={80}
+                          autoFocus
+                        />
+                      </label>
+                      <label className="mobile-alert-toggle">
+                        <input
+                          type="checkbox"
+                          checked={alertsEnabled}
+                          onChange={(event) => setAlertsEnabled(event.target.checked)}
+                        />
+                        <span><BellRing size={17} /><span><strong>New match alerts</strong><small>Notify me when a symbol enters this filter.</small></span></span>
+                      </label>
+                      {saveError && <p className="mobile-personal-error">{saveError}</p>}
+                      <div className="mobile-save-filter-actions">
+                        {activeSavedFilter && (
+                          <button type="button" className="danger" disabled={saveBusy} onClick={() => void removeSavedFilter()}>
+                            <Trash2 size={16} />Delete
+                          </button>
+                        )}
+                        <button type="button" onClick={() => setSaveFormOpen(false)} disabled={saveBusy}>Cancel</button>
+                        <button type="button" className="primary" onClick={() => void submitSavedFilter()} disabled={saveBusy || !saveName.trim()}>
+                          <Save size={16} />{activeSavedFilter ? "Update" : "Save"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
+          )}
+
           <section className="mobile-sort-section">
             <div className="mobile-sheet-section-heading">
               <h3>Sort by</h3>
@@ -605,8 +768,8 @@ function FilterSheet({
             </div>
 
             <div className="mobile-filter-name">
-              <span>{presetActive ? "Saved filter" : "Filter"}</span>
-              <strong>{presetActive ? "Strong YoY and on support" : count > 0 ? "Custom filter" : "No filter selected"}</strong>
+              <span>{activeSavedFilter ? "Saved filter" : presetActive ? "Built-in filter" : "Filter"}</span>
+              <strong>{activeSavedFilter?.name ?? (presetActive ? "Strong YoY and on support" : count > 0 ? "Custom filter" : "No filter selected")}</strong>
             </div>
 
             {expression.groups.length > 0 ? (
@@ -1075,9 +1238,11 @@ export function MobileStockExplorer({
   loading,
   onSelectTicker,
   actions,
+  headerActions,
   editMode = false,
   removingTicker,
   onRemoveStock,
+  personalization,
 }: Props) {
   const [query, setQuery] = useState("");
   const [filterExpression, setFilterExpression] = useState<FilterExpression>({ operator: "and", groups: [] });
@@ -1085,6 +1250,7 @@ export function MobileStockExplorer({
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [activeSavedFilterId, setActiveSavedFilterId] = useState<string | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
 
   const visibleSnapshots = useMemo(() => {
@@ -1126,6 +1292,14 @@ export function MobileStockExplorer({
       : createStrongYoySupportExpression());
     setSortKey("support_best");
     setSortDirection("asc");
+    setActiveSavedFilterId(null);
+  };
+
+  const selectSavedFilter = (filter: SavedFilter) => {
+    setFilterExpression(filter.expression);
+    setSortKey(filter.sort_key);
+    setSortDirection(filter.sort_direction);
+    setActiveSavedFilterId(filter.id);
   };
 
   const openDetail = (ticker: string) => {
@@ -1150,16 +1324,19 @@ export function MobileStockExplorer({
             <h1>Stocks</h1>
             <p>Insights{dateLabel ? ` · ${dateLabel}` : ""}</p>
           </div>
-          <button
-            type="button"
-            className={`mobile-options-button ${filterCount > 0 ? "active" : ""}`}
-            onClick={() => setSheetOpen(true)}
-            aria-label="Open filter and sort options"
-            title="Filter and sort"
-          >
-            <SlidersHorizontal size={22} />
-            {filterCount > 0 && <span>{filterCount}</span>}
-          </button>
+          <div className="mobile-header-actions">
+            {headerActions?.(openDetail)}
+            <button
+              type="button"
+              className={`mobile-options-button ${filterCount > 0 ? "active" : ""}`}
+              onClick={() => setSheetOpen(true)}
+              aria-label="Open filter and sort options"
+              title="Filter and sort"
+            >
+              <SlidersHorizontal size={22} />
+              {filterCount > 0 && <span>{filterCount}</span>}
+            </button>
+          </div>
         </header>
 
         <label className="mobile-stock-search">
@@ -1181,12 +1358,23 @@ export function MobileStockExplorer({
             {presetActive && <Check size={15} />}
             Strong YoY and on support
           </button>
+          {personalization?.signedIn && personalization.savedFilters.map((filter) => (
+            <button
+              type="button"
+              key={filter.id}
+              className={activeSavedFilterId === filter.id ? "active" : ""}
+              onClick={() => selectSavedFilter(filter)}
+            >
+              {activeSavedFilterId === filter.id && <Check size={15} />}
+              {filter.name}
+            </button>
+          ))}
         </div>
 
         {filterCount > 0 && (
           <div className="mobile-filter-expression-summary" aria-label="Active filter logic">
             <button type="button" onClick={() => setSheetOpen(true)}>
-              <span>{presetActive ? "Strong YoY and on support" : "Custom filter"}</span>
+              <span>{personalization?.savedFilters.find((item) => item.id === activeSavedFilterId)?.name ?? (presetActive ? "Strong YoY and on support" : "Custom filter")}</span>
               <small>
                 {filterExpression.groups.length} group{filterExpression.groups.length === 1 ? "" : "s"}
                 {filterExpression.groups.length > 1 ? ` joined by ${filterExpression.operator.toUpperCase()}` : ""}
@@ -1195,7 +1383,10 @@ export function MobileStockExplorer({
             </button>
             <button
               type="button"
-              onClick={() => setFilterExpression({ operator: "and", groups: [] })}
+              onClick={() => {
+                setFilterExpression({ operator: "and", groups: [] });
+                setActiveSavedFilterId(null);
+              }}
               aria-label="Clear filter"
               title="Clear filter"
             >
@@ -1260,12 +1451,19 @@ export function MobileStockExplorer({
         sortKey={sortKey}
         sortDirection={sortDirection}
         actions={actions}
+        personalization={personalization}
+        activeSavedFilterId={activeSavedFilterId}
         onClose={() => setSheetOpen(false)}
         onExpressionChange={setFilterExpression}
         onApplyPreset={toggleStrongYoySupportPreset}
         onSortKeyChange={setSortKey}
         onSortDirectionChange={setSortDirection}
-        onClear={() => setFilterExpression({ operator: "and", groups: [] })}
+        onSelectSavedFilter={selectSavedFilter}
+        onSavedFilter={(filter) => setActiveSavedFilterId(filter?.id ?? null)}
+        onClear={() => {
+          setFilterExpression({ operator: "and", groups: [] });
+          setActiveSavedFilterId(null);
+        }}
       />
     </div>
   );
