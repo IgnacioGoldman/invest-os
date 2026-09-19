@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -29,9 +29,11 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
 
       - name: Install Python dependencies
-        run: python -m pip install -r backend/requirements.txt
+        run: python -m pip install pydantic==2.7.4 python-dotenv==1.0.1 requests==2.32.3 yfinance==1.4.1
 
       - name: Refresh stock data
         env:
