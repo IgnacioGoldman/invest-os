@@ -12,7 +12,7 @@ import {
   type RefreshJob,
   type StockUniverseItem,
 } from "./api";
-import { OpenDataStockTable } from "./components/OpenDataStockTable";
+import { MobileStockExplorer } from "./components/MobileStockExplorer";
 import "./styles.css";
 
 const isActiveRefreshJob = (job: RefreshJob) => job.status === "queued" || job.status === "running";
@@ -222,18 +222,15 @@ export default function App() {
   );
 
   return (
-    <div className="app-shell exploration-only-shell">
-      <main className="main-content exploration-page">
+    <div className="stock-mobile-shell">
+      <main className="stock-mobile-page">
         {error && <p className="error-banner">{error}</p>}
-        <OpenDataStockTable
+        <MobileStockExplorer
           snapshots={stocks}
           selectedTicker={selectedTicker}
           loading={loading}
-          analyses={{}}
-          analysisLoading={false}
           onSelectTicker={setSelectedTicker}
-          variant="beta"
-          betaActions={betaActions}
+          actions={betaActions}
           editMode={STATIC_DATA_MODE ? false : editMode}
           removingTicker={mutatingTicker}
           onRemoveStock={removeStock}
