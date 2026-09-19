@@ -29,7 +29,7 @@ Supabase is optional. Without its environment values, the public stock explorer 
 
 The publishable key is intentionally used by the browser; row-level security keeps each user's data private. Never expose `SUPABASE_SERVICE_ROLE_KEY` to Vite or any `VITE_*` variable.
 
-The Pages workflow evaluates saved filters after each push, manual deployment, and daily scheduled run. A filter's first evaluation establishes its baseline without sending notifications. Later symbols entering an alert-enabled filter create in-app notifications.
+The Pages workflow evaluates saved filters after each deployment. A separate lightweight workflow runs the same evaluator every eight hours, keeping alerts timely and providing regular database activity for the Free Supabase project. A filter's first evaluation establishes its baseline without sending notifications. Later symbols entering an alert-enabled filter create in-app notifications.
 
 ## Kept Data
 

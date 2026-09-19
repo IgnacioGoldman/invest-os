@@ -96,6 +96,9 @@ const SUPPORT_KEYS: Record<Extract<FilterKey, `support_${string}`>, string> = {
 };
 
 const SUPPORT_FILTER_KEYS = ["support_1m", "support_6m", "support_2y", "support_5y"] as const;
+const LONG_SUPPORT_FILTER_KEYS = ["support_6m", "support_2y", "support_5y"] as const;
+type SupportFilterKey = typeof SUPPORT_FILTER_KEYS[number];
+type BuiltInPreset = "pullback" | "support";
 
 const FILTER_DEFINITIONS: FilterDefinition[] = [
   {
@@ -338,27 +341,35 @@ function signalFor(snapshot: OpenDataStockSnapshot, key: FilterKey): Signal {
   return supportSignal(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
 }
 
-function closestSupport(snapshot: OpenDataStockSnapshot) {
-  return SUPPORT_FILTER_KEYS
+function closestSupport(snapshot: OpenDataStockSnapshot, keys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS) {
+  return keys
     .map((key) => ({
       key,
       label: FILTER_DEFINITIONS.find((definition) => definition.key === key)?.shortLabel ?? key,
       value: finiteNumber(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value),
     }))
-    .filter((item): item is { key: typeof SUPPORT_FILTER_KEYS[number]; label: string; value: number } => item.value != null)
+    .filter((item): item is { key: SupportFilterKey; label: string; value: number } => item.value != null)
     .sort((left, right) => left.value - right.value)[0] ?? null;
 }
 
-function sortValue(snapshot: OpenDataStockSnapshot, key: SortKey): number | string | null {
+function sortValue(
+  snapshot: OpenDataStockSnapshot,
+  key: SortKey,
+  supportKeys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS,
+): number | string | null {
   if (key === "symbol") return snapshot.ticker;
-  if (key === "support_best") return closestSupport(snapshot)?.value ?? null;
+  if (key === "support_best") return closestSupport(snapshot, supportKeys)?.value ?? null;
   if (key === "revenue") return finiteNumber(snapshot.business_health.revenue_growth_yoy?.value);
   if (key === "eps") return finiteNumber(snapshot.business_health.eps_growth_yoy?.value);
   if (key === "momentum") return revenueMomentum(snapshot).change;
   return finiteNumber(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
 }
 
-function rowMetric(snapshot: OpenDataStockSnapshot, key: SortKey) {
+function rowMetric(
+  snapshot: OpenDataStockSnapshot,
+  key: SortKey,
+  supportKeys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS,
+) {
   if (key === "symbol") {
     const dailyChange = snapshot.price_opportunity.change_1d?.value;
     const dailySignal: Signal = dailyChange == null
@@ -387,7 +398,7 @@ function rowMetric(snapshot: OpenDataStockSnapshot, key: SortKey) {
     };
   }
   if (key === "support_best") {
-    const support = closestSupport(snapshot);
+    const support = closestSupport(snapshot, supportKeys);
     return {
       value: formatPercent(support?.value, true),
       signal: supportSignal(support?.value),
@@ -422,14 +433,22 @@ function createFilterGroup(field: FilterKey = "revenue"): FilterGroup {
   };
 }
 
-function createStrongYoySupportExpression(): FilterExpression {
+function createSupportConditions(fields: readonly Extract<FilterKey, `support_${string}`>[]) {
+  return fields.flatMap((field) => [
+    createCondition(field, "At support"),
+    createCondition(field, "Near support"),
+  ]);
+}
+
+function createStrongYoyExpression(preset: BuiltInPreset): FilterExpression {
+  const supportFields = preset === "pullback" ? (["support_1m"] as const) : LONG_SUPPORT_FILTER_KEYS;
   return {
     operator: "and",
     groups: [
       {
         id: nextFilterId("group"),
         operator: "or",
-        conditions: SUPPORT_FILTER_KEYS.map((field) => createCondition(field, "At support")),
+        conditions: createSupportConditions(supportFields),
       },
       {
         id: nextFilterId("group"),
@@ -454,16 +473,34 @@ function filterExpressionMatches(snapshot: OpenDataStockSnapshot, expression: Fi
   return expression.operator === "and" ? groupMatches.every(Boolean) : groupMatches.some(Boolean);
 }
 
-function isStrongYoySupportExpression(expression: FilterExpression) {
-  if (expression.operator !== "and" || expression.groups.length !== 2) return false;
+function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
+  if (expression.operator !== "and" || expression.groups.length !== 2) return null;
   const signatures = expression.groups.map((group) => ({
     operator: group.operator,
     conditions: group.conditions.map((condition) => `${condition.field}:${condition.value}`).sort(),
   }));
-  const supportSignature = SUPPORT_FILTER_KEYS.map((key) => `${key}:At support`).sort();
   const growthSignature = ["revenue:Solid", "revenue:Strong"];
-  return signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature.join("|"))
-    && signatures.some((group) => group.operator === "or" && group.conditions.join("|") === growthSignature.join("|"));
+  const hasGrowthGroup = signatures.some(
+    (group) => group.operator === "or" && group.conditions.join("|") === growthSignature.join("|"),
+  );
+  if (!hasGrowthGroup) return null;
+  const supportSignature = (fields: readonly Extract<FilterKey, `support_${string}`>[]) => fields
+    .flatMap((key) => [`${key}:At support`, `${key}:Near support`])
+    .sort()
+    .join("|");
+  if (signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature(["support_1m"]))) {
+    return "pullback";
+  }
+  if (signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature(LONG_SUPPORT_FILTER_KEYS))) {
+    return "support";
+  }
+  return null;
+}
+
+function builtInPresetName(preset: BuiltInPreset | null) {
+  if (preset === "pullback") return "Strong YoY and on pullback";
+  if (preset === "support") return "Strong YoY and on support";
+  return null;
 }
 
 function StockStatus({ signal }: { signal: Signal }) {
@@ -480,7 +517,8 @@ function FilterSheet({
   activeSavedFilterId,
   onClose,
   onExpressionChange,
-  onApplyPreset,
+  onApplyPullbackPreset,
+  onApplySupportPreset,
   onSortKeyChange,
   onSortDirectionChange,
   onClear,
@@ -496,7 +534,8 @@ function FilterSheet({
   activeSavedFilterId: string | null;
   onClose: () => void;
   onExpressionChange: (expression: FilterExpression) => void;
-  onApplyPreset: () => void;
+  onApplyPullbackPreset: () => void;
+  onApplySupportPreset: () => void;
   onSortKeyChange: (key: SortKey) => void;
   onSortDirectionChange: (direction: SortDirection) => void;
   onClear: () => void;
@@ -519,11 +558,12 @@ function FilterSheet({
 
   if (!open) return null;
   const count = activeFilterCount(expression);
-  const presetActive = isStrongYoySupportExpression(expression);
+  const builtInPreset = builtInPresetFor(expression);
+  const builtInName = builtInPresetName(builtInPreset);
   const activeSavedFilter = personalization?.savedFilters.find((item) => item.id === activeSavedFilterId) ?? null;
 
   const openSaveForm = () => {
-    setSaveName(activeSavedFilter?.name ?? (presetActive ? "Strong YoY and on support" : "My stock filter"));
+    setSaveName(activeSavedFilter?.name ?? builtInName ?? "My stock filter");
     setAlertsEnabled(activeSavedFilter?.notifications_enabled ?? false);
     setSaveError(null);
     setSaveFormOpen(true);
@@ -768,8 +808,8 @@ function FilterSheet({
             </div>
 
             <div className="mobile-filter-name">
-              <span>{activeSavedFilter ? "Saved filter" : presetActive ? "Built-in filter" : "Filter"}</span>
-              <strong>{activeSavedFilter?.name ?? (presetActive ? "Strong YoY and on support" : count > 0 ? "Custom filter" : "No filter selected")}</strong>
+              <span>{activeSavedFilter ? "Saved filter" : builtInPreset ? "Built-in filter" : "Filter"}</span>
+              <strong>{activeSavedFilter?.name ?? builtInName ?? (count > 0 ? "Custom filter" : "No filter selected")}</strong>
             </div>
 
             {expression.groups.length > 0 ? (
@@ -901,7 +941,8 @@ function FilterSheet({
                 <p>Use groups for parentheses, then choose whether groups and conditions use AND or OR.</p>
                 <div>
                   <button type="button" onClick={addGroup}><Plus size={16} />New filter</button>
-                  <button type="button" onClick={onApplyPreset}>Use Strong YoY preset</button>
+                  <button type="button" onClick={onApplyPullbackPreset}>Use Pullback preset</button>
+                  <button type="button" onClick={onApplySupportPreset}>Use Support preset</button>
                 </div>
               </div>
             )}
@@ -1252,6 +1293,9 @@ export function MobileStockExplorer({
   const [detailOpen, setDetailOpen] = useState(false);
   const [activeSavedFilterId, setActiveSavedFilterId] = useState<string | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
+  const builtInPreset = builtInPresetFor(filterExpression);
+  const builtInName = builtInPresetName(builtInPreset);
+  const relevantSupportKeys = builtInPreset === "support" ? LONG_SUPPORT_FILTER_KEYS : SUPPORT_FILTER_KEYS;
 
   const visibleSnapshots = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -1263,8 +1307,8 @@ export function MobileStockExplorer({
         return matchesSearch && filterExpressionMatches(snapshot, filterExpression);
       })
       .sort((left, right) => {
-        const leftValue = sortValue(left, sortKey);
-        const rightValue = sortValue(right, sortKey);
+        const leftValue = sortValue(left, sortKey, relevantSupportKeys);
+        const rightValue = sortValue(right, sortKey, relevantSupportKeys);
         if (leftValue == null && rightValue == null) return left.ticker.localeCompare(right.ticker);
         if (leftValue == null) return 1;
         if (rightValue == null) return -1;
@@ -1273,24 +1317,25 @@ export function MobileStockExplorer({
           : String(leftValue).localeCompare(String(rightValue), undefined, { numeric: true, sensitivity: "base" });
         return (sortDirection === "asc" ? comparison : -comparison) || left.ticker.localeCompare(right.ticker);
       });
-  }, [filterExpression, query, snapshots, sortDirection, sortKey]);
+  }, [filterExpression, query, relevantSupportKeys, snapshots, sortDirection, sortKey]);
 
   const filterCount = activeFilterCount(filterExpression);
-  const presetActive = isStrongYoySupportExpression(filterExpression);
   const sortLabel = SORT_OPTIONS.find((option) => option.key === sortKey)?.label ?? "Symbol";
   const sortSummary = sortKey === "support_best"
-    ? sortDirection === "asc" ? "Closest support" : "Farthest support"
+    ? builtInPreset === "support"
+      ? sortDirection === "asc" ? "Closest long-term support" : "Farthest long-term support"
+      : sortDirection === "asc" ? "Closest support" : "Farthest support"
     : `${sortDirection === "asc" ? "Lowest" : "Highest"} ${sortLabel}`;
   const latestGeneratedAt = snapshots.reduce((latest, snapshot) => snapshot.generated_at > latest ? snapshot.generated_at : latest, "");
   const dateLabel = latestGeneratedAt
     ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(latestGeneratedAt))
     : "";
 
-  const toggleStrongYoySupportPreset = () => {
-    setFilterExpression(presetActive
+  const toggleBuiltInPreset = (preset: BuiltInPreset) => {
+    setFilterExpression(builtInPreset === preset
       ? { operator: "and", groups: [] }
-      : createStrongYoySupportExpression());
-    setSortKey("support_best");
+      : createStrongYoyExpression(preset));
+    setSortKey(preset === "pullback" ? "support_1m" : "support_best");
     setSortDirection("asc");
     setActiveSavedFilterId(null);
   };
@@ -1354,8 +1399,12 @@ export function MobileStockExplorer({
         </label>
 
         <div className="mobile-quick-filters" aria-label="Quick filters">
-          <button type="button" className={presetActive ? "active" : ""} onClick={toggleStrongYoySupportPreset}>
-            {presetActive && <Check size={15} />}
+          <button type="button" className={builtInPreset === "pullback" ? "active" : ""} onClick={() => toggleBuiltInPreset("pullback")}>
+            {builtInPreset === "pullback" && <Check size={15} />}
+            Strong YoY and on pullback
+          </button>
+          <button type="button" className={builtInPreset === "support" ? "active" : ""} onClick={() => toggleBuiltInPreset("support")}>
+            {builtInPreset === "support" && <Check size={15} />}
             Strong YoY and on support
           </button>
           {personalization?.signedIn && personalization.savedFilters.map((filter) => (
@@ -1374,7 +1423,7 @@ export function MobileStockExplorer({
         {filterCount > 0 && (
           <div className="mobile-filter-expression-summary" aria-label="Active filter logic">
             <button type="button" onClick={() => setSheetOpen(true)}>
-              <span>{personalization?.savedFilters.find((item) => item.id === activeSavedFilterId)?.name ?? (presetActive ? "Strong YoY and on support" : "Custom filter")}</span>
+              <span>{personalization?.savedFilters.find((item) => item.id === activeSavedFilterId)?.name ?? builtInName ?? "Custom filter"}</span>
               <small>
                 {filterExpression.groups.length} group{filterExpression.groups.length === 1 ? "" : "s"}
                 {filterExpression.groups.length > 1 ? ` joined by ${filterExpression.operator.toUpperCase()}` : ""}
@@ -1412,7 +1461,7 @@ export function MobileStockExplorer({
         ) : (
           <section className="mobile-stock-list" aria-label="Stocks">
             {visibleSnapshots.map((snapshot) => {
-              const metric = rowMetric(snapshot, sortKey);
+              const metric = rowMetric(snapshot, sortKey, relevantSupportKeys);
               return (
                 <article className="mobile-stock-row" key={snapshot.ticker}>
                   <button type="button" className="mobile-stock-row-main" onClick={() => openDetail(snapshot.ticker)}>
@@ -1455,7 +1504,8 @@ export function MobileStockExplorer({
         activeSavedFilterId={activeSavedFilterId}
         onClose={() => setSheetOpen(false)}
         onExpressionChange={setFilterExpression}
-        onApplyPreset={toggleStrongYoySupportPreset}
+        onApplyPullbackPreset={() => toggleBuiltInPreset("pullback")}
+        onApplySupportPreset={() => toggleBuiltInPreset("support")}
         onSortKeyChange={setSortKey}
         onSortDirectionChange={setSortDirection}
         onSelectSavedFilter={selectSavedFilter}
