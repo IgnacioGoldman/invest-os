@@ -1,6 +1,13 @@
 import type { FilterExpression, SortDirection, SortKey } from "./components/MobileStockExplorer";
 import { requireSupabase } from "./supabase";
 
+export const PULLBACK_FILTER_KEY = "builtin:pullback";
+export const SUPPORT_FILTER_KEY = "builtin:support";
+
+export function savedFilterKey(filterId: string) {
+  return `saved:${filterId}`;
+}
+
 export type SavedFilter = {
   id: string;
   user_id: string;
@@ -8,21 +15,14 @@ export type SavedFilter = {
   expression: FilterExpression;
   sort_key: SortKey;
   sort_direction: SortDirection;
-  notifications_enabled: boolean;
-  last_evaluated_at: string | null;
   created_at: string;
   updated_at: string;
 };
 
-export type StockNotification = {
-  id: string;
-  user_id: string;
-  filter_id: string;
+export type FilterMatchEvent = {
+  filter_key: string;
   ticker: string;
-  title: string;
-  body: string;
-  created_at: string;
-  read_at: string | null;
+  matched_on: string;
 };
 
 export type SaveFilterInput = {
@@ -32,11 +32,17 @@ export type SaveFilterInput = {
   expression: FilterExpression;
   sortKey: SortKey;
   sortDirection: SortDirection;
-  notificationsEnabled: boolean;
 };
 
 function throwIfError(error: { message: string } | null) {
   if (error) throw new Error(error.message);
+}
+
+export async function ensureUserProfile(userId: string) {
+  const { error } = await requireSupabase()
+    .from("user_profiles")
+    .upsert({ user_id: userId }, { onConflict: "user_id", ignoreDuplicates: true });
+  throwIfError(error);
 }
 
 export async function fetchSavedFilters(userId: string) {
@@ -56,7 +62,6 @@ export async function saveFilter(input: SaveFilterInput) {
     expression: input.expression,
     sort_key: input.sortKey,
     sort_direction: input.sortDirection,
-    notifications_enabled: input.notificationsEnabled,
   };
   const query = input.id
     ? requireSupabase().from("saved_filters").update(payload).eq("id", input.id)
@@ -71,30 +76,41 @@ export async function deleteSavedFilter(filterId: string) {
   throwIfError(error);
 }
 
-export async function fetchNotifications(userId: string) {
+export async function fetchWatchlist(userId: string) {
   const { data, error } = await requireSupabase()
-    .from("notifications")
-    .select("*")
+    .from("watchlist_items")
+    .select("ticker")
     .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(50);
+    .order("created_at", { ascending: true });
   throwIfError(error);
-  return (data ?? []) as StockNotification[];
+  return (data ?? []).map((item) => String(item.ticker));
 }
 
-export async function markNotificationRead(notificationId: string) {
+export async function addWatchlistItem(userId: string, ticker: string) {
+  const symbol = ticker.toUpperCase();
   const { error } = await requireSupabase()
-    .from("notifications")
-    .update({ read_at: new Date().toISOString() })
-    .eq("id", notificationId);
+    .from("watchlist_items")
+    .upsert({ user_id: userId, ticker: symbol }, { onConflict: "user_id,ticker", ignoreDuplicates: true });
+  throwIfError(error);
+  return symbol;
+}
+
+export async function removeWatchlistItem(userId: string, ticker: string) {
+  const symbol = ticker.toUpperCase();
+  const { error } = await requireSupabase()
+    .from("watchlist_items")
+    .delete()
+    .eq("user_id", userId)
+    .eq("ticker", symbol);
   throwIfError(error);
 }
 
-export async function markAllNotificationsRead(userId: string) {
-  const { error } = await requireSupabase()
-    .from("notifications")
-    .update({ read_at: new Date().toISOString() })
+export async function fetchFilterMatchEvents(userId: string, matchedOn: string) {
+  const { data, error } = await requireSupabase()
+    .from("filter_match_events")
+    .select("filter_key,ticker,matched_on")
     .eq("user_id", userId)
-    .is("read_at", null);
+    .eq("matched_on", matchedOn);
   throwIfError(error);
+  return (data ?? []) as FilterMatchEvent[];
 }

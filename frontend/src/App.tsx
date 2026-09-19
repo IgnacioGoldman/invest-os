@@ -16,21 +16,32 @@ import {
 import { MobileStockExplorer } from "./components/MobileStockExplorer";
 import { PersonalizationControls } from "./components/PersonalizationControls";
 import {
+  addWatchlistItem,
   deleteSavedFilter,
-  fetchNotifications,
+  ensureUserProfile,
+  fetchFilterMatchEvents,
   fetchSavedFilters,
-  markAllNotificationsRead,
-  markNotificationRead,
+  fetchWatchlist,
+  removeWatchlistItem,
   saveFilter,
+  savedFilterKey,
   type SavedFilter,
   type SaveFilterInput,
-  type StockNotification,
 } from "./personalization";
 import { isSupabaseConfigured, signInWithGoogle, signOut, supabase } from "./supabase";
 import "./styles.css";
 
 const isActiveRefreshJob = (job: RefreshJob) => job.status === "queued" || job.status === "running";
 const isExplorationBetaRefreshJob = (job: RefreshJob) => job.source === "exploration_beta";
+
+function currentMatchDate() {
+  return new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Stockholm",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
 
 export default function App() {
   const [stocks, setStocks] = useState<OpenDataStockSnapshot[]>([]);
@@ -45,7 +56,8 @@ export default function App() {
   const [mutatingTicker, setMutatingTicker] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
-  const [notifications, setNotifications] = useState<StockNotification[]>([]);
+  const [watchlistTickers, setWatchlistTickers] = useState<string[]>([]);
+  const [filterBadgeCounts, setFilterBadgeCounts] = useState<Record<string, number>>({});
 
   const loadStocks = useCallback(async () => {
     setLoading(true);
@@ -102,21 +114,28 @@ export default function App() {
 
   const loadPersonalization = useCallback(async (userId: string) => {
     try {
-      const [filters, items] = await Promise.all([
+      await ensureUserProfile(userId);
+      const [filters, tickers, events] = await Promise.all([
         fetchSavedFilters(userId),
-        fetchNotifications(userId),
+        fetchWatchlist(userId),
+        fetchFilterMatchEvents(userId, currentMatchDate()),
       ]);
       setSavedFilters(filters);
-      setNotifications(items);
+      setWatchlistTickers(tickers);
+      setFilterBadgeCounts(events.reduce<Record<string, number>>((counts, event) => {
+        counts[event.filter_key] = (counts[event.filter_key] ?? 0) + 1;
+        return counts;
+      }, {}));
     } catch (exc) {
-      setError(exc instanceof Error ? exc.message : "Failed to load your saved filters.");
+      setError(exc instanceof Error ? exc.message : "Failed to load your account data.");
     }
   }, []);
 
   useEffect(() => {
     if (!session) {
       setSavedFilters([]);
-      setNotifications([]);
+      setWatchlistTickers([]);
+      setFilterBadgeCounts({});
       return undefined;
     }
     void loadPersonalization(session.user.id);
@@ -199,20 +218,23 @@ export default function App() {
   const removeSavedFilter = async (filterId: string) => {
     await deleteSavedFilter(filterId);
     setSavedFilters((current) => current.filter((item) => item.id !== filterId));
-    setNotifications((current) => current.filter((item) => item.filter_id !== filterId));
+    setFilterBadgeCounts((current) => {
+      const next = { ...current };
+      delete next[savedFilterKey(filterId)];
+      return next;
+    });
   };
 
-  const readNotification = async (notificationId: string) => {
-    await markNotificationRead(notificationId);
-    const readAt = new Date().toISOString();
-    setNotifications((current) => current.map((item) => item.id === notificationId ? { ...item, read_at: readAt } : item));
+  const addToWatchlist = async (ticker: string) => {
+    if (!session) throw new Error("Sign in before editing your watchlist.");
+    const symbol = await addWatchlistItem(session.user.id, ticker);
+    setWatchlistTickers((current) => current.includes(symbol) ? current : [...current, symbol]);
   };
 
-  const readAllNotifications = async () => {
+  const removeFromWatchlist = async (ticker: string) => {
     if (!session) return;
-    await markAllNotificationsRead(session.user.id);
-    const readAt = new Date().toISOString();
-    setNotifications((current) => current.map((item) => ({ ...item, read_at: item.read_at ?? readAt })));
+    await removeWatchlistItem(session.user.id, ticker);
+    setWatchlistTickers((current) => current.filter((symbol) => symbol !== ticker));
   };
 
   const stockSearchNeedle = stockSearch.trim().toLowerCase();
@@ -318,24 +340,24 @@ export default function App() {
           loading={loading}
           onSelectTicker={setSelectedTicker}
           actions={betaActions}
-          headerActions={(openTicker) => (
+          headerActions={() => (
             <PersonalizationControls
               configured={isSupabaseConfigured}
               session={session}
-              notifications={notifications}
               onSignIn={signInWithGoogle}
               onSignOut={signOut}
-              onReadNotification={readNotification}
-              onReadAllNotifications={readAllNotifications}
-              onOpenTicker={openTicker}
             />
           )}
           personalization={isSupabaseConfigured ? {
             signedIn: Boolean(session),
             savedFilters,
+            watchlistTickers,
+            filterBadgeCounts,
             onRequestSignIn: signInWithGoogle,
             onSaveFilter: persistFilter,
             onDeleteFilter: removeSavedFilter,
+            onAddToWatchlist: addToWatchlist,
+            onRemoveFromWatchlist: removeFromWatchlist,
           } : undefined}
           editMode={STATIC_DATA_MODE ? false : editMode}
           removingTicker={mutatingTicker}

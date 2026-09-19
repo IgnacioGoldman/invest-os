@@ -9,15 +9,47 @@ from typing import Any
 from urllib.error import HTTPError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
+from zoneinfo import ZoneInfo
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STOCKS_PATH = ROOT / "frontend" / "public" / "data" / "open-data" / "stocks.json"
+MATCH_TIMEZONE = ZoneInfo("Europe/Stockholm")
 SUPPORT_METRICS = {
     "support_1m": "support_1m_distance",
     "support_6m": "support_6m_distance",
     "support_2y": "support_2y_distance",
     "support_5y": "support_5y_distance",
+}
+
+
+def _support_conditions(fields: list[str]) -> list[dict[str, str]]:
+    return [
+        {"field": field, "value": value}
+        for field in fields
+        for value in ("At support", "Near support")
+    ]
+
+
+def _strong_yoy_expression(support_fields: list[str]) -> dict[str, Any]:
+    return {
+        "operator": "and",
+        "groups": [
+            {"operator": "or", "conditions": _support_conditions(support_fields)},
+            {
+                "operator": "or",
+                "conditions": [
+                    {"field": "revenue", "value": "Strong"},
+                    {"field": "revenue", "value": "Solid"},
+                ],
+            },
+        ],
+    }
+
+
+BUILT_IN_FILTERS = {
+    "builtin:pullback": _strong_yoy_expression(["support_1m"]),
+    "builtin:support": _strong_yoy_expression(["support_6m", "support_2y", "support_5y"]),
 }
 
 
@@ -62,7 +94,10 @@ def _period_key(period: str) -> tuple[int, int, str]:
 
 
 def _revenue_momentum(snapshot: dict[str, Any]) -> str:
-    rows = sorted(snapshot.get("historical_series", {}).get("quarterly_revenue", []), key=lambda row: _period_key(str(row.get("period", ""))))
+    rows = sorted(
+        snapshot.get("historical_series", {}).get("quarterly_revenue", []),
+        key=lambda row: _period_key(str(row.get("period", ""))),
+    )
     points = [
         _number(row.get("metrics", {}).get("revenue_growth_yoy", {}).get("value"))
         for row in rows
@@ -117,7 +152,14 @@ class SupabaseRest:
             "Content-Type": "application/json",
         }
 
-    def request(self, method: str, table: str, params: dict[str, str] | None = None, payload: Any = None, prefer: str | None = None) -> Any:
+    def request(
+        self,
+        method: str,
+        table: str,
+        params: dict[str, str] | None = None,
+        payload: Any = None,
+        prefer: str | None = None,
+    ) -> Any:
         url = f"{self.base}/{quote(table)}"
         if params:
             url = f"{url}?{urlencode(params, safe='(),.*:')}"
@@ -135,69 +177,134 @@ class SupabaseRest:
             raise RuntimeError(f"Supabase {method} {table} failed ({exc.code}): {detail}") from exc
 
 
+def _filters_by_user(saved_filters: list[dict[str, Any]]) -> dict[str, list[tuple[str, dict[str, Any]]]]:
+    result: dict[str, list[tuple[str, dict[str, Any]]]] = {}
+    for saved_filter in saved_filters:
+        user_id = str(saved_filter.get("user_id", ""))
+        filter_id = str(saved_filter.get("id", ""))
+        expression = saved_filter.get("expression")
+        if user_id and filter_id and isinstance(expression, dict):
+            result.setdefault(user_id, []).append((f"saved:{filter_id}", expression))
+    return result
+
+
 def evaluate(stocks: list[dict[str, Any]], client: SupabaseRest) -> tuple[int, int]:
-    filters = client.request("GET", "saved_filters", {"select": "id,user_id,name,expression,notifications_enabled,last_evaluated_at"}) or []
-    evaluated = 0
-    notification_count = 0
+    profiles = client.request("GET", "user_profiles", {"select": "user_id"}) or []
+    watchlist_rows = client.request("GET", "watchlist_items", {"select": "user_id,ticker"}) or []
+    saved_filters = client.request("GET", "saved_filters", {"select": "id,user_id,expression"}) or []
+    evaluations = client.request("GET", "filter_evaluations", {"select": "user_id,filter_key"}) or []
+    states = client.request(
+        "GET",
+        "filter_match_state",
+        {"select": "user_id,filter_key,ticker,first_matched_at,active"},
+    ) or []
+
+    stocks_by_ticker = {
+        str(snapshot.get("ticker", "")).upper(): snapshot
+        for snapshot in stocks
+        if snapshot.get("ticker")
+    }
+    watchlists: dict[str, set[str]] = {}
+    for row in watchlist_rows:
+        watchlists.setdefault(str(row["user_id"]), set()).add(str(row["ticker"]).upper())
+
+    custom_filters = _filters_by_user(saved_filters)
+    initialized = {(str(row["user_id"]), str(row["filter_key"])) for row in evaluations}
+    state_by_filter: dict[tuple[str, str], dict[str, dict[str, Any]]] = {}
+    for row in states:
+        key = (str(row["user_id"]), str(row["filter_key"]))
+        state_by_filter.setdefault(key, {})[str(row["ticker"]).upper()] = row
+
     now = datetime.now(timezone.utc).isoformat()
+    matched_on = datetime.now(MATCH_TIMEZONE).date().isoformat()
+    evaluated_count = 0
+    event_count = 0
 
-    for saved_filter in filters:
-        filter_id = str(saved_filter["id"])
-        current = {
-            str(snapshot.get("ticker", "")).upper()
-            for snapshot in stocks
-            if snapshot.get("ticker") and expression_matches(snapshot, saved_filter.get("expression") or {})
-        }
-        existing_rows = client.request(
-            "GET",
-            "filter_matches",
-            {"select": "ticker,first_matched_at,active", "filter_id": f"eq.{filter_id}"},
-        ) or []
-        existing = {str(row["ticker"]): row for row in existing_rows}
-        initialized = saved_filter.get("last_evaluated_at") is not None
-        entered = sorted(ticker for ticker in current if ticker not in existing or not existing[ticker].get("active"))
+    for profile in profiles:
+        user_id = str(profile["user_id"])
+        watched_stocks = [
+            stocks_by_ticker[ticker]
+            for ticker in sorted(watchlists.get(user_id, set()))
+            if ticker in stocks_by_ticker
+        ]
+        filters = list(BUILT_IN_FILTERS.items()) + custom_filters.get(user_id, [])
 
-        for ticker, row in existing.items():
-            if row.get("active") and ticker not in current:
-                client.request("PATCH", "filter_matches", {"filter_id": f"eq.{filter_id}", "ticker": f"eq.{ticker}"}, {"active": False})
-
-        if current:
-            match_rows = [
-                {
-                    "filter_id": filter_id,
-                    "ticker": ticker,
-                    "first_matched_at": existing.get(ticker, {}).get("first_matched_at") or now,
-                    "last_matched_at": now,
-                    "active": True,
-                }
-                for ticker in sorted(current)
-            ]
-            client.request(
-                "POST",
-                "filter_matches",
-                {"on_conflict": "filter_id,ticker"},
-                match_rows,
-                "resolution=merge-duplicates",
+        for filter_key, expression in filters:
+            tracking_key = (user_id, filter_key)
+            existing = state_by_filter.get(tracking_key, {})
+            current = {
+                str(snapshot["ticker"]).upper()
+                for snapshot in watched_stocks
+                if expression_matches(snapshot, expression)
+            }
+            entered = sorted(
+                ticker
+                for ticker in current
+                if ticker not in existing or not existing[ticker].get("active")
             )
 
-        if initialized and saved_filter.get("notifications_enabled") and entered:
-            rows = [
-                {
-                    "user_id": saved_filter["user_id"],
-                    "filter_id": filter_id,
-                    "ticker": ticker,
-                    "title": f"{ticker} is a new match",
-                    "body": f"{ticker} just entered {saved_filter['name']}.",
-                }
-                for ticker in entered
-            ]
-            client.request("POST", "notifications", payload=rows)
-            notification_count += len(rows)
+            for ticker, row in existing.items():
+                if row.get("active") and ticker not in current:
+                    client.request(
+                        "PATCH",
+                        "filter_match_state",
+                        {
+                            "user_id": f"eq.{user_id}",
+                            "filter_key": f"eq.{filter_key}",
+                            "ticker": f"eq.{ticker}",
+                        },
+                        {"active": False},
+                    )
 
-        client.request("PATCH", "saved_filters", {"id": f"eq.{filter_id}"}, {"last_evaluated_at": now})
-        evaluated += 1
+            if current:
+                state_rows = [
+                    {
+                        "user_id": user_id,
+                        "filter_key": filter_key,
+                        "ticker": ticker,
+                        "first_matched_at": existing.get(ticker, {}).get("first_matched_at") or now,
+                        "last_matched_at": now,
+                        "active": True,
+                    }
+                    for ticker in sorted(current)
+                ]
+                client.request(
+                    "POST",
+                    "filter_match_state",
+                    {"on_conflict": "user_id,filter_key,ticker"},
+                    state_rows,
+                    "resolution=merge-duplicates,return=minimal",
+                )
 
-    return evaluated, notification_count
+            if tracking_key in initialized and entered:
+                event_rows = [
+                    {
+                        "user_id": user_id,
+                        "filter_key": filter_key,
+                        "ticker": ticker,
+                        "matched_on": matched_on,
+                    }
+                    for ticker in entered
+                ]
+                client.request(
+                    "POST",
+                    "filter_match_events",
+                    {"on_conflict": "user_id,filter_key,ticker,matched_on"},
+                    event_rows,
+                    "resolution=ignore-duplicates,return=minimal",
+                )
+                event_count += len(event_rows)
+
+            client.request(
+                "POST",
+                "filter_evaluations",
+                {"on_conflict": "user_id,filter_key"},
+                {"user_id": user_id, "filter_key": filter_key, "last_evaluated_at": now},
+                "resolution=merge-duplicates,return=minimal",
+            )
+            evaluated_count += 1
+
+    return evaluated_count, event_count
 
 
 def main() -> None:
@@ -208,8 +315,8 @@ def main() -> None:
         raise SystemExit(2)
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_STOCKS_PATH
     stocks = json.loads(path.read_text(encoding="utf-8"))
-    evaluated, notifications = evaluate(stocks, SupabaseRest(url, key))
-    print(f"Evaluated {evaluated} saved filters and created {notifications} notifications.")
+    evaluated, events = evaluate(stocks, SupabaseRest(url, key))
+    print(f"Evaluated {evaluated} watchlist filters and created {events} daily match events.")
 
 
 if __name__ == "__main__":

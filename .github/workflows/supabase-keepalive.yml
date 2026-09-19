@@ -1,4 +1,4 @@
-name: Evaluate saved filters
+name: Evaluate watchlist filters
 
 on:
   workflow_dispatch:
@@ -21,7 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Evaluate saved filters
+      - name: Evaluate watchlist filter badges
         if: ${{ env.SUPABASE_CONFIGURED == 'true' }}
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

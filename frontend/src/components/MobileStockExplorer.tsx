@@ -3,7 +3,6 @@ import {
   ArrowLeft,
   ArrowUp,
   BarChart3,
-  BellRing,
   Bookmark,
   Check,
   ChevronRight,
@@ -24,7 +23,13 @@ import {
   type OpenDataPricePoint,
   type OpenDataStockSnapshot,
 } from "../api";
-import type { SavedFilter, SaveFilterInput } from "../personalization";
+import {
+  PULLBACK_FILTER_KEY,
+  SUPPORT_FILTER_KEY,
+  savedFilterKey,
+  type SavedFilter,
+  type SaveFilterInput,
+} from "../personalization";
 
 type Props = {
   snapshots: OpenDataStockSnapshot[];
@@ -39,9 +44,13 @@ type Props = {
   personalization?: {
     signedIn: boolean;
     savedFilters: SavedFilter[];
+    watchlistTickers: string[];
+    filterBadgeCounts: Record<string, number>;
     onRequestSignIn: () => Promise<void>;
     onSaveFilter: (input: Omit<SaveFilterInput, "userId">) => Promise<SavedFilter>;
     onDeleteFilter: (filterId: string) => Promise<void>;
+    onAddToWatchlist: (ticker: string) => Promise<void>;
+    onRemoveFromWatchlist: (ticker: string) => Promise<void>;
   };
 };
 
@@ -507,6 +516,11 @@ function StockStatus({ signal }: { signal: Signal }) {
   return <span className={`mobile-status ${signal.tone}`}>{signal.label}</span>;
 }
 
+function FilterNewBadge({ count }: { count?: number }) {
+  if (!count) return null;
+  return <span className="mobile-filter-new-badge">+{count}</span>;
+}
+
 function FilterSheet({
   open,
   expression,
@@ -544,7 +558,6 @@ function FilterSheet({
 }) {
   const [saveFormOpen, setSaveFormOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
-  const [alertsEnabled, setAlertsEnabled] = useState(false);
   const [saveBusy, setSaveBusy] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   useEffect(() => {
@@ -564,7 +577,6 @@ function FilterSheet({
 
   const openSaveForm = () => {
     setSaveName(activeSavedFilter?.name ?? builtInName ?? "My stock filter");
-    setAlertsEnabled(activeSavedFilter?.notifications_enabled ?? false);
     setSaveError(null);
     setSaveFormOpen(true);
   };
@@ -580,7 +592,6 @@ function FilterSheet({
         expression,
         sortKey,
         sortDirection,
-        notificationsEnabled: alertsEnabled,
       });
       onSavedFilter(saved);
       setSaveFormOpen(false);
@@ -697,7 +708,7 @@ function FilterSheet({
                 <>
                   <button type="button" className="mobile-signin-filter" disabled={saveBusy} onClick={() => void requestSignIn()}>
                     <LogIn size={18} />
-                    <span><strong>Sign in to save filters</strong><small>Sync views and get new-match alerts.</small></span>
+                    <span><strong>Sign in to save filters</strong><small>Sync views and see daily new-match badges.</small></span>
                     <ChevronRight size={17} />
                   </button>
                   {saveError && <p className="mobile-personal-error">{saveError}</p>}
@@ -715,7 +726,7 @@ function FilterSheet({
                         >
                           <Bookmark size={15} fill={activeSavedFilterId === filter.id ? "currentColor" : "none"} />
                           <span>{filter.name}</span>
-                          {filter.notifications_enabled && <BellRing size={14} />}
+                          <FilterNewBadge count={personalization.filterBadgeCounts[savedFilterKey(filter.id)]} />
                         </button>
                       ))}
                     </div>
@@ -734,14 +745,6 @@ function FilterSheet({
                           maxLength={80}
                           autoFocus
                         />
-                      </label>
-                      <label className="mobile-alert-toggle">
-                        <input
-                          type="checkbox"
-                          checked={alertsEnabled}
-                          onChange={(event) => setAlertsEnabled(event.target.checked)}
-                        />
-                        <span><BellRing size={17} /><span><strong>New match alerts</strong><small>Notify me when a symbol enters this filter.</small></span></span>
                       </label>
                       {saveError && <p className="mobile-personal-error">{saveError}</p>}
                       <div className="mobile-save-filter-actions">
@@ -964,6 +967,107 @@ function FilterSheet({
           <button type="button" className="mobile-done-button" onClick={onClose}>
             Show stocks{count > 0 ? ` (${count} condition${count === 1 ? "" : "s"})` : ""}
           </button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
+function WatchlistSheet({
+  open,
+  snapshots,
+  watchlistTickers,
+  onClose,
+  onAdd,
+  onRemove,
+}: {
+  open: boolean;
+  snapshots: OpenDataStockSnapshot[];
+  watchlistTickers: string[];
+  onClose: () => void;
+  onAdd: (ticker: string) => Promise<void>;
+  onRemove: (ticker: string) => Promise<void>;
+}) {
+  const [query, setQuery] = useState("");
+  const [busyTicker, setBusyTicker] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", close);
+    return () => document.removeEventListener("keydown", close);
+  }, [onClose, open]);
+
+  if (!open) return null;
+  const watched = new Set(watchlistTickers);
+  const needle = query.trim().toLowerCase();
+  const rows = snapshots.filter((snapshot) => !needle || [snapshot.ticker, snapshot.name, snapshot.sector, snapshot.industry]
+    .filter(Boolean)
+    .some((value) => String(value).toLowerCase().includes(needle)));
+
+  const update = async (ticker: string, action: (symbol: string) => Promise<void>) => {
+    setBusyTicker(ticker);
+    setError(null);
+    try {
+      await action(ticker);
+    } catch (exc) {
+      setError(exc instanceof Error ? exc.message : `Could not update ${ticker}.`);
+    } finally {
+      setBusyTicker(null);
+    }
+  };
+
+  return (
+    <div className="mobile-sheet-backdrop" role="presentation" onMouseDown={(event) => {
+      if (event.currentTarget === event.target) onClose();
+    }}>
+      <section className="mobile-watchlist-sheet" role="dialog" aria-modal="true" aria-label="Manage watchlist">
+        <div className="mobile-sheet-handle" aria-hidden="true" />
+        <header className="mobile-sheet-header">
+          <div><h2>Watchlist</h2><p>{watchlistTickers.length} symbol{watchlistTickers.length === 1 ? "" : "s"} saved</p></div>
+          <button type="button" className="mobile-icon-button" onClick={onClose} aria-label="Close watchlist">
+            <X size={20} />
+          </button>
+        </header>
+        <label className="mobile-watchlist-search">
+          <Search size={18} />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Find a symbol or company"
+            aria-label="Find stocks for watchlist"
+            autoFocus
+          />
+          {query && <button type="button" onClick={() => setQuery("")} aria-label="Clear watchlist search"><X size={16} /></button>}
+        </label>
+        {error && <p className="mobile-watchlist-error">{error}</p>}
+        <div className="mobile-watchlist-picker">
+          {rows.map((snapshot) => {
+            const isWatched = watched.has(snapshot.ticker);
+            return (
+              <div className="mobile-watchlist-option" key={snapshot.ticker}>
+                <span><strong>{snapshot.ticker}</strong><small>{snapshot.name ?? snapshot.industry ?? ""}</small></span>
+                <button
+                  type="button"
+                  className={isWatched ? "remove" : "add"}
+                  disabled={busyTicker === snapshot.ticker}
+                  onClick={() => void update(snapshot.ticker, isWatched ? onRemove : onAdd)}
+                  aria-label={`${isWatched ? "Remove" : "Add"} ${snapshot.ticker} ${isWatched ? "from" : "to"} watchlist`}
+                  title={`${isWatched ? "Remove from" : "Add to"} watchlist`}
+                >
+                  {isWatched ? <><Check size={16} />Added</> : <><Plus size={16} />Add</>}
+                </button>
+              </div>
+            );
+          })}
+          {rows.length === 0 && <p className="mobile-watchlist-no-results">No stocks match your search.</p>}
+        </div>
+        <footer className="mobile-watchlist-footer">
+          <button type="button" onClick={onClose}>Done</button>
         </footer>
       </section>
     </div>
@@ -1290,16 +1394,21 @@ export function MobileStockExplorer({
   const [sortKey, setSortKey] = useState<SortKey>("support_1m");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [watchlistOpen, setWatchlistOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [activeSavedFilterId, setActiveSavedFilterId] = useState<string | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
   const builtInPreset = builtInPresetFor(filterExpression);
   const builtInName = builtInPresetName(builtInPreset);
   const relevantSupportKeys = builtInPreset === "support" ? LONG_SUPPORT_FILTER_KEYS : SUPPORT_FILTER_KEYS;
+  const signedIn = personalization?.signedIn ?? false;
+  const watchlistTickers = personalization?.watchlistTickers ?? [];
+  const watchlist = useMemo(() => new Set(watchlistTickers), [watchlistTickers]);
+  const baseSnapshots = signedIn ? snapshots.filter((snapshot) => watchlist.has(snapshot.ticker)) : snapshots;
 
   const visibleSnapshots = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return snapshots
+    return baseSnapshots
       .filter((snapshot) => {
         const matchesSearch = !needle || [snapshot.ticker, snapshot.name, snapshot.sector, snapshot.industry]
           .filter(Boolean)
@@ -1317,7 +1426,7 @@ export function MobileStockExplorer({
           : String(leftValue).localeCompare(String(rightValue), undefined, { numeric: true, sensitivity: "base" });
         return (sortDirection === "asc" ? comparison : -comparison) || left.ticker.localeCompare(right.ticker);
       });
-  }, [filterExpression, query, relevantSupportKeys, snapshots, sortDirection, sortKey]);
+  }, [baseSnapshots, filterExpression, query, relevantSupportKeys, sortDirection, sortKey]);
 
   const filterCount = activeFilterCount(filterExpression);
   const sortLabel = SORT_OPTIONS.find((option) => option.key === sortKey)?.label ?? "Symbol";
@@ -1366,8 +1475,8 @@ export function MobileStockExplorer({
       <main className="mobile-stock-main">
         <header className="mobile-stock-header">
           <div>
-            <h1>Stocks</h1>
-            <p>Insights{dateLabel ? ` · ${dateLabel}` : ""}</p>
+            <h1>{signedIn ? "Watchlist" : "Stocks"}</h1>
+            <p>{signedIn ? "My stocks" : "Insights"}{dateLabel ? ` · ${dateLabel}` : ""}</p>
           </div>
           <div className="mobile-header-actions">
             {headerActions?.(openDetail)}
@@ -1402,10 +1511,12 @@ export function MobileStockExplorer({
           <button type="button" className={builtInPreset === "pullback" ? "active" : ""} onClick={() => toggleBuiltInPreset("pullback")}>
             {builtInPreset === "pullback" && <Check size={15} />}
             Strong YoY and on pullback
+            <FilterNewBadge count={personalization?.filterBadgeCounts[PULLBACK_FILTER_KEY]} />
           </button>
           <button type="button" className={builtInPreset === "support" ? "active" : ""} onClick={() => toggleBuiltInPreset("support")}>
             {builtInPreset === "support" && <Check size={15} />}
             Strong YoY and on support
+            <FilterNewBadge count={personalization?.filterBadgeCounts[SUPPORT_FILTER_KEY]} />
           </button>
           {personalization?.signedIn && personalization.savedFilters.map((filter) => (
             <button
@@ -1416,6 +1527,7 @@ export function MobileStockExplorer({
             >
               {activeSavedFilterId === filter.id && <Check size={15} />}
               {filter.name}
+              <FilterNewBadge count={personalization.filterBadgeCounts[savedFilterKey(filter.id)]} />
             </button>
           ))}
         </div>
@@ -1445,18 +1557,28 @@ export function MobileStockExplorer({
         )}
 
         <div className="mobile-list-summary">
-          <span>{visibleSnapshots.length} of {snapshots.length} stocks</span>
-          <button type="button" onClick={() => setSheetOpen(true)}>
-            {sortSummary}
-          </button>
+          <span>{signedIn ? `${visibleSnapshots.length} of ${baseSnapshots.length} watched` : `${visibleSnapshots.length} of ${snapshots.length} stocks`}</span>
+          <div className="mobile-list-actions">
+            {signedIn && (
+              <button type="button" onClick={() => setWatchlistOpen(true)}>
+                <Plus size={15} />Manage
+              </button>
+            )}
+            <button type="button" onClick={() => setSheetOpen(true)}>{sortSummary}</button>
+          </div>
         </div>
 
         {loading ? (
           <div className="mobile-list-state">Loading stock insights...</div>
         ) : visibleSnapshots.length === 0 ? (
           <div className="mobile-list-state">
-            <strong>{snapshots.length === 0 ? "No stock metrics loaded" : "No stocks match"}</strong>
-            <p>{snapshots.length === 0 ? "The data bundle is empty." : "Try removing a filter or changing the search."}</p>
+            <strong>{snapshots.length === 0 ? "No stock metrics loaded" : signedIn && baseSnapshots.length === 0 ? "Your watchlist is empty" : "No stocks match"}</strong>
+            <p>{snapshots.length === 0 ? "The data bundle is empty." : signedIn && baseSnapshots.length === 0 ? "Add symbols to build your personal list." : "Try removing a filter or changing the search."}</p>
+            {signedIn && baseSnapshots.length === 0 && (
+              <button type="button" className="mobile-empty-watchlist-button" onClick={() => setWatchlistOpen(true)}>
+                <Plus size={17} />Add symbols
+              </button>
+            )}
           </div>
         ) : (
           <section className="mobile-stock-list" aria-label="Stocks">
@@ -1515,6 +1637,16 @@ export function MobileStockExplorer({
           setActiveSavedFilterId(null);
         }}
       />
+      {personalization?.signedIn && (
+        <WatchlistSheet
+          open={watchlistOpen}
+          snapshots={snapshots}
+          watchlistTickers={personalization.watchlistTickers}
+          onClose={() => setWatchlistOpen(false)}
+          onAdd={personalization.onAddToWatchlist}
+          onRemove={personalization.onRemoveFromWatchlist}
+        />
+      )}
     </div>
   );
 }
