@@ -18,6 +18,8 @@ from app.services.asset_opportunities import (
     build_asset_opportunities_file,
     save_asset_opportunities,
 )
+from app.services.open_data_stock_store import save_stock_snapshot_to_db
+from app.services.storage import connect, replace_stock_derived_signals_file
 from app.services.stock_derived_signals import StockDerivedSignalsFile, build_stock_derived_signals_file
 from app.snapshot import get_portfolio_snapshot
 
@@ -41,10 +43,11 @@ def _save_stock_derived_signals(
     return latest_path
 
 
-def _refresh_stock_symbol(ticker: str) -> str:
+def _refresh_stock_symbol(settings: Settings, ticker: str) -> str:
     provider = OpenDataProvider(force_refresh=True, include_filing_details=False)
     snapshot = provider.get_open_data_snapshot(ticker)
     save_open_data_stock_snapshot(snapshot)
+    save_stock_snapshot_to_db(settings, snapshot)
     return snapshot.ticker
 
 
@@ -64,6 +67,8 @@ def _is_snapshot_fresh_today(generated_at: datetime) -> bool:
 def refresh_exploration_data(
     settings: Settings,
     progress: ExplorationProgressCallback | None = None,
+    *,
+    include_assets: bool = True,
 ) -> list[str]:
     warnings: list[str] = []
     active_tickers = load_open_data_active_tickers()
@@ -77,7 +82,7 @@ def refresh_exploration_data(
     ]
     stale_tickers = [*missing_tickers, *stale_existing_tickers]
     skipped_fresh = len(current_stock_snapshots) - len(stale_existing_tickers)
-    total_steps = max(1, len(stale_tickers)) + 2
+    total_steps = max(1, len(stale_tickers)) + (2 if include_assets else 1)
 
     if progress:
         progress(
@@ -92,7 +97,7 @@ def refresh_exploration_data(
         workers = min(MAX_STOCK_REFRESH_WORKERS, len(stale_tickers))
         completed = 0
         with ThreadPoolExecutor(max_workers=workers) as executor:
-            future_by_ticker = {executor.submit(_refresh_stock_symbol, ticker): ticker for ticker in stale_tickers}
+            future_by_ticker = {executor.submit(_refresh_stock_symbol, settings, ticker): ticker for ticker in stale_tickers}
             for future in as_completed(future_by_ticker):
                 ticker = future_by_ticker[future]
                 completed += 1
@@ -112,6 +117,14 @@ def refresh_exploration_data(
     refreshed_stock_snapshots = load_latest_open_data_stock_snapshots()
     stock_signals = build_stock_derived_signals_file(refreshed_stock_snapshots)
     _save_stock_derived_signals(stock_signals)
+    with connect(settings.data_dir) as conn:
+        for snapshot in refreshed_stock_snapshots:
+            save_stock_snapshot_to_db(settings, snapshot)
+        replace_stock_derived_signals_file(conn, stock_signals)
+        conn.commit()
+
+    if not include_assets:
+        return warnings
 
     if progress:
         progress("exploration_asset_signals", "Refreshing ETF, crypto, and commodity signals", total_steps, total_steps)

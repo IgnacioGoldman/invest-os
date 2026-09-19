@@ -53,6 +53,7 @@ def _source_label(source: RefreshSource) -> str:
         "manual": "Manual cash and assets",
         "market_data": "Market prices",
         "exploration": "Exploration data",
+        "exploration_beta": "Exploration Beta data",
         "fx": "FX rates",
         "prices_fx": "Prices and FX",
     }.get(source, source)

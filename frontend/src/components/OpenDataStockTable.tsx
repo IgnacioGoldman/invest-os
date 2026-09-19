@@ -1,6 +1,8 @@
-import type { OpenDataCompanyContext, OpenDataMetric, OpenDataStockSnapshot, StockEntryAnalysis, StockEntryAnalysisSection } from "../api";
+import type { OpenDataCompanyContext, OpenDataMetric, OpenDataPricePoint, OpenDataStockSnapshot, StockEntryAnalysis, StockEntryAnalysisSection } from "../api";
+import { fetchOpenDataStockPriceHistory } from "../api";
 import { ArrowDown, ArrowUp, ArrowUpDown, BarChart3, ChevronDown, ChevronLeft, ChevronRight, Filter, GripVertical, Info, SlidersHorizontal, X } from "lucide-react";
-import { Fragment, memo, useEffect, useMemo, useState } from "react";
+import type { ComponentProps, ReactNode } from "react";
+import { Fragment, memo, useEffect, useMemo, useRef, useState } from "react";
 import { formatDateTime } from "../format";
 
 type Props = {
@@ -10,6 +12,8 @@ type Props = {
   analyses: Record<string, StockEntryAnalysis>;
   analysisLoading: boolean;
   onSelectTicker: (ticker: string) => void;
+  variant?: "stable" | "beta";
+  betaActions?: ReactNode;
 };
 
 const COLUMNS = [
@@ -57,6 +61,8 @@ type SortValue = number | string | null;
 type MetricGroup = "business_health" | "price_opportunity" | "valuation";
 type ColumnKind = "conviction" | "assessment" | "text" | "metric" | "derived";
 type FilterValue = { field: string; value: string };
+type PriceRange = "1D" | "1W" | "1M" | "3M" | "6M" | "1Y" | "5Y" | "ALL";
+type PriceHistoryStatus = "idle" | "loading" | "loaded" | "error";
 type DerivedMetric = {
   value: number | null;
   kind: MetricKind;
@@ -249,6 +255,16 @@ const DEFAULT_VISIBLE_COLUMN_IDS = [
   "metric:price_opportunity:support_1d_distance",
 ];
 const PAGE_SIZE = 10;
+const PRICE_RANGES: Array<{ value: PriceRange; label: string; days: number | null }> = [
+  { value: "1D", label: "1D", days: 1 },
+  { value: "1W", label: "1W", days: 7 },
+  { value: "1M", label: "1M", days: 30 },
+  { value: "3M", label: "3M", days: 91 },
+  { value: "6M", label: "6M", days: 182 },
+  { value: "1Y", label: "1Y", days: 365 },
+  { value: "5Y", label: "5Y", days: 365 * 5 },
+  { value: "ALL", label: "All", days: null },
+];
 
 const CHARTS: Array<{
   title: string;
@@ -283,6 +299,16 @@ function formatRatio(value?: number | null) {
   return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value);
 }
 
+function formatPrice(value?: number | null) {
+  if (value == null) return "-";
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: value >= 100 ? 2 : 2,
+    maximumFractionDigits: value >= 100 ? 2 : 4,
+  }).format(value);
+}
+
 function formatPercent(value?: number | null) {
   if (value == null) return "-";
   return `${formatRatio(value)}%`;
@@ -304,6 +330,13 @@ function supportSignalLabel(value?: number | null) {
 function formatSupportSignal(value?: number | null) {
   if (value == null) return "Far";
   return `${supportSignalLabel(value)} ${formatSignedPercent(value)}`;
+}
+
+function supportSignalTone(value?: number | null): Tone {
+  if (value == null) return "neutral";
+  if (value <= 2.5) return "good";
+  if (value <= 6) return "watch";
+  return "neutral";
 }
 
 function formatValue(metric: OpenDataMetric | undefined, kind: string) {
@@ -759,12 +792,49 @@ function quarterlyRevenueGrowthPoints(snapshot: OpenDataStockSnapshot) {
     .filter((point): point is { period: string; value: number } => point.value != null);
 }
 
+function periodParts(period: string) {
+  const match = /^FY(\d+)\s+(Q[1-4])$/.exec(period);
+  if (!match) return null;
+  return { fiscalYear: Number(match[1]), quarter: match[2] };
+}
+
+function quarterlyMetricGrowthPoints(snapshot: OpenDataStockSnapshot, metric: string) {
+  const rows = sortedHistoricalRows(snapshot, "quarterly_fundamentals")
+    .map((row) => ({ period: row.period, value: metricValue(row, metric), parts: periodParts(row.period) }))
+    .filter((point): point is { period: string; value: number; parts: { fiscalYear: number; quarter: string } } => (
+      point.value != null && point.parts != null
+    ));
+  const byQuarter = new Map(rows.map((point) => [`${point.parts.fiscalYear}:${point.parts.quarter}`, point]));
+  return rows
+    .map((point) => {
+      const prior = byQuarter.get(`${point.parts.fiscalYear - 1}:${point.parts.quarter}`);
+      if (!prior || point.value <= 0 || prior.value <= 0) return null;
+      return {
+        period: point.period,
+        value: ((point.value - prior.value) / Math.abs(prior.value)) * 100,
+      };
+    })
+    .filter((point): point is { period: string; value: number } => point != null);
+}
+
+function quarterlyEpsGrowthPoints(snapshot: OpenDataStockSnapshot) {
+  return quarterlyMetricGrowthPoints(snapshot, "eps_diluted");
+}
+
 function revenueGrowthSignal(value?: number | null): { label: string; tone: Tone; detail: string } {
   if (value == null) return { label: "Unclear", tone: "neutral", detail: "Comparable quarterly revenue YoY is unavailable." };
   if (value >= 20) return { label: "Strong", tone: "good", detail: "Latest-quarter revenue YoY is at least 20%." };
   if (value >= 8) return { label: "Solid", tone: "good", detail: "Latest-quarter revenue YoY is at least 8%." };
   if (value >= 0) return { label: "Mixed", tone: "watch", detail: "Latest-quarter revenue YoY is positive but below 8%." };
   return { label: "Weak", tone: "caution", detail: "Latest-quarter revenue YoY is negative." };
+}
+
+function epsGrowthSignal(value?: number | null): { label: string; tone: Tone; detail: string } {
+  if (value == null) return { label: "Unclear", tone: "neutral", detail: "Comparable quarterly EPS YoY is unavailable." };
+  if (value >= 20) return { label: "Strong", tone: "good", detail: "Latest-quarter EPS YoY is at least 20%." };
+  if (value >= 8) return { label: "Solid", tone: "good", detail: "Latest-quarter EPS YoY is at least 8%." };
+  if (value >= 0) return { label: "Mixed", tone: "watch", detail: "Latest-quarter EPS YoY is positive but below 8%." };
+  return { label: "Weak", tone: "caution", detail: "Latest-quarter EPS YoY is negative." };
 }
 
 function formatSignedPp(value?: number | null) {
@@ -824,14 +894,220 @@ function revenueGrowthMomentum(snapshot: OpenDataStockSnapshot): {
   };
 }
 
-function QuarterlyRevenueGrowthBarChart({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
-  const points = quarterlyRevenueGrowthPoints(snapshot);
+function dateMs(value: string) {
+  const parsed = Date.parse(`${value}T00:00:00Z`);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function sortedPricePoints(points: OpenDataPricePoint[]) {
+  return points
+    .filter((point) => Number.isFinite(point.close) && point.close > 0 && dateMs(point.date) != null)
+    .sort((left, right) => (dateMs(left.date) ?? 0) - (dateMs(right.date) ?? 0));
+}
+
+function pricePointsForRange(points: OpenDataPricePoint[], range: PriceRange) {
+  const sorted = sortedPricePoints(points);
+  if (range === "1D") return sorted.slice(-2);
+  const option = PRICE_RANGES.find((item) => item.value === range);
+  if (!option || option.days == null) return sorted;
+  const latest = sorted[sorted.length - 1];
+  const latestMs = latest ? dateMs(latest.date) : null;
+  if (latestMs == null) return sorted;
+  const cutoff = latestMs - option.days * 24 * 60 * 60 * 1000;
+  const ranged = sorted.filter((point) => (dateMs(point.date) ?? 0) >= cutoff);
+  return ranged.length >= 2 ? ranged : sorted.slice(-2);
+}
+
+function formatChartDate(value: string) {
+  const [year, month, day] = value.split("-");
+  if (!year || !month || !day) return value;
+  return `${month}/${day}/${year.slice(2)}`;
+}
+
+function PriceLineChart({
+  snapshot,
+  points,
+  loading,
+  error,
+}: {
+  snapshot: OpenDataStockSnapshot;
+  points?: OpenDataPricePoint[];
+  loading?: boolean;
+  error?: string;
+}) {
+  const [range, setRange] = useState<PriceRange>("1M");
+  const [hoveredPricePoint, setHoveredPricePoint] = useState<({ date: string; close: number; x: number; y: number }) | null>(null);
+  const rangedPoints = points ? pricePointsForRange(points, range) : [];
+  const latestPoint = rangedPoints[rangedPoints.length - 1];
+  const firstPoint = rangedPoints[0];
+  const fallbackPrice = snapshot.price_opportunity.current_price?.value;
+  const change = firstPoint && latestPoint && firstPoint.close !== 0
+    ? ((latestPoint.close - firstPoint.close) / firstPoint.close) * 100
+    : null;
+  const tone = change == null ? "neutral" : change >= 0 ? "good" : "bad";
+
+  if (loading) {
+    return (
+      <div className="temp-price-chart empty-chart">
+        <div className="mini-chart-heading">
+          <strong>Stock Price</strong>
+          <small>Loading daily close history...</small>
+        </div>
+      </div>
+    );
+  }
+
+  if (rangedPoints.length < 2) {
+    return (
+      <div className="temp-price-chart empty-chart">
+        <div className="mini-chart-heading">
+          <strong>Stock Price</strong>
+          <small>{error ?? (fallbackPrice == null ? "No daily price history available." : `Latest ${formatPrice(fallbackPrice)}`)}</small>
+        </div>
+      </div>
+    );
+  }
+
+  const width = 620;
+  const height = 220;
+  const left = 54;
+  const right = 18;
+  const top = 22;
+  const bottom = 38;
+  const plotWidth = width - left - right;
+  const plotHeight = height - top - bottom;
+  const values = rangedPoints.map((point) => point.close);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const spread = max - min || Math.max(Math.abs(max), 1);
+  const minY = min - spread * 0.08;
+  const maxY = max + spread * 0.08;
+  const svgPoints = rangedPoints.map((point, index) => {
+    const x = left + (index / (rangedPoints.length - 1)) * plotWidth;
+    const y = top + ((maxY - point.close) / (maxY - minY || 1)) * plotHeight;
+    return { ...point, x, y };
+  });
+  const linePoints = svgPoints.map((point) => `${point.x},${point.y}`).join(" ");
+  const yTicks = [maxY, maxY - (maxY - minY) / 3, minY + (maxY - minY) / 3, minY].map((value) => ({
+    value,
+    y: top + ((maxY - value) / (maxY - minY || 1)) * plotHeight,
+  }));
+  const xTickIndexes = Array.from(new Set([0, Math.floor((svgPoints.length - 1) / 2), svgPoints.length - 1]));
+  const tooltipWidth = 124;
+  const tooltipHeight = 44;
+  const tooltipX = hoveredPricePoint ? Math.min(width - right - tooltipWidth, Math.max(left, hoveredPricePoint.x - tooltipWidth / 2)) : 0;
+  const tooltipY = hoveredPricePoint ? Math.max(top, hoveredPricePoint.y - tooltipHeight - 10) : 0;
+  const nearestPointForX = (clientX: number, svg: SVGSVGElement) => {
+    const rect = svg.getBoundingClientRect();
+    const x = ((clientX - rect.left) / rect.width) * width;
+    const ratio = Math.max(0, Math.min(1, (x - left) / plotWidth));
+    const index = Math.min(svgPoints.length - 1, Math.max(0, Math.round(ratio * (svgPoints.length - 1))));
+    return svgPoints[index];
+  };
+
+  return (
+    <div className="temp-price-chart">
+      <div className="temp-price-heading">
+        <div className="mini-chart-heading">
+          <strong>Stock Price</strong>
+          <small>
+            {formatPrice(latestPoint.close)}{" "}
+            <span className={`price-change ${tone}`}>{change == null ? "-" : formatSignedPercent(change)}</span>
+          </small>
+        </div>
+        <div className="price-range-control" aria-label="Price chart range">
+          {PRICE_RANGES.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={range === option.value ? "active" : ""}
+              onClick={() => setRange(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${snapshot.ticker} price chart ${range}`}>
+        {yTicks.map((tick) => (
+          <g className="price-axis-tick" key={tick.value}>
+            <line x1={left} x2={width - right} y1={tick.y} y2={tick.y} />
+            <text x={left - 8} y={tick.y + 4} textAnchor="end">
+              {formatPrice(tick.value)}
+            </text>
+          </g>
+        ))}
+        {xTickIndexes.map((index) => (
+          <g className="price-date-tick" key={svgPoints[index].date}>
+            <line x1={svgPoints[index].x} x2={svgPoints[index].x} y1={top + plotHeight} y2={top + plotHeight + 4} />
+            <text
+              x={svgPoints[index].x}
+              y={height - 12}
+              textAnchor={index === 0 ? "start" : index === svgPoints.length - 1 ? "end" : "middle"}
+            >
+              {formatChartDate(svgPoints[index].date)}
+            </text>
+          </g>
+        ))}
+        <polyline className={`price-line ${tone}`} points={linePoints}>
+          <title>
+            {snapshot.ticker} {range}: {formatPrice(firstPoint.close)} to {formatPrice(latestPoint.close)}
+          </title>
+        </polyline>
+        <circle cx={svgPoints[0].x} cy={svgPoints[0].y} r="3" />
+        <circle cx={svgPoints[svgPoints.length - 1].x} cy={svgPoints[svgPoints.length - 1].y} r="3.5" />
+        {hoveredPricePoint && (
+          <g className="price-hover-layer" pointerEvents="none">
+            <line x1={hoveredPricePoint.x} x2={hoveredPricePoint.x} y1={top} y2={top + plotHeight} />
+            <circle cx={hoveredPricePoint.x} cy={hoveredPricePoint.y} r="4" />
+            <g className="price-tooltip" transform={`translate(${tooltipX} ${tooltipY})`}>
+              <rect width={tooltipWidth} height={tooltipHeight} rx={6} />
+              <text x={10} y={17} className="tooltip-date">
+                {formatChartDate(hoveredPricePoint.date)}
+              </text>
+              <text x={10} y={34} className="tooltip-price">
+                {formatPrice(hoveredPricePoint.close)}
+              </text>
+            </g>
+          </g>
+        )}
+        <rect
+          className="price-hit-area"
+          x={left}
+          y={top}
+          width={plotWidth}
+          height={plotHeight}
+          tabIndex={0}
+          aria-label="Hover price chart for date and close"
+          onMouseMove={(event) => setHoveredPricePoint(nearestPointForX(event.clientX, event.currentTarget.ownerSVGElement as SVGSVGElement))}
+          onMouseLeave={() => setHoveredPricePoint(null)}
+          onFocus={() => setHoveredPricePoint(svgPoints[svgPoints.length - 1])}
+          onBlur={() => setHoveredPricePoint(null)}
+        />
+      </svg>
+    </div>
+  );
+}
+
+function QuarterlyGrowthBarChart({
+  snapshot,
+  title,
+  points,
+  emptyMessage,
+  ariaMetric,
+}: {
+  snapshot: OpenDataStockSnapshot;
+  title: string;
+  points: { period: string; value: number }[];
+  emptyMessage: string;
+  ariaMetric: string;
+}) {
   const [hoveredPoint, setHoveredPoint] = useState<{ period: string; value: number; x: number; y: number } | null>(null);
   if (points.length === 0) {
     return (
       <div className="temp-bar-chart empty-chart">
-        <strong>Latest-quarter revenue YoY</strong>
-        <small>No comparable quarterly revenue growth history from SEC facts.</small>
+        <strong>{title}</strong>
+        <small>{emptyMessage}</small>
       </div>
     );
   }
@@ -861,14 +1137,14 @@ function QuarterlyRevenueGrowthBarChart({ snapshot }: { snapshot: OpenDataStockS
   return (
     <div className="temp-bar-chart">
       <div className="mini-chart-heading">
-        <strong>Latest-quarter revenue YoY</strong>
+        <strong>{title}</strong>
         <small>
           {points.length} comparable quarters, latest {points[points.length - 1].period}{" "}
           {formatPercent(points[points.length - 1].value)}
         </small>
       </div>
       <div className="temp-bar-chart-scroll">
-        <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${snapshot.ticker} quarterly revenue growth YoY`}>
+        <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${snapshot.ticker} ${ariaMetric}`}>
           <line x1={left} x2={width - right} y1={zeroY} y2={zeroY} className="zero-line" />
           <text x={left - 8} y={top + 4} textAnchor="end">
             {formatPercent(max)}
@@ -944,16 +1220,198 @@ function QuarterlyRevenueGrowthBarChart({ snapshot }: { snapshot: OpenDataStockS
   );
 }
 
+function QuarterlyRevenueGrowthBarChart({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
+  return (
+    <QuarterlyGrowthBarChart
+      snapshot={snapshot}
+      title="Revenue YoY"
+      points={quarterlyRevenueGrowthPoints(snapshot)}
+      emptyMessage="No comparable quarterly revenue growth history from SEC facts."
+      ariaMetric="quarterly revenue growth YoY"
+    />
+  );
+}
+
+function QuarterlyEpsGrowthBarChart({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
+  return (
+    <QuarterlyGrowthBarChart
+      snapshot={snapshot}
+      title="EPS Growth YoY"
+      points={quarterlyEpsGrowthPoints(snapshot)}
+      emptyMessage="No comparable positive quarterly EPS growth history from SEC facts."
+      ariaMetric="quarterly EPS growth YoY"
+    />
+  );
+}
+
+function StockFilterControls({
+  query,
+  onQueryChange,
+  activeFilters,
+  activeFilterCount,
+  filterMenuOpen,
+  setFilterMenuOpen,
+  onBeforeOpenFilters,
+  filterDimensions,
+  activeFilterField,
+  setActiveFilterField,
+  activeFilterDimension,
+  filterValueLabel,
+  applyFilterValue,
+  clearFilters,
+  removeFilter,
+  getFilterLabel,
+}: {
+  query: string;
+  onQueryChange: (value: string) => void;
+  activeFilters: FilterValue[];
+  activeFilterCount: number;
+  filterMenuOpen: boolean;
+  setFilterMenuOpen: (value: boolean | ((open: boolean) => boolean)) => void;
+  onBeforeOpenFilters?: () => void;
+  filterDimensions: FilterDimension[];
+  activeFilterField: string;
+  setActiveFilterField: (field: string) => void;
+  activeFilterDimension: FilterDimension | null;
+  filterValueLabel: (field: string) => string;
+  applyFilterValue: (value: string) => void;
+  clearFilters: () => void;
+  removeFilter: (field: string) => void;
+  getFilterLabel: (field: string, value: string) => string;
+}) {
+  return (
+    <div className="open-data-filters temp-filters">
+      <input
+        type="search"
+        value={query}
+        onChange={(event) => onQueryChange(event.target.value)}
+        placeholder="Search symbol, name, sector"
+        aria-label="Search temp stock insights"
+      />
+      <div className="filter-menu">
+        <button
+          type="button"
+          className={`filter-menu-trigger ${activeFilterCount > 0 ? "active" : ""}`}
+          onClick={() => {
+            onBeforeOpenFilters?.();
+            setFilterMenuOpen((open) => !open);
+          }}
+          aria-expanded={filterMenuOpen}
+        >
+          <Filter size={16} aria-hidden="true" />
+          Filter
+          {activeFilterCount > 0 && <span>{activeFilterCount}</span>}
+        </button>
+        {filterMenuOpen && (
+          <div className="filter-popover">
+            <div className="filter-columns">
+              <div className="filter-category-list">
+                {filterDimensions.map((dimension) => (
+                  <button
+                    key={dimension.field}
+                    type="button"
+                    className={activeFilterField === dimension.field ? "active" : ""}
+                    onClick={() => setActiveFilterField(dimension.field)}
+                  >
+                    <span>{dimension.label}</span>
+                    <small>{filterValueLabel(dimension.field)}</small>
+                    <ChevronRight size={15} aria-hidden="true" />
+                  </button>
+                ))}
+              </div>
+              <div className="filter-option-list">
+                <strong>{activeFilterDimension?.label ?? "Filter"}</strong>
+                {activeFilterDimension?.values.map((option) => {
+                  const active = activeFilters.some(
+                    (filter) => filter.field === activeFilterDimension.field && filter.value === option.value,
+                  );
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={active ? "active" : ""}
+                      onClick={() => applyFilterValue(option.value)}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {activeFilterCount > 0 && (
+              <button type="button" className="filter-clear" onClick={clearFilters}>
+                Clear filters
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+      {activeFilters.length > 0 && (
+        <div className="active-filter-list" aria-label="Active filters">
+          {activeFilters.map((filter) => (
+            <button
+              key={`${filter.field}-${filter.value}`}
+              type="button"
+              className="active-filter-chip"
+              onClick={() => removeFilter(filter.field)}
+              title="Remove filter"
+            >
+              {getFilterLabel(filter.field, filter.value)}
+              <X size={13} aria-hidden="true" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function StocksInsightsTempTable({
   snapshots,
+  totalSnapshots,
+  loading,
+  filterControls,
+  actions,
 }: {
   snapshots: OpenDataStockSnapshot[];
+  totalSnapshots: number;
+  loading: boolean;
+  filterControls: ComponentProps<typeof StockFilterControls>;
+  actions?: ReactNode;
 }) {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const rows = [...snapshots].sort((left, right) => left.ticker.localeCompare(right.ticker));
+  const [priceHistoryByTicker, setPriceHistoryByTicker] = useState<Record<string, OpenDataPricePoint[]>>({});
+  const [priceHistoryStatus, setPriceHistoryStatus] = useState<Record<string, PriceHistoryStatus>>({});
+  const [priceHistoryErrors, setPriceHistoryErrors] = useState<Record<string, string>>({});
+  const requestedPriceHistory = useRef<Set<string>>(new Set());
+  const rows = useMemo(() => [...snapshots].sort((left, right) => left.ticker.localeCompare(right.ticker)), [snapshots]);
   const toggleExpandedRow = (ticker: string) => {
     setExpandedRows((current) => ({ ...current, [ticker]: !current[ticker] }));
   };
+
+  useEffect(() => {
+    rows.forEach((snapshot) => {
+      const ticker = snapshot.ticker;
+      if (!expandedRows[ticker] || requestedPriceHistory.current.has(ticker)) {
+        return;
+      }
+      requestedPriceHistory.current.add(ticker);
+      setPriceHistoryStatus((current) => ({ ...current, [ticker]: "loading" }));
+      fetchOpenDataStockPriceHistory(ticker)
+        .then((points) => {
+          setPriceHistoryByTicker((current) => ({ ...current, [ticker]: points }));
+          setPriceHistoryStatus((current) => ({ ...current, [ticker]: "loaded" }));
+        })
+        .catch((error) => {
+          setPriceHistoryErrors((current) => ({
+            ...current,
+            [ticker]: error instanceof Error ? error.message : "Price history unavailable.",
+          }));
+          setPriceHistoryStatus((current) => ({ ...current, [ticker]: "error" }));
+          requestedPriceHistory.current.delete(ticker);
+        });
+    });
+  }, [expandedRows, rows]);
 
   return (
     <section className="panel open-data-stocks-temp">
@@ -962,11 +1420,14 @@ function StocksInsightsTempTable({
           <h2>Stocks Insights temp</h2>
         </div>
         <div className="panel-heading-actions">
-          <span>{rows.length}</span>
+          <span>{rows.length} / {totalSnapshots}</span>
+          {actions}
         </div>
       </div>
-      {rows.length === 0 ? (
-        <p className="empty block">No open-data stock metrics loaded.</p>
+      <StockFilterControls {...filterControls} />
+      {loading && <p className="loading inline">Loading open-data stock metrics...</p>}
+      {!loading && rows.length === 0 ? (
+        <p className="empty block">{totalSnapshots === 0 ? "No open-data stock metrics loaded." : "No stocks match the current filters."}</p>
       ) : (
         <div className="table-wrap">
           <table className="open-data-table exploration-temp-table">
@@ -975,13 +1436,21 @@ function StocksInsightsTempTable({
                 <th>Symbol</th>
                 <th>Latest revenue growth YoY</th>
                 <th>Momentum revenue growth YoY</th>
+                <th>Latest EPS Growth YoY</th>
+                <th>Near Support</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((snapshot) => {
                 const revenueGrowth = snapshot.business_health.revenue_growth_yoy;
+                const epsGrowth = snapshot.business_health.eps_growth_yoy;
+                const support = snapshot.price_opportunity.support_1d_distance;
                 const growthSignal = revenueGrowthSignal(revenueGrowth?.value);
+                const epsSignal = epsGrowthSignal(epsGrowth?.value);
                 const momentum = revenueGrowthMomentum(snapshot);
+                const supportValue = support?.value;
+                const supportLabel = supportSignalLabel(supportValue);
+                const supportTone = supportSignalTone(supportValue);
                 const rowExpanded = Boolean(expandedRows[snapshot.ticker]);
                 return (
                   <Fragment key={snapshot.ticker}>
@@ -992,7 +1461,7 @@ function StocksInsightsTempTable({
                             type="button"
                             className="icon-button row-toggle exploration-row-toggle"
                             onClick={() => toggleExpandedRow(snapshot.ticker)}
-                            title={rowExpanded ? "Hide quarterly revenue chart" : "Show quarterly revenue chart"}
+                            title={rowExpanded ? "Hide growth charts" : "Show growth charts"}
                             aria-expanded={rowExpanded}
                           >
                             {rowExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
@@ -1013,11 +1482,28 @@ function StocksInsightsTempTable({
                             : `${formatSignedPp(momentum.change)} vs ${momentum.previous?.period ?? "previous quarter"}`}
                         </small>
                       </td>
+                      <td title={epsGrowth ? `${epsSignal.detail}\n${epsGrowth.notes}\n${epsGrowth.source}` : epsSignal.detail}>
+                        <span className={`analysis-tag table-assessment-tag ${epsSignal.tone}`}>{epsSignal.label}</span>
+                        <small>{formatValue(epsGrowth, "percent")}</small>
+                      </td>
+                      <td title={support ? `${support.notes}\n${support.source}` : "Nearest support distance was unavailable."}>
+                        <span className={`analysis-tag table-assessment-tag ${supportTone}`}>{supportLabel}</span>
+                        <small>{supportValue == null ? "-" : formatSignedPercent(supportValue)}</small>
+                      </td>
                     </tr>
                     {rowExpanded && (
                       <tr className="exploration-detail-row temp-chart-row">
-                        <td colSpan={3}>
-                          <QuarterlyRevenueGrowthBarChart snapshot={snapshot} />
+                        <td colSpan={5}>
+                          <div className="temp-chart-stack">
+                            <PriceLineChart
+                              snapshot={snapshot}
+                              points={priceHistoryByTicker[snapshot.ticker]}
+                              loading={priceHistoryStatus[snapshot.ticker] === "loading"}
+                              error={priceHistoryErrors[snapshot.ticker]}
+                            />
+                            <QuarterlyRevenueGrowthBarChart snapshot={snapshot} />
+                            <QuarterlyEpsGrowthBarChart snapshot={snapshot} />
+                          </div>
                         </td>
                       </tr>
                     )}
@@ -1290,11 +1776,14 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
   analyses,
   analysisLoading,
   onSelectTicker,
+  variant = "stable",
+  betaActions,
 }: Props) {
   const [openDetail, setOpenDetail] = useState<DetailKind>(null);
   const [query, setQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState<FilterValue[]>([]);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+  const [tempFilterMenuOpen, setTempFilterMenuOpen] = useState(false);
   const [activeFilterField, setActiveFilterField] = useState("sector");
   const [legendOpen, setLegendOpen] = useState(false);
   const [sortKey, setSortKey] = useState("symbol");
@@ -1336,7 +1825,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
   );
 
   const filterDimensions = useMemo<FilterDimension[]>(() => {
-    if (!filterMenuOpen && activeFilters.length === 0) {
+    if (!filterMenuOpen && !tempFilterMenuOpen && activeFilters.length === 0) {
       return [];
     }
 
@@ -1418,7 +1907,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
         ),
       })),
     ].filter((dimension) => dimension.values.length > 0);
-  }, [activeFilters.length, analyses, derivedByTicker, filterMenuOpen, snapshots]);
+  }, [activeFilters.length, analyses, derivedByTicker, filterMenuOpen, snapshots, tempFilterMenuOpen]);
 
   const activeFilterCount = activeFilters.length;
   const activeFilterDimension =
@@ -1436,6 +1925,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
       return [...next, { field: activeFilterField, value }];
     });
     setFilterMenuOpen(false);
+    setTempFilterMenuOpen(false);
   };
 
   const removeFilter = (field: string) => {
@@ -1733,9 +2223,41 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
     );
   };
 
+  const betaTable = (
+    <StocksInsightsTempTable
+      snapshots={visibleSnapshots}
+      totalSnapshots={snapshots.length}
+      loading={loading}
+      actions={betaActions}
+      filterControls={{
+        query,
+        onQueryChange: setQuery,
+        activeFilters,
+        activeFilterCount,
+        filterMenuOpen: tempFilterMenuOpen,
+        setFilterMenuOpen: setTempFilterMenuOpen,
+        onBeforeOpenFilters: () => {
+          setFilterMenuOpen(false);
+          setColumnMenuOpen(false);
+        },
+        filterDimensions,
+        activeFilterField,
+        setActiveFilterField,
+        activeFilterDimension,
+        filterValueLabel,
+        applyFilterValue,
+        clearFilters,
+        removeFilter,
+        getFilterLabel: (field, value) => filterLabelFor(field, value, filterDimensions),
+      }}
+    />
+  );
+
+  if (variant === "beta") {
+    return betaTable;
+  }
+
   return (
-    <>
-    <StocksInsightsTempTable snapshots={snapshots} />
     <section className="panel open-data-stocks">
       <div className="panel-heading">
         <div className="panel-title-with-info">
@@ -1791,6 +2313,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
                 type="button"
                 className={`filter-menu-trigger ${activeFilterCount > 0 ? "active" : ""}`}
                 onClick={() => {
+                  setTempFilterMenuOpen(false);
                   setColumnMenuOpen(false);
                   setFilterMenuOpen((open) => !open);
                 }}
@@ -1849,6 +2372,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
                 type="button"
                 className={`filter-menu-trigger ${columnMenuOpen ? "active" : ""}`}
                 onClick={() => {
+                  setTempFilterMenuOpen(false);
                   setFilterMenuOpen(false);
                   setColumnMenuOpen((open) => !open);
                 }}
@@ -2035,6 +2559,5 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
         </>
       )}
     </section>
-    </>
   );
 });

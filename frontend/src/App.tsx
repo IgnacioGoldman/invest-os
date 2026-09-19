@@ -3,6 +3,7 @@ import {
   Brain,
   Eye,
   EyeOff,
+  FlaskConical,
   LogOut,
   NotebookPen,
   RefreshCcw,
@@ -93,8 +94,8 @@ const APP_ACTIVE_VIEW_STORAGE_KEY = "invest-os:active-view";
 const INVESTOR_PERSONALITY_STORAGE_KEY = "invest-os:investor-personality";
 const DEFAULT_EYE_OPERATIONS_COMPACT = true;
 const EMPTY_LEDGER_EVENTS: BinanceLedgerEvent[] = [];
-const DEFAULT_SIDEBAR_ORDER: SidebarView[] = ["personality", "capital", "consultancy", "exploration", "eye", "notes"];
-const APP_VIEWS = ["personality", "capital", "consultancy", "exploration", "eye", "notes", "settings"] as const;
+const DEFAULT_SIDEBAR_ORDER: SidebarView[] = ["personality", "capital", "consultancy", "exploration", "exploration_beta", "eye", "notes"];
+const APP_VIEWS = ["personality", "capital", "consultancy", "exploration", "exploration_beta", "eye", "notes", "settings"] as const;
 type AppView = (typeof APP_VIEWS)[number];
 type EyeAssetView = "stocks" | "crypto";
 
@@ -107,6 +108,7 @@ const isMarketDataRefreshJob = (job: RefreshJob) =>
   job.step_source === "fx";
 const isExplorationRefreshJob = (job: RefreshJob) =>
   job.source === "exploration" || job.step_source === "exploration" || Boolean(job.step_source?.startsWith("exploration_"));
+const isExplorationBetaRefreshJob = (job: RefreshJob) => job.source === "exploration_beta";
 
 const SIDEBAR_ITEM_META = {
   personality: {
@@ -128,6 +130,11 @@ const SIDEBAR_ITEM_META = {
     icon: Telescope,
     label: "Exploration",
     caption: "Research",
+  },
+  exploration_beta: {
+    icon: FlaskConical,
+    label: "Exploration Beta",
+    caption: "Labs",
   },
   eye: {
     icon: Eye,
@@ -422,6 +429,8 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   const [marketDataRefreshStatus, setMarketDataRefreshStatus] = useState<string | null>(null);
   const [explorationRefreshing, setExplorationRefreshing] = useState(false);
   const [explorationRefreshStatus, setExplorationRefreshStatus] = useState<string | null>(null);
+  const [explorationBetaRefreshing, setExplorationBetaRefreshing] = useState(false);
+  const [explorationBetaRefreshStatus, setExplorationBetaRefreshStatus] = useState<string | null>(null);
   const refreshJobsRef = useRef<RefreshJob[]>([]);
 
   const loadPortfolioData = useCallback(async () => {
@@ -488,6 +497,10 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
         const previous = previousById.get(job.id);
         return previous && isActiveRefreshJob(previous) && job.status === "success" && isExplorationRefreshJob(job);
       });
+      const explorationBetaCompletion = jobs.some((job) => {
+        const previous = previousById.get(job.id);
+        return previous && isActiveRefreshJob(previous) && job.status === "success" && isExplorationBetaRefreshJob(job);
+      });
       refreshJobsRef.current = jobs;
       setRefreshJobs(jobs);
       if (successfulCompletion) {
@@ -496,6 +509,10 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
       if (explorationCompletion) {
         await loadExplorationData();
         setExplorationRefreshStatus("Exploration refreshed.");
+      }
+      if (explorationBetaCompletion) {
+        await loadExplorationData();
+        setExplorationBetaRefreshStatus("Exploration Beta refreshed.");
       }
       if (finishedSinceLastPoll) {
         setLoading(false);
@@ -538,6 +555,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     });
   }, [persistSidebarOrder]);
   const explorationVisited = visitedViews.has("exploration");
+  const stockExplorationVisited = explorationVisited || visitedViews.has("exploration_beta");
 
   const persistInvestorPersonalityState = useCallback(async (profile: InvestorPersonalityState) => {
     setInvestorProfileSaving(true);
@@ -775,6 +793,32 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     }
   }, [loadExplorationData, loadPortfolioData]);
 
+  const refreshExplorationBetaData = useCallback(async () => {
+    setExplorationBetaRefreshing(true);
+    setExplorationBetaRefreshStatus(null);
+    setError(null);
+    try {
+      const job = await startRefreshJob("exploration_beta");
+      const jobs = await fetchRefreshJobs().catch(() => [job]);
+      const latestJob = jobs.find((item) => item.id === job.id) ?? job;
+      refreshJobsRef.current = jobs;
+      setRefreshJobs(jobs);
+      if (latestJob.status === "success") {
+        await Promise.all([loadPortfolioData(), loadExplorationData()]);
+        setExplorationBetaRefreshStatus("Exploration Beta refreshed.");
+        return;
+      }
+      setExplorationBetaRefreshStatus(
+        latestJob.duplicate_of ? "Exploration Beta refresh is already running." : "Exploration Beta refresh started.",
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not refresh Exploration Beta data.");
+      setExplorationBetaRefreshStatus("Could not refresh Exploration Beta data.");
+    } finally {
+      setExplorationBetaRefreshing(false);
+    }
+  }, [loadExplorationData, loadPortfolioData]);
+
   const selectedNote = useMemo(
     () => notes.find((note) => note.id === selectedNoteId) ?? null,
     [notes, selectedNoteId],
@@ -882,6 +926,10 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   );
   const activeExplorationRefreshJob = useMemo(
     () => refreshJobs.find((job) => isActiveRefreshJob(job) && isExplorationRefreshJob(job)) ?? null,
+    [refreshJobs],
+  );
+  const activeExplorationBetaRefreshJob = useMemo(
+    () => refreshJobs.find((job) => isActiveRefreshJob(job) && isExplorationBetaRefreshJob(job)) ?? null,
     [refreshJobs],
   );
 
@@ -1007,7 +1055,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   }, [hasActiveRefreshJob, pollRefreshJobs]);
 
   useEffect(() => {
-    if (!explorationVisited || openDataStocks.length > 0 || openDataStockLoading || openDataStockLoaded) {
+    if (!stockExplorationVisited || openDataStocks.length > 0 || openDataStockLoading || openDataStockLoaded) {
       return;
     }
     setOpenDataStockLoading(true);
@@ -1029,7 +1077,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
         setOpenDataStockLoaded(true);
         setOpenDataStockLoading(false);
       });
-  }, [explorationVisited, openDataStocks.length, openDataStockLoaded, openDataStockLoading]);
+  }, [openDataStocks.length, openDataStockLoaded, openDataStockLoading, stockExplorationVisited]);
 
   useEffect(() => {
     if (!explorationVisited || assetInsightsLoading || assetInsightsLoaded) {
@@ -1050,7 +1098,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
   }, [assetInsightsLoaded, assetInsightsLoading, explorationVisited]);
 
   useEffect(() => {
-    if (!explorationVisited || openDataStocks.length === 0 || stockEntryAnalysesLoading) {
+    if (!stockExplorationVisited || openDataStocks.length === 0 || stockEntryAnalysesLoading) {
       return;
     }
     const analysisKey = `${STOCK_ANALYSIS_TAXONOMY_VERSION}:${openDataStocks
@@ -1071,9 +1119,9 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
       });
   }, [
     openDataStocks,
-    explorationVisited,
     stockEntryAnalysesLoadedKey,
     stockEntryAnalysesLoading,
+    stockExplorationVisited,
   ]);
 
   const displayRate = useMemo(
@@ -1209,6 +1257,10 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
     exploration: {
       title: "Exploration",
       subtitle: "Stock insights, ETFs, crypto, and commodities.",
+    },
+    exploration_beta: {
+      title: "Exploration Beta",
+      subtitle: "Experimental stock research views.",
     },
     eye: {
       title: "Eye",
@@ -1374,6 +1426,7 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
                 analyses={stockEntryAnalyses}
                 analysisLoading={stockEntryAnalysesLoading}
                 onSelectTicker={setSelectedOpenDataTicker}
+                variant="stable"
               />
               <AssetInsightsTable
                 title="ETF Insights"
@@ -1395,6 +1448,36 @@ function DashboardApp({ onLogout }: { onLogout: () => void }) {
                 loading={assetInsightsLoading}
                 kind="commodity_proxy"
                 emptyLabel="No commodity-proxy deterministic metrics loaded. Run python scripts/build_asset_derived_signals.py."
+              />
+            </section>
+          </FrozenPage>
+        )}
+
+        {snapshot && visitedViews.has("exploration_beta") && (
+          <FrozenPage className="app-page exploration-page" active={activeView === "exploration_beta"}>
+            <section className="positions-section exploration-insights">
+              <OpenDataStockTable
+                snapshots={openDataStocks}
+                selectedTicker={selectedOpenDataTicker}
+                loading={openDataStockLoading}
+                analyses={stockEntryAnalyses}
+                analysisLoading={stockEntryAnalysesLoading}
+                onSelectTicker={setSelectedOpenDataTicker}
+                variant="beta"
+                betaActions={
+                  <>
+                    {explorationBetaRefreshStatus && <span>{explorationBetaRefreshStatus}</span>}
+                    <button
+                      type="button"
+                      onClick={refreshExplorationBetaData}
+                      disabled={explorationBetaRefreshing || Boolean(activeExplorationBetaRefreshJob)}
+                      title="Fetch only missing or stale stock Open Data and rebuild Beta signals"
+                    >
+                      <RefreshCcw size={16} aria-hidden="true" />
+                      {explorationBetaRefreshing || activeExplorationBetaRefreshJob ? "Refreshing" : "Refresh"}
+                    </button>
+                  </>
+                }
               />
             </section>
           </FrozenPage>

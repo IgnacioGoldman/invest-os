@@ -7,7 +7,9 @@ from typing import Iterable, TypeVar
 
 from pydantic import BaseModel
 
+from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataSnapshot
 from app.models import BinanceLedgerEvent, CashBalance, FxRate, HistoricalPrice, Holding, MarketPrice, Order, SourceResult, SourceSyncStatus
+from app.services.stock_derived_signals import StockDerivedSignals, StockDerivedSignalsFile
 
 
 DB_FILE = "invest_os.sqlite"
@@ -92,6 +94,31 @@ def init_db(conn: sqlite3.Connection) -> None:
             source TEXT NOT NULL,
             fetched_at TEXT NOT NULL,
             PRIMARY KEY (asset, currency, priced_at)
+        );
+
+        CREATE TABLE IF NOT EXISTS stock_open_data_snapshots (
+            ticker TEXT PRIMARY KEY,
+            generated_at TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS stock_derived_signals (
+            ticker TEXT PRIMARY KEY,
+            generated_at TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS stock_metric_series (
+            ticker TEXT NOT NULL,
+            series TEXT NOT NULL,
+            metric TEXT NOT NULL,
+            period TEXT NOT NULL,
+            as_of TEXT NOT NULL,
+            value REAL,
+            source TEXT NOT NULL,
+            tier TEXT NOT NULL,
+            notes TEXT NOT NULL,
+            PRIMARY KEY (ticker, series, metric, period)
         );
 
         CREATE TABLE IF NOT EXISTS recommendations (
@@ -334,6 +361,118 @@ def load_historical_prices(conn: sqlite3.Connection) -> dict[tuple[str, str, str
         )
         for row in rows
     }
+
+
+def replace_stock_price_history(conn: sqlite3.Connection, ticker: str, points: Iterable[HistoricalPricePoint]) -> None:
+    fetched_at = datetime.now(timezone.utc).isoformat()
+    conn.executemany(
+        """
+        INSERT INTO historical_prices (asset, currency, priced_at, price, source, fetched_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(asset, currency, priced_at) DO UPDATE SET
+            price = excluded.price,
+            source = excluded.source,
+            fetched_at = excluded.fetched_at
+        """,
+        [
+            (
+                ticker.upper(),
+                "USD",
+                f"{point.date}T00:00:00+00:00" if "T" not in point.date else point.date,
+                point.close,
+                point.source,
+                fetched_at,
+            )
+            for point in points
+            if point.close > 0
+        ],
+    )
+
+
+def load_stock_price_history(conn: sqlite3.Connection, ticker: str) -> list[HistoricalPricePoint]:
+    rows = conn.execute(
+        """
+        SELECT priced_at, price, source
+        FROM historical_prices
+        WHERE asset = ? AND currency = 'USD'
+        ORDER BY priced_at
+        """,
+        (ticker.upper(),),
+    )
+    return [
+        HistoricalPricePoint(
+            date=str(row["priced_at"]).split("T", 1)[0],
+            close=row["price"],
+            source=row["source"],
+        )
+        for row in rows
+    ]
+
+
+def replace_stock_metric_series(conn: sqlite3.Connection, snapshot: OpenDataSnapshot) -> None:
+    conn.execute("DELETE FROM stock_metric_series WHERE ticker = ?", (snapshot.ticker.upper(),))
+    rows = []
+    for series_name, series_rows in snapshot.historical_series.items():
+        for period_row in series_rows:
+            for metric_name, metric in period_row.metrics.items():
+                rows.append(
+                    (
+                        snapshot.ticker.upper(),
+                        series_name,
+                        metric_name,
+                        period_row.period,
+                        period_row.as_of,
+                        metric.value,
+                        metric.source,
+                        metric.tier,
+                        metric.notes,
+                    )
+                )
+    conn.executemany(
+        """
+        INSERT OR REPLACE INTO stock_metric_series
+            (ticker, series, metric, period, as_of, value, source, tier, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        rows,
+    )
+
+
+def replace_stock_open_data_snapshot(conn: sqlite3.Connection, snapshot: OpenDataSnapshot) -> None:
+    conn.execute(
+        """
+        INSERT INTO stock_open_data_snapshots (ticker, generated_at, payload)
+        VALUES (?, ?, ?)
+        ON CONFLICT(ticker) DO UPDATE SET
+            generated_at = excluded.generated_at,
+            payload = excluded.payload
+        """,
+        (snapshot.ticker.upper(), snapshot.generated_at.isoformat(), snapshot.model_dump_json()),
+    )
+    replace_stock_metric_series(conn, snapshot)
+
+
+def load_stock_open_data_snapshots(conn: sqlite3.Connection) -> list[OpenDataSnapshot]:
+    rows = conn.execute("SELECT payload FROM stock_open_data_snapshots ORDER BY ticker")
+    return [OpenDataSnapshot.model_validate_json(row["payload"]) for row in rows]
+
+
+def replace_stock_derived_signals_file(conn: sqlite3.Connection, payload: StockDerivedSignalsFile) -> None:
+    conn.executemany(
+        """
+        INSERT INTO stock_derived_signals (ticker, generated_at, payload)
+        VALUES (?, ?, ?)
+        ON CONFLICT(ticker) DO UPDATE SET
+            generated_at = excluded.generated_at,
+            payload = excluded.payload
+        """,
+        [(stock.ticker.upper(), stock.generated_at.isoformat(), stock.model_dump_json()) for stock in payload.stocks],
+    )
+
+
+def load_stock_derived_signals(conn: sqlite3.Connection) -> dict[str, StockDerivedSignals]:
+    rows = conn.execute("SELECT ticker, payload FROM stock_derived_signals")
+    return {row["ticker"].upper(): StockDerivedSignals.model_validate_json(row["payload"]) for row in rows}
 
 
 def load_fx_rates(conn: sqlite3.Connection, base_currency: str) -> dict[str, FxRate]:

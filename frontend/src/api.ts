@@ -106,7 +106,8 @@ export type RefreshSource =
   | "ibkr"
   | "manual"
   | "market_data"
-  | "exploration";
+  | "exploration"
+  | "exploration_beta";
 
 export type RefreshJobSource =
   | RefreshSource
@@ -170,7 +171,7 @@ export type InvestorProfile = {
   updated_at?: string | null;
 };
 
-export type SidebarView = "personality" | "capital" | "consultancy" | "exploration" | "eye" | "notes";
+export type SidebarView = "personality" | "capital" | "consultancy" | "exploration" | "exploration_beta" | "eye" | "notes";
 
 export type UserPreferences = {
   sidebar_order: SidebarView[];
@@ -414,6 +415,15 @@ export type OpenDataStockSnapshot = {
   company_context?: OpenDataCompanyContext | null;
   data_gaps: string[];
   metrics: Record<string, OpenDataMetric>;
+};
+
+export type OpenDataPricePoint = {
+  date: string;
+  close: number;
+  high?: number | null;
+  low?: number | null;
+  volume?: number | null;
+  source: string;
 };
 
 export type StockEntryAnalysisSection = {
@@ -864,6 +874,10 @@ export async function fetchOpenDataStocks(): Promise<OpenDataStockSnapshot[]> {
 
 export async function fetchOpenDataStock(ticker = "GOOGL"): Promise<OpenDataStockSnapshot> {
   return requestJson<OpenDataStockSnapshot>(`/api/open-data/stocks/${encodeURIComponent(ticker)}`);
+}
+
+export async function fetchOpenDataStockPriceHistory(ticker: string): Promise<OpenDataPricePoint[]> {
+  return requestJson<OpenDataPricePoint[]>(`/api/open-data/stocks/${encodeURIComponent(ticker)}/price-history`);
 }
 
 export async function fetchOpenDataStockAnalyses(): Promise<Record<string, StockEntryAnalysis>> {

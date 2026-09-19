@@ -61,6 +61,7 @@ REFRESH_STEP_LABELS: dict[str, str] = {
     "ibkr_history": "IBKR activity history",
     "market_data": "Market prices",
     "exploration": "Exploration data",
+    "exploration_beta": "Exploration Beta data",
     "fx": "FX rates",
     "snapshot": "Rebuilding snapshot",
 }
@@ -1294,6 +1295,13 @@ def _refresh_one(conn, settings: Settings, source: RefreshSource, progress: Refr
 
         warnings = refresh_exploration_data(settings, progress=progress)
         update_sync_status(conn, "exploration", "warning" if warnings else "success", warnings)
+        return
+
+    if source == "exploration_beta":
+        from app.services.exploration_refresh import refresh_exploration_data
+
+        warnings = refresh_exploration_data(settings, progress=progress, include_assets=False)
+        update_sync_status(conn, "exploration_beta", "warning" if warnings else "success", warnings)
         return
 
     raise ValueError(f"Unsupported refresh source: {source}")

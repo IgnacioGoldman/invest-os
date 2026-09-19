@@ -4,12 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.entry_engine.build_entry_snapshot import build_entry_snapshot
 from app.entry_engine.models import EntrySnapshotFile, EntrySnapshotRequest
-from app.entry_engine.open_data_models import OpenDataSnapshot
+from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataSnapshot
 from app.entry_engine.providers.open_data_provider import OpenDataProvider
 from app.entry_engine.utils.file_storage import (
     load_latest_entry_snapshot,
     load_latest_open_data_stock_snapshot,
-    load_latest_open_data_stock_snapshots,
     save_open_data_stock_snapshot,
 )
 from app.models import RefreshRequest
@@ -35,6 +34,7 @@ from app.services.connections import (
     save_user_connection,
 )
 from app.services.notes import Note, NoteRequest, create_note, delete_note, load_notes, update_note
+from app.services.open_data_stock_store import load_db_or_backfill_price_history, load_db_or_backfill_stock_snapshots, save_stock_snapshot_to_db
 from app.services.recommendations import (
     RecommendationCodexRequest,
     RecommendationDeleteRequest,
@@ -283,7 +283,7 @@ def generate_entry_snapshot(request: EntrySnapshotRequest) -> EntrySnapshotFile:
 
 @app.get("/api/open-data/stocks")
 def open_data_stocks() -> list[OpenDataSnapshot]:
-    return load_latest_open_data_stock_snapshots()
+    return load_db_or_backfill_stock_snapshots(get_settings())
 
 
 @app.get("/api/open-data/stocks/analysis")
@@ -333,6 +333,11 @@ def open_data_stock(ticker: str) -> OpenDataSnapshot:
     return refresh_open_data_stock(ticker)
 
 
+@app.get("/api/open-data/stocks/{ticker}/price-history")
+def open_data_stock_price_history(ticker: str) -> list[HistoricalPricePoint]:
+    return load_db_or_backfill_price_history(get_settings(), ticker)
+
+
 @app.get("/api/open-data/stocks/{ticker}/analysis")
 def open_data_stock_analysis(ticker: str) -> StockEntryAnalysis:
     analysis = analyze_latest_open_data_stock_entry(ticker)
@@ -346,6 +351,7 @@ def refresh_open_data_stock(ticker: str) -> OpenDataSnapshot:
     try:
         snapshot = OpenDataProvider(force_refresh=True).get_open_data_snapshot(ticker)
         save_open_data_stock_snapshot(snapshot)
+        save_stock_snapshot_to_db(get_settings(), snapshot)
         return snapshot
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

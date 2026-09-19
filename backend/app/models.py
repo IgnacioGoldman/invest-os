@@ -19,6 +19,7 @@ RefreshSource = Literal[
     "exploration",
     "fx",
     "prices_fx",
+    "exploration_beta",
 ]
 
 

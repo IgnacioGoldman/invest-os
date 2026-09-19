@@ -5912,16 +5912,181 @@ tbody tr:hover td {
 }
 
 .exploration-page .exploration-temp-table {
-  min-width: 520px;
+  min-width: 780px;
 }
 
 .exploration-page .exploration-temp-table th,
 .exploration-page .exploration-temp-table td {
-  width: 33.333%;
+  width: 20%;
 }
 
 .exploration-page .temp-chart-row td {
   padding: 0;
+}
+
+.exploration-page .temp-chart-stack {
+  display: grid;
+}
+
+.exploration-page .temp-chart-stack > * + * {
+  border-top: 1px solid var(--app-border);
+}
+
+.exploration-page .temp-chart-stack .temp-bar-chart + .temp-bar-chart {
+  border-top: 1px solid var(--app-border);
+}
+
+.exploration-page .temp-price-chart {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px 16px 54px;
+}
+
+.exploration-page .temp-price-chart.empty-chart {
+  min-height: 88px;
+  place-content: center start;
+}
+
+.exploration-page .temp-price-heading {
+  align-items: start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.exploration-page .price-range-control {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 3px;
+}
+
+.exploration-page .price-range-control button {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--app-muted);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 850;
+  min-height: 26px;
+  padding: 0 8px;
+}
+
+.exploration-page .price-range-control button.active {
+  background: rgba(109, 143, 255, 0.22);
+  color: var(--app-foreground);
+}
+
+.exploration-page .temp-price-chart svg {
+  display: block;
+  max-width: 100%;
+  min-height: 220px;
+}
+
+.exploration-page .temp-price-chart line {
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 1;
+}
+
+.exploration-page .temp-price-chart .price-axis-tick line {
+  stroke: rgba(255, 255, 255, 0.09);
+}
+
+.exploration-page .temp-price-chart .price-date-tick line {
+  stroke: rgba(255, 255, 255, 0.2);
+}
+
+.exploration-page .temp-price-chart text {
+  fill: var(--app-muted);
+  font-size: 10px;
+}
+
+.exploration-page .temp-price-chart circle {
+  fill: var(--app-foreground);
+  stroke: rgba(8, 11, 18, 0.9);
+  stroke-width: 1.5;
+}
+
+.exploration-page .temp-price-chart .price-line {
+  fill: none;
+  stroke: rgba(196, 205, 225, 0.88);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+}
+
+.exploration-page .temp-price-chart .price-line.good {
+  stroke: rgba(87, 206, 139, 0.92);
+}
+
+.exploration-page .temp-price-chart .price-line.bad {
+  stroke: rgba(255, 111, 111, 0.9);
+}
+
+.exploration-page .temp-price-chart .price-hit-area {
+  cursor: crosshair;
+  fill: transparent;
+}
+
+.exploration-page .temp-price-chart .price-hit-area:focus {
+  outline: none;
+}
+
+.exploration-page .temp-price-chart .price-hover-layer > line {
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-dasharray: 3 4;
+}
+
+.exploration-page .temp-price-chart .price-hover-layer > circle {
+  fill: var(--app-foreground);
+  stroke: rgba(8, 11, 18, 0.9);
+  stroke-width: 1.6;
+}
+
+.exploration-page .temp-price-chart .price-tooltip rect {
+  fill: rgba(8, 11, 18, 0.98);
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 1;
+}
+
+.exploration-page .temp-price-chart .price-tooltip text {
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.72);
+  stroke-linejoin: round;
+  stroke-width: 2px;
+}
+
+.exploration-page .temp-price-chart .price-tooltip .tooltip-date {
+  fill: #ffffff;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.exploration-page .temp-price-chart .price-tooltip .tooltip-price {
+  fill: #c9d3ff;
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.exploration-page .price-change {
+  font-weight: 850;
+}
+
+.exploration-page .price-change.good {
+  color: #7ff0ad;
+}
+
+.exploration-page .price-change.bad {
+  color: #ff9d9d;
+}
+
+.exploration-page .price-change.neutral {
+  color: var(--app-muted);
 }
 
 .exploration-page .temp-bar-chart {
