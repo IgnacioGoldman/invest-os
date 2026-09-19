@@ -16,8 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
-from app.entry_engine.utils.file_storage import save_open_data_stock_snapshot  # noqa: E402
-from app.services.stock_entry_analysis import analyze_open_data_stock_entry  # noqa: E402
+from app.config import get_settings  # noqa: E402
+from app.services.open_data_stock_store import activate_stock, save_stock_snapshot_to_db  # noqa: E402
 
 
 YAHOO_MOST_ACTIVE_URL = "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved"
@@ -183,34 +183,23 @@ def _collect_ticker(
 ) -> dict[str, Any]:
     snapshot = provider.get_open_data_snapshot(ticker)
     coverage = _metric_coverage(snapshot)
-    analysis_payload: dict[str, Any] = {}
-    if include_analysis:
-        analysis = analyze_open_data_stock_entry(snapshot)
-        analysis_payload = {
-            "analysis": {
-                "needs_more_data": analysis.needs_more_data,
-                "conviction": analysis.conviction,
-                "opportunity_type": analysis.opportunity_type,
-                "business": analysis.business_health.assessment,
-                "price": analysis.price_opportunity.assessment,
-                "valuation": analysis.valuation.assessment,
-                "missing_data": analysis.missing_data,
-            }
-        }
     should_save = (
         save
         and (min_coverage_to_save is None or coverage["collectable_coverage_percent"] >= min_coverage_to_save)
         and not coverage["unsupported_metric_paths"]
     )
-    saved_path = save_open_data_stock_snapshot(snapshot) if should_save else None
+    if should_save:
+        settings = get_settings()
+        save_stock_snapshot_to_db(settings, snapshot)
+        activate_stock(settings, snapshot.ticker)
     return {
         "ticker": snapshot.ticker,
         "name": snapshot.name,
         "cik": snapshot.cik,
         "source": snapshot.source,
         "generated_at": snapshot.generated_at.isoformat(),
-        "saved_path": str(saved_path.relative_to(ROOT)) if saved_path else None,
-        **analysis_payload,
+        "saved_to": "data/invest_os.sqlite" if should_save else None,
+        "analysis": None if include_analysis else None,
         **coverage,
     }
 
@@ -331,7 +320,7 @@ def main() -> None:
             "this is recommended for large universe runs."
         ),
     )
-    parser.add_argument("--no-save", action="store_true", help="Do not persist snapshots under data/stocks/open_data/.")
+    parser.add_argument("--no-save", action="store_true", help="Do not persist snapshots to SQLite.")
     parser.add_argument("--output", type=Path, help="Write the JSON run report to a file as well as stdout.")
     parser.add_argument("--workers", type=int, default=6, help="Number of tickers to collect in parallel.")
     parser.add_argument("--ticker-retries", type=int, default=2, help="Retry a whole ticker collection this many times.")

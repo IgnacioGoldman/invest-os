@@ -120,6 +120,12 @@ EPS_UNITS = tuple(f"{currency}/shares" for currency in MONETARY_UNITS)
 SUPPORT_ZONE_MAX_TOLERANCE = 0.04
 SUPPORT_ZONE_MAX_AGE_DAYS = 365
 SUPPORT_RECLAIM_LOOKBACK_SESSIONS = 30
+SUPPORT_DISTANCE_WINDOWS = {
+    "support_1m_distance": ("1M", 30),
+    "support_6m_distance": ("6M", 182),
+    "support_2y_distance": ("2Y", 365 * 2),
+    "support_5y_distance": ("5Y", 365 * 5),
+}
 
 
 @dataclass(frozen=True)
@@ -615,6 +621,10 @@ def compute_open_data_snapshot(
         "distance_from_52w_high": price_metrics["distance_from_52w_high"],
         "distance_from_52w_low": price_metrics["distance_from_52w_low"],
         "support_1d_distance": price_metrics["support_1d_distance"],
+        "support_1m_distance": price_metrics["support_1m_distance"],
+        "support_6m_distance": price_metrics["support_6m_distance"],
+        "support_2y_distance": price_metrics["support_2y_distance"],
+        "support_5y_distance": price_metrics["support_5y_distance"],
     }
     valuation = {
         "pe": pe,
@@ -1567,6 +1577,10 @@ def _price_opportunity_metrics(
             "distance_from_52w_high",
             "distance_from_52w_low",
             "support_1d_distance",
+            "support_1m_distance",
+            "support_6m_distance",
+            "support_2y_distance",
+            "support_5y_distance",
         ):
             metrics[name] = _unavailable(name, "Historical open/free prices were unavailable.", fallback_as_of)
         return metrics
@@ -1595,6 +1609,8 @@ def _price_opportunity_metrics(
     metrics["distance_from_52w_high"] = _distance_metric("distance_from_52w_high", price, high_52w, source, as_of, "latest close to 52-week high close", fallback_as_of)
     metrics["distance_from_52w_low"] = _distance_metric("distance_from_52w_low", price, low_52w, source, as_of, "latest close to 52-week low close", fallback_as_of)
     metrics["support_1d_distance"] = _support_1d_metric(points, price, source, as_of, fallback_as_of)
+    for metric_name, (label, days) in SUPPORT_DISTANCE_WINDOWS.items():
+        metrics[metric_name] = _support_distance_metric(metric_name, label, days, points, price, source, as_of, fallback_as_of)
     return metrics
 
 
@@ -1645,10 +1661,12 @@ def _days_between(left: str, right: str) -> int:
     return abs((right_date - left_date).days)
 
 
-def _support_zones(points: list[HistoricalPricePoint], latest_date: date) -> list[SupportZone]:
-    lookback_start = latest_date - timedelta(days=365 * 2)
+def _support_zones(points: list[HistoricalPricePoint], latest_date: date, lookback_days: int = 365 * 2) -> list[SupportZone]:
+    lookback_start = latest_date - timedelta(days=lookback_days)
     lookback = [point for point in points if (_parse_date(point.date) or date.min) >= lookback_start]
-    if len(lookback) < 120:
+    minimum_points = 18 if lookback_days <= 45 else 60 if lookback_days <= 210 else 120
+    minimum_touches = 1 if lookback_days <= 45 else 2
+    if len(lookback) < minimum_points:
         return []
 
     tolerance = _support_zone_tolerance(lookback)
@@ -1675,7 +1693,7 @@ def _support_zones(points: list[HistoricalPricePoint], latest_date: date) -> lis
         for point in ordered:
             if not separated_touches or _days_between(separated_touches[-1].date, point.date) >= 15:
                 separated_touches.append(point)
-        if len(separated_touches) < 2:
+        if len(separated_touches) < minimum_touches:
             continue
         lows = [_price_low(point) for point in separated_touches]
         low = min(lows) * (1 - tolerance / 2)
@@ -1725,10 +1743,12 @@ def _valid_support_zones(
     points: list[HistoricalPricePoint],
     latest_date: date,
     current_price: float,
+    lookback_days: int = 365 * 2,
 ) -> list[SupportZone]:
     zones: list[SupportZone] = []
-    for zone in _support_zones(points, latest_date):
-        if _zone_age_days(zone, latest_date) > SUPPORT_ZONE_MAX_AGE_DAYS:
+    max_age_days = min(SUPPORT_ZONE_MAX_AGE_DAYS, max(21, lookback_days))
+    for zone in _support_zones(points, latest_date, lookback_days):
+        if _zone_age_days(zone, latest_date) > max_age_days:
             continue
         if zone.midpoint > current_price * 1.005:
             continue
@@ -1775,6 +1795,53 @@ def _support_1d_metric(
         as_of=as_of,
         notes=(
             "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. "
+            f"Support zone: ${zone.low:.2f}-${zone.high:.2f}; midpoint ${zone.midpoint:.2f}; "
+            f"distance {distance:+.2f}%; touches {zone.touches}; "
+            f"first touch {zone.first_touch}; last touch {zone.last_touch}; "
+            f"cluster tolerance {zone.tolerance_pct:.1f}%."
+        ),
+    )
+
+
+def _support_distance_metric(
+    metric_name: str,
+    label: str,
+    lookback_days: int,
+    points: list[HistoricalPricePoint],
+    current_price: float,
+    source: str,
+    as_of: str,
+    fallback_as_of: str,
+) -> OpenDataMetric:
+    latest_date = _parse_date(points[-1].date) if points else None
+    if latest_date is None:
+        return _unavailable(metric_name, "Latest historical price date was unavailable.", fallback_as_of)
+
+    candidate_zones = _valid_support_zones(points, latest_date, current_price, lookback_days)
+    if not candidate_zones:
+        return _unavailable(
+            metric_name,
+            f"No usable {label} support zone was detected below the latest close from open/free daily price history.",
+            as_of,
+        )
+
+    zone = min(
+        candidate_zones,
+        key=lambda item: (
+            max((current_price / item.high) - 1, 0),
+            abs((current_price / item.midpoint) - 1),
+            -item.touches,
+            _zone_age_days(item, latest_date),
+        ),
+    )
+    distance = ((current_price - zone.midpoint) / zone.midpoint) * 100
+    return OpenDataMetric(
+        value=distance,
+        source=source,
+        tier="computed_from_public_facts",
+        as_of=as_of,
+        notes=(
+            f"Nearest {label} support zone below/reclaimed by the latest close. "
             f"Support zone: ${zone.low:.2f}-${zone.high:.2f}; midpoint ${zone.midpoint:.2f}; "
             f"distance {distance:+.2f}%; touches {zone.touches}; "
             f"first touch {zone.first_touch}; last touch {zone.last_touch}; "

@@ -4,15 +4,20 @@ import json
 from pathlib import Path
 
 from app.config import PROJECT_DIR, Settings
+from app.entry_engine.open_data_metrics import SUPPORT_DISTANCE_WINDOWS, _support_distance_metric
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataSnapshot
-from app.entry_engine.utils.file_storage import load_latest_open_data_stock_snapshots, load_open_data_active_tickers
 from app.services.storage import (
+    activate_stock_ticker,
     connect,
+    deactivate_stock_ticker,
+    load_active_stock_tickers,
+    load_stock_open_data_snapshot,
     load_stock_open_data_snapshots,
     load_stock_price_history,
     replace_stock_derived_signals_file,
     replace_stock_open_data_snapshot,
     replace_stock_price_history,
+    seed_active_stock_tickers,
 )
 from app.services.stock_derived_signals import StockDerivedSignalsFile
 
@@ -60,32 +65,85 @@ def backfill_stock_derived_signals(settings: Settings) -> None:
         conn.commit()
 
 
-def load_db_or_backfill_stock_snapshots(settings: Settings) -> list[OpenDataSnapshot]:
-    active_tickers = set(load_open_data_active_tickers())
+def ensure_active_stock_seed(settings: Settings) -> None:
     with connect(settings.data_dir) as conn:
-        snapshots = load_stock_open_data_snapshots(conn)
-        if snapshots:
-            backfill_stock_derived_signals(settings)
-            return [snapshot for snapshot in snapshots if not active_tickers or snapshot.ticker in active_tickers]
-
-        snapshots = load_latest_open_data_stock_snapshots()
-        for snapshot in snapshots:
-            replace_stock_open_data_snapshot(conn, snapshot)
-            price_history = load_cached_price_history(snapshot.ticker)
-            if price_history:
-                replace_stock_price_history(conn, snapshot.ticker, price_history)
+        seed_active_stock_tickers(conn, [snapshot.ticker for snapshot in load_stock_open_data_snapshots(conn)])
         conn.commit()
-        backfill_stock_derived_signals(settings)
-        return snapshots
+
+
+def load_active_tickers(settings: Settings) -> list[str]:
+    ensure_active_stock_seed(settings)
+    with connect(settings.data_dir) as conn:
+        return load_active_stock_tickers(conn)
+
+
+def activate_stock(settings: Settings, ticker: str) -> None:
+    with connect(settings.data_dir) as conn:
+        activate_stock_ticker(conn, ticker)
+        conn.commit()
+
+
+def deactivate_stock(settings: Settings, ticker: str) -> None:
+    with connect(settings.data_dir) as conn:
+        deactivate_stock_ticker(conn, ticker)
+        conn.commit()
+
+
+def load_db_stock_snapshot(settings: Settings, ticker: str) -> OpenDataSnapshot | None:
+    with connect(settings.data_dir) as conn:
+        return load_stock_open_data_snapshot(conn, ticker)
+
+
+def load_db_or_backfill_stock_snapshots(settings: Settings) -> list[OpenDataSnapshot]:
+    ensure_active_stock_seed(settings)
+    with connect(settings.data_dir) as conn:
+        active_tickers = set(load_active_stock_tickers(conn))
+        snapshots = [
+            _snapshot_with_support_backfill(conn, snapshot)
+            for snapshot in load_stock_open_data_snapshots(conn)
+            if not active_tickers or snapshot.ticker in active_tickers
+        ]
+        conn.commit()
+    backfill_stock_derived_signals(settings)
+    return snapshots
+
+
+def load_all_db_stock_snapshots(settings: Settings) -> list[OpenDataSnapshot]:
+    with connect(settings.data_dir) as conn:
+        return load_stock_open_data_snapshots(conn)
+
+
+def _snapshot_with_support_backfill(
+    conn,
+    snapshot: OpenDataSnapshot,
+) -> OpenDataSnapshot:
+    current_price = snapshot.price_opportunity.get("current_price")
+    if current_price is None or current_price.value is None:
+        return snapshot
+    missing = [key for key in SUPPORT_DISTANCE_WINDOWS if key not in snapshot.price_opportunity]
+    if not missing:
+        return snapshot
+    points = load_stock_price_history(conn, snapshot.ticker)
+    if not points:
+        return snapshot
+    price_opportunity = dict(snapshot.price_opportunity)
+    for key in missing:
+        label, days = SUPPORT_DISTANCE_WINDOWS[key]
+        price_opportunity[key] = _support_distance_metric(
+            key,
+            label,
+            days,
+            points,
+            current_price.value,
+            current_price.source,
+            current_price.as_of,
+            current_price.as_of,
+        )
+    updated = snapshot.model_copy(update={"price_opportunity": price_opportunity})
+    replace_stock_open_data_snapshot(conn, updated)
+    return updated
 
 
 def load_db_or_backfill_price_history(settings: Settings, ticker: str) -> list[HistoricalPricePoint]:
     with connect(settings.data_dir) as conn:
-        points = load_stock_price_history(conn, ticker)
-        if points:
-            return points
-        points = load_cached_price_history(ticker)
-        if points:
-            replace_stock_price_history(conn, ticker, points)
-            conn.commit()
-        return points
+        return load_stock_price_history(conn, ticker)

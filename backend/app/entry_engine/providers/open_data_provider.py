@@ -16,7 +16,6 @@ from typing import Any
 import requests
 
 from app.config import PROJECT_DIR
-from app.entry_engine.data_provider import OpenDataMetricProvider
 from app.entry_engine.open_data_metrics import compute_open_data_snapshot
 from app.entry_engine.open_data_models import (
     HistoricalPricePoint,
@@ -27,7 +26,6 @@ from app.entry_engine.open_data_models import (
     OpenDataMetric,
     OpenDataSnapshot,
 )
-from app.sources.market_data import STOOQ_URL, _stooq_symbols
 
 
 logger = logging.getLogger(__name__)
@@ -37,6 +35,7 @@ SEC_TICKER_EXCHANGE_MAPPING_URL = "https://www.sec.gov/files/company_tickers_exc
 SEC_COMPANYFACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010d}.json"
 SEC_SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
 SEC_ARCHIVES_BASE_URL = "https://www.sec.gov/Archives/edgar/data"
+STOOQ_URL = "https://stooq.com/q/l/"
 STOOQ_DAILY_HISTORY_URL = "https://stooq.com/q/d/l/"
 FRANKFURTER_LATEST_URL = "https://api.frankfurter.dev/v1/latest"
 GOOGL_FALLBACK_CIK = 1652044
@@ -82,6 +81,19 @@ ADR_RATIO_BY_TICKER = {
 SUPPORTED_FX_CURRENCIES = {"USD", "EUR", "GBP", "DKK", "CHF", "CAD", "TWD", "JPY", "CNY", "HKD"}
 
 
+def _stooq_symbols(symbol: str, currency: str) -> list[str]:
+    normalized = symbol.strip().lower()
+    if not normalized or not normalized.replace(".", "").replace("-", "").isalnum():
+        return []
+    if "." in normalized:
+        return [normalized]
+    if currency.upper() == "EUR":
+        return [f"{normalized}.de", f"{normalized}.nl", f"{normalized}.mi", f"{normalized}.pa", f"{normalized}.as"]
+    if currency.upper() == "GBP":
+        return [f"{normalized}.uk", f"{normalized}.us"]
+    return [f"{normalized}.us", f"{normalized}.de", f"{normalized}.nl"]
+
+
 def _positive_float(value: Any) -> float | None:
     if value in (None, "", "N/D"):
         return None
@@ -116,7 +128,7 @@ class JsonFileCache:
         tmp_path.replace(path)
 
 
-class OpenDataProvider(OpenDataMetricProvider):
+class OpenDataProvider:
     source = "open_free_public"
 
     def __init__(

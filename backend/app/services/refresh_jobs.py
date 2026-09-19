@@ -3,16 +3,17 @@ from __future__ import annotations
 from collections import deque
 from datetime import datetime, timezone
 from threading import Condition, Thread
+from typing import Literal
 from uuid import uuid4
 
 from pydantic import BaseModel
 
 from app.config import Settings
-from app.models import RefreshSource
-from app.services.portfolio import REFRESH_STEP_LABELS, refresh_snapshot, refresh_steps_for_source
+from app.services.exploration_refresh import refresh_exploration_data
 
 
-RefreshJobStatus = str
+RefreshSource = Literal["exploration_beta"]
+RefreshJobStatus = Literal["queued", "running", "success", "error"]
 
 
 class RefreshJob(BaseModel):
@@ -41,22 +42,6 @@ _MAX_FINISHED_JOBS = 12
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
-
-
-def _source_label(source: RefreshSource) -> str:
-    return {
-        "all": "Refresh all",
-        "binance": "Binance",
-        "binance_ledger": "Binance ledger",
-        "ibkr": "IBKR",
-        "ibkr_history": "IBKR history",
-        "manual": "Manual cash and assets",
-        "market_data": "Market prices",
-        "exploration": "Exploration data",
-        "exploration_beta": "Exploration Beta data",
-        "fx": "FX rates",
-        "prices_fx": "Prices and FX",
-    }.get(source, source)
 
 
 def _view(job: RefreshJob) -> RefreshJob:
@@ -88,15 +73,14 @@ def start_refresh_job(settings: Settings, source: RefreshSource) -> RefreshJob:
         if existing:
             return _view(existing.model_copy(update={"duplicate_of": existing.id}))
 
-        steps = refresh_steps_for_source(source)
         job = RefreshJob(
             id=str(uuid4()),
             source=source,
-            label=_source_label(source),
+            label="Exploration Beta data",
             status="queued",
             queued_at=_now(),
             stage="Queued",
-            total_steps=len(steps) + 1,
+            total_steps=1,
         )
         _jobs[job.id] = job
         _queue.append(job.id)
@@ -107,10 +91,7 @@ def start_refresh_job(settings: Settings, source: RefreshSource) -> RefreshJob:
 
 def list_refresh_jobs() -> list[RefreshJob]:
     with _condition:
-        return [
-            _view(job)
-            for job in sorted(_jobs.values(), key=lambda item: item.queued_at, reverse=True)
-        ]
+        return [_view(job) for job in sorted(_jobs.values(), key=lambda item: item.queued_at, reverse=True)]
 
 
 def _ensure_worker_locked(settings: Settings) -> None:
@@ -118,8 +99,7 @@ def _ensure_worker_locked(settings: Settings) -> None:
     if _worker_started:
         return
     _worker_started = True
-    worker = Thread(target=_worker_loop, args=(settings,), daemon=True)
-    worker.start()
+    Thread(target=_worker_loop, args=(settings,), daemon=True).start()
 
 
 def _worker_loop(settings: Settings) -> None:
@@ -142,6 +122,7 @@ def _worker_loop(settings: Settings) -> None:
             )
 
         try:
+
             def progress(step_source: str, stage: str, current_step: int, total_steps: int) -> None:
                 with _condition:
                     current = _jobs.get(job_id)
@@ -149,14 +130,14 @@ def _worker_loop(settings: Settings) -> None:
                         return
                     _jobs[job_id] = current.model_copy(
                         update={
-                            "stage": stage or REFRESH_STEP_LABELS.get(step_source, step_source),
+                            "stage": stage,
                             "step_source": step_source,
                             "current_step": current_step,
                             "total_steps": total_steps,
                         }
                     )
 
-            refresh_snapshot(settings, job.source, progress=progress)
+            refresh_exploration_data(settings, progress=progress)
             with _condition:
                 current = _jobs.get(job_id)
                 if current:

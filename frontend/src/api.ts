@@ -1,124 +1,13 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+const DATA_BASE = trimTrailingSlash(import.meta.env.VITE_STATIC_DATA_BASE_URL ?? `${import.meta.env.BASE_URL}data`);
+export const STATIC_DATA_MODE = import.meta.env.VITE_DATA_MODE === "static";
 const REQUEST_TIMEOUT_MS = 30000;
-const ENTRY_BUILD_TIMEOUT_MS = 30 * 60 * 1000;
 
-export type Holding = {
-  id: string;
-  source: string;
-  platform: string;
-  symbol: string;
-  name?: string | null;
-  asset_class: string;
-  quantity: number;
-  currency: string;
-  current_price?: number | null;
-  market_value: number;
-  cost_basis?: number | null;
-  unrealized_pnl?: number | null;
-  sector?: string | null;
-  vertical?: string | null;
-  geography?: string | null;
-  confidence: string;
-  updated_at: string;
-  valuation_source?: string | null;
-  valuation_timestamp?: string | null;
-  value_in_base?: number | null;
-};
-
-export type CashBalance = {
-  id: string;
-  source: string;
-  platform: string;
-  currency: string;
-  balance: number;
-  purpose: string;
-  updated_at: string;
-  value_in_base?: number | null;
-};
-
-export type Order = {
-  id: string;
-  source: string;
-  platform: string;
-  symbol: string;
-  side: "BUY" | "SELL";
-  order_type?: string | null;
-  quantity: number;
-  limit_price?: number | null;
-  status?: string | null;
-  created_at?: string | null;
-  purpose: string;
-  raw: Record<string, unknown>;
-  quote_currency?: string | null;
-  purchase_amount?: number | null;
-  current_value?: number | null;
-  roi_percent?: number | null;
-  cost_basis_amount?: number | null;
-  realized_pnl?: number | null;
-  realized_roi_percent?: number | null;
-  unrealized_pnl?: number | null;
-  unrealized_roi_percent?: number | null;
-  remaining_quantity?: number | null;
-  remaining_cost_basis?: number | null;
-  position_status?: string | null;
-  account_value_before?: number | null;
-  account_value_after?: number | null;
-  account_value_currency?: string | null;
-  account_value_source?: string | null;
-  account_value_warning?: string | null;
-  account_balances_after?: Record<string, number>;
-  account_asset_values_after?: Record<string, number>;
-  valuation_source?: string | null;
-  valuation_timestamp?: string | null;
-};
-
-export type BinanceLedgerEvent = {
-  id: string;
-  source: "binance";
-  platform: string;
-  event_type: "start" | "deposit" | "withdrawal" | "convert" | "fiat_deposit" | "fiat_withdrawal" | "transfer";
-  asset: string;
-  amount: number;
-  original_amount?: number | null;
-  credited_amount?: number | null;
-  fee: number;
-  status?: string | null;
-  created_at: string;
-  balance_changes: Record<string, number>;
-  raw: Record<string, unknown>;
-  account_value_after?: number | null;
-  account_value_currency?: string | null;
-  account_value_source?: string | null;
-  account_value_warning?: string | null;
-  account_balances_after?: Record<string, number>;
-  account_asset_values_after?: Record<string, number>;
-};
-
-export type BreakdownItem = {
-  name: string;
-  value: number;
-  percent: number;
-};
-
-export type RefreshSource =
-  | "all"
-  | "binance"
-  | "ibkr"
-  | "manual"
-  | "market_data"
-  | "exploration"
-  | "exploration_beta";
-
-export type RefreshJobSource =
-  | RefreshSource
-  | "binance_ledger"
-  | "ibkr_history"
-  | "fx"
-  | "prices_fx";
+export type RefreshSource = "exploration_beta";
 
 export type RefreshJob = {
   id: string;
-  source: RefreshJobSource;
+  source: RefreshSource;
   label: string;
   status: "queued" | "running" | "success" | "error";
   queued_at: string;
@@ -133,222 +22,16 @@ export type RefreshJob = {
   elapsed_seconds: number;
 };
 
-export type SourceSyncStatus = {
-  source: string;
-  last_synced_at?: string | null;
-  status: string;
-  warning?: string | null;
-};
-
-export type DisplayRate = {
-  currency: string;
-  rate_from_base: number;
-  source: string;
-  fetched_at?: string | null;
-};
-
-export type InvestorPersonalityId =
-  | "capital_preservation"
-  | "steady_growth"
-  | "balanced_conviction"
-  | "aggressive_growth"
-  | "high_risk_explorer"
-  | "starter"
-  | "custom"
-  | "low_risk"
-  | "high_risk";
-
-export type InvestorAllocation = {
-  vwce: number;
-  cashBonds: number;
-  individualStocks: number;
-  crypto: number;
-};
-
-export type InvestorProfile = {
-  personality: InvestorPersonalityId;
-  customAllocation: InvestorAllocation;
-  updated_at?: string | null;
-};
-
-export type SidebarView = "personality" | "capital" | "consultancy" | "exploration" | "exploration_beta" | "eye" | "notes";
-
-export type UserPreferences = {
-  sidebar_order: SidebarView[];
-  updated_at?: string | null;
-};
-
-export type ManualCapitalEntryKind = "bank_cash" | "stock" | "other_asset";
-
-export type ManualCapitalEntryRequest = {
-  kind: ManualCapitalEntryKind;
-  platform: string;
-  currency: string;
-  account_name?: string | null;
-  balance?: number | null;
-  purpose?: string | null;
-  symbol?: string | null;
+export type StockUniverseItem = {
+  symbol: string;
   name?: string | null;
-  asset_class?: string | null;
-  quantity?: number | null;
-  estimated_price?: number | null;
-  cost_basis?: number | null;
-  sector?: string | null;
-  vertical?: string | null;
-  geography?: string | null;
-  notes?: string | null;
-};
-
-export type ManualCapitalSnapshot = {
-  cash: Record<string, unknown>[];
-  assets: Record<string, unknown>[];
-  cash_path: string;
-  assets_path: string;
-};
-
-export type UserConnectionSource = "ibkr" | "binance";
-
-export type UserConnection = {
-  source: UserConnectionSource;
-  label: string;
-  configured: boolean;
-  updated_at?: string | null;
-  ibkr_host?: string | null;
-  ibkr_port?: number | null;
-  ibkr_client_id?: number | null;
-  ibkr_flex_query_id?: string | null;
-  ibkr_flex_token_configured?: boolean;
-  ibkr_flex_token_preview?: string | null;
-  binance_api_key_configured?: boolean;
-  binance_api_key_preview?: string | null;
-  binance_api_secret_configured?: boolean;
-  binance_api_secret_preview?: string | null;
-  binance_ledger_start_date?: string | null;
-};
-
-export type UserConnectionUpdate = {
-  ibkr_host?: string | null;
-  ibkr_port?: number | null;
-  ibkr_client_id?: number | null;
-  ibkr_flex_query_id?: string | null;
-  ibkr_flex_token?: string | null;
-  binance_api_key?: string | null;
-  binance_api_secret?: string | null;
-  binance_ledger_start_date?: string | null;
-};
-
-export type Note = {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-  updated_at: string;
-};
-
-export type NoteRequest = {
-  title: string;
-  content: string;
-};
-
-type RawInvestorProfile = InvestorProfile & {
-  custom_allocation?: InvestorAllocation;
-};
-
-export type Recommendation = {
-  id?: string | null;
-  severity: "info" | "warning" | "critical";
-  category:
-    | "allocation"
-    | "drawdown_reserve"
-    | "trim_or_exit"
-    | "capital_move"
-    | "entry"
-    | "concentration"
-    | "theme";
-  title: string;
-  detail: string;
-};
-
-export type RecommendationSnapshot = {
-  generated_at?: string | null;
-  recommendations: Recommendation[];
-};
-
-export type RecommendationFollowUpResponse = {
-  recommendation_key: string;
-  question: string;
-  generated_at: string;
-  mode: "openai" | "codex_required" | "codex";
-  status: "complete" | "pending_codex";
-  answer: string;
-  context_tickers: string[];
-  follow_up_id?: string | null;
-  codex_command?: string | null;
-};
-
-export type BusinessHealth = {
-  revenue_growth_yoy?: number | null;
-  revenue_cagr_3y?: number | null;
-  eps_growth_yoy?: number | null;
-  eps_cagr_3y?: number | null;
-  gross_margin?: number | null;
-  operating_margin?: number | null;
-  net_margin?: number | null;
-  free_cash_flow?: number | null;
-  roe?: number | null;
-  roic?: number | null;
-  cash?: number | null;
-  debt?: number | null;
-  debt_to_equity?: number | null;
-};
-
-export type PriceOpportunity = {
-  current_price?: number | null;
-  change_1d?: number | null;
-  change_1w?: number | null;
-  change_1m?: number | null;
-  change_3m?: number | null;
-  change_6m?: number | null;
-  change_1y?: number | null;
-  change_2y?: number | null;
-  change_5y?: number | null;
-  distance_from_ath?: number | null;
-  distance_from_52w_high?: number | null;
-  distance_from_52w_low?: number | null;
-  support_1d_distance?: number | null;
-};
-
-export type Valuation = {
-  pe?: number | null;
-  forward_pe?: number | null;
-  peg?: number | null;
-  price_to_sales?: number | null;
-  ev_to_ebitda?: number | null;
-  fcf_yield?: number | null;
-};
-
-export type EntryStockSnapshot = {
-  date: string;
-  ticker: string;
-  name?: string | null;
-  exchange?: string | null;
+  quote_type?: string | null;
+  region?: string | null;
   country?: string | null;
   sector?: string | null;
   industry?: string | null;
-  market_cap?: number | null;
-  avg_volume?: number | null;
-  business_health: BusinessHealth;
-  price_opportunity: PriceOpportunity;
-  valuation: Valuation;
-};
-
-export type EntrySnapshotFile = {
-  date: string;
-  source: string;
-  generated_at: string;
-  count: number;
-  failed_tickers: string[];
-  stocks: EntryStockSnapshot[];
+  active: boolean;
+  loaded: boolean;
 };
 
 export type OpenDataMetricTier =
@@ -461,477 +144,106 @@ export type StockEntryAnalysis = {
   dca_entry: StockEntryDcaPlan;
 };
 
-export type StockCandidateDecision =
-  | "starter_entry_candidate"
-  | "watchlist"
-  | "wait"
-  | "tactical_candidate"
-  | "no_clean_candidate";
-
-export type StockCandidate = {
-  ticker: string;
-  name?: string | null;
-  horizon?: "long_term_accumulation" | "tactical_entry" | "long_term" | "short_term" | "both" | null;
-  conviction: number;
-  decision: StockCandidateDecision;
-  entry_quality: string;
-  why_now: string;
-  thesis: string;
-  business_evidence?: string[];
-  valuation_evidence?: string[];
-  price_evidence?: string[];
-  support_1d_evidence?: string[];
-  derived_signal_evidence?: string[];
-  key_risks?: string[];
-  evidence: string[];
-  main_risks: string[];
-  missing_data: string[];
-};
-
-export type StockRunnerUp = {
-  ticker: string;
-  name?: string | null;
-  horizon: "long_term_accumulation" | "tactical_entry" | "long_term" | "short_term" | "both";
-  reason: string;
-};
-
-export type StockRejectedCandidate = {
-  ticker: string;
-  name?: string | null;
-  reason: string;
-};
-
-export type StockCandidateAnalysis = {
-  generated_at: string;
-  as_of: string;
-  source: string;
-  skill: string;
-  deterministic_inputs: string[];
-  live_context_used: boolean;
-  best_long_term_candidate?: StockCandidate | null;
-  best_short_term_candidate?: StockCandidate | null;
-  runner_ups: StockRunnerUp[];
-  rejected_interesting_names: StockRejectedCandidate[];
-  data_quality_notes: string[];
-};
-
-export type AssetMetric = {
-  value?: number | null;
-  kind: "percent" | "ratio" | "compact" | "currency";
-  source: string;
-  as_of: string;
-  notes: string;
-};
-
-export type AssetInterestingFact = {
-  type: string;
-  severity: number;
-  text: string;
-  evidence: string[];
-};
-
-export type AssetClass = "etf" | "commodity_proxy" | "crypto";
-
-export type AssetOpportunity = {
-  symbol: string;
-  name?: string | null;
-  asset_class: AssetClass;
-  exposure: string;
-  category?: string | null;
-  currency: string;
-  generated_at: string;
-  price_metrics: Record<string, AssetMetric>;
-  native_metrics: Record<string, AssetMetric>;
-  scores: Record<string, AssetMetric>;
-  interesting_facts: AssetInterestingFact[];
-  risk_bucket?: string | null;
-  data_gaps: string[];
-};
-
-export type AssetOpportunityFile = {
-  generated_at: string;
-  source: string;
-  deterministic_inputs: string[];
-  count: number;
-  assets: AssetOpportunity[];
-  collection_errors: string[];
-};
-
-export type PortfolioSnapshot = {
-  generated_at: string;
-  base_currency: string;
-  total_net_worth: number;
-  total_cash: number;
-  total_invested: number;
-  holdings: Holding[];
-  cash_balances: CashBalance[];
-  open_orders: Order[];
-  order_history: Order[];
-  ledger_events: BinanceLedgerEvent[];
-  platform_breakdown: BreakdownItem[];
-  asset_class_breakdown: BreakdownItem[];
-  top_positions: Holding[];
-  data_warnings: string[];
-  source_sync_status: SourceSyncStatus[];
-  display_rates: DisplayRate[];
-};
-
-async function requestSnapshot(
-  path: string,
-  init?: RequestInit,
-  timeoutMs = REQUEST_TIMEOUT_MS,
-): Promise<PortfolioSnapshot> {
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(`${API_BASE}${path}`, { ...init, signal: controller.signal });
-    if (!response.ok) {
-      throw new Error(`Snapshot request failed: ${response.status}`);
-    }
-    return response.json();
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      throw new Error("Snapshot request timed out.");
-    }
-    throw error;
-  } finally {
-    window.clearTimeout(timeout);
-  }
-}
-
 async function requestJson<T>(path: string, init?: RequestInit, timeoutMs = REQUEST_TIMEOUT_MS): Promise<T> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(`${API_BASE}${path}`, { ...init, signal: controller.signal });
+    const response = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...(init?.headers ?? {}),
+      },
+      signal: controller.signal,
+    });
     if (!response.ok) {
-      const detail = await response.json().catch(() => null);
-      throw new Error(detail?.detail ?? `Request failed: ${response.status}`);
+      let detail = response.statusText;
+      try {
+        const payload = await response.json();
+        detail = payload.detail ?? detail;
+      } catch {
+        // Keep the HTTP status text when the response has no JSON body.
+      }
+      throw new Error(detail || `Request failed with ${response.status}`);
     }
-    if (response.status === 204) {
-      return undefined as T;
-    }
-    return response.json();
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      throw new Error("Request timed out.");
-    }
-    throw error;
+    return response.json() as Promise<T>;
   } finally {
     window.clearTimeout(timeout);
   }
 }
 
-export async function fetchSnapshot(): Promise<PortfolioSnapshot> {
-  return requestSnapshot("/api/snapshot");
+function trimTrailingSlash(value: string): string {
+  return value.endsWith("/") ? value.slice(0, -1) : value;
 }
 
-const normalizeInvestorProfile = (profile: RawInvestorProfile): InvestorProfile => ({
-  personality: profile.personality,
-  customAllocation: profile.customAllocation ?? profile.custom_allocation ?? {
-    vwce: 55,
-    cashBonds: 15,
-    individualStocks: 25,
-    crypto: 5,
-  },
-  updated_at: profile.updated_at ?? null,
-});
-
-export async function fetchInvestorProfile(): Promise<InvestorProfile> {
-  const profile = await requestJson<RawInvestorProfile>("/api/user-profile");
-  return normalizeInvestorProfile(profile);
+function staticPath(path: string): string {
+  return `${DATA_BASE}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-export async function saveInvestorProfile(profile: InvestorProfile): Promise<InvestorProfile> {
-  const saved = await requestJson<RawInvestorProfile>("/api/user-profile", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      personality: profile.personality,
-      customAllocation: profile.customAllocation,
-    }),
+async function requestStaticJson<T>(path: string): Promise<T> {
+  const response = await fetch(staticPath(path), {
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
-  return normalizeInvestorProfile(saved);
+  if (!response.ok) {
+    throw new Error(`Static data request failed with ${response.status}`);
+  }
+  return response.json() as Promise<T>;
 }
 
-export async function fetchUserPreferences(): Promise<UserPreferences> {
-  return requestJson<UserPreferences>("/api/user-preferences");
+export async function fetchOpenDataStocks(): Promise<OpenDataStockSnapshot[]> {
+  if (STATIC_DATA_MODE) {
+    return requestStaticJson<OpenDataStockSnapshot[]>("/open-data/stocks.json");
+  }
+  return requestJson<OpenDataStockSnapshot[]>("/api/open-data/stocks");
 }
 
-export async function saveUserPreferences(preferences: Pick<UserPreferences, "sidebar_order">): Promise<UserPreferences> {
-  return requestJson<UserPreferences>("/api/user-preferences", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(preferences),
-  });
+export async function fetchStockUniverse(): Promise<StockUniverseItem[]> {
+  if (STATIC_DATA_MODE) {
+    return requestStaticJson<StockUniverseItem[]>("/stocks/universe.json");
+  }
+  return requestJson<StockUniverseItem[]>("/api/stocks/universe");
 }
 
-export async function fetchManualCapital(): Promise<ManualCapitalSnapshot> {
-  return requestJson<ManualCapitalSnapshot>("/api/capital/manual");
-}
-
-export async function addManualCapitalEntry(entry: ManualCapitalEntryRequest): Promise<ManualCapitalSnapshot> {
-  return requestJson<ManualCapitalSnapshot>("/api/capital/manual", {
+export async function addActiveStock(ticker: string): Promise<OpenDataStockSnapshot> {
+  if (STATIC_DATA_MODE) {
+    throw new Error(`Static build cannot add ${ticker}. Update data/stocks/stocks.json and wait for the next refresh.`);
+  }
+  return requestJson<OpenDataStockSnapshot>(`/api/stocks/active/${encodeURIComponent(ticker)}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(entry),
   });
 }
 
-export async function updateManualCapitalEntry(
-  entryId: string,
-  entry: ManualCapitalEntryRequest,
-): Promise<ManualCapitalSnapshot> {
-  return requestJson<ManualCapitalSnapshot>(`/api/capital/manual/${encodeURIComponent(entryId)}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(entry),
-  });
-}
-
-export async function deleteManualCapitalEntry(entryId: string): Promise<ManualCapitalSnapshot> {
-  return requestJson<ManualCapitalSnapshot>(`/api/capital/manual/${encodeURIComponent(entryId)}`, {
+export async function removeActiveStock(ticker: string): Promise<{ status: string; ticker: string }> {
+  if (STATIC_DATA_MODE) {
+    throw new Error(`Static build cannot remove ${ticker}. Update data/stocks/stocks.json and wait for the next refresh.`);
+  }
+  return requestJson<{ status: string; ticker: string }>(`/api/stocks/active/${encodeURIComponent(ticker)}`, {
     method: "DELETE",
   });
 }
 
-export async function fetchUserConnections(): Promise<UserConnection[]> {
-  return requestJson<UserConnection[]>("/api/connections");
-}
-
-export async function saveUserConnection(
-  source: UserConnectionSource,
-  connection: UserConnectionUpdate,
-): Promise<UserConnection> {
-  return requestJson<UserConnection>(`/api/connections/${encodeURIComponent(source)}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(connection),
-  });
-}
-
-export async function deleteUserConnection(source: UserConnectionSource): Promise<UserConnection> {
-  return requestJson<UserConnection>(`/api/connections/${encodeURIComponent(source)}`, {
-    method: "DELETE",
-  });
-}
-
-export async function fetchNotes(): Promise<Note[]> {
-  return requestJson<Note[]>("/api/notes");
-}
-
-export async function createNote(note: NoteRequest): Promise<Note> {
-  return requestJson<Note>("/api/notes", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(note),
-  });
-}
-
-export async function updateNote(noteId: string, note: NoteRequest): Promise<Note> {
-  return requestJson<Note>(`/api/notes/${encodeURIComponent(noteId)}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(note),
-  });
-}
-
-export async function deleteNote(noteId: string): Promise<void> {
-  await requestJson<void>(`/api/notes/${encodeURIComponent(noteId)}`, {
-    method: "DELETE",
-  });
+export async function fetchOpenDataStockPriceHistory(ticker: string): Promise<OpenDataPricePoint[]> {
+  if (STATIC_DATA_MODE) {
+    return requestStaticJson<OpenDataPricePoint[]>(`/open-data/price-history/${encodeURIComponent(ticker.toUpperCase())}.json`);
+  }
+  return requestJson<OpenDataPricePoint[]>(`/api/open-data/stocks/${encodeURIComponent(ticker)}/price-history`);
 }
 
 export async function startRefreshJob(source: RefreshSource): Promise<RefreshJob> {
+  if (STATIC_DATA_MODE) {
+    throw new Error(`Static build cannot start ${source} refresh jobs. GitHub Actions refreshes the data daily.`);
+  }
   return requestJson<RefreshJob>("/api/refresh", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ source }),
   });
 }
 
 export async function fetchRefreshJobs(): Promise<RefreshJob[]> {
+  if (STATIC_DATA_MODE) {
+    return [];
+  }
   return requestJson<RefreshJob[]>("/api/refresh/jobs");
-}
-
-export async function fetchRecommendations(): Promise<RecommendationSnapshot> {
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  try {
-    const response = await fetch(`${API_BASE}/api/recommendations`, { signal: controller.signal });
-    if (!response.ok) {
-      throw new Error(`Recommendations request failed: ${response.status}`);
-    }
-    return response.json();
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      throw new Error("Recommendations request timed out.");
-    }
-    throw error;
-  } finally {
-    window.clearTimeout(timeout);
-  }
-}
-
-export async function generateRecommendations(): Promise<RecommendationSnapshot> {
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS * 3);
-  try {
-    const response = await fetch(`${API_BASE}/api/recommendations`, {
-      method: "POST",
-      signal: controller.signal,
-    });
-    if (!response.ok) {
-      const detail = await response.json().catch(() => null);
-      throw new Error(detail?.detail ?? `Recommendations generation failed: ${response.status}`);
-    }
-    return response.json();
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      throw new Error("Recommendations generation timed out.");
-    }
-    throw error;
-  } finally {
-    window.clearTimeout(timeout);
-  }
-}
-
-export async function askRecommendationFollowUp(
-  recommendation: Recommendation,
-  question: string,
-): Promise<RecommendationFollowUpResponse> {
-  return requestJson<RecommendationFollowUpResponse>(
-    "/api/recommendations/follow-up",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ recommendation, question }),
-    },
-    REQUEST_TIMEOUT_MS * 2,
-  );
-}
-
-export async function createRecommendationCodexRequest(
-  recommendation: Recommendation,
-  question: string,
-  prompt: string,
-): Promise<RecommendationFollowUpResponse> {
-  return requestJson<RecommendationFollowUpResponse>(
-    "/api/recommendations/follow-up/codex-request",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ recommendation, question, prompt }),
-    },
-  );
-}
-
-export async function deleteRecommendation(recommendation: Recommendation): Promise<RecommendationSnapshot> {
-  return requestJson<RecommendationSnapshot>(
-    "/api/recommendations/delete",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ recommendation }),
-    },
-  );
-}
-
-export async function fetchRecommendationFollowUpResult(requestId: string): Promise<RecommendationFollowUpResponse> {
-  return requestJson<RecommendationFollowUpResponse>(`/api/recommendations/follow-up/${requestId}`);
-}
-
-export async function fetchRecommendationFollowUps(): Promise<RecommendationFollowUpResponse[]> {
-  return requestJson<RecommendationFollowUpResponse[]>("/api/recommendations/follow-ups");
-}
-
-export async function fetchLatestEntrySnapshot(): Promise<EntrySnapshotFile | null> {
-  try {
-    return await requestJson<EntrySnapshotFile>("/api/entry/snapshot");
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("No entry snapshot")) {
-      return null;
-    }
-    throw error;
-  }
-}
-
-export async function buildEntrySnapshot(limit = 2000): Promise<EntrySnapshotFile> {
-  return requestJson<EntrySnapshotFile>(
-    "/api/entry/snapshot",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ limit }),
-    },
-    ENTRY_BUILD_TIMEOUT_MS,
-  );
-}
-
-export async function fetchOpenDataStocks(): Promise<OpenDataStockSnapshot[]> {
-  return requestJson<OpenDataStockSnapshot[]>("/api/open-data/stocks");
-}
-
-export async function fetchOpenDataStock(ticker = "GOOGL"): Promise<OpenDataStockSnapshot> {
-  return requestJson<OpenDataStockSnapshot>(`/api/open-data/stocks/${encodeURIComponent(ticker)}`);
-}
-
-export async function fetchOpenDataStockPriceHistory(ticker: string): Promise<OpenDataPricePoint[]> {
-  return requestJson<OpenDataPricePoint[]>(`/api/open-data/stocks/${encodeURIComponent(ticker)}/price-history`);
-}
-
-export async function fetchOpenDataStockAnalyses(): Promise<Record<string, StockEntryAnalysis>> {
-  try {
-    return await requestJson<Record<string, StockEntryAnalysis>>("/api/open-data/stocks/analysis");
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("No collected open-data stock facts")) {
-      return {};
-    }
-    throw error;
-  }
-}
-
-export async function fetchOpenDataStockAnalysis(ticker = "GOOGL"): Promise<StockEntryAnalysis | null> {
-  try {
-    return await requestJson<StockEntryAnalysis>(`/api/open-data/stocks/${encodeURIComponent(ticker)}/analysis`);
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("No collected open-data facts")) {
-      return null;
-    }
-    throw error;
-  }
-}
-
-export async function fetchStockCandidateAnalysis(): Promise<StockCandidateAnalysis | null> {
-  try {
-    return await requestJson<StockCandidateAnalysis>("/api/open-data/stocks/candidate-analysis");
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("No AI stock candidate analysis")) {
-      return null;
-    }
-    throw error;
-  }
-}
-
-export async function fetchAssetOpportunities(): Promise<AssetOpportunityFile | null> {
-  try {
-    return await requestJson<AssetOpportunityFile>("/api/open-data/assets");
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("No multi-asset derived signals")) {
-      return null;
-    }
-    throw error;
-  }
-}
-
-export async function fetchEtfOpportunities(): Promise<AssetOpportunity[]> {
-  return requestJson<AssetOpportunity[]>("/api/open-data/assets/etfs");
-}
-
-export async function fetchCommodityOpportunities(): Promise<AssetOpportunity[]> {
-  return requestJson<AssetOpportunity[]>("/api/open-data/assets/commodities");
-}
-
-export async function fetchCryptoOpportunities(): Promise<AssetOpportunity[]> {
-  return requestJson<AssetOpportunity[]>("/api/open-data/assets/crypto");
 }

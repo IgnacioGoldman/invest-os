@@ -8,20 +8,9 @@ from typing import Callable
 
 from app.config import DATA_DIR, Settings
 from app.entry_engine.providers.open_data_provider import OpenDataProvider
-from app.entry_engine.utils.file_storage import (
-    load_open_data_active_tickers,
-    load_latest_open_data_stock_snapshots,
-    save_open_data_stock_snapshot,
-)
-from app.services.asset_opportunities import (
-    ASSET_OPPORTUNITY_DIR,
-    build_asset_opportunities_file,
-    save_asset_opportunities,
-)
-from app.services.open_data_stock_store import save_stock_snapshot_to_db
+from app.services.open_data_stock_store import load_active_tickers, load_db_or_backfill_stock_snapshots, save_stock_snapshot_to_db
 from app.services.storage import connect, replace_stock_derived_signals_file
 from app.services.stock_derived_signals import StockDerivedSignalsFile, build_stock_derived_signals_file
-from app.snapshot import get_portfolio_snapshot
 
 
 ExplorationProgressCallback = Callable[[str, str, int, int], None]
@@ -46,7 +35,6 @@ def _save_stock_derived_signals(
 def _refresh_stock_symbol(settings: Settings, ticker: str) -> str:
     provider = OpenDataProvider(force_refresh=True, include_filing_details=False)
     snapshot = provider.get_open_data_snapshot(ticker)
-    save_open_data_stock_snapshot(snapshot)
     save_stock_snapshot_to_db(settings, snapshot)
     return snapshot.ticker
 
@@ -67,12 +55,10 @@ def _is_snapshot_fresh_today(generated_at: datetime) -> bool:
 def refresh_exploration_data(
     settings: Settings,
     progress: ExplorationProgressCallback | None = None,
-    *,
-    include_assets: bool = True,
 ) -> list[str]:
     warnings: list[str] = []
-    active_tickers = load_open_data_active_tickers()
-    current_stock_snapshots = load_latest_open_data_stock_snapshots()
+    active_tickers = load_active_tickers(settings)
+    current_stock_snapshots = load_db_or_backfill_stock_snapshots(settings)
     current_by_ticker = {snapshot.ticker: snapshot for snapshot in current_stock_snapshots}
     missing_tickers = [ticker for ticker in active_tickers if ticker not in current_by_ticker]
     stale_existing_tickers = [
@@ -82,11 +68,11 @@ def refresh_exploration_data(
     ]
     stale_tickers = [*missing_tickers, *stale_existing_tickers]
     skipped_fresh = len(current_stock_snapshots) - len(stale_existing_tickers)
-    total_steps = max(1, len(stale_tickers)) + (2 if include_assets else 1)
+    total_steps = max(1, len(stale_tickers)) + 1
 
     if progress:
         progress(
-            "exploration",
+            "exploration_beta",
             f"Refreshing {len(stale_tickers)} stale stock symbols; skipping {skipped_fresh} fetched today",
             0,
             total_steps,
@@ -106,15 +92,15 @@ def refresh_exploration_data(
                 except Exception as exc:
                     stock_failures.append(f"{ticker} ({exc})")
                 if progress:
-                    progress("exploration", f"Refreshed {completed}/{len(stale_tickers)} stale stock symbols", completed, total_steps)
+                    progress("exploration_beta", f"Refreshed {completed}/{len(stale_tickers)} stale stock symbols", completed, total_steps)
     elif not current_stock_snapshots:
         warnings.append("No stock rows were available to refresh.")
 
     warnings.extend(_compact_failures(stock_failures, label="Stock refresh failures"))
 
     if progress:
-        progress("exploration_stock_signals", "Rebuilding stock derived signals", max(1, len(stale_tickers)) + 1, total_steps)
-    refreshed_stock_snapshots = load_latest_open_data_stock_snapshots()
+        progress("exploration_beta_signals", "Rebuilding stock derived signals", max(1, len(stale_tickers)) + 1, total_steps)
+    refreshed_stock_snapshots = load_db_or_backfill_stock_snapshots(settings)
     stock_signals = build_stock_derived_signals_file(refreshed_stock_snapshots)
     _save_stock_derived_signals(stock_signals)
     with connect(settings.data_dir) as conn:
@@ -122,19 +108,5 @@ def refresh_exploration_data(
             save_stock_snapshot_to_db(settings, snapshot)
         replace_stock_derived_signals_file(conn, stock_signals)
         conn.commit()
-
-    if not include_assets:
-        return warnings
-
-    if progress:
-        progress("exploration_asset_signals", "Refreshing ETF, crypto, and commodity signals", total_steps, total_steps)
-    try:
-        portfolio_snapshot = get_portfolio_snapshot()
-    except Exception as exc:
-        portfolio_snapshot = None
-        warnings.append(f"Portfolio-fit scores used no portfolio snapshot: {exc}")
-    asset_signals = build_asset_opportunities_file(portfolio_snapshot=portfolio_snapshot)
-    save_asset_opportunities(asset_signals, ASSET_OPPORTUNITY_DIR)
-    warnings.extend(_compact_failures(asset_signals.collection_errors, label="Asset signal collection failures"))
 
     return warnings

@@ -9,7 +9,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from app.entry_engine.utils.file_storage import load_latest_open_data_stock_snapshots  # noqa: E402
+from app.config import get_settings  # noqa: E402
+from app.services.open_data_stock_store import load_db_or_backfill_stock_snapshots  # noqa: E402
+from app.services.storage import connect, replace_stock_derived_signals_file  # noqa: E402
 from app.services.stock_derived_signals import build_stock_derived_signals_file  # noqa: E402
 
 
@@ -17,7 +19,8 @@ DEFAULT_OUTPUT_DIR = ROOT / "data" / "stocks" / "derived_signals"
 
 
 def write_derived_signals(output_dir: Path, *, include_low_fidelity: bool = False) -> Path:
-    snapshots = load_latest_open_data_stock_snapshots(include_low_fidelity=include_low_fidelity)
+    settings = get_settings()
+    snapshots = load_db_or_backfill_stock_snapshots(settings)
     payload = build_stock_derived_signals_file(snapshots)
     output_dir.mkdir(parents=True, exist_ok=True)
     snapshot_date = payload.generated_at.date().isoformat()
@@ -26,6 +29,9 @@ def write_derived_signals(output_dir: Path, *, include_low_fidelity: bool = Fals
     latest_path = output_dir / "latest.json"
     dated_path.write_text(text, encoding="utf-8")
     latest_path.write_text(text, encoding="utf-8")
+    with connect(settings.data_dir) as conn:
+        replace_stock_derived_signals_file(conn, payload)
+        conn.commit()
     return latest_path
 
 

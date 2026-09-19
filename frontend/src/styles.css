@@ -5730,6 +5730,13 @@ tbody tr:hover td {
   justify-content: flex-end;
 }
 
+.exploration-page .stock-action-cluster {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  position: relative;
+}
+
 .exploration-page .panel-heading-actions button,
 .exploration-page .filter-menu-trigger,
 .exploration-page .table-icon-button,
@@ -5741,6 +5748,7 @@ tbody tr:hover td {
 }
 
 .exploration-page .panel-heading-actions button:hover,
+.exploration-page .panel-heading-actions button.active,
 .exploration-page .filter-menu-trigger.active,
 .exploration-page .filter-menu-trigger:hover,
 .exploration-page .table-icon-button.active,
@@ -5749,6 +5757,96 @@ tbody tr:hover td {
   background: rgba(109, 143, 255, 0.12);
   border-color: rgba(109, 143, 255, 0.36);
   color: var(--app-foreground);
+}
+
+.exploration-page .stock-picker-popover {
+  background: rgba(18, 21, 30, 0.98);
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+  box-shadow: 0 22px 70px -34px rgba(0, 0, 0, 0.9);
+  display: grid;
+  gap: 10px;
+  max-height: min(520px, calc(100vh - 120px));
+  min-width: 340px;
+  overflow: hidden;
+  padding: 12px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 20;
+}
+
+.exploration-page .stock-picker-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.exploration-page .stock-picker-heading strong {
+  color: var(--app-foreground);
+  font-size: 0.88rem;
+}
+
+.exploration-page .stock-picker-popover input {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  color: var(--app-foreground);
+  min-height: 36px;
+  padding: 0 10px;
+}
+
+.exploration-page .stock-picker-list {
+  display: grid;
+  gap: 6px;
+  max-height: 360px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.exploration-page .stock-picker-list button {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-height: 44px;
+  text-align: left;
+  width: 100%;
+}
+
+.exploration-page .stock-picker-list button:disabled {
+  cursor: default;
+  opacity: 0.58;
+}
+
+.exploration-page .stock-picker-list span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.exploration-page .stock-picker-list small {
+  color: var(--app-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exploration-page .stock-picker-list em {
+  color: var(--app-muted-strong);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.exploration-page .table-row-action-cell {
+  text-align: center;
+}
+
+.exploration-page .icon-button.danger:hover {
+  background: rgba(255, 99, 99, 0.12);
+  border-color: rgba(255, 99, 99, 0.36);
+  color: #ffb4b4;
 }
 
 .exploration-page .panel-heading-actions > span,
@@ -5912,12 +6010,12 @@ tbody tr:hover td {
 }
 
 .exploration-page .exploration-temp-table {
-  min-width: 780px;
+  min-width: 1080px;
 }
 
 .exploration-page .exploration-temp-table th,
 .exploration-page .exploration-temp-table td {
-  width: 20%;
+  min-width: 120px;
 }
 
 .exploration-page .temp-chart-row td {
@@ -8714,4 +8812,168 @@ tbody tr:hover td {
     min-height: 32px;
     width: 100%;
   }
+}
+
+/* Final Exploration Beta overrides: keep the simplified app visually coherent. */
+.exploration-only-shell {
+  --lite-bg: #f7f8fb;
+  --lite-surface: #ffffff;
+  --lite-surface-soft: #f1f4f8;
+  --lite-border: #d9e0ea;
+  --lite-border-strong: #c2ccd9;
+  --lite-text: #17202e;
+  --lite-muted: #657286;
+  --lite-muted-strong: #455268;
+  --lite-primary: #275f88;
+  --lite-primary-soft: #e6f0f6;
+  --lite-positive: #1f7a55;
+  --lite-warning: #a76818;
+  --lite-negative: #b04444;
+  --lite-shadow: 0 22px 60px -42px rgba(21, 35, 58, 0.45);
+  background: var(--lite-bg);
+  color: var(--lite-text);
+  display: grid;
+  grid-template-columns: 176px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.exploration-only-shell .sidebar {
+  background: #101722;
+  border-right: 1px solid #1e2937;
+  color: #f7f9fc;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px 14px;
+}
+
+.exploration-only-shell .sidebar-brand,
+.exploration-only-shell .sidebar-nav button {
+  color: #f7f9fc;
+}
+
+.exploration-only-shell .sidebar-nav button.active {
+  background: #f7f9fc;
+  border-color: #f7f9fc;
+  color: #101722;
+}
+
+.exploration-only-shell .main-content,
+.exploration-page {
+  background: var(--lite-bg);
+  color: var(--lite-text);
+}
+
+.exploration-only-shell .panel,
+.exploration-page .panel,
+.exploration-page .table-wrap,
+.exploration-page table,
+.exploration-page td {
+  background: var(--lite-surface);
+  color: var(--lite-text);
+}
+
+.exploration-page .panel {
+  border: 1px solid var(--lite-border);
+  border-radius: 10px;
+  box-shadow: var(--lite-shadow);
+}
+
+.exploration-page .panel-heading,
+.exploration-page .open-data-filters {
+  background: var(--lite-surface);
+  border-color: var(--lite-border);
+}
+
+.exploration-page .panel-title-with-info h2,
+.exploration-page .ticker-cell-main strong,
+.exploration-page .open-data-table td strong,
+.exploration-page .stock-picker-heading strong,
+.exploration-page .stock-picker-list strong,
+.exploration-page .temp-price-heading strong,
+.exploration-page .temp-bar-chart strong {
+  color: var(--lite-text);
+}
+
+.exploration-page th {
+  background: #f3f6fa;
+  border-color: var(--lite-border);
+  color: var(--lite-muted-strong);
+  text-transform: none;
+}
+
+.exploration-page td {
+  border-color: #e9edf3;
+}
+
+.exploration-page td small,
+.exploration-page .stock-picker-list small,
+.exploration-page .temp-price-chart text,
+.exploration-page .temp-bar-chart text {
+  color: var(--lite-muted);
+  fill: var(--lite-muted);
+}
+
+.exploration-page .panel-heading-actions > span {
+  background: var(--lite-surface-soft);
+  border-color: var(--lite-border);
+  color: var(--lite-muted-strong);
+}
+
+.exploration-only-shell button,
+.exploration-page .panel-heading-actions button,
+.exploration-page .filter-menu-trigger,
+.exploration-page .table-icon-button,
+.exploration-page .icon-button,
+.exploration-page .price-range-control button {
+  background: var(--lite-surface);
+  border: 1px solid var(--lite-border);
+  border-radius: 8px;
+  color: var(--lite-muted-strong);
+}
+
+.exploration-page .panel-heading-actions .primary {
+  background: var(--lite-primary);
+  border-color: var(--lite-primary);
+  color: #ffffff;
+}
+
+.exploration-page .open-data-filters input,
+.exploration-page .stock-picker-popover input {
+  background: #ffffff;
+  border-color: var(--lite-border-strong);
+  color: var(--lite-text);
+}
+
+.exploration-page .stock-picker-popover,
+.exploration-page .stock-picker-list button,
+.exploration-page .price-range-control,
+.exploration-page .temp-price-chart,
+.exploration-page .temp-bar-chart,
+.exploration-page .temp-chart-row td {
+  background: #ffffff;
+  color: var(--lite-text);
+}
+
+.exploration-page .analysis-tag.good,
+.exploration-page .table-assessment-tag.good {
+  background: #e7f5ee;
+  border-color: #b9dfcc;
+  color: var(--lite-positive);
+}
+
+.exploration-page .analysis-tag.watch,
+.exploration-page .table-assessment-tag.watch,
+.exploration-page .analysis-tag.caution,
+.exploration-page .table-assessment-tag.caution {
+  background: #fff4df;
+  border-color: #ead19a;
+  color: var(--lite-warning);
+}
+
+.exploration-page .analysis-tag.neutral,
+.exploration-page .table-assessment-tag.neutral {
+  background: #edf1f6;
+  border-color: #d9e0ea;
+  color: var(--lite-muted-strong);
 }

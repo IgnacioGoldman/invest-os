@@ -14,6 +14,9 @@ type Props = {
   onSelectTicker: (ticker: string) => void;
   variant?: "stable" | "beta";
   betaActions?: ReactNode;
+  editMode?: boolean;
+  removingTicker?: string | null;
+  onRemoveStock?: (ticker: string) => void;
 };
 
 const COLUMNS = [
@@ -31,7 +34,11 @@ const COLUMNS = [
   ["business_health", "debt", "Debt", "compact"],
   ["business_health", "debt_to_equity", "D/E", "ratio"],
   ["price_opportunity", "current_price", "Price", "ratio"],
-  ["price_opportunity", "support_1d_distance", "Support 1D", "percent"],
+  ["price_opportunity", "support_1d_distance", "Near Support 1D", "percent"],
+  ["price_opportunity", "support_1m_distance", "Near Support 1M", "percent"],
+  ["price_opportunity", "support_6m_distance", "Near Support 6M", "percent"],
+  ["price_opportunity", "support_2y_distance", "Near Support 2Y", "percent"],
+  ["price_opportunity", "support_5y_distance", "Near Support 5Y", "percent"],
   ["price_opportunity", "change_1d", "1D", "percent"],
   ["price_opportunity", "change_1w", "1W", "percent"],
   ["price_opportunity", "change_1m", "1M", "percent"],
@@ -61,7 +68,7 @@ type SortValue = number | string | null;
 type MetricGroup = "business_health" | "price_opportunity" | "valuation";
 type ColumnKind = "conviction" | "assessment" | "text" | "metric" | "derived";
 type FilterValue = { field: string; value: string };
-type PriceRange = "1D" | "1W" | "1M" | "3M" | "6M" | "1Y" | "5Y" | "ALL";
+type PriceRange = "1D" | "1W" | "1M" | "3M" | "6M" | "1Y" | "2Y" | "5Y" | "ALL";
 type PriceHistoryStatus = "idle" | "loading" | "loaded" | "error";
 type DerivedMetric = {
   value: number | null;
@@ -262,9 +269,16 @@ const PRICE_RANGES: Array<{ value: PriceRange; label: string; days: number | nul
   { value: "3M", label: "3M", days: 91 },
   { value: "6M", label: "6M", days: 182 },
   { value: "1Y", label: "1Y", days: 365 },
+  { value: "2Y", label: "2Y", days: 365 * 2 },
   { value: "5Y", label: "5Y", days: 365 * 5 },
   { value: "ALL", label: "All", days: null },
 ];
+const BETA_SUPPORT_COLUMNS = [
+  ["support_1m_distance", "Near 1M"],
+  ["support_6m_distance", "Near 6M"],
+  ["support_2y_distance", "Near 2Y"],
+  ["support_5y_distance", "Near 5Y"],
+] as const;
 
 const CHARTS: Array<{
   title: string;
@@ -332,11 +346,21 @@ function formatSupportSignal(value?: number | null) {
   return `${supportSignalLabel(value)} ${formatSignedPercent(value)}`;
 }
 
+function inferredSupportLevel(currentPrice?: number | null, supportDistance?: number | null) {
+  if (currentPrice == null || supportDistance == null) return null;
+  const divisor = 1 + supportDistance / 100;
+  return divisor > 0 ? currentPrice / divisor : null;
+}
+
 function supportSignalTone(value?: number | null): Tone {
   if (value == null) return "neutral";
   if (value <= 2.5) return "good";
   if (value <= 6) return "watch";
   return "neutral";
+}
+
+function isSupportMetric(group?: MetricGroup, key?: string) {
+  return group === "price_opportunity" && Boolean(key?.startsWith("support_") && key.endsWith("_distance"));
 }
 
 function formatValue(metric: OpenDataMetric | undefined, kind: string) {
@@ -1372,12 +1396,18 @@ function StocksInsightsTempTable({
   loading,
   filterControls,
   actions,
+  editMode = false,
+  removingTicker,
+  onRemoveStock,
 }: {
   snapshots: OpenDataStockSnapshot[];
   totalSnapshots: number;
   loading: boolean;
   filterControls: ComponentProps<typeof StockFilterControls>;
   actions?: ReactNode;
+  editMode?: boolean;
+  removingTicker?: string | null;
+  onRemoveStock?: (ticker: string) => void;
 }) {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [priceHistoryByTicker, setPriceHistoryByTicker] = useState<Record<string, OpenDataPricePoint[]>>({});
@@ -1417,10 +1447,10 @@ function StocksInsightsTempTable({
     <section className="panel open-data-stocks-temp">
       <div className="panel-heading">
         <div className="panel-title-with-info">
-          <h2>Stocks Insights temp</h2>
+          <h2>Stock Insights</h2>
         </div>
         <div className="panel-heading-actions">
-          <span>{rows.length} / {totalSnapshots}</span>
+          <span>{rows.length} stocks</span>
           {actions}
         </div>
       </div>
@@ -1437,20 +1467,19 @@ function StocksInsightsTempTable({
                 <th>Latest revenue growth YoY</th>
                 <th>Momentum revenue growth YoY</th>
                 <th>Latest EPS Growth YoY</th>
-                <th>Near Support</th>
+                {BETA_SUPPORT_COLUMNS.map(([, label]) => (
+                  <th key={label}>{label}</th>
+                ))}
+                {editMode && <th>Remove</th>}
               </tr>
             </thead>
             <tbody>
               {rows.map((snapshot) => {
                 const revenueGrowth = snapshot.business_health.revenue_growth_yoy;
                 const epsGrowth = snapshot.business_health.eps_growth_yoy;
-                const support = snapshot.price_opportunity.support_1d_distance;
                 const growthSignal = revenueGrowthSignal(revenueGrowth?.value);
                 const epsSignal = epsGrowthSignal(epsGrowth?.value);
                 const momentum = revenueGrowthMomentum(snapshot);
-                const supportValue = support?.value;
-                const supportLabel = supportSignalLabel(supportValue);
-                const supportTone = supportSignalTone(supportValue);
                 const rowExpanded = Boolean(expandedRows[snapshot.ticker]);
                 return (
                   <Fragment key={snapshot.ticker}>
@@ -1486,14 +1515,44 @@ function StocksInsightsTempTable({
                         <span className={`analysis-tag table-assessment-tag ${epsSignal.tone}`}>{epsSignal.label}</span>
                         <small>{formatValue(epsGrowth, "percent")}</small>
                       </td>
-                      <td title={support ? `${support.notes}\n${support.source}` : "Nearest support distance was unavailable."}>
-                        <span className={`analysis-tag table-assessment-tag ${supportTone}`}>{supportLabel}</span>
-                        <small>{supportValue == null ? "-" : formatSignedPercent(supportValue)}</small>
-                      </td>
+                      {BETA_SUPPORT_COLUMNS.map(([key, label]) => {
+                        const support = snapshot.price_opportunity[key];
+                        const supportValue = support?.value;
+                        const supportLevel = inferredSupportLevel(snapshot.price_opportunity.current_price?.value, supportValue);
+                        return (
+                          <td key={key} title={support ? `${label}: ${support.notes}\n${support.source}` : `${label} was unavailable.`}>
+                            <span className={`analysis-tag table-assessment-tag ${supportSignalTone(supportValue)}`}>
+                              {supportSignalLabel(supportValue)}
+                            </span>
+                            <small>
+                              {supportValue == null ? "-" : formatSignedPercent(supportValue)}
+                              {supportLevel == null ? null : (
+                                <>
+                                  <br />
+                                  {formatPrice(supportLevel)}
+                                </>
+                              )}
+                            </small>
+                          </td>
+                        );
+                      })}
+                      {editMode && (
+                        <td className="table-row-action-cell">
+                          <button
+                            type="button"
+                            className="icon-button danger"
+                            onClick={() => onRemoveStock?.(snapshot.ticker)}
+                            disabled={removingTicker === snapshot.ticker}
+                            title={`Remove ${snapshot.ticker} from table`}
+                          >
+                            <X size={15} aria-hidden="true" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                     {rowExpanded && (
                       <tr className="exploration-detail-row temp-chart-row">
-                        <td colSpan={5}>
+                        <td colSpan={editMode ? 9 : 8}>
                           <div className="temp-chart-stack">
                             <PriceLineChart
                               snapshot={snapshot}
@@ -1778,6 +1837,9 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
   onSelectTicker,
   variant = "stable",
   betaActions,
+  editMode,
+  removingTicker,
+  onRemoveStock,
 }: Props) {
   const [openDetail, setOpenDetail] = useState<DetailKind>(null);
   const [query, setQuery] = useState("");
@@ -1900,7 +1962,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
         values: uniqueOptions(
           snapshots.map((snapshot) => {
             const metric = snapshot[column.group as MetricGroup]?.[column.key ?? ""];
-            const isSupportSignal = column.group === "price_opportunity" && column.key === "support_1d_distance";
+            const isSupportSignal = isSupportMetric(column.group, column.key);
             const label = isSupportSignal ? formatSupportSignal(metric?.value) : formatValue(metric, column.metricKind ?? "ratio");
             return { value: metric?.value == null ? label : String(metric.value), label };
           }),
@@ -2111,13 +2173,13 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
 
     if (column.kind === "metric" && column.group && column.key) {
       const metric = snapshot[column.group][column.key];
-      const isSupportSignal = column.group === "price_opportunity" && column.key === "support_1d_distance";
+      const isSupportSignal = isSupportMetric(column.group, column.key);
       return (
         <td key={column.id} title={metric ? `${column.label}: ${metric.notes}\n${metric.source}` : column.label}>
           <strong>{isSupportSignal ? formatSupportSignal(metric?.value) : formatValue(metric, column.metricKind ?? "ratio")}</strong>
           {metric && (
             <small>
-              {isSupportSignal ? "Daily zones" : `Source period ${metric.as_of}`}
+              {isSupportSignal ? "Support zones" : `Source period ${metric.as_of}`}
               <br />
               {tierLabel(metric.tier)}
             </small>
@@ -2180,7 +2242,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
 
     if (column.kind === "metric" && column.group && column.key) {
       const metric = snapshot[column.group][column.key];
-      const isSupportSignal = column.group === "price_opportunity" && column.key === "support_1d_distance";
+      const isSupportSignal = isSupportMetric(column.group, column.key);
       return (
         <article
           className="exploration-metric-card"
@@ -2193,7 +2255,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
             <small>
               {tierLabel(metric.tier)}
               <br />
-              {isSupportSignal ? "Daily zones" : `Source period ${metric.as_of}`}
+              {isSupportSignal ? "Support zones" : `Source period ${metric.as_of}`}
             </small>
           )}
         </article>
@@ -2229,6 +2291,9 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
       totalSnapshots={snapshots.length}
       loading={loading}
       actions={betaActions}
+      editMode={editMode}
+      removingTicker={removingTicker}
+      onRemoveStock={onRemoveStock}
       filterControls={{
         query,
         onQueryChange: setQuery,
