@@ -1390,8 +1390,8 @@ export function MobileStockExplorer({
   personalization,
 }: Props) {
   const [query, setQuery] = useState("");
-  const [filterExpression, setFilterExpression] = useState<FilterExpression>({ operator: "and", groups: [] });
-  const [sortKey, setSortKey] = useState<SortKey>("support_1m");
+  const [filterExpression, setFilterExpression] = useState<FilterExpression>(() => createStrongYoyExpression("support"));
+  const [sortKey, setSortKey] = useState<SortKey>("support_best");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [watchlistOpen, setWatchlistOpen] = useState(false);
