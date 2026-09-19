@@ -1,0 +1,28 @@
+{
+  "source": "github_actions_static_export",
+  "stock_count": 22,
+  "tickers": [
+    "AAPL",
+    "AMZN",
+    "AZN",
+    "CALM",
+    "CRM",
+    "DDOG",
+    "DT",
+    "DXCM",
+    "GOOG",
+    "INOD",
+    "MA",
+    "MELI",
+    "META",
+    "MSFT",
+    "MSTR",
+    "NFLX",
+    "NVDA",
+    "ORCL",
+    "TSLA",
+    "UBER",
+    "V",
+    "YPF"
+  ]
+}
