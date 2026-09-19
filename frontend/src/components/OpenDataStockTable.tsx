@@ -657,6 +657,7 @@ function sortValueFor(
   if (sortKey === "industry") return snapshot.industry ?? null;
   if (sortKey === "exchange") return snapshot.exchange ?? null;
   if (sortKey === "region") return snapshot.country ?? null;
+  if (sortKey === "temp:revenue_momentum") return revenueGrowthMomentum(snapshot).change;
   if (sortKey === "conviction") return analysis?.conviction ?? null;
   if (sortKey === "business" || sortKey === "price" || sortKey === "valuation") {
     const section = analysisSectionFor(analysis, sortKey);
@@ -690,6 +691,13 @@ function filterValueFor(
   if (field === "industry") return snapshot.industry ?? "";
   if (field === "exchange") return snapshot.exchange ?? "";
   if (field === "region") return snapshot.country ?? "";
+  if (field === "temp:revenue_growth_signal") return revenueGrowthSignal(snapshot.business_health.revenue_growth_yoy?.value).label;
+  if (field === "temp:revenue_momentum") return revenueGrowthMomentum(snapshot).label;
+  if (field === "temp:eps_growth_signal") return epsGrowthSignal(snapshot.business_health.eps_growth_yoy?.value).label;
+  if (field.startsWith("temp:support:")) {
+    const key = field.slice("temp:support:".length);
+    return supportSignalLabel(snapshot.price_opportunity[key]?.value);
+  }
   if (field === "conviction") {
     if (!analysis) return "";
     if (analysis.needs_more_data) return "needs_data";
@@ -1396,6 +1404,7 @@ function StocksInsightsTempTable({
   loading,
   filterControls,
   actions,
+  renderSortHeader,
   editMode = false,
   removingTicker,
   onRemoveStock,
@@ -1405,6 +1414,7 @@ function StocksInsightsTempTable({
   loading: boolean;
   filterControls: ComponentProps<typeof StockFilterControls>;
   actions?: ReactNode;
+  renderSortHeader: (key: string, label: string) => ReactNode;
   editMode?: boolean;
   removingTicker?: string | null;
   onRemoveStock?: (ticker: string) => void;
@@ -1414,7 +1424,7 @@ function StocksInsightsTempTable({
   const [priceHistoryStatus, setPriceHistoryStatus] = useState<Record<string, PriceHistoryStatus>>({});
   const [priceHistoryErrors, setPriceHistoryErrors] = useState<Record<string, string>>({});
   const requestedPriceHistory = useRef<Set<string>>(new Set());
-  const rows = useMemo(() => [...snapshots].sort((left, right) => left.ticker.localeCompare(right.ticker)), [snapshots]);
+  const rows = snapshots;
   const toggleExpandedRow = (ticker: string) => {
     setExpandedRows((current) => ({ ...current, [ticker]: !current[ticker] }));
   };
@@ -1463,12 +1473,12 @@ function StocksInsightsTempTable({
           <table className="open-data-table exploration-temp-table">
             <thead>
               <tr>
-                <th>Symbol</th>
-                <th>Latest revenue growth YoY</th>
-                <th>Momentum revenue growth YoY</th>
-                <th>Latest EPS Growth YoY</th>
-                {BETA_SUPPORT_COLUMNS.map(([, label]) => (
-                  <th key={label}>{label}</th>
+                <th>{renderSortHeader("symbol", "Symbol")}</th>
+                <th>{renderSortHeader("metric:business_health:revenue_growth_yoy", "Latest revenue growth YoY")}</th>
+                <th>{renderSortHeader("temp:revenue_momentum", "Momentum revenue growth YoY")}</th>
+                <th>{renderSortHeader("metric:business_health:eps_growth_yoy", "Latest EPS Growth YoY")}</th>
+                {BETA_SUPPORT_COLUMNS.map(([key, label]) => (
+                  <th key={label}>{renderSortHeader(`metric:price_opportunity:${key}`, label)}</th>
                 ))}
                 {editMode && <th>Remove</th>}
               </tr>
@@ -1891,6 +1901,66 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
       return [];
     }
 
+    if (variant === "beta") {
+      return [
+        {
+          field: "symbol",
+          label: "Symbol",
+          values: uniqueOptions(snapshots.map((snapshot) => ({ value: snapshot.ticker, label: snapshot.ticker }))),
+        },
+        {
+          field: "sector",
+          label: "Sector",
+          values: uniqueOptions(snapshots.map((snapshot) => ({ value: snapshot.sector ?? "", label: snapshot.sector ?? "" }))),
+        },
+        {
+          field: "industry",
+          label: "Industry",
+          values: uniqueOptions(snapshots.map((snapshot) => ({ value: snapshot.industry ?? "", label: snapshot.industry ?? "" }))),
+        },
+        {
+          field: "temp:revenue_growth_signal",
+          label: "Revenue Growth",
+          values: uniqueOptions(
+            snapshots.map((snapshot) => {
+              const signal = revenueGrowthSignal(snapshot.business_health.revenue_growth_yoy?.value);
+              return { value: signal.label, label: signal.label };
+            }),
+          ),
+        },
+        {
+          field: "temp:revenue_momentum",
+          label: "Revenue Momentum",
+          values: uniqueOptions(
+            snapshots.map((snapshot) => {
+              const momentum = revenueGrowthMomentum(snapshot);
+              return { value: momentum.label, label: momentum.label };
+            }),
+          ),
+        },
+        {
+          field: "temp:eps_growth_signal",
+          label: "EPS Growth",
+          values: uniqueOptions(
+            snapshots.map((snapshot) => {
+              const signal = epsGrowthSignal(snapshot.business_health.eps_growth_yoy?.value);
+              return { value: signal.label, label: signal.label };
+            }),
+          ),
+        },
+        ...BETA_SUPPORT_COLUMNS.map(([key, label]) => ({
+          field: `temp:support:${key}`,
+          label,
+          values: uniqueOptions(
+            snapshots.map((snapshot) => {
+              const signal = supportSignalLabel(snapshot.price_opportunity[key]?.value);
+              return { value: signal, label: signal };
+            }),
+          ),
+        })),
+      ].filter((dimension) => dimension.values.length > 0);
+    }
+
     const analysesList = snapshots
       .map((snapshot) => analyses[snapshot.ticker])
       .filter((analysis): analysis is StockEntryAnalysis => Boolean(analysis));
@@ -1969,7 +2039,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
         ),
       })),
     ].filter((dimension) => dimension.values.length > 0);
-  }, [activeFilters.length, analyses, derivedByTicker, filterMenuOpen, snapshots, tempFilterMenuOpen]);
+  }, [activeFilters.length, analyses, derivedByTicker, filterMenuOpen, snapshots, tempFilterMenuOpen, variant]);
 
   const activeFilterCount = activeFilters.length;
   const activeFilterDimension =
@@ -1983,8 +2053,9 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
 
   const applyFilterValue = (value: string) => {
     setActiveFilters((filters) => {
-      const next = filters.filter((filter) => filter.field !== activeFilterField);
-      return [...next, { field: activeFilterField, value }];
+      const field = activeFilterDimension?.field ?? activeFilterField;
+      const next = filters.filter((filter) => filter.field !== field);
+      return [...next, { field, value }];
     });
     setFilterMenuOpen(false);
     setTempFilterMenuOpen(false);
@@ -2291,6 +2362,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
       totalSnapshots={snapshots.length}
       loading={loading}
       actions={betaActions}
+      renderSortHeader={renderSortHeader}
       editMode={editMode}
       removingTicker={removingTicker}
       onRemoveStock={onRemoveStock}

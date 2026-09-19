@@ -1,4 +1,4 @@
-import { FlaskConical, Pencil, Plus, RefreshCcw, X } from "lucide-react";
+import { Pencil, Plus, RefreshCcw, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   fetchOpenDataStocks,
@@ -223,18 +223,6 @@ export default function App() {
 
   return (
     <div className="app-shell exploration-only-shell">
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <FlaskConical size={20} aria-hidden="true" />
-          <strong>Explore</strong>
-        </div>
-        <nav className="sidebar-nav" aria-label="Primary">
-          <button type="button" className="active">
-            <FlaskConical size={18} aria-hidden="true" />
-            <span>Stocks</span>
-          </button>
-        </nav>
-      </aside>
       <main className="main-content exploration-page">
         {error && <p className="error-banner">{error}</p>}
         <OpenDataStockTable

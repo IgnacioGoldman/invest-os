@@ -79,7 +79,7 @@ Use it to answer:
 
 ### Understand Near Support
 
-Near support metrics estimate the distance from the latest close to the nearest detected support zone within a lookback window.
+Near support metrics estimate the distance from the latest close to a detected support zone within a lookback window. Short windows can reflect a nearby tactical shelf; longer windows use the primary support floor in that chart range.
 
 Current support windows:
 
@@ -88,7 +88,7 @@ Current support windows:
 - Near 2Y
 - Near 5Y
 
-These are nearest support-zone metrics, not strongest historical floor metrics. For example, a 5Y support value of `+3%` means the nearest detected support zone inside the 5-year lookback is about 3% below the latest close. It does not mean the deepest or most obvious 5-year support is only 3% away.
+For example, a 5Y support value of `+90%` means the primary detected 5-year support floor is about 90% below the latest close. It does not mean price is near support on that chart.
 
 The table shows both:
 
@@ -126,4 +126,3 @@ Exploration Beta is not:
 4. Use support distance as a setup clue, not as a decision by itself.
 5. Open the underlying metric tooltips when a number looks surprising.
 6. Shortlist candidates for deeper research outside the table.
-

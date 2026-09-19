@@ -1746,7 +1746,7 @@ def _valid_support_zones(
     lookback_days: int = 365 * 2,
 ) -> list[SupportZone]:
     zones: list[SupportZone] = []
-    max_age_days = min(SUPPORT_ZONE_MAX_AGE_DAYS, max(21, lookback_days))
+    max_age_days = max(21, lookback_days)
     for zone in _support_zones(points, latest_date, lookback_days):
         if _zone_age_days(zone, latest_date) > max_age_days:
             continue
@@ -1756,6 +1756,22 @@ def _valid_support_zones(
             continue
         zones.append(zone)
     return zones
+
+
+def _primary_support_zone(
+    candidate_zones: list[SupportZone],
+    current_price: float,
+    latest_date: date,
+) -> SupportZone:
+    return min(
+        candidate_zones,
+        key=lambda item: (
+            item.midpoint,
+            -item.touches,
+            _zone_age_days(item, latest_date),
+            abs((current_price / item.midpoint) - 1),
+        ),
+    )
 
 
 def _support_1d_metric(
@@ -1825,15 +1841,7 @@ def _support_distance_metric(
             as_of,
         )
 
-    zone = min(
-        candidate_zones,
-        key=lambda item: (
-            max((current_price / item.high) - 1, 0),
-            abs((current_price / item.midpoint) - 1),
-            -item.touches,
-            _zone_age_days(item, latest_date),
-        ),
-    )
+    zone = _primary_support_zone(candidate_zones, current_price, latest_date)
     distance = ((current_price - zone.midpoint) / zone.midpoint) * 100
     return OpenDataMetric(
         value=distance,
@@ -1841,7 +1849,7 @@ def _support_distance_metric(
         tier="computed_from_public_facts",
         as_of=as_of,
         notes=(
-            f"Nearest {label} support zone below/reclaimed by the latest close. "
+            f"Primary {label} support floor below/reclaimed by the latest close. "
             f"Support zone: ${zone.low:.2f}-${zone.high:.2f}; midpoint ${zone.midpoint:.2f}; "
             f"distance {distance:+.2f}%; touches {zone.touches}; "
             f"first touch {zone.first_touch}; last touch {zone.last_touch}; "

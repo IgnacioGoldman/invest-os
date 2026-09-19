@@ -8832,36 +8832,22 @@ tbody tr:hover td {
   --lite-shadow: 0 22px 60px -42px rgba(21, 35, 58, 0.45);
   background: var(--lite-bg);
   color: var(--lite-text);
-  display: grid;
-  grid-template-columns: 176px minmax(0, 1fr);
+  display: block;
+  margin: 0;
+  max-width: none;
   min-height: 100vh;
-}
-
-.exploration-only-shell .sidebar {
-  background: #101722;
-  border-right: 1px solid #1e2937;
-  color: #f7f9fc;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding: 18px 14px;
-}
-
-.exploration-only-shell .sidebar-brand,
-.exploration-only-shell .sidebar-nav button {
-  color: #f7f9fc;
-}
-
-.exploration-only-shell .sidebar-nav button.active {
-  background: #f7f9fc;
-  border-color: #f7f9fc;
-  color: #101722;
+  padding: 18px;
 }
 
 .exploration-only-shell .main-content,
 .exploration-page {
   background: var(--lite-bg);
   color: var(--lite-text);
+  margin: 0;
+  max-width: none;
+  min-height: calc(100vh - 36px);
+  padding: 0;
+  width: 100%;
 }
 
 .exploration-only-shell .panel,

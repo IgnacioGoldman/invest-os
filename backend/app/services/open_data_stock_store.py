@@ -120,16 +120,14 @@ def _snapshot_with_support_backfill(
     current_price = snapshot.price_opportunity.get("current_price")
     if current_price is None or current_price.value is None:
         return snapshot
-    missing = [key for key in SUPPORT_DISTANCE_WINDOWS if key not in snapshot.price_opportunity]
-    if not missing:
-        return snapshot
     points = load_stock_price_history(conn, snapshot.ticker)
     if not points:
         return snapshot
     price_opportunity = dict(snapshot.price_opportunity)
-    for key in missing:
-        label, days = SUPPORT_DISTANCE_WINDOWS[key]
-        price_opportunity[key] = _support_distance_metric(
+    changed = False
+    for key, (label, days) in SUPPORT_DISTANCE_WINDOWS.items():
+        existing = price_opportunity.get(key)
+        updated = _support_distance_metric(
             key,
             label,
             days,
@@ -139,6 +137,11 @@ def _snapshot_with_support_backfill(
             current_price.as_of,
             current_price.as_of,
         )
+        if existing != updated:
+            price_opportunity[key] = updated
+            changed = True
+    if not changed:
+        return snapshot
     updated = snapshot.model_copy(update={"price_opportunity": price_opportunity})
     replace_stock_open_data_snapshot(conn, updated)
     return updated
