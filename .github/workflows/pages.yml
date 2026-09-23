@@ -6,8 +6,7 @@ on:
       - main
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"
-      timezone: Europe/Stockholm
+    - cron: "30 23 * * 1-5"
 
 permissions:
   contents: read
@@ -21,11 +20,56 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     env:
       SUPABASE_PERSONALIZATION_CONFIGURED: ${{ secrets.SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install data dependencies
+        run: python -m pip install --disable-pip-version-check -r backend/requirements.txt
+
+      - name: Refresh stock data
+        run: >-
+          python scripts/open_data_poc.py
+          --universe-file data/stocks/stocks.json
+          --skip-filing-details
+          --min-coverage 0
+          --workers 4
+          --ticker-retries 2
+          --request-timeout 20
+          --request-retries 2
+          --retry-backoff 1
+          --output /tmp/open-data-refresh-report.json
+
+      - name: Build derived stock signals
+        run: python scripts/build_stock_derived_signals.py
+
+      - name: Export refreshed static data
+        run: python scripts/export_static_site_data.py
+
+      - name: Validate refreshed static data
+        run: >-
+          python scripts/validate_static_stock_refresh.py
+          --report /tmp/open-data-refresh-report.json
+          --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload refresh report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: stock-refresh-report-${{ github.run_id }}
+          path: /tmp/open-data-refresh-report.json
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Set up Node
         uses: actions/setup-node@v5

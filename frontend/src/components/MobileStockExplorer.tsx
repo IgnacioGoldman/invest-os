@@ -1435,9 +1435,13 @@ export function MobileStockExplorer({
       ? sortDirection === "asc" ? "Closest long-term support" : "Farthest long-term support"
       : sortDirection === "asc" ? "Closest support" : "Farthest support"
     : `${sortDirection === "asc" ? "Lowest" : "Highest"} ${sortLabel}`;
-  const latestGeneratedAt = snapshots.reduce((latest, snapshot) => snapshot.generated_at > latest ? snapshot.generated_at : latest, "");
-  const dateLabel = latestGeneratedAt
-    ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(latestGeneratedAt))
+  const latestMarketDate = snapshots.reduce((latest, snapshot) => {
+    const asOf = snapshot.price_opportunity.current_price?.as_of?.slice(0, 10) ?? "";
+    return asOf > latest ? asOf : latest;
+  }, "");
+  const dateLabel = latestMarketDate
+    ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", timeZone: "UTC" })
+      .format(new Date(`${latestMarketDate}T12:00:00Z`))
     : "";
 
   const toggleBuiltInPreset = (preset: BuiltInPreset) => {

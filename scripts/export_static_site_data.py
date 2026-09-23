@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import json
 import shutil
 import sqlite3
@@ -96,6 +97,27 @@ def _build_universe_rows(universe_path: Path, loaded: set[str], active: set[str]
     return rows
 
 
+def _snapshot_metadata(snapshots: list[dict[str, Any]]) -> dict[str, Any]:
+    generated_at = sorted(
+        str(snapshot.get("generated_at"))
+        for snapshot in snapshots
+        if snapshot.get("generated_at")
+    )
+    market_dates = [
+        str(snapshot.get("price_opportunity", {}).get("current_price", {}).get("as_of"))[:10]
+        for snapshot in snapshots
+        if snapshot.get("price_opportunity", {}).get("current_price", {}).get("as_of")
+    ]
+    market_date_counts = Counter(market_dates)
+    market_as_of = market_date_counts.most_common(1)[0][0] if market_date_counts else None
+    return {
+        "schema_version": 1,
+        "refreshed_at": generated_at[-1] if generated_at else None,
+        "market_as_of": market_as_of,
+        "market_date_counts": dict(sorted(market_date_counts.items())),
+    }
+
+
 def export_static_site_data(data_dir: Path, output_dir: Path, universe_path: Path) -> None:
     db_path = data_dir / DB_FILE
     if not db_path.exists():
@@ -118,6 +140,7 @@ def export_static_site_data(data_dir: Path, output_dir: Path, universe_path: Pat
         _write_json(
             output_dir / "meta.json",
             {
+                **_snapshot_metadata(snapshots),
                 "source": "github_actions_static_export",
                 "stock_count": len(snapshots),
                 "tickers": sorted(loaded),
@@ -140,7 +163,8 @@ def main() -> None:
     output_dir = args.output_dir if args.output_dir.is_absolute() else ROOT / args.output_dir
     universe_path = args.universe_file if args.universe_file.is_absolute() else ROOT / args.universe_file
     export_static_site_data(data_dir, output_dir, universe_path)
-    print(f"Exported static site data to {output_dir.relative_to(ROOT)}")
+    display_path = output_dir.relative_to(ROOT) if output_dir.is_relative_to(ROOT) else output_dir
+    print(f"Exported static site data to {display_path}")
 
 
 if __name__ == "__main__":

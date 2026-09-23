@@ -21,9 +21,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Download deployed stock data
+        if: ${{ env.SUPABASE_CONFIGURED == 'true' }}
+        run: >-
+          curl --fail --show-error --silent
+          --retry 4 --retry-all-errors
+          "https://ignaciogoldman.github.io/invest-os/data/open-data/stocks.json?run=${GITHUB_RUN_ID}"
+          --output /tmp/deployed-stocks.json
+
       - name: Evaluate watchlist filter badges
         if: ${{ env.SUPABASE_CONFIGURED == 'true' }}
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: python scripts/evaluate_saved_filters.py
+        run: python scripts/evaluate_saved_filters.py /tmp/deployed-stocks.json
