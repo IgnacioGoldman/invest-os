@@ -29,7 +29,7 @@ Supabase is optional. Without its environment values, the public stock explorer 
 
 The publishable key is intentionally used by the browser; row-level security keeps each user's data private. Never expose `SUPABASE_SERVICE_ROLE_KEY` to Vite or any `VITE_*` variable.
 
-The Pages workflow refreshes and validates the tracked stock universe after each completed US market session, then evaluates each user's watchlist filters against that exact dataset. A separate lightweight workflow downloads the currently deployed dataset and evaluates it every eight hours, keeping badges timely and providing regular database activity for the Free Supabase project. A filter's first evaluation establishes its baseline quietly. Later watched symbols entering a built-in or custom filter create a dated in-app badge event.
+The Pages workflow refreshes and validates the tracked stock universe every four hours on weekdays, then evaluates each user's watchlist filters against that exact dataset. A separate lightweight workflow downloads the currently deployed dataset and evaluates it every eight hours, keeping badges timely and providing regular database activity for the Free Supabase project. A filter's first evaluation establishes its baseline quietly. Later watched symbols entering a built-in or custom filter create a dated in-app badge event.
 
 ## Kept Data
 
@@ -67,4 +67,4 @@ Exports active SQLite stock snapshots, the universe, and price history into `fro
 
 The `.github/workflows/pages.yml` workflow refreshes the tracked universe from public data, rejects incomplete or incoherent refreshes, exports static JSON with `VITE_DATA_MODE=static`, evaluates watchlist filter badges when Supabase secrets are configured, and deploys `frontend/dist` to GitHub Pages. Generated market data is kept in the deployment artifact rather than committed daily.
 
-It runs on pushes to `main`, manual dispatches, and at `23:30 UTC` Monday through Friday after the US market close. In the repository settings, set Pages source to GitHub Actions.
+It runs on pushes to `main`, manual dispatches, and at 30 minutes past every fourth UTC hour Monday through Friday. In the repository settings, set Pages source to GitHub Actions.
