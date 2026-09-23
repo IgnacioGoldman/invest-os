@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 
 from app.entry_engine.open_data_models import HistoricalPricePoint  # noqa: E402
 from app.entry_engine.utils.file_storage import load_stock_universe  # noqa: E402
+from app.services.open_data_stock_store import load_cached_price_history  # noqa: E402
 from app.services.storage import DB_FILE  # noqa: E402
 
 
@@ -52,6 +53,9 @@ def _load_active_tickers(conn: sqlite3.Connection) -> set[str]:
 
 
 def _load_price_history(conn: sqlite3.Connection, ticker: str) -> list[dict[str, Any]]:
+    cached = load_cached_price_history(ticker)
+    if cached:
+        return [point.model_dump(mode="json") for point in cached]
     rows = conn.execute(
         """
         SELECT priced_at, price, source

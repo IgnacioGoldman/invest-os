@@ -1,12 +1,9 @@
-name: Deploy GitHub Pages
+name: Refresh stock prices
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
   schedule:
-    - cron: "30 10 * * 1-5"
+    - cron: "30 */4 * * 1-5"
 
 permissions:
   contents: read
@@ -20,7 +17,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 45
     env:
       SUPABASE_PERSONALIZATION_CONFIGURED: ${{ secrets.SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
     steps:
@@ -37,37 +34,25 @@ jobs:
       - name: Install data dependencies
         run: python -m pip install --disable-pip-version-check -r backend/requirements.txt
 
-      - name: Refresh fundamentals and price data
+      - name: Refresh deployed price data
         run: >-
-          python scripts/open_data_poc.py
-          --universe-file data/stocks/stocks.json
-          --skip-filing-details
-          --min-coverage 0
+          python scripts/refresh_static_prices.py
+          --cache-bust "${GITHUB_RUN_ID}"
           --workers 4
-          --ticker-retries 2
-          --request-timeout 20
-          --request-retries 2
-          --retry-backoff 1
-          --output /tmp/open-data-refresh-report.json
-
-      - name: Build derived stock signals
-        run: python scripts/build_stock_derived_signals.py
-
-      - name: Export refreshed static data
-        run: python scripts/export_static_site_data.py
+          --output /tmp/price-refresh-report.json
 
       - name: Validate refreshed static data
         run: >-
           python scripts/validate_static_stock_refresh.py
-          --report /tmp/open-data-refresh-report.json
+          --report /tmp/price-refresh-report.json
           --summary "$GITHUB_STEP_SUMMARY"
 
       - name: Upload refresh report
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: stock-refresh-report-${{ github.run_id }}
-          path: /tmp/open-data-refresh-report.json
+          name: price-refresh-report-${{ github.run_id }}
+          path: /tmp/price-refresh-report.json
           if-no-files-found: warn
           retention-days: 14
 

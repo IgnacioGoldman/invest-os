@@ -17,7 +17,11 @@ sys.path.insert(0, str(ROOT / "backend"))
 
 from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
 from app.config import get_settings  # noqa: E402
-from app.services.open_data_stock_store import activate_stock, save_stock_snapshot_to_db  # noqa: E402
+from app.services.open_data_stock_store import (  # noqa: E402
+    activate_stock,
+    load_cached_price_history,
+    save_stock_snapshot_to_db,
+)
 
 
 YAHOO_MOST_ACTIVE_URL = "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved"
@@ -182,6 +186,8 @@ def _collect_ticker(
     include_analysis: bool = False,
 ) -> dict[str, Any]:
     snapshot = provider.get_open_data_snapshot(ticker)
+    if not load_cached_price_history(snapshot.ticker):
+        raise RuntimeError(f"{snapshot.ticker}: historical prices were unavailable.")
     coverage = _metric_coverage(snapshot)
     should_save = (
         save

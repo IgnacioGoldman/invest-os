@@ -1614,6 +1614,15 @@ def _price_opportunity_metrics(
     return metrics
 
 
+def compute_price_opportunity_metrics(
+    history: list[HistoricalPricePoint],
+    latest_price: LatestPrice | None = None,
+    fallback_as_of: str | None = None,
+) -> dict[str, OpenDataMetric]:
+    """Recompute price-only metrics without rebuilding SEC fundamentals."""
+    return _price_opportunity_metrics(history, latest_price, fallback_as_of or date.today().isoformat())
+
+
 def _price_low(point: HistoricalPricePoint) -> float:
     return point.low if point.low is not None and math.isfinite(point.low) and point.low > 0 else point.close
 

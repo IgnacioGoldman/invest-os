@@ -375,6 +375,14 @@ class OpenDataProvider:
             self.cache.set(f"price_history_{symbol}.json", [point.model_dump(mode="json") for point in history])
         return history
 
+    def fetch_price_history_since(self, ticker: str, start_date: str) -> list[HistoricalPricePoint]:
+        """Fetch a recent daily-candle window for merging into persisted history."""
+        symbol = ticker.upper().strip()
+        history = self._fetch_yfinance_history(symbol, start_date=start_date)
+        if history:
+            return history
+        return [point for point in self._fetch_stooq_history(symbol) if point.date >= start_date]
+
     def fetch_forward_pe_estimate(self, ticker: str) -> OpenDataMetric | None:
         symbol = ticker.upper().strip()
         cached = None if self.force_refresh else self.cache.get(f"forward_pe_estimate_{symbol}.json", timedelta(hours=12))
@@ -898,14 +906,19 @@ class OpenDataProvider:
 
         return []
 
-    def _fetch_yfinance_history(self, ticker: str) -> list[HistoricalPricePoint]:
+    def _fetch_yfinance_history(self, ticker: str, *, start_date: str | None = None) -> list[HistoricalPricePoint]:
         try:
             import yfinance as yf  # type: ignore[import-not-found]
         except ImportError:
             return []
 
         try:
-            frame = yf.Ticker(ticker).history(period="max", interval="1d", auto_adjust=False)
+            history_args: dict[str, Any] = {"interval": "1d", "auto_adjust": False}
+            if start_date:
+                history_args["start"] = start_date
+            else:
+                history_args["period"] = "max"
+            frame = yf.Ticker(ticker).history(**history_args)
         except Exception:
             logger.exception("yfinance historical price fetch failed for %s", ticker)
             return []
