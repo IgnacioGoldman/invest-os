@@ -10,7 +10,7 @@ Current flows:
 
 Both workflows read the universe from `data/stocks/stocks.json`. (**Symbols:** 22 manually selected stocks: `INOD`, `ORCL`, `CRM`, `AZN`, `NFLX`, `UBER`, `V`, `MA`, `CALM`, `DXCM`, `MSTR`, `MELI`, `MSFT`, `AAPL`, `META`, `GOOG`, `AMZN`, `NVDA`, `TSLA`, `DT`, `DDOG`, and `YPF`.)
 
-- **Every four hours:** download the last successful deployed dataset, fetch recent daily candles, merge them into existing history, and recalculate price, return, and support metrics. SEC data is reused unchanged.
+- **Every four hours and on pushes:** download the last successful deployed dataset, fetch recent daily candles, merge them into existing history, and recalculate price, return, and support metrics. SEC data is reused unchanged. If one price source is temporarily empty, its deployed history is retained and the global date validation decides whether publishing is safe.
 - **Once daily:** fetch the full available candle history plus SEC Company Facts and recent submission metadata. These provide revenue, EPS, margins, cash flow, cash, debt, equity, shares, and annual/quarterly history.
 - **Other data:** Yahoo Finance supplies forward PE and market-cap estimates. Frankfurter or Yahoo Finance supplies currency conversion when required.
 

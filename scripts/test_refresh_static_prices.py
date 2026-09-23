@@ -68,6 +68,16 @@ class RefreshStaticPricesTests(unittest.TestCase):
         self.assertEqual(provider.recent_calls, [(latest - timedelta(days=365 * 5 + 30)).isoformat()])
         self.assertEqual(updated[-1].close, 102)
 
+    def test_empty_provider_response_retains_valid_baseline(self) -> None:
+        latest = date(2026, 1, 20)
+        baseline = [point(latest, 101, low=99)]
+        provider = FakeProvider(full=[], recent=[])
+
+        updated = fetch_updated_history(provider, "TEST", baseline, attempts=3, retry_backoff=0)
+
+        self.assertEqual(updated, baseline)
+        self.assertEqual(len(provider.recent_calls), 3)
+
     def test_refresh_preserves_fundamentals_and_updates_price_metrics(self) -> None:
         metric = OpenDataMetric(
             value=20,

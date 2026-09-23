@@ -71,6 +71,6 @@ Downloads the last successful Pages dataset and updates only candles and price/s
 
 ## GitHub Pages
 
-The `.github/workflows/pages.yml` workflow refreshes SEC fundamentals and prices, rejects incomplete or incoherent refreshes, exports static JSON with `VITE_DATA_MODE=static`, and deploys `frontend/dist` to GitHub Pages. It runs on pushes, manual dispatches, and at `10:30 UTC` Monday through Friday.
+The `.github/workflows/pages.yml` workflow refreshes SEC fundamentals and prices, rejects incomplete or incoherent refreshes, exports static JSON with `VITE_DATA_MODE=static`, and deploys `frontend/dist` to GitHub Pages. It runs manually and at `10:30 UTC` Monday through Friday.
 
-The `.github/workflows/price-refresh.yml` workflow reuses the last successful deployed fundamentals and refreshes prices at `00:30`, `04:30`, `08:30`, `12:30`, `16:30`, and `20:30 UTC` Monday through Friday. In the repository settings, set Pages source to GitHub Actions.
+The `.github/workflows/price-refresh.yml` workflow runs on pushes to `main` and reuses the last successful deployed fundamentals. It refreshes prices at `00:30`, `04:30`, `08:30`, `12:30`, `16:30`, and `20:30 UTC` Monday through Friday. In the repository settings, set Pages source to GitHub Actions.

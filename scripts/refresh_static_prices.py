@@ -138,6 +138,8 @@ def fetch_updated_history(
     baseline: list[HistoricalPricePoint],
     *,
     overlap_days: int = 14,
+    attempts: int = 3,
+    retry_backoff: float = 1,
 ) -> list[HistoricalPricePoint]:
     if not baseline:
         start_date = "1970-01-01"
@@ -147,9 +149,18 @@ def fetch_updated_history(
     else:
         latest = date.fromisoformat(baseline[-1].date[:10])
         start_date = (latest - timedelta(days=overlap_days)).isoformat()
-    fetched = provider.fetch_price_history_since(ticker, start_date)
+    fetched: list[HistoricalPricePoint] = []
+    for attempt in range(1, max(1, attempts) + 1):
+        fetched = provider.fetch_price_history_since(ticker, start_date)
+        if fetched:
+            break
+        if attempt < max(1, attempts) and retry_backoff > 0:
+            time.sleep(retry_backoff * (2 ** (attempt - 1)))
     if not fetched:
-        raise RuntimeError(f"{ticker}: no price history was returned.")
+        if baseline:
+            logger.warning("%s: recent prices unavailable; retaining the deployed history.", ticker)
+            return baseline
+        raise RuntimeError(f"{ticker}: no price history was returned and no baseline is available.")
     return merge_price_history(baseline, fetched)
 
 
