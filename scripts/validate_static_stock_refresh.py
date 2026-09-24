@@ -12,7 +12,9 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 SUPPORT_KEYS = (
     "support_1m_distance",
+    "support_3m_distance",
     "support_6m_distance",
+    "support_1y_distance",
     "support_2y_distance",
     "support_5y_distance",
 )

@@ -60,7 +60,9 @@ export type FilterKey =
   | "momentum"
   | "eps"
   | "support_1m"
+  | "support_3m"
   | "support_6m"
+  | "support_1y"
   | "support_2y"
   | "support_5y";
 export type SortKey = "symbol" | "support_best" | FilterKey;
@@ -99,13 +101,15 @@ type FilterDefinition = {
 
 const SUPPORT_KEYS: Record<Extract<FilterKey, `support_${string}`>, string> = {
   support_1m: "support_1m_distance",
+  support_3m: "support_3m_distance",
   support_6m: "support_6m_distance",
+  support_1y: "support_1y_distance",
   support_2y: "support_2y_distance",
   support_5y: "support_5y_distance",
 };
 
-const SUPPORT_FILTER_KEYS = ["support_1m", "support_6m", "support_2y", "support_5y"] as const;
-const LONG_SUPPORT_FILTER_KEYS = ["support_6m", "support_2y", "support_5y"] as const;
+const SUPPORT_FILTER_KEYS = ["support_1m", "support_3m", "support_6m", "support_1y", "support_2y", "support_5y"] as const;
+const LONG_SUPPORT_FILTER_KEYS = ["support_3m", "support_6m", "support_1y", "support_2y", "support_5y"] as const;
 type SupportFilterKey = typeof SUPPORT_FILTER_KEYS[number];
 type BuiltInPreset = "pullback" | "support";
 
@@ -151,7 +155,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
       { label: "Unclear", tone: "neutral" },
     ],
   },
-  ...(["1m", "6m", "2y", "5y"] as const).map((range) => ({
+  ...(["1m", "3m", "6m", "1y", "2y", "5y"] as const).map((range) => ({
     key: `support_${range}` as FilterKey,
     label: `Near ${range.toUpperCase()} support`,
     shortLabel: `${range.toUpperCase()} support`,
@@ -224,7 +228,9 @@ const VALUATION_METRICS: Array<[string, string, MetricKind]> = [
 
 const SUPPORT_METRICS: Array<[string, string]> = [
   ["support_1m_distance", "1M support"],
+  ["support_3m_distance", "3M support"],
   ["support_6m_distance", "6M support"],
+  ["support_1y_distance", "1Y support"],
   ["support_2y_distance", "2Y support"],
   ["support_5y_distance", "5Y support"],
 ];
@@ -1102,8 +1108,10 @@ function pointsForRange(points: OpenDataPricePoint[], range: ChartRange) {
 
 function supportKeyForRange(range: ChartRange) {
   if (range === "1W" || range === "1M") return "support_1m_distance";
-  if (range === "3M" || range === "6M") return "support_6m_distance";
-  if (range === "1Y" || range === "2Y") return "support_2y_distance";
+  if (range === "3M") return "support_3m_distance";
+  if (range === "6M") return "support_6m_distance";
+  if (range === "1Y") return "support_1y_distance";
+  if (range === "2Y") return "support_2y_distance";
   return "support_5y_distance";
 }
 

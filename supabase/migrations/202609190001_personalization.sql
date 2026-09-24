@@ -6,7 +6,7 @@ create table public.saved_filters (
   name text not null check (char_length(name) between 1 and 80),
   expression jsonb not null check (jsonb_typeof(expression) = 'object'),
   sort_key text not null default 'support_1m' check (
-    sort_key in ('symbol', 'support_best', 'revenue', 'momentum', 'eps', 'support_1m', 'support_6m', 'support_2y', 'support_5y')
+    sort_key in ('symbol', 'support_best', 'revenue', 'momentum', 'eps', 'support_1m', 'support_3m', 'support_6m', 'support_1y', 'support_2y', 'support_5y')
   ),
   sort_direction text not null default 'asc' check (sort_direction in ('asc', 'desc')),
   notifications_enabled boolean not null default false,

@@ -52,7 +52,9 @@ def snapshot(
     revenue: float,
     support_1m: float,
     support_5y: float,
+    support_3m: float | None = None,
     support_6m: float | None = None,
+    support_1y: float | None = None,
     support_2y: float | None = None,
 ) -> dict:
     return {
@@ -63,7 +65,9 @@ def snapshot(
         },
         "price_opportunity": {
             "support_1m_distance": {"value": support_1m},
+            "support_3m_distance": {"value": support_3m},
             "support_6m_distance": {"value": support_6m},
+            "support_1y_distance": {"value": support_1y},
             "support_2y_distance": {"value": support_2y},
             "support_5y_distance": {"value": support_5y},
         },
@@ -111,8 +115,8 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
         long_term_only = snapshot("LONG", 12, 12, 30, support_6m=1)
         self.assertFalse(expression_matches(long_term_only, BUILT_IN_FILTERS["builtin:pullback"]))
 
-    def test_support_preset_uses_six_month_two_year_or_five_year_support(self) -> None:
-        row = snapshot("SUPPORT", 25, 20, 30, support_2y=5)
+    def test_support_preset_uses_three_month_through_five_year_support(self) -> None:
+        row = snapshot("SUPPORT", 25, 20, 30, support_1y=5)
         self.assertTrue(expression_matches(row, BUILT_IN_FILTERS["builtin:support"]))
 
         one_month_only = snapshot("SHORT", 25, 1, 30)

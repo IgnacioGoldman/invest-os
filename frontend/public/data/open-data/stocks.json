@@ -188,11 +188,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 10.188857630335937,
+        "value": 5.514386095296466,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $294.00-$316.10; midpoint $305.05; distance +10.19%; touches 3; first touch 2026-06-01; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $309.03-$328.09; midpoint $318.56; distance +5.51%; touches 2; first touch 2026-07-23; last touch 2026-09-09; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": 6.592886657690301,
@@ -201,12 +201,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $310.53-$320.15; midpoint $315.34; distance +6.59%; touches 1; first touch 2026-09-09; last touch 2026-09-09; cluster tolerance 3.1%."
       },
+      "support_3m_distance": {
+        "value": 8.604480969728725,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $297.35-$321.65; midpoint $309.50; distance +8.60%; touches 2; first touch 2026-08-03; last touch 2026-09-09; cluster tolerance 4.0%."
+      },
       "support_6m_distance": {
         "value": 32.935476407479854,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $241.70-$264.01; midpoint $252.85; distance +32.94%; touches 2; first touch 2026-03-30; last touch 2026-04-14; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 33.23017126043674,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $240.36-$264.22; midpoint $252.29; distance +33.23%; touches 5; first touch 2025-10-10; last touch 2026-04-07; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 69.88085526390687,
@@ -13142,39 +13156,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 10.188857630335937,
+        "value": 5.514386095296466,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $294.00-$316.10; midpoint $305.05; distance +10.19%; touches 3; first touch 2026-06-01; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $309.03-$328.09; midpoint $318.56; distance +5.51%; touches 2; first touch 2026-07-23; last touch 2026-09-09; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 8.464024363643489,
+        "value": 6.592886657690301,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $305.17-$314.63; midpoint $309.90; distance +8.46%; touches 1; first touch 2026-09-09; last touch 2026-09-09; cluster tolerance 3.1%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $310.53-$320.15; midpoint $315.34; distance +6.59%; touches 1; first touch 2026-09-09; last touch 2026-09-09; cluster tolerance 3.1%."
       },
       "support_6m_distance": {
-        "value": 10.188857630335937,
+        "value": 32.935476407479854,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $294.00-$316.10; midpoint $305.05; distance +10.19%; touches 3; first touch 2026-06-01; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $241.70-$264.01; midpoint $252.85; distance +32.94%; touches 2; first touch 2026-03-30; last touch 2026-04-14; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 10.188857630335937,
+        "value": 69.88085526390687,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $294.00-$316.10; midpoint $305.05; distance +10.19%; touches 3; first touch 2026-06-01; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $189.30-$206.43; midpoint $197.86; distance +69.88%; touches 5; first touch 2025-04-21; last touch 2025-08-01; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 10.188857630335937,
+        "value": 163.44459496670584,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $294.00-$316.10; midpoint $305.05; distance +10.19%; touches 3; first touch 2026-06-01; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $122.52-$132.66; midpoint $127.59; distance +163.44%; touches 2; first touch 2022-06-16; last touch 2023-01-05; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 38.362243975250166,
@@ -13273,6 +13287,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": 8.604480969728725,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $297.35-$321.65; midpoint $309.50; distance +8.60%; touches 2; first touch 2026-08-03; last touch 2026-09-09; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 33.23017126043674,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $240.36-$264.22; midpoint $252.29; distance +33.23%; touches 5; first touch 2025-10-10; last touch 2026-04-07; cluster tolerance 4.0%."
       }
     }
   },
@@ -13465,11 +13493,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": -0.14848895143408614,
+        "value": -0.0829356981503523,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $246.89-$261.28; midpoint $254.09; distance -0.15%; touches 3; first touch 2026-04-30; last touch 2026-09-01; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $243.31-$264.53; midpoint $253.92; distance -0.08%; touches 3; first touch 2026-04-20; last touch 2026-09-01; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": -0.47465536786808576,
@@ -13478,12 +13506,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $250.35-$259.49; midpoint $254.92; distance -0.47%; touches 1; first touch 2026-09-01; last touch 2026-09-01; cluster tolerance 3.6%."
       },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
       "support_6m_distance": {
         "value": 11.848515031458087,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $222.12-$231.55; midpoint $226.83; distance +11.85%; touches 2; first touch 2026-06-25; last touch 2026-07-29; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 24.784334741450014,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $194.81-$211.82; midpoint $203.32; distance +24.78%; touches 2; first touch 2026-02-13; last touch 2026-03-13; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 38.79550810770934,
@@ -26445,39 +26487,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": -0.14848895143408614,
+        "value": -0.0829356981503523,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $246.89-$261.28; midpoint $254.09; distance -0.15%; touches 3; first touch 2026-04-30; last touch 2026-09-01; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $243.31-$264.53; midpoint $253.92; distance -0.08%; touches 3; first touch 2026-04-20; last touch 2026-09-01; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 0.7065510617374996,
+        "value": -0.47465536786808576,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $247.41-$256.45; midpoint $251.93; distance +0.71%; touches 1; first touch 2026-09-01; last touch 2026-09-01; cluster tolerance 3.6%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $250.35-$259.49; midpoint $254.92; distance -0.47%; touches 1; first touch 2026-09-01; last touch 2026-09-01; cluster tolerance 3.6%."
       },
       "support_6m_distance": {
-        "value": -0.14848895143408614,
+        "value": 11.848515031458087,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $246.89-$261.28; midpoint $254.09; distance -0.15%; touches 3; first touch 2026-04-30; last touch 2026-09-01; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $222.12-$231.55; midpoint $226.83; distance +11.85%; touches 2; first touch 2026-06-25; last touch 2026-07-29; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": -0.14848895143408614,
+        "value": 38.79550810770934,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $246.89-$261.28; midpoint $254.09; distance -0.15%; touches 3; first touch 2026-04-30; last touch 2026-09-01; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $177.18-$188.40; midpoint $182.79; distance +38.80%; touches 3; first touch 2024-10-07; last touch 2025-04-30; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": -0.14848895143408614,
+        "value": 186.73985307827638,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $246.89-$261.28; midpoint $254.09; distance -0.15%; touches 3; first touch 2026-04-30; last touch 2026-09-01; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $84.42-$92.54; midpoint $88.48; distance +186.74%; touches 3; first touch 2022-11-09; last touch 2023-03-10; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 20.447810137427236,
@@ -26576,6 +26618,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
+      "support_1y_distance": {
+        "value": 24.784334741450014,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $194.81-$211.82; midpoint $203.32; distance +24.78%; touches 2; first touch 2026-02-13; last touch 2026-03-13; cluster tolerance 4.0%."
       }
     }
   },
@@ -26768,11 +26824,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 0.5622747365253387,
+        "value": 1.0148925577929746,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $160.78-$169.52; midpoint $165.15; distance +0.56%; touches 2; first touch 2025-10-16; last touch 2026-07-20; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $159.05-$169.77; midpoint $164.41; distance +1.01%; touches 3; first touch 2025-10-21; last touch 2026-07-14; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": 5.823881258738267,
@@ -26781,12 +26837,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $154.66-$159.22; midpoint $156.94; distance +5.82%; touches 1; first touch 2026-09-09; last touch 2026-09-09; cluster tolerance 2.9%."
       },
+      "support_3m_distance": {
+        "value": 6.261822683499725,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $152.51-$160.08; midpoint $156.29; distance +6.26%; touches 2; first touch 2026-08-04; last touch 2026-09-09; cluster tolerance 4.0%."
+      },
       "support_6m_distance": {
         "value": 6.261822683499725,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $152.51-$160.08; midpoint $156.29; distance +6.26%; touches 2; first touch 2026-08-04; last touch 2026-09-09; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 4.435228970414371,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $152.51-$165.55; midpoint $159.03; distance +4.44%; touches 3; first touch 2025-11-05; last touch 2026-09-09; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 27.080713477437463,
@@ -30815,39 +30885,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 0.5622747365253387,
+        "value": 1.0148925577929746,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $160.78-$169.52; midpoint $165.15; distance +0.56%; touches 2; first touch 2025-10-16; last touch 2026-07-20; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $159.05-$169.77; midpoint $164.41; distance +1.01%; touches 3; first touch 2025-10-21; last touch 2026-07-14; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 5.958910304043579,
+        "value": 5.823881258738267,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $154.46-$159.02; midpoint $156.74; distance +5.96%; touches 1; first touch 2026-09-09; last touch 2026-09-09; cluster tolerance 2.9%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $154.66-$159.22; midpoint $156.94; distance +5.82%; touches 1; first touch 2026-09-09; last touch 2026-09-09; cluster tolerance 2.9%."
       },
       "support_6m_distance": {
-        "value": 7.073571762445853,
+        "value": 6.261822683499725,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $150.34-$159.87; midpoint $155.11; distance +7.07%; touches 2; first touch 2026-08-03; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $152.51-$160.08; midpoint $156.29; distance +6.26%; touches 2; first touch 2026-08-04; last touch 2026-09-09; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 0.5622747365253387,
+        "value": 27.080713477437463,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $160.78-$169.52; midpoint $165.15; distance +0.56%; touches 2; first touch 2025-10-16; last touch 2026-07-20; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $125.15-$136.23; midpoint $130.69; distance +27.08%; touches 6; first touch 2024-11-06; last touch 2025-05-14; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 2.187358836834583,
+        "value": 50.88717011641795,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $155.53-$169.52; midpoint $162.52; distance +2.19%; touches 4; first touch 2025-08-28; last touch 2026-07-20; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $103.92-$116.22; midpoint $110.07; distance +50.89%; touches 6; first touch 2021-12-03; last touch 2022-10-20; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 12.675508788239393,
@@ -30946,6 +31016,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": 6.261822683499725,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $152.51-$160.08; midpoint $156.29; distance +6.26%; touches 2; first touch 2026-08-04; last touch 2026-09-09; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 4.435228970414371,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $152.51-$165.55; midpoint $159.03; distance +4.44%; touches 3; first touch 2025-11-05; last touch 2026-09-09; cluster tolerance 4.0%."
       }
     }
   },
@@ -31151,12 +31235,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $71.95-$74.51; midpoint $73.23; distance -0.46%; touches 1; first touch 2026-09-09; last touch 2026-09-09; cluster tolerance 3.5%."
       },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
       "support_6m_distance": {
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
         "as_of": "2026-09-18",
         "notes": "support_6m_distance: No usable 6M support zone was detected below the latest close from open/free daily price history."
+      },
+      "support_1y_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_1y_distance: No usable 1Y support zone was detected below the latest close from open/free daily price history."
       },
       "support_2y_distance": {
         "value": null,
@@ -42625,11 +42723,11 @@
         "notes": "support_1d_distance: No recent repeated daily swing-low support zone was detected below the latest close using roughly two years of open/free price history. Zones that were stale, above price, or recently approached from below are ignored."
       },
       "support_1m_distance": {
-        "value": -0.013720351194942118,
+        "value": -0.4642959875720993,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $71.62-$74.18; midpoint $72.90; distance -0.01%; touches 1; first touch 2026-09-09; last touch 2026-09-09; cluster tolerance 3.5%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $71.95-$74.51; midpoint $73.23; distance -0.46%; touches 1; first touch 2026-09-09; last touch 2026-09-09; cluster tolerance 3.5%."
       },
       "support_6m_distance": {
         "value": null,
@@ -42646,11 +42744,11 @@
         "notes": "support_2y_distance: No usable 2Y support zone was detected below the latest close from open/free daily price history."
       },
       "support_5y_distance": {
-        "value": null,
-        "source": "open_data_provider",
-        "tier": "unavailable_open_free",
+        "value": 105.86323807129143,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "support_5y_distance: No usable 5Y support zone was detected below the latest close from open/free daily price history."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $33.85-$36.96; midpoint $35.41; distance +105.86%; touches 4; first touch 2021-10-13; last touch 2021-12-21; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 10.997647674439317,
@@ -42749,6 +42847,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
+      "support_1y_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_1y_distance: No usable 1Y support zone was detected below the latest close from open/free daily price history."
       }
     }
   },
@@ -42941,11 +43053,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 4.835233191739445,
+        "value": 5.283230761591166,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $214.58-$239.31; midpoint $226.95; distance +4.84%; touches 7; first touch 2025-04-07; last touch 2026-01-21; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $215.67-$236.29; midpoint $225.98; distance +5.28%; touches 3; first touch 2025-08-12; last touch 2026-01-20; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": null,
@@ -42954,12 +43066,26 @@
         "as_of": "2026-09-18",
         "notes": "support_1m_distance: No usable 1M support zone was detected below the latest close from open/free daily price history."
       },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
       "support_6m_distance": {
         "value": 44.893468025074704,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $159.25-$169.16; midpoint $164.20; distance +44.89%; touches 3; first touch 2026-04-10; last touch 2026-07-09; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 44.893468025074704,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $159.25-$169.16; midpoint $164.20; distance +44.89%; touches 3; first touch 2026-04-10; last touch 2026-07-09; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 44.893468025074704,
@@ -55523,39 +55649,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 4.835233191739445,
+        "value": 5.283230761591166,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $214.58-$239.31; midpoint $226.95; distance +4.84%; touches 7; first touch 2025-04-07; last touch 2026-01-21; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $215.67-$236.29; midpoint $225.98; distance +5.28%; touches 3; first touch 2025-08-12; last touch 2026-01-20; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 19.58783705377053,
-        "source": "yfinance_history",
-        "tier": "computed_from_public_facts",
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $194.97-$202.93; midpoint $198.95; distance +19.59%; touches 1; first touch 2026-08-26; last touch 2026-08-26; cluster tolerance 4.0%."
+        "notes": "support_1m_distance: No usable 1M support zone was detected below the latest close from open/free daily price history."
       },
       "support_6m_distance": {
-        "value": 41.320589142923446,
+        "value": 44.893468025074704,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $160.25-$176.46; midpoint $168.35; distance +41.32%; touches 3; first touch 2026-04-10; last touch 2026-05-28; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $159.25-$169.16; midpoint $164.20; distance +44.89%; touches 3; first touch 2026-04-10; last touch 2026-07-09; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 4.835233191739445,
+        "value": 44.893468025074704,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $214.58-$239.31; midpoint $226.95; distance +4.84%; touches 7; first touch 2025-04-07; last touch 2026-01-21; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $159.25-$169.16; midpoint $164.20; distance +44.89%; touches 3; first touch 2026-04-10; last touch 2026-07-09; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 4.8510817146375445,
+        "value": 83.98256100675916,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $214.51-$239.31; midpoint $226.91; distance +4.85%; touches 10; first touch 2022-01-10; last touch 2026-01-21; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $125.90-$132.73; midpoint $129.32; distance +83.98%; touches 2; first touch 2022-12-08; last touch 2022-12-28; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 20.216551283037063,
@@ -55654,6 +55780,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
+      "support_1y_distance": {
+        "value": 44.893468025074704,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $159.25-$169.16; midpoint $164.20; distance +44.89%; touches 3; first touch 2026-04-10; last touch 2026-07-09; cluster tolerance 4.0%."
       }
     }
   },
@@ -55846,11 +55986,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 4.928663982855038,
+        "value": 1.6432138006138064,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $208.48-$229.77; midpoint $219.12; distance +4.93%; touches 4; first touch 2026-06-09; last touch 2026-08-26; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $218.53-$233.88; midpoint $226.20; distance +1.64%; touches 3; first touch 2026-06-09; last touch 2026-08-25; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": 9.88864066524617,
@@ -55859,12 +55999,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $205.05-$213.41; midpoint $209.23; distance +9.89%; touches 1; first touch 2026-09-02; last touch 2026-09-02; cluster tolerance 4.0%."
       },
+      "support_3m_distance": {
+        "value": 1.6432138006138064,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $218.53-$233.88; midpoint $226.20; distance +1.64%; touches 2; first touch 2026-08-06; last touch 2026-08-25; cluster tolerance 4.0%."
+      },
       "support_6m_distance": {
         "value": 1.6432138006138064,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $218.53-$233.88; midpoint $226.20; distance +1.64%; touches 3; first touch 2026-06-09; last touch 2026-08-25; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 119.57022480658583,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $100.56-$108.86; midpoint $104.71; distance +119.57%; touches 3; first touch 2026-02-05; last touch 2026-04-10; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 128.35156757343807,
@@ -61998,39 +62152,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 4.928663982855038,
+        "value": 1.6432138006138064,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $208.48-$229.77; midpoint $219.12; distance +4.93%; touches 4; first touch 2026-06-09; last touch 2026-08-26; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $218.53-$233.88; midpoint $226.20; distance +1.64%; touches 3; first touch 2026-06-09; last touch 2026-08-25; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 4.986300533764982,
+        "value": 9.88864066524617,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $214.62-$223.38; midpoint $219.00; distance +4.99%; touches 1; first touch 2026-08-26; last touch 2026-08-26; cluster tolerance 4.0%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $205.05-$213.41; midpoint $209.23; distance +9.89%; touches 1; first touch 2026-09-02; last touch 2026-09-02; cluster tolerance 4.0%."
       },
       "support_6m_distance": {
-        "value": 4.928663982855038,
+        "value": 1.6432138006138064,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $208.48-$229.77; midpoint $219.12; distance +4.93%; touches 4; first touch 2026-06-09; last touch 2026-08-26; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $218.53-$233.88; midpoint $226.20; distance +1.64%; touches 3; first touch 2026-06-09; last touch 2026-08-25; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 4.928663982855038,
+        "value": 128.35156757343807,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $208.48-$229.77; midpoint $219.12; distance +4.93%; touches 4; first touch 2026-06-09; last touch 2026-08-26; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $96.71-$104.67; midpoint $100.69; distance +128.35%; touches 2; first touch 2025-03-13; last touch 2026-02-23; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 4.928663982855038,
+        "value": 257.3715645907589,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $208.48-$229.77; midpoint $219.12; distance +4.93%; touches 4; first touch 2026-06-09; last touch 2026-08-26; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $62.23-$66.44; midpoint $64.34; distance +257.37%; touches 4; first touch 2023-01-05; last touch 2023-05-02; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 480.3676428092429,
@@ -62129,6 +62283,20 @@
         "tier": "unavailable_open_free",
         "as_of": "2026-09-19",
         "notes": "ev_to_ebitda: Inputs required for this open/free computation were unavailable."
+      },
+      "support_3m_distance": {
+        "value": 1.6432138006138064,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $218.53-$233.88; midpoint $226.20; distance +1.64%; touches 2; first touch 2026-08-06; last touch 2026-08-25; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 119.57022480658583,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $100.56-$108.86; midpoint $104.71; distance +119.57%; touches 3; first touch 2026-02-05; last touch 2026-04-10; cluster tolerance 4.0%."
       }
     }
   },
@@ -62321,11 +62489,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 6.723336911992693,
+        "value": 5.246680739142776,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $48.57-$54.76; midpoint $51.67; distance +6.72%; touches 9; first touch 2024-10-02; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $49.28-$55.50; midpoint $52.39; distance +5.25%; touches 8; first touch 2024-10-01; last touch 2026-09-08; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": 9.644061216597885,
@@ -62334,12 +62502,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $49.28-$51.30; midpoint $50.29; distance +9.64%; touches 1; first touch 2026-09-08; last touch 2026-09-08; cluster tolerance 4.0%."
       },
+      "support_3m_distance": {
+        "value": 12.583914276280902,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $46.66-$51.30; midpoint $48.98; distance +12.58%; touches 2; first touch 2026-08-17; last touch 2026-09-08; cluster tolerance 4.0%."
+      },
       "support_6m_distance": {
         "value": 57.02154221536071,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $33.60-$36.63; midpoint $35.12; distance +57.02%; touches 3; first touch 2026-03-27; last touch 2026-05-13; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 64.2601568779034,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $31.71-$35.42; midpoint $33.57; distance +64.26%; touches 4; first touch 2026-02-05; last touch 2026-05-13; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 64.2601568779034,
@@ -68680,39 +68862,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 6.723336911992693,
+        "value": 5.246680739142776,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $48.57-$54.76; midpoint $51.67; distance +6.72%; touches 9; first touch 2024-10-02; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $49.28-$55.50; midpoint $52.39; distance +5.25%; touches 8; first touch 2024-10-01; last touch 2026-09-08; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 11.259075588655264,
+        "value": 9.644061216597885,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $48.57-$50.55; midpoint $49.56; distance +11.26%; touches 1; first touch 2026-09-09; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $49.28-$51.30; midpoint $50.29; distance +9.64%; touches 1; first touch 2026-09-08; last touch 2026-09-08; cluster tolerance 4.0%."
       },
       "support_6m_distance": {
-        "value": 39.289550403708496,
+        "value": 57.02154221536071,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $37.97-$41.21; midpoint $39.59; distance +39.29%; touches 3; first touch 2026-05-27; last touch 2026-07-23; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $33.60-$36.63; midpoint $35.12; distance +57.02%; touches 3; first touch 2026-03-27; last touch 2026-05-13; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 6.723336911992693,
+        "value": 64.2601568779034,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $48.57-$54.76; midpoint $51.67; distance +6.72%; touches 9; first touch 2024-10-02; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $31.71-$35.42; midpoint $33.57; distance +64.26%; touches 4; first touch 2026-02-05; last touch 2026-05-13; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 9.986775589648275,
+        "value": 67.92340181128023,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $47.22-$53.05; midpoint $50.13; distance +9.99%; touches 12; first touch 2022-01-10; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $31.36-$34.31; midpoint $32.84; distance +67.92%; touches 6; first touch 2022-09-26; last touch 2026-04-10; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 107.006533747649,
@@ -68811,6 +68993,20 @@
         "tier": "unavailable_open_free",
         "as_of": "2026-09-19",
         "notes": "ev_to_ebitda: Inputs required for this open/free computation were unavailable."
+      },
+      "support_3m_distance": {
+        "value": 12.583914276280902,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $46.66-$51.30; midpoint $48.98; distance +12.58%; touches 2; first touch 2026-08-17; last touch 2026-09-08; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 64.2601568779034,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $31.71-$35.42; midpoint $33.57; distance +64.26%; touches 4; first touch 2026-02-05; last touch 2026-05-13; cluster tolerance 4.0%."
       }
     }
   },
@@ -69003,11 +69199,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 6.911112883740328,
+        "value": 5.471283895707115,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $80.45-$86.70; midpoint $83.57; distance +6.91%; touches 5; first touch 2025-02-04; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $81.27-$88.16; midpoint $84.72; distance +5.47%; touches 5; first touch 2025-01-29; last touch 2026-09-11; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": 7.611706356426058,
@@ -69016,12 +69212,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $81.60-$84.46; midpoint $83.03; distance +7.61%; touches 1; first touch 2026-09-11; last touch 2026-09-11; cluster tolerance 3.5%."
       },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
       "support_6m_distance": {
         "value": 54.87254461231997,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $56.41-$58.98; midpoint $57.69; distance +54.87%; touches 2; first touch 2026-04-29; last touch 2026-05-14; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 54.87254461231997,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $56.41-$58.98; midpoint $57.69; distance +54.87%; touches 2; first touch 2026-04-29; last touch 2026-05-14; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 52.16876006578731,
@@ -80634,39 +80844,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 6.911112883740328,
+        "value": 5.471283895707115,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $80.45-$86.70; midpoint $83.57; distance +6.91%; touches 5; first touch 2025-02-04; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $81.27-$88.16; midpoint $84.72; distance +5.47%; touches 5; first touch 2025-01-29; last touch 2026-09-11; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 2.1026126076722362,
+        "value": 7.611706356426058,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $86.00-$89.02; midpoint $87.51; distance +2.10%; touches 1; first touch 2026-08-26; last touch 2026-08-26; cluster tolerance 3.5%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $81.60-$84.46; midpoint $83.03; distance +7.61%; touches 1; first touch 2026-09-11; last touch 2026-09-11; cluster tolerance 3.5%."
       },
       "support_6m_distance": {
-        "value": 8.708876675646477,
+        "value": 54.87254461231997,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $80.45-$83.94; midpoint $82.19; distance +8.71%; touches 2; first touch 2026-08-07; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $56.41-$58.98; midpoint $57.69; distance +54.87%; touches 2; first touch 2026-04-29; last touch 2026-05-14; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 6.911112883740328,
+        "value": 52.16876006578731,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $80.45-$86.70; midpoint $83.57; distance +6.91%; touches 5; first touch 2025-02-04; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $56.41-$61.03; midpoint $58.72; distance +52.17%; touches 3; first touch 2025-04-04; last touch 2026-05-14; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 6.709248912130467,
+        "value": 52.16876006578731,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $80.45-$87.02; midpoint $83.73; distance +6.71%; touches 7; first touch 2022-08-09; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $56.41-$61.03; midpoint $58.72; distance +52.17%; touches 3; first touch 2025-04-04; last touch 2026-05-14; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 34.86589417300654,
@@ -80765,6 +80975,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
+      "support_1y_distance": {
+        "value": 54.87254461231997,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $56.41-$58.98; midpoint $57.69; distance +54.87%; touches 2; first touch 2026-04-29; last touch 2026-05-14; cluster tolerance 4.0%."
       }
     }
   },
@@ -80957,11 +81181,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 5.730652782642014,
+        "value": 6.150676163779742,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $308.59-$342.89; midpoint $325.74; distance +5.73%; touches 5; first touch 2026-01-21; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $307.52-$341.38; midpoint $324.45; distance +6.15%; touches 7; first touch 2025-12-01; last touch 2026-09-01; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": 3.7285802271865176,
@@ -80970,12 +81194,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $327.20-$336.86; midpoint $332.03; distance +3.73%; touches 1; first touch 2026-09-01; last touch 2026-09-01; cluster tolerance 2.9%."
       },
+      "support_3m_distance": {
+        "value": 4.85324899119799,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $311.97-$344.96; midpoint $328.47; distance +4.85%; touches 4; first touch 2026-06-26; last touch 2026-09-09; cluster tolerance 4.0%."
+      },
       "support_6m_distance": {
         "value": 4.85324899119799,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $311.97-$344.96; midpoint $328.47; distance +4.85%; touches 5; first touch 2026-04-21; last touch 2026-09-09; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 25.195198394905027,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $267.68-$282.52; midpoint $275.10; distance +25.20%; touches 2; first touch 2025-11-14; last touch 2026-03-30; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 129.98660321459553,
@@ -89752,39 +89990,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 5.730652782642014,
+        "value": 6.150676163779742,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $308.59-$342.89; midpoint $325.74; distance +5.73%; touches 5; first touch 2026-01-21; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $307.52-$341.38; midpoint $324.45; distance +6.15%; touches 7; first touch 2025-12-01; last touch 2026-09-01; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 4.591695686121866,
+        "value": 3.7285802271865176,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $324.50-$334.08; midpoint $329.29; distance +4.59%; touches 1; first touch 2026-09-01; last touch 2026-09-01; cluster tolerance 2.9%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $327.20-$336.86; midpoint $332.03; distance +3.73%; touches 1; first touch 2026-09-01; last touch 2026-09-01; cluster tolerance 2.9%."
       },
       "support_6m_distance": {
-        "value": 5.730652782642014,
+        "value": 4.85324899119799,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $308.59-$342.89; midpoint $325.74; distance +5.73%; touches 4; first touch 2026-06-26; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $311.97-$344.96; midpoint $328.47; distance +4.85%; touches 5; first touch 2026-04-21; last touch 2026-09-09; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 5.730652782642014,
+        "value": 129.98660321459553,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $308.59-$342.89; midpoint $325.74; distance +5.73%; touches 5; first touch 2026-01-21; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $143.65-$155.86; midpoint $149.75; distance +129.99%; touches 2; first touch 2025-04-08; last touch 2025-05-07; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 5.730652782642014,
+        "value": 305.1658435298175,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $308.59-$342.89; midpoint $325.74; distance +5.73%; touches 5; first touch 2026-01-21; last touch 2026-09-09; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $81.82-$88.19; midpoint $85.00; distance +305.17%; touches 2; first touch 2022-11-03; last touch 2022-12-28; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 17.35977041861102,
@@ -89883,6 +90121,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": 4.85324899119799,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $311.97-$344.96; midpoint $328.47; distance +4.85%; touches 4; first touch 2026-06-26; last touch 2026-09-09; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 25.195198394905027,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $267.68-$282.52; midpoint $275.10; distance +25.20%; touches 2; first touch 2025-11-14; last touch 2026-03-30; cluster tolerance 4.0%."
       }
     }
   },
@@ -90075,11 +90327,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 11.6366684821096,
+        "value": 4.163435081539694,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $48.72-$53.65; midpoint $51.18; distance +11.64%; touches 3; first touch 2025-11-21; last touch 2026-09-02; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $53.20-$56.51; midpoint $54.86; distance +4.16%; touches 3; first touch 2025-12-01; last touch 2026-09-02; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": 5.249582659900035,
@@ -90088,12 +90340,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $53.20-$55.38; midpoint $54.29; distance +5.25%; touches 1; first touch 2026-09-02; last touch 2026-09-02; cluster tolerance 4.0%."
       },
+      "support_3m_distance": {
+        "value": 4.163435081539694,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $53.20-$56.51; midpoint $54.86; distance +4.16%; touches 2; first touch 2026-07-29; last touch 2026-09-02; cluster tolerance 4.0%."
+      },
       "support_6m_distance": {
         "value": 4.163435081539694,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $53.20-$56.51; midpoint $54.86; distance +4.16%; touches 2; first touch 2026-07-29; last touch 2026-09-02; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 30.988946587391204,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $42.65-$44.59; midpoint $43.62; distance +30.99%; touches 2; first touch 2026-02-05; last touch 2026-03-03; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 91.5656139856669,
@@ -101710,39 +101976,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 11.6366684821096,
+        "value": 4.163435081539694,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $48.72-$53.65; midpoint $51.18; distance +11.64%; touches 3; first touch 2025-11-21; last touch 2026-09-02; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $53.20-$56.51; midpoint $54.86; distance +4.16%; touches 3; first touch 2025-12-01; last touch 2026-09-02; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 8.63118069815344,
+        "value": 5.249582659900035,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $51.55-$53.65; midpoint $52.60; distance +8.63%; touches 1; first touch 2026-09-02; last touch 2026-09-02; cluster tolerance 4.0%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $53.20-$55.38; midpoint $54.29; distance +5.25%; touches 1; first touch 2026-09-02; last touch 2026-09-02; cluster tolerance 4.0%."
       },
       "support_6m_distance": {
-        "value": 6.80852945882118,
+        "value": 4.163435081539694,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $51.55-$55.45; midpoint $53.50; distance +6.81%; touches 2; first touch 2026-07-29; last touch 2026-09-02; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $53.20-$56.51; midpoint $54.86; distance +4.16%; touches 2; first touch 2026-07-29; last touch 2026-09-02; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 11.6366684821096,
+        "value": 91.5656139856669,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $48.72-$53.65; midpoint $51.18; distance +11.64%; touches 3; first touch 2025-11-21; last touch 2026-09-02; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $29.09-$30.57; midpoint $29.83; distance +91.57%; touches 2; first touch 2025-04-04; last touch 2025-04-21; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 11.6366684821096,
+        "value": 1880.383306309999,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $48.72-$53.65; midpoint $51.18; distance +11.64%; touches 3; first touch 2025-11-21; last touch 2026-09-02; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $2.81-$2.96; midpoint $2.89; distance +1880.38%; touches 4; first touch 2022-09-23; last touch 2022-12-28; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 42.74098997047361,
@@ -101841,6 +102107,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": 4.163435081539694,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $53.20-$56.51; midpoint $54.86; distance +4.16%; touches 2; first touch 2026-07-29; last touch 2026-09-02; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 30.988946587391204,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $42.65-$44.59; midpoint $43.62; distance +30.99%; touches 2; first touch 2026-02-05; last touch 2026-03-03; cluster tolerance 4.0%."
       }
     }
   },
@@ -102033,11 +102313,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 2.8180738179373,
+        "value": 2.4603698309082143,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $527.95-$571.55; midpoint $549.75; distance +2.82%; touches 11; first touch 2025-02-11; last touch 2026-09-10; cluster tolerance 3.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $529.55-$573.78; midpoint $551.67; distance +2.46%; touches 11; first touch 2025-02-21; last touch 2026-09-10; cluster tolerance 3.0%."
       },
       "support_1m_distance": {
         "value": -0.02299465552386683,
@@ -102046,12 +102326,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $558.30-$572.44; midpoint $565.37; distance -0.02%; touches 1; first touch 2026-09-10; last touch 2026-09-10; cluster tolerance 2.5%."
       },
+      "support_3m_distance": {
+        "value": 7.633843604640969,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $512.30-$538.00; midpoint $525.15; distance +7.63%; touches 2; first touch 2026-07-08; last touch 2026-07-23; cluster tolerance 2.9%."
+      },
       "support_6m_distance": {
         "value": 15.68175732676296,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $476.89-$500.34; midpoint $488.62; distance +15.68%; touches 4; first touch 2026-03-27; last touch 2026-06-22; cluster tolerance 3.0%."
+      },
+      "support_1y_distance": {
+        "value": 15.32007600351995,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $476.89-$503.41; midpoint $490.15; distance +15.32%; touches 5; first touch 2026-02-23; last touch 2026-06-22; cluster tolerance 3.0%."
       },
       "support_2y_distance": {
         "value": 16.019408379751916,
@@ -114514,39 +114808,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 2.8180738179373,
+        "value": 2.4603698309082143,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $527.95-$571.55; midpoint $549.75; distance +2.82%; touches 11; first touch 2025-02-11; last touch 2026-09-10; cluster tolerance 3.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $529.55-$573.78; midpoint $551.67; distance +2.46%; touches 11; first touch 2025-02-21; last touch 2026-09-10; cluster tolerance 3.0%."
       },
       "support_1m_distance": {
-        "value": 0.36756350427664447,
+        "value": -0.02299465552386683,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $556.13-$570.21; midpoint $563.17; distance +0.37%; touches 1; first touch 2026-09-10; last touch 2026-09-10; cluster tolerance 2.5%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $558.30-$572.44; midpoint $565.37; distance -0.02%; touches 1; first touch 2026-09-10; last touch 2026-09-10; cluster tolerance 2.5%."
       },
       "support_6m_distance": {
-        "value": 0.995609956844927,
+        "value": 15.68175732676296,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $547.79-$571.55; midpoint $559.67; distance +1.00%; touches 2; first touch 2026-08-12; last touch 2026-09-10; cluster tolerance 3.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $476.89-$500.34; midpoint $488.62; distance +15.68%; touches 4; first touch 2026-03-27; last touch 2026-06-22; cluster tolerance 3.0%."
       },
       "support_2y_distance": {
-        "value": 2.8180738179373,
+        "value": 16.019408379751916,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $527.95-$571.55; midpoint $549.75; distance +2.82%; touches 11; first touch 2025-02-11; last touch 2026-09-10; cluster tolerance 3.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $464.53-$509.85; midpoint $487.19; distance +16.02%; touches 9; first touch 2024-09-24; last touch 2026-06-22; cluster tolerance 3.0%."
       },
       "support_5y_distance": {
-        "value": 2.8180738179373,
+        "value": 82.54192924556249,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $527.95-$571.55; midpoint $549.75; distance +2.82%; touches 11; first touch 2025-02-11; last touch 2026-09-10; cluster tolerance 3.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $301.72-$317.58; midpoint $309.65; distance +82.54%; touches 4; first touch 2021-12-01; last touch 2022-11-03; cluster tolerance 3.0%."
       },
       "pe": {
         "value": 30.701046403208043,
@@ -114645,6 +114939,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": 7.633843604640969,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $512.30-$538.00; midpoint $525.15; distance +7.63%; touches 2; first touch 2026-07-08; last touch 2026-07-23; cluster tolerance 2.9%."
+      },
+      "support_1y_distance": {
+        "value": 15.32007600351995,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $476.89-$503.41; midpoint $490.15; distance +15.32%; touches 5; first touch 2026-02-23; last touch 2026-06-22; cluster tolerance 3.0%."
       }
     }
   },
@@ -114837,11 +115145,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 4.981576052273725,
+        "value": 2.4355746770942264,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $1598.56-$1806.59; midpoint $1702.57; distance +4.98%; touches 9; first touch 2024-11-07; last touch 2026-08-18; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $1632.68-$1857.10; midpoint $1744.89; distance +2.44%; touches 8; first touch 2024-11-07; last touch 2026-08-07; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": null,
@@ -114850,12 +115158,26 @@
         "as_of": "2026-09-18",
         "notes": "support_1m_distance: No usable 1M support zone was detected below the latest close from open/free daily price history."
       },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
       "support_6m_distance": {
         "value": 13.579395278476374,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $1515.87-$1631.51; midpoint $1573.69; distance +13.58%; touches 3; first touch 2026-03-27; last touch 2026-06-10; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 13.579395278476374,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $1515.87-$1631.51; midpoint $1573.69; distance +13.58%; touches 3; first touch 2026-03-27; last touch 2026-06-10; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 13.579395278476374,
@@ -126533,11 +126855,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 4.981576052273725,
+        "value": 2.4355746770942264,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $1598.56-$1806.59; midpoint $1702.57; distance +4.98%; touches 9; first touch 2024-11-07; last touch 2026-08-18; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $1632.68-$1857.10; midpoint $1744.89; distance +2.44%; touches 8; first touch 2024-11-07; last touch 2026-08-07; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": null,
@@ -126547,25 +126869,25 @@
         "notes": "support_1m_distance: No usable 1M support zone was detected below the latest close from open/free daily price history."
       },
       "support_6m_distance": {
-        "value": 1.8504178472750623,
+        "value": 13.579395278476374,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $1703.24-$1806.59; midpoint $1754.92; distance +1.85%; touches 3; first touch 2026-04-29; last touch 2026-08-18; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $1515.87-$1631.51; midpoint $1573.69; distance +13.58%; touches 3; first touch 2026-03-27; last touch 2026-06-10; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 4.981576052273725,
+        "value": 13.579395278476374,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $1598.56-$1806.59; midpoint $1702.57; distance +4.98%; touches 9; first touch 2024-11-07; last touch 2026-08-18; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $1515.87-$1631.51; midpoint $1573.69; distance +13.58%; touches 3; first touch 2026-03-27; last touch 2026-06-10; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 4.535713335652412,
+        "value": 168.0084685761815,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $1613.08-$1806.59; midpoint $1709.84; distance +4.54%; touches 10; first touch 2024-02-06; last touch 2026-08-18; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $640.56-$693.27; midpoint $666.92; distance +168.01%; touches 2; first touch 2022-05-11; last touch 2022-07-12; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 48.63974749169417,
@@ -126664,6 +126986,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
+      "support_1y_distance": {
+        "value": 13.579395278476374,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $1515.87-$1631.51; midpoint $1573.69; distance +13.58%; touches 3; first touch 2026-03-27; last touch 2026-06-10; cluster tolerance 4.0%."
       }
     }
   },
@@ -126856,11 +127192,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 4.324347103456895,
+        "value": 12.181562902838962,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $610.20-$666.11; midpoint $638.15; distance +4.32%; touches 5; first touch 2025-02-25; last touch 2026-04-23; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $570.71-$616.20; midpoint $593.46; distance +12.18%; touches 6; first touch 2024-12-20; last touch 2026-05-11; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": null,
@@ -126869,12 +127205,26 @@
         "as_of": "2026-09-18",
         "notes": "support_1m_distance: No usable 1M support zone was detected below the latest close from open/free daily price history."
       },
+      "support_3m_distance": {
+        "value": 22.96904690629232,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $528.25-$554.54; midpoint $541.40; distance +22.97%; touches 2; first touch 2026-07-30; last touch 2026-08-18; cluster tolerance 4.0%."
+      },
       "support_6m_distance": {
         "value": 24.4684554444972,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $515.21-$554.54; midpoint $534.87; distance +24.47%; touches 4; first touch 2026-03-27; last touch 2026-08-18; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 24.4684554444972,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $515.21-$554.54; midpoint $534.87; distance +24.47%; touches 4; first touch 2026-03-27; last touch 2026-08-18; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 34.52329249348742,
@@ -137837,39 +138187,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 4.324347103456895,
+        "value": 12.181562902838962,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $610.20-$666.11; midpoint $638.15; distance +4.32%; touches 5; first touch 2025-02-25; last touch 2026-04-23; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $570.71-$616.20; midpoint $593.46; distance +12.18%; touches 6; first touch 2024-12-20; last touch 2026-05-11; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 19.717681932736863,
-        "source": "yfinance_history",
-        "tier": "computed_from_public_facts",
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $544.98-$567.22; midpoint $556.10; distance +19.72%; touches 1; first touch 2026-09-01; last touch 2026-09-01; cluster tolerance 4.0%."
+        "notes": "support_1m_distance: No usable 1M support zone was detected below the latest close from open/free daily price history."
       },
       "support_6m_distance": {
-        "value": 17.458757053297266,
+        "value": 24.4684554444972,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $544.98-$588.61; midpoint $566.79; distance +17.46%; touches 3; first touch 2026-06-11; last touch 2026-09-01; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $515.21-$554.54; midpoint $534.87; distance +24.47%; touches 4; first touch 2026-03-27; last touch 2026-08-18; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 4.324347103456895,
+        "value": 34.52329249348742,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $610.20-$666.11; midpoint $638.15; distance +4.32%; touches 5; first touch 2025-02-25; last touch 2026-04-23; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $474.97-$514.82; midpoint $494.90; distance +34.52%; touches 2; first touch 2025-04-04; last touch 2025-04-21; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 4.324347103456895,
+        "value": 479.9625156556184,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $610.20-$666.11; midpoint $638.15; distance +4.32%; touches 5; first touch 2025-02-25; last touch 2026-04-23; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $111.65-$117.93; midpoint $114.79; distance +479.96%; touches 2; first touch 2022-12-07; last touch 2022-12-28; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 25.086118535052425,
@@ -137968,6 +138318,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": 22.96904690629232,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $528.25-$554.54; midpoint $541.40; distance +22.97%; touches 2; first touch 2026-07-30; last touch 2026-08-18; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 24.4684554444972,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $515.21-$554.54; midpoint $534.87; distance +24.47%; touches 4; first touch 2026-03-27; last touch 2026-08-18; cluster tolerance 4.0%."
       }
     }
   },
@@ -138160,11 +138524,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 3.009551067425992,
+        "value": 0.5649604100397514,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $455.59-$503.12; midpoint $479.35; distance +3.01%; touches 8; first touch 2025-06-23; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $463.39-$518.62; midpoint $491.01; distance +0.56%; touches 9; first touch 2025-07-02; last touch 2026-09-09; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": 0.43323602344251566,
@@ -138173,12 +138537,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $484.46-$498.84; midpoint $491.65; distance +0.43%; touches 1; first touch 2026-09-09; last touch 2026-09-09; cluster tolerance 2.9%."
       },
+      "support_3m_distance": {
+        "value": 29.100373377355517,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $373.95-$391.01; midpoint $382.48; distance +29.10%; touches 2; first touch 2026-07-08; last touch 2026-07-23; cluster tolerance 4.0%."
+      },
       "support_6m_distance": {
         "value": 39.15591553027353,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $345.77-$363.91; midpoint $354.84; distance +39.16%; touches 2; first touch 2026-03-27; last touch 2026-06-25; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 39.15591553027353,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $345.77-$363.91; midpoint $354.84; distance +39.16%; touches 2; first touch 2026-03-27; last touch 2026-06-25; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 39.15591553027353,
@@ -150948,39 +151326,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 3.009551067425992,
+        "value": 0.5649604100397514,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $455.59-$503.12; midpoint $479.35; distance +3.01%; touches 8; first touch 2025-06-23; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $463.39-$518.62; midpoint $491.01; distance +0.56%; touches 9; first touch 2025-07-02; last touch 2026-09-09; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 1.6008227940940072,
+        "value": 0.43323602344251566,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $478.89-$493.11; midpoint $486.00; distance +1.60%; touches 1; first touch 2026-09-10; last touch 2026-09-10; cluster tolerance 2.9%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $484.46-$498.84; midpoint $491.65; distance +0.43%; touches 1; first touch 2026-09-09; last touch 2026-09-09; cluster tolerance 2.9%."
       },
       "support_6m_distance": {
-        "value": 2.5155532535167664,
+        "value": 39.15591553027353,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $467.61-$495.72; midpoint $481.66; distance +2.52%; touches 2; first touch 2026-08-18; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $345.77-$363.91; midpoint $354.84; distance +39.16%; touches 2; first touch 2026-03-27; last touch 2026-06-25; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 3.009551067425992,
+        "value": 39.15591553027353,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $455.59-$503.12; midpoint $479.35; distance +3.01%; touches 8; first touch 2025-06-23; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $345.77-$363.91; midpoint $354.84; distance +39.16%; touches 3; first touch 2025-04-08; last touch 2026-06-25; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 3.009551067425992,
+        "value": 124.50504797012955,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $455.59-$503.12; midpoint $479.35; distance +3.01%; touches 8; first touch 2025-06-23; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $209.97-$229.92; midpoint $219.94; distance +124.51%; touches 3; first touch 2022-10-11; last touch 2023-01-05; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 27.515288569649865,
@@ -151079,6 +151457,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": 29.100373377355517,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $373.95-$391.01; midpoint $382.48; distance +29.10%; touches 2; first touch 2026-07-08; last touch 2026-07-23; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 39.15591553027353,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $345.77-$363.91; midpoint $354.84; distance +39.16%; touches 2; first touch 2026-03-27; last touch 2026-06-25; cluster tolerance 4.0%."
       }
     }
   },
@@ -151271,11 +151663,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 18.100569411337613,
+        "value": 25.039701740705496,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $125.24-$135.42; midpoint $130.33; distance +18.10%; touches 2; first touch 2026-03-03; last touch 2026-03-19; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $120.54-$125.65; midpoint $123.10; distance +25.04%; touches 2; first touch 2026-02-12; last touch 2026-09-02; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": 24.945202628886538,
@@ -151284,12 +151676,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $120.73-$125.65; midpoint $123.19; distance +24.95%; touches 1; first touch 2026-09-02; last touch 2026-09-02; cluster tolerance 4.0%."
       },
+      "support_3m_distance": {
+        "value": 66.03776889344114,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $90.26-$95.15; midpoint $92.70; distance +66.04%; touches 3; first touch 2026-07-13; last touch 2026-08-18; cluster tolerance 4.0%."
+      },
       "support_6m_distance": {
         "value": 66.03776889344114,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $90.26-$95.15; midpoint $92.70; distance +66.04%; touches 3; first touch 2026-07-13; last touch 2026-08-18; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 66.03776889344114,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $90.26-$95.15; midpoint $92.70; distance +66.04%; touches 3; first touch 2026-07-13; last touch 2026-08-18; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 66.03776889344114,
@@ -162924,39 +163330,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 18.100569411337613,
+        "value": 25.039701740705496,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $125.24-$135.42; midpoint $130.33; distance +18.10%; touches 2; first touch 2026-03-03; last touch 2026-03-19; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $120.54-$125.65; midpoint $123.10; distance +25.04%; touches 2; first touch 2026-02-12; last touch 2026-09-02; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 26.808371767870543,
+        "value": 24.945202628886538,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $118.95-$123.81; midpoint $121.38; distance +26.81%; touches 1; first touch 2026-09-02; last touch 2026-09-02; cluster tolerance 4.0%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $120.73-$125.65; midpoint $123.19; distance +24.95%; touches 1; first touch 2026-09-02; last touch 2026-09-02; cluster tolerance 4.0%."
       },
       "support_6m_distance": {
-        "value": 33.99926639085258,
+        "value": 66.03776889344114,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $111.00-$118.73; midpoint $114.87; distance +34.00%; touches 2; first touch 2026-04-02; last touch 2026-06-11; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $90.26-$95.15; midpoint $92.70; distance +66.04%; touches 3; first touch 2026-07-13; last touch 2026-08-18; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 18.100569411337613,
+        "value": 66.03776889344114,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $125.24-$135.42; midpoint $130.33; distance +18.10%; touches 2; first touch 2026-03-03; last touch 2026-03-19; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $90.26-$95.15; midpoint $92.70; distance +66.04%; touches 3; first touch 2026-07-13; last touch 2026-08-18; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 16.026753795515592,
+        "value": 894.7284098364461,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $129.90-$135.42; midpoint $132.66; distance +16.03%; touches 2; first touch 2024-06-24; last touch 2026-03-19; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $14.91-$16.04; midpoint $15.47; distance +894.73%; touches 2; first touch 2022-06-13; last touch 2022-11-21; cluster tolerance 4.0%."
       },
       "pe": {
         "value": -1.7841179936615539,
@@ -163055,6 +163461,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": 66.03776889344114,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $90.26-$95.15; midpoint $92.70; distance +66.04%; touches 3; first touch 2026-07-13; last touch 2026-08-18; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 66.03776889344114,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $90.26-$95.15; midpoint $92.70; distance +66.04%; touches 3; first touch 2026-07-13; last touch 2026-08-18; cluster tolerance 4.0%."
       }
     }
   },
@@ -163247,11 +163667,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 2.1722914958632282,
+        "value": 3.618493546621101,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $68.25-$72.28; midpoint $70.26; distance +2.17%; touches 2; first touch 2024-10-07; last touch 2026-06-25; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $66.25-$72.32; midpoint $69.28; distance +3.62%; touches 3; first touch 2024-10-07; last touch 2026-07-20; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": null,
@@ -163260,12 +163680,26 @@
         "as_of": "2026-09-18",
         "notes": "support_1m_distance: No usable 1M support zone was detected below the latest close from open/free daily price history."
       },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
       "support_6m_distance": {
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
         "as_of": "2026-09-18",
         "notes": "support_6m_distance: No usable 6M support zone was detected below the latest close from open/free daily price history."
+      },
+      "support_1y_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_1y_distance: No usable 1Y support zone was detected below the latest close from open/free daily price history."
       },
       "support_2y_distance": {
         "value": 3.618493546621101,
@@ -176224,11 +176658,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 2.1722914958632282,
+        "value": 3.618493546621101,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $68.25-$72.28; midpoint $70.26; distance +2.17%; touches 2; first touch 2024-10-07; last touch 2026-06-25; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $66.25-$72.32; midpoint $69.28; distance +3.62%; touches 3; first touch 2024-10-07; last touch 2026-07-20; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": null,
@@ -176245,18 +176679,18 @@
         "notes": "support_6m_distance: No usable 6M support zone was detected below the latest close from open/free daily price history."
       },
       "support_2y_distance": {
-        "value": 2.1722914958632282,
+        "value": 3.618493546621101,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $68.25-$72.28; midpoint $70.26; distance +2.17%; touches 2; first touch 2024-10-07; last touch 2026-06-25; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $66.25-$72.32; midpoint $69.28; distance +3.62%; touches 3; first touch 2024-10-07; last touch 2026-07-20; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 2.1722914958632282,
+        "value": 329.96599551698284,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $68.25-$72.28; midpoint $70.26; distance +2.17%; touches 2; first touch 2024-10-07; last touch 2026-06-25; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $16.30-$17.09; midpoint $16.70; distance +329.97%; touches 2; first touch 2022-05-11; last touch 2022-06-14; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 22.412216445042052,
@@ -176355,6 +176789,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
+      "support_1y_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_1y_distance: No usable 1Y support zone was detected below the latest close from open/free daily price history."
       }
     }
   },
@@ -176547,11 +176995,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 4.566058877919975,
+        "value": 3.721312198135127,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $204.60-$220.52; midpoint $212.56; distance +4.57%; touches 3; first touch 2026-05-27; last touch 2026-09-14; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $206.74-$221.85; midpoint $214.30; distance +3.72%; touches 3; first touch 2026-05-29; last touch 2026-09-14; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": 5.3612045879074675,
@@ -176560,12 +177008,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $206.74-$215.18; midpoint $210.96; distance +5.36%; touches 1; first touch 2026-09-14; last touch 2026-09-14; cluster tolerance 4.0%."
       },
+      "support_3m_distance": {
+        "value": 16.19215125278191,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $186.21-$196.38; midpoint $191.30; distance +16.19%; touches 2; first touch 2026-06-26; last touch 2026-07-29; cluster tolerance 4.0%."
+      },
       "support_6m_distance": {
         "value": 12.386539677872273,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $188.68-$206.87; midpoint $197.77; distance +12.39%; touches 4; first touch 2026-04-23; last touch 2026-07-17; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 31.838919007618866,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $161.87-$175.32; midpoint $168.59; distance +31.84%; touches 3; first touch 2025-12-17; last touch 2026-03-30; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 132.41248349165002,
@@ -188812,39 +189274,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 4.566058877919975,
+        "value": 3.721312198135127,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $204.60-$220.52; midpoint $212.56; distance +4.57%; touches 3; first touch 2026-05-27; last touch 2026-09-14; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $206.74-$221.85; midpoint $214.30; distance +3.72%; touches 3; first touch 2026-05-29; last touch 2026-09-14; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 6.384919381766692,
+        "value": 5.3612045879074675,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $204.75-$213.11; midpoint $208.93; distance +6.38%; touches 1; first touch 2026-09-14; last touch 2026-09-14; cluster tolerance 4.0%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $206.74-$215.18; midpoint $210.96; distance +5.36%; touches 1; first touch 2026-09-14; last touch 2026-09-14; cluster tolerance 4.0%."
       },
       "support_6m_distance": {
-        "value": 4.566058877919975,
+        "value": 12.386539677872273,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $204.60-$220.52; midpoint $212.56; distance +4.57%; touches 3; first touch 2026-05-27; last touch 2026-09-14; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $188.68-$206.87; midpoint $197.77; distance +12.39%; touches 4; first touch 2026-04-23; last touch 2026-07-17; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 4.566058877919975,
+        "value": 132.41248349165002,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $204.60-$220.52; midpoint $212.56; distance +4.57%; touches 3; first touch 2026-05-27; last touch 2026-09-14; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $92.42-$98.85; midpoint $95.64; distance +132.41%; touches 2; first touch 2025-04-04; last touch 2025-04-21; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 4.566058877919975,
+        "value": 1456.036452638255,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $204.60-$220.52; midpoint $212.56; distance +4.57%; touches 3; first touch 2026-05-27; last touch 2026-09-14; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $13.76-$14.81; midpoint $14.28; distance +1456.04%; touches 2; first touch 2022-07-01; last touch 2022-12-28; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 27.98541608127703,
@@ -188943,6 +189405,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": 16.19215125278191,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $186.21-$196.38; midpoint $191.30; distance +16.19%; touches 2; first touch 2026-06-26; last touch 2026-07-29; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 31.838919007618866,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $161.87-$175.32; midpoint $168.59; distance +31.84%; touches 3; first touch 2025-12-17; last touch 2026-03-30; cluster tolerance 4.0%."
       }
     }
   },
@@ -189135,11 +189611,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 7.781188800975183,
+        "value": 5.130090905891214,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $132.54-$141.36; midpoint $136.95; distance +7.78%; touches 5; first touch 2025-03-11; last touch 2026-08-19; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $133.75-$147.06; midpoint $140.41; distance +5.13%; touches 6; first touch 2025-03-11; last touch 2026-08-20; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": 4.450886612043688,
@@ -189148,12 +189624,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $138.49-$144.15; midpoint $141.32; distance +4.45%; touches 1; first touch 2026-09-01; last touch 2026-09-01; cluster tolerance 4.0%."
       },
+      "support_3m_distance": {
+        "value": 4.548541318218366,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $137.46-$144.91; midpoint $141.19; distance +4.55%; touches 2; first touch 2026-07-02; last touch 2026-08-20; cluster tolerance 4.0%."
+      },
       "support_6m_distance": {
         "value": 5.084652994015744,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $136.02-$144.91; midpoint $140.47; distance +5.08%; touches 3; first touch 2026-03-30; last touch 2026-08-20; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 5.942040761199947,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $133.75-$144.91; midpoint $139.33; distance +5.94%; touches 5; first touch 2026-02-05; last touch 2026-08-20; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 5.130090905891214,
@@ -201950,39 +202440,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 7.781188800975183,
+        "value": 5.130090905891214,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $132.54-$141.36; midpoint $136.95; distance +7.78%; touches 5; first touch 2025-03-11; last touch 2026-08-19; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $133.75-$147.06; midpoint $140.41; distance +5.13%; touches 6; first touch 2025-03-11; last touch 2026-08-20; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 5.647007816143169,
+        "value": 4.450886612043688,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $136.93-$142.51; midpoint $139.72; distance +5.65%; touches 1; first touch 2026-09-02; last touch 2026-09-02; cluster tolerance 4.0%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $138.49-$144.15; midpoint $141.32; distance +4.45%; touches 1; first touch 2026-09-01; last touch 2026-09-01; cluster tolerance 4.0%."
       },
       "support_6m_distance": {
-        "value": 7.59154591730621,
+        "value": 5.084652994015744,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $134.21-$140.18; midpoint $137.19; distance +7.59%; touches 2; first touch 2026-03-30; last touch 2026-08-19; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $136.02-$144.91; midpoint $140.47; distance +5.08%; touches 3; first touch 2026-03-30; last touch 2026-08-20; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 7.781188800975183,
+        "value": 5.130090905891214,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $132.54-$141.36; midpoint $136.95; distance +7.78%; touches 5; first touch 2025-03-11; last touch 2026-08-19; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $133.75-$147.06; midpoint $140.41; distance +5.13%; touches 6; first touch 2025-03-11; last touch 2026-08-20; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 7.781188800975183,
+        "value": 135.8371448581914,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $132.54-$141.36; midpoint $136.95; distance +7.78%; touches 8; first touch 2024-06-25; last touch 2026-08-19; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $59.85-$65.33; midpoint $62.59; distance +135.84%; touches 2; first touch 2022-06-13; last touch 2022-09-30; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 23.405391217286187,
@@ -202081,6 +202571,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": 4.548541318218366,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $137.46-$144.91; midpoint $141.19; distance +4.55%; touches 2; first touch 2026-07-02; last touch 2026-08-20; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 5.942040761199947,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $133.75-$144.91; midpoint $139.33; distance +5.94%; touches 5; first touch 2026-02-05; last touch 2026-08-20; cluster tolerance 4.0%."
       }
     }
   },
@@ -202273,11 +202777,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 9.954556985629088,
+        "value": 4.443200258188685,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $318.60-$343.98; midpoint $331.29; distance +9.95%; touches 5; first touch 2024-11-27; last touch 2026-04-07; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $336.38-$361.16; midpoint $348.77; distance +4.44%; touches 2; first touch 2026-04-08; last touch 2026-09-04; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": 2.8778815035699656,
@@ -202286,12 +202790,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $347.00-$361.16; midpoint $354.08; distance +2.88%; touches 1; first touch 2026-09-04; last touch 2026-09-04; cluster tolerance 4.0%."
       },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
       "support_6m_distance": {
         "value": 4.443200258188685,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $336.38-$361.16; midpoint $348.77; distance +4.44%; touches 2; first touch 2026-04-08; last touch 2026-09-04; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 4.443200258188685,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $336.38-$361.16; midpoint $348.77; distance +4.44%; touches 2; first touch 2026-04-08; last touch 2026-09-04; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 65.56334657837675,
@@ -213920,39 +214438,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 9.954556985629088,
+        "value": 4.443200258188685,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $318.60-$343.98; midpoint $331.29; distance +9.95%; touches 5; first touch 2024-11-27; last touch 2026-04-07; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $336.38-$361.16; midpoint $348.77; distance +4.44%; touches 2; first touch 2026-04-08; last touch 2026-09-04; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": null,
-        "source": "open_data_provider",
-        "tier": "unavailable_open_free",
+        "value": 2.8778815035699656,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "support_1m_distance: No usable 1M support zone was detected below the latest close from open/free daily price history."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $347.00-$361.16; midpoint $354.08; distance +2.88%; touches 1; first touch 2026-09-04; last touch 2026-09-04; cluster tolerance 4.0%."
       },
       "support_6m_distance": {
-        "value": null,
-        "source": "open_data_provider",
-        "tier": "unavailable_open_free",
+        "value": 4.443200258188685,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "support_6m_distance: No usable 6M support zone was detected below the latest close from open/free daily price history."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $336.38-$361.16; midpoint $348.77; distance +4.44%; touches 2; first touch 2026-04-08; last touch 2026-09-04; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 9.954556985629088,
+        "value": 65.56334657837675,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $318.60-$343.98; midpoint $331.29; distance +9.95%; touches 5; first touch 2024-11-27; last touch 2026-04-07; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $213.44-$226.59; midpoint $220.02; distance +65.56%; touches 3; first touch 2024-10-11; last touch 2025-04-08; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 11.689103800011729,
+        "value": 117.06744187364946,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $308.31-$343.98; midpoint $326.15; distance +11.69%; touches 9; first touch 2021-11-15; last touch 2026-04-07; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $159.25-$176.38; midpoint $167.81; distance +117.07%; touches 7; first touch 2022-11-21; last touch 2024-06-11; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 338.98942195278613,
@@ -214051,6 +214569,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
+      "support_1y_distance": {
+        "value": 4.443200258188685,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $336.38-$361.16; midpoint $348.77; distance +4.44%; touches 2; first touch 2026-04-08; last touch 2026-09-04; cluster tolerance 4.0%."
       }
     }
   },
@@ -214243,11 +214775,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 5.682098453516091,
+        "value": -0.15960102840568094,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $62.15-$71.27; midpoint $66.71; distance +5.68%; touches 11; first touch 2024-10-31; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $66.82-$74.41; midpoint $70.61; distance -0.16%; touches 14; first touch 2024-10-02; last touch 2026-09-09; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": null,
@@ -214256,12 +214788,26 @@
         "as_of": "2026-09-18",
         "notes": "support_1m_distance: No usable 1M support zone was detected below the latest close from open/free daily price history."
       },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
       "support_6m_distance": {
         "value": 2.8275353327717094,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $64.62-$72.50; midpoint $68.56; distance +2.83%; touches 5; first touch 2026-03-27; last touch 2026-09-09; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 1.857709060316242,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $64.62-$73.81; midpoint $69.21; distance +1.86%; touches 8; first touch 2026-02-13; last touch 2026-09-09; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 17.248111984680012,
@@ -220751,39 +221297,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 5.682098453516091,
+        "value": -0.15960102840568094,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $62.15-$71.27; midpoint $66.71; distance +5.68%; touches 11; first touch 2024-10-31; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $66.82-$74.41; midpoint $70.61; distance -0.16%; touches 14; first touch 2024-10-02; last touch 2026-09-09; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 1.8197605070836904,
-        "source": "yfinance_history",
-        "tier": "computed_from_public_facts",
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $67.91-$70.57; midpoint $69.24; distance +1.82%; touches 1; first touch 2026-09-10; last touch 2026-09-10; cluster tolerance 3.8%."
+        "notes": "support_1m_distance: No usable 1M support zone was detected below the latest close from open/free daily price history."
       },
       "support_6m_distance": {
-        "value": 4.198841386296448,
+        "value": 2.8275353327717094,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $64.10-$71.22; midpoint $67.66; distance +4.20%; touches 6; first touch 2026-03-27; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $64.62-$72.50; midpoint $68.56; distance +2.83%; touches 5; first touch 2026-03-27; last touch 2026-09-09; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 5.682098453516091,
+        "value": 17.248111984680012,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $62.15-$71.27; midpoint $66.71; distance +5.68%; touches 11; first touch 2024-10-31; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $58.73-$61.53; midpoint $60.13; distance +17.25%; touches 2; first touch 2024-12-13; last touch 2024-12-31; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": -0.09621615852295451,
+        "value": 242.8688238415584,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $67.01-$74.12; midpoint $70.57; distance -0.10%; touches 16; first touch 2024-06-21; last touch 2026-09-10; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $20.06-$21.06; midpoint $20.56; distance +242.87%; touches 2; first touch 2022-06-16; last touch 2022-07-14; cluster tolerance 4.0%."
       },
       "pe": {
         "value": 15.089347792045098,
@@ -220882,6 +221428,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": null,
+        "source": "open_data_provider",
+        "tier": "unavailable_open_free",
+        "as_of": "2026-09-18",
+        "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+      },
+      "support_1y_distance": {
+        "value": 1.857709060316242,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $64.62-$73.81; midpoint $69.21; distance +1.86%; touches 8; first touch 2026-02-13; last touch 2026-09-09; cluster tolerance 4.0%."
       }
     }
   },
@@ -221074,11 +221634,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 3.692493437983866,
+        "value": 3.6648453106344596,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $347.36-$362.99; midpoint $355.18; distance +3.69%; touches 2; first touch 2025-05-23; last touch 2026-08-18; cluster tolerance 2.8%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $346.75-$363.79; midpoint $355.27; distance +3.66%; touches 3; first touch 2025-05-23; last touch 2026-08-17; cluster tolerance 2.8%."
       },
       "support_1m_distance": {
         "value": 0.29411429835123964,
@@ -221087,12 +221647,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $362.60-$371.82; midpoint $367.21; distance +0.29%; touches 1; first touch 2026-09-10; last touch 2026-09-10; cluster tolerance 2.5%."
       },
+      "support_3m_distance": {
+        "value": 4.253964616617769,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $342.78-$363.75; midpoint $353.26; distance +4.25%; touches 3; first touch 2026-07-08; last touch 2026-08-17; cluster tolerance 2.7%."
+      },
       "support_6m_distance": {
         "value": 17.32593270711072,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $304.62-$323.19; midpoint $313.90; distance +17.33%; touches 3; first touch 2026-04-23; last touch 2026-06-03; cluster tolerance 2.8%."
+      },
+      "support_1y_distance": {
+        "value": 17.18511415985062,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $302.29-$326.27; midpoint $314.28; distance +17.19%; touches 6; first touch 2025-11-18; last touch 2026-06-03; cluster tolerance 2.8%."
       },
       "support_2y_distance": {
         "value": 18.593065270512888,
@@ -233785,39 +234359,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 3.692493437983866,
+        "value": 3.6648453106344596,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $347.36-$362.99; midpoint $355.18; distance +3.69%; touches 2; first touch 2025-05-23; last touch 2026-08-18; cluster tolerance 2.8%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $346.75-$363.79; midpoint $355.27; distance +3.66%; touches 3; first touch 2025-05-23; last touch 2026-08-17; cluster tolerance 2.8%."
       },
       "support_1m_distance": {
-        "value": 0.7578298354420202,
+        "value": 0.29411429835123964,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $360.94-$370.10; midpoint $365.52; distance +0.76%; touches 1; first touch 2026-09-10; last touch 2026-09-10; cluster tolerance 2.5%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $362.60-$371.82; midpoint $367.21; distance +0.29%; touches 1; first touch 2026-09-10; last touch 2026-09-10; cluster tolerance 2.5%."
       },
       "support_6m_distance": {
-        "value": 1.783545912794683,
+        "value": 17.32593270711072,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $353.11-$370.56; midpoint $361.84; distance +1.78%; touches 2; first touch 2026-08-18; last touch 2026-09-10; cluster tolerance 2.8%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $304.62-$323.19; midpoint $313.90; distance +17.33%; touches 3; first touch 2026-04-23; last touch 2026-06-03; cluster tolerance 2.8%."
       },
       "support_2y_distance": {
-        "value": 3.692493437983866,
+        "value": 18.593065270512888,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $347.36-$362.99; midpoint $355.18; distance +3.69%; touches 2; first touch 2025-05-23; last touch 2026-08-18; cluster tolerance 2.8%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $302.69-$318.41; midpoint $310.55; distance +18.59%; touches 7; first touch 2024-11-20; last touch 2026-06-03; cluster tolerance 2.8%."
       },
       "support_5y_distance": {
-        "value": 3.692493437983866,
+        "value": 90.36513966663361,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $347.36-$362.99; midpoint $355.18; distance +3.69%; touches 2; first touch 2025-05-23; last touch 2026-08-18; cluster tolerance 2.8%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $186.44-$200.49; midpoint $193.47; distance +90.37%; touches 6; first touch 2021-11-22; last touch 2022-11-09; cluster tolerance 2.8%."
       },
       "pe": {
         "value": 31.094223645979493,
@@ -233916,6 +234490,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-19",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": 4.253964616617769,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $342.78-$363.75; midpoint $353.26; distance +4.25%; touches 3; first touch 2026-07-08; last touch 2026-08-17; cluster tolerance 2.7%."
+      },
+      "support_1y_distance": {
+        "value": 17.18511415985062,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $302.29-$326.27; midpoint $314.28; distance +17.19%; touches 6; first touch 2025-11-18; last touch 2026-06-03; cluster tolerance 2.8%."
       }
     }
   },
@@ -234108,11 +234696,11 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 13.170711058954849,
+        "value": 11.301470179221447,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $46.90-$50.22; midpoint $48.56; distance +13.17%; touches 2; first touch 2026-07-28; last touch 2026-08-12; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $47.92-$50.84; midpoint $49.38; distance +11.30%; touches 2; first touch 2026-07-28; last touch 2026-08-12; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
         "value": 9.898022253698201,
@@ -234121,12 +234709,26 @@
         "as_of": "2026-09-18",
         "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $49.01-$51.01; midpoint $50.01; distance +9.90%; touches 1; first touch 2026-08-25; last touch 2026-08-25; cluster tolerance 4.0%."
       },
+      "support_3m_distance": {
+        "value": 11.301470179221447,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $47.92-$50.84; midpoint $49.38; distance +11.30%; touches 2; first touch 2026-07-28; last touch 2026-08-12; cluster tolerance 4.0%."
+      },
       "support_6m_distance": {
         "value": 11.301470179221447,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $47.92-$50.84; midpoint $49.38; distance +11.30%; touches 2; first touch 2026-07-28; last touch 2026-08-12; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 62.87388707195072,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $32.12-$35.36; midpoint $33.74; distance +62.87%; touches 3; first touch 2025-12-17; last touch 2026-03-03; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
         "value": 126.18772927619494,
@@ -236094,39 +236696,39 @@
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1d_distance": {
-        "value": 13.170711058954849,
+        "value": 11.301470179221447,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $46.90-$50.22; midpoint $48.56; distance +13.17%; touches 2; first touch 2026-07-28; last touch 2026-08-12; cluster tolerance 4.0%."
+        "notes": "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. Support zone: $47.92-$50.84; midpoint $49.38; distance +11.30%; touches 2; first touch 2026-07-28; last touch 2026-08-12; cluster tolerance 4.0%."
       },
       "support_1m_distance": {
-        "value": 11.232542510018309,
+        "value": 9.898022253698201,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 1M support zone below/reclaimed by the latest close. Support zone: $48.42-$50.40; midpoint $49.41; distance +11.23%; touches 1; first touch 2026-08-26; last touch 2026-08-26; cluster tolerance 4.0%."
+        "notes": "Primary 1M support floor below/reclaimed by the latest close. Support zone: $49.01-$51.01; midpoint $50.01; distance +9.90%; touches 1; first touch 2026-08-25; last touch 2026-08-25; cluster tolerance 4.0%."
       },
       "support_6m_distance": {
-        "value": 13.170711058954849,
+        "value": 11.301470179221447,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 6M support zone below/reclaimed by the latest close. Support zone: $46.90-$50.22; midpoint $48.56; distance +13.17%; touches 2; first touch 2026-07-28; last touch 2026-08-12; cluster tolerance 4.0%."
+        "notes": "Primary 6M support floor below/reclaimed by the latest close. Support zone: $47.92-$50.84; midpoint $49.38; distance +11.30%; touches 2; first touch 2026-07-28; last touch 2026-08-12; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 13.170711058954849,
+        "value": 126.18772927619494,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 2Y support zone below/reclaimed by the latest close. Support zone: $46.90-$50.22; midpoint $48.56; distance +13.17%; touches 2; first touch 2026-07-28; last touch 2026-08-12; cluster tolerance 4.0%."
+        "notes": "Primary 2Y support floor below/reclaimed by the latest close. Support zone: $23.39-$25.20; midpoint $24.30; distance +126.19%; touches 3; first touch 2024-10-23; last touch 2025-10-21; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 13.170711058954849,
+        "value": 1334.3876828632633,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
-        "notes": "Nearest 5Y support zone below/reclaimed by the latest close. Support zone: $46.90-$50.22; midpoint $48.56; distance +13.17%; touches 2; first touch 2026-07-28; last touch 2026-08-12; cluster tolerance 4.0%."
+        "notes": "Primary 5Y support floor below/reclaimed by the latest close. Support zone: $3.67-$3.99; midpoint $3.83; distance +1334.39%; touches 3; first touch 2021-12-20; last touch 2022-05-09; cluster tolerance 4.0%."
       },
       "pe": {
         "value": -26.96080405571616,
@@ -236225,6 +236827,20 @@
         "tier": "proxy_estimate",
         "as_of": "2026-09-18",
         "notes": "Proxy EV/EBITDA from open/free public facts."
+      },
+      "support_3m_distance": {
+        "value": 11.301470179221447,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 3M support floor below/reclaimed by the latest close. Support zone: $47.92-$50.84; midpoint $49.38; distance +11.30%; touches 2; first touch 2026-07-28; last touch 2026-08-12; cluster tolerance 4.0%."
+      },
+      "support_1y_distance": {
+        "value": 62.87388707195072,
+        "source": "yfinance_history",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-09-18",
+        "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $32.12-$35.36; midpoint $33.74; distance +62.87%; touches 3; first touch 2025-12-17; last touch 2026-03-03; cluster tolerance 4.0%."
       }
     }
   }

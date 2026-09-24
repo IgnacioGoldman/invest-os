@@ -120,6 +120,8 @@ class RefreshStaticPricesTests(unittest.TestCase):
         self.assertEqual(updated.metrics["current_price"].value, history[-1].close)
         self.assertNotIn("support_1d_distance", updated.price_opportunity)
         self.assertNotIn("support_1d_distance", updated.metrics)
+        self.assertIn("support_3m_distance", updated.price_opportunity)
+        self.assertIn("support_1y_distance", updated.price_opportunity)
         self.assertIn("support_5y_distance", updated.price_opportunity)
         self.assertEqual(updated.generated_at, refreshed_at)
 

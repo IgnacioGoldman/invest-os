@@ -122,7 +122,9 @@ SUPPORT_ZONE_MAX_AGE_DAYS = 365
 SUPPORT_RECLAIM_LOOKBACK_SESSIONS = 30
 SUPPORT_DISTANCE_WINDOWS = {
     "support_1m_distance": ("1M", 30),
+    "support_3m_distance": ("3M", 91),
     "support_6m_distance": ("6M", 182),
+    "support_1y_distance": ("1Y", 365),
     "support_2y_distance": ("2Y", 365 * 2),
     "support_5y_distance": ("5Y", 365 * 5),
 }
@@ -621,7 +623,9 @@ def compute_open_data_snapshot(
         "distance_from_52w_high": price_metrics["distance_from_52w_high"],
         "distance_from_52w_low": price_metrics["distance_from_52w_low"],
         "support_1m_distance": price_metrics["support_1m_distance"],
+        "support_3m_distance": price_metrics["support_3m_distance"],
         "support_6m_distance": price_metrics["support_6m_distance"],
+        "support_1y_distance": price_metrics["support_1y_distance"],
         "support_2y_distance": price_metrics["support_2y_distance"],
         "support_5y_distance": price_metrics["support_5y_distance"],
     }
@@ -1576,7 +1580,9 @@ def _price_opportunity_metrics(
             "distance_from_52w_high",
             "distance_from_52w_low",
             "support_1m_distance",
+            "support_3m_distance",
             "support_6m_distance",
+            "support_1y_distance",
             "support_2y_distance",
             "support_5y_distance",
         ):

@@ -35,7 +35,9 @@ const COLUMNS = [
   ["business_health", "debt_to_equity", "D/E", "ratio"],
   ["price_opportunity", "current_price", "Price", "ratio"],
   ["price_opportunity", "support_1m_distance", "Near Support 1M", "percent"],
+  ["price_opportunity", "support_3m_distance", "Near Support 3M", "percent"],
   ["price_opportunity", "support_6m_distance", "Near Support 6M", "percent"],
+  ["price_opportunity", "support_1y_distance", "Near Support 1Y", "percent"],
   ["price_opportunity", "support_2y_distance", "Near Support 2Y", "percent"],
   ["price_opportunity", "support_5y_distance", "Near Support 5Y", "percent"],
   ["price_opportunity", "change_1d", "1D", "percent"],
@@ -273,7 +275,9 @@ const PRICE_RANGES: Array<{ value: PriceRange; label: string; days: number | nul
 ];
 const BETA_SUPPORT_COLUMNS = [
   ["support_1m_distance", "Near 1M"],
+  ["support_3m_distance", "Near 3M"],
   ["support_6m_distance", "Near 6M"],
+  ["support_1y_distance", "Near 1Y"],
   ["support_2y_distance", "Near 2Y"],
   ["support_5y_distance", "Near 5Y"],
 ] as const;

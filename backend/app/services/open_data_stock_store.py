@@ -142,7 +142,9 @@ def _snapshot_with_support_backfill(
             changed = True
     if not changed:
         return snapshot
-    updated = snapshot.model_copy(update={"price_opportunity": price_opportunity})
+    metrics = dict(snapshot.metrics)
+    metrics.update({key: value for key, value in price_opportunity.items() if key in SUPPORT_DISTANCE_WINDOWS})
+    updated = snapshot.model_copy(update={"price_opportunity": price_opportunity, "metrics": metrics})
     replace_stock_open_data_snapshot(conn, updated)
     return updated
 

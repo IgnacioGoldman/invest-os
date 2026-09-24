@@ -17,7 +17,9 @@ DEFAULT_STOCKS_PATH = ROOT / "frontend" / "public" / "data" / "open-data" / "sto
 MATCH_TIMEZONE = ZoneInfo("Europe/Stockholm")
 SUPPORT_METRICS = {
     "support_1m": "support_1m_distance",
+    "support_3m": "support_3m_distance",
     "support_6m": "support_6m_distance",
+    "support_1y": "support_1y_distance",
     "support_2y": "support_2y_distance",
     "support_5y": "support_5y_distance",
 }
@@ -49,7 +51,7 @@ def _strong_yoy_expression(support_fields: list[str]) -> dict[str, Any]:
 
 BUILT_IN_FILTERS = {
     "builtin:pullback": _strong_yoy_expression(["support_1m"]),
-    "builtin:support": _strong_yoy_expression(["support_6m", "support_2y", "support_5y"]),
+    "builtin:support": _strong_yoy_expression(["support_3m", "support_6m", "support_1y", "support_2y", "support_5y"]),
 }
 
 
