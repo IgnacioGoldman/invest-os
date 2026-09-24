@@ -254,6 +254,15 @@ function formatPrice(value?: number | null) {
   }).format(value);
 }
 
+function formatChartPrice(value: number) {
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+    notation: Math.abs(value) >= 1_000 ? "compact" : "standard",
+    maximumFractionDigits: Math.abs(value) < 100 ? 1 : 0,
+  }).format(value);
+}
+
 function formatCompact(value?: number | null) {
   if (value == null) return "-";
   return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 2 }).format(value);
@@ -1110,8 +1119,8 @@ function PriceChart({ snapshot, points, loading, error }: {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const ranged = pointsForRange(points, range);
   const width = 720;
-  const height = 300;
-  const padding = { top: 24, right: 16, bottom: 30, left: 12 };
+  const height = 360;
+  const padding = { top: 26, right: 68, bottom: 40, left: 12 };
   const supportKey = supportKeyForRange(range);
   const currentPrice = snapshot.price_opportunity.current_price?.value;
   const supportDistance = snapshot.price_opportunity[supportKey]?.value;
@@ -1131,6 +1140,11 @@ function PriceChart({ snapshot, points, loading, error }: {
   const last = ranged[ranged.length - 1];
   const change = first && last ? ((last.close - first.close) / first.close) * 100 : null;
   const selected = ranged[hoverIndex ?? Math.max(ranged.length - 1, 0)];
+  const guideParts = [0.25, 0.5, 0.75];
+  const dateGuideIndices = Array.from(new Set([0, Math.round((ranged.length - 1) / 2), ranged.length - 1]));
+  const dateFormatter = new Intl.DateTimeFormat(undefined, range === "2Y" || range === "5Y" || range === "ALL"
+    ? { month: "short", year: "2-digit" }
+    : { month: "short", day: "numeric" });
 
   const onPointerMove = (event: React.PointerEvent<SVGRectElement>) => {
     if (ranged.length === 0) return;
@@ -1179,8 +1193,13 @@ function PriceChart({ snapshot, points, loading, error }: {
           aria-label={`${snapshot.ticker} ${range} price chart`}
           onContextMenu={(event) => event.preventDefault()}
         >
-          {[0.25, 0.5, 0.75].map((part) => (
-            <line key={part} className="mobile-chart-gridline" x1={padding.left} x2={width - padding.right} y1={padding.top + innerHeight * part} y2={padding.top + innerHeight * part} />
+          {guideParts.map((part) => (
+            <g key={part}>
+              <line className="mobile-chart-gridline" x1={padding.left} x2={width - padding.right} y1={padding.top + innerHeight * part} y2={padding.top + innerHeight * part} />
+              <text className="mobile-chart-axis-label" x={width - 4} y={padding.top + innerHeight * part}>
+                {formatChartPrice(yMax - (yMax - yMin) * part)}
+              </text>
+            </g>
           ))}
           {supportLevel != null && (
             <g className="mobile-support-line">
@@ -1195,8 +1214,17 @@ function PriceChart({ snapshot, points, loading, error }: {
               <circle cx={xFor(hoverIndex)} cy={yFor(selected.close)} r="5" />
             </g>
           )}
-          <text className="mobile-chart-date" x={padding.left} y={height - 7}>{first?.date}</text>
-          <text className="mobile-chart-date" textAnchor="end" x={width - padding.right} y={height - 7}>{last?.date}</text>
+          {dateGuideIndices.map((index) => (
+            <text
+              key={`${ranged[index].date}-${index}`}
+              className="mobile-chart-date"
+              textAnchor={index === 0 ? "start" : index === ranged.length - 1 ? "end" : "middle"}
+              x={xFor(index)}
+              y={height - 9}
+            >
+              {dateFormatter.format(new Date(`${ranged[index].date}T00:00:00Z`))}
+            </text>
+          ))}
           <rect
             className="mobile-chart-hit"
             x={padding.left}
