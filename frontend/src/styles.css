@@ -6010,7 +6010,7 @@ tbody tr:hover td {
 }
 
 .exploration-page .exploration-temp-table {
-  min-width: 1080px;
+  min-width: 760px;
 }
 
 .exploration-page .exploration-temp-table th,
@@ -6019,6 +6019,135 @@ tbody tr:hover td {
 }
 
 .exploration-page .temp-chart-row td {
+  padding: 0;
+}
+
+.exploration-page .growth-metric-trigger {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  gap: 7px;
+  justify-items: start;
+  min-height: 92px;
+  min-width: 178px;
+  padding: 10px;
+  text-align: left;
+  width: 100%;
+}
+
+.exploration-page .growth-metric-trigger:hover,
+.exploration-page .growth-metric-trigger.active {
+  background: rgba(109, 143, 255, 0.12);
+  border-color: rgba(140, 164, 255, 0.45);
+}
+
+.exploration-page .growth-metric-trigger > span {
+  color: var(--app-muted);
+  font-size: 0.72rem;
+  font-weight: 760;
+  line-height: 1.25;
+}
+
+.exploration-page .growth-metric-trigger > strong {
+  color: var(--app-foreground);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.exploration-page .growth-metric-trigger > em {
+  font-style: normal;
+}
+
+.exploration-page .growth-detail-panel {
+  padding: 18px;
+}
+
+.exploration-page .growth-detail-layout {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(260px, 0.74fr) minmax(420px, 1.26fr);
+}
+
+.exploration-page .growth-detail-copy {
+  align-content: start;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.exploration-page .growth-detail-copy > span,
+.exploration-page .growth-formula > span,
+.exploration-page .metric-source-list > span {
+  color: var(--app-muted);
+  font-size: 0.72rem;
+  font-weight: 820;
+  text-transform: uppercase;
+}
+
+.exploration-page .growth-detail-copy h3 {
+  color: var(--app-foreground);
+  font-size: 1.08rem;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.exploration-page .growth-detail-copy p {
+  color: var(--app-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.exploration-page .growth-detail-copy .metric-question {
+  color: var(--app-foreground);
+  font-style: italic;
+  font-weight: 720;
+}
+
+.exploration-page .growth-formula {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+}
+
+.exploration-page .growth-formula strong {
+  color: var(--app-foreground);
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.exploration-page .growth-formula small {
+  color: var(--app-muted);
+  line-height: 1.4;
+}
+
+.exploration-page .metric-source-list {
+  display: grid;
+  gap: 7px;
+}
+
+.exploration-page .metric-source-list code {
+  background: rgba(8, 11, 18, 0.72);
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  color: #d6ddff;
+  font-size: 0.7rem;
+  overflow-wrap: anywhere;
+  padding: 7px 8px;
+}
+
+.exploration-page .growth-detail-chart {
+  min-width: 0;
+}
+
+.exploration-page .growth-detail-chart .temp-bar-chart {
   padding: 0;
 }
 
@@ -6229,10 +6358,16 @@ tbody tr:hover td {
 .exploration-page .temp-bar-chart .bar-hit-area {
   cursor: pointer;
   fill: transparent;
+  touch-action: none;
 }
 
 .exploration-page .temp-bar-chart .bar-hit-area:focus {
   outline: none;
+}
+
+.exploration-page .temp-bar-chart rect.selected {
+  stroke: #ffffff;
+  stroke-width: 2;
 }
 
 .exploration-page .temp-bar-chart .temp-bar-tooltip rect {
@@ -6270,6 +6405,12 @@ tbody tr:hover td {
 .exploration-page .temp-bar-chart text {
   fill: var(--app-muted);
   font-size: 10px;
+}
+
+@media (max-width: 920px) {
+  .exploration-page .growth-detail-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 .exploration-page .exploration-asset-table {
@@ -9339,6 +9480,46 @@ body:has(.mobile-sheet-backdrop) {
   overflow: hidden;
 }
 
+.mobile-pagination {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 16px 4px 0;
+}
+
+.mobile-stock-app .mobile-pagination button {
+  align-items: center;
+  background: var(--mobile-surface-soft);
+  border: 1px solid transparent;
+  border-radius: 50%;
+  color: var(--mobile-text);
+  display: inline-flex;
+  height: 44px;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0;
+  width: 44px;
+}
+
+.mobile-stock-app .mobile-pagination button:hover:not(:disabled) {
+  background: #292a2e;
+  border-color: var(--mobile-border-strong);
+}
+
+.mobile-stock-app .mobile-pagination button:disabled {
+  color: #4c4d52;
+  cursor: not-allowed;
+}
+
+.mobile-pagination strong {
+  color: var(--mobile-muted);
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 58px;
+  text-align: center;
+}
+
 .mobile-stock-row {
   min-width: 0;
   position: relative;
@@ -10770,18 +10951,26 @@ body:has(.mobile-sheet-backdrop) {
   padding: 22px 0;
 }
 
-.mobile-signal-strip > div {
+.mobile-growth-signal {
   background: var(--mobile-surface);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
+  color: inherit;
+  cursor: pointer;
   display: grid;
   gap: 10px;
   justify-items: start;
   min-width: 0;
   padding: 15px;
+  text-align: left;
 }
 
-.mobile-signal-strip > div > span:first-child,
+.mobile-growth-signal.active {
+  border-color: rgba(91, 140, 255, 0.62);
+  box-shadow: 0 0 0 1px rgba(91, 140, 255, 0.22) inset;
+}
+
+.mobile-growth-signal > span:first-child,
 .mobile-metric-card > span {
   color: var(--mobile-muted);
   font-size: 0.75rem;
@@ -10792,6 +10981,74 @@ body:has(.mobile-sheet-backdrop) {
   color: var(--mobile-text);
   font-size: 1.05rem;
   font-variant-numeric: tabular-nums;
+}
+
+.mobile-growth-detail-panel {
+  border-top: 1px solid var(--mobile-border);
+  display: grid;
+  gap: 14px;
+  padding: 24px 0;
+}
+
+.mobile-growth-copy,
+.mobile-growth-formula,
+.mobile-source-list {
+  background: var(--mobile-surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.mobile-growth-copy > span,
+.mobile-growth-formula > span,
+.mobile-source-list > span {
+  color: var(--mobile-muted);
+  font-size: 0.7rem;
+  font-weight: 780;
+  text-transform: uppercase;
+}
+
+.mobile-growth-copy h2 {
+  color: var(--mobile-text);
+  font-size: 1.1rem;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.mobile-growth-copy p {
+  color: var(--mobile-muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.mobile-growth-copy .metric-question {
+  color: var(--mobile-text);
+  font-style: italic;
+  font-weight: 720;
+}
+
+.mobile-growth-formula strong {
+  color: var(--mobile-text);
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.mobile-growth-formula small {
+  color: var(--mobile-muted);
+  line-height: 1.45;
+}
+
+.mobile-source-list code {
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  color: var(--mobile-text);
+  font-size: 0.7rem;
+  overflow-wrap: anywhere;
+  padding: 8px;
 }
 
 .mobile-detail-section {
@@ -10908,6 +11165,17 @@ body:has(.mobile-sheet-backdrop) {
   fill: var(--mobile-red);
 }
 
+.mobile-growth-chart rect.selected {
+  stroke: #ffffff;
+  stroke-width: 2;
+}
+
+.mobile-growth-hit {
+  cursor: pointer;
+  fill: transparent;
+  touch-action: none;
+}
+
 .mobile-growth-chart .mobile-bar-zero {
   stroke: rgba(255, 255, 255, 0.2);
   stroke-width: 1;
@@ -10917,6 +11185,26 @@ body:has(.mobile-sheet-backdrop) {
   fill: var(--mobile-muted);
   font-size: 10px;
   font-weight: 600;
+}
+
+.mobile-growth-tooltip rect {
+  fill: rgba(17, 20, 29, 0.98);
+  stroke: rgba(255, 255, 255, 0.16);
+}
+
+.mobile-growth-tooltip text {
+  fill: var(--mobile-text);
+  font-size: 11px;
+}
+
+.mobile-growth-tooltip .positive {
+  fill: var(--mobile-green);
+  font-weight: 760;
+}
+
+.mobile-growth-tooltip .negative {
+  fill: var(--mobile-red);
+  font-weight: 760;
 }
 
 .mobile-detail-footer {

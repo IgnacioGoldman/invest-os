@@ -63,6 +63,7 @@ type MetricKind = "percent" | "ratio" | "compact";
 type HistoricalRow = OpenDataStockSnapshot["historical_series"][string][number];
 type DetailKind = "charts" | "analysis" | null;
 type Tone = "good" | "watch" | "caution" | "bad" | "neutral";
+type GrowthDetailKey = "revenue" | "momentum" | "eps";
 type ConvictionFilter = "all" | "strong" | "setup" | "uncertain" | "weak" | "needs_data";
 type SortDirection = "asc" | "desc";
 type SortValue = number | string | null;
@@ -106,6 +107,27 @@ const CONVICTION_HELP =
   "4-5: interesting but too uncertain\n" +
   "6-7: interesting setup, but with meaningful caveats\n" +
   "8-10: very strong setup with cleaner valuation, price action, and evidence";
+
+const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: string; description: string }> = {
+  revenue: {
+    title: "Latest revenue growth YoY",
+    question: "Is the business growing right now?",
+    description:
+      "Compares the latest quarter's revenue with the same quarter last year. It tells you whether customers are spending more with the company and whether the overall business is expanding. For example, +15% means the company generated 15% more revenue than one year ago.",
+  },
+  momentum: {
+    title: "Momentum revenue growth YoY",
+    question: "Is the company's growth getting stronger or weaker?",
+    description:
+      "Compares the latest revenue growth rate with the previous quarter's growth rate. A positive percentage-point change means growth is accelerating; a negative change means it is decelerating.",
+  },
+  eps: {
+    title: "Latest EPS growth YoY",
+    question: "Is the company converting growth into earnings?",
+    description:
+      "Compares latest-quarter diluted earnings per share with the same quarter last year. It helps separate revenue growth from profitable growth.",
+  },
+};
 
 const OPPORTUNITY_COPY: Record<StockEntryAnalysis["opportunity_type"], { label: string; detail: string; tone: Tone }> = {
   "Temporary selloff": {
@@ -400,6 +422,34 @@ function sortedHistoricalRows(snapshot: OpenDataStockSnapshot, series: string) {
   return [...(snapshot.historical_series[series] ?? [])].sort((left, right) =>
     left.period.localeCompare(right.period, undefined, { numeric: true, sensitivity: "base" }),
   );
+}
+
+function sourceFacts(source?: string) {
+  return (source ?? "")
+    .split(";")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function revenueGrowthDetail(snapshot: OpenDataStockSnapshot) {
+  const rows = sortedHistoricalRows(snapshot, "quarterly_revenue");
+  const latest = [...rows].reverse().find((row) => metricValue(row, "revenue_growth_yoy") != null);
+  if (!latest) return null;
+  const parts = periodParts(latest.period);
+  const prior = parts
+    ? rows.find((row) => {
+        const priorParts = periodParts(row.period);
+        return priorParts?.fiscalYear === parts.fiscalYear - 1 && priorParts.quarter === parts.quarter;
+      })
+    : null;
+
+  return {
+    latest,
+    prior,
+    latestRevenue: metricValue(latest, "revenue"),
+    priorRevenue: prior ? metricValue(prior, "revenue") : null,
+    growth: latest.metrics.revenue_growth_yoy,
+  };
 }
 
 function historicalValues(snapshot: OpenDataStockSnapshot, series: string, metric: string) {
@@ -1128,12 +1178,14 @@ function QuarterlyGrowthBarChart({
   points,
   emptyMessage,
   ariaMetric,
+  selectedPeriod,
 }: {
   snapshot: OpenDataStockSnapshot;
   title: string;
   points: { period: string; value: number }[];
   emptyMessage: string;
   ariaMetric: string;
+  selectedPeriod?: string;
 }) {
   const [hoveredPoint, setHoveredPoint] = useState<{ period: string; value: number; x: number; y: number } | null>(null);
   if (points.length === 0) {
@@ -1166,6 +1218,23 @@ function QuarterlyGrowthBarChart({
   const tooltipHeight = 44;
   const tooltipX = hoveredPoint ? Math.min(width - right - tooltipWidth, Math.max(left, hoveredPoint.x - tooltipWidth / 2)) : 0;
   const tooltipY = hoveredPoint ? Math.max(top, hoveredPoint.y - tooltipHeight - 8) : 0;
+  const tooltipPointForIndex = (index: number) => {
+    const point = points[index];
+    const x = left + index * slotWidth + gap / 2;
+    const y = point.value >= 0 ? yFor(point.value) : zeroY;
+    return {
+      period: point.period,
+      value: point.value,
+      x: x + barWidth / 2,
+      y: Math.min(y, zeroY),
+    };
+  };
+  const tooltipPointForClientX = (clientX: number, svg: SVGSVGElement) => {
+    const rect = svg.getBoundingClientRect();
+    const x = ((clientX - rect.left) / rect.width) * width;
+    const index = Math.min(points.length - 1, Math.max(0, Math.floor((x - left) / slotWidth)));
+    return tooltipPointForIndex(index);
+  };
 
   return (
     <div className="temp-bar-chart">
@@ -1196,12 +1265,11 @@ function QuarterlyGrowthBarChart({
             const labelVisible =
               index === 0 || index === points.length - 1 || (index % labelEvery === 0 && index < points.length - 2);
             const [yearLabel, quarterLabel] = point.period.replace("FY", "").split(" ");
-            const tooltipPoint = {
-              period: point.period,
-              value: point.value,
-              x: x + barWidth / 2,
-              y: Math.min(y, zeroY),
-            };
+            const tooltipPoint = tooltipPointForIndex(index);
+            const className = [
+              point.value >= 0 ? "positive" : "negative",
+              point.period === selectedPeriod ? "selected" : "",
+            ].filter(Boolean).join(" ");
             return (
               <g key={point.period}>
                 <rect
@@ -1210,7 +1278,7 @@ function QuarterlyGrowthBarChart({
                   width={barWidth}
                   height={barHeight}
                   rx={2}
-                  className={point.value >= 0 ? "positive" : "negative"}
+                  className={className}
                 />
                 <rect
                   x={left + index * slotWidth}
@@ -1223,7 +1291,25 @@ function QuarterlyGrowthBarChart({
                   onFocus={() => setHoveredPoint(tooltipPoint)}
                   onBlur={() => setHoveredPoint(null)}
                   onMouseEnter={() => setHoveredPoint(tooltipPoint)}
-                  onMouseLeave={() => setHoveredPoint(null)}
+                  onMouseLeave={(event) => {
+                    if (event.buttons === 0) setHoveredPoint(null);
+                  }}
+                  onPointerDown={(event) => {
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                    setHoveredPoint(tooltipPoint);
+                  }}
+                  onPointerMove={(event) => {
+                    if (event.buttons === 0 && event.pointerType !== "touch") return;
+                    const svg = event.currentTarget.ownerSVGElement;
+                    if (svg) setHoveredPoint(tooltipPointForClientX(event.clientX, svg));
+                  }}
+                  onPointerUp={(event) => {
+                    event.currentTarget.releasePointerCapture(event.pointerId);
+                  }}
+                  onPointerCancel={(event) => {
+                    event.currentTarget.releasePointerCapture(event.pointerId);
+                    setHoveredPoint(null);
+                  }}
                 />
                 {labelVisible && (
                   <text x={x + barWidth / 2} y={height - 18} textAnchor="middle">
@@ -1254,13 +1340,15 @@ function QuarterlyGrowthBarChart({
 }
 
 function QuarterlyRevenueGrowthBarChart({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
+  const detail = revenueGrowthDetail(snapshot);
   return (
     <QuarterlyGrowthBarChart
       snapshot={snapshot}
-      title="Revenue YoY"
+      title="Revenue growth YoY"
       points={quarterlyRevenueGrowthPoints(snapshot)}
       emptyMessage="No comparable quarterly revenue growth history from SEC facts."
       ariaMetric="quarterly revenue growth YoY"
+      selectedPeriod={detail?.latest.period}
     />
   );
 }
@@ -1274,6 +1362,141 @@ function QuarterlyEpsGrowthBarChart({ snapshot }: { snapshot: OpenDataStockSnaps
       emptyMessage="No comparable positive quarterly EPS growth history from SEC facts."
       ariaMetric="quarterly EPS growth YoY"
     />
+  );
+}
+
+function GrowthMetricButton({
+  active,
+  detailKey,
+  label,
+  tone,
+  signal,
+  value,
+  onClick,
+}: {
+  active: boolean;
+  detailKey: GrowthDetailKey;
+  label: string;
+  tone: Tone;
+  signal: string;
+  value: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={`growth-metric-trigger ${active ? "active" : ""}`}
+      onClick={onClick}
+      aria-expanded={active}
+      aria-controls={`growth-detail-${detailKey}`}
+    >
+      <span>{label}</span>
+      <strong>{value}</strong>
+      <em className={`analysis-tag table-assessment-tag ${tone}`}>{signal}</em>
+    </button>
+  );
+}
+
+function RevenueMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
+  const detail = revenueGrowthDetail(snapshot);
+  const copy = GROWTH_DETAIL_COPY.revenue;
+  const facts = sourceFacts(detail?.growth?.source);
+
+  return (
+    <div className="growth-detail-layout">
+      <div className="growth-detail-copy">
+        <span>Metric definition</span>
+        <h3>{copy.title}</h3>
+        <p className="metric-question">{copy.question}</p>
+        <p>{copy.description}</p>
+        <div className="growth-formula">
+          <span>Current value</span>
+          <strong>{formatValue(detail?.growth, "percent")}</strong>
+          <small>
+            {detail?.latest.period ?? "Latest quarter"}
+            {detail?.latestRevenue != null && detail?.priorRevenue != null
+              ? `: ${formatCompact(detail.latestRevenue)} vs ${formatCompact(detail.priorRevenue)} one year earlier`
+              : ""}
+          </small>
+        </div>
+        {facts.length > 0 && (
+          <div className="metric-source-list">
+            <span>Source facts</span>
+            {facts.map((fact) => (
+              <code key={fact}>{fact}</code>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="growth-detail-chart">
+        <QuarterlyRevenueGrowthBarChart snapshot={snapshot} />
+      </div>
+    </div>
+  );
+}
+
+function MomentumMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
+  const copy = GROWTH_DETAIL_COPY.momentum;
+  const momentum = revenueGrowthMomentum(snapshot);
+  return (
+    <div className="growth-detail-layout">
+      <div className="growth-detail-copy">
+        <span>Metric definition</span>
+        <h3>{copy.title}</h3>
+        <p className="metric-question">{copy.question}</p>
+        <p>{copy.description}</p>
+        <div className="growth-formula">
+          <span>Current value</span>
+          <strong>{momentum.change == null ? "-" : formatSignedPp(momentum.change)}</strong>
+          <small>{momentum.detail}</small>
+        </div>
+      </div>
+      <div className="growth-detail-chart">
+        <QuarterlyRevenueGrowthBarChart snapshot={snapshot} />
+      </div>
+    </div>
+  );
+}
+
+function EpsMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
+  const copy = GROWTH_DETAIL_COPY.eps;
+  const metric = snapshot.business_health.eps_growth_yoy;
+  const facts = sourceFacts(metric?.source);
+  return (
+    <div className="growth-detail-layout">
+      <div className="growth-detail-copy">
+        <span>Metric definition</span>
+        <h3>{copy.title}</h3>
+        <p className="metric-question">{copy.question}</p>
+        <p>{copy.description}</p>
+        <div className="growth-formula">
+          <span>Current value</span>
+          <strong>{formatValue(metric, "percent")}</strong>
+          <small>{metric?.notes ?? "Comparable quarterly EPS growth is unavailable."}</small>
+        </div>
+        {facts.length > 0 && (
+          <div className="metric-source-list">
+            <span>Source facts</span>
+            {facts.map((fact) => (
+              <code key={fact}>{fact}</code>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="growth-detail-chart">
+        <QuarterlyEpsGrowthBarChart snapshot={snapshot} />
+      </div>
+    </div>
+  );
+}
+
+function GrowthMetricDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataStockSnapshot; detailKey: GrowthDetailKey }) {
+  return (
+    <div className="growth-detail-panel" id={`growth-detail-${detailKey}`}>
+      {detailKey === "revenue" && <RevenueMetricDetails snapshot={snapshot} />}
+      {detailKey === "momentum" && <MomentumMetricDetails snapshot={snapshot} />}
+      {detailKey === "eps" && <EpsMetricDetails snapshot={snapshot} />}
+    </div>
   );
 }
 
@@ -1409,6 +1632,8 @@ function StocksInsightsTempTable({
   editMode = false,
   removingTicker,
   onRemoveStock,
+  totalVisibleSnapshots,
+  pagination,
 }: {
   snapshots: OpenDataStockSnapshot[];
   totalSnapshots: number;
@@ -1419,40 +1644,17 @@ function StocksInsightsTempTable({
   editMode?: boolean;
   removingTicker?: string | null;
   onRemoveStock?: (ticker: string) => void;
+  totalVisibleSnapshots: number;
+  pagination?: ReactNode;
 }) {
-  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const [priceHistoryByTicker, setPriceHistoryByTicker] = useState<Record<string, OpenDataPricePoint[]>>({});
-  const [priceHistoryStatus, setPriceHistoryStatus] = useState<Record<string, PriceHistoryStatus>>({});
-  const [priceHistoryErrors, setPriceHistoryErrors] = useState<Record<string, string>>({});
-  const requestedPriceHistory = useRef<Set<string>>(new Set());
+  const [activeGrowthDetails, setActiveGrowthDetails] = useState<Record<string, GrowthDetailKey | undefined>>({});
   const rows = snapshots;
-  const toggleExpandedRow = (ticker: string) => {
-    setExpandedRows((current) => ({ ...current, [ticker]: !current[ticker] }));
+  const toggleGrowthDetail = (ticker: string, detailKey: GrowthDetailKey) => {
+    setActiveGrowthDetails((current) => ({
+      ...current,
+      [ticker]: current[ticker] === detailKey ? undefined : detailKey,
+    }));
   };
-
-  useEffect(() => {
-    rows.forEach((snapshot) => {
-      const ticker = snapshot.ticker;
-      if (!expandedRows[ticker] || requestedPriceHistory.current.has(ticker)) {
-        return;
-      }
-      requestedPriceHistory.current.add(ticker);
-      setPriceHistoryStatus((current) => ({ ...current, [ticker]: "loading" }));
-      fetchOpenDataStockPriceHistory(ticker)
-        .then((points) => {
-          setPriceHistoryByTicker((current) => ({ ...current, [ticker]: points }));
-          setPriceHistoryStatus((current) => ({ ...current, [ticker]: "loaded" }));
-        })
-        .catch((error) => {
-          setPriceHistoryErrors((current) => ({
-            ...current,
-            [ticker]: error instanceof Error ? error.message : "Price history unavailable.",
-          }));
-          setPriceHistoryStatus((current) => ({ ...current, [ticker]: "error" }));
-          requestedPriceHistory.current.delete(ticker);
-        });
-    });
-  }, [expandedRows, rows]);
 
   return (
     <section className="panel open-data-stocks-temp">
@@ -1461,93 +1663,82 @@ function StocksInsightsTempTable({
           <h2>Stock Insights</h2>
         </div>
         <div className="panel-heading-actions">
-          <span>{rows.length} stocks</span>
+          <span>{rows.length} / {totalVisibleSnapshots} / {totalSnapshots}</span>
           {actions}
         </div>
       </div>
       <StockFilterControls {...filterControls} />
+      {pagination}
       {loading && <p className="loading inline">Loading open-data stock metrics...</p>}
-      {!loading && rows.length === 0 ? (
+      {!loading && totalVisibleSnapshots === 0 ? (
         <p className="empty block">{totalSnapshots === 0 ? "No open-data stock metrics loaded." : "No stocks match the current filters."}</p>
       ) : (
         <div className="table-wrap">
           <table className="open-data-table exploration-temp-table">
             <thead>
-              <tr>
-                <th>{renderSortHeader("symbol", "Symbol")}</th>
-                <th>{renderSortHeader("metric:business_health:revenue_growth_yoy", "Latest revenue growth YoY")}</th>
-                <th>{renderSortHeader("temp:revenue_momentum", "Momentum revenue growth YoY")}</th>
-                <th>{renderSortHeader("metric:business_health:eps_growth_yoy", "Latest EPS Growth YoY")}</th>
-                {BETA_SUPPORT_COLUMNS.map(([key, label]) => (
-                  <th key={label}>{renderSortHeader(`metric:price_opportunity:${key}`, label)}</th>
-                ))}
-                {editMode && <th>Remove</th>}
-              </tr>
+	              <tr>
+	                <th>{renderSortHeader("symbol", "Symbol")}</th>
+	                <th>{renderSortHeader("metric:business_health:revenue_growth_yoy", "Latest revenue growth YoY")}</th>
+	                <th>{renderSortHeader("temp:revenue_momentum", "Momentum revenue growth YoY")}</th>
+	                <th>{renderSortHeader("metric:business_health:eps_growth_yoy", "Latest EPS Growth YoY")}</th>
+	                {editMode && <th>Remove</th>}
+	              </tr>
             </thead>
             <tbody>
               {rows.map((snapshot) => {
                 const revenueGrowth = snapshot.business_health.revenue_growth_yoy;
                 const epsGrowth = snapshot.business_health.eps_growth_yoy;
-                const growthSignal = revenueGrowthSignal(revenueGrowth?.value);
-                const epsSignal = epsGrowthSignal(epsGrowth?.value);
-                const momentum = revenueGrowthMomentum(snapshot);
-                const rowExpanded = Boolean(expandedRows[snapshot.ticker]);
-                return (
-                  <Fragment key={snapshot.ticker}>
-                    <tr className={rowExpanded ? "exploration-row-expanded" : ""}>
-                      <td>
-                        <div className="ticker-cell-main">
-                          <button
-                            type="button"
-                            className="icon-button row-toggle exploration-row-toggle"
-                            onClick={() => toggleExpandedRow(snapshot.ticker)}
-                            title={rowExpanded ? "Hide growth charts" : "Show growth charts"}
-                            aria-expanded={rowExpanded}
-                          >
-                            {rowExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                          </button>
-                          <strong>{snapshot.ticker}</strong>
-                        </div>
-                        <small>{snapshot.name ?? `CIK ${snapshot.cik ?? "-"}`}</small>
-                      </td>
-                      <td title={revenueGrowth ? `${growthSignal.detail}\n${revenueGrowth.notes}\n${revenueGrowth.source}` : growthSignal.detail}>
-                        <span className={`analysis-tag table-assessment-tag ${growthSignal.tone}`}>{growthSignal.label}</span>
-                        <small>{formatValue(revenueGrowth, "percent")}</small>
-                      </td>
-                      <td title={momentum.detail}>
-                        <span className={`analysis-tag table-assessment-tag ${momentum.tone}`}>{momentum.label}</span>
-                        <small>
-                          {momentum.change == null
-                            ? "Needs 2 quarters"
-                            : `${formatSignedPp(momentum.change)} vs ${momentum.previous?.period ?? "previous quarter"}`}
-                        </small>
-                      </td>
-                      <td title={epsGrowth ? `${epsSignal.detail}\n${epsGrowth.notes}\n${epsGrowth.source}` : epsSignal.detail}>
-                        <span className={`analysis-tag table-assessment-tag ${epsSignal.tone}`}>{epsSignal.label}</span>
-                        <small>{formatValue(epsGrowth, "percent")}</small>
-                      </td>
-                      {BETA_SUPPORT_COLUMNS.map(([key, label]) => {
-                        const support = snapshot.price_opportunity[key];
-                        const supportValue = support?.value;
-                        const supportLevel = inferredSupportLevel(snapshot.price_opportunity.current_price?.value, supportValue);
-                        return (
-                          <td key={key} title={support ? `${label}: ${support.notes}\n${support.source}` : `${label} was unavailable.`}>
-                            <span className={`analysis-tag table-assessment-tag ${supportSignalTone(supportValue)}`}>
-                              {supportSignalLabel(supportValue)}
-                            </span>
-                            <small>
-                              {supportValue == null ? "-" : formatSignedPercent(supportValue)}
-                              {supportLevel == null ? null : (
-                                <>
-                                  <br />
-                                  {formatPrice(supportLevel)}
-                                </>
-                              )}
-                            </small>
-                          </td>
-                        );
-                      })}
-                      {editMode && (
+	                const growthSignal = revenueGrowthSignal(revenueGrowth?.value);
+	                const epsSignal = epsGrowthSignal(epsGrowth?.value);
+	                const momentum = revenueGrowthMomentum(snapshot);
+	                const activeDetail = activeGrowthDetails[snapshot.ticker];
+	                return (
+	                  <Fragment key={snapshot.ticker}>
+	                    <tr className={activeDetail ? "exploration-row-expanded" : ""}>
+	                      <td>
+	                        <div className="ticker-cell-main">
+	                          <strong>{snapshot.ticker}</strong>
+	                        </div>
+	                        <small>{snapshot.name ?? `CIK ${snapshot.cik ?? "-"}`}</small>
+	                      </td>
+	                      <td>
+	                        <GrowthMetricButton
+	                          active={activeDetail === "revenue"}
+	                          detailKey="revenue"
+	                          label="Latest revenue growth YoY"
+	                          tone={growthSignal.tone}
+	                          signal={growthSignal.label}
+	                          value={formatValue(revenueGrowth, "percent")}
+	                          onClick={() => toggleGrowthDetail(snapshot.ticker, "revenue")}
+	                        />
+	                      </td>
+	                      <td>
+	                        <GrowthMetricButton
+	                          active={activeDetail === "momentum"}
+	                          detailKey="momentum"
+	                          label="Momentum revenue growth YoY"
+	                          tone={momentum.tone}
+	                          signal={momentum.label}
+	                          value={
+	                            momentum.change == null
+	                              ? "Needs 2 quarters"
+	                              : `${formatSignedPp(momentum.change)} vs ${momentum.previous?.period ?? "previous quarter"}`
+	                          }
+	                          onClick={() => toggleGrowthDetail(snapshot.ticker, "momentum")}
+	                        />
+	                      </td>
+	                      <td>
+	                        <GrowthMetricButton
+	                          active={activeDetail === "eps"}
+	                          detailKey="eps"
+	                          label="Latest EPS growth YoY"
+	                          tone={epsSignal.tone}
+	                          signal={epsSignal.label}
+	                          value={formatValue(epsGrowth, "percent")}
+	                          onClick={() => toggleGrowthDetail(snapshot.ticker, "eps")}
+	                        />
+	                      </td>
+	                      {editMode && (
                         <td className="table-row-action-cell">
                           <button
                             type="button"
@@ -1559,23 +1750,14 @@ function StocksInsightsTempTable({
                             <X size={15} aria-hidden="true" />
                           </button>
                         </td>
-                      )}
-                    </tr>
-                    {rowExpanded && (
-                      <tr className="exploration-detail-row temp-chart-row">
-                        <td colSpan={editMode ? 9 : 8}>
-                          <div className="temp-chart-stack">
-                            <PriceLineChart
-                              snapshot={snapshot}
-                              points={priceHistoryByTicker[snapshot.ticker]}
-                              loading={priceHistoryStatus[snapshot.ticker] === "loading"}
-                              error={priceHistoryErrors[snapshot.ticker]}
-                            />
-                            <QuarterlyRevenueGrowthBarChart snapshot={snapshot} />
-                            <QuarterlyEpsGrowthBarChart snapshot={snapshot} />
-                          </div>
-                        </td>
-                      </tr>
+	                      )}
+	                    </tr>
+	                    {activeDetail && (
+	                      <tr className="exploration-detail-row temp-chart-row">
+	                        <td colSpan={editMode ? 5 : 4}>
+	                          <GrowthMetricDetailPanel snapshot={snapshot} detailKey={activeDetail} />
+	                        </td>
+	                      </tr>
                     )}
                   </Fragment>
                 );
@@ -2107,6 +2289,29 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
     const start = (currentPage - 1) * PAGE_SIZE;
     return visibleSnapshots.slice(start, start + PAGE_SIZE);
   }, [currentPage, visibleSnapshots]);
+  const pagination = visibleSnapshots.length > PAGE_SIZE ? (
+    <div className="table-pagination" aria-label="Stocks table pagination">
+      <button
+        type="button"
+        className="icon-button"
+        onClick={() => setPage((value) => Math.max(1, value - 1))}
+        disabled={currentPage === 1}
+        title="Previous page"
+      >
+        <ChevronLeft size={18} aria-hidden="true" />
+      </button>
+      <strong>{currentPage} / {totalPages}</strong>
+      <button
+        type="button"
+        className="icon-button"
+        onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+        disabled={currentPage === totalPages}
+        title="Next page"
+      >
+        <ChevronRight size={18} aria-hidden="true" />
+      </button>
+    </div>
+  ) : null;
 
   useEffect(() => {
     setPage(1);
@@ -2359,14 +2564,16 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
 
   const betaTable = (
     <StocksInsightsTempTable
-      snapshots={visibleSnapshots}
+      snapshots={pagedSnapshots}
       totalSnapshots={snapshots.length}
+      totalVisibleSnapshots={visibleSnapshots.length}
       loading={loading}
       actions={betaActions}
       renderSortHeader={renderSortHeader}
       editMode={editMode}
       removingTicker={removingTicker}
       onRemoveStock={onRemoveStock}
+      pagination={pagination}
       filterControls={{
         query,
         onQueryChange: setQuery,
@@ -2561,29 +2768,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
               </div>
             )}
           </div>
-          {visibleSnapshots.length > PAGE_SIZE && (
-            <div className="table-pagination" aria-label="Stocks table pagination">
-              <button
-                type="button"
-                className="icon-button"
-                onClick={() => setPage((value) => Math.max(1, value - 1))}
-                disabled={currentPage === 1}
-                title="Previous page"
-              >
-                <ChevronLeft size={18} aria-hidden="true" />
-              </button>
-              <strong>{currentPage} / {totalPages}</strong>
-              <button
-                type="button"
-                className="icon-button"
-                onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
-                disabled={currentPage === totalPages}
-                title="Next page"
-              >
-                <ChevronRight size={18} aria-hidden="true" />
-              </button>
-            </div>
-          )}
+          {pagination}
           <div className="table-wrap">
             <table
               className="open-data-table exploration-metrics-table"

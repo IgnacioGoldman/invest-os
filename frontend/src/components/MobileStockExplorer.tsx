@@ -2,9 +2,9 @@ import {
   ArrowDown,
   ArrowLeft,
   ArrowUp,
-  BarChart3,
   Bookmark,
   Check,
+  ChevronLeft,
   ChevronRight,
   LogIn,
   Plus,
@@ -16,9 +16,8 @@ import {
   X,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  fetchOpenDataStockPriceHistory,
   type OpenDataMetric,
   type OpenDataPricePoint,
   type OpenDataStockSnapshot,
@@ -55,6 +54,7 @@ type Props = {
 };
 
 type Tone = "positive" | "warning" | "negative" | "neutral" | "info";
+type GrowthDetailKey = "revenue" | "momentum" | "eps";
 export type FilterKey =
   | "revenue"
   | "momentum"
@@ -88,6 +88,27 @@ type MetricKind = "percent" | "ratio" | "compact" | "price";
 type Signal = {
   label: string;
   tone: Tone;
+};
+
+const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: string; description: string }> = {
+  revenue: {
+    title: "Latest revenue growth YoY",
+    question: "Is the business growing right now?",
+    description:
+      "Compares the latest quarter's revenue with the same quarter last year. It tells you whether customers are spending more with the company and whether the overall business is expanding. For example, +15% means the company generated 15% more revenue than one year ago.",
+  },
+  momentum: {
+    title: "Revenue growth momentum",
+    question: "Is the company's growth getting stronger or weaker?",
+    description:
+      "Compares the latest revenue growth rate with the previous quarter's growth rate. A positive percentage-point change means growth is accelerating; a negative change means it is decelerating.",
+  },
+  eps: {
+    title: "Latest EPS growth YoY",
+    question: "Is the company converting growth into earnings?",
+    description:
+      "Compares latest-quarter diluted earnings per share with the same quarter last year. It helps separate revenue growth from profitable growth.",
+  },
 };
 
 type FilterDefinition = {
@@ -186,54 +207,7 @@ const CHART_RANGES: Array<{ key: ChartRange; days: number | null }> = [
   { key: "5Y", days: 365 * 5 },
   { key: "ALL", days: null },
 ];
-
-const BUSINESS_METRICS: Array<[string, string, MetricKind]> = [
-  ["revenue_growth_yoy", "Revenue growth YoY", "percent"],
-  ["revenue_cagr_3y", "Revenue CAGR 3Y", "percent"],
-  ["eps_growth_yoy", "EPS growth YoY", "percent"],
-  ["eps_cagr_3y", "EPS CAGR 3Y", "percent"],
-  ["gross_margin", "Gross margin", "percent"],
-  ["operating_margin", "Operating margin", "percent"],
-  ["net_margin", "Net margin", "percent"],
-  ["free_cash_flow", "Free cash flow", "compact"],
-  ["roe", "Return on equity", "percent"],
-  ["roic", "Return on capital", "percent"],
-  ["cash", "Cash", "compact"],
-  ["debt", "Debt", "compact"],
-  ["debt_to_equity", "Debt to equity", "ratio"],
-];
-
-const RETURN_METRICS: Array<[string, string, MetricKind]> = [
-  ["change_1d", "1 day", "percent"],
-  ["change_1w", "1 week", "percent"],
-  ["change_1m", "1 month", "percent"],
-  ["change_3m", "3 months", "percent"],
-  ["change_6m", "6 months", "percent"],
-  ["change_1y", "1 year", "percent"],
-  ["change_2y", "2 years", "percent"],
-  ["change_5y", "5 years", "percent"],
-  ["distance_from_ath", "From all-time high", "percent"],
-  ["distance_from_52w_high", "From 52-week high", "percent"],
-  ["distance_from_52w_low", "From 52-week low", "percent"],
-];
-
-const VALUATION_METRICS: Array<[string, string, MetricKind]> = [
-  ["pe", "P/E", "ratio"],
-  ["forward_pe", "Forward P/E", "ratio"],
-  ["peg", "PEG", "ratio"],
-  ["price_to_sales", "Price to sales", "ratio"],
-  ["ev_to_ebitda", "EV / EBITDA", "ratio"],
-  ["fcf_yield", "FCF yield", "percent"],
-];
-
-const SUPPORT_METRICS: Array<[string, string]> = [
-  ["support_1m_distance", "1M support"],
-  ["support_3m_distance", "3M support"],
-  ["support_6m_distance", "6M support"],
-  ["support_1y_distance", "1Y support"],
-  ["support_2y_distance", "2Y support"],
-  ["support_5y_distance", "5Y support"],
-];
+const PAGE_SIZE = 10;
 
 function finiteNumber(value?: number | null) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
@@ -319,9 +293,36 @@ function revenueGrowthPoints(snapshot: OpenDataStockSnapshot) {
     .filter((point): point is { period: string; value: number } => point.value != null);
 }
 
+function sourceFacts(source?: string) {
+  return (source ?? "")
+    .split(";")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function periodParts(period: string) {
   const match = /^FY(\d+)\s+(Q[1-4])$/.exec(period);
   return match ? { year: Number(match[1]), quarter: match[2] } : null;
+}
+
+function revenueGrowthDetail(snapshot: OpenDataStockSnapshot) {
+  const rows = historicalRows(snapshot, "quarterly_revenue");
+  const latest = [...rows].reverse().find((row) => metricValue(row, "revenue_growth_yoy") != null);
+  if (!latest) return null;
+  const parts = periodParts(latest.period);
+  const prior = parts
+    ? rows.find((row) => {
+        const priorParts = periodParts(row.period);
+        return priorParts?.year === parts.year - 1 && priorParts.quarter === parts.quarter;
+      })
+    : null;
+  return {
+    latest,
+    prior,
+    latestRevenue: metricValue(latest, "revenue"),
+    priorRevenue: prior ? metricValue(prior, "revenue") : null,
+    growth: latest.metrics.revenue_growth_yoy,
+  };
 }
 
 function quarterlyGrowthPoints(snapshot: OpenDataStockSnapshot, metric: string) {
@@ -1256,7 +1257,16 @@ function PriceChart({ snapshot, points, loading, error }: {
   );
 }
 
-function GrowthChart({ title, points }: { title: string; points: Array<{ period: string; value: number }> }) {
+function GrowthChart({
+  title,
+  points,
+  selectedPeriod,
+}: {
+  title: string;
+  points: Array<{ period: string; value: number }>;
+  selectedPeriod?: string;
+}) {
+  const [activePoint, setActivePoint] = useState<{ period: string; value: number; x: number; y: number } | null>(null);
   const visible = points.slice(-8);
   if (visible.length === 0) {
     return (
@@ -1277,6 +1287,23 @@ function GrowthChart({ title, points }: { title: string; points: Array<{ period:
   const zeroY = yFor(0);
   const slot = (width - pad.left - pad.right) / visible.length;
   const barWidth = Math.min(slot * 0.62, 48);
+  const tooltipWidth = 116;
+  const tooltipHeight = 42;
+  const tooltipX = activePoint ? Math.min(width - tooltipWidth - 6, Math.max(6, activePoint.x - tooltipWidth / 2)) : 0;
+  const tooltipY = activePoint ? Math.max(8, activePoint.y - tooltipHeight - 8) : 0;
+  const pointForIndex = (index: number) => {
+    const point = visible[index];
+    const x = pad.left + slot * index + slot / 2;
+    const valueY = yFor(point.value);
+    const y = point.value >= 0 ? valueY : zeroY;
+    return { period: point.period, value: point.value, x, y: Math.min(y, zeroY) };
+  };
+  const pointForClientX = (clientX: number, svg: SVGSVGElement) => {
+    const rect = svg.getBoundingClientRect();
+    const x = ((clientX - rect.left) / rect.width) * width;
+    const index = Math.min(visible.length - 1, Math.max(0, Math.floor((x - pad.left) / slot)));
+    return pointForIndex(index);
+  };
 
   return (
     <article className="mobile-growth-chart">
@@ -1291,81 +1318,137 @@ function GrowthChart({ title, points }: { title: string; points: Array<{ period:
           const valueY = yFor(point.value);
           const y = point.value >= 0 ? valueY : zeroY;
           const barHeight = Math.max(Math.abs(zeroY - valueY), 2);
+          const pointLabel = point.period.replace("FY", "").split(" ");
+          const barClassName = [
+            point.value >= 0 ? "positive" : "negative",
+            point.period === selectedPeriod ? "selected" : "",
+          ].filter(Boolean).join(" ");
           return (
             <g key={point.period}>
-              <rect className={point.value >= 0 ? "positive" : "negative"} x={x} y={y} width={barWidth} height={barHeight} rx="4" />
-              <text x={x + barWidth / 2} y={height - 10} textAnchor="middle">{point.period.replace("FY", "").replace(" ", "\n")}</text>
+              <rect className={barClassName} x={x} y={y} width={barWidth} height={barHeight} rx="4" />
+              <rect
+                className="mobile-growth-hit"
+                x={pad.left + slot * index}
+                y={pad.top}
+                width={slot}
+                height={height - pad.top - pad.bottom}
+                tabIndex={0}
+                aria-label={`${point.period}: ${formatPercent(point.value, true)}`}
+                onFocus={() => setActivePoint(pointForIndex(index))}
+                onBlur={() => setActivePoint(null)}
+                onPointerDown={(event) => {
+                  event.currentTarget.setPointerCapture(event.pointerId);
+                  setActivePoint(pointForIndex(index));
+                }}
+                onPointerMove={(event) => {
+                  if (event.buttons === 0 && event.pointerType !== "touch") return;
+                  const svg = event.currentTarget.ownerSVGElement;
+                  if (svg) setActivePoint(pointForClientX(event.clientX, svg));
+                }}
+                onPointerUp={(event) => {
+                  event.currentTarget.releasePointerCapture(event.pointerId);
+                }}
+                onPointerCancel={(event) => {
+                  event.currentTarget.releasePointerCapture(event.pointerId);
+                  setActivePoint(null);
+                }}
+              />
+              <text x={x + barWidth / 2} y={height - 18} textAnchor="middle">
+                <tspan x={x + barWidth / 2}>{pointLabel[0]}</tspan>
+                <tspan x={x + barWidth / 2} dy="11">{pointLabel[1]}</tspan>
+              </text>
             </g>
           );
         })}
+        {activePoint && (
+          <g className="mobile-growth-tooltip" transform={`translate(${tooltipX} ${tooltipY})`} pointerEvents="none">
+            <rect width={tooltipWidth} height={tooltipHeight} rx="8" />
+            <text x="10" y="16" className="tooltip-period">{activePoint.period}</text>
+            <text x="10" y="32" className={activePoint.value < 0 ? "negative" : "positive"}>
+              {formatPercent(activePoint.value, true)}
+            </text>
+          </g>
+        )}
       </svg>
     </article>
   );
 }
 
-function MetricCard({ label, metric, kind, supportPrice }: {
+function MobileGrowthSignalButton({
+  active,
+  label,
+  signal,
+  value,
+  onClick,
+}: {
+  active: boolean;
   label: string;
-  metric?: OpenDataMetric;
-  kind: MetricKind;
-  supportPrice?: number | null;
+  signal: Signal;
+  value: string;
+  onClick: () => void;
 }) {
   return (
-    <article className="mobile-metric-card" title={metric?.notes}>
+    <button type="button" className={`mobile-growth-signal ${active ? "active" : ""}`} onClick={onClick}>
       <span>{label}</span>
-      <strong>{formatMetric(metric, kind)}</strong>
-      {supportPrice != null && <small>{formatPrice(supportPrice)}</small>}
-    </article>
+      <StockStatus signal={signal} />
+      <strong>{value}</strong>
+    </button>
   );
 }
 
-function MetricSection({
-  title,
-  metrics,
-  source,
-}: {
-  title: string;
-  metrics: Array<[string, string, MetricKind]>;
-  source: Record<string, OpenDataMetric>;
-}) {
+function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataStockSnapshot; detailKey: GrowthDetailKey }) {
+  const copy = GROWTH_DETAIL_COPY[detailKey];
+  const revenueDetail = revenueGrowthDetail(snapshot);
+  const momentum = revenueMomentum(snapshot);
+  const epsMetric = snapshot.business_health.eps_growth_yoy;
+  const metric = detailKey === "eps" ? epsMetric : detailKey === "revenue" ? revenueDetail?.growth : undefined;
+  const facts = sourceFacts(metric?.source);
+  const currentValue = detailKey === "momentum"
+    ? momentum.change == null ? "-" : `${momentum.change > 0 ? "+" : ""}${formatNumber(momentum.change)} pp`
+    : formatMetric(metric, "percent");
+  const detailText = detailKey === "momentum"
+    ? momentum.change == null ? "Needs at least two comparable quarterly revenue YoY points." : `${momentum.label} versus ${momentum.period ?? "the prior quarter"}.`
+    : detailKey === "revenue" && revenueDetail?.latestRevenue != null && revenueDetail?.priorRevenue != null
+      ? `${revenueDetail.latest.period}: ${formatCompact(revenueDetail.latestRevenue)} vs ${formatCompact(revenueDetail.priorRevenue)} one year earlier.`
+      : metric?.notes ?? "Comparable quarterly data is unavailable.";
+
   return (
-    <section className="mobile-detail-section">
-      <h2>{title}</h2>
-      <div className="mobile-metric-grid">
-        {metrics.map(([key, label, kind]) => <MetricCard key={key} label={label} metric={source[key]} kind={kind} />)}
+    <section className="mobile-growth-detail-panel">
+      <div className="mobile-growth-copy">
+        <span>Metric definition</span>
+        <h2>{copy.title}</h2>
+        <p className="metric-question">{copy.question}</p>
+        <p>{copy.description}</p>
       </div>
+      <div className="mobile-growth-formula">
+        <span>Current value</span>
+        <strong>{currentValue}</strong>
+        <small>{detailText}</small>
+      </div>
+      {facts.length > 0 && (
+        <div className="mobile-source-list">
+          <span>Source facts</span>
+          {facts.map((fact) => (
+            <code key={fact}>{fact}</code>
+          ))}
+        </div>
+      )}
+      <GrowthChart
+        title={detailKey === "eps" ? "EPS growth YoY" : "Revenue growth YoY"}
+        points={detailKey === "eps" ? quarterlyGrowthPoints(snapshot, "eps_diluted") : revenueGrowthPoints(snapshot)}
+        selectedPeriod={detailKey === "revenue" ? revenueDetail?.latest.period : undefined}
+      />
     </section>
   );
 }
 
 function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; onBack: () => void }) {
-  const [points, setPoints] = useState<OpenDataPricePoint[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [activeGrowthDetail, setActiveGrowthDetail] = useState<GrowthDetailKey>("revenue");
   const currentPrice = snapshot.price_opportunity.current_price?.value;
   const dailyChange = snapshot.price_opportunity.change_1d?.value;
   const revenueSignal = growthSignal(snapshot.business_health.revenue_growth_yoy?.value);
   const epsSignal = growthSignal(snapshot.business_health.eps_growth_yoy?.value);
   const momentum = revenueMomentum(snapshot);
-
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setError(null);
-    setPoints([]);
-    fetchOpenDataStockPriceHistory(snapshot.ticker)
-      .then((next) => {
-        if (active) setPoints(next);
-      })
-      .catch((reason) => {
-        if (active) setError(reason instanceof Error ? reason.message : "Price history unavailable.");
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [snapshot.ticker]);
 
   return (
     <div className="mobile-stock-detail">
@@ -1390,46 +1473,31 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
           </div>
         </section>
 
-        <PriceChart snapshot={snapshot} points={points} loading={loading} error={error} />
-
         <section className="mobile-signal-strip" aria-label="Current growth signals">
-          <div><span>Revenue</span><StockStatus signal={revenueSignal} /><strong>{formatPercent(snapshot.business_health.revenue_growth_yoy?.value, true)}</strong></div>
-          <div><span>Momentum</span><StockStatus signal={momentum} /><strong>{momentum.change == null ? "-" : `${momentum.change > 0 ? "+" : ""}${formatNumber(momentum.change)} pp`}</strong></div>
-          <div><span>EPS</span><StockStatus signal={epsSignal} /><strong>{formatPercent(snapshot.business_health.eps_growth_yoy?.value, true)}</strong></div>
+          <MobileGrowthSignalButton
+            active={activeGrowthDetail === "revenue"}
+            label="Latest revenue growth YoY"
+            signal={revenueSignal}
+            value={formatPercent(snapshot.business_health.revenue_growth_yoy?.value, true)}
+            onClick={() => setActiveGrowthDetail("revenue")}
+          />
+          <MobileGrowthSignalButton
+            active={activeGrowthDetail === "momentum"}
+            label="Revenue growth momentum"
+            signal={momentum}
+            value={momentum.change == null ? "-" : `${momentum.change > 0 ? "+" : ""}${formatNumber(momentum.change)} pp`}
+            onClick={() => setActiveGrowthDetail("momentum")}
+          />
+          <MobileGrowthSignalButton
+            active={activeGrowthDetail === "eps"}
+            label="Latest EPS growth YoY"
+            signal={epsSignal}
+            value={formatPercent(snapshot.business_health.eps_growth_yoy?.value, true)}
+            onClick={() => setActiveGrowthDetail("eps")}
+          />
         </section>
 
-        <section className="mobile-detail-section">
-          <h2>Support</h2>
-          <div className="mobile-metric-grid mobile-support-grid">
-            {SUPPORT_METRICS.map(([key, label]) => {
-              const metric = snapshot.price_opportunity[key];
-              const level = inferredSupportLevel(currentPrice, metric?.value);
-              return (
-                <article className="mobile-metric-card" key={key} title={metric?.notes}>
-                  <span>{label}</span>
-                  <StockStatus signal={supportSignal(metric?.value)} />
-                  <strong>{formatPercent(metric?.value, true)}</strong>
-                  <small>{level == null ? "Support unavailable" : `Level ${formatPrice(level)}`}</small>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="mobile-detail-section">
-          <div className="mobile-section-heading-with-icon">
-            <BarChart3 size={18} />
-            <h2>Growth trends</h2>
-          </div>
-          <div className="mobile-growth-grid">
-            <GrowthChart title="Revenue growth YoY" points={revenueGrowthPoints(snapshot)} />
-            <GrowthChart title="EPS growth YoY" points={quarterlyGrowthPoints(snapshot, "eps_diluted")} />
-          </div>
-        </section>
-
-        <MetricSection title="Business" metrics={BUSINESS_METRICS} source={snapshot.business_health} />
-        <MetricSection title="Price performance" metrics={RETURN_METRICS} source={snapshot.price_opportunity} />
-        <MetricSection title="Valuation" metrics={VALUATION_METRICS} source={snapshot.valuation} />
+        <MobileGrowthDetailPanel snapshot={snapshot} detailKey={activeGrowthDetail} />
 
         <footer className="mobile-detail-footer">
           <span>Updated {new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(snapshot.generated_at))}</span>
@@ -1460,6 +1528,8 @@ export function MobileStockExplorer({
   const [watchlistOpen, setWatchlistOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [activeSavedFilterId, setActiveSavedFilterId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const listTopRef = useRef<HTMLDivElement | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
   const builtInPreset = builtInPresetFor(filterExpression);
   const builtInName = builtInPresetName(builtInPreset);
@@ -1467,7 +1537,10 @@ export function MobileStockExplorer({
   const signedIn = personalization?.signedIn ?? false;
   const watchlistTickers = personalization?.watchlistTickers ?? [];
   const watchlist = useMemo(() => new Set(watchlistTickers), [watchlistTickers]);
-  const baseSnapshots = signedIn ? snapshots.filter((snapshot) => watchlist.has(snapshot.ticker)) : snapshots;
+  const baseSnapshots = useMemo(
+    () => signedIn ? snapshots.filter((snapshot) => watchlist.has(snapshot.ticker)) : snapshots,
+    [signedIn, snapshots, watchlist],
+  );
 
   const visibleSnapshots = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -1490,6 +1563,19 @@ export function MobileStockExplorer({
         return (sortDirection === "asc" ? comparison : -comparison) || left.ticker.localeCompare(right.ticker);
       });
   }, [baseSnapshots, filterExpression, query, relevantSupportKeys, sortDirection, sortKey]);
+  const totalPages = Math.max(1, Math.ceil(visibleSnapshots.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageStart = visibleSnapshots.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const pageEnd = Math.min(currentPage * PAGE_SIZE, visibleSnapshots.length);
+  const pagedSnapshots = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return visibleSnapshots.slice(start, start + PAGE_SIZE);
+  }, [currentPage, visibleSnapshots]);
+  const listSummaryLabel = visibleSnapshots.length === 0
+    ? signedIn ? `0 of ${baseSnapshots.length} watched` : `0 of ${snapshots.length} stocks`
+    : signedIn
+      ? `${pageStart}-${pageEnd} of ${visibleSnapshots.length} watched`
+      : `${pageStart}-${pageEnd} of ${visibleSnapshots.length} stocks`;
 
   const filterCount = activeFilterCount(filterExpression);
   const sortLabel = SORT_OPTIONS.find((option) => option.key === sortKey)?.label ?? "Symbol";
@@ -1506,6 +1592,23 @@ export function MobileStockExplorer({
     ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", timeZone: "UTC" })
       .format(new Date(`${latestMarketDate}T12:00:00Z`))
     : "";
+
+  useEffect(() => {
+    setPage(1);
+  }, [filterExpression, query, signedIn, sortDirection, sortKey, watchlistTickers]);
+
+  useEffect(() => {
+    setPage((value) => Math.min(value, totalPages));
+  }, [totalPages]);
+
+  const goToPage = (nextPage: number) => {
+    const boundedPage = Math.max(1, Math.min(totalPages, nextPage));
+    if (boundedPage === currentPage) return;
+    setPage(boundedPage);
+    window.requestAnimationFrame(() => {
+      listTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   const toggleBuiltInPreset = (preset: BuiltInPreset) => {
     setFilterExpression(builtInPreset === preset
@@ -1623,8 +1726,8 @@ export function MobileStockExplorer({
           </div>
         )}
 
-        <div className="mobile-list-summary">
-          <span>{signedIn ? `${visibleSnapshots.length} of ${baseSnapshots.length} watched` : `${visibleSnapshots.length} of ${snapshots.length} stocks`}</span>
+        <div className="mobile-list-summary" ref={listTopRef}>
+          <span>{listSummaryLabel}</span>
           <div className="mobile-list-actions">
             {signedIn && (
               <button type="button" onClick={() => setWatchlistOpen(true)}>
@@ -1648,38 +1751,63 @@ export function MobileStockExplorer({
             )}
           </div>
         ) : (
-          <section className="mobile-stock-list" aria-label="Stocks">
-            {visibleSnapshots.map((snapshot) => {
-              const metric = rowMetric(snapshot, sortKey, relevantSupportKeys);
-              return (
-                <article className="mobile-stock-row" key={snapshot.ticker}>
-                  <button type="button" className="mobile-stock-row-main" onClick={() => openDetail(snapshot.ticker)}>
-                    <div className="mobile-stock-identity">
-                      <strong>{snapshot.ticker}<ChevronRight size={18} /></strong>
-                      <span>{snapshot.name ?? snapshot.industry ?? ""}</span>
-                    </div>
-                    <div className="mobile-stock-value">
-                      <strong>{metric.value}</strong>
-                      <StockStatus signal={metric.signal} />
-                      {metric.secondary && <small>{metric.secondary}</small>}
-                    </div>
-                  </button>
-                  {editMode && (
-                    <button
-                      type="button"
-                      className="mobile-remove-stock"
-                      onClick={() => onRemoveStock?.(snapshot.ticker)}
-                      disabled={removingTicker === snapshot.ticker}
-                      aria-label={`Remove ${snapshot.ticker}`}
-                      title={`Remove ${snapshot.ticker}`}
-                    >
-                      <X size={17} />
+          <>
+            <section className="mobile-stock-list" aria-label="Stocks">
+              {pagedSnapshots.map((snapshot) => {
+                const metric = rowMetric(snapshot, sortKey, relevantSupportKeys);
+                return (
+                  <article className="mobile-stock-row" key={snapshot.ticker}>
+                    <button type="button" className="mobile-stock-row-main" onClick={() => openDetail(snapshot.ticker)}>
+                      <div className="mobile-stock-identity">
+                        <strong>{snapshot.ticker}<ChevronRight size={18} /></strong>
+                        <span>{snapshot.name ?? snapshot.industry ?? ""}</span>
+                      </div>
+                      <div className="mobile-stock-value">
+                        <strong>{metric.value}</strong>
+                        <StockStatus signal={metric.signal} />
+                        {metric.secondary && <small>{metric.secondary}</small>}
+                      </div>
                     </button>
-                  )}
-                </article>
-              );
-            })}
-          </section>
+                    {editMode && (
+                      <button
+                        type="button"
+                        className="mobile-remove-stock"
+                        onClick={() => onRemoveStock?.(snapshot.ticker)}
+                        disabled={removingTicker === snapshot.ticker}
+                        aria-label={`Remove ${snapshot.ticker}`}
+                        title={`Remove ${snapshot.ticker}`}
+                      >
+                        <X size={17} />
+                      </button>
+                    )}
+                  </article>
+                );
+              })}
+            </section>
+            {visibleSnapshots.length > PAGE_SIZE && (
+              <nav className="mobile-pagination" aria-label="Stocks pagination">
+                <button
+                  type="button"
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  aria-label="Previous page"
+                  title="Previous page"
+                >
+                  <ChevronLeft size={19} />
+                </button>
+                <strong>{currentPage} / {totalPages}</strong>
+                <button
+                  type="button"
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  aria-label="Next page"
+                  title="Next page"
+                >
+                  <ChevronRight size={19} />
+                </button>
+              </nav>
+            )}
+          </>
         )}
       </main>
 
