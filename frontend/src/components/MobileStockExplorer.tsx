@@ -80,7 +80,7 @@ export type FilterExpression = {
   operator: LogicOperator;
   groups: FilterGroup[];
 };
-type ChartRange = "1D" | "1W" | "1M" | "3M" | "6M" | "1Y" | "2Y" | "5Y" | "ALL";
+type ChartRange = "1W" | "1M" | "3M" | "6M" | "1Y" | "2Y" | "5Y" | "ALL";
 type MetricKind = "percent" | "ratio" | "compact" | "price";
 
 type Signal = {
@@ -173,7 +173,6 @@ const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
 ];
 
 const CHART_RANGES: Array<{ key: ChartRange; days: number | null }> = [
-  { key: "1D", days: 1 },
   { key: "1W", days: 7 },
   { key: "1M", days: 30 },
   { key: "3M", days: 91 },
@@ -1092,7 +1091,6 @@ function pointsForRange(points: OpenDataPricePoint[], range: ChartRange) {
   const sorted = points
     .filter((point) => point.close > 0 && Number.isFinite(point.close) && dateValue(point.date) != null)
     .sort((left, right) => (dateValue(left.date) ?? 0) - (dateValue(right.date) ?? 0));
-  if (range === "1D") return sorted.slice(-2);
   const days = CHART_RANGES.find((option) => option.key === range)?.days;
   if (days == null) return sorted;
   const latest = sorted[sorted.length - 1];
@@ -1103,7 +1101,7 @@ function pointsForRange(points: OpenDataPricePoint[], range: ChartRange) {
 }
 
 function supportKeyForRange(range: ChartRange) {
-  if (range === "1D" || range === "1W" || range === "1M") return "support_1m_distance";
+  if (range === "1W" || range === "1M") return "support_1m_distance";
   if (range === "3M" || range === "6M") return "support_6m_distance";
   if (range === "1Y" || range === "2Y") return "support_2y_distance";
   return "support_5y_distance";

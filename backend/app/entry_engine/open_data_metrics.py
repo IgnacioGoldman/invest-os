@@ -620,7 +620,6 @@ def compute_open_data_snapshot(
         "distance_from_ath": price_metrics["distance_from_ath"],
         "distance_from_52w_high": price_metrics["distance_from_52w_high"],
         "distance_from_52w_low": price_metrics["distance_from_52w_low"],
-        "support_1d_distance": price_metrics["support_1d_distance"],
         "support_1m_distance": price_metrics["support_1m_distance"],
         "support_6m_distance": price_metrics["support_6m_distance"],
         "support_2y_distance": price_metrics["support_2y_distance"],
@@ -1576,7 +1575,6 @@ def _price_opportunity_metrics(
             "distance_from_ath",
             "distance_from_52w_high",
             "distance_from_52w_low",
-            "support_1d_distance",
             "support_1m_distance",
             "support_6m_distance",
             "support_2y_distance",
@@ -1608,7 +1606,6 @@ def _price_opportunity_metrics(
     metrics["distance_from_ath"] = _distance_metric("distance_from_ath", price, ath, source, as_of, "latest close to all-time high close", fallback_as_of)
     metrics["distance_from_52w_high"] = _distance_metric("distance_from_52w_high", price, high_52w, source, as_of, "latest close to 52-week high close", fallback_as_of)
     metrics["distance_from_52w_low"] = _distance_metric("distance_from_52w_low", price, low_52w, source, as_of, "latest close to 52-week low close", fallback_as_of)
-    metrics["support_1d_distance"] = _support_1d_metric(points, price, source, as_of, fallback_as_of)
     for metric_name, (label, days) in SUPPORT_DISTANCE_WINDOWS.items():
         metrics[metric_name] = _support_distance_metric(metric_name, label, days, points, price, source, as_of, fallback_as_of)
     return metrics
@@ -1779,51 +1776,6 @@ def _primary_support_zone(
             -item.touches,
             _zone_age_days(item, latest_date),
             abs((current_price / item.midpoint) - 1),
-        ),
-    )
-
-
-def _support_1d_metric(
-    points: list[HistoricalPricePoint],
-    current_price: float,
-    source: str,
-    as_of: str,
-    fallback_as_of: str,
-) -> OpenDataMetric:
-    latest_date = _parse_date(points[-1].date) if points else None
-    if latest_date is None:
-        return _unavailable("support_1d_distance", "Latest historical price date was unavailable.", fallback_as_of)
-
-    candidate_zones = _valid_support_zones(points, latest_date, current_price)
-    if not candidate_zones:
-        return _unavailable(
-            "support_1d_distance",
-            "No recent repeated daily swing-low support zone was detected below the latest close using roughly two years of open/free price history. "
-            "Zones that were stale, above price, or recently approached from below are ignored.",
-            as_of,
-        )
-
-    zone = min(
-        candidate_zones,
-        key=lambda item: (
-            max((current_price / item.high) - 1, 0),
-            abs((current_price / item.midpoint) - 1),
-            -item.touches,
-            _zone_age_days(item, latest_date),
-        ),
-    )
-    distance = ((current_price - zone.midpoint) / zone.midpoint) * 100
-    return OpenDataMetric(
-        value=distance,
-        source=source,
-        tier="computed_from_public_facts",
-        as_of=as_of,
-        notes=(
-            "Nearest recent repeated daily swing-low support zone below/reclaimed by the latest close over roughly two years. "
-            f"Support zone: ${zone.low:.2f}-${zone.high:.2f}; midpoint ${zone.midpoint:.2f}; "
-            f"distance {distance:+.2f}%; touches {zone.touches}; "
-            f"first touch {zone.first_touch}; last touch {zone.last_touch}; "
-            f"cluster tolerance {zone.tolerance_pct:.1f}%."
         ),
     )
 

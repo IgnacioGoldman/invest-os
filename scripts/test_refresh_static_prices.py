@@ -93,12 +93,19 @@ class RefreshStaticPricesTests(unittest.TestCase):
             as_of="2026-01-01",
             notes="Old price.",
         )
+        obsolete_support = OpenDataMetric(
+            value=1,
+            source="old_price",
+            tier="computed_from_public_facts",
+            as_of="2026-01-01",
+            notes="Retired 1D support metric.",
+        )
         snapshot = OpenDataSnapshot(
             ticker="TEST",
             business_health={"revenue_growth_yoy": metric},
-            price_opportunity={"current_price": old_price},
+            price_opportunity={"current_price": old_price, "support_1d_distance": obsolete_support},
             valuation={"pe": metric},
-            metrics={"revenue_growth_yoy": metric, "current_price": old_price},
+            metrics={"revenue_growth_yoy": metric, "current_price": old_price, "support_1d_distance": obsolete_support},
         )
         start = date(2025, 1, 1)
         history = [point(start + timedelta(days=index), 100 + index / 10, low=99 + index / 10) for index in range(400)]
@@ -111,6 +118,8 @@ class RefreshStaticPricesTests(unittest.TestCase):
         self.assertEqual(updated.metrics["revenue_growth_yoy"], metric)
         self.assertEqual(updated.price_opportunity["current_price"].value, history[-1].close)
         self.assertEqual(updated.metrics["current_price"].value, history[-1].close)
+        self.assertNotIn("support_1d_distance", updated.price_opportunity)
+        self.assertNotIn("support_1d_distance", updated.metrics)
         self.assertIn("support_5y_distance", updated.price_opportunity)
         self.assertEqual(updated.generated_at, refreshed_at)
 

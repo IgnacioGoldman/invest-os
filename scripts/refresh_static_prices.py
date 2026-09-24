@@ -172,7 +172,7 @@ def refresh_snapshot_prices(
 ) -> OpenDataSnapshot:
     timestamp = refreshed_at or datetime.now(timezone.utc)
     price_metrics = compute_price_opportunity_metrics(history, fallback_as_of=timestamp.date().isoformat())
-    metrics = dict(snapshot.metrics)
+    metrics = {key: value for key, value in snapshot.metrics.items() if key != "support_1d_distance"}
     metrics.update(price_metrics)
     return snapshot.model_copy(
         update={

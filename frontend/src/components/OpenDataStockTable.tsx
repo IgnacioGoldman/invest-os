@@ -34,7 +34,6 @@ const COLUMNS = [
   ["business_health", "debt", "Debt", "compact"],
   ["business_health", "debt_to_equity", "D/E", "ratio"],
   ["price_opportunity", "current_price", "Price", "ratio"],
-  ["price_opportunity", "support_1d_distance", "Near Support 1D", "percent"],
   ["price_opportunity", "support_1m_distance", "Near Support 1M", "percent"],
   ["price_opportunity", "support_6m_distance", "Near Support 6M", "percent"],
   ["price_opportunity", "support_2y_distance", "Near Support 2Y", "percent"],
@@ -68,7 +67,7 @@ type SortValue = number | string | null;
 type MetricGroup = "business_health" | "price_opportunity" | "valuation";
 type ColumnKind = "conviction" | "assessment" | "text" | "metric" | "derived";
 type FilterValue = { field: string; value: string };
-type PriceRange = "1D" | "1W" | "1M" | "3M" | "6M" | "1Y" | "2Y" | "5Y" | "ALL";
+type PriceRange = "1W" | "1M" | "3M" | "6M" | "1Y" | "2Y" | "5Y" | "ALL";
 type PriceHistoryStatus = "idle" | "loading" | "loaded" | "error";
 type DerivedMetric = {
   value: number | null;
@@ -259,11 +258,10 @@ const DEFAULT_VISIBLE_COLUMN_IDS = [
   "price",
   "valuation",
   "sector",
-  "metric:price_opportunity:support_1d_distance",
+  "metric:price_opportunity:support_1m_distance",
 ];
 const PAGE_SIZE = 10;
 const PRICE_RANGES: Array<{ value: PriceRange; label: string; days: number | null }> = [
-  { value: "1D", label: "1D", days: 1 },
   { value: "1W", label: "1W", days: 7 },
   { value: "1M", label: "1M", days: 30 },
   { value: "3M", label: "3M", days: 91 },
@@ -939,7 +937,6 @@ function sortedPricePoints(points: OpenDataPricePoint[]) {
 
 function pricePointsForRange(points: OpenDataPricePoint[], range: PriceRange) {
   const sorted = sortedPricePoints(points);
-  if (range === "1D") return sorted.slice(-2);
   const option = PRICE_RANGES.find((item) => item.value === range);
   if (!option || option.days == null) return sorted;
   const latest = sorted[sorted.length - 1];
