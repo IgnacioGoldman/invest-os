@@ -10946,9 +10946,9 @@ body:has(.mobile-sheet-backdrop) {
 
 .mobile-signal-strip {
   display: grid;
-  gap: 10px;
+  gap: 7px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  padding: 22px 0;
+  padding: 14px 0 16px;
 }
 
 .mobile-growth-signal {
@@ -10958,10 +10958,11 @@ body:has(.mobile-sheet-backdrop) {
   color: inherit;
   cursor: pointer;
   display: grid;
-  gap: 10px;
+  gap: 6px;
   justify-items: start;
+  min-height: 84px;
   min-width: 0;
-  padding: 15px;
+  padding: 10px 8px;
   text-align: left;
 }
 
@@ -10973,21 +10974,28 @@ body:has(.mobile-sheet-backdrop) {
 .mobile-growth-signal > span:first-child,
 .mobile-metric-card > span {
   color: var(--mobile-muted);
-  font-size: 0.75rem;
+  font-size: 0.64rem;
   font-weight: 680;
+  line-height: 1.18;
 }
 
 .mobile-signal-strip strong {
   color: var(--mobile-text);
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.mobile-growth-signal .mobile-status {
+  font-size: 0.62rem;
+  min-height: 20px;
+  padding: 3px 6px;
 }
 
 .mobile-growth-detail-panel {
-  border-top: 1px solid var(--mobile-border);
   display: grid;
   gap: 14px;
-  padding: 24px 0;
+  padding: 0 0 24px;
 }
 
 .mobile-growth-copy,

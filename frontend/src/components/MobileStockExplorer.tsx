@@ -18,6 +18,7 @@ import {
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  fetchOpenDataStockPriceHistory,
   type OpenDataMetric,
   type OpenDataPricePoint,
   type OpenDataStockSnapshot,
@@ -1444,11 +1445,34 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
 
 function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; onBack: () => void }) {
   const [activeGrowthDetail, setActiveGrowthDetail] = useState<GrowthDetailKey>("revenue");
+  const [points, setPoints] = useState<OpenDataPricePoint[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const currentPrice = snapshot.price_opportunity.current_price?.value;
   const dailyChange = snapshot.price_opportunity.change_1d?.value;
   const revenueSignal = growthSignal(snapshot.business_health.revenue_growth_yoy?.value);
   const epsSignal = growthSignal(snapshot.business_health.eps_growth_yoy?.value);
   const momentum = revenueMomentum(snapshot);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+    setPoints([]);
+    fetchOpenDataStockPriceHistory(snapshot.ticker)
+      .then((next) => {
+        if (active) setPoints(next);
+      })
+      .catch((reason) => {
+        if (active) setError(reason instanceof Error ? reason.message : "Price history unavailable.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [snapshot.ticker]);
 
   return (
     <div className="mobile-stock-detail">
@@ -1471,9 +1495,11 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
             <strong>{formatPrice(currentPrice)}</strong>
             <span className={dailyChange != null && dailyChange < 0 ? "negative" : "positive"}>{formatPercent(dailyChange, true)} today</span>
           </div>
-        </section>
+	        </section>
+	
+	        <PriceChart snapshot={snapshot} points={points} loading={loading} error={error} />
 
-        <section className="mobile-signal-strip" aria-label="Current growth signals">
+	        <section className="mobile-signal-strip" aria-label="Current growth signals">
           <MobileGrowthSignalButton
             active={activeGrowthDetail === "revenue"}
             label="Latest revenue growth YoY"
