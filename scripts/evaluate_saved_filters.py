@@ -50,8 +50,8 @@ def _strong_yoy_expression(support_fields: list[str]) -> dict[str, Any]:
 
 
 BUILT_IN_FILTERS = {
-    "builtin:pullback": _strong_yoy_expression(["support_1m"]),
-    "builtin:support": _strong_yoy_expression(["support_3m", "support_6m", "support_1y", "support_2y", "support_5y"]),
+    "builtin:pullback": _strong_yoy_expression(["support_1m", "support_3m", "support_6m"]),
+    "builtin:support": _strong_yoy_expression(["support_1y", "support_2y", "support_5y"]),
 }
 
 

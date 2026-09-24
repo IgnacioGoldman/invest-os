@@ -108,19 +108,25 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
         self.assertEqual(signal_for(row, "support_1m"), "At support")
         self.assertEqual(signal_for(row, "support_5y"), "Above support")
 
-    def test_pullback_preset_only_uses_one_month_support(self) -> None:
-        row = snapshot("PULLBACK", 12, 4, 30, support_6m=1)
+    def test_pullback_preset_uses_one_three_and_six_month_support(self) -> None:
+        row = snapshot("PULLBACK", 12, 12, 30, support_6m=1)
         self.assertTrue(expression_matches(row, BUILT_IN_FILTERS["builtin:pullback"]))
 
-        long_term_only = snapshot("LONG", 12, 12, 30, support_6m=1)
+        three_month = snapshot("THREE", 12, 12, 30, support_3m=5)
+        self.assertTrue(expression_matches(three_month, BUILT_IN_FILTERS["builtin:pullback"]))
+
+        long_term_only = snapshot("LONG", 12, 12, 30, support_1y=1)
         self.assertFalse(expression_matches(long_term_only, BUILT_IN_FILTERS["builtin:pullback"]))
 
-    def test_support_preset_uses_three_month_through_five_year_support(self) -> None:
+    def test_support_preset_uses_one_year_through_five_year_support(self) -> None:
         row = snapshot("SUPPORT", 25, 20, 30, support_1y=5)
         self.assertTrue(expression_matches(row, BUILT_IN_FILTERS["builtin:support"]))
 
         one_month_only = snapshot("SHORT", 25, 1, 30)
         self.assertFalse(expression_matches(one_month_only, BUILT_IN_FILTERS["builtin:support"]))
+
+        six_month_only = snapshot("MID", 25, 12, 30, support_6m=1)
+        self.assertFalse(expression_matches(six_month_only, BUILT_IN_FILTERS["builtin:support"]))
 
     def test_first_run_is_quiet_then_new_match_creates_daily_badge_event(self) -> None:
         client = FakeSupabase()

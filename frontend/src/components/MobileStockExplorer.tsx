@@ -131,7 +131,8 @@ const SUPPORT_KEYS: Record<Extract<FilterKey, `support_${string}`>, string> = {
 };
 
 const SUPPORT_FILTER_KEYS = ["support_1m", "support_3m", "support_6m", "support_1y", "support_2y", "support_5y"] as const;
-const LONG_SUPPORT_FILTER_KEYS = ["support_3m", "support_6m", "support_1y", "support_2y", "support_5y"] as const;
+const PULLBACK_SUPPORT_FILTER_KEYS = ["support_1m", "support_3m", "support_6m"] as const;
+const SUPPORT_PRESET_FILTER_KEYS = ["support_1y", "support_2y", "support_5y"] as const;
 type SupportFilterKey = typeof SUPPORT_FILTER_KEYS[number];
 type BuiltInPreset = "pullback" | "support";
 
@@ -466,7 +467,7 @@ function createSupportConditions(fields: readonly Extract<FilterKey, `support_${
 }
 
 function createStrongYoyExpression(preset: BuiltInPreset): FilterExpression {
-  const supportFields = preset === "pullback" ? (["support_1m"] as const) : LONG_SUPPORT_FILTER_KEYS;
+  const supportFields = preset === "pullback" ? PULLBACK_SUPPORT_FILTER_KEYS : SUPPORT_PRESET_FILTER_KEYS;
   return {
     operator: "and",
     groups: [
@@ -513,10 +514,10 @@ function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
     .flatMap((key) => [`${key}:At support`, `${key}:Near support`])
     .sort()
     .join("|");
-  if (signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature(["support_1m"]))) {
+  if (signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature(PULLBACK_SUPPORT_FILTER_KEYS))) {
     return "pullback";
   }
-  if (signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature(LONG_SUPPORT_FILTER_KEYS))) {
+  if (signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature(SUPPORT_PRESET_FILTER_KEYS))) {
     return "support";
   }
   return null;
@@ -1559,7 +1560,11 @@ export function MobileStockExplorer({
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
   const builtInPreset = builtInPresetFor(filterExpression);
   const builtInName = builtInPresetName(builtInPreset);
-  const relevantSupportKeys = builtInPreset === "support" ? LONG_SUPPORT_FILTER_KEYS : SUPPORT_FILTER_KEYS;
+  const relevantSupportKeys = builtInPreset === "support"
+    ? SUPPORT_PRESET_FILTER_KEYS
+    : builtInPreset === "pullback"
+      ? PULLBACK_SUPPORT_FILTER_KEYS
+      : SUPPORT_FILTER_KEYS;
   const signedIn = personalization?.signedIn ?? false;
   const watchlistTickers = personalization?.watchlistTickers ?? [];
   const watchlist = useMemo(() => new Set(watchlistTickers), [watchlistTickers]);
