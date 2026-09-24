@@ -11128,13 +11128,21 @@ body:has(.mobile-sheet-backdrop) {
   }
 
   .mobile-detail-hero {
-    align-items: start;
-    display: grid;
-    gap: 18px;
+    gap: 12px;
+  }
+
+  .mobile-detail-hero > div:first-child {
+    min-width: 0;
+  }
+
+  .mobile-detail-hero > div:first-child > span,
+  .mobile-detail-hero p {
+    overflow-wrap: anywhere;
   }
 
   .mobile-detail-price {
-    justify-items: start;
+    flex: 0 0 auto;
+    justify-items: end;
   }
 
   .mobile-range-control {
