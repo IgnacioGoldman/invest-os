@@ -295,13 +295,6 @@ function revenueGrowthPoints(snapshot: OpenDataStockSnapshot) {
     .filter((point): point is { period: string; value: number } => point.value != null);
 }
 
-function sourceFacts(source?: string) {
-  return (source ?? "")
-    .split(";")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 function periodParts(period: string) {
   const match = /^FY(\d+)\s+(Q[1-4])$/.exec(period);
   return match ? { year: Number(match[1]), quarter: match[2] } : null;
@@ -1404,7 +1397,6 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
   const momentum = revenueMomentum(snapshot);
   const epsMetric = snapshot.business_health.eps_growth_yoy;
   const metric = detailKey === "eps" ? epsMetric : detailKey === "revenue" ? revenueDetail?.growth : undefined;
-  const facts = sourceFacts(metric?.source);
   const currentValue = detailKey === "momentum"
     ? momentum.change == null ? "-" : `${momentum.change > 0 ? "+" : ""}${formatNumber(momentum.change)} pp`
     : formatMetric(metric, "percent");
@@ -1427,14 +1419,6 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
         <strong>{currentValue}</strong>
         <small>{detailText}</small>
       </div>
-      {facts.length > 0 && (
-        <div className="mobile-source-list">
-          <span>Source facts</span>
-          {facts.map((fact) => (
-            <code key={fact}>{fact}</code>
-          ))}
-        </div>
-      )}
       <GrowthChart
         title={detailKey === "eps" ? "EPS growth YoY" : "Revenue growth YoY"}
         points={detailKey === "eps" ? quarterlyGrowthPoints(snapshot, "eps_diluted") : revenueGrowthPoints(snapshot)}

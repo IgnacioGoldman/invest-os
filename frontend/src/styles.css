@@ -6080,8 +6080,7 @@ tbody tr:hover td {
 }
 
 .exploration-page .growth-detail-copy > span,
-.exploration-page .growth-formula > span,
-.exploration-page .metric-source-list > span {
+.exploration-page .growth-formula > span {
   color: var(--app-muted);
   font-size: 0.72rem;
   font-weight: 820;
@@ -6126,21 +6125,6 @@ tbody tr:hover td {
 .exploration-page .growth-formula small {
   color: var(--app-muted);
   line-height: 1.4;
-}
-
-.exploration-page .metric-source-list {
-  display: grid;
-  gap: 7px;
-}
-
-.exploration-page .metric-source-list code {
-  background: rgba(8, 11, 18, 0.72);
-  border: 1px solid var(--app-border);
-  border-radius: 6px;
-  color: #d6ddff;
-  font-size: 0.7rem;
-  overflow-wrap: anywhere;
-  padding: 7px 8px;
 }
 
 .exploration-page .growth-detail-chart {
@@ -10999,8 +10983,7 @@ body:has(.mobile-sheet-backdrop) {
 }
 
 .mobile-growth-copy,
-.mobile-growth-formula,
-.mobile-source-list {
+.mobile-growth-formula {
   background: var(--mobile-surface);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
@@ -11010,8 +10993,7 @@ body:has(.mobile-sheet-backdrop) {
 }
 
 .mobile-growth-copy > span,
-.mobile-growth-formula > span,
-.mobile-source-list > span {
+.mobile-growth-formula > span {
   color: var(--mobile-muted);
   font-size: 0.7rem;
   font-weight: 780;
@@ -11047,16 +11029,6 @@ body:has(.mobile-sheet-backdrop) {
 .mobile-growth-formula small {
   color: var(--mobile-muted);
   line-height: 1.45;
-}
-
-.mobile-source-list code {
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
-  color: var(--mobile-text);
-  font-size: 0.7rem;
-  overflow-wrap: anywhere;
-  padding: 8px;
 }
 
 .mobile-detail-section {

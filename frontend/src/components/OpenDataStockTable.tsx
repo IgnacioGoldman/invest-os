@@ -424,13 +424,6 @@ function sortedHistoricalRows(snapshot: OpenDataStockSnapshot, series: string) {
   );
 }
 
-function sourceFacts(source?: string) {
-  return (source ?? "")
-    .split(";")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 function revenueGrowthDetail(snapshot: OpenDataStockSnapshot) {
   const rows = sortedHistoricalRows(snapshot, "quarterly_revenue");
   const latest = [...rows].reverse().find((row) => metricValue(row, "revenue_growth_yoy") != null);
@@ -1400,7 +1393,6 @@ function GrowthMetricButton({
 function RevenueMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
   const detail = revenueGrowthDetail(snapshot);
   const copy = GROWTH_DETAIL_COPY.revenue;
-  const facts = sourceFacts(detail?.growth?.source);
 
   return (
     <div className="growth-detail-layout">
@@ -1419,14 +1411,6 @@ function RevenueMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot })
               : ""}
           </small>
         </div>
-        {facts.length > 0 && (
-          <div className="metric-source-list">
-            <span>Source facts</span>
-            {facts.map((fact) => (
-              <code key={fact}>{fact}</code>
-            ))}
-          </div>
-        )}
       </div>
       <div className="growth-detail-chart">
         <QuarterlyRevenueGrowthBarChart snapshot={snapshot} />
@@ -1461,7 +1445,6 @@ function MomentumMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }
 function EpsMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
   const copy = GROWTH_DETAIL_COPY.eps;
   const metric = snapshot.business_health.eps_growth_yoy;
-  const facts = sourceFacts(metric?.source);
   return (
     <div className="growth-detail-layout">
       <div className="growth-detail-copy">
@@ -1474,14 +1457,6 @@ function EpsMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
           <strong>{formatValue(metric, "percent")}</strong>
           <small>{metric?.notes ?? "Comparable quarterly EPS growth is unavailable."}</small>
         </div>
-        {facts.length > 0 && (
-          <div className="metric-source-list">
-            <span>Source facts</span>
-            {facts.map((fact) => (
-              <code key={fact}>{fact}</code>
-            ))}
-          </div>
-        )}
       </div>
       <div className="growth-detail-chart">
         <QuarterlyEpsGrowthBarChart snapshot={snapshot} />
