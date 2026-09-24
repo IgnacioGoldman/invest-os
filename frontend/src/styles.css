@@ -10653,11 +10653,14 @@ body:has(.mobile-sheet-backdrop) {
 }
 
 .mobile-price-chart {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
   display: block;
   height: auto;
   max-height: 360px;
   overflow: visible;
   touch-action: none;
+  user-select: none;
   width: 100%;
 }
 

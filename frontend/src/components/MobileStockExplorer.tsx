@@ -1139,6 +1139,18 @@ function PriceChart({ snapshot, points, loading, error }: {
     setHoverIndex(Math.round((relativeX / Math.max(bounds.width, 1)) * (ranged.length - 1)));
   };
 
+  const onPointerDown = (event: React.PointerEvent<SVGRectElement>) => {
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    onPointerMove(event);
+  };
+
+  const releasePointer = (event: React.PointerEvent<SVGRectElement>) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
   return (
     <section className="mobile-chart-section">
       <div className="mobile-chart-heading">
@@ -1160,7 +1172,13 @@ function PriceChart({ snapshot, points, loading, error }: {
       ) : ranged.length < 2 ? (
         <div className="mobile-chart-placeholder">Price history is unavailable for this range.</div>
       ) : (
-        <svg className="mobile-price-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${snapshot.ticker} ${range} price chart`}>
+        <svg
+          className="mobile-price-chart"
+          viewBox={`0 0 ${width} ${height}`}
+          role="img"
+          aria-label={`${snapshot.ticker} ${range} price chart`}
+          onContextMenu={(event) => event.preventDefault()}
+        >
           {[0.25, 0.5, 0.75].map((part) => (
             <line key={part} className="mobile-chart-gridline" x1={padding.left} x2={width - padding.right} y1={padding.top + innerHeight * part} y2={padding.top + innerHeight * part} />
           ))}
@@ -1179,7 +1197,18 @@ function PriceChart({ snapshot, points, loading, error }: {
           )}
           <text className="mobile-chart-date" x={padding.left} y={height - 7}>{first?.date}</text>
           <text className="mobile-chart-date" textAnchor="end" x={width - padding.right} y={height - 7}>{last?.date}</text>
-          <rect className="mobile-chart-hit" x={padding.left} y={padding.top} width={innerWidth} height={innerHeight} onPointerMove={onPointerMove} onPointerLeave={() => setHoverIndex(null)} />
+          <rect
+            className="mobile-chart-hit"
+            x={padding.left}
+            y={padding.top}
+            width={innerWidth}
+            height={innerHeight}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={releasePointer}
+            onPointerCancel={releasePointer}
+            onPointerLeave={() => setHoverIndex(null)}
+          />
         </svg>
       )}
       <div className="mobile-range-control" aria-label="Price chart range">
