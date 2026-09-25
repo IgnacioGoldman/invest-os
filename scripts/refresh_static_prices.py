@@ -33,6 +33,10 @@ class PriceHistoryProvider(Protocol):
     def fetch_price_history_since(self, ticker: str, start_date: str) -> list[HistoricalPricePoint]: ...
 
 
+class DownloadNotFound(RuntimeError):
+    pass
+
+
 def _write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(f"{path.suffix}.tmp")
@@ -42,6 +46,12 @@ def _write_json(path: Path, payload: Any) -> None:
 
 def _load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _load_json_if_present(path: Path) -> Any | None:
+    if not path.exists():
+        return None
+    return _load_json(path)
 
 
 def _universe_tickers(payload: Any) -> list[str]:
@@ -57,7 +67,28 @@ def _universe_tickers(payload: Any) -> list[str]:
     return tickers
 
 
-def _download_json(session: requests.Session, base_url: str, path: str, cache_bust: str) -> Any:
+def _rows_by_ticker(rows: Any) -> dict[str, dict[str, Any]]:
+    if not isinstance(rows, list):
+        return {}
+    return {
+        str(row.get("ticker") or row.get("symbol") or "").upper(): row
+        for row in rows
+        if isinstance(row, dict) and (row.get("ticker") or row.get("symbol"))
+    }
+
+
+def _merge_stock_rows(deployed: list[Any], local: Any, tickers: list[str]) -> list[dict[str, Any]]:
+    deployed_by_ticker = _rows_by_ticker(deployed)
+    local_by_ticker = _rows_by_ticker(local)
+    rows: list[dict[str, Any]] = []
+    for ticker in tickers:
+        row = deployed_by_ticker.get(ticker) or local_by_ticker.get(ticker)
+        if row is not None:
+            rows.append(row)
+    return rows
+
+
+def _download_json(session: requests.Session, base_url: str, path: str, cache_bust: str, *, missing_ok: bool = False) -> Any:
     url = f"{base_url.rstrip('/')}/{path.lstrip('/')}"
     last_error: Exception | None = None
     for attempt in range(1, 5):
@@ -68,8 +99,12 @@ def _download_json(session: requests.Session, base_url: str, path: str, cache_bu
                 headers={"User-Agent": "Invest OS static price refresh/0.1"},
                 timeout=60,
             )
+            if response.status_code == 404 and missing_ok:
+                raise DownloadNotFound(f"{url} returned 404.")
             response.raise_for_status()
             return response.json()
+        except DownloadNotFound:
+            raise
         except (requests.RequestException, ValueError) as exc:
             last_error = exc
             if attempt < 4:
@@ -86,10 +121,14 @@ def hydrate_deployed_data(
     workers: int,
 ) -> list[dict[str, Any]]:
     session = requests.Session()
-    stocks = _download_json(session, base_url, "open-data/stocks.json", cache_bust)
-    universe = _download_json(session, base_url, "stocks/universe.json", cache_bust)
-    if not isinstance(stocks, list):
+    deployed_stocks = _download_json(session, base_url, "open-data/stocks.json", cache_bust)
+    deployed_universe = _download_json(session, base_url, "stocks/universe.json", cache_bust)
+    if not isinstance(deployed_stocks, list):
         raise ValueError("The deployed stocks payload is not a list.")
+    local_stocks = _load_json_if_present(data_dir / "open-data" / "stocks.json")
+    local_universe = _load_json_if_present(data_dir / "stocks" / "universe.json")
+    stocks = _merge_stock_rows(deployed_stocks, local_stocks, tickers)
+    universe = local_universe if local_universe is not None else deployed_universe
 
     histories: dict[str, Any] = {}
     with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
@@ -100,12 +139,18 @@ def hydrate_deployed_data(
                 base_url,
                 f"open-data/price-history/{quote(ticker)}.json",
                 cache_bust,
+                missing_ok=True,
             ): ticker
             for ticker in tickers
         }
         for future in as_completed(future_map):
             ticker = future_map[future]
-            histories[ticker] = future.result()
+            try:
+                histories[ticker] = future.result()
+            except DownloadNotFound:
+                history_path = data_dir / "open-data" / "price-history" / f"{ticker}.json"
+                histories[ticker] = _load_json_if_present(history_path) or []
+                logger.info("%s: deployed price history is missing; using local baseline.", ticker)
 
     _write_json(data_dir / "open-data" / "stocks.json", stocks)
     _write_json(data_dir / "stocks" / "universe.json", universe)

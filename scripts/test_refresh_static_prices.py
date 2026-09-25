@@ -1,9 +1,15 @@
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta, timezone
+import json
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
-from refresh_static_prices import fetch_updated_history, merge_price_history, refresh_snapshot_prices
+import requests
+
+from refresh_static_prices import fetch_updated_history, hydrate_deployed_data, merge_price_history, refresh_snapshot_prices
 
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataMetric, OpenDataSnapshot
 
@@ -35,7 +41,71 @@ class FakeProvider:
         return self.recent
 
 
+class FakeResponse:
+    def __init__(self, payload: object = None, *, status_code: int = 200) -> None:
+        self.payload = payload
+        self.status_code = status_code
+
+    def raise_for_status(self) -> None:
+        if self.status_code >= 400:
+            raise requests.HTTPError(f"{self.status_code} error", response=self)
+
+    def json(self) -> object:
+        return self.payload
+
+
+class FakeSession:
+    def __init__(self, routes: dict[str, object]) -> None:
+        self.routes = routes
+
+    def get(self, url: str, **_: object) -> FakeResponse:
+        path = url.split("/data/", 1)[1]
+        payload = self.routes[path]
+        if payload == 404:
+            return FakeResponse(status_code=404)
+        return FakeResponse(payload)
+
+
 class RefreshStaticPricesTests(unittest.TestCase):
+    def test_hydrate_falls_back_to_local_data_for_new_tickers(self) -> None:
+        with TemporaryDirectory() as directory:
+            data_dir = Path(directory)
+            (data_dir / "open-data" / "price-history").mkdir(parents=True)
+            (data_dir / "stocks").mkdir(parents=True)
+            local_stocks = [{"ticker": "AAA", "name": "Local AAA"}, {"ticker": "NEW", "name": "New Co"}]
+            local_universe = {"rows": [{"symbol": "AAA"}, {"symbol": "NEW"}]}
+            local_new_history = [{"date": "2026-09-24", "close": 20}]
+            (data_dir / "open-data" / "stocks.json").write_text(json.dumps(local_stocks), encoding="utf-8")
+            (data_dir / "stocks" / "universe.json").write_text(json.dumps(local_universe), encoding="utf-8")
+            (data_dir / "open-data" / "price-history" / "NEW.json").write_text(
+                json.dumps(local_new_history),
+                encoding="utf-8",
+            )
+            routes = {
+                "open-data/stocks.json": [{"ticker": "AAA", "name": "Deployed AAA"}],
+                "stocks/universe.json": {"rows": [{"symbol": "AAA"}]},
+                "open-data/price-history/AAA.json": [{"date": "2026-09-24", "close": 10}],
+                "open-data/price-history/NEW.json": 404,
+            }
+
+            with patch("refresh_static_prices.requests.Session", side_effect=lambda: FakeSession(routes)):
+                stocks = hydrate_deployed_data(
+                    "https://example.com/data",
+                    data_dir,
+                    ["AAA", "NEW"],
+                    cache_bust="test",
+                    workers=2,
+                )
+
+            self.assertEqual([row["ticker"] for row in stocks], ["AAA", "NEW"])
+            self.assertEqual(stocks[0]["name"], "Deployed AAA")
+            self.assertEqual(stocks[1]["name"], "New Co")
+            self.assertEqual(
+                json.loads((data_dir / "open-data" / "price-history" / "NEW.json").read_text(encoding="utf-8")),
+                local_new_history,
+            )
+            self.assertEqual(json.loads((data_dir / "stocks" / "universe.json").read_text(encoding="utf-8")), local_universe)
+
     def test_merge_price_history_replaces_overlapping_dates(self) -> None:
         start = date(2026, 1, 1)
         merged = merge_price_history(
