@@ -6131,6 +6131,29 @@ tbody tr:hover td {
   line-height: 1.4;
 }
 
+.exploration-page .support-window-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.exploration-page .support-window-row {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 44px minmax(74px, auto) 1fr;
+}
+
+.exploration-page .support-window-row span,
+.exploration-page .support-window-row small {
+  color: var(--app-muted);
+  font-size: 0.78rem;
+}
+
+.exploration-page .support-window-row strong {
+  font-size: 0.9rem;
+}
+
 .exploration-page .growth-detail-chart {
   min-width: 0;
 }
@@ -11037,6 +11060,29 @@ body:has(.mobile-sheet-backdrop) {
 .mobile-growth-formula small {
   color: var(--mobile-muted);
   line-height: 1.45;
+}
+
+.mobile-support-window-list {
+  display: grid;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.mobile-support-window-row {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 42px minmax(72px, auto) 1fr;
+}
+
+.mobile-support-window-row span,
+.mobile-support-window-row small {
+  color: var(--mobile-muted);
+  font-size: 0.76rem;
+}
+
+.mobile-support-window-row strong {
+  font-size: 0.92rem;
 }
 
 .mobile-detail-section {

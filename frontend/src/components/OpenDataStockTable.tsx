@@ -394,7 +394,7 @@ function supportWindowLabel(key: string) {
   return match ? match[1].toUpperCase() : "Support";
 }
 
-function closestSupportInsight(snapshot: OpenDataStockSnapshot) {
+function supportInsights(snapshot: OpenDataStockSnapshot) {
   return BETA_SUPPORT_COLUMNS
     .map(([key]) => {
       const value = finiteNumber(snapshot.price_opportunity[key]?.value);
@@ -413,7 +413,10 @@ function closestSupportInsight(snapshot: OpenDataStockSnapshot) {
       value: number;
       metric: OpenDataMetric;
     } => item != null)
-    .sort((left, right) => Math.abs(left.value) - Math.abs(right.value))[0] ?? null;
+}
+
+function closestSupportInsight(snapshot: OpenDataStockSnapshot) {
+  return [...supportInsights(snapshot)].sort((left, right) => Math.abs(left.value) - Math.abs(right.value))[0] ?? null;
 }
 
 function isSupportMetric(group?: MetricGroup, key?: string) {
@@ -1505,6 +1508,7 @@ function EpsMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
 function SupportMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
   const copy = GROWTH_DETAIL_COPY.support;
   const support = closestSupportInsight(snapshot);
+  const supports = supportInsights(snapshot);
   const currentPrice = finiteNumber(snapshot.price_opportunity.current_price?.value);
   const supportLevel = support ? inferredSupportLevel(currentPrice, support.value) : null;
   const detail = support
@@ -1528,6 +1532,20 @@ function SupportMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot })
           <span>Current value</span>
           <strong>{support ? supportSignalLabel(support.value) : "Far"}</strong>
           <small>{detail}</small>
+          {supports.length > 0 && (
+            <div className="support-window-list" aria-label="All support proximities">
+              {supports.map((item) => {
+                const level = inferredSupportLevel(currentPrice, item.value);
+                return (
+                  <div className="support-window-row" key={item.key}>
+                    <span>{item.window}</span>
+                    <strong>{formatSignedPercent(item.value)}</strong>
+                    <small>{level == null ? "No level" : formatPrice(level)}</small>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

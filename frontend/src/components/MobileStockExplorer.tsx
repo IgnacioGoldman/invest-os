@@ -366,7 +366,7 @@ function signalFor(snapshot: OpenDataStockSnapshot, key: FilterKey): Signal {
   return supportSignal(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
 }
 
-function closestSupport(snapshot: OpenDataStockSnapshot, keys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS) {
+function supportWindows(snapshot: OpenDataStockSnapshot, keys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS) {
   return keys
     .map((key) => ({
       key,
@@ -377,8 +377,11 @@ function closestSupport(snapshot: OpenDataStockSnapshot, keys: readonly SupportF
     }))
     .filter((item): item is { key: SupportFilterKey; label: string; window: string; value: number; metric: OpenDataMetric } =>
       item.value != null,
-    )
-    .sort((left, right) => Math.abs(left.value) - Math.abs(right.value))[0] ?? null;
+    );
+}
+
+function closestSupport(snapshot: OpenDataStockSnapshot, keys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS) {
+  return [...supportWindows(snapshot, keys)].sort((left, right) => Math.abs(left.value) - Math.abs(right.value))[0] ?? null;
 }
 
 function sortValue(
@@ -1429,6 +1432,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
   const momentum = revenueMomentum(snapshot);
   const epsMetric = snapshot.business_health.eps_growth_yoy;
   const support = closestSupport(snapshot);
+  const supports = supportWindows(snapshot);
   const currentPrice = finiteNumber(snapshot.price_opportunity.current_price?.value);
   const supportLevel = support ? inferredSupportLevel(currentPrice, support.value) : null;
   if (detailKey === "support") {
@@ -1454,6 +1458,20 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
           <span>Current value</span>
           <strong>{supportSignal(support?.value).label}</strong>
           <small>{detailText}</small>
+          {supports.length > 0 && (
+            <div className="mobile-support-window-list" aria-label="All support proximities">
+              {supports.map((item) => {
+                const level = inferredSupportLevel(currentPrice, item.value);
+                return (
+                  <div className="mobile-support-window-row" key={item.key}>
+                    <span>{item.window}</span>
+                    <strong>{formatPercent(item.value, true)}</strong>
+                    <small>{level == null ? "No level" : formatPrice(level)}</small>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     );
