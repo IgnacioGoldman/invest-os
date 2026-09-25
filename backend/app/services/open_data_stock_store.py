@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from app.config import PROJECT_DIR, Settings
-from app.entry_engine.open_data_metrics import SUPPORT_DISTANCE_WINDOWS, _support_distance_metric
+from app.entry_engine.open_data_metrics import SUPPORT_DISTANCE_WINDOWS, backfill_fcf_margin_metric, _support_distance_metric
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataSnapshot
 from app.services.storage import (
     activate_stock_ticker,
@@ -91,7 +91,12 @@ def deactivate_stock(settings: Settings, ticker: str) -> None:
 
 def load_db_stock_snapshot(settings: Settings, ticker: str) -> OpenDataSnapshot | None:
     with connect(settings.data_dir) as conn:
-        return load_stock_open_data_snapshot(conn, ticker)
+        snapshot = load_stock_open_data_snapshot(conn, ticker)
+        if snapshot is None:
+            return None
+        updated = _snapshot_with_metric_backfills(conn, snapshot)
+        conn.commit()
+        return updated
 
 
 def load_db_or_backfill_stock_snapshots(settings: Settings) -> list[OpenDataSnapshot]:
@@ -99,7 +104,7 @@ def load_db_or_backfill_stock_snapshots(settings: Settings) -> list[OpenDataSnap
     with connect(settings.data_dir) as conn:
         active_tickers = set(load_active_stock_tickers(conn))
         snapshots = [
-            _snapshot_with_support_backfill(conn, snapshot)
+            _snapshot_with_metric_backfills(conn, snapshot)
             for snapshot in load_stock_open_data_snapshots(conn)
             if not active_tickers or snapshot.ticker in active_tickers
         ]
@@ -110,7 +115,19 @@ def load_db_or_backfill_stock_snapshots(settings: Settings) -> list[OpenDataSnap
 
 def load_all_db_stock_snapshots(settings: Settings) -> list[OpenDataSnapshot]:
     with connect(settings.data_dir) as conn:
-        return load_stock_open_data_snapshots(conn)
+        snapshots = [_snapshot_with_metric_backfills(conn, snapshot) for snapshot in load_stock_open_data_snapshots(conn)]
+        conn.commit()
+        return snapshots
+
+
+def _snapshot_with_metric_backfills(
+    conn,
+    snapshot: OpenDataSnapshot,
+) -> OpenDataSnapshot:
+    updated = backfill_fcf_margin_metric(snapshot)
+    if updated != snapshot:
+        replace_stock_open_data_snapshot(conn, updated)
+    return _snapshot_with_support_backfill(conn, updated)
 
 
 def _snapshot_with_support_backfill(

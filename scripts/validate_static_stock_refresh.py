@@ -90,6 +90,23 @@ def _validate_latest_revenue_growth(ticker: str, snapshot: dict[str, Any], error
         )
 
 
+def _validate_fcf_margin(ticker: str, snapshot: dict[str, Any], errors: list[str]) -> None:
+    business_health = snapshot.get("business_health")
+    metrics = snapshot.get("metrics")
+    if not isinstance(business_health, dict) or not isinstance(metrics, dict):
+        return
+    free_cash_flow = _metric_value(metrics.get("free_cash_flow_ttm"))
+    revenue = _metric_value(metrics.get("revenue_ttm"))
+    if free_cash_flow is None or revenue in (None, 0):
+        return
+    value = _metric_value(business_health.get("fcf_margin"))
+    expected = (free_cash_flow / revenue) * 100
+    if value is None:
+        errors.append(f"{ticker}: fcf_margin is missing even though free_cash_flow_ttm and revenue_ttm are available.")
+    elif not math.isclose(value, expected, rel_tol=1e-9, abs_tol=1e-6):
+        errors.append(f"{ticker}: fcf_margin {value:.6f} does not match free_cash_flow_ttm / revenue_ttm {expected:.6f}.")
+
+
 def validate_refresh(report: dict[str, Any], universe: Any, stocks: Any, history_dir: Path) -> dict[str, Any]:
     errors: list[str] = []
     expected = _universe_tickers(universe)
@@ -142,6 +159,7 @@ def validate_refresh(report: dict[str, Any], universe: Any, stocks: Any, history
         if missing_support:
             errors.append(f"{ticker}: missing support metrics {missing_support}.")
         _validate_latest_revenue_growth(ticker, snapshot, errors)
+        _validate_fcf_margin(ticker, snapshot, errors)
 
         history_path = history_dir / f"{ticker}.json"
         if not history_path.exists():

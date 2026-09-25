@@ -185,6 +185,49 @@ class QuarterlyFact:
     notes: str
 
 
+def backfill_fcf_margin_metric(snapshot: OpenDataSnapshot) -> OpenDataSnapshot:
+    """Add the TTM FCF margin metric to older snapshots when the TTM inputs exist."""
+    existing = snapshot.business_health.get("fcf_margin")
+    existing_ttm = snapshot.metrics.get("fcf_margin_ttm")
+    if existing is not None and existing.value is not None and existing_ttm is not None and existing_ttm.value is not None:
+        return snapshot
+
+    business_health = dict(snapshot.business_health)
+    metrics = dict(snapshot.metrics)
+    fallback_as_of = snapshot.generated_at.date().isoformat()
+    if _is_financial_business(snapshot.sector, snapshot.industry):
+        metric = _unavailable(
+            "fcf_margin",
+            "Free cash flow margin is not meaningful for many financial businesses because operating cash flow is distorted by balance-sheet lending, deposits, and financing activity.",
+            fallback_as_of,
+        )
+    elif existing is not None and existing.value is not None:
+        metric = existing
+    elif existing_ttm is not None and existing_ttm.value is not None:
+        metric = existing_ttm
+    else:
+        free_cash_flow = metrics.get("free_cash_flow_ttm")
+        revenue = metrics.get("revenue_ttm")
+        if free_cash_flow is None or revenue is None:
+            return snapshot
+        metric = _computed_metric(
+            "fcf_margin",
+            free_cash_flow.value,
+            revenue.value,
+            lambda fcf, sales: (fcf / sales) * 100,
+            source=f"{free_cash_flow.source}; {revenue.source}",
+            as_of=_max_as_of(free_cash_flow.as_of, revenue.as_of),
+            notes="Free cash flow TTM divided by revenue TTM, expressed as a percentage.",
+            fallback_as_of=fallback_as_of,
+        )
+        if metric.value is None:
+            return snapshot
+
+    business_health["fcf_margin"] = metric
+    metrics["fcf_margin_ttm"] = metric
+    return snapshot.model_copy(update={"business_health": business_health, "metrics": metrics})
+
+
 def compute_open_data_snapshot(
     *,
     ticker: str,

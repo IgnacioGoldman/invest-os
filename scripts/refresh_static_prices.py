@@ -18,7 +18,7 @@ import requests
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from app.entry_engine.open_data_metrics import compute_price_opportunity_metrics  # noqa: E402
+from app.entry_engine.open_data_metrics import backfill_fcf_margin_metric, compute_price_opportunity_metrics  # noqa: E402
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataSnapshot  # noqa: E402
 from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
 
@@ -170,6 +170,7 @@ def refresh_snapshot_prices(
     *,
     refreshed_at: datetime | None = None,
 ) -> OpenDataSnapshot:
+    snapshot = backfill_fcf_margin_metric(snapshot)
     timestamp = refreshed_at or datetime.now(timezone.utc)
     price_metrics = compute_price_opportunity_metrics(history, fallback_as_of=timestamp.date().isoformat())
     metrics = {key: value for key, value in snapshot.metrics.items() if key != "support_1d_distance"}
@@ -245,7 +246,8 @@ def refresh_prices(
                 [point.model_dump(mode="json") for point in updated_histories[ticker]],
             )
         elif ticker in snapshot_by_ticker:
-            output_rows.append(snapshot_by_ticker[ticker])
+            fallback_snapshot = backfill_fcf_margin_metric(OpenDataSnapshot.model_validate(snapshot_by_ticker[ticker]))
+            output_rows.append(fallback_snapshot.model_dump(mode="json"))
 
     _write_json(data_dir / "open-data" / "stocks.json", output_rows)
     market_dates = [
