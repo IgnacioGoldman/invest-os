@@ -285,10 +285,20 @@ function supportSignal(value?: number | null): Signal {
   return { label: "Above support", tone: "neutral" };
 }
 
+function historicalRowSortValue(row: OpenDataStockSnapshot["historical_series"][string][number]) {
+  const asOf = Date.parse(`${row.as_of}T00:00:00Z`);
+  return Number.isFinite(asOf) ? asOf : null;
+}
+
 function historicalRows(snapshot: OpenDataStockSnapshot, series: string) {
-  return [...(snapshot.historical_series[series] ?? [])].sort((left, right) =>
-    left.period.localeCompare(right.period, undefined, { numeric: true, sensitivity: "base" }),
-  );
+  return [...(snapshot.historical_series[series] ?? [])].sort((left, right) => {
+    const leftDate = historicalRowSortValue(left);
+    const rightDate = historicalRowSortValue(right);
+    if (leftDate != null && rightDate != null && leftDate !== rightDate) return leftDate - rightDate;
+    if (leftDate != null && rightDate == null) return -1;
+    if (leftDate == null && rightDate != null) return 1;
+    return left.period.localeCompare(right.period, undefined, { numeric: true, sensitivity: "base" });
+  });
 }
 
 function metricValue(row: OpenDataStockSnapshot["historical_series"][string][number], key: string) {

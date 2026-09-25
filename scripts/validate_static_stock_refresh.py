@@ -42,6 +42,54 @@ def _parse_date(value: Any) -> date | None:
         return None
 
 
+def _finite_number(value: Any) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    number = float(value)
+    return number if math.isfinite(number) else None
+
+
+def _metric_value(metric: Any) -> float | None:
+    return _finite_number(metric.get("value") if isinstance(metric, dict) else None)
+
+
+def _latest_series_metric_by_as_of(snapshot: dict[str, Any], series_name: str, metric_name: str) -> tuple[date, float] | None:
+    historical_series = snapshot.get("historical_series")
+    if not isinstance(historical_series, dict):
+        return None
+    rows = historical_series.get(series_name)
+    if not isinstance(rows, list):
+        return None
+    candidates: list[tuple[date, float]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        as_of = _parse_date(row.get("as_of"))
+        metrics = row.get("metrics")
+        if as_of is None or not isinstance(metrics, dict):
+            continue
+        value = _metric_value(metrics.get(metric_name))
+        if value is not None:
+            candidates.append((as_of, value))
+    return max(candidates, key=lambda item: item[0]) if candidates else None
+
+
+def _validate_latest_revenue_growth(ticker: str, snapshot: dict[str, Any], errors: list[str]) -> None:
+    business_health = snapshot.get("business_health")
+    if not isinstance(business_health, dict):
+        return
+    card_value = _metric_value(business_health.get("revenue_growth_yoy"))
+    latest_series = _latest_series_metric_by_as_of(snapshot, "quarterly_revenue", "revenue_growth_yoy")
+    if card_value is None or latest_series is None:
+        return
+    latest_date, latest_value = latest_series
+    if not math.isclose(card_value, latest_value, rel_tol=1e-9, abs_tol=1e-6):
+        errors.append(
+            f"{ticker}: latest revenue_growth_yoy card value {card_value:.6f} does not match "
+            f"latest dated quarterly_revenue value {latest_value:.6f} as of {latest_date.isoformat()}."
+        )
+
+
 def validate_refresh(report: dict[str, Any], universe: Any, stocks: Any, history_dir: Path) -> dict[str, Any]:
     errors: list[str] = []
     expected = _universe_tickers(universe)
@@ -93,6 +141,7 @@ def validate_refresh(report: dict[str, Any], universe: Any, stocks: Any, history
         missing_support = [key for key in SUPPORT_KEYS if key not in price_metrics]
         if missing_support:
             errors.append(f"{ticker}: missing support metrics {missing_support}.")
+        _validate_latest_revenue_growth(ticker, snapshot, errors)
 
         history_path = history_dir / f"{ticker}.json"
         if not history_path.exists():
