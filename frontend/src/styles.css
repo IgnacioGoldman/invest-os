@@ -9445,25 +9445,26 @@ body:has(.mobile-sheet-backdrop) {
   min-height: 52px;
 }
 
-.mobile-stock-app .mobile-filter-expression-summary button:first-child {
+.mobile-filter-expression-summary > div:first-child {
   align-items: start;
   display: grid;
-  gap: 2px;
+  gap: 4px;
   justify-content: stretch;
   padding: 9px 12px;
   text-align: left;
 }
 
-.mobile-filter-expression-summary button:first-child > span {
+.mobile-filter-expression-summary > div:first-child > span {
   color: #80c7ff;
   font-size: 0.79rem;
   font-weight: 800;
 }
 
-.mobile-filter-expression-summary button:first-child > small {
+.mobile-filter-expression-summary > div:first-child > small {
   color: var(--mobile-muted);
   font-size: 0.69rem;
   font-weight: 650;
+  line-height: 1.35;
 }
 
 .mobile-stock-app .mobile-filter-expression-summary button:last-child {

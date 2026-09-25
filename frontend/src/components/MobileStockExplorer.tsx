@@ -148,6 +148,10 @@ const PULLBACK_SUPPORT_FILTER_KEYS = ["support_1m", "support_3m", "support_6m"] 
 const SUPPORT_PRESET_FILTER_KEYS = ["support_1y", "support_2y", "support_5y"] as const;
 type SupportFilterKey = typeof SUPPORT_FILTER_KEYS[number];
 type BuiltInPreset = "pullback" | "support";
+type BuiltInPresetCopy = {
+  name: string;
+  summary: string;
+};
 
 const FILTER_DEFINITIONS: FilterDefinition[] = [
   {
@@ -602,10 +606,25 @@ function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
   return null;
 }
 
+const BUILT_IN_PRESET_COPY: Record<BuiltInPreset, BuiltInPresetCopy> = {
+  support: {
+    name: "Strong YoY and on support",
+    summary:
+      "Companies with strong latest revenue growth, where the current price is at or near support zones identified across the past 1Y, 2Y, and 5Y. This can surface high-quality businesses trading near longer-term areas of interest.",
+  },
+  pullback: {
+    name: "Strong YoY and on pullback",
+    summary:
+      "Companies with strong latest revenue growth that are going through a shorter-term correction, with price at or near support zones identified across the past 1M, 3M, and 6M.",
+  },
+};
+
 function builtInPresetName(preset: BuiltInPreset | null) {
-  if (preset === "pullback") return "Strong YoY and on pullback";
-  if (preset === "support") return "Strong YoY and on support";
-  return null;
+  return preset ? BUILT_IN_PRESET_COPY[preset].name : null;
+}
+
+function builtInPresetSummary(preset: BuiltInPreset | null) {
+  return preset ? BUILT_IN_PRESET_COPY[preset].summary : null;
 }
 
 function StockStatus({ signal }: { signal: Signal }) {
@@ -1040,8 +1059,8 @@ function FilterSheet({
                 <p>Use groups for parentheses, then choose whether groups and conditions use AND or OR.</p>
                 <div>
                   <button type="button" onClick={addGroup}><Plus size={16} />New filter</button>
-                  <button type="button" onClick={onApplyPullbackPreset}>Use Pullback preset</button>
                   <button type="button" onClick={onApplySupportPreset}>Use Support preset</button>
+                  <button type="button" onClick={onApplyPullbackPreset}>Use Pullback preset</button>
                 </div>
               </div>
             )}
@@ -1742,6 +1761,7 @@ export function MobileStockExplorer({
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
   const builtInPreset = builtInPresetFor(filterExpression);
   const builtInName = builtInPresetName(builtInPreset);
+  const builtInSummary = builtInPresetSummary(builtInPreset);
   const relevantSupportKeys = builtInPreset === "support"
     ? SUPPORT_PRESET_FILTER_KEYS
     : builtInPreset === "pullback"
@@ -1891,15 +1911,15 @@ export function MobileStockExplorer({
         </label>
 
         <div className="mobile-quick-filters" aria-label="Quick filters">
-          <button type="button" className={builtInPreset === "pullback" ? "active" : ""} onClick={() => toggleBuiltInPreset("pullback")}>
-            {builtInPreset === "pullback" && <Check size={15} />}
-            Strong YoY and on pullback
-            <FilterNewBadge count={personalization?.filterBadgeCounts[PULLBACK_FILTER_KEY]} />
-          </button>
           <button type="button" className={builtInPreset === "support" ? "active" : ""} onClick={() => toggleBuiltInPreset("support")}>
             {builtInPreset === "support" && <Check size={15} />}
             Strong YoY and on support
             <FilterNewBadge count={personalization?.filterBadgeCounts[SUPPORT_FILTER_KEY]} />
+          </button>
+          <button type="button" className={builtInPreset === "pullback" ? "active" : ""} onClick={() => toggleBuiltInPreset("pullback")}>
+            {builtInPreset === "pullback" && <Check size={15} />}
+            Strong YoY and on pullback
+            <FilterNewBadge count={personalization?.filterBadgeCounts[PULLBACK_FILTER_KEY]} />
           </button>
           {personalization?.signedIn && personalization.savedFilters.map((filter) => (
             <button
@@ -1917,14 +1937,18 @@ export function MobileStockExplorer({
 
         {filterCount > 0 && (
           <div className="mobile-filter-expression-summary" aria-label="Active filter logic">
-            <button type="button" onClick={() => setSheetOpen(true)}>
+            <div>
               <span>{personalization?.savedFilters.find((item) => item.id === activeSavedFilterId)?.name ?? builtInName ?? "Custom filter"}</span>
               <small>
-                {filterExpression.groups.length} group{filterExpression.groups.length === 1 ? "" : "s"}
-                {filterExpression.groups.length > 1 ? ` joined by ${filterExpression.operator.toUpperCase()}` : ""}
-                {` · ${filterCount} condition${filterCount === 1 ? "" : "s"}`}
+                {builtInSummary ?? (
+                  <>
+                    {filterExpression.groups.length} group{filterExpression.groups.length === 1 ? "" : "s"}
+                    {filterExpression.groups.length > 1 ? ` joined by ${filterExpression.operator.toUpperCase()}` : ""}
+                    {` · ${filterCount} condition${filterCount === 1 ? "" : "s"}`}
+                  </>
+                )}
               </small>
-            </button>
+            </div>
             <button
               type="button"
               onClick={() => {
