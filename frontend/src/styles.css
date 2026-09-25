@@ -6391,8 +6391,10 @@ tbody tr:hover td {
 }
 
 .exploration-page .temp-bar-chart rect.selected {
-  stroke: #ffffff;
-  stroke-width: 2;
+  filter: drop-shadow(0 0 4px rgba(82, 120, 255, 0.42));
+  stroke: #5278ff;
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
 }
 
 .exploration-page .temp-bar-chart .temp-bar-tooltip rect {
@@ -11226,8 +11228,10 @@ body:has(.mobile-sheet-backdrop) {
 }
 
 .mobile-growth-chart rect.selected {
-  stroke: #ffffff;
-  stroke-width: 2;
+  filter: drop-shadow(0 0 5px rgba(143, 178, 255, 0.55));
+  stroke: #8fb2ff;
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
 }
 
 .mobile-growth-hit {
