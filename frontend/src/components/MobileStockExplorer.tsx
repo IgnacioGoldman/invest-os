@@ -55,11 +55,12 @@ type Props = {
 };
 
 type Tone = "positive" | "warning" | "negative" | "neutral" | "info";
-type GrowthDetailKey = "revenue" | "momentum" | "eps" | "support";
+type GrowthDetailKey = "revenue" | "momentum" | "eps" | "fcf_margin" | "support";
 export type FilterKey =
   | "revenue"
   | "momentum"
   | "eps"
+  | "fcf_margin"
   | "support_1m"
   | "support_3m"
   | "support_6m"
@@ -110,6 +111,12 @@ const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: str
     description:
       "Compares latest-quarter diluted earnings per share with the same quarter last year. It helps separate revenue growth from profitable growth.",
   },
+  fcf_margin: {
+    title: "Free cash flow margin",
+    question: "Is the company turning revenue into actual cash?",
+    description:
+      "Compares trailing-12-month free cash flow with trailing-12-month revenue. TTM is used because a single quarter can be noisy when collections, inventory, working capital, or capex timing shift cash flow around.",
+  },
   support: {
     title: "Proximity to support",
     question: "Is the current price close to a nearby support zone?",
@@ -122,7 +129,7 @@ type FilterDefinition = {
   key: FilterKey;
   label: string;
   shortLabel: string;
-  section: "Growth" | "Support";
+  section: "Growth" | "Quality" | "Support";
   description: string;
   options: Array<{ label: string; tone: Tone }>;
 };
@@ -176,6 +183,20 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     shortLabel: "EPS YoY",
     section: "Growth",
     description: "Year-over-year earnings-per-share growth in the latest quarter.",
+    options: [
+      { label: "Strong", tone: "positive" },
+      { label: "Solid", tone: "positive" },
+      { label: "Mixed", tone: "warning" },
+      { label: "Weak", tone: "negative" },
+      { label: "Unclear", tone: "neutral" },
+    ],
+  },
+  {
+    key: "fcf_margin",
+    label: "Free cash flow margin",
+    shortLabel: "FCF Mgn",
+    section: "Quality",
+    description: "Trailing-12-month free cash flow divided by trailing-12-month revenue.",
     options: [
       { label: "Strong", tone: "positive" },
       { label: "Solid", tone: "positive" },
@@ -278,6 +299,14 @@ function growthSignal(value?: number | null): Signal {
   return { label: "Weak", tone: "negative" };
 }
 
+function fcfMarginSignal(value?: number | null): Signal {
+  if (value == null) return { label: "Unclear", tone: "neutral" };
+  if (value >= 20) return { label: "Strong", tone: "positive" };
+  if (value >= 10) return { label: "Solid", tone: "positive" };
+  if (value >= 0) return { label: "Mixed", tone: "warning" };
+  return { label: "Weak", tone: "negative" };
+}
+
 function supportSignal(value?: number | null): Signal {
   if (value == null || value > 25) return { label: "Far", tone: "info" };
   if (value <= 2.5) return { label: "At support", tone: "positive" };
@@ -352,6 +381,12 @@ function quarterlyGrowthPoints(snapshot: OpenDataStockSnapshot, metric: string) 
     .filter((point): point is { period: string; value: number } => point != null);
 }
 
+function quarterlyMetricPoints(snapshot: OpenDataStockSnapshot, metric: string) {
+  return historicalRows(snapshot, "quarterly_fundamentals")
+    .map((row) => ({ period: row.period, value: metricValue(row, metric) }))
+    .filter((point): point is { period: string; value: number } => point.value != null);
+}
+
 function revenueMomentum(snapshot: OpenDataStockSnapshot) {
   const points = revenueGrowthPoints(snapshot);
   const latest = points[points.length - 1];
@@ -372,6 +407,7 @@ function inferredSupportLevel(currentPrice?: number | null, supportDistance?: nu
 function signalFor(snapshot: OpenDataStockSnapshot, key: FilterKey): Signal {
   if (key === "revenue") return growthSignal(snapshot.business_health.revenue_growth_yoy?.value);
   if (key === "eps") return growthSignal(snapshot.business_health.eps_growth_yoy?.value);
+  if (key === "fcf_margin") return fcfMarginSignal(snapshot.business_health.fcf_margin?.value);
   if (key === "momentum") return revenueMomentum(snapshot);
   return supportSignal(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
 }
@@ -423,6 +459,7 @@ function sortValue(
   }
   if (key === "revenue") return finiteNumber(snapshot.business_health.revenue_growth_yoy?.value);
   if (key === "eps") return finiteNumber(snapshot.business_health.eps_growth_yoy?.value);
+  if (key === "fcf_margin") return finiteNumber(snapshot.business_health.fcf_margin?.value);
   if (key === "momentum") return revenueMomentum(snapshot).change;
   return finiteNumber(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
 }
@@ -450,6 +487,10 @@ function rowMetric(
   if (key === "revenue" || key === "eps") {
     const metric = key === "revenue" ? snapshot.business_health.revenue_growth_yoy : snapshot.business_health.eps_growth_yoy;
     return { value: formatPercent(metric?.value, true), signal: growthSignal(metric?.value), secondary: null };
+  }
+  if (key === "fcf_margin") {
+    const metric = snapshot.business_health.fcf_margin;
+    return { value: formatPercent(metric?.value, true), signal: fcfMarginSignal(metric?.value), secondary: "TTM" };
   }
   if (key === "momentum") {
     const momentum = revenueMomentum(snapshot);
@@ -1460,6 +1501,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
   const revenueDetail = revenueGrowthDetail(snapshot);
   const momentum = revenueMomentum(snapshot);
   const epsMetric = snapshot.business_health.eps_growth_yoy;
+  const fcfMarginMetric = snapshot.business_health.fcf_margin;
   const support = closestSupport(snapshot);
   const supports = supportWindows(snapshot);
   const currentPrice = finiteNumber(snapshot.price_opportunity.current_price?.value);
@@ -1505,15 +1547,33 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
       </section>
     );
   }
-  const metric = detailKey === "eps" ? epsMetric : detailKey === "revenue" ? revenueDetail?.growth : undefined;
+  const metric = detailKey === "eps"
+    ? epsMetric
+    : detailKey === "fcf_margin"
+      ? fcfMarginMetric
+      : detailKey === "revenue"
+        ? revenueDetail?.growth
+        : undefined;
   const currentValue = detailKey === "momentum"
     ? momentum.change == null ? "-" : `${momentum.change > 0 ? "+" : ""}${formatNumber(momentum.change)} pp`
     : formatMetric(metric, "percent");
   const detailText = detailKey === "momentum"
     ? momentum.change == null ? "Needs at least two comparable quarterly revenue YoY points." : `${momentum.label} versus ${momentum.period ?? "the prior quarter"}.`
+    : detailKey === "fcf_margin"
+      ? fcfMarginMetric?.notes ?? "Trailing-12-month free cash flow margin is unavailable."
     : detailKey === "revenue" && revenueDetail?.latestRevenue != null && revenueDetail?.priorRevenue != null
       ? `${revenueDetail.latest.period}: ${formatCompact(revenueDetail.latestRevenue)} vs ${formatCompact(revenueDetail.priorRevenue)} one year earlier.`
       : metric?.notes ?? "Comparable quarterly data is unavailable.";
+  const chartTitle = detailKey === "eps"
+    ? "EPS growth YoY"
+    : detailKey === "fcf_margin"
+      ? "Quarterly FCF margin"
+      : "Revenue growth YoY";
+  const chartPoints = detailKey === "eps"
+    ? quarterlyGrowthPoints(snapshot, "eps_diluted")
+    : detailKey === "fcf_margin"
+      ? quarterlyMetricPoints(snapshot, "fcf_margin")
+      : revenueGrowthPoints(snapshot);
 
   return (
     <section className="mobile-growth-detail-panel">
@@ -1529,8 +1589,8 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
         <small>{detailText}</small>
       </div>
       <GrowthChart
-        title={detailKey === "eps" ? "EPS growth YoY" : "Revenue growth YoY"}
-        points={detailKey === "eps" ? quarterlyGrowthPoints(snapshot, "eps_diluted") : revenueGrowthPoints(snapshot)}
+        title={chartTitle}
+        points={chartPoints}
         selectedPeriod={detailKey === "revenue" ? revenueDetail?.latest.period : undefined}
       />
     </section>
@@ -1546,6 +1606,8 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
   const dailyChange = snapshot.price_opportunity.change_1d?.value;
   const revenueSignal = growthSignal(snapshot.business_health.revenue_growth_yoy?.value);
   const epsSignal = growthSignal(snapshot.business_health.eps_growth_yoy?.value);
+  const fcfMarginMetric = snapshot.business_health.fcf_margin;
+  const fcfMarginStatus = fcfMarginSignal(fcfMarginMetric?.value);
   const momentum = revenueMomentum(snapshot);
   const support = closestSupport(snapshot);
   const supportStatus = supportSignal(support?.value);
@@ -1616,6 +1678,13 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
             signal={epsSignal}
             value={formatPercent(snapshot.business_health.eps_growth_yoy?.value, true)}
             onClick={() => setActiveGrowthDetail("eps")}
+          />
+          <MobileGrowthSignalButton
+            active={activeGrowthDetail === "fcf_margin"}
+            label="Free cash flow margin"
+            signal={fcfMarginStatus}
+            value={formatPercent(fcfMarginMetric?.value, true)}
+            onClick={() => setActiveGrowthDetail("fcf_margin")}
           />
           <MobileGrowthSignalButton
             active={activeGrowthDetail === "support"}

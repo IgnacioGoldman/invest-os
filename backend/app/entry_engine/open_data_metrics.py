@@ -367,6 +367,16 @@ def compute_open_data_snapshot(
         notes="Net income divided by revenue, expressed as a percentage.",
         fallback_as_of=as_of,
     )
+    fcf_margin = _computed_metric(
+        "fcf_margin",
+        free_cash_flow.value,
+        revenue.value,
+        lambda fcf, sales: (fcf / sales) * 100,
+        source=f"{free_cash_flow.source}; {revenue.source}",
+        as_of=_max_as_of(free_cash_flow.as_of, revenue.as_of),
+        notes="Free cash flow TTM divided by revenue TTM, expressed as a percentage.",
+        fallback_as_of=as_of,
+    )
     roe = _computed_metric(
         "roe",
         net_income.value,
@@ -603,6 +613,7 @@ def compute_open_data_snapshot(
         "operating_margin": operating_margin_quarterly,
         "net_margin": net_margin_quarterly,
         "free_cash_flow": free_cash_flow_quarterly,
+        "fcf_margin": fcf_margin,
         "roe": roe_quarterly,
         "roic": roic_quarterly,
         "cash": cash,
@@ -656,6 +667,7 @@ def compute_open_data_snapshot(
         **price_opportunity,
         **valuation,
         "free_cash_flow_ttm": free_cash_flow,
+        "fcf_margin_ttm": fcf_margin,
         "pe_ttm": pe,
         "price_to_sales_ttm": price_to_sales,
         "fcf_yield": fcf_yield,
@@ -2053,6 +2065,7 @@ def _mark_non_comparable_metrics(
             "gross_margin": "Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses.",
             "operating_margin": "Operating margin is not meaningful for many financial businesses because interest income, credit costs, and balance-sheet funding do not map cleanly to normal operating-company margins.",
             "free_cash_flow": "Free cash flow is not meaningful for many financial businesses because operating cash flow is distorted by balance-sheet lending, deposits, and financing activity.",
+            "fcf_margin": "Free cash flow margin is not meaningful for many financial businesses because operating cash flow is distorted by balance-sheet lending, deposits, and financing activity.",
             "roic": "ROIC is not meaningful for many financial businesses because invested capital is not comparable to operating-company capital.",
         },
         "valuation": {

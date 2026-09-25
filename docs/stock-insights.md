@@ -35,6 +35,12 @@ _Is the company converting its business into more earnings for shareholders?_
 
 Compares earnings per share with the same quarter last year. Revenue can grow while costs grow even faster, so EPS tells you whether that growth is actually producing more profit per share. For example, Revenue +15% / EPS +25% is generally healthier than Revenue +15% / EPS -10%
 
+### Free Cash Flow Margin
+
+_Is the company turning its revenue into actual cash?_
+
+Measures free cash flow as a percentage of revenue. It shows how much cash the business keeps after paying operating costs and capital expenditures. This is especially useful because revenue and EPS can look strong while cash generation is weak.
+
 ## Price
 
 ### Proximity to support
@@ -42,3 +48,4 @@ Compares earnings per share with the same quarter last year. Revenue can grow wh
 _Is the current price close to a nearby support zone?_
 
 Compares the current price with a detected support zone from recent daily price history. Support means a clustered swing-low area with enough touches to look like a practical floor, not simply the lowest price in the range. Closer to 0% means the stock is nearer support; the window label shows which price range produced the signal. See [Support](support.md) for the calculation details.
+

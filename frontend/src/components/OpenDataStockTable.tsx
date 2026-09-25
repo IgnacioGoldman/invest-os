@@ -28,6 +28,7 @@ const COLUMNS = [
   ["business_health", "operating_margin", "Q Operating", "percent"],
   ["business_health", "net_margin", "Q Net", "percent"],
   ["business_health", "free_cash_flow", "Q FCF", "compact"],
+  ["business_health", "fcf_margin", "FCF Mgn", "percent"],
   ["business_health", "roe", "Q ROE", "percent"],
   ["business_health", "roic", "Q ROIC", "percent"],
   ["business_health", "cash", "Cash", "compact"],

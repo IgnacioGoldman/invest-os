@@ -100,6 +100,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-27",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 29.279405684809873,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-09-27; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-27; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-28; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-09-27; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-27; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-28; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-09-27; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-27; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-28",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-27",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -13301,6 +13308,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $240.36-$264.22; midpoint $252.29; distance +33.23%; touches 5; first touch 2025-10-10; last touch 2026-04-07; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 29.279405684809873,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-09-27; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-27; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-28; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-09-27; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-27; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-28; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-09-27; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-27; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-28",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-27",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -13405,6 +13419,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": -1.4986850247524752,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -26632,6 +26653,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $194.81-$211.82; midpoint $203.32; distance +24.78%; touches 2; first touch 2026-02-13; last touch 2026-03-13; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": -1.4986850247524752,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -26736,6 +26764,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2025-12-31",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 20.029282078346583,
+        "source": "sec_companyfacts:ifrs-full/CashFlowsFromUsedInOperatingActivities:USD:20-F:2025-12-31; sec_companyfacts:ifrs-full/PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:USD:20-F:2025-12-31; sec_companyfacts:ifrs-full/Revenue:USD:20-F:2025-12-31",
+        "tier": "computed_from_public_facts",
+        "as_of": "2025-12-31",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -31030,6 +31065,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $152.51-$165.55; midpoint $159.03; distance +4.44%; touches 3; first touch 2025-11-05; last touch 2026-09-09; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 20.029282078346583,
+        "source": "sec_companyfacts:ifrs-full/CashFlowsFromUsedInOperatingActivities:USD:20-F:2025-12-31; sec_companyfacts:ifrs-full/PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:USD:20-F:2025-12-31; sec_companyfacts:ifrs-full/Revenue:USD:20-F:2025-12-31",
+        "tier": "computed_from_public_facts",
+        "as_of": "2025-12-31",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -31134,6 +31176,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-05-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 11.283465767651956,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2026-05-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2026-05-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2026-05-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-05-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -42861,6 +42910,13 @@
         "tier": "unavailable_open_free",
         "as_of": "2026-09-18",
         "notes": "support_1y_distance: No usable 1Y support zone was detected below the latest close from open/free daily price history."
+      },
+      "fcf_margin_ttm": {
+        "value": 11.283465767651956,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2026-05-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2026-05-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2026-05-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-05-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -42965,6 +43021,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-07-31",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 34.48950794301061,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2026-01-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-07-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-07-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2026-01-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-07-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-07-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2026-01-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-07-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-07-31",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-07-31",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -55794,6 +55857,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $159.25-$169.16; midpoint $164.20; distance +44.89%; touches 3; first touch 2026-04-10; last touch 2026-07-09; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 34.48950794301061,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2026-01-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-07-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-07-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2026-01-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-07-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-07-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2026-01-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-07-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-07-31",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-07-31",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -55898,6 +55968,13 @@
         "tier": "unavailable_open_free",
         "as_of": "2026-09-19",
         "notes": "debt_to_equity: Inputs required for this open/free computation were unavailable."
+      },
+      "fcf_margin": {
+        "value": 29.8006289823469,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -62297,6 +62374,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $100.56-$108.86; midpoint $104.71; distance +119.57%; touches 3; first touch 2026-02-05; last touch 2026-04-10; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 29.8006289823469,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -62401,6 +62485,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 27.2265609714896,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2026-03-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2026-03-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2026-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -69007,6 +69098,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $31.71-$35.42; midpoint $33.57; distance +64.26%; touches 4; first touch 2026-02-05; last touch 2026-05-13; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 27.2265609714896,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2026-03-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2026-03-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2026-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -69111,6 +69209,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 28.274168880302664,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -80989,6 +81094,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $56.41-$58.98; midpoint $57.69; distance +54.87%; touches 2; first touch 2026-04-29; last touch 2026-05-14; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 28.274168880302664,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -81093,6 +81205,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 11.948208654618202,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -90135,6 +90254,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $267.68-$282.52; midpoint $275.10; distance +25.20%; touches 2; first touch 2025-11-14; last touch 2026-03-30; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 11.948208654618202,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -90239,6 +90365,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 57.96622567504509,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -102121,6 +102254,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $42.65-$44.59; midpoint $43.62; distance +30.99%; touches 2; first touch 2026-02-05; last touch 2026-03-03; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 57.96622567504509,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -102225,6 +102365,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 47.607103155374396,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -114953,6 +115100,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $476.89-$503.41; midpoint $490.15; distance +15.32%; touches 5; first touch 2026-02-23; last touch 2026-06-22; cluster tolerance 3.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 47.607103155374396,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -115057,6 +115211,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 35.27087715308965,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -127000,6 +127161,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $1515.87-$1631.51; midpoint $1573.69; distance +13.58%; touches 3; first touch 2026-03-27; last touch 2026-06-10; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 35.27087715308965,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -127104,6 +127272,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 17.95248130314966,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -138332,6 +138507,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $515.21-$554.54; midpoint $534.87; distance +24.47%; touches 4; first touch 2026-03-27; last touch 2026-08-18; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 17.95248130314966,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -138436,6 +138618,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 20.18659651216403,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2026-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -151471,6 +151660,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $345.77-$363.91; midpoint $354.84; distance +39.16%; touches 2; first touch 2026-03-27; last touch 2026-06-25; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 20.18659651216403,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2026-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -151575,6 +151771,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": -5.255173603934607,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -163475,6 +163678,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $90.26-$95.15; midpoint $92.70; distance +66.04%; touches 3; first touch 2026-07-13; last touch 2026-08-18; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": -5.255173603934607,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -163579,6 +163789,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 23.055259164399388,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -176803,6 +177020,13 @@
         "tier": "unavailable_open_free",
         "as_of": "2026-09-18",
         "notes": "support_1y_distance: No usable 1Y support zone was detected below the latest close from open/free daily price history."
+      },
+      "fcf_margin_ttm": {
+        "value": 23.055259164399388,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -176907,6 +177131,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-07-26",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 41.92032214410668,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2026-01-25; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-07-26; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-07-27; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-K:2026-01-25; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2026-07-26; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2025-07-27; sec_companyfacts:us-gaap/Revenues:USD:10-K:2026-01-25; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-07-26; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-07-27",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-07-26",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -189419,6 +189650,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $161.87-$175.32; midpoint $168.59; distance +31.84%; touches 3; first touch 2025-12-17; last touch 2026-03-30; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 41.92032214410668,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2026-01-25; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-07-26; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-07-27; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-K:2026-01-25; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2026-07-26; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2025-07-27; sec_companyfacts:us-gaap/Revenues:USD:10-K:2026-01-25; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-07-26; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-07-27",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-07-26",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -189523,6 +189761,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-08-31",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": -40.013374944271064,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2026-05-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-08-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-08-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2026-05-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-08-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-08-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2026-05-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-08-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-08-31",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-08-31",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -202585,6 +202830,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $133.75-$144.91; midpoint $139.33; distance +5.94%; touches 5; first touch 2026-02-05; last touch 2026-08-20; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": -40.013374944271064,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2026-05-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-08-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-08-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2026-05-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-08-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-08-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2026-05-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-08-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-08-31",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-08-31",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -202689,6 +202941,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 5.560756231965181,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -214583,6 +214842,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $336.38-$361.16; midpoint $348.77; distance +4.44%; touches 2; first touch 2026-04-08; last touch 2026-09-04; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 5.560756231965181,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -214687,6 +214953,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-06-30",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 18.317127491987613,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -221442,6 +221715,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $64.62-$73.81; midpoint $69.21; distance +1.86%; touches 8; first touch 2026-02-13; last touch 2026-09-09; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": 18.317127491987613,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/Revenues:USD:10-Q:2025-06-30",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-06-30",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -221546,6 +221826,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-03-31",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": 49.23652590234039,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-09-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-K:2025-09-30; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-03-31",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-03-31",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -234504,6 +234791,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $302.29-$326.27; midpoint $314.28; distance +17.19%; touches 6; first touch 2025-11-18; last touch 2026-06-03; cluster tolerance 2.8%."
+      },
+      "fcf_margin_ttm": {
+        "value": 49.23652590234039,
+        "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-09-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-K:2025-09-30; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-03-31",
+        "tier": "computed_from_public_facts",
+        "as_of": "2026-03-31",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   },
@@ -234608,6 +234902,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2025-12-31",
         "notes": "Latest debt divided by latest stockholders' equity."
+      },
+      "fcf_margin": {
+        "value": -0.6396357328707719,
+        "source": "sec_companyfacts:ifrs-full/CashFlowsFromUsedInOperatingActivities:USD:20-F:2025-12-31; sec_companyfacts:ifrs-full/PurchaseOfPropertyPlantAndEquipmentIntangibleAssetsOtherThanGoodwillInvestmentPropertyAndOtherNoncurrentAssets:USD:20-F:2025-12-31; sec_companyfacts:ifrs-full/Revenue:USD:20-F:2025-12-31",
+        "tier": "computed_from_public_facts",
+        "as_of": "2025-12-31",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     },
     "price_opportunity": {
@@ -236841,6 +237142,13 @@
         "tier": "computed_from_public_facts",
         "as_of": "2026-09-18",
         "notes": "Primary 1Y support floor below/reclaimed by the latest close. Support zone: $32.12-$35.36; midpoint $33.74; distance +62.87%; touches 3; first touch 2025-12-17; last touch 2026-03-03; cluster tolerance 4.0%."
+      },
+      "fcf_margin_ttm": {
+        "value": -0.6396357328707719,
+        "source": "sec_companyfacts:ifrs-full/CashFlowsFromUsedInOperatingActivities:USD:20-F:2025-12-31; sec_companyfacts:ifrs-full/PurchaseOfPropertyPlantAndEquipmentIntangibleAssetsOtherThanGoodwillInvestmentPropertyAndOtherNoncurrentAssets:USD:20-F:2025-12-31; sec_companyfacts:ifrs-full/Revenue:USD:20-F:2025-12-31",
+        "tier": "computed_from_public_facts",
+        "as_of": "2025-12-31",
+        "notes": "Free cash flow TTM divided by revenue TTM, expressed as a percentage."
       }
     }
   }
