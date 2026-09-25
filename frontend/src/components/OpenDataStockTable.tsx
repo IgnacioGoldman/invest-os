@@ -989,6 +989,10 @@ function formatSignedPp(value?: number | null) {
   return `${prefix}${formatRatio(value)} pp`;
 }
 
+function formatSignedPercentDelta(value?: number | null) {
+  return formatSignedPercent(value);
+}
+
 function revenueGrowthMomentum(snapshot: OpenDataStockSnapshot): {
   label: string;
   tone: Tone;
@@ -1240,14 +1244,14 @@ function QuarterlyGrowthBarChart({
   points,
   emptyMessage,
   ariaMetric,
-  selectedPeriod,
+  selectedPeriods,
 }: {
   snapshot: OpenDataStockSnapshot;
   title: string;
   points: { period: string; value: number }[];
   emptyMessage: string;
   ariaMetric: string;
-  selectedPeriod?: string;
+  selectedPeriods?: string[];
 }) {
   const [hoveredPoint, setHoveredPoint] = useState<{ period: string; value: number; x: number; y: number } | null>(null);
   if (points.length === 0) {
@@ -1330,7 +1334,7 @@ function QuarterlyGrowthBarChart({
             const tooltipPoint = tooltipPointForIndex(index);
             const className = [
               point.value >= 0 ? "positive" : "negative",
-              point.period === selectedPeriod ? "selected" : "",
+              selectedPeriods?.includes(point.period) ? "selected" : "",
             ].filter(Boolean).join(" ");
             return (
               <g key={point.period}>
@@ -1401,7 +1405,13 @@ function QuarterlyGrowthBarChart({
   );
 }
 
-function QuarterlyRevenueGrowthBarChart({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
+function QuarterlyRevenueGrowthBarChart({
+  snapshot,
+  selectedPeriods,
+}: {
+  snapshot: OpenDataStockSnapshot;
+  selectedPeriods?: string[];
+}) {
   const detail = revenueGrowthDetail(snapshot);
   return (
     <QuarterlyGrowthBarChart
@@ -1410,7 +1420,7 @@ function QuarterlyRevenueGrowthBarChart({ snapshot }: { snapshot: OpenDataStockS
       points={quarterlyRevenueGrowthPoints(snapshot)}
       emptyMessage="No comparable quarterly revenue growth history from SEC facts."
       ariaMetric="quarterly revenue growth YoY"
-      selectedPeriod={detail?.latest.period}
+      selectedPeriods={selectedPeriods ?? (detail?.latest.period ? [detail.latest.period] : undefined)}
     />
   );
 }
@@ -1502,12 +1512,15 @@ function MomentumMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }
         <p>{copy.description}</p>
         <div className="growth-formula">
           <span>Current value</span>
-          <strong>{momentum.change == null ? "-" : formatSignedPp(momentum.change)}</strong>
+          <strong>{momentum.change == null ? "-" : formatSignedPercentDelta(momentum.change)}</strong>
           <small>{momentum.detail}</small>
         </div>
       </div>
       <div className="growth-detail-chart">
-        <QuarterlyRevenueGrowthBarChart snapshot={snapshot} />
+        <QuarterlyRevenueGrowthBarChart
+          snapshot={snapshot}
+          selectedPeriods={[momentum.previous?.period, momentum.latest?.period].filter((period): period is string => Boolean(period))}
+        />
       </div>
     </div>
   );
@@ -1819,7 +1832,7 @@ function StocksInsightsTempTable({
 	                          value={
 	                            momentum.change == null
 	                              ? "Needs 2 quarters"
-	                              : `${formatSignedPp(momentum.change)} vs ${momentum.previous?.period ?? "previous quarter"}`
+	                              : `${formatSignedPercentDelta(momentum.change)} vs ${momentum.previous?.period ?? "previous quarter"}`
 	                          }
 	                          onClick={() => toggleGrowthDetail(snapshot.ticker, "momentum")}
 	                        />
