@@ -55,7 +55,7 @@ type Props = {
 };
 
 type Tone = "positive" | "warning" | "negative" | "neutral" | "info";
-type GrowthDetailKey = "revenue" | "momentum" | "eps";
+type GrowthDetailKey = "revenue" | "momentum" | "eps" | "support";
 export type FilterKey =
   | "revenue"
   | "momentum"
@@ -109,6 +109,12 @@ const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: str
     question: "Is the company converting growth into earnings?",
     description:
       "Compares latest-quarter diluted earnings per share with the same quarter last year. It helps separate revenue growth from profitable growth.",
+  },
+  support: {
+    title: "Proximity to support",
+    question: "Is the current price close to a nearby support zone?",
+    description:
+      "Compares the current price with a detected support zone from recent daily price history. Support means a clustered swing-low area with enough touches to look like a practical floor, not just the lowest price in the range.",
   },
 };
 
@@ -365,10 +371,14 @@ function closestSupport(snapshot: OpenDataStockSnapshot, keys: readonly SupportF
     .map((key) => ({
       key,
       label: FILTER_DEFINITIONS.find((definition) => definition.key === key)?.shortLabel ?? key,
+      window: key.replace("support_", "").toUpperCase(),
       value: finiteNumber(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value),
+      metric: snapshot.price_opportunity[SUPPORT_KEYS[key]],
     }))
-    .filter((item): item is { key: SupportFilterKey; label: string; value: number } => item.value != null)
-    .sort((left, right) => left.value - right.value)[0] ?? null;
+    .filter((item): item is { key: SupportFilterKey; label: string; window: string; value: number; metric: OpenDataMetric } =>
+      item.value != null,
+    )
+    .sort((left, right) => Math.abs(left.value) - Math.abs(right.value))[0] ?? null;
 }
 
 function sortValue(
@@ -377,7 +387,10 @@ function sortValue(
   supportKeys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS,
 ): number | string | null {
   if (key === "symbol") return snapshot.ticker;
-  if (key === "support_best") return closestSupport(snapshot, supportKeys)?.value ?? null;
+  if (key === "support_best") {
+    const support = closestSupport(snapshot, supportKeys);
+    return support ? Math.abs(support.value) : null;
+  }
   if (key === "revenue") return finiteNumber(snapshot.business_health.revenue_growth_yoy?.value);
   if (key === "eps") return finiteNumber(snapshot.business_health.eps_growth_yoy?.value);
   if (key === "momentum") return revenueMomentum(snapshot).change;
@@ -1111,6 +1124,11 @@ function supportKeyForRange(range: ChartRange) {
   return "support_5y_distance";
 }
 
+function supportFirstTouchDate(metric?: OpenDataMetric) {
+  const match = metric?.notes.match(/first touch (\d{4}-\d{2}-\d{2})/i);
+  return match?.[1] ?? null;
+}
+
 function PriceChart({ snapshot, points, loading, error }: {
   snapshot: OpenDataStockSnapshot;
   points: OpenDataPricePoint[];
@@ -1125,7 +1143,8 @@ function PriceChart({ snapshot, points, loading, error }: {
   const padding = { top: 26, right: 68, bottom: 40, left: 12 };
   const supportKey = supportKeyForRange(range);
   const currentPrice = snapshot.price_opportunity.current_price?.value;
-  const supportDistance = snapshot.price_opportunity[supportKey]?.value;
+  const supportMetric = snapshot.price_opportunity[supportKey];
+  const supportDistance = supportMetric?.value;
   const supportLevel = inferredSupportLevel(currentPrice, supportDistance);
   const values = [...ranged.map((point) => point.close), ...(supportLevel == null ? [] : [supportLevel])];
   const min = values.length ? Math.min(...values) : 0;
@@ -1136,6 +1155,14 @@ function PriceChart({ snapshot, points, loading, error }: {
   const innerWidth = width - padding.left - padding.right;
   const innerHeight = height - padding.top - padding.bottom;
   const xFor = (index: number) => padding.left + (index / Math.max(ranged.length - 1, 1)) * innerWidth;
+  const xForDate = (date: string) => {
+    const firstDate = ranged[0] ? dateValue(ranged[0].date) : null;
+    const lastDate = ranged[ranged.length - 1] ? dateValue(ranged[ranged.length - 1].date) : null;
+    const targetDate = dateValue(date);
+    if (firstDate == null || lastDate == null || targetDate == null || firstDate === lastDate) return padding.left;
+    const clampedDate = Math.max(firstDate, Math.min(lastDate, targetDate));
+    return padding.left + ((clampedDate - firstDate) / (lastDate - firstDate)) * innerWidth;
+  };
   const yFor = (value: number) => padding.top + ((yMax - value) / Math.max(yMax - yMin, 1)) * innerHeight;
   const path = ranged.map((point, index) => `${index === 0 ? "M" : "L"}${xFor(index).toFixed(2)},${yFor(point.close).toFixed(2)}`).join(" ");
   const first = ranged[0];
@@ -1144,6 +1171,9 @@ function PriceChart({ snapshot, points, loading, error }: {
   const selected = ranged[hoverIndex ?? Math.max(ranged.length - 1, 0)];
   const guideParts = [0.25, 0.5, 0.75];
   const dateGuideIndices = Array.from(new Set([0, Math.round((ranged.length - 1) / 2), ranged.length - 1]));
+  const supportStartDate = supportFirstTouchDate(supportMetric);
+  const supportStartX = supportStartDate ? xForDate(supportStartDate) : padding.left;
+  const supportLabelX = Math.min(width - padding.right - 8, supportStartX + 6);
   const dateFormatter = new Intl.DateTimeFormat(undefined, range === "2Y" || range === "5Y" || range === "ALL"
     ? { month: "short", year: "2-digit" }
     : { month: "short", day: "numeric" });
@@ -1205,8 +1235,8 @@ function PriceChart({ snapshot, points, loading, error }: {
           ))}
           {supportLevel != null && (
             <g className="mobile-support-line">
-              <line x1={padding.left} x2={width - padding.right} y1={yFor(supportLevel)} y2={yFor(supportLevel)} />
-              <text x={padding.left + 6} y={yFor(supportLevel) - 7}>{range === "ALL" ? "5Y" : supportKey.split("_")[1].toUpperCase()} support {formatPrice(supportLevel)}</text>
+              <line x1={supportStartX} x2={width - padding.right} y1={yFor(supportLevel)} y2={yFor(supportLevel)} />
+              <text x={supportLabelX} y={yFor(supportLevel) - 7}>{range === "ALL" ? "5Y" : supportKey.split("_")[1].toUpperCase()} support {formatPrice(supportLevel)}</text>
             </g>
           )}
           <path className={`mobile-price-path ${change != null && change < 0 ? "negative" : "positive"}`} d={path} />
@@ -1375,15 +1405,17 @@ function MobileGrowthSignalButton({
   signal,
   value,
   onClick,
+  className = "",
 }: {
   active: boolean;
   label: string;
   signal: Signal;
   value: string;
   onClick: () => void;
+  className?: string;
 }) {
   return (
-    <button type="button" className={`mobile-growth-signal ${active ? "active" : ""}`} onClick={onClick}>
+    <button type="button" className={`mobile-growth-signal ${active ? "active" : ""} ${className}`.trim()} onClick={onClick}>
       <span>{label}</span>
       <StockStatus signal={signal} />
       <strong>{value}</strong>
@@ -1396,6 +1428,36 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
   const revenueDetail = revenueGrowthDetail(snapshot);
   const momentum = revenueMomentum(snapshot);
   const epsMetric = snapshot.business_health.eps_growth_yoy;
+  const support = closestSupport(snapshot);
+  const currentPrice = finiteNumber(snapshot.price_opportunity.current_price?.value);
+  const supportLevel = support ? inferredSupportLevel(currentPrice, support.value) : null;
+  if (detailKey === "support") {
+    const detailText = support
+      ? [
+          `Nearest window: ${support.window}.`,
+          `Distance from support: ${formatPercent(support.value, true)}.`,
+          supportLevel != null && currentPrice != null
+            ? `Inferred support level ${formatPrice(supportLevel)} vs current price ${formatPrice(currentPrice)}.`
+            : null,
+        ].filter(Boolean).join(" ")
+      : "No usable support zone was detected from the available open/free price history.";
+
+    return (
+      <section className="mobile-growth-detail-panel mobile-support-detail-panel">
+        <div className="mobile-growth-copy">
+          <span>Metric definition</span>
+          <h2>{copy.title}</h2>
+          <p className="metric-question">{copy.question}</p>
+          <p>{copy.description}</p>
+        </div>
+        <div className="mobile-growth-formula">
+          <span>Current value</span>
+          <strong>{supportSignal(support?.value).label}</strong>
+          <small>{detailText}</small>
+        </div>
+      </section>
+    );
+  }
   const metric = detailKey === "eps" ? epsMetric : detailKey === "revenue" ? revenueDetail?.growth : undefined;
   const currentValue = detailKey === "momentum"
     ? momentum.change == null ? "-" : `${momentum.change > 0 ? "+" : ""}${formatNumber(momentum.change)} pp`
@@ -1438,6 +1500,8 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
   const revenueSignal = growthSignal(snapshot.business_health.revenue_growth_yoy?.value);
   const epsSignal = growthSignal(snapshot.business_health.eps_growth_yoy?.value);
   const momentum = revenueMomentum(snapshot);
+  const support = closestSupport(snapshot);
+  const supportStatus = supportSignal(support?.value);
 
   useEffect(() => {
     let active = true;
@@ -1505,6 +1569,14 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
             signal={epsSignal}
             value={formatPercent(snapshot.business_health.eps_growth_yoy?.value, true)}
             onClick={() => setActiveGrowthDetail("eps")}
+          />
+          <MobileGrowthSignalButton
+            active={activeGrowthDetail === "support"}
+            className="mobile-support-signal"
+            label="Proximity to support"
+            signal={supportStatus}
+            value={support?.window ?? "No zone"}
+            onClick={() => setActiveGrowthDetail("support")}
           />
         </section>
 

@@ -63,7 +63,7 @@ type MetricKind = "percent" | "ratio" | "compact";
 type HistoricalRow = OpenDataStockSnapshot["historical_series"][string][number];
 type DetailKind = "charts" | "analysis" | null;
 type Tone = "good" | "watch" | "caution" | "bad" | "neutral";
-type GrowthDetailKey = "revenue" | "momentum" | "eps";
+type GrowthDetailKey = "revenue" | "momentum" | "eps" | "support";
 type ConvictionFilter = "all" | "strong" | "setup" | "uncertain" | "weak" | "needs_data";
 type SortDirection = "asc" | "desc";
 type SortValue = number | string | null;
@@ -126,6 +126,12 @@ const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: str
     question: "Is the company converting growth into earnings?",
     description:
       "Compares latest-quarter diluted earnings per share with the same quarter last year. It helps separate revenue growth from profitable growth.",
+  },
+  support: {
+    title: "Proximity to support",
+    question: "Is the current price close to a nearby support zone?",
+    description:
+      "Compares the current price with a detected support zone from recent daily price history. Support means a clustered swing-low area with enough touches to look like a practical floor, not just the lowest price in the range.",
   },
 };
 
@@ -381,6 +387,33 @@ function supportSignalTone(value?: number | null): Tone {
   if (value <= 2.5) return "good";
   if (value <= 6) return "watch";
   return "neutral";
+}
+
+function supportWindowLabel(key: string) {
+  const match = /^support_(.+)_distance$/.exec(key);
+  return match ? match[1].toUpperCase() : "Support";
+}
+
+function closestSupportInsight(snapshot: OpenDataStockSnapshot) {
+  return BETA_SUPPORT_COLUMNS
+    .map(([key]) => {
+      const value = finiteNumber(snapshot.price_opportunity[key]?.value);
+      return value == null
+        ? null
+        : {
+            key,
+            window: supportWindowLabel(key),
+            value,
+            metric: snapshot.price_opportunity[key],
+          };
+    })
+    .filter((item): item is {
+      key: typeof BETA_SUPPORT_COLUMNS[number][0];
+      window: string;
+      value: number;
+      metric: OpenDataMetric;
+    } => item != null)
+    .sort((left, right) => Math.abs(left.value) - Math.abs(right.value))[0] ?? null;
 }
 
 function isSupportMetric(group?: MetricGroup, key?: string) {
@@ -703,6 +736,10 @@ function sortValueFor(
   if (sortKey === "exchange") return snapshot.exchange ?? null;
   if (sortKey === "region") return snapshot.country ?? null;
   if (sortKey === "temp:revenue_momentum") return revenueGrowthMomentum(snapshot).change;
+  if (sortKey === "temp:support_best") {
+    const support = closestSupportInsight(snapshot);
+    return support ? Math.abs(support.value) : null;
+  }
   if (sortKey === "conviction") return analysis?.conviction ?? null;
   if (sortKey === "business" || sortKey === "price" || sortKey === "valuation") {
     const section = analysisSectionFor(analysis, sortKey);
@@ -1465,12 +1502,45 @@ function EpsMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
   );
 }
 
+function SupportMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
+  const copy = GROWTH_DETAIL_COPY.support;
+  const support = closestSupportInsight(snapshot);
+  const currentPrice = finiteNumber(snapshot.price_opportunity.current_price?.value);
+  const supportLevel = support ? inferredSupportLevel(currentPrice, support.value) : null;
+  const detail = support
+    ? [
+        `Nearest window: ${support.window}.`,
+        `Distance from support: ${formatSignedPercent(support.value)}.`,
+        supportLevel != null && currentPrice != null
+          ? `Inferred support level ${formatPrice(supportLevel)} vs current price ${formatPrice(currentPrice)}.`
+          : null,
+      ].filter(Boolean).join(" ")
+    : "No usable support zone was detected from the available open/free price history.";
+
+  return (
+    <div className="growth-detail-layout support-detail-layout">
+      <div className="growth-detail-copy">
+        <span>Metric definition</span>
+        <h3>{copy.title}</h3>
+        <p className="metric-question">{copy.question}</p>
+        <p>{copy.description}</p>
+        <div className="growth-formula">
+          <span>Current value</span>
+          <strong>{support ? supportSignalLabel(support.value) : "Far"}</strong>
+          <small>{detail}</small>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function GrowthMetricDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataStockSnapshot; detailKey: GrowthDetailKey }) {
   return (
     <div className="growth-detail-panel" id={`growth-detail-${detailKey}`}>
       {detailKey === "revenue" && <RevenueMetricDetails snapshot={snapshot} />}
       {detailKey === "momentum" && <MomentumMetricDetails snapshot={snapshot} />}
       {detailKey === "eps" && <EpsMetricDetails snapshot={snapshot} />}
+      {detailKey === "support" && <SupportMetricDetails snapshot={snapshot} />}
     </div>
   );
 }
@@ -1656,6 +1726,7 @@ function StocksInsightsTempTable({
 	                <th>{renderSortHeader("metric:business_health:revenue_growth_yoy", "Latest revenue growth YoY")}</th>
 	                <th>{renderSortHeader("temp:revenue_momentum", "Momentum revenue growth YoY")}</th>
 	                <th>{renderSortHeader("metric:business_health:eps_growth_yoy", "Latest EPS Growth YoY")}</th>
+	                <th>{renderSortHeader("temp:support_best", "Proximity to support")}</th>
 	                {editMode && <th>Remove</th>}
 	              </tr>
             </thead>
@@ -1666,6 +1737,8 @@ function StocksInsightsTempTable({
 	                const growthSignal = revenueGrowthSignal(revenueGrowth?.value);
 	                const epsSignal = epsGrowthSignal(epsGrowth?.value);
 	                const momentum = revenueGrowthMomentum(snapshot);
+	                const support = closestSupportInsight(snapshot);
+	                const supportSignal = supportSignalLabel(support?.value);
 	                const activeDetail = activeGrowthDetails[snapshot.ticker];
 	                return (
 	                  <Fragment key={snapshot.ticker}>
@@ -1713,6 +1786,17 @@ function StocksInsightsTempTable({
 	                          onClick={() => toggleGrowthDetail(snapshot.ticker, "eps")}
 	                        />
 	                      </td>
+	                      <td>
+	                        <GrowthMetricButton
+	                          active={activeDetail === "support"}
+	                          detailKey="support"
+	                          label="Proximity to support"
+	                          tone={supportSignalTone(support?.value)}
+	                          signal={support?.window ?? "No zone"}
+	                          value={supportSignal}
+	                          onClick={() => toggleGrowthDetail(snapshot.ticker, "support")}
+	                        />
+	                      </td>
 	                      {editMode && (
                         <td className="table-row-action-cell">
                           <button
@@ -1729,7 +1813,7 @@ function StocksInsightsTempTable({
 	                    </tr>
 	                    {activeDetail && (
 	                      <tr className="exploration-detail-row temp-chart-row">
-	                        <td colSpan={editMode ? 5 : 4}>
+	                        <td colSpan={editMode ? 6 : 5}>
 	                          <GrowthMetricDetailPanel snapshot={snapshot} detailKey={activeDetail} />
 	                        </td>
 	                      </tr>

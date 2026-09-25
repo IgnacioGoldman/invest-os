@@ -6072,6 +6072,10 @@ tbody tr:hover td {
   grid-template-columns: minmax(260px, 0.74fr) minmax(420px, 1.26fr);
 }
 
+.exploration-page .support-detail-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .exploration-page .growth-detail-copy {
   align-content: start;
   display: grid;
@@ -10933,6 +10937,10 @@ body:has(.mobile-sheet-backdrop) {
   gap: 7px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   padding: 14px 0 16px;
+}
+
+.mobile-support-signal {
+  grid-column: 1 / -1;
 }
 
 .mobile-growth-signal {
