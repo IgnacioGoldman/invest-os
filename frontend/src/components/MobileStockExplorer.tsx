@@ -6,6 +6,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Download,
   LogIn,
   Plus,
   RotateCcw,
@@ -624,6 +625,152 @@ function builtInPresetName(preset: BuiltInPreset | null) {
 
 function builtInPresetSummary(preset: BuiltInPreset | null) {
   return preset ? BUILT_IN_PRESET_COPY[preset].summary : null;
+}
+
+function markdownValue(value?: string | number | null) {
+  if (value == null || value === "") return "-";
+  return String(value).replace(/\s+/g, " ").trim();
+}
+
+function metricLine(label: string, value: string, signal: Signal, metric?: OpenDataMetric) {
+  const parts = [`- ${label}: ${value} - ${signal.label}`];
+  if (metric?.as_of) parts.push(`as of ${metric.as_of}`);
+  if (metric?.notes) parts.push(metric.notes);
+  return parts.join(" | ");
+}
+
+function filterExpressionSummary(expression: FilterExpression, count: number) {
+  return [
+    `${expression.groups.length} group${expression.groups.length === 1 ? "" : "s"}`,
+    expression.groups.length > 1 ? `joined by ${expression.operator.toUpperCase()}` : "",
+    `${count} condition${count === 1 ? "" : "s"}`,
+  ].filter(Boolean).join(" | ");
+}
+
+function exportFilterContext(
+  expression: FilterExpression,
+  count: number,
+  preset: BuiltInPreset | null,
+  activeSavedFilter?: SavedFilter | null,
+) {
+  return {
+    name: activeSavedFilter?.name ?? builtInPresetName(preset) ?? "Custom filter",
+    summary: builtInPresetSummary(preset) ?? filterExpressionSummary(expression, count),
+  };
+}
+
+function buildStockExportMarkdown({
+  snapshots,
+  filterName,
+  filterSummary,
+  visibleCount,
+}: {
+  snapshots: OpenDataStockSnapshot[];
+  filterName: string;
+  filterSummary: string;
+  visibleCount: number;
+}) {
+  const generatedAt = new Date().toISOString();
+  const lines = [
+    "# Stock comparison brief",
+    "",
+    `Generated: ${generatedAt}`,
+    `Filter context: ${filterName}`,
+    `Filter description: ${filterSummary}`,
+    `Selected stocks: ${snapshots.map((snapshot) => snapshot.ticker).join(", ")}`,
+    `Filtered universe size: ${visibleCount}`,
+    "",
+    "Use this brief to compare the selected stocks. Rank them for a medium/long-term investor using the app's current metrics, support setup, company context, and caveats.",
+    "",
+  ];
+
+  snapshots.forEach((snapshot) => {
+    const revenueMetric = snapshot.business_health.revenue_growth_yoy;
+    const epsMetric = snapshot.business_health.eps_growth_yoy;
+    const fcfMarginMetric = snapshot.business_health.fcf_margin;
+    const momentum = revenueMomentum(snapshot);
+    const bestSupport = closestSupport(snapshot);
+    const supportRows = supportWindows(snapshot)
+      .map((support) => `- ${support.window} support: ${formatPercent(support.value, true)} - ${supportSignal(support.value).label}`)
+      .join("\n");
+    const context = snapshot.company_context;
+    const filings = context?.recent_filings.slice(0, 5) ?? [];
+    const gaps = [...(snapshot.data_gaps ?? []), ...(context?.known_context_gaps ?? [])].slice(0, 8);
+
+    lines.push(
+      `## ${snapshot.ticker} - ${markdownValue(snapshot.name)}`,
+      "",
+      "### Metadata",
+      `- Sector: ${markdownValue(snapshot.sector)}`,
+      `- Industry: ${markdownValue(snapshot.industry)}`,
+      `- Exchange: ${markdownValue(snapshot.exchange)}`,
+      `- Country: ${markdownValue(snapshot.country)}`,
+      `- App snapshot generated: ${markdownValue(snapshot.generated_at)}`,
+      "",
+      "### App metrics",
+      metricLine("Latest revenue growth YoY", formatPercent(revenueMetric?.value, true), growthSignal(revenueMetric?.value), revenueMetric),
+      `- Revenue growth momentum: ${momentum.change == null ? "-" : `${formatNumber(momentum.change)} pp`} - ${momentum.label}`,
+      metricLine("Latest EPS growth YoY", formatPercent(epsMetric?.value, true), growthSignal(epsMetric?.value), epsMetric),
+      metricLine("Free cash flow margin", formatPercent(fcfMarginMetric?.value, true), fcfMarginSignal(fcfMarginMetric?.value), fcfMarginMetric),
+      `- Best support setup: ${bestSupport ? `${bestSupport.window} support | ${formatPercent(bestSupport.value, true)} | ${supportSignal(bestSupport.value).label}` : "-"}`,
+      "",
+      "### Support proximity",
+      supportRows || "- No support windows available",
+      "",
+      "### Current company context",
+      context?.notes ? `- Context notes: ${markdownValue(context.notes)}` : "- Context notes: -",
+      context?.as_of ? `- Context as of: ${context.as_of}` : "- Context as of: -",
+    );
+
+    if (filings.length > 0) {
+      lines.push(
+        "",
+        "Recent filings:",
+        ...filings.map((filing) => {
+          const description = filing.primary_document_description || filing.primary_document || filing.notes;
+          const items = filing.items.length > 0 ? ` | items: ${filing.items.join(", ")}` : "";
+          return `- ${filing.filing_date} ${filing.form}: ${markdownValue(description)}${items}`;
+        }),
+      );
+    }
+
+    if (gaps.length > 0) {
+      lines.push("", "Caveats / missing data:", ...gaps.map((gap) => `- ${markdownValue(gap)}`));
+    }
+
+    lines.push("");
+  });
+
+  return `${lines.join("\n").trim()}\n`;
+}
+
+function exportFileName(snapshots: OpenDataStockSnapshot[]) {
+  const symbols = snapshots.map((snapshot) => snapshot.ticker).join("-").toLowerCase();
+  const date = new Date().toISOString().slice(0, 10);
+  return `stock-brief-${symbols || "selection"}-${date}.md`;
+}
+
+async function shareOrDownloadMarkdown(markdown: string, filename: string) {
+  const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+  const file = new File([blob], filename, { type: "text/markdown" });
+
+  if (navigator.canShare?.({ files: [file] })) {
+    await navigator.share({
+      title: "Stock comparison brief",
+      text: "Stock comparison brief exported from Invest OS.",
+      files: [file],
+    });
+    return;
+  }
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function StockStatus({ signal }: { signal: Signal }) {
@@ -1755,11 +1902,16 @@ export function MobileStockExplorer({
   const [watchlistOpen, setWatchlistOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [activeSavedFilterId, setActiveSavedFilterId] = useState<string | null>(null);
+  const [exportMode, setExportMode] = useState(false);
+  const [exportSelection, setExportSelection] = useState<string[]>([]);
+  const [exportError, setExportError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const listTopRef = useRef<HTMLDivElement | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
   const builtInPreset = builtInPresetFor(filterExpression);
   const builtInSummary = builtInPresetSummary(builtInPreset);
+  const activeSavedFilter = personalization?.savedFilters.find((item) => item.id === activeSavedFilterId) ?? null;
+  const currentFilterContext = exportFilterContext(filterExpression, activeFilterCount(filterExpression), builtInPreset, activeSavedFilter);
   const relevantSupportKeys = builtInPreset === "support"
     ? SUPPORT_PRESET_FILTER_KEYS
     : builtInPreset === "pullback"
@@ -1823,6 +1975,11 @@ export function MobileStockExplorer({
   }, [filterExpression, query, signedIn, sortDirection, sortKey, watchlistTickers]);
 
   useEffect(() => {
+    const visibleTickers = new Set(visibleSnapshots.map((snapshot) => snapshot.ticker));
+    setExportSelection((tickers) => tickers.filter((ticker) => visibleTickers.has(ticker)));
+  }, [visibleSnapshots]);
+
+  useEffect(() => {
     setPage((value) => Math.min(value, totalPages));
   }, [totalPages]);
 
@@ -1855,6 +2012,45 @@ export function MobileStockExplorer({
     setFilterExpression({ operator: "and", groups: [createFilterGroup()] });
     setActiveSavedFilterId(null);
     setSheetOpen(true);
+  };
+
+  const startExport = () => {
+    setExportSelection([]);
+    setExportError(null);
+    setExportMode(true);
+  };
+
+  const cancelExport = () => {
+    setExportMode(false);
+    setExportSelection([]);
+    setExportError(null);
+  };
+
+  const toggleExportSelection = (ticker: string) => {
+    setExportSelection((tickers) => (
+      tickers.includes(ticker)
+        ? tickers.filter((item) => item !== ticker)
+        : [...tickers, ticker]
+    ));
+  };
+
+  const exportSelectedStocks = async () => {
+    const selectedSnapshots = visibleSnapshots.filter((snapshot) => exportSelection.includes(snapshot.ticker));
+    if (selectedSnapshots.length === 0) return;
+    setExportError(null);
+    try {
+      const markdown = buildStockExportMarkdown({
+        snapshots: selectedSnapshots,
+        filterName: currentFilterContext.name,
+        filterSummary: currentFilterContext.summary,
+        visibleCount: visibleSnapshots.length,
+      });
+      await shareOrDownloadMarkdown(markdown, exportFileName(selectedSnapshots));
+      cancelExport();
+    } catch (exc) {
+      if (exc instanceof DOMException && exc.name === "AbortError") return;
+      setExportError(exc instanceof Error ? exc.message : "Could not export selected stocks.");
+    }
   };
 
   const openDetail = (ticker: string) => {
@@ -1934,7 +2130,7 @@ export function MobileStockExplorer({
 
         {filterCount > 0 && (
           <p className="mobile-filter-expression-summary" aria-label="Active filter description">
-            {builtInSummary ?? (
+            {builtInSummary ?? currentFilterContext.summary ?? (
               <>
                 {filterExpression.groups.length} group{filterExpression.groups.length === 1 ? "" : "s"}
                 {filterExpression.groups.length > 1 ? ` joined by ${filterExpression.operator.toUpperCase()}` : ""}
@@ -1947,13 +2143,36 @@ export function MobileStockExplorer({
         <div className="mobile-list-summary" ref={listTopRef}>
           <span>{listSummaryLabel}</span>
           <div className="mobile-list-actions">
-            {signedIn && (
+            {exportMode ? (
+              <>
+                <button type="button" onClick={cancelExport}>Cancel</button>
+                <button
+                  type="button"
+                  className="mobile-export-confirm"
+                  onClick={() => void exportSelectedStocks()}
+                  disabled={exportSelection.length === 0}
+                >
+                  <Download size={15} />Export {exportSelection.length}
+                </button>
+              </>
+            ) : (
+              <button type="button" onClick={startExport} disabled={visibleSnapshots.length === 0}>
+                <Download size={15} />Export
+              </button>
+            )}
+            {!exportMode && signedIn && (
               <button type="button" onClick={() => setWatchlistOpen(true)}>
                 <Plus size={15} />Manage
               </button>
             )}
           </div>
         </div>
+        {exportMode && (
+          <p className="mobile-export-hint">
+            Select stocks from this filtered list, then export a compact AI comparison brief.
+          </p>
+        )}
+        {exportError && <p className="mobile-personal-error">{exportError}</p>}
 
         {loading ? (
           <div className="mobile-list-state">Loading stock insights...</div>
@@ -1972,11 +2191,22 @@ export function MobileStockExplorer({
             <section className="mobile-stock-list" aria-label="Stocks">
               {pagedSnapshots.map((snapshot) => {
                 const metric = rowMetric(snapshot, sortKey, relevantSupportKeys);
+                const exportSelected = exportSelection.includes(snapshot.ticker);
                 return (
-                  <article className="mobile-stock-row" key={snapshot.ticker}>
-                    <button type="button" className="mobile-stock-row-main" onClick={() => openDetail(snapshot.ticker)}>
+                  <article className={`mobile-stock-row ${exportSelected ? "export-selected" : ""}`} key={snapshot.ticker}>
+                    <button
+                      type="button"
+                      className={`mobile-stock-row-main ${exportMode ? "export-selecting" : ""}`}
+                      onClick={() => exportMode ? toggleExportSelection(snapshot.ticker) : openDetail(snapshot.ticker)}
+                      aria-pressed={exportMode ? exportSelected : undefined}
+                    >
+                      {exportMode && (
+                        <span className={`mobile-export-check ${exportSelected ? "selected" : ""}`} aria-hidden="true">
+                          {exportSelected && <Check size={14} />}
+                        </span>
+                      )}
                       <div className="mobile-stock-identity">
-                        <strong>{snapshot.ticker}<ChevronRight size={18} /></strong>
+                        <strong>{snapshot.ticker}{!exportMode && <ChevronRight size={18} />}</strong>
                         <span>{snapshot.name ?? snapshot.industry ?? ""}</span>
                       </div>
                       <div className="mobile-stock-value">
@@ -1985,7 +2215,7 @@ export function MobileStockExplorer({
                         {metric.secondary && <small>{metric.secondary}</small>}
                       </div>
                     </button>
-                    {editMode && (
+                    {editMode && !exportMode && (
                       <button
                         type="button"
                         className="mobile-remove-stock"
