@@ -149,6 +149,7 @@ type SupportFilterKey = typeof SUPPORT_FILTER_KEYS[number];
 type BuiltInPreset = "pullback" | "support";
 type BuiltInPresetCopy = {
   name: string;
+  summary: string;
 };
 
 const FILTER_DEFINITIONS: FilterDefinition[] = [
@@ -607,14 +608,22 @@ function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
 const BUILT_IN_PRESET_COPY: Record<BuiltInPreset, BuiltInPresetCopy> = {
   support: {
     name: "Strong YoY and on support",
+    summary:
+      "Companies with strong latest revenue growth, where the current price is at or near support zones identified across the past 1Y, 2Y, and 5Y. This can surface high-quality businesses trading near longer-term areas of interest.",
   },
   pullback: {
     name: "Strong YoY and on pullback",
+    summary:
+      "Companies with strong latest revenue growth that are going through a shorter-term correction, with price at or near support zones identified across the past 1M, 3M, and 6M.",
   },
 };
 
 function builtInPresetName(preset: BuiltInPreset | null) {
   return preset ? BUILT_IN_PRESET_COPY[preset].name : null;
+}
+
+function builtInPresetSummary(preset: BuiltInPreset | null) {
+  return preset ? BUILT_IN_PRESET_COPY[preset].summary : null;
 }
 
 function StockStatus({ signal }: { signal: Signal }) {
@@ -1750,6 +1759,8 @@ export function MobileStockExplorer({
   const listTopRef = useRef<HTMLDivElement | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
   const builtInPreset = builtInPresetFor(filterExpression);
+  const builtInName = builtInPresetName(builtInPreset);
+  const builtInSummary = builtInPresetSummary(builtInPreset);
   const relevantSupportKeys = builtInPreset === "support"
     ? SUPPORT_PRESET_FILTER_KEYS
     : builtInPreset === "pullback"
@@ -1799,12 +1810,6 @@ export function MobileStockExplorer({
       : `${pageStart}-${pageEnd} of ${visibleSnapshots.length} stocks`;
 
   const filterCount = activeFilterCount(filterExpression);
-  const sortLabel = SORT_OPTIONS.find((option) => option.key === sortKey)?.label ?? "Symbol";
-  const sortSummary = sortKey === "support_best"
-    ? builtInPreset === "support"
-      ? sortDirection === "asc" ? "Priority long-term support" : "Weakest long-term support"
-      : sortDirection === "asc" ? "Priority support" : "Weakest support"
-    : `${sortDirection === "asc" ? "Lowest" : "Highest"} ${sortLabel}`;
   const latestMarketDate = snapshots.reduce((latest, snapshot) => {
     const asOf = snapshot.price_opportunity.current_price?.as_of?.slice(0, 10) ?? "";
     return asOf > latest ? asOf : latest;
@@ -1928,6 +1933,34 @@ export function MobileStockExplorer({
           </button>
         </div>
 
+        {filterCount > 0 && (
+          <div className="mobile-filter-expression-summary" aria-label="Active filter logic">
+            <div>
+              <span>{personalization?.savedFilters.find((item) => item.id === activeSavedFilterId)?.name ?? builtInName ?? "Custom filter"}</span>
+              <small>
+                {builtInSummary ?? (
+                  <>
+                    {filterExpression.groups.length} group{filterExpression.groups.length === 1 ? "" : "s"}
+                    {filterExpression.groups.length > 1 ? ` joined by ${filterExpression.operator.toUpperCase()}` : ""}
+                    {` · ${filterCount} condition${filterCount === 1 ? "" : "s"}`}
+                  </>
+                )}
+              </small>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setFilterExpression({ operator: "and", groups: [] });
+                setActiveSavedFilterId(null);
+              }}
+              aria-label="Clear filter"
+              title="Clear filter"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
         <div className="mobile-list-summary" ref={listTopRef}>
           <span>{listSummaryLabel}</span>
           <div className="mobile-list-actions">
@@ -1936,7 +1969,6 @@ export function MobileStockExplorer({
                 <Plus size={15} />Manage
               </button>
             )}
-            <button type="button" onClick={() => setSheetOpen(true)}>{sortSummary}</button>
           </div>
         </div>
 
