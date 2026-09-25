@@ -394,6 +394,18 @@ function supportWindowLabel(key: string) {
   return match ? match[1].toUpperCase() : "Support";
 }
 
+function supportWindowRank(key: typeof BETA_SUPPORT_COLUMNS[number][0]) {
+  const index = BETA_SUPPORT_COLUMNS.findIndex(([supportKey]) => supportKey === key);
+  return index === -1 ? -1 : index;
+}
+
+function supportSignalRank(value: number) {
+  if (value <= 2.5) return 0;
+  if (value <= 6) return 1;
+  if (value <= 25) return 2;
+  return 3;
+}
+
 function supportInsights(snapshot: OpenDataStockSnapshot) {
   return BETA_SUPPORT_COLUMNS
     .map(([key]) => {
@@ -416,7 +428,13 @@ function supportInsights(snapshot: OpenDataStockSnapshot) {
 }
 
 function closestSupportInsight(snapshot: OpenDataStockSnapshot) {
-  return [...supportInsights(snapshot)].sort((left, right) => Math.abs(left.value) - Math.abs(right.value))[0] ?? null;
+  return [...supportInsights(snapshot)].sort((left, right) => {
+    const signalDelta = supportSignalRank(left.value) - supportSignalRank(right.value);
+    if (signalDelta !== 0) return signalDelta;
+    const timeframeDelta = supportWindowRank(right.key) - supportWindowRank(left.key);
+    if (timeframeDelta !== 0) return timeframeDelta;
+    return Math.abs(left.value) - Math.abs(right.value);
+  })[0] ?? null;
 }
 
 function isSupportMetric(group?: MetricGroup, key?: string) {

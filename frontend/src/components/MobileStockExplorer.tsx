@@ -201,7 +201,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
 
 const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
   { key: "symbol", label: "Symbol" },
-  { key: "support_best", label: "Closest support" },
+  { key: "support_best", label: "Priority support" },
   ...FILTER_DEFINITIONS.map(({ key, shortLabel }) => ({ key, label: shortLabel })),
 ];
 
@@ -390,8 +390,25 @@ function supportWindows(snapshot: OpenDataStockSnapshot, keys: readonly SupportF
     );
 }
 
+function supportTimeframeRank(key: SupportFilterKey) {
+  return SUPPORT_FILTER_KEYS.indexOf(key);
+}
+
+function supportSignalRank(value: number) {
+  if (value <= 2.5) return 0;
+  if (value <= 6) return 1;
+  if (value <= 25) return 2;
+  return 3;
+}
+
 function closestSupport(snapshot: OpenDataStockSnapshot, keys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS) {
-  return [...supportWindows(snapshot, keys)].sort((left, right) => Math.abs(left.value) - Math.abs(right.value))[0] ?? null;
+  return [...supportWindows(snapshot, keys)].sort((left, right) => {
+    const signalDelta = supportSignalRank(left.value) - supportSignalRank(right.value);
+    if (signalDelta !== 0) return signalDelta;
+    const timeframeDelta = supportTimeframeRank(right.key) - supportTimeframeRank(left.key);
+    if (timeframeDelta !== 0) return timeframeDelta;
+    return Math.abs(left.value) - Math.abs(right.value);
+  })[0] ?? null;
 }
 
 function sortValue(
@@ -1698,8 +1715,8 @@ export function MobileStockExplorer({
   const sortLabel = SORT_OPTIONS.find((option) => option.key === sortKey)?.label ?? "Symbol";
   const sortSummary = sortKey === "support_best"
     ? builtInPreset === "support"
-      ? sortDirection === "asc" ? "Closest long-term support" : "Farthest long-term support"
-      : sortDirection === "asc" ? "Closest support" : "Farthest support"
+      ? sortDirection === "asc" ? "Priority long-term support" : "Weakest long-term support"
+      : sortDirection === "asc" ? "Priority support" : "Weakest support"
     : `${sortDirection === "asc" ? "Lowest" : "Highest"} ${sortLabel}`;
   const latestMarketDate = snapshots.reduce((latest, snapshot) => {
     const asOf = snapshot.price_opportunity.current_price?.as_of?.slice(0, 10) ?? "";
