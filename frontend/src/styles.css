@@ -9388,6 +9388,19 @@ body:has(.mobile-sheet-backdrop) {
   color: #08080a;
 }
 
+.mobile-stock-app .mobile-quick-filters .mobile-filter-create-button {
+  border-color: var(--mobile-border-strong);
+  border-radius: 50%;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0;
+  width: 42px;
+}
+
+.mobile-stock-app .mobile-quick-filters .mobile-filter-create-button:hover {
+  background: #292a2e;
+}
+
 .mobile-filter-new-badge {
   align-items: center;
   background: var(--mobile-green);
@@ -9423,15 +9436,6 @@ body:has(.mobile-sheet-backdrop) {
   gap: 5px;
   min-height: 32px;
   padding: 0 10px;
-}
-
-.mobile-filter-expression-summary {
-  color: var(--mobile-muted);
-  font-size: 0.76rem;
-  font-weight: 650;
-  line-height: 1.45;
-  margin: 9px 4px 0;
-  max-width: 720px;
 }
 
 .mobile-list-summary {

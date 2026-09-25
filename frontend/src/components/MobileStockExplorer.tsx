@@ -11,7 +11,6 @@ import {
   RotateCcw,
   Save,
   Search,
-  SlidersHorizontal,
   Trash2,
   X,
 } from "lucide-react";
@@ -150,7 +149,6 @@ type SupportFilterKey = typeof SUPPORT_FILTER_KEYS[number];
 type BuiltInPreset = "pullback" | "support";
 type BuiltInPresetCopy = {
   name: string;
-  summary: string;
 };
 
 const FILTER_DEFINITIONS: FilterDefinition[] = [
@@ -609,22 +607,14 @@ function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
 const BUILT_IN_PRESET_COPY: Record<BuiltInPreset, BuiltInPresetCopy> = {
   support: {
     name: "Strong YoY and on support",
-    summary:
-      "Companies with strong latest revenue growth, where the current price is at or near support zones identified across the past 1Y, 2Y, and 5Y. This can surface high-quality businesses trading near longer-term areas of interest.",
   },
   pullback: {
     name: "Strong YoY and on pullback",
-    summary:
-      "Companies with strong latest revenue growth that are going through a shorter-term correction, with price at or near support zones identified across the past 1M, 3M, and 6M.",
   },
 };
 
 function builtInPresetName(preset: BuiltInPreset | null) {
   return preset ? BUILT_IN_PRESET_COPY[preset].name : null;
-}
-
-function builtInPresetSummary(preset: BuiltInPreset | null) {
-  return preset ? BUILT_IN_PRESET_COPY[preset].summary : null;
 }
 
 function StockStatus({ signal }: { signal: Signal }) {
@@ -1054,7 +1044,7 @@ function FilterSheet({
               </>
             ) : (
               <div className="mobile-filter-empty">
-                <SlidersHorizontal size={22} />
+                <Plus size={22} />
                 <strong>Build a filter with clear logic</strong>
                 <p>Use groups for parentheses, then choose whether groups and conditions use AND or OR.</p>
                 <div>
@@ -1760,7 +1750,6 @@ export function MobileStockExplorer({
   const listTopRef = useRef<HTMLDivElement | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
   const builtInPreset = builtInPresetFor(filterExpression);
-  const builtInSummary = builtInPresetSummary(builtInPreset);
   const relevantSupportKeys = builtInPreset === "support"
     ? SUPPORT_PRESET_FILTER_KEYS
     : builtInPreset === "pullback"
@@ -1858,6 +1847,12 @@ export function MobileStockExplorer({
     setActiveSavedFilterId(filter.id);
   };
 
+  const createCustomFilter = () => {
+    setFilterExpression({ operator: "and", groups: [createFilterGroup()] });
+    setActiveSavedFilterId(null);
+    setSheetOpen(true);
+  };
+
   const openDetail = (ticker: string) => {
     onSelectTicker(ticker);
     setDetailOpen(true);
@@ -1882,16 +1877,6 @@ export function MobileStockExplorer({
           </div>
           <div className="mobile-header-actions">
             {headerActions?.(openDetail)}
-            <button
-              type="button"
-              className={`mobile-options-button ${filterCount > 0 ? "active" : ""}`}
-              onClick={() => setSheetOpen(true)}
-              aria-label="Open filter and sort options"
-              title="Filter and sort"
-            >
-              <SlidersHorizontal size={22} />
-              {filterCount > 0 && <span>{filterCount}</span>}
-            </button>
           </div>
         </header>
 
@@ -1932,19 +1917,16 @@ export function MobileStockExplorer({
               <FilterNewBadge count={personalization.filterBadgeCounts[savedFilterKey(filter.id)]} />
             </button>
           ))}
+          <button
+            type="button"
+            className="mobile-filter-create-button"
+            onClick={createCustomFilter}
+            aria-label="Create custom filter"
+            title="Create custom filter"
+          >
+            <Plus size={18} />
+          </button>
         </div>
-
-        {filterCount > 0 && (
-          <p className="mobile-filter-expression-summary" aria-label="Active filter description">
-            {builtInSummary ?? (
-              <>
-                {filterExpression.groups.length} group{filterExpression.groups.length === 1 ? "" : "s"}
-                {filterExpression.groups.length > 1 ? ` joined by ${filterExpression.operator.toUpperCase()}` : ""}
-                {` · ${filterCount} condition${filterCount === 1 ? "" : "s"}`}
-              </>
-            )}
-          </p>
-        )}
 
         <div className="mobile-list-summary" ref={listTopRef}>
           <span>{listSummaryLabel}</span>
