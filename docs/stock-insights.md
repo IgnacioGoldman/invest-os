@@ -33,7 +33,7 @@ Looks at how the revenue growth rate is changing between quarters. A company gro
 
 _Is the company converting its business into more earnings for shareholders?_
 
-Compares earnings per share with the same quarter last year. Revenue can grow while costs grow even faster, so EPS tells you whether that growth is actually producing more profit per share. For example, Revenue +15% / EPS +25% is generally healthier than Revenue +15% / EPS -10%
+Compares earnings per share with the same quarter last year. It shows whether the company is generating more profit for each share outstanding, not just growing revenue. This matters because revenue can increase while profits stagnate or fall if costs rise too quickly. For example, Revenue +15% / EPS +25% suggests improving profitability, while Revenue +15% / EPS -10% suggests that growth is not translating into higher earnings per share.
 
 ### Free Cash Flow Margin
 

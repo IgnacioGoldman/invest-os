@@ -126,7 +126,7 @@ const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: str
     title: "Latest EPS growth YoY",
     question: "Is the company converting growth into earnings?",
     description:
-      "Compares latest-quarter diluted earnings per share with the same quarter last year. It helps separate revenue growth from profitable growth.",
+      "Compares earnings per share with the same quarter last year. It shows whether the company is generating more profit for each share outstanding, not just growing revenue. This matters because revenue can increase while profits stagnate or fall if costs rise too quickly. For example, Revenue +15% / EPS +25% suggests improving profitability, while Revenue +15% / EPS -10% suggests that growth is not translating into higher earnings per share.",
   },
   support: {
     title: "Proximity to support",
