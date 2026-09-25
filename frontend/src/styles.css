@@ -9426,51 +9426,12 @@ body:has(.mobile-sheet-backdrop) {
 }
 
 .mobile-filter-expression-summary {
-  align-items: stretch;
-  background: rgba(54, 162, 255, 0.1);
-  border: 1px solid rgba(54, 162, 255, 0.28);
-  border-radius: 12px;
-  display: grid;
-  gap: 0;
-  grid-template-columns: minmax(0, 1fr) 44px;
-  margin-top: 10px;
-  overflow: hidden;
-}
-
-.mobile-stock-app .mobile-filter-expression-summary button {
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  color: var(--mobile-text);
-  min-height: 52px;
-}
-
-.mobile-filter-expression-summary > div:first-child {
-  align-items: start;
-  display: grid;
-  gap: 4px;
-  justify-content: stretch;
-  padding: 9px 12px;
-  text-align: left;
-}
-
-.mobile-filter-expression-summary > div:first-child > span {
-  color: #80c7ff;
-  font-size: 0.79rem;
-  font-weight: 800;
-}
-
-.mobile-filter-expression-summary > div:first-child > small {
   color: var(--mobile-muted);
-  font-size: 0.69rem;
+  font-size: 0.76rem;
   font-weight: 650;
-  line-height: 1.35;
-}
-
-.mobile-stock-app .mobile-filter-expression-summary button:last-child {
-  border-left: 1px solid rgba(54, 162, 255, 0.2);
-  justify-content: center;
-  padding: 0;
+  line-height: 1.45;
+  margin: 9px 4px 0;
+  max-width: 720px;
 }
 
 .mobile-list-summary {
