@@ -391,11 +391,13 @@ function revenueMomentum(snapshot: OpenDataStockSnapshot) {
   const points = revenueGrowthPoints(snapshot);
   const latest = points[points.length - 1];
   const previous = points[points.length - 2];
-  if (!latest || !previous) return { label: "Unclear", tone: "neutral" as Tone, change: null, period: null };
+  if (!latest || !previous) {
+    return { label: "Unclear", tone: "neutral" as Tone, change: null, latest: null, previous: null };
+  }
   const change = latest.value - previous.value;
-  if (change >= 3) return { label: "Accelerating", tone: "positive" as Tone, change, period: previous.period };
-  if (change <= -3) return { label: "Decelerating", tone: "negative" as Tone, change, period: previous.period };
-  return { label: "Stable", tone: "warning" as Tone, change, period: previous.period };
+  if (change >= 3) return { label: "Accelerating", tone: "positive" as Tone, change, latest, previous };
+  if (change <= -3) return { label: "Decelerating", tone: "negative" as Tone, change, latest, previous };
+  return { label: "Stable", tone: "warning" as Tone, change, latest, previous };
 }
 
 function inferredSupportLevel(currentPrice?: number | null, supportDistance?: number | null) {
@@ -495,7 +497,7 @@ function rowMetric(
   if (key === "momentum") {
     const momentum = revenueMomentum(snapshot);
     return {
-      value: momentum.change == null ? "-" : `${momentum.change > 0 ? "+" : ""}${formatNumber(momentum.change)} pp`,
+      value: formatPercent(momentum.change, true),
       signal: momentum,
       secondary: null,
     };
@@ -1356,11 +1358,11 @@ function PriceChart({ snapshot, points, loading, error }: {
 function GrowthChart({
   title,
   points,
-  selectedPeriod,
+  selectedPeriods,
 }: {
   title: string;
   points: Array<{ period: string; value: number }>;
-  selectedPeriod?: string;
+  selectedPeriods?: string[];
 }) {
   const [activePoint, setActivePoint] = useState<{ period: string; value: number; x: number; y: number } | null>(null);
   const visible = points.slice(-8);
@@ -1417,7 +1419,7 @@ function GrowthChart({
           const pointLabel = point.period.replace("FY", "").split(" ");
           const barClassName = [
             point.value >= 0 ? "positive" : "negative",
-            point.period === selectedPeriod ? "selected" : "",
+            selectedPeriods?.includes(point.period) ? "selected" : "",
           ].filter(Boolean).join(" ");
           return (
             <g key={point.period}>
@@ -1555,10 +1557,12 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
         ? revenueDetail?.growth
         : undefined;
   const currentValue = detailKey === "momentum"
-    ? momentum.change == null ? "-" : `${momentum.change > 0 ? "+" : ""}${formatNumber(momentum.change)} pp`
+    ? formatPercent(momentum.change, true)
     : formatMetric(metric, "percent");
   const detailText = detailKey === "momentum"
-    ? momentum.change == null ? "Needs at least two comparable quarterly revenue YoY points." : `${momentum.label} versus ${momentum.period ?? "the prior quarter"}.`
+    ? momentum.change == null
+      ? "Needs at least two comparable quarterly revenue YoY points."
+      : `${momentum.label}: ${formatPercent(momentum.latest?.value, true)} vs ${formatPercent(momentum.previous?.value, true)} in ${momentum.previous?.period ?? "the prior quarter"}.`
     : detailKey === "fcf_margin"
       ? fcfMarginMetric?.notes ?? "Trailing-12-month free cash flow margin is unavailable."
     : detailKey === "revenue" && revenueDetail?.latestRevenue != null && revenueDetail?.priorRevenue != null
@@ -1591,7 +1595,13 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
       <GrowthChart
         title={chartTitle}
         points={chartPoints}
-        selectedPeriod={detailKey === "revenue" ? revenueDetail?.latest.period : undefined}
+        selectedPeriods={
+          detailKey === "revenue"
+            ? revenueDetail?.latest.period ? [revenueDetail.latest.period] : undefined
+            : detailKey === "momentum"
+              ? [momentum.previous?.period, momentum.latest?.period].filter((period): period is string => Boolean(period))
+              : undefined
+        }
       />
     </section>
   );
@@ -1669,7 +1679,7 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
             active={activeGrowthDetail === "momentum"}
             label="Revenue growth momentum"
             signal={momentum}
-            value={momentum.change == null ? "-" : `${momentum.change > 0 ? "+" : ""}${formatNumber(momentum.change)} pp`}
+            value={formatPercent(momentum.change, true)}
             onClick={() => setActiveGrowthDetail("momentum")}
           />
           <MobileGrowthSignalButton
