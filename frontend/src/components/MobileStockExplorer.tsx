@@ -1759,7 +1759,6 @@ export function MobileStockExplorer({
   const listTopRef = useRef<HTMLDivElement | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
   const builtInPreset = builtInPresetFor(filterExpression);
-  const builtInName = builtInPresetName(builtInPreset);
   const builtInSummary = builtInPresetSummary(builtInPreset);
   const relevantSupportKeys = builtInPreset === "support"
     ? SUPPORT_PRESET_FILTER_KEYS
@@ -1934,31 +1933,15 @@ export function MobileStockExplorer({
         </div>
 
         {filterCount > 0 && (
-          <div className="mobile-filter-expression-summary" aria-label="Active filter logic">
-            <div>
-              <span>{personalization?.savedFilters.find((item) => item.id === activeSavedFilterId)?.name ?? builtInName ?? "Custom filter"}</span>
-              <small>
-                {builtInSummary ?? (
-                  <>
-                    {filterExpression.groups.length} group{filterExpression.groups.length === 1 ? "" : "s"}
-                    {filterExpression.groups.length > 1 ? ` joined by ${filterExpression.operator.toUpperCase()}` : ""}
-                    {` · ${filterCount} condition${filterCount === 1 ? "" : "s"}`}
-                  </>
-                )}
-              </small>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setFilterExpression({ operator: "and", groups: [] });
-                setActiveSavedFilterId(null);
-              }}
-              aria-label="Clear filter"
-              title="Clear filter"
-            >
-              <X size={16} />
-            </button>
-          </div>
+          <p className="mobile-filter-expression-summary" aria-label="Active filter description">
+            {builtInSummary ?? (
+              <>
+                {filterExpression.groups.length} group{filterExpression.groups.length === 1 ? "" : "s"}
+                {filterExpression.groups.length > 1 ? ` joined by ${filterExpression.operator.toUpperCase()}` : ""}
+                {` · ${filterCount} condition${filterCount === 1 ? "" : "s"}`}
+              </>
+            )}
+          </p>
         )}
 
         <div className="mobile-list-summary" ref={listTopRef}>
