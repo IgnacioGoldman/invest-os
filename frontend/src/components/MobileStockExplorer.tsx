@@ -1430,8 +1430,10 @@ function MobileGrowthSignalButton({
   return (
     <button type="button" className={`mobile-growth-signal ${active ? "active" : ""} ${className}`.trim()} onClick={onClick}>
       <span>{label}</span>
-      <StockStatus signal={signal} />
-      <strong>{value}</strong>
+      <span className="mobile-growth-signal-summary">
+        <StockStatus signal={signal} />
+        <strong>{value}</strong>
+      </span>
     </button>
   );
 }

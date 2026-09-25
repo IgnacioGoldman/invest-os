@@ -1434,8 +1434,10 @@ function GrowthMetricButton({
       aria-controls={`growth-detail-${detailKey}`}
     >
       <span>{label}</span>
-      <strong>{value}</strong>
-      <em className={`analysis-tag table-assessment-tag ${tone}`}>{signal}</em>
+      <span className="growth-metric-summary">
+        <em className={`analysis-tag table-assessment-tag ${tone}`}>{signal}</em>
+        <strong>{value}</strong>
+      </span>
     </button>
   );
 }

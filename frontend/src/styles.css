@@ -6029,11 +6029,11 @@ tbody tr:hover td {
   color: inherit;
   cursor: pointer;
   display: grid;
-  gap: 7px;
+  gap: 8px;
   justify-items: start;
-  min-height: 92px;
-  min-width: 178px;
-  padding: 10px;
+  min-height: 70px;
+  min-width: 168px;
+  padding: 9px 10px;
   text-align: left;
   width: 100%;
 }
@@ -6044,21 +6044,35 @@ tbody tr:hover td {
   border-color: rgba(140, 164, 255, 0.45);
 }
 
-.exploration-page .growth-metric-trigger > span {
+.exploration-page .growth-metric-trigger > span:first-child {
   color: var(--app-muted);
   font-size: 0.72rem;
   font-weight: 760;
   line-height: 1.25;
 }
 
-.exploration-page .growth-metric-trigger > strong {
-  color: var(--app-foreground);
-  font-size: 1rem;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.15;
+.exploration-page .growth-metric-summary {
+  align-items: center;
+  display: flex;
+  gap: 7px;
+  justify-content: space-between;
+  min-width: 0;
+  width: 100%;
 }
 
-.exploration-page .growth-metric-trigger > em {
+.exploration-page .growth-metric-summary > strong {
+  color: var(--app-foreground);
+  flex: 1 1 auto;
+  font-size: 0.98rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.exploration-page .growth-metric-summary > em {
+  flex: 0 0 auto;
   font-style: normal;
 }
 
@@ -10973,9 +10987,9 @@ body:has(.mobile-sheet-backdrop) {
   color: inherit;
   cursor: pointer;
   display: grid;
-  gap: 6px;
+  gap: 8px;
   justify-items: start;
-  min-height: 84px;
+  min-height: 66px;
   min-width: 0;
   padding: 10px 8px;
   text-align: left;
@@ -10999,12 +11013,24 @@ body:has(.mobile-sheet-backdrop) {
   font-size: 0.9rem;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
 }
 
 .mobile-growth-signal .mobile-status {
   font-size: 0.62rem;
   min-height: 20px;
   padding: 3px 6px;
+}
+
+.mobile-growth-signal-summary {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+  min-width: 0;
+  width: 100%;
 }
 
 .mobile-growth-detail-panel {
@@ -11394,11 +11420,11 @@ body:has(.mobile-sheet-backdrop) {
     grid-template-columns: 1fr;
   }
 
-  .mobile-signal-strip > div {
+  .mobile-signal-strip > button {
     align-items: center;
-    grid-template-columns: minmax(80px, 1fr) auto auto;
+    grid-template-columns: minmax(80px, 1fr) minmax(0, auto);
     justify-items: start;
-    min-height: 64px;
+    min-height: 54px;
   }
 
   .mobile-metric-grid {
@@ -11475,12 +11501,8 @@ body:has(.mobile-sheet-backdrop) {
     font-size: 0.66rem;
   }
 
-  .mobile-signal-strip > div {
-    grid-template-columns: minmax(70px, 1fr) auto;
-  }
-
-  .mobile-signal-strip > div > strong {
-    grid-column: 1 / -1;
+  .mobile-signal-strip > button {
+    grid-template-columns: 1fr;
   }
 
   .mobile-metric-card {
