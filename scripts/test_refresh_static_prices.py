@@ -208,44 +208,6 @@ class RefreshStaticPricesTests(unittest.TestCase):
         self.assertIn("support_5y_distance", updated.price_opportunity)
         self.assertEqual(updated.generated_at, refreshed_at)
 
-    def test_refresh_updates_adjusted_eps_and_alignment_when_available(self) -> None:
-        gaap = OpenDataMetric(
-            value=85,
-            source="sec_companyfacts",
-            tier="computed_from_public_facts",
-            as_of="2026-06-30",
-            notes="GAAP EPS growth.",
-        )
-        adjusted = OpenDataMetric(
-            value=35,
-            source="sec_earnings_release:https://example.com/earnings.htm",
-            tier="exact_public_fact",
-            as_of="2026-08-05",
-            notes="Adjusted EPS growth.",
-        )
-        old_price = OpenDataMetric(
-            value=100,
-            source="old_price",
-            tier="exact_public_fact",
-            as_of="2026-01-01",
-            notes="Old price.",
-        )
-        snapshot = OpenDataSnapshot(
-            ticker="TEST",
-            business_health={"eps_gaap_growth_yoy": gaap},
-            price_opportunity={"current_price": old_price},
-            metrics={"eps_gaap_growth_yoy": gaap, "current_price": old_price},
-        )
-        start = date(2025, 1, 1)
-        history = [point(start + timedelta(days=index), 100 + index / 10, low=99 + index / 10) for index in range(400)]
-
-        updated = refresh_snapshot_prices(snapshot, history, adjusted_eps_growth_yoy=adjusted)
-
-        self.assertEqual(updated.business_health["eps_adjusted_growth_yoy"], adjusted)
-        self.assertEqual(updated.metrics["eps_adjusted_growth_yoy"], adjusted)
-        self.assertEqual(updated.business_health["eps_alignment"].value, 50)
-        self.assertEqual(updated.metrics["eps_alignment"].value, 50)
-
 
 if __name__ == "__main__":
     unittest.main()

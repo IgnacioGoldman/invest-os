@@ -18,8 +18,8 @@ import requests
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from app.entry_engine.open_data_metrics import backfill_fcf_margin_metric, compute_price_opportunity_metrics, _eps_alignment_metric  # noqa: E402
-from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataMetric, OpenDataSnapshot  # noqa: E402
+from app.entry_engine.open_data_metrics import backfill_fcf_margin_metric, compute_price_opportunity_metrics  # noqa: E402
+from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataSnapshot  # noqa: E402
 from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
 
 
@@ -213,31 +213,16 @@ def refresh_snapshot_prices(
     snapshot: OpenDataSnapshot,
     history: list[HistoricalPricePoint],
     *,
-    adjusted_eps_growth_yoy: OpenDataMetric | None = None,
     refreshed_at: datetime | None = None,
 ) -> OpenDataSnapshot:
     snapshot = backfill_fcf_margin_metric(snapshot)
     timestamp = refreshed_at or datetime.now(timezone.utc)
     price_metrics = compute_price_opportunity_metrics(history, fallback_as_of=timestamp.date().isoformat())
-    business_health = dict(snapshot.business_health)
     metrics = {key: value for key, value in snapshot.metrics.items() if key != "support_1d_distance"}
-    if adjusted_eps_growth_yoy is not None:
-        business_health["eps_adjusted_growth_yoy"] = adjusted_eps_growth_yoy
-        metrics["eps_adjusted_growth_yoy"] = adjusted_eps_growth_yoy
-        gaap_eps = business_health.get("eps_gaap_growth_yoy") or business_health.get("eps_growth_yoy")
-        if gaap_eps is not None:
-            eps_alignment = _eps_alignment_metric(
-                adjusted_eps_growth_yoy,
-                gaap_eps,
-                timestamp.date().isoformat(),
-            )
-            business_health["eps_alignment"] = eps_alignment
-            metrics["eps_alignment"] = eps_alignment
     metrics.update(price_metrics)
     return snapshot.model_copy(
         update={
             "generated_at": timestamp,
-            "business_health": business_health,
             "price_opportunity": price_metrics,
             "metrics": metrics,
         }
@@ -270,12 +255,9 @@ def refresh_prices(
         baseline = [HistoricalPricePoint.model_validate(row) for row in _load_json(history_path)]
         provider = OpenDataProvider(include_filing_details=False)
         history = fetch_updated_history(provider, ticker, baseline)
-        raw_model = OpenDataSnapshot.model_validate(raw_snapshot)
-        adjusted_eps_growth_yoy = provider.fetch_adjusted_eps_growth_yoy(raw_model.cik) if raw_model.cik else None
         snapshot = refresh_snapshot_prices(
-            raw_model,
+            OpenDataSnapshot.model_validate(raw_snapshot),
             history,
-            adjusted_eps_growth_yoy=adjusted_eps_growth_yoy,
             refreshed_at=refreshed_at,
         )
         return snapshot, history
