@@ -1,12 +1,13 @@
 {
   "schema_version": 1,
-  "refreshed_at": "2026-09-25T11:19:08.709474Z",
+  "refreshed_at": "2026-09-26T17:08:06.189256Z",
   "market_as_of": "2026-09-24",
   "market_date_counts": {
-    "2026-09-24": 75
+    "2026-09-24": 75,
+    "2026-09-25": 2
   },
   "source": "github_actions_static_export",
-  "stock_count": 75,
+  "stock_count": 77,
   "tickers": [
     "AAPL",
     "ABBV",
@@ -21,6 +22,7 @@
     "ANET",
     "APP",
     "AVGO",
+    "AXFO.ST",
     "AZN",
     "B",
     "BMY",
@@ -59,6 +61,7 @@
     "MSTR",
     "MU",
     "NFLX",
+    "NIBE-B.ST",
     "NVDA",
     "NVS",
     "ORCL",

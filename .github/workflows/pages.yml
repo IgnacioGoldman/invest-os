@@ -50,6 +50,15 @@ jobs:
           --retry-backoff 1
           --output /tmp/open-data-refresh-report.json
 
+      - name: Enrich adjusted EPS metrics
+        run: >-
+          python scripts/enrich_adjusted_eps.py
+          --max-sec-archive-lookups 2
+          --request-timeout 20
+          --request-retries 1
+          --retry-backoff 1
+          --output /tmp/adjusted-eps-enrichment-report.json
+
       - name: Build derived stock signals
         run: python scripts/build_stock_derived_signals.py
 
@@ -67,7 +76,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: stock-refresh-report-${{ github.run_id }}
-          path: /tmp/open-data-refresh-report.json
+          path: |
+            /tmp/open-data-refresh-report.json
+            /tmp/adjusted-eps-enrichment-report.json
           if-no-files-found: warn
           retention-days: 14
 

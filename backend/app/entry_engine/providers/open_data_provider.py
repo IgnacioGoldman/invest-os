@@ -10,6 +10,7 @@ import re
 import threading
 import time
 from datetime import date, datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from io import StringIO
 from pathlib import Path
 from typing import Any
@@ -36,6 +37,12 @@ SEC_TICKER_EXCHANGE_MAPPING_URL = "https://www.sec.gov/files/company_tickers_exc
 SEC_COMPANYFACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010d}.json"
 SEC_SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
 SEC_ARCHIVES_BASE_URL = "https://www.sec.gov/Archives/edgar/data"
+SEC_REQUEST_INTERVAL_SECONDS = float(os.getenv("SEC_REQUEST_INTERVAL_SECONDS", "0.5"))
+SEC_429_COOLDOWN_SECONDS = float(os.getenv("SEC_429_COOLDOWN_SECONDS", "30"))
+SEC_503_COOLDOWN_SECONDS = float(os.getenv("SEC_503_COOLDOWN_SECONDS", "15"))
+SEC_RETRY_AFTER_MAX_SECONDS = float(os.getenv("SEC_RETRY_AFTER_MAX_SECONDS", "120"))
+SEC_ARCHIVE_LOOKUP_LIMIT = int(os.getenv("SEC_ARCHIVE_LOOKUP_LIMIT", "2"))
+SEC_ARCHIVE_FAILURE_CACHE_TTL = timedelta(hours=float(os.getenv("SEC_ARCHIVE_FAILURE_CACHE_HOURS", "6")))
 STOOQ_URL = "https://stooq.com/q/l/"
 STOOQ_DAILY_HISTORY_URL = "https://stooq.com/q/d/l/"
 FRANKFURTER_LATEST_URL = "https://api.frankfurter.dev/v1/latest"
@@ -79,7 +86,7 @@ ADR_RATIO_BY_TICKER = {
         "source": "TSMC ADS ratio: 1 ADS represents 5 common shares.",
     },
 }
-SUPPORTED_FX_CURRENCIES = {"USD", "EUR", "GBP", "DKK", "CHF", "CAD", "TWD", "JPY", "CNY", "HKD"}
+SUPPORTED_FX_CURRENCIES = {"USD", "EUR", "GBP", "SEK", "DKK", "CHF", "CAD", "TWD", "JPY", "CNY", "HKD"}
 ADJUSTED_EPS_LABEL_RE = re.compile(
     r"\b(?:non[-\s]?gaap|adjusted)\s+(?:diluted\s+)?(?:eps|earnings\s+per\s+share)\b",
     re.IGNORECASE,
@@ -93,6 +100,34 @@ ADJUSTED_EPS_GROWTH_RE = re.compile(
     r"(?:grew|growth(?:\s+of)?|increased|up|rose)\s*(?:by\s*)?([+-]?\d+(?:\.\d+)?)\s*%",
     re.IGNORECASE,
 )
+
+
+class RequestPacer:
+    def __init__(self, interval_seconds: float) -> None:
+        self.interval_seconds = max(0.0, interval_seconds)
+        self._lock = threading.Lock()
+        self._next_allowed_at = 0.0
+        self._cooldown_until = 0.0
+
+    def wait(self) -> None:
+        while True:
+            with self._lock:
+                now = time.monotonic()
+                wait_until = max(self._next_allowed_at, self._cooldown_until)
+                if now >= wait_until:
+                    self._next_allowed_at = now + self.interval_seconds
+                    return
+                sleep_for = wait_until - now
+            time.sleep(sleep_for)
+
+    def cooldown(self, seconds: float) -> None:
+        if seconds <= 0:
+            return
+        with self._lock:
+            self._cooldown_until = max(self._cooldown_until, time.monotonic() + seconds)
+
+
+SEC_REQUEST_PACER = RequestPacer(SEC_REQUEST_INTERVAL_SECONDS)
 
 
 def _stooq_symbols(symbol: str, currency: str) -> list[str]:
@@ -116,6 +151,65 @@ def _positive_float(value: Any) -> float | None:
     except (TypeError, ValueError):
         return None
     return number if math.isfinite(number) and number > 0 else None
+
+
+def _finite_float(value: Any) -> float | None:
+    if value in (None, "", "N/D"):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
+
+
+def _date_from_yfinance_column(column: Any) -> date | None:
+    if hasattr(column, "date"):
+        try:
+            return column.date()
+        except TypeError:
+            pass
+    raw = str(column)[:10]
+    try:
+        return date.fromisoformat(raw)
+    except ValueError:
+        return None
+
+
+def _period_start(period_end: date, *, annual: bool) -> date:
+    if annual:
+        return date(period_end.year, 1, 1)
+    month = ((period_end.month - 1) // 3) * 3 + 1
+    return date(period_end.year, month, 1)
+
+
+def _fiscal_period(period_end: date, *, annual: bool) -> str:
+    if annual:
+        return "FY"
+    quarter = ((period_end.month - 1) // 3) + 1
+    return f"Q{quarter}"
+
+
+def _yfinance_fact_row(value: float, period_end: date, *, annual: bool) -> dict[str, Any]:
+    return {
+        "val": value,
+        "start": _period_start(period_end, annual=annual).isoformat(),
+        "end": period_end.isoformat(),
+        "filed": period_end.isoformat(),
+        "form": "YF-ANNUAL" if annual else "YF-QUARTER",
+        "fp": _fiscal_period(period_end, annual=annual),
+        "fy": period_end.year,
+        "frame": f"YF{period_end.year}" if annual else f"YF{period_end.year}{_fiscal_period(period_end, annual=annual)}",
+    }
+
+
+def _frame_value(frame: Any, row_name: str, column: Any) -> float | None:
+    try:
+        if row_name not in frame.index:
+            return None
+        return _finite_float(frame.at[row_name, column])
+    except (AttributeError, KeyError, TypeError, ValueError):
+        return None
 
 
 class JsonFileCache:
@@ -155,6 +249,7 @@ class OpenDataProvider:
         retry_attempts: int = 2,
         retry_backoff: float = 0.75,
         include_filing_details: bool = True,
+        max_sec_archive_lookups: int | None = None,
         force_refresh: bool = False,
     ) -> None:
         self.cache = cache or JsonFileCache()
@@ -167,40 +262,90 @@ class OpenDataProvider:
         self.retry_attempts = max(1, retry_attempts)
         self.retry_backoff = max(0, retry_backoff)
         self.include_filing_details = include_filing_details
+        self.max_sec_archive_lookups = max(
+            0,
+            SEC_ARCHIVE_LOOKUP_LIMIT if max_sec_archive_lookups is None else max_sec_archive_lookups,
+        )
         self.force_refresh = force_refresh
         self.stooq_api_key = os.getenv("STOOQ_API_KEY") or None
         self._yfinance_info_cache: dict[str, dict[str, Any] | None] = {}
 
-    def _get(self, url: str, *, timeout: float | None = None, **kwargs: Any) -> requests.Response:
+    def _get(
+        self,
+        url: str,
+        *,
+        timeout: float | None = None,
+        pacer: RequestPacer | None = None,
+        retry_after_on_429: float | None = None,
+        retry_after_by_status: dict[int, float] | None = None,
+        retry_sleep_cap: float | None = None,
+        **kwargs: Any,
+    ) -> requests.Response:
         attempts = self.retry_attempts
         last_error: requests.RequestException | None = None
         for attempt in range(1, attempts + 1):
             try:
+                if pacer is not None:
+                    pacer.wait()
                 response = self.session.get(url, timeout=timeout or self.request_timeout, **kwargs)
                 response.raise_for_status()
                 return response
             except requests.RequestException as exc:
                 last_error = exc
+                retry_after = self._retry_after_delay_seconds(exc.response if isinstance(exc, requests.HTTPError) else None)
+                status = self._http_status(exc)
+                if retry_after is None and status == 429:
+                    retry_after = retry_after_on_429
+                if retry_after is None and retry_after_by_status is not None and status is not None:
+                    retry_after = retry_after_by_status.get(status)
+                if retry_after is not None and retry_sleep_cap is not None:
+                    retry_after = min(retry_after, retry_sleep_cap)
+                if retry_after is not None and pacer is not None:
+                    pacer.cooldown(retry_after)
                 if attempt >= attempts:
                     break
-                sleep_for = self.retry_backoff * (2 ** (attempt - 1))
+                sleep_for = max(self.retry_backoff * (2 ** (attempt - 1)), retry_after or 0)
                 logger.warning("GET failed for %s on attempt %s/%s: %s", url, attempt, attempts, exc)
                 if sleep_for > 0:
                     time.sleep(sleep_for)
         assert last_error is not None
         raise last_error
 
+    def _http_status(self, exc: requests.RequestException) -> int | None:
+        response = exc.response if isinstance(exc, requests.HTTPError) else None
+        return response.status_code if response is not None else None
+
+    def _retry_after_delay_seconds(self, response: requests.Response | None) -> float | None:
+        if response is None:
+            return None
+        retry_after = response.headers.get("Retry-After")
+        if not retry_after:
+            return None
+        try:
+            seconds = float(retry_after)
+        except ValueError:
+            try:
+                retry_at = parsedate_to_datetime(retry_after)
+            except (TypeError, ValueError):
+                return None
+            if retry_at.tzinfo is None:
+                retry_at = retry_at.replace(tzinfo=timezone.utc)
+            seconds = (retry_at - datetime.now(timezone.utc)).total_seconds()
+        return max(0.0, seconds)
+
     def get_open_data_snapshot(self, ticker: str) -> OpenDataSnapshot:
         symbol = ticker.upper().strip()
         metadata = self.resolve_company_metadata(symbol)
-        cik = int(metadata["cik"])
-        companyfacts = self.fetch_companyfacts(cik)
+        raw_cik = metadata.get("cik")
+        cik = int(raw_cik) if raw_cik is not None else None
+        companyfacts = self.fetch_companyfacts(cik) if cik is not None else self.fetch_yfinance_companyfacts(symbol, metadata)
         price_history = self.fetch_price_history(symbol)
-        price = self._latest_price_from_history(symbol, price_history) or self.fetch_latest_price(symbol)
+        price_currency = str(metadata.get("currency") or "USD").upper()
+        price = self._latest_price_from_history(symbol, price_history, currency=price_currency) or self.fetch_latest_price(symbol)
         forward_pe_estimate = self.fetch_forward_pe_estimate(symbol)
         market_cap_estimate = self.fetch_market_cap_estimate(symbol)
-        company_context = self.fetch_company_context(cik)
-        adjusted_eps_growth_yoy = self.fetch_adjusted_eps_growth_yoy(cik)
+        company_context = self.fetch_company_context(cik) if cik is not None else self._yfinance_company_context(symbol)
+        adjusted_eps_growth_yoy = self.fetch_adjusted_eps_growth_yoy(cik) if cik is not None else None
         statement_currency_rates = self.fetch_statement_currency_rates(companyfacts, price)
         adr = ADR_RATIO_BY_TICKER.get(symbol, {"ratio": 1.0, "source": None})
         return compute_open_data_snapshot(
@@ -261,6 +406,9 @@ class OpenDataProvider:
 
         if symbol == "GOOGL":
             return dict(GOOGL_FALLBACK_METADATA)
+        yahoo_metadata = self._resolve_yfinance_metadata(symbol, universe_metadata)
+        if yahoo_metadata is not None:
+            return yahoo_metadata
         raise ValueError(f"Could not resolve metadata for {symbol}.")
 
     def resolve_cik(self, ticker: str) -> int:
@@ -318,6 +466,215 @@ class OpenDataProvider:
         row = universe.get(symbol.upper())
         return row if isinstance(row, dict) else {}
 
+    def _resolve_yfinance_metadata(self, symbol: str, universe_metadata: dict[str, Any]) -> dict[str, Any] | None:
+        info = self._fetch_yfinance_info(symbol)
+        if not info:
+            return None
+        quote_type = str(info.get("quoteType") or "").upper()
+        if quote_type and quote_type not in {"EQUITY", "ADR"}:
+            return None
+        name = (
+            universe_metadata.get("name")
+            or info.get("longName")
+            or info.get("shortName")
+            or info.get("displayName")
+            or symbol
+        )
+        currency = str(info.get("currency") or info.get("financialCurrency") or universe_metadata.get("currency") or "USD").upper()
+        return {
+            "ticker": symbol,
+            "name": name,
+            "cik": None,
+            "exchange": universe_metadata.get("exchange") or info.get("fullExchangeName") or info.get("exchange"),
+            "country": universe_metadata.get("country") or universe_metadata.get("region") or info.get("country"),
+            "sector": universe_metadata.get("sector") or info.get("sector"),
+            "industry": universe_metadata.get("industry") or info.get("industry"),
+            "currency": currency,
+        }
+
+    def fetch_yfinance_companyfacts(self, ticker: str, metadata: dict[str, Any]) -> dict[str, Any]:
+        symbol = ticker.upper().strip()
+        cache_name = f"yfinance_companyfacts_{symbol.replace('/', '_')}.json"
+        cached = None if self.force_refresh else self.cache.get(cache_name, timedelta(hours=12))
+        if cached is not None:
+            return cached
+        facts = self._build_yfinance_companyfacts(symbol, metadata)
+        self.cache.set(cache_name, facts)
+        return facts
+
+    def _build_yfinance_companyfacts(self, symbol: str, metadata: dict[str, Any]) -> dict[str, Any]:
+        try:
+            import yfinance as yf  # type: ignore[import-not-found]
+        except ImportError as exc:
+            raise ValueError(f"yfinance is required to collect non-SEC fundamentals for {symbol}.") from exc
+
+        ticker = yf.Ticker(symbol)
+        info = self._fetch_yfinance_info(symbol) or {}
+        currency = str(
+            metadata.get("currency")
+            or info.get("financialCurrency")
+            or info.get("currency")
+            or "USD"
+        ).upper()
+        frames = {
+            "income_annual": self._safe_yfinance_frame(ticker, "income_stmt", symbol),
+            "income_quarterly": self._safe_yfinance_frame(ticker, "quarterly_income_stmt", symbol),
+            "cashflow_annual": self._safe_yfinance_frame(ticker, "cashflow", symbol),
+            "cashflow_quarterly": self._safe_yfinance_frame(ticker, "quarterly_cashflow", symbol),
+            "balance_annual": self._safe_yfinance_frame(ticker, "balance_sheet", symbol),
+            "balance_quarterly": self._safe_yfinance_frame(ticker, "quarterly_balance_sheet", symbol),
+        }
+        return self._yfinance_companyfacts_from_frames(symbol, metadata, info, frames, currency)
+
+    def _safe_yfinance_frame(self, ticker: Any, attribute: str, symbol: str) -> Any:
+        try:
+            return getattr(ticker, attribute)
+        except Exception as exc:
+            logger.warning("yfinance %s fetch failed for %s: %s", attribute, symbol, exc)
+            return None
+
+    def _yfinance_companyfacts_from_frames(
+        self,
+        symbol: str,
+        metadata: dict[str, Any],
+        info: dict[str, Any],
+        frames: dict[str, Any],
+        currency: str,
+    ) -> dict[str, Any]:
+        facts: dict[str, Any] = {"yfinance": {}}
+
+        def add_fact(concept: str, unit: str, row: dict[str, Any]) -> None:
+            facts["yfinance"].setdefault(concept, {"units": {}})
+            facts["yfinance"][concept]["units"].setdefault(unit, [])
+            facts["yfinance"][concept]["units"][unit].append(row)
+
+        def add_frame(frame: Any, mappings: dict[str, tuple[str, str]], *, annual: bool) -> None:
+            if frame is None or getattr(frame, "empty", True):
+                return
+            for column in getattr(frame, "columns", []):
+                period_end = _date_from_yfinance_column(column)
+                if period_end is None:
+                    continue
+                for source_row, (concept, unit_kind) in mappings.items():
+                    value = _frame_value(frame, source_row, column)
+                    if value is None:
+                        continue
+                    unit = "shares" if unit_kind == "shares" else f"{currency}/shares" if unit_kind == "eps" else currency
+                    add_fact(concept, unit, _yfinance_fact_row(value, period_end, annual=annual))
+
+        income_mappings = {
+            "Total Revenue": ("RevenueFromContractWithCustomerExcludingAssessedTax", "currency"),
+            "Gross Profit": ("GrossProfit", "currency"),
+            "Cost Of Revenue": ("CostOfRevenue", "currency"),
+            "Operating Income": ("OperatingIncomeLoss", "currency"),
+            "Total Operating Income As Reported": ("OperatingIncomeLoss", "currency"),
+            "Net Income": ("NetIncomeLoss", "currency"),
+            "Net Income Common Stockholders": ("NetIncomeLoss", "currency"),
+            "Diluted EPS": ("EarningsPerShareDiluted", "eps"),
+            "Diluted Average Shares": ("WeightedAverageNumberOfDilutedSharesOutstanding", "shares"),
+        }
+        cashflow_mappings = {
+            "Operating Cash Flow": ("NetCashProvidedByUsedInOperatingActivities", "currency"),
+            "Capital Expenditure": ("PaymentsToAcquirePropertyPlantAndEquipment", "currency"),
+        }
+        balance_mappings = {
+            "Cash Cash Equivalents And Short Term Investments": ("CashCashEquivalentsAndShortTermInvestments", "currency"),
+            "Cash And Cash Equivalents": ("CashAndCashEquivalentsAtCarryingValue", "currency"),
+            "Total Debt": ("DebtCurrent", "currency"),
+            "Stockholders Equity": ("StockholdersEquity", "currency"),
+        }
+        add_frame(frames.get("income_annual"), income_mappings, annual=True)
+        add_frame(frames.get("income_quarterly"), income_mappings, annual=False)
+        add_frame(frames.get("cashflow_annual"), cashflow_mappings, annual=True)
+        add_frame(frames.get("cashflow_quarterly"), cashflow_mappings, annual=False)
+        add_frame(frames.get("balance_annual"), balance_mappings, annual=True)
+        add_frame(frames.get("balance_quarterly"), balance_mappings, annual=False)
+        self._add_yfinance_synthetic_facts(facts, frames, currency)
+
+        return {
+            "entityName": metadata.get("name") or info.get("longName") or info.get("shortName") or symbol,
+            "source": "yfinance_statement_tables",
+            "facts": facts,
+        }
+
+    def _add_yfinance_synthetic_facts(self, companyfacts: dict[str, Any], frames: dict[str, Any], currency: str) -> None:
+        for frame_name, annual in (("income_annual", True), ("income_quarterly", False)):
+            frame = frames.get(frame_name)
+            if frame is None or getattr(frame, "empty", True):
+                continue
+            for column in getattr(frame, "columns", []):
+                period_end = _date_from_yfinance_column(column)
+                if period_end is None:
+                    continue
+                ebitda = _frame_value(frame, "EBITDA", column)
+                operating_income = _frame_value(frame, "Operating Income", column)
+                if ebitda is not None and operating_income is not None:
+                    self._append_yfinance_fact(
+                        companyfacts,
+                        "DepreciationAndAmortisationExpense",
+                        currency,
+                        ebitda - operating_income,
+                        period_end,
+                        annual=annual,
+                    )
+
+        for frame_name, annual in (("cashflow_annual", True), ("cashflow_quarterly", False)):
+            frame = frames.get(frame_name)
+            if frame is None or getattr(frame, "empty", True):
+                continue
+            for column in getattr(frame, "columns", []):
+                if _frame_value(frame, "Capital Expenditure", column) is not None:
+                    continue
+                period_end = _date_from_yfinance_column(column)
+                if period_end is None:
+                    continue
+                operating_cash_flow = _frame_value(frame, "Operating Cash Flow", column)
+                free_cash_flow = _frame_value(frame, "Free Cash Flow", column)
+                if operating_cash_flow is None or free_cash_flow is None:
+                    continue
+                self._append_yfinance_fact(
+                    companyfacts,
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    currency,
+                    operating_cash_flow - free_cash_flow,
+                    period_end,
+                    annual=annual,
+                )
+
+    def _append_yfinance_fact(
+        self,
+        companyfacts: dict[str, Any],
+        concept: str,
+        unit: str,
+        value: float,
+        period_end: date,
+        *,
+        annual: bool,
+    ) -> None:
+        taxonomy = (
+            companyfacts.setdefault("yfinance", {})
+            if "facts" not in companyfacts
+            else companyfacts.setdefault("facts", {}).setdefault("yfinance", {})
+        )
+        taxonomy.setdefault(concept, {"units": {}})
+        taxonomy[concept]["units"].setdefault(unit, [])
+        taxonomy[concept]["units"][unit].append(_yfinance_fact_row(value, period_end, annual=annual))
+
+    def _yfinance_company_context(self, symbol: str) -> OpenDataCompanyContext:
+        return OpenDataCompanyContext(
+            source="yfinance",
+            as_of=date.today().isoformat(),
+            recent_filings=[],
+            known_context_gaps=[
+                "SEC submissions are unavailable for this non-SEC-listed ticker.",
+                "Issuer investor-relations reports are not yet parsed by the deterministic provider.",
+            ],
+            notes=(
+                "Basic market metadata and statement tables are collected from Yahoo Finance/yfinance. "
+                "Company filing/news context is not classified."
+            ),
+        )
+
     def _legacy_resolve_cik(self, ticker: str) -> int:
         symbol = ticker.upper().strip()
         mapping = self.cache.get("sec_company_tickers.json", timedelta(days=7))
@@ -362,18 +719,32 @@ class OpenDataProvider:
         cache_name = f"adjusted_eps_growth_CIK{cik:010d}.json"
         cached = None if self.force_refresh else self.cache.get(cache_name, timedelta(hours=12))
         if cached is not None:
-            if cached == {"unavailable": True}:
-                return None
-            try:
-                return OpenDataMetric.model_validate(cached)
-            except ValueError:
-                pass
+            if isinstance(cached, dict) and cached.get("unavailable") is True:
+                cached_lookup_limit = cached.get("max_sec_archive_lookups")
+                try:
+                    lookup_limit = int(cached_lookup_limit) if cached_lookup_limit is not None else None
+                except (TypeError, ValueError):
+                    lookup_limit = None
+                if lookup_limit is not None and lookup_limit >= self.max_sec_archive_lookups:
+                    return None
+            else:
+                try:
+                    return OpenDataMetric.model_validate(cached)
+                except ValueError:
+                    pass
+        if not self.include_filing_details or self.max_sec_archive_lookups <= 0:
+            return None
 
         submissions = self._fetch_sec_submissions(cik)
         if submissions is None:
             return None
         metric = self._adjusted_eps_growth_from_submissions(cik, submissions)
-        self.cache.set(cache_name, metric.model_dump(mode="json") if metric is not None else {"unavailable": True})
+        self.cache.set(
+            cache_name,
+            metric.model_dump(mode="json")
+            if metric is not None
+            else {"unavailable": True, "max_sec_archive_lookups": self.max_sec_archive_lookups},
+        )
         return metric
 
     def _fetch_sec_submissions(self, cik: int) -> dict[str, Any] | None:
@@ -580,6 +951,7 @@ class OpenDataProvider:
         forms = recent.get("form") if isinstance(recent.get("form"), list) else []
         filings: list[OpenDataCompanyFiling] = []
         target_forms = {"8-K", "10-Q", "10-K"}
+        archive_lookups = 0
 
         for index, raw_form in enumerate(forms):
             form = str(raw_form or "")
@@ -591,6 +963,10 @@ class OpenDataProvider:
                 continue
             source_url = self._filing_source_url(cik, accession_number)
             primary_document = self._recent_value(recent, "primaryDocument", index)
+            exhibits: list[OpenDataFilingExhibit] = []
+            if self.include_filing_details and archive_lookups < self.max_sec_archive_lookups:
+                archive_lookups += 1
+                exhibits = self._fetch_filing_exhibits(cik, accession_number)
             filing = OpenDataCompanyFiling(
                 accession_number=accession_number,
                 form=form,
@@ -600,9 +976,7 @@ class OpenDataProvider:
                 primary_document=primary_document,
                 primary_document_description=self._recent_value(recent, "primaryDocDescription", index),
                 items=self._filing_items(self._recent_value(recent, "items", index)),
-                exhibits=self._fetch_filing_exhibits(cik, accession_number)
-                if self.include_filing_details
-                else [],
+                exhibits=exhibits,
                 source_url=source_url,
                 notes="Recent company-specific SEC filing metadata. This is factual context, not an assessment.",
             )
@@ -611,13 +985,19 @@ class OpenDataProvider:
                 break
 
         as_of = max((filing.filing_date for filing in filings), default=date.today().isoformat())
+        known_context_gaps: list[str] = []
+        if not self.include_filing_details:
+            known_context_gaps.append("SEC filing archive exhibit details were skipped for batch collection scalability.")
+        elif archive_lookups < len(filings):
+            known_context_gaps.append(
+                f"SEC filing archive exhibit lookups were limited to the {archive_lookups} newest filings "
+                "to keep EDGAR requests moderate."
+            )
         return OpenDataCompanyContext(
             source="sec_submissions",
             as_of=as_of,
             recent_filings=filings,
-            known_context_gaps=[]
-            if self.include_filing_details
-            else ["SEC filing archive exhibit details were skipped for batch collection scalability."],
+            known_context_gaps=known_context_gaps,
             notes=(
                 "Company context is collected from SEC submissions and filing index metadata. "
                 "The app does not classify the news as good or bad."
@@ -651,12 +1031,25 @@ class OpenDataProvider:
     def _fetch_filing_exhibits(self, cik: int, accession_number: str) -> list[OpenDataFilingExhibit]:
         accession = accession_number.replace("-", "")
         cache_name = f"sec_filing_index_CIK{cik:010d}_{accession}.json"
+        failure_cache_name = f"sec_filing_index_failure_CIK{cik:010d}_{accession}.json"
+        if not self.force_refresh and self.cache.get(failure_cache_name, SEC_ARCHIVE_FAILURE_CACHE_TTL) is not None:
+            return []
         index_json = None if self.force_refresh else self.cache.get(cache_name, timedelta(days=7))
         if index_json is None:
+            index_url = f"{SEC_ARCHIVES_BASE_URL}/{cik}/{accession}/index.json"
             try:
-                index_json = self._sec_get_json(f"{SEC_ARCHIVES_BASE_URL}/{cik}/{accession}/index.json")
+                index_json = self._sec_get_json(index_url)
                 self.cache.set(cache_name, index_json)
-            except requests.RequestException:
+            except requests.RequestException as exc:
+                self.cache.set(
+                    failure_cache_name,
+                    {
+                        "unavailable": True,
+                        "url": index_url,
+                        "status": self._http_status(exc),
+                        "cached_at": datetime.now(timezone.utc).isoformat(),
+                    },
+                )
                 return []
         directory_items = index_json.get("directory", {}).get("item", []) if isinstance(index_json, dict) else []
         if not isinstance(directory_items, list):
@@ -684,10 +1077,13 @@ class OpenDataProvider:
         return exhibits
 
     def _adjusted_eps_growth_from_submissions(self, cik: int, submissions: dict[str, Any]) -> OpenDataMetric | None:
+        if not self.include_filing_details or self.max_sec_archive_lookups <= 0:
+            return None
         recent = submissions.get("filings", {}).get("recent", {})
         if not isinstance(recent, dict):
             return None
         forms = recent.get("form") if isinstance(recent.get("form"), list) else []
+        archive_lookups = 0
         for index, raw_form in enumerate(forms):
             form = str(raw_form or "")
             if form not in {"8-K", "6-K"}:
@@ -699,6 +1095,9 @@ class OpenDataProvider:
             items = self._filing_items(self._recent_value(recent, "items", index))
             if form == "8-K" and items and not any(item.startswith("2.02") or item.startswith("9.01") for item in items):
                 continue
+            if archive_lookups >= self.max_sec_archive_lookups:
+                break
+            archive_lookups += 1
             for exhibit in self._earnings_release_exhibits(cik, accession_number):
                 if not exhibit.url:
                     continue
@@ -756,6 +1155,10 @@ class OpenDataProvider:
         try:
             response = self._get(
                 url,
+                pacer=SEC_REQUEST_PACER,
+                retry_after_on_429=SEC_429_COOLDOWN_SECONDS,
+                retry_after_by_status={503: SEC_503_COOLDOWN_SECONDS},
+                retry_sleep_cap=SEC_RETRY_AFTER_MAX_SECONDS,
                 headers={
                     "User-Agent": self.sec_user_agent,
                     "Accept": "text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8",
@@ -865,7 +1268,13 @@ class OpenDataProvider:
             return f"EX-4.{digits[1:].lstrip('0') or digits[1:]}"
         return f"EX-{digits}"
 
-    def _latest_price_from_history(self, ticker: str, history: list[HistoricalPricePoint]) -> LatestPrice | None:
+    def _latest_price_from_history(
+        self,
+        ticker: str,
+        history: list[HistoricalPricePoint],
+        *,
+        currency: str = "USD",
+    ) -> LatestPrice | None:
         usable_history = [point for point in history if math.isfinite(point.close) and point.close > 0]
         if not usable_history:
             return None
@@ -873,7 +1282,7 @@ class OpenDataProvider:
         return LatestPrice(
             ticker=ticker.upper(),
             price=latest.close,
-            currency="USD",
+            currency=currency.upper(),
             source=latest.source,
             as_of=latest.date,
         )
@@ -881,6 +1290,10 @@ class OpenDataProvider:
     def _sec_get_json(self, url: str) -> Any:
         response = self._get(
             url,
+            pacer=SEC_REQUEST_PACER,
+            retry_after_on_429=SEC_429_COOLDOWN_SECONDS,
+            retry_after_by_status={503: SEC_503_COOLDOWN_SECONDS},
+            retry_sleep_cap=SEC_RETRY_AFTER_MAX_SECONDS,
             headers={
                 "User-Agent": self.sec_user_agent,
                 "Accept": "application/json",
@@ -912,10 +1325,14 @@ class OpenDataProvider:
         return LatestPrice(
             ticker=ticker.upper(),
             price=float(closes.iloc[-1]),
-            currency="USD",
+            currency=self._yfinance_currency(ticker),
             source="yfinance",
             as_of=as_of,
         )
+
+    def _yfinance_currency(self, ticker: str) -> str:
+        info = self._fetch_yfinance_info(ticker) or {}
+        return str(info.get("currency") or info.get("financialCurrency") or "USD").upper()
 
     def _fetch_yfinance_forward_pe(self, ticker: str) -> OpenDataMetric | None:
         info = self._fetch_yfinance_info(ticker)

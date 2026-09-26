@@ -52,6 +52,12 @@ python scripts/open_data_poc.py --universe-file data/stocks/stocks.json --worker
 Collects public stock facts into `data/invest_os.sqlite` and marks saved tickers active.
 
 ```sh
+python scripts/enrich_adjusted_eps.py --max-sec-archive-lookups 2
+```
+
+Adds adjusted EPS growth and GAAP/adjusted EPS alignment to saved SEC-backed stock snapshots with a small, paced SEC Archives pass.
+
+```sh
 python scripts/build_stock_derived_signals.py
 ```
 

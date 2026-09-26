@@ -111,8 +111,8 @@ DEBT_DIRECT_CONCEPTS = (
     "LeaseLiabilities",
 )
 
-SEC_TAXONOMIES = ("us-gaap", "ifrs-full")
-MONETARY_UNITS = ("USD", "EUR", "GBP", "DKK", "CHF", "CAD", "TWD", "JPY", "CNY", "HKD")
+SEC_TAXONOMIES = ("us-gaap", "ifrs-full", "yfinance")
+MONETARY_UNITS = ("USD", "EUR", "GBP", "SEK", "DKK", "CHF", "CAD", "TWD", "JPY", "CNY", "HKD")
 USD_UNITS = MONETARY_UNITS
 SHARE_UNITS = ("shares",)
 EPS_UNITS = tuple(f"{currency}/shares" for currency in MONETARY_UNITS)
@@ -348,9 +348,13 @@ def compute_open_data_snapshot(
         years=3,
         fact_label="revenue",
     )
+    if revenue_cagr_3y.value is None:
+        revenue_cagr_3y = _growth_metric(companyfacts, REVENUE_CONCEPTS, USD_UNITS, "revenue_cagr_3y", 3, as_of)
     eps_gaap_growth_yoy = _quarterly_eps_growth_metric(companyfacts, "eps_gaap_growth_yoy", 1, as_of)
     eps_growth_yoy = eps_gaap_growth_yoy
     eps_cagr_3y = _quarterly_eps_growth_metric(companyfacts, "eps_cagr_3y", 3, as_of)
+    if eps_cagr_3y.value is None:
+        eps_cagr_3y = _eps_growth_metric(companyfacts, "eps_cagr_3y", 3, as_of)
     eps_adjusted_growth_yoy = adjusted_eps_growth_yoy or _unavailable(
         "eps_adjusted_growth_yoy",
         "Adjusted EPS growth was not found in an official earnings-release exhibit with high-confidence parsing.",
@@ -610,7 +614,7 @@ def compute_open_data_snapshot(
         fallback_as_of=as_of,
         tier="proxy_estimate",
     )
-    historical_series = _historical_series(companyfacts, price_history or [], as_of)
+    historical_series = _historical_series(companyfacts, price_history or [], as_of, price.currency if price else None)
     data_gaps = _data_gaps(historical_series, forward_pe_estimate, company_context, companyfacts)
     gross_margin_quarterly = _latest_historical_metric(
         historical_series,
@@ -1111,11 +1115,12 @@ def _historical_series(
     companyfacts: dict[str, Any],
     price_history: list[HistoricalPricePoint],
     fallback_as_of: str,
+    price_currency: str | None = None,
 ) -> dict[str, list[OpenDataPeriodMetrics]]:
     annual = _annual_fundamental_rows(companyfacts, fallback_as_of)
     quarterly_fundamentals = _quarterly_fundamental_rows(companyfacts, fallback_as_of)
     quarterly_revenue = _quarterly_revenue_rows(companyfacts, fallback_as_of)
-    valuations = _annual_valuation_rows(companyfacts, price_history, annual, fallback_as_of)
+    valuations = _annual_valuation_rows(companyfacts, price_history, annual, fallback_as_of, price_currency=price_currency)
     ranges = _valuation_range_rows(valuations, fallback_as_of)
     return {
         "quarterly_revenue": quarterly_revenue,
@@ -1500,10 +1505,13 @@ def _annual_valuation_rows(
     price_history: list[HistoricalPricePoint],
     annual_rows: list[OpenDataPeriodMetrics],
     fallback_as_of: str,
+    *,
+    price_currency: str | None = None,
 ) -> list[OpenDataPeriodMetrics]:
     depreciation = _annual_fact_map(companyfacts, DEPRECIATION_AMORTIZATION_CONCEPTS, USD_UNITS)
     prices = sorted((point for point in price_history if math.isfinite(point.close) and point.close > 0), key=lambda point: point.date)
     rows: list[OpenDataPeriodMetrics] = []
+    valuation_currency = (price_currency or "USD").upper()
 
     for annual in annual_rows:
         try:
@@ -1539,26 +1547,26 @@ def _annual_valuation_rows(
             tier="proxy_estimate",
         )
         enterprise_value = (
-            _currency_mismatch_metric_for_price_currency("enterprise_value", "USD", debt, cash, fallback_as_of=fallback_as_of)
-            if _has_statement_currency_mismatch("USD", debt, cash)
+            _currency_mismatch_metric_for_price_currency("enterprise_value", valuation_currency, debt, cash, fallback_as_of=fallback_as_of)
+            if _has_statement_currency_mismatch(valuation_currency, debt, cash)
             else _enterprise_value_from_metrics(market_cap, debt, cash, fallback_as_of)
         )
         row = {
             "year_end_price": price,
             "market_cap": market_cap,
             "pe": (
-                _currency_mismatch_metric_for_price_currency("pe", "USD", net_income, fallback_as_of=fallback_as_of)
-                if _has_statement_currency_mismatch("USD", net_income)
+                _currency_mismatch_metric_for_price_currency("pe", valuation_currency, net_income, fallback_as_of=fallback_as_of)
+                if _has_statement_currency_mismatch(valuation_currency, net_income)
                 else _computed_from_metrics("pe", market_cap, net_income, lambda value, income: value / income, "Historical PE from public facts.", fallback_as_of)
             ),
             "price_to_sales": (
-                _currency_mismatch_metric_for_price_currency("price_to_sales", "USD", revenue, fallback_as_of=fallback_as_of)
-                if _has_statement_currency_mismatch("USD", revenue)
+                _currency_mismatch_metric_for_price_currency("price_to_sales", valuation_currency, revenue, fallback_as_of=fallback_as_of)
+                if _has_statement_currency_mismatch(valuation_currency, revenue)
                 else _computed_from_metrics("price_to_sales", market_cap, revenue, lambda value, sales: value / sales, "Historical Price/Sales from public facts.", fallback_as_of)
             ),
             "fcf_yield": (
-                _currency_mismatch_metric_for_price_currency("fcf_yield", "USD", fcf, fallback_as_of=fallback_as_of)
-                if _has_statement_currency_mismatch("USD", fcf)
+                _currency_mismatch_metric_for_price_currency("fcf_yield", valuation_currency, fcf, fallback_as_of=fallback_as_of)
+                if _has_statement_currency_mismatch(valuation_currency, fcf)
                 else _computed_from_metrics("fcf_yield", fcf, market_cap, lambda free_cash_flow, value: (free_cash_flow / value) * 100, "Historical FCF yield from public facts.", fallback_as_of)
             ),
             "enterprise_value": enterprise_value,
@@ -1596,6 +1604,11 @@ def _data_gaps(
 ) -> list[str]:
     gaps: list[str] = []
     taxonomies = companyfacts.get("facts", {}) if isinstance(companyfacts.get("facts"), dict) else {}
+    if "yfinance" in taxonomies:
+        gaps.append(
+            "Fundamentals were normalized from Yahoo Finance statement tables rather than SEC companyfacts; "
+            "statement rows are open/free vendor data and may lag issuer filings."
+        )
     if "us-gaap" not in taxonomies and "ifrs-full" in taxonomies:
         gaps.append(
             "SEC companyfacts uses IFRS taxonomy. Foreign-currency fundamentals are supported; current valuation can use "
@@ -2048,7 +2061,7 @@ def _source_statement_currencies(source: str) -> set[str]:
     currencies: set[str] = set()
     for raw_part in source.split(";"):
         part = raw_part.strip()
-        if not part.startswith("sec_companyfacts:"):
+        if not part.startswith(("sec_companyfacts:", "yfinance_statement:")):
             continue
         pieces = part.split(":")
         if len(pieces) < 3:
@@ -2545,7 +2558,7 @@ def _is_ytd_quarter(point: FactPoint) -> bool:
 
 def _is_10k(point: FactPoint) -> bool:
     form = point.form.upper()
-    return form.startswith("10-K") or form.startswith("20-F") or form.startswith("40-F")
+    return form.startswith("10-K") or form.startswith("20-F") or form.startswith("40-F") or form == "YF-ANNUAL"
 
 
 def _is_10q(point: FactPoint) -> bool:
@@ -2554,7 +2567,7 @@ def _is_10q(point: FactPoint) -> bool:
 
 def _is_quarterly_form(point: FactPoint) -> bool:
     form = point.form.upper()
-    return form.startswith("10-Q") or form.startswith("6-K")
+    return form.startswith("10-Q") or form.startswith("6-K") or form == "YF-QUARTER"
 
 
 def _annual_points(companyfacts: dict[str, Any], concepts: tuple[str, ...], units: tuple[str, ...]) -> list[FactPoint]:
@@ -2855,6 +2868,8 @@ def _parse_date(raw: Any) -> date | None:
 
 
 def _source(point: FactPoint) -> str:
+    if point.taxonomy == "yfinance" or point.form.upper().startswith("YF-"):
+        return f"yfinance_statement:{point.taxonomy}/{point.concept}:{point.unit}:{point.form}:{point.end.isoformat()}"
     return f"sec_companyfacts:{point.taxonomy}/{point.concept}:{point.unit}:{point.form}:{point.end.isoformat()}"
 
 

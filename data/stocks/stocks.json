@@ -6,16 +6,18 @@
     "analysis_report": "/tmp/invest_os_business_signal_analysis.json"
   },
   "parameters": {
-    "count": 75,
+    "count": 77,
     "base_count": 22,
-    "added_count": 53
+    "added_count": 55
   },
-  "methodology": "Keep the existing focused Invest OS universe, then add liquid US-listed businesses selected by a local open-data business-signal screen emphasizing revenue growth, EPS growth, free-cash-flow margin, operating margin, returns, positive free cash flow, and debt control.",
+  "methodology": "Keep the existing focused Invest OS universe, then add liquid businesses selected by a local open-data business-signal screen emphasizing revenue growth, EPS growth, free-cash-flow margin, operating margin, returns, positive free cash flow, debt control, and source coverage.",
   "tickers": [
     "INOD",
     "ORCL",
     "CRM",
     "AZN",
+    "AXFO.ST",
+    "NIBE-B.ST",
     "NFLX",
     "UBER",
     "V",
@@ -132,6 +134,30 @@
       "country": "United Kingdom",
       "sector": "Healthcare",
       "industry": "Drug Manufacturers"
+    },
+    {
+      "symbol": "AXFO.ST",
+      "name": "Axfood AB (publ)",
+      "exchange": "Nasdaq Stockholm",
+      "quote_type": "EQUITY",
+      "region": "Sweden",
+      "country": "Sweden",
+      "currency": "SEK",
+      "preferred_provider": "yfinance",
+      "sector": "Consumer Defensive",
+      "industry": "Grocery Stores"
+    },
+    {
+      "symbol": "NIBE-B.ST",
+      "name": "NIBE Industrier AB (publ)",
+      "exchange": "Nasdaq Stockholm",
+      "quote_type": "EQUITY",
+      "region": "Sweden",
+      "country": "Sweden",
+      "currency": "SEK",
+      "preferred_provider": "yfinance",
+      "sector": "Industrials",
+      "industry": "Building Products & Equipment"
     },
     {
       "symbol": "NFLX",

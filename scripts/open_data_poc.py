@@ -220,6 +220,7 @@ def _collect_item_with_retries(
     min_coverage: float,
     include_analysis: bool,
     include_filing_details: bool,
+    max_sec_archive_lookups: int | None,
     ticker_retries: int,
     request_timeout: float,
     request_retries: int,
@@ -234,6 +235,7 @@ def _collect_item_with_retries(
             retry_attempts=request_retries,
             retry_backoff=retry_backoff,
             include_filing_details=include_filing_details,
+            max_sec_archive_lookups=max_sec_archive_lookups,
         )
         try:
             result = {
@@ -325,13 +327,21 @@ def main() -> None:
         "--skip-filing-details",
         action="store_true",
         help=(
-            "Skip per-filing SEC archive exhibit lookups. Recent filing metadata is still collected; "
-            "this is recommended for large universe runs."
+            "Skip per-filing SEC archive exhibit lookups, including archive-derived adjusted EPS parsing. "
+            "Recent filing metadata is still collected; this is recommended for large universe runs."
+        ),
+    )
+    parser.add_argument(
+        "--max-sec-archive-lookups",
+        type=int,
+        help=(
+            "Maximum optional SEC Archives filing-index lookups per ticker. "
+            "Defaults to the provider's conservative SEC_ARCHIVE_LOOKUP_LIMIT."
         ),
     )
     parser.add_argument("--no-save", action="store_true", help="Do not persist snapshots to SQLite.")
     parser.add_argument("--output", type=Path, help="Write the JSON run report to a file as well as stdout.")
-    parser.add_argument("--workers", type=int, default=6, help="Number of tickers to collect in parallel.")
+    parser.add_argument("--workers", type=int, default=3, help="Number of tickers to collect in parallel.")
     parser.add_argument("--ticker-retries", type=int, default=2, help="Retry a whole ticker collection this many times.")
     parser.add_argument("--request-timeout", type=float, default=15.0, help="Per-request timeout used by the open-data provider.")
     parser.add_argument("--request-retries", type=int, default=2, help="Retry individual HTTP requests this many times.")
@@ -349,6 +359,7 @@ def main() -> None:
         retry_attempts=args.request_retries,
         retry_backoff=args.retry_backoff,
         include_filing_details=not args.skip_filing_details,
+        max_sec_archive_lookups=args.max_sec_archive_lookups,
     )
     save = not args.no_save
 
@@ -460,6 +471,7 @@ def main() -> None:
                     min_coverage=args.min_coverage,
                     include_analysis=args.include_analysis,
                     include_filing_details=not args.skip_filing_details,
+                    max_sec_archive_lookups=args.max_sec_archive_lookups,
                     ticker_retries=args.ticker_retries,
                     request_timeout=args.request_timeout,
                     request_retries=args.request_retries,
@@ -479,6 +491,7 @@ def main() -> None:
                     min_coverage=args.min_coverage,
                     include_analysis=args.include_analysis,
                     include_filing_details=not args.skip_filing_details,
+                    max_sec_archive_lookups=args.max_sec_archive_lookups,
                     ticker_retries=args.ticker_retries,
                     request_timeout=args.request_timeout,
                     request_retries=args.request_retries,

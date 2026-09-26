@@ -5,14 +5,14 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import requests
 
 from refresh_static_prices import fetch_updated_history, hydrate_deployed_data, merge_price_history, refresh_snapshot_prices
 
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataMetric, OpenDataSnapshot
-from app.entry_engine.providers.open_data_provider import OpenDataProvider
+from app.entry_engine.providers.open_data_provider import JsonFileCache, OpenDataProvider
 
 
 def point(day: date, close: float, *, low: float | None = None) -> HistoricalPricePoint:
@@ -43,9 +43,16 @@ class FakeProvider:
 
 
 class FakeResponse:
-    def __init__(self, payload: object = None, *, status_code: int = 200) -> None:
+    def __init__(
+        self,
+        payload: object = None,
+        *,
+        status_code: int = 200,
+        headers: dict[str, str] | None = None,
+    ) -> None:
         self.payload = payload
         self.status_code = status_code
+        self.headers = headers or {}
 
     def raise_for_status(self) -> None:
         if self.status_code >= 400:
@@ -67,6 +74,16 @@ class FakeSession:
         return FakeResponse(payload)
 
 
+class SequenceSession:
+    def __init__(self, responses: list[FakeResponse]) -> None:
+        self.responses = responses
+
+    def get(self, url: str, **_: object) -> FakeResponse:
+        if not self.responses:
+            raise AssertionError(f"Unexpected request to {url}")
+        return self.responses.pop(0)
+
+
 class RefreshStaticPricesTests(unittest.TestCase):
     def test_adjusted_eps_parser_accepts_actuals_and_rejects_outlook(self) -> None:
         provider = OpenDataProvider()
@@ -79,6 +96,91 @@ class RefreshStaticPricesTests(unittest.TestCase):
                 "Outlook for Q3: Non-GAAP EPS of $0.84 to $0.88, representing growth of 28% to 35% YoY"
             )
         )
+
+    def test_skip_filing_details_skips_archive_adjusted_eps_lookup(self) -> None:
+        session = Mock()
+        with TemporaryDirectory() as directory:
+            provider = OpenDataProvider(
+                cache=JsonFileCache(Path(directory)),
+                session=session,
+                include_filing_details=False,
+            )
+
+            self.assertIsNone(provider.fetch_adjusted_eps_growth_yoy(123456))
+
+        session.get.assert_not_called()
+
+    def test_get_uses_retry_after_for_429(self) -> None:
+        session = SequenceSession(
+            [
+                FakeResponse(status_code=429, headers={"Retry-After": "2"}),
+                FakeResponse({"ok": True}),
+            ]
+        )
+        provider = OpenDataProvider(session=session, retry_attempts=2, retry_backoff=0.1)
+
+        with patch("app.entry_engine.providers.open_data_provider.time.sleep") as sleep:
+            response = provider._get("https://www.sec.gov/example.json", retry_after_on_429=30)
+
+        self.assertEqual(response.json(), {"ok": True})
+        sleep.assert_called_once_with(2)
+
+    def test_get_uses_status_cooldown_for_503(self) -> None:
+        session = SequenceSession(
+            [
+                FakeResponse(status_code=503),
+                FakeResponse({"ok": True}),
+            ]
+        )
+        provider = OpenDataProvider(session=session, retry_attempts=2, retry_backoff=0.1)
+
+        with patch("app.entry_engine.providers.open_data_provider.time.sleep") as sleep:
+            response = provider._get("https://www.sec.gov/example.json", retry_after_by_status={503: 5})
+
+        self.assertEqual(response.json(), {"ok": True})
+        sleep.assert_called_once_with(5)
+
+    def test_failed_filing_index_is_negative_cached(self) -> None:
+        session = Mock()
+        session.get.return_value = FakeResponse(status_code=503)
+        with TemporaryDirectory() as directory:
+            provider = OpenDataProvider(
+                cache=JsonFileCache(Path(directory)),
+                session=session,
+                retry_attempts=1,
+            )
+
+            first = provider._fetch_filing_exhibits(1018724, "0001018724-21-000008")
+            second = provider._fetch_filing_exhibits(1018724, "0001018724-21-000008")
+
+        self.assertEqual(first, [])
+        self.assertEqual(second, [])
+        session.get.assert_called_once()
+
+    def test_adjusted_eps_unavailable_cache_respects_lookup_depth(self) -> None:
+        with TemporaryDirectory() as directory:
+            cache = JsonFileCache(Path(directory))
+            cache.set("adjusted_eps_growth_CIK0000000123.json", {"unavailable": True, "max_sec_archive_lookups": 1})
+
+            shallow_session = Mock()
+            shallow_provider = OpenDataProvider(
+                cache=cache,
+                session=shallow_session,
+                max_sec_archive_lookups=1,
+            )
+            self.assertIsNone(shallow_provider.fetch_adjusted_eps_growth_yoy(123))
+            shallow_session.get.assert_not_called()
+
+            deep_session = Mock()
+            deep_session.get.return_value = FakeResponse({"filings": {"recent": {"form": []}}})
+            deep_provider = OpenDataProvider(
+                cache=cache,
+                session=deep_session,
+                max_sec_archive_lookups=2,
+                retry_attempts=1,
+            )
+            self.assertIsNone(deep_provider.fetch_adjusted_eps_growth_yoy(123))
+            deep_session.get.assert_called_once()
 
     def test_hydrate_falls_back_to_local_data_for_new_tickers(self) -> None:
         with TemporaryDirectory() as directory:

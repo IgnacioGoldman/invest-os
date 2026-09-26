@@ -35,9 +35,15 @@ def load_stock_universe(path: Path = OPEN_DATA_STOCK_UNIVERSE_PATH) -> list[dict
     except json.JSONDecodeError:
         return []
 
-    raw_rows: object
+    metadata_by_symbol: dict[str, dict[str, Any]] = {}
     if isinstance(payload, dict):
         raw_rows = payload.get("tickers") or payload.get("rows") or []
+        raw_metadata = payload.get("rows") if payload.get("tickers") is not None else payload.get("metadata")
+        if isinstance(raw_metadata, list):
+            for raw_row in raw_metadata:
+                metadata = _normalize_universe_row(raw_row)
+                if metadata is not None:
+                    metadata_by_symbol[metadata["symbol"]] = metadata
     else:
         raw_rows = payload
 
@@ -50,6 +56,8 @@ def load_stock_universe(path: Path = OPEN_DATA_STOCK_UNIVERSE_PATH) -> list[dict
         row = _normalize_universe_row(raw_row)
         if row is None or row["symbol"] in seen:
             continue
+        if row["symbol"] in metadata_by_symbol:
+            row = {**metadata_by_symbol[row["symbol"]], **row}
         seen.add(row["symbol"])
         rows.append(row)
     return rows
