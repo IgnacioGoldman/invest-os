@@ -223,8 +223,8 @@ def _interesting_facts(snapshot: OpenDataSnapshot, metrics: dict[str, DerivedSig
             InterestingFact(
                 type="eps_acceleration",
                 severity=_severity(eps_accel, 50),
-                text=f"EPS growth is {label}: YoY growth differs from 3-year CAGR by {_fmt_pct(eps_accel)}.",
-                evidence=["business_health.eps_growth_yoy", "business_health.eps_cagr_3y"],
+                text=f"GAAP EPS growth is {label}: YoY growth differs from 3-year EPS CAGR by {_fmt_pct(eps_accel)}.",
+                evidence=["business_health.eps_gaap_growth_yoy", "business_health.eps_cagr_3y"],
             )
         )
 
@@ -331,7 +331,9 @@ def build_stock_derived_signals(
 ) -> StockDerivedSignals:
     revenue_growth = _metric(snapshot, "business_health", "revenue_growth_yoy")
     revenue_cagr = _metric(snapshot, "business_health", "revenue_cagr_3y")
-    eps_growth = _metric(snapshot, "business_health", "eps_growth_yoy")
+    eps_growth = _metric(snapshot, "business_health", "eps_gaap_growth_yoy")
+    if eps_growth is None:
+        eps_growth = _metric(snapshot, "business_health", "eps_growth_yoy")
     eps_cagr = _metric(snapshot, "business_health", "eps_cagr_3y")
     cash = _metric(snapshot, "business_health", "cash")
     debt = _metric(snapshot, "business_health", "debt")
@@ -376,7 +378,7 @@ def build_stock_derived_signals(
         "ps_hist_percentile": _signal(ps_hist, "percent", "Current price/sales percentile against available annual valuation history."),
         "fcfy_hist_percentile": _signal(fcfy_hist, "percent", "Current FCF yield percentile against available annual valuation history. Higher means more attractive cash-flow yield versus its own history."),
         "rev_accel": _signal(rev_accel, "percent", "Latest-quarter revenue growth YoY minus 3-year revenue CAGR."),
-        "eps_accel": _signal(eps_accel, "percent", "EPS growth YoY minus 3-year EPS CAGR."),
+        "eps_accel": _signal(eps_accel, "percent", "GAAP EPS growth YoY minus 3-year EPS CAGR."),
         "op_margin_yoy_delta": _signal(_historical_delta(snapshot, "annual_fundamentals", "operating_margin", 1), "percent", "Latest annual operating margin minus prior-year annual operating margin."),
         "fcf_margin_3y_delta": _signal(_historical_delta(snapshot, "annual_fundamentals", "fcf_margin", 3), "percent", "Latest annual FCF margin minus annual FCF margin three periods earlier."),
         "fcf_conversion": _signal(None if fcf_conversion is None else fcf_conversion * 100, "percent", "TTM free cash flow divided by TTM net income."),

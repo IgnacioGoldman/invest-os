@@ -56,6 +56,10 @@ def snapshot(
     support_6m: float | None = None,
     support_1y: float | None = None,
     support_2y: float | None = None,
+    forward_pe: float | None = 18,
+    fcf_yield: float | None = 4,
+    price_to_sales: float | None = 6,
+    ev_to_ebitda: float | None = 18,
 ) -> dict:
     return {
         "ticker": ticker,
@@ -70,6 +74,12 @@ def snapshot(
             "support_1y_distance": {"value": support_1y},
             "support_2y_distance": {"value": support_2y},
             "support_5y_distance": {"value": support_5y},
+        },
+        "valuation": {
+            "forward_pe": {"value": forward_pe},
+            "fcf_yield": {"value": fcf_yield},
+            "price_to_sales": {"value": price_to_sales},
+            "ev_to_ebitda": {"value": ev_to_ebitda},
         },
         "historical_series": {},
     }
@@ -92,6 +102,13 @@ STRONG_YOY_SUPPORT = {
                 {"field": "revenue", "value": "Solid"},
             ],
         },
+        {
+            "operator": "or",
+            "conditions": [
+                {"field": "valuation", "value": "Cheap"},
+                {"field": "valuation", "value": "Fair"},
+            ],
+        },
     ],
 }
 
@@ -107,6 +124,10 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
         self.assertEqual(signal_for(row, "revenue"), "Strong")
         self.assertEqual(signal_for(row, "support_1m"), "At support")
         self.assertEqual(signal_for(row, "support_5y"), "Above support")
+        self.assertEqual(signal_for(row, "valuation"), "Cheap")
+
+        app_like = snapshot("APP_LIKE", 50, 1, 1, forward_pe=14.9, fcf_yield=4.3, price_to_sales=15.4, ev_to_ebitda=19.6)
+        self.assertEqual(signal_for(app_like, "valuation"), "Pricey")
 
     def test_pullback_preset_uses_one_three_and_six_month_support(self) -> None:
         row = snapshot("PULLBACK", 12, 12, 30, support_6m=1)
@@ -117,6 +138,9 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
 
         long_term_only = snapshot("LONG", 12, 12, 30, support_1y=1)
         self.assertFalse(expression_matches(long_term_only, BUILT_IN_FILTERS["builtin:pullback"]))
+
+        pricey = snapshot("PRICEY", 30, 1, 30, price_to_sales=15)
+        self.assertFalse(expression_matches(pricey, BUILT_IN_FILTERS["builtin:pullback"]))
 
     def test_support_preset_uses_one_year_through_five_year_support(self) -> None:
         row = snapshot("SUPPORT", 25, 20, 30, support_1y=5)

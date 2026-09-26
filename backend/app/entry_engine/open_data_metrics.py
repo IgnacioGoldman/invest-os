@@ -347,8 +347,15 @@ def compute_open_data_snapshot(
         years=3,
         fact_label="revenue",
     )
-    eps_growth_yoy = _quarterly_eps_growth_metric(companyfacts, "eps_growth_yoy", 1, as_of)
+    eps_gaap_growth_yoy = _quarterly_eps_growth_metric(companyfacts, "eps_gaap_growth_yoy", 1, as_of)
+    eps_growth_yoy = eps_gaap_growth_yoy
     eps_cagr_3y = _quarterly_eps_growth_metric(companyfacts, "eps_cagr_3y", 3, as_of)
+    eps_adjusted_growth_yoy = _unavailable(
+        "eps_adjusted_growth_yoy",
+        "Adjusted EPS growth requires a non-GAAP earnings-release or analyst data source; SEC companyfacts only provide GAAP EPS.",
+        as_of,
+    )
+    eps_alignment = _eps_alignment_metric(eps_adjusted_growth_yoy, eps_gaap_growth_yoy, as_of)
 
     shares = _shares_diluted_metric(companyfacts, as_of)
     cash = _latest_fact_metric(
@@ -651,6 +658,9 @@ def compute_open_data_snapshot(
         "revenue_growth_yoy": revenue_growth_yoy,
         "revenue_cagr_3y": revenue_cagr_3y,
         "eps_growth_yoy": eps_growth_yoy,
+        "eps_adjusted_growth_yoy": eps_adjusted_growth_yoy,
+        "eps_gaap_growth_yoy": eps_gaap_growth_yoy,
+        "eps_alignment": eps_alignment,
         "eps_cagr_3y": eps_cagr_3y,
         "gross_margin": gross_margin_quarterly,
         "operating_margin": operating_margin_quarterly,
@@ -705,6 +715,9 @@ def compute_open_data_snapshot(
         "revenue_growth_yoy": revenue_growth_yoy,
         "revenue_cagr_3y": revenue_cagr_3y,
         "eps_growth_yoy": eps_growth_yoy,
+        "eps_adjusted_growth_yoy": eps_adjusted_growth_yoy,
+        "eps_gaap_growth_yoy": eps_gaap_growth_yoy,
+        "eps_alignment": eps_alignment,
         "eps_cagr_3y": eps_cagr_3y,
         **business_health,
         **price_opportunity,
@@ -911,7 +924,7 @@ def _quarterly_eps_growth_metric(companyfacts: dict[str, Any], metric_name: str,
             if years == 1
             else (((latest.value / prior.value) ** (1 / years)) - 1) * 100
         )
-        label = "Latest-quarter diluted EPS YoY growth" if years == 1 else f"Latest-quarter diluted EPS {years}-year CAGR"
+        label = "Latest-quarter GAAP diluted EPS YoY growth" if years == 1 else f"Latest-quarter GAAP diluted EPS {years}-year CAGR"
         return OpenDataMetric(
             value=value,
             source=f"{latest.source}; {prior.source}",
@@ -922,6 +935,32 @@ def _quarterly_eps_growth_metric(companyfacts: dict[str, Any], metric_name: str,
     return _eps_not_meaningful_metric(metric_name, latest.value, prior.value, latest.source, prior.source, latest.end.isoformat(), years)
 
 
+def _eps_alignment_metric(adjusted: OpenDataMetric, gaap: OpenDataMetric, fallback_as_of: str) -> OpenDataMetric:
+    if adjusted.value is None:
+        return _unavailable(
+            "eps_alignment",
+            "Adjusted EPS growth was unavailable, so GAAP/adjusted EPS alignment could not be assessed.",
+            fallback_as_of,
+        )
+    if gaap.value is None:
+        return _unavailable(
+            "eps_alignment",
+            "GAAP EPS growth was unavailable, so GAAP/adjusted EPS alignment could not be assessed.",
+            fallback_as_of,
+        )
+    gap = abs(adjusted.value - gaap.value)
+    return OpenDataMetric(
+        value=gap,
+        source=f"{adjusted.source}; {gaap.source}",
+        tier="computed_from_public_facts" if adjusted.tier == "computed_from_public_facts" and gaap.tier == "computed_from_public_facts" else "proxy_estimate",
+        as_of=_max_as_of(adjusted.as_of, gaap.as_of),
+        notes=(
+            "Absolute percentage-point gap between adjusted EPS growth and GAAP EPS growth. "
+            "Lower means the underlying adjusted earnings trend and reported GAAP earnings trend are better aligned."
+        ),
+    )
+
+
 def _eps_growth_metric(companyfacts: dict[str, Any], metric_name: str, years: int, fallback_as_of: str) -> OpenDataMetric:
     eps_points = _annual_points(companyfacts, DILUTED_EPS_CONCEPTS, EPS_UNITS)
     if len(eps_points) > years:
@@ -929,7 +968,7 @@ def _eps_growth_metric(companyfacts: dict[str, Any], metric_name: str, years: in
         prior = _annual_point_for_fy(eps_points, latest.fy - years if latest.fy else None) or eps_points[years]
         if latest.value > 0 and prior.value > 0:
             value = ((latest.value - prior.value) / abs(prior.value)) * 100 if years == 1 else (((latest.value / prior.value) ** (1 / years)) - 1) * 100
-            label = "YoY diluted EPS growth" if years == 1 else f"{years}-year diluted EPS CAGR"
+            label = "YoY GAAP diluted EPS growth" if years == 1 else f"{years}-year GAAP diluted EPS CAGR"
             return OpenDataMetric(
                 value=value,
                 source=f"{_source(latest)}; {_source(prior)}",
@@ -947,7 +986,7 @@ def _eps_growth_metric(companyfacts: dict[str, Any], metric_name: str, years: in
         prior = _computed_eps_for_fy(computed_eps, latest["fy"] - years if latest.get("fy") else None) or computed_eps[years]
         if latest["eps"] > 0 and prior["eps"] > 0:
             value = ((latest["eps"] - prior["eps"]) / abs(prior["eps"])) * 100 if years == 1 else (((latest["eps"] / prior["eps"]) ** (1 / years)) - 1) * 100
-            label = "YoY EPS growth" if years == 1 else f"{years}-year EPS CAGR"
+            label = "YoY GAAP EPS growth" if years == 1 else f"{years}-year GAAP EPS CAGR"
             return OpenDataMetric(
                 value=value,
                 source=f"{latest['source']}; {prior['source']}",
@@ -978,15 +1017,15 @@ def _eps_not_meaningful_metric(
     years: int,
 ) -> OpenDataMetric:
     if latest_eps > 0 and prior_eps <= 0:
-        label = "YoY EPS growth" if years == 1 else f"{years}-year EPS CAGR"
+        label = "YoY GAAP EPS growth" if years == 1 else f"{years}-year GAAP EPS CAGR"
         notes = (
-            f"{metric_name}: EPS turned positive from a loss-making comparison period "
+            f"{metric_name}: GAAP EPS turned positive from a loss-making comparison period "
             f"(latest {latest_eps:.4g}, comparison {prior_eps:.4g}); {label} is not meaningful."
         )
     elif latest_eps <= 0:
-        notes = f"{metric_name}: EPS remains loss-making (latest {latest_eps:.4g}); EPS growth is not meaningful."
+        notes = f"{metric_name}: GAAP EPS remains loss-making (latest {latest_eps:.4g}); GAAP EPS growth is not meaningful."
     else:
-        notes = f"{metric_name}: Comparison EPS was non-positive ({prior_eps:.4g}); EPS growth is not meaningful."
+        notes = f"{metric_name}: Comparison GAAP EPS was non-positive ({prior_eps:.4g}); GAAP EPS growth is not meaningful."
     return OpenDataMetric(
         value=None,
         source=f"{latest_source}; {prior_source}",

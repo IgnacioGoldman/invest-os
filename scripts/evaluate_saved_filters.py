@@ -33,6 +33,13 @@ def _support_conditions(fields: list[str]) -> list[dict[str, str]]:
     ]
 
 
+def _valuation_conditions() -> list[dict[str, str]]:
+    return [
+        {"field": "valuation", "value": "Cheap"},
+        {"field": "valuation", "value": "Fair"},
+    ]
+
+
 def _strong_yoy_expression(support_fields: list[str]) -> dict[str, Any]:
     return {
         "operator": "and",
@@ -45,6 +52,7 @@ def _strong_yoy_expression(support_fields: list[str]) -> dict[str, Any]:
                     {"field": "revenue", "value": "Solid"},
                 ],
             },
+            {"operator": "or", "conditions": _valuation_conditions()},
         ],
     }
 
@@ -87,6 +95,44 @@ def _support_signal(value: float | None) -> str:
     return "Above support"
 
 
+def _valuation_signal(snapshot: dict[str, Any]) -> str:
+    forward_pe = _metric_value(snapshot, "valuation", "forward_pe")
+    fcf_yield = _metric_value(snapshot, "valuation", "fcf_yield")
+    price_sales = _metric_value(snapshot, "valuation", "price_to_sales")
+    ev_to_ebitda = _metric_value(snapshot, "valuation", "ev_to_ebitda")
+
+    if all(value is None for value in (forward_pe, fcf_yield, price_sales, ev_to_ebitda)):
+        return "Unclear"
+    if (
+        (forward_pe is not None and forward_pe >= 50)
+        or (fcf_yield is not None and fcf_yield < 1)
+        or (price_sales is not None and price_sales >= 20)
+        or (ev_to_ebitda is not None and ev_to_ebitda >= 40)
+    ):
+        return "Very pricey"
+    if (
+        (forward_pe is not None and forward_pe >= 35)
+        or (fcf_yield is not None and fcf_yield < 2)
+        or (price_sales is not None and price_sales >= 12)
+        or (ev_to_ebitda is not None and ev_to_ebitda >= 25)
+    ):
+        return "Pricey"
+    if (
+        forward_pe is not None
+        and forward_pe <= 18
+        and (fcf_yield is None or fcf_yield >= 4)
+        and (price_sales is None or price_sales <= 8)
+    ):
+        return "Cheap"
+    if (
+        (forward_pe is not None and forward_pe <= 25)
+        or (fcf_yield is not None and fcf_yield >= 3)
+        or (price_sales is not None and price_sales <= 8)
+    ):
+        return "Fair"
+    return "Unclear"
+
+
 def _period_key(period: str) -> tuple[int, int, str]:
     if period.startswith("FY") and " Q" in period:
         year, quarter = period[2:].split(" Q", 1)
@@ -119,9 +165,12 @@ def signal_for(snapshot: dict[str, Any], field: str) -> str:
     if field == "revenue":
         return _growth_signal(_metric_value(snapshot, "business_health", "revenue_growth_yoy"))
     if field == "eps":
-        return _growth_signal(_metric_value(snapshot, "business_health", "eps_growth_yoy"))
+        value = _metric_value(snapshot, "business_health", "eps_gaap_growth_yoy")
+        return _growth_signal(value if value is not None else _metric_value(snapshot, "business_health", "eps_growth_yoy"))
     if field == "momentum":
         return _revenue_momentum(snapshot)
+    if field == "valuation":
+        return _valuation_signal(snapshot)
     metric = SUPPORT_METRICS.get(field)
     return _support_signal(_metric_value(snapshot, "price_opportunity", metric)) if metric else "Unclear"
 

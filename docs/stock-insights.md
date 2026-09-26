@@ -8,7 +8,7 @@ The goal is not to predict the future or produce a buy/sell command. The goal is
 
 Stock insights use public open-data snapshots, mainly:
 
-- Business facts: latest-quarter revenue growth, EPS growth, margins, free cash flow, returns on equity/capital, cash, debt, and share count.
+- Business facts: latest-quarter revenue growth, adjusted EPS growth, GAAP EPS growth, EPS alignment, margins, free cash flow, returns on equity/capital, cash, debt, and share count.
 - Price facts: current price, 1 day to 5 year price changes, distance from all-time high, distance from 52 week high/low, volatility, and support-zone distance.
 - Valuation facts: trailing PE, forward PE estimate when available, PEG proxy, price/sales, EV/EBITDA proxy, FCF yield, and valuation history.
 - Context facts: recent SEC filings, known data gaps, peer ranks, valuation percentiles, net cash/debt, FCF conversion, and price versus fundamentals.
@@ -29,11 +29,23 @@ _Is the company’s growth getting stronger or weaker?_
 
 Looks at how the revenue growth rate is changing between quarters. A company growing 8% → 12% → 16% is accelerating, while 25% → 20% → 15% is still growing strongly but slowing down. This helps you detect improvement or deterioration before revenue actually turns negative.
 
-### Latest EPS Growth YoY
+### Adjusted EPS Growth YoY
 
-_Is the company converting its business into more earnings for shareholders?_
+_Is the company generating more underlying earnings for shareholders?_
 
-Compares earnings per share with the same quarter last year. It shows whether the company is generating more profit for each share outstanding, not just growing revenue. This matters because revenue can increase while profits stagnate or fall if costs rise too quickly. For example, Revenue +15% / EPS +25% suggests improving profitability, while Revenue +15% / EPS -10% suggests that growth is not translating into higher earnings per share.
+Compares adjusted earnings per share with the same quarter last year. It aims to show how the ongoing business is performing by excluding certain unusual or non-recurring items reported by the company. This can give a cleaner view of earnings growth when GAAP results are affected by large one-off gains or charges. For example, Adjusted EPS +25% suggests underlying earnings per share are improving, while Adjusted EPS -10% suggests the core earnings trend is weakening.
+
+### GAAP EPS Growth YoY
+
+_Is the company reporting more profit per share than a year ago?_
+
+Compares GAAP diluted earnings per share with the same quarter last year. It reflects the company’s official reported earnings after operating costs, interest, taxes, changes in share count, and other accounting gains or losses. Because unusual items can affect GAAP earnings, a very strong or weak result does not always mean the underlying business changed by the same amount. For example, GAAP EPS +80% may look very strong, but part of that increase could come from a large investment gain.
+
+### EPS Alignment
+
+_Are adjusted and reported earnings telling the same story?_
+
+Compares the adjusted and GAAP EPS trends to see how closely they agree. High alignment means both measures point to a similar earnings trend, while low alignment suggests that unusual or excluded items are materially affecting reported earnings. For example, Adjusted EPS +25% / GAAP EPS +22% shows strong alignment, while Adjusted EPS +25% / GAAP EPS +80% signals a large divergence that may need further investigation.
 
 ### Free Cash Flow Margin
 
@@ -47,5 +59,13 @@ Measures free cash flow as a percentage of revenue. It shows how much cash the b
 
 _Is the current price close to a nearby support zone?_
 
-Compares the current price with a detected support zone from recent daily price history. Support means a clustered swing-low area with enough touches to look like a practical floor, not simply the lowest price in the range. Closer to 0% means the stock is nearer support; the window label shows which price range produced the signal. See [Support](support.md) for the calculation details.
+Compares the current price with a detected support zone from recent daily price history. Support means a clustered swing-low area with enough touches to look like a practical floor, not simply the lowest price in the range. Closer to 0% means the stock is nearer support; the window label shows which price range produced the signal. See [Support](metrics/support.md) for the calculation details.
 
+## Valuation
+
+### Forward P/E
+
+_How expensive is the stock relative to expected earnings?_
+
+Compares the current share price with analysts’ expected earnings per share over the next 12 months. It helps answer whether investors are already paying a high price for the company’s expected growth.
+A high Forward P/E is not automatically bad if earnings are expected to grow quickly. A low Forward P/E is not automatically attractive if earnings are stagnating or falling.

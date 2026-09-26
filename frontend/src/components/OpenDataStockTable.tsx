@@ -22,7 +22,7 @@ type Props = {
 const COLUMNS = [
   ["business_health", "revenue_growth_yoy", "Q Rev YoY", "percent"],
   ["business_health", "revenue_cagr_3y", "Q Rev CAGR 3Y", "percent"],
-  ["business_health", "eps_growth_yoy", "Q EPS YoY", "percent"],
+  ["business_health", "eps_gaap_growth_yoy", "Q GAAP EPS YoY", "percent"],
   ["business_health", "eps_cagr_3y", "Q EPS CAGR 3Y", "percent"],
   ["business_health", "gross_margin", "Q Gross", "percent"],
   ["business_health", "operating_margin", "Q Operating", "percent"],
@@ -123,10 +123,10 @@ const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: str
       "Compares the latest revenue growth rate with the previous quarter's growth rate. A positive percentage-point change means growth is accelerating; a negative change means it is decelerating.",
   },
   eps: {
-    title: "Latest EPS growth YoY",
-    question: "Is the company converting growth into earnings?",
+    title: "GAAP EPS growth YoY",
+    question: "Is reported earnings per share improving?",
     description:
-      "Compares earnings per share with the same quarter last year. It shows whether the company is generating more profit for each share outstanding, not just growing revenue. This matters because revenue can increase while profits stagnate or fall if costs rise too quickly. For example, Revenue +15% / EPS +25% suggests improving profitability, while Revenue +15% / EPS -10% suggests that growth is not translating into higher earnings per share.",
+      "Compares GAAP diluted earnings per share with the same quarter last year. Strong GAAP growth can be useful, but unusual gains or charges may make it diverge from adjusted EPS.",
   },
   support: {
     title: "Proximity to support",
@@ -452,6 +452,10 @@ function formatValue(metric: OpenDataMetric | undefined, kind: string) {
   return formatCompact(metric.value);
 }
 
+function epsGaapMetric(snapshot: OpenDataStockSnapshot) {
+  return snapshot.business_health.eps_gaap_growth_yoy ?? snapshot.business_health.eps_growth_yoy;
+}
+
 function tierLabel(tier: OpenDataMetric["tier"]) {
   return tier.replace(/_/g, " ");
 }
@@ -643,7 +647,7 @@ function derivedMetric(value: number | null, kind: MetricKind, notes: string): D
 function computeDerivedMetrics(snapshot: OpenDataStockSnapshot, context: DerivedMetricContext): Record<string, DerivedMetric> {
   const revenueGrowth = snapshotMetricValue(snapshot, "business_health", "revenue_growth_yoy");
   const revenueCagr = snapshotMetricValue(snapshot, "business_health", "revenue_cagr_3y");
-  const epsGrowth = snapshotMetricValue(snapshot, "business_health", "eps_growth_yoy");
+  const epsGrowth = finiteNumber(epsGaapMetric(snapshot)?.value);
   const epsCagr = snapshotMetricValue(snapshot, "business_health", "eps_cagr_3y");
   const cash = snapshotMetricValue(snapshot, "business_health", "cash");
   const debt = snapshotMetricValue(snapshot, "business_health", "debt");
@@ -685,7 +689,7 @@ function computeDerivedMetrics(snapshot: OpenDataStockSnapshot, context: Derived
     ps_hist_percentile: derivedMetric(psHistPercentile, "percent", "Current price/sales percentile against available annual valuation history."),
     fcfy_hist_percentile: derivedMetric(fcfyHistPercentile, "percent", "Current FCF yield percentile against available annual valuation history. Higher means more attractive cash-flow yield versus its own history."),
     rev_accel: derivedMetric(revAccel, "percent", "Latest-quarter revenue growth YoY minus 3-year revenue CAGR."),
-    eps_accel: derivedMetric(epsAccel, "percent", "EPS growth YoY minus 3-year EPS CAGR."),
+    eps_accel: derivedMetric(epsAccel, "percent", "GAAP EPS growth YoY minus 3-year EPS CAGR."),
     op_margin_yoy_delta: derivedMetric(historicalDelta(snapshot, "annual_fundamentals", "operating_margin", 1), "percent", "Latest annual operating margin minus prior-year annual operating margin."),
     fcf_margin_3y_delta: derivedMetric(historicalDelta(snapshot, "annual_fundamentals", "fcf_margin", 3), "percent", "Latest annual FCF margin minus annual FCF margin three periods earlier."),
     fcf_conversion: derivedMetric(fcfConversionRatio == null ? null : fcfConversionRatio * 100, "percent", "TTM free cash flow divided by TTM net income."),
@@ -781,7 +785,10 @@ function sortValueFor(
 
   if (sortKey.startsWith("metric:")) {
     const [, group, key] = sortKey.split(":") as [string, MetricGroup, string];
-    const value = snapshot[group]?.[key]?.value;
+    const metric = group === "business_health" && key === "eps_gaap_growth_yoy"
+      ? epsGaapMetric(snapshot)
+      : snapshot[group]?.[key];
+    const value = metric?.value;
     return typeof value === "number" && Number.isFinite(value) ? value : null;
   }
 
@@ -807,7 +814,7 @@ function filterValueFor(
   if (field === "region") return snapshot.country ?? "";
   if (field === "temp:revenue_growth_signal") return revenueGrowthSignal(snapshot.business_health.revenue_growth_yoy?.value).label;
   if (field === "temp:revenue_momentum") return revenueGrowthMomentum(snapshot).label;
-  if (field === "temp:eps_growth_signal") return epsGrowthSignal(snapshot.business_health.eps_growth_yoy?.value).label;
+  if (field === "temp:eps_growth_signal") return epsGrowthSignal(epsGaapMetric(snapshot)?.value).label;
   if (field.startsWith("temp:support:")) {
     const key = field.slice("temp:support:".length);
     return supportSignalLabel(snapshot.price_opportunity[key]?.value);
@@ -825,7 +832,9 @@ function filterValueFor(
   }
   if (field.startsWith("metric:")) {
     const [, group, key] = field.split(":") as [string, MetricGroup, string];
-    const metric = snapshot[group]?.[key];
+    const metric = group === "business_health" && key === "eps_gaap_growth_yoy"
+      ? epsGaapMetric(snapshot)
+      : snapshot[group]?.[key];
     if (!metric) return "";
     return metric.value == null ? formatValue(metric, "ratio") : String(metric.value);
   }
@@ -1429,10 +1438,10 @@ function QuarterlyEpsGrowthBarChart({ snapshot }: { snapshot: OpenDataStockSnaps
   return (
     <QuarterlyGrowthBarChart
       snapshot={snapshot}
-      title="EPS Growth YoY"
+      title="GAAP EPS Growth YoY"
       points={quarterlyEpsGrowthPoints(snapshot)}
-      emptyMessage="No comparable positive quarterly EPS growth history from SEC facts."
-      ariaMetric="quarterly EPS growth YoY"
+      emptyMessage="No comparable positive quarterly GAAP EPS growth history from SEC facts."
+      ariaMetric="quarterly GAAP EPS growth YoY"
     />
   );
 }
@@ -1528,7 +1537,7 @@ function MomentumMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }
 
 function EpsMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
   const copy = GROWTH_DETAIL_COPY.eps;
-  const metric = snapshot.business_health.eps_growth_yoy;
+  const metric = epsGaapMetric(snapshot);
   return (
     <div className="growth-detail-layout">
       <div className="growth-detail-copy">
@@ -1539,7 +1548,7 @@ function EpsMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
         <div className="growth-formula">
           <span>Current value</span>
           <strong>{formatValue(metric, "percent")}</strong>
-          <small>{metric?.notes ?? "Comparable quarterly EPS growth is unavailable."}</small>
+          <small>{metric?.notes ?? "Comparable quarterly GAAP EPS growth is unavailable."}</small>
         </div>
       </div>
       <div className="growth-detail-chart">
@@ -1787,7 +1796,7 @@ function StocksInsightsTempTable({
 	                <th>{renderSortHeader("symbol", "Symbol")}</th>
 	                <th>{renderSortHeader("metric:business_health:revenue_growth_yoy", "Latest revenue growth YoY")}</th>
 	                <th>{renderSortHeader("temp:revenue_momentum", "Momentum revenue growth YoY")}</th>
-	                <th>{renderSortHeader("metric:business_health:eps_growth_yoy", "Latest EPS Growth YoY")}</th>
+	                <th>{renderSortHeader("metric:business_health:eps_gaap_growth_yoy", "GAAP EPS Growth YoY")}</th>
 	                <th>{renderSortHeader("temp:support_best", "Proximity to support")}</th>
 	                {editMode && <th>Remove</th>}
 	              </tr>
@@ -1795,7 +1804,7 @@ function StocksInsightsTempTable({
             <tbody>
               {rows.map((snapshot) => {
                 const revenueGrowth = snapshot.business_health.revenue_growth_yoy;
-                const epsGrowth = snapshot.business_health.eps_growth_yoy;
+                const epsGrowth = epsGaapMetric(snapshot);
 	                const growthSignal = revenueGrowthSignal(revenueGrowth?.value);
 	                const epsSignal = epsGrowthSignal(epsGrowth?.value);
 	                const momentum = revenueGrowthMomentum(snapshot);
@@ -1841,7 +1850,7 @@ function StocksInsightsTempTable({
 	                        <GrowthMetricButton
 	                          active={activeDetail === "eps"}
 	                          detailKey="eps"
-	                          label="Latest EPS growth YoY"
+	                          label="GAAP EPS growth YoY"
 	                          tone={epsSignal.tone}
 	                          signal={epsSignal.label}
 	                          value={formatValue(epsGrowth, "percent")}
@@ -2244,10 +2253,10 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
         },
         {
           field: "temp:eps_growth_signal",
-          label: "EPS Growth",
+          label: "GAAP EPS Growth",
           values: uniqueOptions(
             snapshots.map((snapshot) => {
-              const signal = epsGrowthSignal(snapshot.business_health.eps_growth_yoy?.value);
+              const signal = epsGrowthSignal(epsGaapMetric(snapshot)?.value);
               return { value: signal.label, label: signal.label };
             }),
           ),
@@ -2335,7 +2344,9 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
         label: column.label,
         values: uniqueOptions(
           snapshots.map((snapshot) => {
-            const metric = snapshot[column.group as MetricGroup]?.[column.key ?? ""];
+            const metric = column.group === "business_health" && column.key === "eps_gaap_growth_yoy"
+              ? epsGaapMetric(snapshot)
+              : snapshot[column.group as MetricGroup]?.[column.key ?? ""];
             const isSupportSignal = isSupportMetric(column.group, column.key);
             const label = isSupportSignal ? formatSupportSignal(metric?.value) : formatValue(metric, column.metricKind ?? "ratio");
             return { value: metric?.value == null ? label : String(metric.value), label };
@@ -2570,7 +2581,9 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
     }
 
     if (column.kind === "metric" && column.group && column.key) {
-      const metric = snapshot[column.group][column.key];
+      const metric = column.group === "business_health" && column.key === "eps_gaap_growth_yoy"
+        ? epsGaapMetric(snapshot)
+        : snapshot[column.group][column.key];
       const isSupportSignal = isSupportMetric(column.group, column.key);
       return (
         <td key={column.id} title={metric ? `${column.label}: ${metric.notes}\n${metric.source}` : column.label}>
@@ -2639,7 +2652,9 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
     }
 
     if (column.kind === "metric" && column.group && column.key) {
-      const metric = snapshot[column.group][column.key];
+      const metric = column.group === "business_health" && column.key === "eps_gaap_growth_yoy"
+        ? epsGaapMetric(snapshot)
+        : snapshot[column.group][column.key];
       const isSupportSignal = isSupportMetric(column.group, column.key);
       return (
         <article

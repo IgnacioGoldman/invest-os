@@ -55,12 +55,13 @@ type Props = {
 };
 
 type Tone = "positive" | "warning" | "negative" | "neutral" | "info";
-type GrowthDetailKey = "revenue" | "momentum" | "eps" | "fcf_margin" | "support";
+type GrowthDetailKey = "revenue" | "momentum" | "eps" | "fcf_margin" | "valuation" | "support";
 export type FilterKey =
   | "revenue"
   | "momentum"
   | "eps"
   | "fcf_margin"
+  | "valuation"
   | "support_1m"
   | "support_3m"
   | "support_6m"
@@ -106,16 +107,22 @@ const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: str
       "Compares the latest revenue growth rate with the previous quarter's growth rate. A positive percentage-point change means growth is accelerating; a negative change means it is decelerating.",
   },
   eps: {
-    title: "Latest EPS growth YoY",
-    question: "Is the company converting growth into earnings?",
+    title: "Adjusted / GAAP EPS growth YoY",
+    question: "Are underlying and reported earnings improving?",
     description:
-      "Compares earnings per share with the same quarter last year. It shows whether the company is generating more profit for each share outstanding, not just growing revenue. This matters because revenue can increase while profits stagnate or fall if costs rise too quickly. For example, Revenue +15% / EPS +25% suggests improving profitability, while Revenue +15% / EPS -10% suggests that growth is not translating into higher earnings per share.",
+      "Adjusted EPS growth aims to show underlying earnings growth, while GAAP EPS growth shows reported accounting earnings. When adjusted and GAAP growth diverge, unusual gains, charges, or exclusions may be driving the reported result.",
   },
   fcf_margin: {
     title: "Free cash flow margin",
     question: "Is the company turning revenue into actual cash?",
     description:
       "Compares trailing-12-month free cash flow with trailing-12-month revenue. TTM is used because a single quarter can be noisy when collections, inventory, working capital, or capex timing shift cash flow around.",
+  },
+  valuation: {
+    title: "Valuation",
+    question: "What are you paying for the growth and cash flow?",
+    description:
+      "Combines forward P/E, free cash flow yield, price/sales, and EV/EBITDA when available. A stock can look excellent operationally but still need caution when sales or enterprise-value multiples already price in a lot of future success.",
   },
   support: {
     title: "Proximity to support",
@@ -183,10 +190,10 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
   },
   {
     key: "eps",
-    label: "Latest EPS growth YoY",
-    shortLabel: "EPS YoY",
+    label: "GAAP EPS growth YoY",
+    shortLabel: "GAAP EPS",
     section: "Growth",
-    description: "Year-over-year earnings-per-share growth in the latest quarter.",
+    description: "Reported GAAP earnings-per-share growth in the latest quarter. Adjusted EPS is exported separately when available.",
     options: [
       { label: "Strong", tone: "positive" },
       { label: "Solid", tone: "positive" },
@@ -206,6 +213,20 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
       { label: "Solid", tone: "positive" },
       { label: "Mixed", tone: "warning" },
       { label: "Weak", tone: "negative" },
+      { label: "Unclear", tone: "neutral" },
+    ],
+  },
+  {
+    key: "valuation",
+    label: "Valuation",
+    shortLabel: "Valuation",
+    section: "Quality",
+    description: "Composite valuation check using forward P/E, FCF yield, price/sales, and EV/EBITDA when available.",
+    options: [
+      { label: "Cheap", tone: "positive" },
+      { label: "Fair", tone: "positive" },
+      { label: "Pricey", tone: "warning" },
+      { label: "Very pricey", tone: "negative" },
       { label: "Unclear", tone: "neutral" },
     ],
   },
@@ -311,6 +332,86 @@ function fcfMarginSignal(value?: number | null): Signal {
   return { label: "Weak", tone: "negative" };
 }
 
+function valuationSignal(snapshot: OpenDataStockSnapshot): Signal {
+  const forwardPe = finiteNumber(snapshot.valuation.forward_pe?.value);
+  const fcfYield = finiteNumber(snapshot.valuation.fcf_yield?.value);
+  const priceSales = finiteNumber(snapshot.valuation.price_to_sales?.value);
+  const evToEbitda = finiteNumber(snapshot.valuation.ev_to_ebitda?.value);
+
+  if (forwardPe == null && fcfYield == null && priceSales == null && evToEbitda == null) {
+    return { label: "Unclear", tone: "neutral" };
+  }
+  if (
+    (forwardPe != null && forwardPe >= 50)
+    || (fcfYield != null && fcfYield < 1)
+    || (priceSales != null && priceSales >= 20)
+    || (evToEbitda != null && evToEbitda >= 40)
+  ) {
+    return { label: "Very pricey", tone: "negative" };
+  }
+  if (
+    (forwardPe != null && forwardPe >= 35)
+    || (fcfYield != null && fcfYield < 2)
+    || (priceSales != null && priceSales >= 12)
+    || (evToEbitda != null && evToEbitda >= 25)
+  ) {
+    return { label: "Pricey", tone: "warning" };
+  }
+  if (
+    forwardPe != null
+    && forwardPe <= 18
+    && (fcfYield == null || fcfYield >= 4)
+    && (priceSales == null || priceSales <= 8)
+  ) {
+    return { label: "Cheap", tone: "positive" };
+  }
+  if (
+    (forwardPe != null && forwardPe <= 25)
+    || (fcfYield != null && fcfYield >= 3)
+    || (priceSales != null && priceSales <= 8)
+  ) {
+    return { label: "Fair", tone: "positive" };
+  }
+  return { label: "Unclear", tone: "neutral" };
+}
+
+function valuationSortScore(snapshot: OpenDataStockSnapshot) {
+  const signal = valuationSignal(snapshot);
+  const rank = ["Cheap", "Fair", "Pricey", "Very pricey", "Unclear"].indexOf(signal.label);
+  const forwardPe = finiteNumber(snapshot.valuation.forward_pe?.value);
+  const pe = finiteNumber(snapshot.valuation.pe?.value);
+  return (rank < 0 ? 4 : rank) * 1000 + (forwardPe ?? pe ?? 999);
+}
+
+function valuationDetailText(snapshot: OpenDataStockSnapshot) {
+  return [
+    `Forward P/E: ${formatMetric(snapshot.valuation.forward_pe, "ratio")}.`,
+    `FCF yield: ${formatMetric(snapshot.valuation.fcf_yield, "percent")}.`,
+    `P/S: ${formatMetric(snapshot.valuation.price_to_sales, "ratio")}.`,
+    `EV/EBITDA: ${formatMetric(snapshot.valuation.ev_to_ebitda, "ratio")}.`,
+  ].join(" ");
+}
+
+function epsGaapMetric(snapshot: OpenDataStockSnapshot) {
+  return snapshot.business_health.eps_gaap_growth_yoy ?? snapshot.business_health.eps_growth_yoy;
+}
+
+function epsAdjustedMetric(snapshot: OpenDataStockSnapshot) {
+  return snapshot.business_health.eps_adjusted_growth_yoy;
+}
+
+function epsAlignmentMetric(snapshot: OpenDataStockSnapshot) {
+  return snapshot.business_health.eps_alignment;
+}
+
+function epsAlignmentSignal(metric?: OpenDataMetric): Signal {
+  const value = finiteNumber(metric?.value);
+  if (value == null) return { label: "Needs adjusted EPS", tone: "neutral" };
+  if (value <= 10) return { label: "Aligned", tone: "positive" };
+  if (value <= 25) return { label: "Some divergence", tone: "warning" };
+  return { label: "Misaligned", tone: "negative" };
+}
+
 function supportSignal(value?: number | null): Signal {
   if (value == null || value > 25) return { label: "Far", tone: "info" };
   if (value <= 2.5) return { label: "At support", tone: "positive" };
@@ -412,8 +513,9 @@ function inferredSupportLevel(currentPrice?: number | null, supportDistance?: nu
 
 function signalFor(snapshot: OpenDataStockSnapshot, key: FilterKey): Signal {
   if (key === "revenue") return growthSignal(snapshot.business_health.revenue_growth_yoy?.value);
-  if (key === "eps") return growthSignal(snapshot.business_health.eps_growth_yoy?.value);
+  if (key === "eps") return growthSignal(epsGaapMetric(snapshot)?.value);
   if (key === "fcf_margin") return fcfMarginSignal(snapshot.business_health.fcf_margin?.value);
+  if (key === "valuation") return valuationSignal(snapshot);
   if (key === "momentum") return revenueMomentum(snapshot);
   return supportSignal(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
 }
@@ -464,8 +566,9 @@ function sortValue(
     return support ? Math.abs(support.value) : null;
   }
   if (key === "revenue") return finiteNumber(snapshot.business_health.revenue_growth_yoy?.value);
-  if (key === "eps") return finiteNumber(snapshot.business_health.eps_growth_yoy?.value);
+  if (key === "eps") return finiteNumber(epsGaapMetric(snapshot)?.value);
   if (key === "fcf_margin") return finiteNumber(snapshot.business_health.fcf_margin?.value);
+  if (key === "valuation") return valuationSortScore(snapshot);
   if (key === "momentum") return revenueMomentum(snapshot).change;
   return finiteNumber(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
 }
@@ -491,12 +594,19 @@ function rowMetric(
     };
   }
   if (key === "revenue" || key === "eps") {
-    const metric = key === "revenue" ? snapshot.business_health.revenue_growth_yoy : snapshot.business_health.eps_growth_yoy;
+    const metric = key === "revenue" ? snapshot.business_health.revenue_growth_yoy : epsGaapMetric(snapshot);
     return { value: formatPercent(metric?.value, true), signal: growthSignal(metric?.value), secondary: null };
   }
   if (key === "fcf_margin") {
     const metric = snapshot.business_health.fcf_margin;
     return { value: formatPercent(metric?.value, true), signal: fcfMarginSignal(metric?.value), secondary: "TTM" };
+  }
+  if (key === "valuation") {
+    return {
+      value: formatMetric(snapshot.valuation.forward_pe, "ratio"),
+      signal: valuationSignal(snapshot),
+      secondary: "Forward P/E",
+    };
   }
   if (key === "momentum") {
     const momentum = revenueMomentum(snapshot);
@@ -549,6 +659,13 @@ function createSupportConditions(fields: readonly Extract<FilterKey, `support_${
   ]);
 }
 
+function createValuationConditions() {
+  return [
+    createCondition("valuation", "Cheap"),
+    createCondition("valuation", "Fair"),
+  ];
+}
+
 function createStrongYoyExpression(preset: BuiltInPreset): FilterExpression {
   const supportFields = preset === "pullback" ? PULLBACK_SUPPORT_FILTER_KEYS : SUPPORT_PRESET_FILTER_KEYS;
   return {
@@ -563,6 +680,11 @@ function createStrongYoyExpression(preset: BuiltInPreset): FilterExpression {
         id: nextFilterId("group"),
         operator: "or",
         conditions: [createCondition("revenue", "Strong"), createCondition("revenue", "Solid")],
+      },
+      {
+        id: nextFilterId("group"),
+        operator: "or",
+        conditions: createValuationConditions(),
       },
     ],
   };
@@ -583,7 +705,7 @@ function filterExpressionMatches(snapshot: OpenDataStockSnapshot, expression: Fi
 }
 
 function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
-  if (expression.operator !== "and" || expression.groups.length !== 2) return null;
+  if (expression.operator !== "and" || expression.groups.length !== 3) return null;
   const signatures = expression.groups.map((group) => ({
     operator: group.operator,
     conditions: group.conditions.map((condition) => `${condition.field}:${condition.value}`).sort(),
@@ -593,6 +715,11 @@ function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
     (group) => group.operator === "or" && group.conditions.join("|") === growthSignature.join("|"),
   );
   if (!hasGrowthGroup) return null;
+  const valuationSignature = ["valuation:Cheap", "valuation:Fair"];
+  const hasValuationGroup = signatures.some(
+    (group) => group.operator === "or" && group.conditions.join("|") === valuationSignature.join("|"),
+  );
+  if (!hasValuationGroup) return null;
   const supportSignature = (fields: readonly Extract<FilterKey, `support_${string}`>[]) => fields
     .flatMap((key) => [`${key}:At support`, `${key}:Near support`])
     .sort()
@@ -608,14 +735,14 @@ function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
 
 const BUILT_IN_PRESET_COPY: Record<BuiltInPreset, BuiltInPresetCopy> = {
   support: {
-    name: "Strong YoY and on support",
+    name: "Strong YoY, fair value and support",
     summary:
-      "Companies with strong latest revenue growth, where the current price is at or near support zones identified across the past 1Y, 2Y, and 5Y. This can surface high-quality businesses trading near longer-term areas of interest.",
+      "Companies with strong latest revenue growth, cheap or fair valuation, and current price at or near support zones identified across the past 1Y, 2Y, and 5Y.",
   },
   pullback: {
-    name: "Strong YoY and on pullback",
+    name: "Strong YoY, fair value and pullback",
     summary:
-      "Companies with strong latest revenue growth that are going through a shorter-term correction, with price at or near support zones identified across the past 1M, 3M, and 6M.",
+      "Companies with strong latest revenue growth and cheap or fair valuation that are going through a shorter-term correction, with price at or near support zones identified across the past 1M, 3M, and 6M.",
   },
 };
 
@@ -647,9 +774,9 @@ function exportFilterContext(
   activeSavedFilter?: SavedFilter | null,
 ) {
   const presetName = preset === "support"
-    ? "Strong growth at support"
+    ? "Strong growth, fair value at support"
     : preset === "pullback"
-      ? "Strong growth on pullback"
+      ? "Strong growth, fair value on pullback"
       : null;
   return {
     name: activeSavedFilter?.name ?? presetName ?? builtInPresetName(preset) ?? "Custom filter",
@@ -730,7 +857,13 @@ function exportContextBullets(snapshot: OpenDataStockSnapshot) {
 
 function exportQualityFlags(snapshot: OpenDataStockSnapshot) {
   const context = snapshot.company_context;
-  const gaps = [...(snapshot.data_gaps ?? []), ...(context?.known_context_gaps ?? [])]
+  const epsAlignment = epsAlignmentMetric(snapshot);
+  const epsFlags = epsAlignment?.value == null
+    ? [epsAlignment?.notes ?? "Adjusted EPS unavailable; GAAP EPS growth may include one-off accounting effects."]
+    : finiteNumber(epsAlignment.value) != null && epsAlignment.value > 25
+      ? [`Adjusted and GAAP EPS growth diverge by ${formatNumber(epsAlignment.value)} percentage points.`]
+      : [];
+  const gaps = [...epsFlags, ...(snapshot.data_gaps ?? []), ...(context?.known_context_gaps ?? [])]
     .map(markdownValue)
     .filter((gap, index, all) => gap !== "-" && all.indexOf(gap) === index)
     .slice(0, 6);
@@ -792,7 +925,9 @@ function buildStockExportMarkdown({
       "",
       `- Revenue growth YoY: ${metricPercent(snapshot.business_health.revenue_growth_yoy)}`,
       `- Revenue growth momentum: ${momentum.change == null ? "-" : `${formatNumber(momentum.change)} pp`}`,
-      `- GAAP EPS growth YoY: ${metricPercent(snapshot.business_health.eps_growth_yoy)}`,
+      `- Adjusted EPS growth YoY: ${metricPercent(epsAdjustedMetric(snapshot))}`,
+      `- GAAP EPS growth YoY: ${metricPercent(epsGaapMetric(snapshot))}`,
+      `- EPS alignment: ${epsAlignmentSignal(epsAlignmentMetric(snapshot)).label}${epsAlignmentMetric(snapshot)?.value == null ? "" : ` (${formatNumber(epsAlignmentMetric(snapshot)?.value)} pp gap)`}`,
       `- FCF margin: ${metricPercent(snapshot.business_health.fcf_margin)}`,
       `- Operating margin: ${metricPercent(snapshot.business_health.operating_margin)}`,
       `- Diluted share count YoY: ${formatPercent(shareCountChange, true)}`,
@@ -1752,7 +1887,9 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
   const copy = GROWTH_DETAIL_COPY[detailKey];
   const revenueDetail = revenueGrowthDetail(snapshot);
   const momentum = revenueMomentum(snapshot);
-  const epsMetric = snapshot.business_health.eps_growth_yoy;
+  const epsAdjusted = epsAdjustedMetric(snapshot);
+  const epsGaap = epsGaapMetric(snapshot);
+  const epsAlignment = epsAlignmentMetric(snapshot);
   const fcfMarginMetric = snapshot.business_health.fcf_margin;
   const support = closestSupport(snapshot);
   const supports = supportWindows(snapshot);
@@ -1799,8 +1936,29 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
       </section>
     );
   }
+
+  if (detailKey === "valuation") {
+    const valuationStatus = valuationSignal(snapshot);
+
+    return (
+      <section className="mobile-growth-detail-panel">
+        <div className="mobile-growth-copy">
+          <span>Metric definition</span>
+          <h2>{copy.title}</h2>
+          <p className="metric-question">{copy.question}</p>
+          <p>{copy.description}</p>
+        </div>
+        <div className="mobile-growth-formula">
+          <span>Current value</span>
+          <strong>{valuationStatus.label}</strong>
+          <small>{valuationDetailText(snapshot)}</small>
+        </div>
+      </section>
+    );
+  }
+
   const metric = detailKey === "eps"
-    ? epsMetric
+    ? epsAdjusted?.value == null ? epsGaap : epsAdjusted
     : detailKey === "fcf_margin"
       ? fcfMarginMetric
       : detailKey === "revenue"
@@ -1815,11 +1973,18 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
       : `${momentum.label}: ${formatPercent(momentum.latest?.value, true)} vs ${formatPercent(momentum.previous?.value, true)} in ${momentum.previous?.period ?? "the prior quarter"}.`
     : detailKey === "fcf_margin"
       ? fcfMarginMetric?.notes ?? "Trailing-12-month free cash flow margin is unavailable."
+    : detailKey === "eps"
+      ? [
+          `Adjusted EPS: ${formatMetric(epsAdjusted, "percent")}.`,
+          `GAAP EPS: ${formatMetric(epsGaap, "percent")}.`,
+          `Alignment: ${epsAlignmentSignal(epsAlignment).label}${epsAlignment?.value == null ? "" : ` (${formatNumber(epsAlignment.value)} pp gap)`}.`,
+          epsAdjusted?.value == null ? "Adjusted EPS is not available from the current open-data source." : null,
+        ].filter(Boolean).join(" ")
     : detailKey === "revenue" && revenueDetail?.latestRevenue != null && revenueDetail?.priorRevenue != null
       ? `${revenueDetail.latest.period}: ${formatCompact(revenueDetail.latestRevenue)} vs ${formatCompact(revenueDetail.priorRevenue)} one year earlier.`
       : metric?.notes ?? "Comparable quarterly data is unavailable.";
   const chartTitle = detailKey === "eps"
-    ? "EPS growth YoY"
+    ? "GAAP EPS growth YoY"
     : detailKey === "fcf_margin"
       ? "Quarterly FCF margin"
       : "Revenue growth YoY";
@@ -1865,9 +2030,11 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
   const currentPrice = snapshot.price_opportunity.current_price?.value;
   const dailyChange = snapshot.price_opportunity.change_1d?.value;
   const revenueSignal = growthSignal(snapshot.business_health.revenue_growth_yoy?.value);
-  const epsSignal = growthSignal(snapshot.business_health.eps_growth_yoy?.value);
+  const epsGaap = epsGaapMetric(snapshot);
+  const epsSignal = growthSignal(epsGaap?.value);
   const fcfMarginMetric = snapshot.business_health.fcf_margin;
   const fcfMarginStatus = fcfMarginSignal(fcfMarginMetric?.value);
+  const valuationStatus = valuationSignal(snapshot);
   const momentum = revenueMomentum(snapshot);
   const support = closestSupport(snapshot);
   const supportStatus = supportSignal(support?.value);
@@ -1934,9 +2101,9 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
           />
           <MobileGrowthSignalButton
             active={activeGrowthDetail === "eps"}
-            label="Latest EPS growth YoY"
+            label="GAAP EPS growth YoY"
             signal={epsSignal}
-            value={formatPercent(snapshot.business_health.eps_growth_yoy?.value, true)}
+            value={formatPercent(epsGaap?.value, true)}
             onClick={() => setActiveGrowthDetail("eps")}
           />
           <MobileGrowthSignalButton
@@ -1945,6 +2112,13 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
             signal={fcfMarginStatus}
             value={formatPercent(fcfMarginMetric?.value, true)}
             onClick={() => setActiveGrowthDetail("fcf_margin")}
+          />
+          <MobileGrowthSignalButton
+            active={activeGrowthDetail === "valuation"}
+            label="Valuation"
+            signal={valuationStatus}
+            value={formatMetric(snapshot.valuation.forward_pe, "ratio")}
+            onClick={() => setActiveGrowthDetail("valuation")}
           />
           <MobileGrowthSignalButton
             active={activeGrowthDetail === "support"}

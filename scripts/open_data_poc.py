@@ -30,6 +30,9 @@ DEFAULT_SKIP_TICKERS = {"GOOGL"}
 REQUIRED_GROUPS = ("business_health", "price_opportunity", "valuation")
 EPS_DEPENDENT_METRICS = {
     "business_health.eps_growth_yoy",
+    "business_health.eps_adjusted_growth_yoy",
+    "business_health.eps_gaap_growth_yoy",
+    "business_health.eps_alignment",
     "business_health.eps_cagr_3y",
     "valuation.forward_pe",
     "valuation.peg",
