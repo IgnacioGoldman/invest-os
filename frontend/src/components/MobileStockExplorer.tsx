@@ -632,13 +632,6 @@ function markdownValue(value?: string | number | null) {
   return String(value).replace(/\s+/g, " ").trim();
 }
 
-function metricLine(label: string, value: string, signal: Signal, metric?: OpenDataMetric) {
-  const parts = [`- ${label}: ${value} - ${signal.label}`];
-  if (metric?.as_of) parts.push(`as of ${metric.as_of}`);
-  if (metric?.notes) parts.push(metric.notes);
-  return parts.join(" | ");
-}
-
 function filterExpressionSummary(expression: FilterExpression, count: number) {
   return [
     `${expression.groups.length} group${expression.groups.length === 1 ? "" : "s"}`,
@@ -653,92 +646,184 @@ function exportFilterContext(
   preset: BuiltInPreset | null,
   activeSavedFilter?: SavedFilter | null,
 ) {
+  const presetName = preset === "support"
+    ? "Strong growth at support"
+    : preset === "pullback"
+      ? "Strong growth on pullback"
+      : null;
   return {
-    name: activeSavedFilter?.name ?? builtInPresetName(preset) ?? "Custom filter",
+    name: activeSavedFilter?.name ?? presetName ?? builtInPresetName(preset) ?? "Custom filter",
     summary: builtInPresetSummary(preset) ?? filterExpressionSummary(expression, count),
   };
+}
+
+function exportDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function metricPercent(metric?: OpenDataMetric) {
+  return formatPercent(metric?.value, true);
+}
+
+function metricRatio(metric?: OpenDataMetric) {
+  return metric?.value == null ? "-" : formatNumber(metric.value);
+}
+
+function historicalMetricValues(snapshot: OpenDataStockSnapshot, series: string, metric: string) {
+  return historicalRows(snapshot, series)
+    .map((row) => metricValue(row, metric))
+    .filter((value): value is number => value != null);
+}
+
+function percentileOfExportValue(values: number[], value?: number | null) {
+  const clean = values.filter(Number.isFinite);
+  if (value == null || clean.length < 2) return null;
+  return (clean.filter((item) => item <= value).length / clean.length) * 100;
+}
+
+function historicalPercentChangeForExport(snapshot: OpenDataStockSnapshot, series: string, metric: string, periodsBack: number) {
+  const values = historicalMetricValues(snapshot, series, metric);
+  const latest = values[values.length - 1];
+  const prior = values[values.length - 1 - periodsBack];
+  if (latest == null || prior == null || prior === 0) return null;
+  return ((latest / prior) - 1) * 100;
+}
+
+function netCashDebtLabel(snapshot: OpenDataStockSnapshot) {
+  const cash = finiteNumber(snapshot.business_health.cash?.value);
+  const debt = finiteNumber(snapshot.business_health.debt?.value);
+  if (cash == null || debt == null) return "-";
+  const netCash = cash - debt;
+  return netCash >= 0 ? `Net cash ${formatCompact(netCash)}` : `Net debt ${formatCompact(Math.abs(netCash))}`;
+}
+
+function supportStatus(distance?: number | null) {
+  if (distance == null) return "-";
+  if (distance < -2.5) return "Below support";
+  if (distance < 0) return "Slightly below support";
+  return supportSignal(distance).label;
+}
+
+function supportStrength(supports: ReturnType<typeof supportWindows>) {
+  const useful = supports.filter((support) => support.value <= 6);
+  if (useful.length >= 3) return "Strong";
+  if (useful.length >= 1) return "Moderate";
+  return "Weak";
+}
+
+function supportConfluence(supports: ReturnType<typeof supportWindows>) {
+  const useful = supports.filter((support) => support.value <= 6).map((support) => support.window);
+  return useful.length ? useful.join(" / ") : "-";
+}
+
+function exportContextBullets(snapshot: OpenDataStockSnapshot) {
+  const context = snapshot.company_context;
+  const filings = context?.recent_filings.slice(0, 5).map((filing) => {
+    const description = filing.primary_document_description || filing.primary_document || filing.notes;
+    return `${filing.filing_date} ${filing.form}: ${markdownValue(description)}`;
+  }) ?? [];
+  const notes = context?.notes && !context.notes.toLowerCase().includes("recent sec filings")
+    ? [markdownValue(context.notes)]
+    : [];
+  return [...notes, ...filings];
+}
+
+function exportQualityFlags(snapshot: OpenDataStockSnapshot) {
+  const context = snapshot.company_context;
+  const gaps = [...(snapshot.data_gaps ?? []), ...(context?.known_context_gaps ?? [])]
+    .map(markdownValue)
+    .filter((gap, index, all) => gap !== "-" && all.indexOf(gap) === index)
+    .slice(0, 6);
+  return gaps.length ? gaps : ["None material"];
 }
 
 function buildStockExportMarkdown({
   snapshots,
   filterName,
-  filterSummary,
-  visibleCount,
 }: {
   snapshots: OpenDataStockSnapshot[];
   filterName: string;
-  filterSummary: string;
-  visibleCount: number;
 }) {
-  const generatedAt = new Date().toISOString();
   const lines = [
-    "# Stock comparison brief",
+    "Stock comparison brief exported from Invest OS.",
     "",
-    `Generated: ${generatedAt}`,
-    `Filter context: ${filterName}`,
-    `Filter description: ${filterSummary}`,
+    `Generated: ${exportDate()}`,
+    `Strategy: ${filterName}`,
     `Selected stocks: ${snapshots.map((snapshot) => snapshot.ticker).join(", ")}`,
-    `Filtered universe size: ${visibleCount}`,
     "",
-    "Use this brief to compare the selected stocks. Rank them for a medium/long-term investor using the app's current metrics, support setup, company context, and caveats.",
+    "Compare these stocks for a medium/long-term investor.",
+    "",
+    "For each stock, evaluate:",
+    "",
+    "- Business strength",
+    "- Valuation",
+    "- Financial quality",
+    "- Price setup / support",
+    "- Material risks or caveats",
+    "",
+    "Then explain:",
+    "",
+    "- Why each stock surfaced",
+    "- What could invalidate the setup",
+    "- The main trade-offs between them",
+    "",
+    "Use the app data below as the primary source of truth. Challenge misleading metrics when necessary.",
     "",
   ];
 
   snapshots.forEach((snapshot) => {
-    const revenueMetric = snapshot.business_health.revenue_growth_yoy;
-    const epsMetric = snapshot.business_health.eps_growth_yoy;
-    const fcfMarginMetric = snapshot.business_health.fcf_margin;
     const momentum = revenueMomentum(snapshot);
     const bestSupport = closestSupport(snapshot);
-    const supportRows = supportWindows(snapshot)
-      .map((support) => `- ${support.window} support: ${formatPercent(support.value, true)} - ${supportSignal(support.value).label}`)
-      .join("\n");
-    const context = snapshot.company_context;
-    const filings = context?.recent_filings.slice(0, 5) ?? [];
-    const gaps = [...(snapshot.data_gaps ?? []), ...(context?.known_context_gaps ?? [])].slice(0, 8);
+    const supports = supportWindows(snapshot);
+    const currentPrice = finiteNumber(snapshot.price_opportunity.current_price?.value);
+    const supportLevel = bestSupport ? inferredSupportLevel(currentPrice, bestSupport.value) : null;
+    const pePercentile = percentileOfExportValue(
+      historicalMetricValues(snapshot, "valuation_history", "pe"),
+      finiteNumber(snapshot.valuation.pe?.value),
+    );
+    const shareCountChange = historicalPercentChangeForExport(snapshot, "annual_fundamentals", "shares_diluted", 1);
+    const contextBullets = exportContextBullets(snapshot);
+    const qualityFlags = exportQualityFlags(snapshot);
 
     lines.push(
-      `## ${snapshot.ticker} - ${markdownValue(snapshot.name)}`,
+      `## ${snapshot.ticker} - ${markdownValue(snapshot.name ?? snapshot.ticker)}`,
       "",
-      "### Metadata",
-      `- Sector: ${markdownValue(snapshot.sector)}`,
-      `- Industry: ${markdownValue(snapshot.industry)}`,
-      `- Exchange: ${markdownValue(snapshot.exchange)}`,
-      `- Country: ${markdownValue(snapshot.country)}`,
-      `- App snapshot generated: ${markdownValue(snapshot.generated_at)}`,
+      "Business",
       "",
-      "### App metrics",
-      metricLine("Latest revenue growth YoY", formatPercent(revenueMetric?.value, true), growthSignal(revenueMetric?.value), revenueMetric),
-      `- Revenue growth momentum: ${momentum.change == null ? "-" : `${formatNumber(momentum.change)} pp`} - ${momentum.label}`,
-      metricLine("Latest EPS growth YoY", formatPercent(epsMetric?.value, true), growthSignal(epsMetric?.value), epsMetric),
-      metricLine("Free cash flow margin", formatPercent(fcfMarginMetric?.value, true), fcfMarginSignal(fcfMarginMetric?.value), fcfMarginMetric),
-      `- Best support setup: ${bestSupport ? `${bestSupport.window} support | ${formatPercent(bestSupport.value, true)} | ${supportSignal(bestSupport.value).label}` : "-"}`,
+      `- Revenue growth YoY: ${metricPercent(snapshot.business_health.revenue_growth_yoy)}`,
+      `- Revenue growth momentum: ${momentum.change == null ? "-" : `${formatNumber(momentum.change)} pp`}`,
+      `- GAAP EPS growth YoY: ${metricPercent(snapshot.business_health.eps_growth_yoy)}`,
+      `- FCF margin: ${metricPercent(snapshot.business_health.fcf_margin)}`,
+      `- Operating margin: ${metricPercent(snapshot.business_health.operating_margin)}`,
+      `- Diluted share count YoY: ${formatPercent(shareCountChange, true)}`,
+      `- Net cash/debt: ${netCashDebtLabel(snapshot)}`,
       "",
-      "### Support proximity",
-      supportRows || "- No support windows available",
+      "Valuation",
       "",
-      "### Current company context",
-      context?.notes ? `- Context notes: ${markdownValue(context.notes)}` : "- Context notes: -",
-      context?.as_of ? `- Context as of: ${context.as_of}` : "- Context as of: -",
+      `- Forward P/E: ${metricRatio(snapshot.valuation.forward_pe)}`,
+      `- FCF yield: ${metricPercent(snapshot.valuation.fcf_yield)}`,
+      `- EV/EBITDA: ${metricRatio(snapshot.valuation.ev_to_ebitda)}`,
+      `- Historical valuation percentile: ${formatPercent(pePercentile)}`,
+      "",
+      "Price setup",
+      "",
+      `- Current price: ${formatPrice(currentPrice)}`,
+      `- Distance from ATH: ${metricPercent(snapshot.price_opportunity.distance_from_ath)}`,
+      `- Primary support: ${formatPrice(supportLevel)}`,
+      `- Distance from support: ${formatPercent(bestSupport?.value, true)}`,
+      `- Support strength: ${supportStrength(supports)}`,
+      `- Confluence: ${supportConfluence(supports)}`,
+      `- Status: ${supportStatus(bestSupport?.value)}`,
+      "",
+      "Context",
+      "",
+      ...(contextBullets.length ? contextBullets.map((item) => `- ${item}`) : ["- None supplied"]),
+      "",
+      "Quality flags",
+      "",
+      ...qualityFlags.map((item) => `- ${item}`),
+      "",
     );
-
-    if (filings.length > 0) {
-      lines.push(
-        "",
-        "Recent filings:",
-        ...filings.map((filing) => {
-          const description = filing.primary_document_description || filing.primary_document || filing.notes;
-          const items = filing.items.length > 0 ? ` | items: ${filing.items.join(", ")}` : "";
-          return `- ${filing.filing_date} ${filing.form}: ${markdownValue(description)}${items}`;
-        }),
-      );
-    }
-
-    if (gaps.length > 0) {
-      lines.push("", "Caveats / missing data:", ...gaps.map((gap) => `- ${markdownValue(gap)}`));
-    }
-
-    lines.push("");
   });
 
   return `${lines.join("\n").trim()}\n`;
@@ -2042,8 +2127,6 @@ export function MobileStockExplorer({
       const markdown = buildStockExportMarkdown({
         snapshots: selectedSnapshots,
         filterName: currentFilterContext.name,
-        filterSummary: currentFilterContext.summary,
-        visibleCount: visibleSnapshots.length,
       });
       await shareOrDownloadMarkdown(markdown, exportFileName(selectedSnapshots));
       cancelExport();
