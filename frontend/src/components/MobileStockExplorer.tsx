@@ -628,6 +628,59 @@ function rowMetric(
   return { value: formatPercent(value, true), signal: supportSignal(value), secondary: null };
 }
 
+function stockCardMetrics(snapshot: OpenDataStockSnapshot, supportKeys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS) {
+  const momentum = revenueMomentum(snapshot);
+  const epsGaap = epsGaapMetric(snapshot);
+  const fcfMargin = snapshot.business_health.fcf_margin;
+  const valuation = valuationSignal(snapshot);
+  const support = closestSupport(snapshot, supportKeys);
+
+  return [
+    {
+      key: "revenue",
+      label: "Rev YoY",
+      fullLabel: "Latest revenue growth YoY",
+      value: formatPercent(snapshot.business_health.revenue_growth_yoy?.value, true),
+      signal: growthSignal(snapshot.business_health.revenue_growth_yoy?.value),
+    },
+    {
+      key: "momentum",
+      label: "Momentum",
+      fullLabel: "Revenue growth momentum",
+      value: formatPercent(momentum.change, true),
+      signal: momentum,
+    },
+    {
+      key: "eps",
+      label: "GAAP EPS",
+      fullLabel: "GAAP EPS growth YoY",
+      value: formatPercent(epsGaap?.value, true),
+      signal: growthSignal(epsGaap?.value),
+    },
+    {
+      key: "fcf",
+      label: "FCF margin",
+      fullLabel: "Free cash flow margin",
+      value: formatPercent(fcfMargin?.value, true),
+      signal: fcfMarginSignal(fcfMargin?.value),
+    },
+    {
+      key: "valuation",
+      label: "Fwd P/E",
+      fullLabel: "Forward P/E valuation",
+      value: formatMetric(snapshot.valuation.forward_pe, "ratio"),
+      signal: valuation,
+    },
+    {
+      key: "support",
+      label: "Support",
+      fullLabel: "Proximity to support",
+      value: formatPercent(support?.value, true),
+      signal: supportSignal(support?.value),
+    },
+  ];
+}
+
 let filterId = 0;
 
 function nextFilterId(prefix: "group" | "condition") {
@@ -2448,6 +2501,7 @@ export function MobileStockExplorer({
             <section className="mobile-stock-list" aria-label="Stocks">
               {pagedSnapshots.map((snapshot) => {
                 const metric = rowMetric(snapshot, sortKey, relevantSupportKeys);
+                const cardMetrics = stockCardMetrics(snapshot, relevantSupportKeys);
                 const exportSelected = exportSelection.includes(snapshot.ticker);
                 return (
                   <article className={`mobile-stock-row ${exportSelected ? "export-selected" : ""}`} key={snapshot.ticker}>
@@ -2465,6 +2519,14 @@ export function MobileStockExplorer({
                       <div className="mobile-stock-identity">
                         <strong>{snapshot.ticker}{!exportMode && <ChevronRight size={18} />}</strong>
                         <span>{snapshot.name ?? snapshot.industry ?? ""}</span>
+                        <div className="mobile-stock-card-metrics" aria-label={`${snapshot.ticker} key metrics`}>
+                          {cardMetrics.map((item) => (
+                            <span className={`mobile-card-metric metric-${item.signal.tone}`} key={item.key} title={`${item.fullLabel}: ${item.value} (${item.signal.label})`}>
+                              <small>{item.label}</small>
+                              <strong>{item.value}</strong>
+                            </span>
+                          ))}
+                        </div>
                       </div>
                       <div className="mobile-stock-value">
                         <strong>{metric.value}</strong>
