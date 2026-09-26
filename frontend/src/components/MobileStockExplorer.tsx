@@ -55,7 +55,15 @@ type Props = {
 };
 
 type Tone = "positive" | "warning" | "negative" | "neutral" | "info";
-type GrowthDetailKey = "revenue" | "momentum" | "eps" | "fcf_margin" | "valuation" | "support";
+type GrowthDetailKey =
+  | "revenue"
+  | "momentum"
+  | "eps_adjusted"
+  | "eps_gaap"
+  | "eps_alignment"
+  | "fcf_margin"
+  | "support"
+  | "forward_pe";
 export type FilterKey =
   | "revenue"
   | "momentum"
@@ -95,37 +103,49 @@ type Signal = {
 
 const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: string; description: string }> = {
   revenue: {
-    title: "Latest revenue growth YoY",
+    title: "Latest Revenue Growth YoY",
     question: "Is the business growing right now?",
     description:
       "Compares the latest quarter's revenue with the same quarter last year. It tells you whether customers are spending more with the company and whether the overall business is expanding. For example, +15% means the company generated 15% more revenue than one year ago.",
   },
   momentum: {
-    title: "Revenue growth momentum",
+    title: "Revenue Growth Momentum",
     question: "Is the company's growth getting stronger or weaker?",
     description:
       "Compares the latest revenue growth rate with the previous quarter's growth rate. A positive percentage-point change means growth is accelerating; a negative change means it is decelerating.",
   },
-  eps: {
-    title: "Adjusted / GAAP EPS growth YoY",
-    question: "Are underlying and reported earnings improving?",
+  eps_adjusted: {
+    title: "Adjusted EPS Growth YoY",
+    question: "Are underlying earnings improving?",
     description:
-      "Adjusted EPS growth aims to show underlying earnings growth, while GAAP EPS growth shows reported accounting earnings. When adjusted and GAAP growth diverge, unusual gains, charges, or exclusions may be driving the reported result.",
+      "Adjusted EPS growth aims to show underlying earnings growth by excluding unusual or non-recurring items when a reliable adjusted EPS source is available.",
+  },
+  eps_gaap: {
+    title: "GAAP EPS Growth YoY",
+    question: "Are reported earnings improving?",
+    description:
+      "GAAP EPS growth shows reported accounting earnings per share versus the same quarter last year. Strong GAAP growth can be useful, but unusual gains or charges may make it diverge from adjusted EPS.",
+  },
+  eps_alignment: {
+    title: "EPS Alignment",
+    question: "Are adjusted and reported earnings telling the same story?",
+    description:
+      "Compares adjusted EPS growth with GAAP EPS growth. A smaller gap means underlying adjusted earnings and reported accounting earnings are better aligned.",
   },
   fcf_margin: {
-    title: "Free cash flow margin",
+    title: "Free Cash Flow Margin",
     question: "Is the company turning revenue into actual cash?",
     description:
       "Compares trailing-12-month free cash flow with trailing-12-month revenue. TTM is used because a single quarter can be noisy when collections, inventory, working capital, or capex timing shift cash flow around.",
   },
-  valuation: {
-    title: "Valuation",
-    question: "What are you paying for the growth and cash flow?",
+  forward_pe: {
+    title: "Forward P/E",
+    question: "What are you paying for expected earnings?",
     description:
-      "Combines forward P/E, free cash flow yield, price/sales, and EV/EBITDA when available. A stock can look excellent operationally but still need caution when sales or enterprise-value multiples already price in a lot of future success.",
+      "Compares the current share price with expected earnings per share over the next 12 months. It is a compact first-pass valuation check, not a full valuation model.",
   },
   support: {
-    title: "Proximity to support",
+    title: "Proximity to Support",
     question: "Is the current price close to a nearby support zone?",
     description:
       "Compares the current price with a detected support zone from recent daily price history. Support means a clustered swing-low area with enough touches to look like a practical floor, not just the lowest price in the range.",
@@ -626,59 +646,6 @@ function rowMetric(
   }
   const value = snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value;
   return { value: formatPercent(value, true), signal: supportSignal(value), secondary: null };
-}
-
-function stockCardMetrics(snapshot: OpenDataStockSnapshot, supportKeys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS) {
-  const momentum = revenueMomentum(snapshot);
-  const epsGaap = epsGaapMetric(snapshot);
-  const fcfMargin = snapshot.business_health.fcf_margin;
-  const valuation = valuationSignal(snapshot);
-  const support = closestSupport(snapshot, supportKeys);
-
-  return [
-    {
-      key: "revenue",
-      label: "Rev YoY",
-      fullLabel: "Latest revenue growth YoY",
-      value: formatPercent(snapshot.business_health.revenue_growth_yoy?.value, true),
-      signal: growthSignal(snapshot.business_health.revenue_growth_yoy?.value),
-    },
-    {
-      key: "momentum",
-      label: "Momentum",
-      fullLabel: "Revenue growth momentum",
-      value: formatPercent(momentum.change, true),
-      signal: momentum,
-    },
-    {
-      key: "eps",
-      label: "GAAP EPS",
-      fullLabel: "GAAP EPS growth YoY",
-      value: formatPercent(epsGaap?.value, true),
-      signal: growthSignal(epsGaap?.value),
-    },
-    {
-      key: "fcf",
-      label: "FCF margin",
-      fullLabel: "Free cash flow margin",
-      value: formatPercent(fcfMargin?.value, true),
-      signal: fcfMarginSignal(fcfMargin?.value),
-    },
-    {
-      key: "valuation",
-      label: "Fwd P/E",
-      fullLabel: "Forward P/E valuation",
-      value: formatMetric(snapshot.valuation.forward_pe, "ratio"),
-      signal: valuation,
-    },
-    {
-      key: "support",
-      label: "Support",
-      fullLabel: "Proximity to support",
-      value: formatPercent(support?.value, true),
-      signal: supportSignal(support?.value),
-    },
-  ];
 }
 
 let filterId = 0;
@@ -1990,7 +1957,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
     );
   }
 
-  if (detailKey === "valuation") {
+  if (detailKey === "forward_pe") {
     const valuationStatus = valuationSignal(snapshot);
 
     return (
@@ -2003,15 +1970,47 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
         </div>
         <div className="mobile-growth-formula">
           <span>Current value</span>
-          <strong>{valuationStatus.label}</strong>
+          <strong>{formatMetric(snapshot.valuation.forward_pe, "ratio")}</strong>
           <small>{valuationDetailText(snapshot)}</small>
+          <StockStatus signal={valuationStatus} />
         </div>
       </section>
     );
   }
 
-  const metric = detailKey === "eps"
-    ? epsAdjusted?.value == null ? epsGaap : epsAdjusted
+  if (detailKey === "eps_adjusted" || detailKey === "eps_alignment") {
+    const signal = detailKey === "eps_alignment"
+      ? epsAlignmentSignal(epsAlignment)
+      : growthSignal(epsAdjusted?.value);
+    const currentValue = detailKey === "eps_alignment"
+      ? epsAlignment?.value == null ? epsAlignmentSignal(epsAlignment).label : `${formatNumber(epsAlignment.value)} pp gap`
+      : formatMetric(epsAdjusted, "percent");
+    const detailText = detailKey === "eps_alignment"
+      ? epsAlignment?.value == null
+        ? epsAlignment?.notes ?? "Adjusted EPS growth is unavailable, so alignment cannot be assessed."
+        : `${epsAlignmentSignal(epsAlignment).label}: adjusted EPS and GAAP EPS differ by ${formatNumber(epsAlignment.value)} percentage points.`
+      : epsAdjusted?.notes ?? "Adjusted EPS is not available from the current open-data source.";
+
+    return (
+      <section className="mobile-growth-detail-panel">
+        <div className="mobile-growth-copy">
+          <span>Metric definition</span>
+          <h2>{copy.title}</h2>
+          <p className="metric-question">{copy.question}</p>
+          <p>{copy.description}</p>
+        </div>
+        <div className="mobile-growth-formula">
+          <span>Current value</span>
+          <strong>{currentValue}</strong>
+          <small>{detailText}</small>
+          <StockStatus signal={signal} />
+        </div>
+      </section>
+    );
+  }
+
+  const metric = detailKey === "eps_gaap"
+    ? epsGaap
     : detailKey === "fcf_margin"
       ? fcfMarginMetric
       : detailKey === "revenue"
@@ -2026,22 +2025,17 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
       : `${momentum.label}: ${formatPercent(momentum.latest?.value, true)} vs ${formatPercent(momentum.previous?.value, true)} in ${momentum.previous?.period ?? "the prior quarter"}.`
     : detailKey === "fcf_margin"
       ? fcfMarginMetric?.notes ?? "Trailing-12-month free cash flow margin is unavailable."
-    : detailKey === "eps"
-      ? [
-          `Adjusted EPS: ${formatMetric(epsAdjusted, "percent")}.`,
-          `GAAP EPS: ${formatMetric(epsGaap, "percent")}.`,
-          `Alignment: ${epsAlignmentSignal(epsAlignment).label}${epsAlignment?.value == null ? "" : ` (${formatNumber(epsAlignment.value)} pp gap)`}.`,
-          epsAdjusted?.value == null ? "Adjusted EPS is not available from the current open-data source." : null,
-        ].filter(Boolean).join(" ")
+    : detailKey === "eps_gaap"
+      ? epsGaap?.notes ?? "Comparable quarterly GAAP EPS growth is unavailable."
     : detailKey === "revenue" && revenueDetail?.latestRevenue != null && revenueDetail?.priorRevenue != null
       ? `${revenueDetail.latest.period}: ${formatCompact(revenueDetail.latestRevenue)} vs ${formatCompact(revenueDetail.priorRevenue)} one year earlier.`
       : metric?.notes ?? "Comparable quarterly data is unavailable.";
-  const chartTitle = detailKey === "eps"
+  const chartTitle = detailKey === "eps_gaap"
     ? "GAAP EPS growth YoY"
     : detailKey === "fcf_margin"
       ? "Quarterly FCF margin"
       : "Revenue growth YoY";
-  const chartPoints = detailKey === "eps"
+  const chartPoints = detailKey === "eps_gaap"
     ? quarterlyGrowthPoints(snapshot, "eps_diluted")
     : detailKey === "fcf_margin"
       ? quarterlyMetricPoints(snapshot, "fcf_margin")
@@ -2083,8 +2077,12 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
   const currentPrice = snapshot.price_opportunity.current_price?.value;
   const dailyChange = snapshot.price_opportunity.change_1d?.value;
   const revenueSignal = growthSignal(snapshot.business_health.revenue_growth_yoy?.value);
+  const epsAdjusted = epsAdjustedMetric(snapshot);
   const epsGaap = epsGaapMetric(snapshot);
-  const epsSignal = growthSignal(epsGaap?.value);
+  const epsAdjustedSignal = growthSignal(epsAdjusted?.value);
+  const epsGaapSignal = growthSignal(epsGaap?.value);
+  const epsAlignment = epsAlignmentMetric(snapshot);
+  const epsAlignmentStatus = epsAlignmentSignal(epsAlignment);
   const fcfMarginMetric = snapshot.business_health.fcf_margin;
   const fcfMarginStatus = fcfMarginSignal(fcfMarginMetric?.value);
   const valuationStatus = valuationSignal(snapshot);
@@ -2140,43 +2138,57 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
 	        <section className="mobile-signal-strip" aria-label="Current growth signals">
           <MobileGrowthSignalButton
             active={activeGrowthDetail === "revenue"}
-            label="Latest revenue growth YoY"
+            label="Latest Revenue Growth YoY"
             signal={revenueSignal}
             value={formatPercent(snapshot.business_health.revenue_growth_yoy?.value, true)}
             onClick={() => setActiveGrowthDetail("revenue")}
           />
           <MobileGrowthSignalButton
             active={activeGrowthDetail === "momentum"}
-            label="Revenue growth momentum"
+            label="Revenue Growth Momentum"
             signal={momentum}
             value={formatPercent(momentum.change, true)}
             onClick={() => setActiveGrowthDetail("momentum")}
           />
           <MobileGrowthSignalButton
-            active={activeGrowthDetail === "eps"}
-            label="GAAP EPS growth YoY"
-            signal={epsSignal}
+            active={activeGrowthDetail === "eps_adjusted"}
+            label="Adjusted EPS Growth YoY"
+            signal={epsAdjustedSignal}
+            value={formatPercent(epsAdjusted?.value, true)}
+            onClick={() => setActiveGrowthDetail("eps_adjusted")}
+          />
+          <MobileGrowthSignalButton
+            active={activeGrowthDetail === "eps_gaap"}
+            label="GAAP EPS Growth YoY"
+            signal={epsGaapSignal}
             value={formatPercent(epsGaap?.value, true)}
-            onClick={() => setActiveGrowthDetail("eps")}
+            onClick={() => setActiveGrowthDetail("eps_gaap")}
+          />
+          <MobileGrowthSignalButton
+            active={activeGrowthDetail === "eps_alignment"}
+            label="EPS Alignment"
+            signal={epsAlignmentStatus}
+            value={epsAlignment?.value == null ? "-" : `${formatNumber(epsAlignment.value)} pp`}
+            onClick={() => setActiveGrowthDetail("eps_alignment")}
           />
           <MobileGrowthSignalButton
             active={activeGrowthDetail === "fcf_margin"}
-            label="Free cash flow margin"
+            label="Free Cash Flow Margin"
             signal={fcfMarginStatus}
             value={formatPercent(fcfMarginMetric?.value, true)}
             onClick={() => setActiveGrowthDetail("fcf_margin")}
           />
           <MobileGrowthSignalButton
-            active={activeGrowthDetail === "valuation"}
-            label="Valuation"
+            active={activeGrowthDetail === "forward_pe"}
+            label="Forward P/E"
             signal={valuationStatus}
             value={formatMetric(snapshot.valuation.forward_pe, "ratio")}
-            onClick={() => setActiveGrowthDetail("valuation")}
+            onClick={() => setActiveGrowthDetail("forward_pe")}
           />
           <MobileGrowthSignalButton
             active={activeGrowthDetail === "support"}
             className="mobile-support-signal"
-            label="Proximity to support"
+            label="Proximity to Support"
             signal={supportStatus}
             value={support?.window ?? "No zone"}
             onClick={() => setActiveGrowthDetail("support")}
@@ -2501,7 +2513,6 @@ export function MobileStockExplorer({
             <section className="mobile-stock-list" aria-label="Stocks">
               {pagedSnapshots.map((snapshot) => {
                 const metric = rowMetric(snapshot, sortKey, relevantSupportKeys);
-                const cardMetrics = stockCardMetrics(snapshot, relevantSupportKeys);
                 const exportSelected = exportSelection.includes(snapshot.ticker);
                 return (
                   <article className={`mobile-stock-row ${exportSelected ? "export-selected" : ""}`} key={snapshot.ticker}>
@@ -2519,14 +2530,6 @@ export function MobileStockExplorer({
                       <div className="mobile-stock-identity">
                         <strong>{snapshot.ticker}{!exportMode && <ChevronRight size={18} />}</strong>
                         <span>{snapshot.name ?? snapshot.industry ?? ""}</span>
-                        <div className="mobile-stock-card-metrics" aria-label={`${snapshot.ticker} key metrics`}>
-                          {cardMetrics.map((item) => (
-                            <span className={`mobile-card-metric metric-${item.signal.tone}`} key={item.key} title={`${item.fullLabel}: ${item.value} (${item.signal.label})`}>
-                              <small>{item.label}</small>
-                              <strong>{item.value}</strong>
-                            </span>
-                          ))}
-                        </div>
                       </div>
                       <div className="mobile-stock-value">
                         <strong>{metric.value}</strong>
