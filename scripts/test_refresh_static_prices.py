@@ -12,6 +12,7 @@ import requests
 from refresh_static_prices import fetch_updated_history, hydrate_deployed_data, merge_price_history, refresh_snapshot_prices
 
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataMetric, OpenDataSnapshot
+from app.entry_engine.providers.open_data_provider import OpenDataProvider
 
 
 def point(day: date, close: float, *, low: float | None = None) -> HistoricalPricePoint:
@@ -67,6 +68,18 @@ class FakeSession:
 
 
 class RefreshStaticPricesTests(unittest.TestCase):
+    def test_adjusted_eps_parser_accepts_actuals_and_rejects_outlook(self) -> None:
+        provider = OpenDataProvider()
+        table = "<tr><td>Non-GAAP EPS (1)</td><td>$</td><td>0.60</td><td>$</td><td>0.81</td><td>35</td><td>%</td></tr>"
+
+        self.assertEqual(provider._parse_adjusted_eps_growth_yoy(table), 35)
+        self.assertEqual(provider._parse_adjusted_eps_growth_yoy("Non-GAAP EPS of $0.81, up 35% year-over-year"), 35)
+        self.assertIsNone(
+            provider._parse_adjusted_eps_growth_yoy(
+                "Outlook for Q3: Non-GAAP EPS of $0.84 to $0.88, representing growth of 28% to 35% YoY"
+            )
+        )
+
     def test_hydrate_falls_back_to_local_data_for_new_tickers(self) -> None:
         with TemporaryDirectory() as directory:
             data_dir = Path(directory)
@@ -194,6 +207,44 @@ class RefreshStaticPricesTests(unittest.TestCase):
         self.assertIn("support_1y_distance", updated.price_opportunity)
         self.assertIn("support_5y_distance", updated.price_opportunity)
         self.assertEqual(updated.generated_at, refreshed_at)
+
+    def test_refresh_updates_adjusted_eps_and_alignment_when_available(self) -> None:
+        gaap = OpenDataMetric(
+            value=85,
+            source="sec_companyfacts",
+            tier="computed_from_public_facts",
+            as_of="2026-06-30",
+            notes="GAAP EPS growth.",
+        )
+        adjusted = OpenDataMetric(
+            value=35,
+            source="sec_earnings_release:https://example.com/earnings.htm",
+            tier="exact_public_fact",
+            as_of="2026-08-05",
+            notes="Adjusted EPS growth.",
+        )
+        old_price = OpenDataMetric(
+            value=100,
+            source="old_price",
+            tier="exact_public_fact",
+            as_of="2026-01-01",
+            notes="Old price.",
+        )
+        snapshot = OpenDataSnapshot(
+            ticker="TEST",
+            business_health={"eps_gaap_growth_yoy": gaap},
+            price_opportunity={"current_price": old_price},
+            metrics={"eps_gaap_growth_yoy": gaap, "current_price": old_price},
+        )
+        start = date(2025, 1, 1)
+        history = [point(start + timedelta(days=index), 100 + index / 10, low=99 + index / 10) for index in range(400)]
+
+        updated = refresh_snapshot_prices(snapshot, history, adjusted_eps_growth_yoy=adjusted)
+
+        self.assertEqual(updated.business_health["eps_adjusted_growth_yoy"], adjusted)
+        self.assertEqual(updated.metrics["eps_adjusted_growth_yoy"], adjusted)
+        self.assertEqual(updated.business_health["eps_alignment"].value, 50)
+        self.assertEqual(updated.metrics["eps_alignment"].value, 50)
 
 
 if __name__ == "__main__":

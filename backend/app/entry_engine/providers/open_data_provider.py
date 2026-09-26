@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import html
 import json
 import logging
 import math
@@ -79,6 +80,19 @@ ADR_RATIO_BY_TICKER = {
     },
 }
 SUPPORTED_FX_CURRENCIES = {"USD", "EUR", "GBP", "DKK", "CHF", "CAD", "TWD", "JPY", "CNY", "HKD"}
+ADJUSTED_EPS_LABEL_RE = re.compile(
+    r"\b(?:non[-\s]?gaap|adjusted)\s+(?:diluted\s+)?(?:eps|earnings\s+per\s+share)\b",
+    re.IGNORECASE,
+)
+ADJUSTED_EPS_SKIP_RE = re.compile(
+    r"\b(?:outlook|guidance|anticipate|anticipated|expect|expected|forecast|estimate|estimated|definition|"
+    r"reconciliation|limitation|weighted-average|weighted average|per share amounts|q[1-4]\s+\d{4}\s+outlook)\b",
+    re.IGNORECASE,
+)
+ADJUSTED_EPS_GROWTH_RE = re.compile(
+    r"(?:grew|growth(?:\s+of)?|increased|up|rose)\s*(?:by\s*)?([+-]?\d+(?:\.\d+)?)\s*%",
+    re.IGNORECASE,
+)
 
 
 def _stooq_symbols(symbol: str, currency: str) -> list[str]:
@@ -186,6 +200,7 @@ class OpenDataProvider:
         forward_pe_estimate = self.fetch_forward_pe_estimate(symbol)
         market_cap_estimate = self.fetch_market_cap_estimate(symbol)
         company_context = self.fetch_company_context(cik)
+        adjusted_eps_growth_yoy = self.fetch_adjusted_eps_growth_yoy(cik)
         statement_currency_rates = self.fetch_statement_currency_rates(companyfacts, price)
         adr = ADR_RATIO_BY_TICKER.get(symbol, {"ratio": 1.0, "source": None})
         return compute_open_data_snapshot(
@@ -200,6 +215,7 @@ class OpenDataProvider:
             industry=metadata.get("industry"),
             forward_pe_estimate=forward_pe_estimate,
             company_context=company_context,
+            adjusted_eps_growth_yoy=adjusted_eps_growth_yoy,
             statement_currency_rates=statement_currency_rates,
             market_cap_estimate=market_cap_estimate,
             adr_ratio=float(adr["ratio"]),
@@ -337,6 +353,30 @@ class OpenDataProvider:
         return data
 
     def fetch_company_context(self, cik: int) -> OpenDataCompanyContext | None:
+        submissions = self._fetch_sec_submissions(cik)
+        if submissions is None:
+            return None
+        return self._company_context_from_submissions(cik, submissions)
+
+    def fetch_adjusted_eps_growth_yoy(self, cik: int) -> OpenDataMetric | None:
+        cache_name = f"adjusted_eps_growth_CIK{cik:010d}.json"
+        cached = None if self.force_refresh else self.cache.get(cache_name, timedelta(hours=12))
+        if cached is not None:
+            if cached == {"unavailable": True}:
+                return None
+            try:
+                return OpenDataMetric.model_validate(cached)
+            except ValueError:
+                pass
+
+        submissions = self._fetch_sec_submissions(cik)
+        if submissions is None:
+            return None
+        metric = self._adjusted_eps_growth_from_submissions(cik, submissions)
+        self.cache.set(cache_name, metric.model_dump(mode="json") if metric is not None else {"unavailable": True})
+        return metric
+
+    def _fetch_sec_submissions(self, cik: int) -> dict[str, Any] | None:
         cache_name = f"sec_submissions_CIK{cik:010d}.json"
         submissions = None if self.force_refresh else self.cache.get(cache_name, timedelta(hours=12))
         if submissions is None:
@@ -346,7 +386,7 @@ class OpenDataProvider:
             except requests.RequestException:
                 logger.exception("SEC submissions fetch failed for CIK %s", cik)
                 return None
-        return self._company_context_from_submissions(cik, submissions)
+        return submissions if isinstance(submissions, dict) else None
 
     def fetch_latest_price(self, ticker: str) -> LatestPrice | None:
         cached = None if self.force_refresh else self.cache.get(f"latest_price_{ticker.upper()}.json", timedelta(minutes=45))
@@ -643,6 +683,122 @@ class OpenDataProvider:
                 break
         return exhibits
 
+    def _adjusted_eps_growth_from_submissions(self, cik: int, submissions: dict[str, Any]) -> OpenDataMetric | None:
+        recent = submissions.get("filings", {}).get("recent", {})
+        if not isinstance(recent, dict):
+            return None
+        forms = recent.get("form") if isinstance(recent.get("form"), list) else []
+        for index, raw_form in enumerate(forms):
+            form = str(raw_form or "")
+            if form not in {"8-K", "6-K"}:
+                continue
+            accession_number = self._recent_value(recent, "accessionNumber", index)
+            filing_date = self._recent_value(recent, "filingDate", index)
+            if not accession_number or not filing_date:
+                continue
+            items = self._filing_items(self._recent_value(recent, "items", index))
+            if form == "8-K" and items and not any(item.startswith("2.02") or item.startswith("9.01") for item in items):
+                continue
+            for exhibit in self._earnings_release_exhibits(cik, accession_number):
+                if not exhibit.url:
+                    continue
+                text = self._fetch_sec_document_text(cik, accession_number, exhibit.document, exhibit.url)
+                if not text:
+                    continue
+                parsed = self._parse_adjusted_eps_growth_yoy(text)
+                if parsed is None:
+                    continue
+                return OpenDataMetric(
+                    value=parsed,
+                    source=f"sec_earnings_release:{exhibit.url}",
+                    tier="exact_public_fact",
+                    as_of=filing_date,
+                    notes=(
+                        "Adjusted EPS growth YoY parsed from an official SEC earnings-release exhibit. "
+                        "Accepted only when a high-confidence Non-GAAP EPS or Adjusted EPS row states a YoY percentage."
+                    ),
+                )
+        return None
+
+    def _earnings_release_exhibits(self, cik: int, accession_number: str) -> list[OpenDataFilingExhibit]:
+        exhibits = self._fetch_filing_exhibits(cik, accession_number)
+        scored: list[tuple[int, OpenDataFilingExhibit]] = []
+        for exhibit in exhibits:
+            haystack = " ".join(
+                value.lower()
+                for value in (exhibit.document, exhibit.description or "", exhibit.type or "")
+                if value
+            )
+            if "99" not in haystack and "earnings" not in haystack and "press" not in haystack:
+                continue
+            score = 0
+            if (exhibit.type or "").upper().startswith("EX-99"):
+                score += 4
+            if "earnings" in haystack:
+                score += 3
+            if "result" in haystack or "financial" in haystack:
+                score += 2
+            if "press" in haystack or "release" in haystack:
+                score += 2
+            if "99.1" in haystack:
+                score += 1
+            scored.append((score, exhibit))
+        scored.sort(key=lambda item: item[0], reverse=True)
+        return [exhibit for score, exhibit in scored if score >= 3][:3]
+
+    def _fetch_sec_document_text(self, cik: int, accession_number: str, document_name: str, url: str) -> str | None:
+        accession = accession_number.replace("-", "")
+        safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "_", document_name)[:120]
+        cache_name = f"sec_document_CIK{cik:010d}_{accession}_{safe_name}.json"
+        cached = None if self.force_refresh else self.cache.get(cache_name, timedelta(days=7))
+        if isinstance(cached, dict) and isinstance(cached.get("text"), str):
+            return cached["text"]
+        try:
+            response = self._get(
+                url,
+                headers={
+                    "User-Agent": self.sec_user_agent,
+                    "Accept": "text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8",
+                    "Accept-Encoding": "gzip, deflate",
+                },
+            )
+        except requests.RequestException:
+            return None
+        text = response.text
+        self.cache.set(cache_name, {"text": text})
+        return text
+
+    def _parse_adjusted_eps_growth_yoy(self, raw_text: str) -> float | None:
+        lines = self._document_text_lines(raw_text)
+        for line in lines:
+            if not ADJUSTED_EPS_LABEL_RE.search(line):
+                continue
+            if ADJUSTED_EPS_SKIP_RE.search(line):
+                continue
+            label_match = ADJUSTED_EPS_LABEL_RE.search(line)
+            if label_match is None:
+                continue
+            after_label = line[label_match.end():]
+            growth_match = ADJUSTED_EPS_GROWTH_RE.search(after_label)
+            if growth_match:
+                return float(growth_match.group(1))
+            percent_matches = re.findall(r"([+-]?\d+(?:\.\d+)?)\s*(?:\|\s*)?%", after_label)
+            if len(percent_matches) == 1:
+                return float(percent_matches[0])
+        return None
+
+    def _document_text_lines(self, raw_text: str) -> list[str]:
+        text = re.sub(r"</(?:td|th)[^>]*>", " | ", raw_text, flags=re.IGNORECASE)
+        text = re.sub(r"</(?:tr|p|div|br|li|h[1-6])[^>]*>", "\n", text, flags=re.IGNORECASE)
+        text = re.sub(r"<[^>]+>", " ", text)
+        text = html.unescape(text).replace("\xa0", " ")
+        lines = []
+        for raw_line in text.splitlines():
+            line = re.sub(r"\s+", " ", raw_line).strip(" \t|")
+            if line:
+                lines.append(line)
+        return lines
+
     def _is_meaningful_filing_exhibit(
         self,
         document_name: str,
@@ -662,6 +818,12 @@ class OpenDataProvider:
         if upper_name.startswith("EX-") or upper_name.startswith("EX"):
             return True
         if name.endswith((".htm", ".html")) and "exhibit" in name:
+            return True
+        if name.endswith((".htm", ".html")) and (
+            "earnings" in name
+            or ("press" in name and "relea" in name)
+            or "results" in name
+        ):
             return True
         if "EX-99" in upper_description or "EX-10" in upper_description:
             return True

@@ -1989,7 +1989,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
       ? epsAlignment?.value == null
         ? epsAlignment?.notes ?? "Adjusted EPS growth is unavailable, so alignment cannot be assessed."
         : `${epsAlignmentSignal(epsAlignment).label}: adjusted EPS and GAAP EPS differ by ${formatNumber(epsAlignment.value)} percentage points.`
-      : epsAdjusted?.notes ?? "Adjusted EPS is not available from the current open-data source.";
+      : epsAdjusted?.notes ?? "Adjusted EPS was not found in an official earnings-release exhibit with high-confidence parsing.";
 
     return (
       <section className="mobile-growth-detail-panel">

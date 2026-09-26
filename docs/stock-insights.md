@@ -33,7 +33,7 @@ Looks at how the revenue growth rate is changing between quarters. A company gro
 
 _Is the company generating more underlying earnings for shareholders?_
 
-Compares adjusted earnings per share with the same quarter last year. It aims to show how the ongoing business is performing by excluding certain unusual or non-recurring items reported by the company. This can give a cleaner view of earnings growth when GAAP results are affected by large one-off gains or charges. For example, Adjusted EPS +25% suggests underlying earnings per share are improving, while Adjusted EPS -10% suggests the core earnings trend is weakening.
+Compares adjusted earnings per share with the same quarter last year. It aims to show how the ongoing business is performing by excluding certain unusual or non-recurring items reported by the company. The app only fills this when it can parse a high-confidence Adjusted EPS or Non-GAAP EPS YoY percentage from an official SEC earnings-release exhibit. For example, Adjusted EPS +25% suggests underlying earnings per share are improving, while Adjusted EPS -10% suggests the core earnings trend is weakening.
 
 ### GAAP EPS Growth YoY
 

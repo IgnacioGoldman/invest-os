@@ -241,6 +241,7 @@ def compute_open_data_snapshot(
     industry: str | None = None,
     forward_pe_estimate: OpenDataMetric | None = None,
     company_context: OpenDataCompanyContext | None = None,
+    adjusted_eps_growth_yoy: OpenDataMetric | None = None,
     statement_currency_rates: dict[str, OpenDataMetric] | None = None,
     market_cap_estimate: OpenDataMetric | None = None,
     adr_ratio: float = 1.0,
@@ -350,9 +351,9 @@ def compute_open_data_snapshot(
     eps_gaap_growth_yoy = _quarterly_eps_growth_metric(companyfacts, "eps_gaap_growth_yoy", 1, as_of)
     eps_growth_yoy = eps_gaap_growth_yoy
     eps_cagr_3y = _quarterly_eps_growth_metric(companyfacts, "eps_cagr_3y", 3, as_of)
-    eps_adjusted_growth_yoy = _unavailable(
+    eps_adjusted_growth_yoy = adjusted_eps_growth_yoy or _unavailable(
         "eps_adjusted_growth_yoy",
-        "Adjusted EPS growth requires a non-GAAP earnings-release or analyst data source; SEC companyfacts only provide GAAP EPS.",
+        "Adjusted EPS growth was not found in an official earnings-release exhibit with high-confidence parsing.",
         as_of,
     )
     eps_alignment = _eps_alignment_metric(eps_adjusted_growth_yoy, eps_gaap_growth_yoy, as_of)
