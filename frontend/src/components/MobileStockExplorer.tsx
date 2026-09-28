@@ -710,6 +710,13 @@ function createStrongYoyExpression(preset: BuiltInPreset): FilterExpression {
   };
 }
 
+function createEmptyFilterExpression(): FilterExpression {
+  return {
+    operator: "and",
+    groups: [],
+  };
+}
+
 function activeFilterCount(expression: FilterExpression) {
   return expression.groups.reduce((total, group) => total + group.conditions.length, 0);
 }
@@ -2219,7 +2226,7 @@ export function MobileStockExplorer({
   personalization,
 }: Props) {
   const [query, setQuery] = useState("");
-  const [filterExpression, setFilterExpression] = useState<FilterExpression>(() => createStrongYoyExpression("support"));
+  const [filterExpression, setFilterExpression] = useState<FilterExpression>(() => createEmptyFilterExpression());
   const [sortKey, setSortKey] = useState<SortKey>("support_best");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [sheetOpen, setSheetOpen] = useState(false);
