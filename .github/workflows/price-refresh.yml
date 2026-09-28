@@ -1,4 +1,4 @@
-name: Refresh stock prices
+name: Update stock prices
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
     - cron: "30 */4 * * 1-5"
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -46,6 +46,19 @@ jobs:
           python scripts/validate_static_stock_refresh.py
           --report /tmp/price-refresh-report.json
           --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: Persist refreshed tracked data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/data
+          if git diff --cached --quiet; then
+            echo "No tracked data changes to persist."
+          else
+            git commit -m "Update stock prices"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
 
       - name: Upload refresh report
         if: ${{ always() }}

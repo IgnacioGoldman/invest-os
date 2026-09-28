@@ -2,11 +2,11 @@
 
 The local workflow is the source-of-truth workflow for improving data quality before the automated refresh runs. It is allowed to be slower, deeper, and more complete than GitHub Actions because it runs intentionally from a developer machine and writes to the persistent local database.
 
-The goal is:
+The current goal is:
 
 `local collectors -> data/invest_os.sqlite -> derived metrics -> static export -> review -> commit publishable data`
 
-GitHub Actions should later update the same persistent dataset model, not rebuild important facts from a temporary database and lose previously discovered evidence.
+GitHub Actions now persist tracked static exports back to the repo. They do not persist `data/invest_os.sqlite` yet because that file is ignored and large enough to require Git LFS or a hosted database decision.
 
 ## 1. What Local Is Responsible For
 
@@ -26,7 +26,7 @@ Local writes to `data/invest_os.sqlite`.
 
 Important: this SQLite file is currently local state, not a tracked repo file. It is large enough that committing it directly to git is probably not viable without Git LFS or another persistence mechanism. The current publishable repo artifact is the exported static data under `frontend/public/data/`.
 
-The intended end state is that both local scripts and GitHub Actions modify a persistent database, then export static JSON from that database. Until that persistence layer is chosen, local can still be the quality-control workflow by updating SQLite and committing the resulting exported static JSON.
+The intended end state is that both local scripts and GitHub Actions modify a persistent database, then export static JSON from that database. Until that persistence layer is chosen, local remains the quality-control workflow by updating SQLite and committing the resulting exported static JSON.
 
 Possible persistence choices:
 
@@ -110,16 +110,17 @@ The current scripts compute many snapshot metrics but do not yet guarantee a min
 
 Local is for completeness and repair. GitHub Actions are for updates.
 
-The daily fundamentals refresh should eventually:
+The daily remote refresh should:
 
-- Read the persistent database as its baseline.
 - Fetch latest SEC Company Facts, recent submissions, prices, and estimates.
 - Add or update only facts that are newer or better.
 - Preserve known-good backfilled metrics when a shallow daily search does not rediscover them.
 - Export static JSON from the updated database.
-- Commit or otherwise persist the updated database/static data, depending on the chosen persistence layer.
+- Commit tracked static data changes back to `main`.
 
-The price refresh should continue to run more frequently, but it should also update the persistent database rather than treating GitHub Pages as the only baseline.
+Once a shared persistent database is chosen, the daily remote refresh should read that database as its baseline and update it directly.
+
+The price refresh continues to run more frequently and commits tracked static data changes. Once a shared persistent database is chosen, it should also update that database rather than treating GitHub Pages as the only baseline.
 
 See [data-refresh.md](data-refresh.md) for the automated refresh model:
 

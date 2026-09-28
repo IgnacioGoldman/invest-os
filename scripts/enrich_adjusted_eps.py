@@ -5,7 +5,7 @@ import json
 import logging
 import sys
 import time
-from datetime import timedelta
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -59,6 +59,15 @@ def _snapshot_as_of(snapshot: OpenDataSnapshot) -> str:
     return snapshot.generated_at.date().isoformat()
 
 
+def _metric_as_of_date(metric: OpenDataMetric | None) -> date | None:
+    if metric is None:
+        return None
+    try:
+        return date.fromisoformat(str(metric.as_of)[:10])
+    except ValueError:
+        return None
+
+
 def _unavailable_adjusted_metric(snapshot: OpenDataSnapshot) -> OpenDataMetric:
     return OpenDataMetric(
         value=None,
@@ -101,11 +110,21 @@ def _patch_eps_metrics(
 
     before = snapshot.model_dump(mode="json")
     existing_adjusted = snapshot.business_health.get("eps_adjusted_growth_yoy")
-    adjusted_metric = adjusted or (
-        existing_adjusted
-        if existing_adjusted is not None and _metric_value(existing_adjusted) is not None
-        else _unavailable_adjusted_metric(snapshot)
-    )
+    if (
+        adjusted is not None
+        and existing_adjusted is not None
+        and _metric_value(existing_adjusted) is not None
+        and _metric_as_of_date(existing_adjusted) is not None
+        and _metric_as_of_date(adjusted) is not None
+        and _metric_as_of_date(existing_adjusted) > _metric_as_of_date(adjusted)
+    ):
+        adjusted_metric = existing_adjusted
+    else:
+        adjusted_metric = adjusted or (
+            existing_adjusted
+            if existing_adjusted is not None and _metric_value(existing_adjusted) is not None
+            else _unavailable_adjusted_metric(snapshot)
+        )
     alignment = _eps_alignment_metric(adjusted_metric, gaap, _snapshot_as_of(snapshot))
 
     snapshot.business_health["eps_gaap_growth_yoy"] = gaap
@@ -127,6 +146,7 @@ def enrich_adjusted_eps(
     limit: int | None,
     dry_run: bool,
     cache_only: bool,
+    force_refresh: bool,
     max_sec_archive_lookups: int,
     request_timeout: float,
     request_retries: int,
@@ -140,6 +160,7 @@ def enrich_adjusted_eps(
         retry_backoff=retry_backoff,
         include_filing_details=not cache_only,
         max_sec_archive_lookups=max_sec_archive_lookups,
+        force_refresh=force_refresh,
     )
     cache = JsonFileCache()
 
@@ -189,6 +210,7 @@ def enrich_adjusted_eps(
         "adjusted_eps_found_count": adjusted_count,
         "dry_run": dry_run,
         "cache_only": cache_only,
+        "force_refresh": force_refresh,
         "max_sec_archive_lookups": max_sec_archive_lookups,
         "requests": session.report(),
         "results": results,
@@ -202,6 +224,7 @@ def main() -> int:
     parser.add_argument("--limit", type=int, help="Maximum number of candidate snapshots to process.")
     parser.add_argument("--dry-run", action="store_true", help="Report changes without saving to SQLite.")
     parser.add_argument("--cache-only", action="store_true", help="Use only cached adjusted EPS metrics; do not make SEC requests.")
+    parser.add_argument("--force-refresh", action="store_true", help="Ignore provider cache and refetch SEC submissions/archive data.")
     parser.add_argument("--max-sec-archive-lookups", type=int, default=1)
     parser.add_argument("--request-timeout", type=float, default=20.0)
     parser.add_argument("--request-retries", type=int, default=1)
@@ -218,6 +241,7 @@ def main() -> int:
         limit=args.limit,
         dry_run=args.dry_run,
         cache_only=args.cache_only,
+        force_refresh=args.force_refresh,
         max_sec_archive_lookups=max(0, args.max_sec_archive_lookups),
         request_timeout=args.request_timeout,
         request_retries=args.request_retries,

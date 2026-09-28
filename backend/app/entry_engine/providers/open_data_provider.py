@@ -1124,25 +1124,21 @@ class OpenDataProvider:
             primary_description = self._recent_value(recent, "primaryDocDescription", index) or ""
             haystack = " ".join([primary_document, primary_description]).lower()
 
-            score = 0
+            priority: int
             if form == "8-K":
                 if any(item.startswith("2.02") for item in items):
-                    score = 100
+                    priority = 0
                 elif items and any(item.startswith("9.01") for item in items):
-                    score = 20
+                    priority = 3 if ("earnings" in haystack or "results" in haystack or "press" in haystack or "release" in haystack) else 4
                 elif not items:
-                    score = 10
+                    priority = 5
                 else:
                     continue
             else:
-                score = 70
-            if "earnings" in haystack or "results" in haystack:
-                score += 10
-            if "press" in haystack or "release" in haystack:
-                score += 5
+                priority = 1 if ("earnings" in haystack or "results" in haystack or "press" in haystack or "release" in haystack) else 2
             candidates.append(
                 (
-                    -score,
+                    priority,
                     index,
                     {
                         "accession_number": accession_number,

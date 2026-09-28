@@ -225,6 +225,26 @@ class RefreshStaticPricesTests(unittest.TestCase):
         self.assertEqual(tried_accessions[0], "0001543151-26-000027")
         self.assertNotIn("0001552781-26-000486", tried_accessions[:2])
 
+    def test_adjusted_eps_prefers_newer_item_202_before_older_earnings_named_item_202(self) -> None:
+        provider = OpenDataProvider(max_sec_archive_lookups=2)
+        submissions = {
+            "filings": {
+                "recent": {
+                    "form": ["8-K", "8-K"],
+                    "filingDate": ["2026-08-13", "2017-11-16"],
+                    "accessionNumber": ["0001628280-26-056699", "0000006951-17-000030"],
+                    "items": ["2.02,9.01", "2.02,9.01"],
+                    "primaryDocument": ["amat-20260813.htm", "exhibit991q42017earningsre.htm"],
+                    "primaryDocDescription": ["8-K", "Earnings Release"],
+                }
+            }
+        }
+
+        candidates = provider._adjusted_eps_candidate_filings(submissions["filings"]["recent"])
+
+        self.assertEqual(candidates[0]["accession_number"], "0001628280-26-056699")
+        self.assertEqual(candidates[1]["accession_number"], "0000006951-17-000030")
+
     def test_hydrate_falls_back_to_local_data_for_new_tickers(self) -> None:
         with TemporaryDirectory() as directory:
             data_dir = Path(directory)
