@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "refreshed_at": "2026-09-28T16:51:15.331280Z",
+  "refreshed_at": "2026-09-28T18:15:32.790569Z",
   "market_as_of": "2026-09-28",
   "market_date_counts": {
     "2026-09-28": 77
   },
-  "source": "github_actions_price_refresh",
+  "source": "github_actions_static_export",
   "stock_count": 77,
   "tickers": [
     "AAPL",
