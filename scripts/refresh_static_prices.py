@@ -21,10 +21,20 @@ sys.path.insert(0, str(ROOT / "backend"))
 from app.entry_engine.open_data_metrics import backfill_fcf_margin_metric, compute_price_opportunity_metrics  # noqa: E402
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataSnapshot  # noqa: E402
 from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
+from app.services.storage import (  # noqa: E402
+    DB_FILE,
+    connect,
+    load_stock_open_data_snapshots,
+    load_stock_price_history,
+    replace_stock_open_data_snapshot,
+    replace_stock_price_history,
+    seed_active_stock_tickers,
+)
 
 
 DEFAULT_BASE_URL = "https://ignaciogoldman.github.io/invest-os/data"
 DEFAULT_DATA_DIR = ROOT / "frontend" / "public" / "data"
+DEFAULT_DB_DATA_DIR = ROOT / "data"
 DEFAULT_UNIVERSE = ROOT / "data" / "stocks" / "stocks.json"
 logger = logging.getLogger(__name__)
 
@@ -52,6 +62,13 @@ def _load_json_if_present(path: Path) -> Any | None:
     if not path.exists():
         return None
     return _load_json(path)
+
+
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
 
 
 def _universe_tickers(payload: Any) -> list[str]:
@@ -229,18 +246,65 @@ def refresh_snapshot_prices(
     )
 
 
+def _load_db_baseline(
+    db_data_dir: Path | None,
+    tickers: list[str],
+) -> tuple[dict[str, dict[str, Any]], dict[str, list[HistoricalPricePoint]]]:
+    if db_data_dir is None or not (db_data_dir / DB_FILE).exists():
+        return {}, {}
+    with connect(db_data_dir) as conn:
+        snapshots = {
+            snapshot.ticker.upper(): snapshot.model_dump(mode="json")
+            for snapshot in load_stock_open_data_snapshots(conn)
+            if snapshot.ticker.upper() in tickers
+        }
+        histories = {
+            ticker: history
+            for ticker in tickers
+            if (history := load_stock_price_history(conn, ticker))
+        }
+    return snapshots, histories
+
+
+def _load_static_price_history(data_dir: Path, ticker: str) -> list[HistoricalPricePoint]:
+    return [
+        HistoricalPricePoint.model_validate(row)
+        for row in _load_json(data_dir / "open-data" / "price-history" / f"{ticker}.json")
+    ]
+
+
+def _persist_refresh_to_db(
+    db_data_dir: Path,
+    tickers: list[str],
+    snapshots: list[OpenDataSnapshot],
+    histories: dict[str, list[HistoricalPricePoint]],
+) -> None:
+    with connect(db_data_dir) as conn:
+        seed_active_stock_tickers(conn, tickers)
+        for snapshot in snapshots:
+            replace_stock_open_data_snapshot(conn, snapshot)
+            history = histories.get(snapshot.ticker.upper())
+            if history:
+                replace_stock_price_history(conn, snapshot.ticker, history)
+        conn.commit()
+
+
 def refresh_prices(
     snapshots: list[dict[str, Any]],
     data_dir: Path,
     tickers: list[str],
     *,
     workers: int,
+    db_data_dir: Path | None = DEFAULT_DB_DATA_DIR,
 ) -> dict[str, Any]:
     snapshot_by_ticker = {
         str(row.get("ticker") or "").upper(): row
         for row in snapshots
         if isinstance(row, dict) and row.get("ticker")
     }
+    db_snapshots, db_histories = _load_db_baseline(db_data_dir, tickers)
+    if db_snapshots:
+        snapshot_by_ticker.update(db_snapshots)
     results: list[dict[str, Any]] = []
     failures: list[dict[str, str]] = []
     updated_snapshots: dict[str, OpenDataSnapshot] = {}
@@ -251,8 +315,7 @@ def refresh_prices(
         raw_snapshot = snapshot_by_ticker.get(ticker)
         if raw_snapshot is None:
             raise ValueError(f"{ticker}: deployed snapshot is missing.")
-        history_path = data_dir / "open-data" / "price-history" / f"{ticker}.json"
-        baseline = [HistoricalPricePoint.model_validate(row) for row in _load_json(history_path)]
+        baseline = db_histories.get(ticker) or _load_static_price_history(data_dir, ticker)
         provider = OpenDataProvider(include_filing_details=False)
         history = fetch_updated_history(provider, ticker, baseline)
         snapshot = refresh_snapshot_prices(
@@ -275,6 +338,7 @@ def refresh_prices(
                         "ticker": ticker,
                         "generated_at": snapshot.generated_at.isoformat(),
                         "saved_to": f"frontend/public/data/open-data/price-history/{ticker}.json",
+                        "db_saved_to": _display_path(db_data_dir / DB_FILE) if db_data_dir is not None else None,
                     }
                 )
             except Exception as exc:
@@ -282,10 +346,14 @@ def refresh_prices(
                 failures.append({"ticker": ticker, "error": str(exc)})
 
     output_rows: list[dict[str, Any]] = []
+    output_snapshots: list[OpenDataSnapshot] = []
+    output_histories: dict[str, list[HistoricalPricePoint]] = {}
     for ticker in tickers:
         snapshot = updated_snapshots.get(ticker)
         if snapshot is not None:
             output_rows.append(snapshot.model_dump(mode="json"))
+            output_snapshots.append(snapshot)
+            output_histories[ticker] = updated_histories[ticker]
             _write_json(
                 data_dir / "open-data" / "price-history" / f"{ticker}.json",
                 [point.model_dump(mode="json") for point in updated_histories[ticker]],
@@ -293,6 +361,8 @@ def refresh_prices(
         elif ticker in snapshot_by_ticker:
             fallback_snapshot = backfill_fcf_margin_metric(OpenDataSnapshot.model_validate(snapshot_by_ticker[ticker]))
             output_rows.append(fallback_snapshot.model_dump(mode="json"))
+            output_snapshots.append(fallback_snapshot)
+            output_histories[ticker] = db_histories.get(ticker) or _load_static_price_history(data_dir, ticker)
 
     _write_json(data_dir / "open-data" / "stocks.json", output_rows)
     market_dates = [
@@ -314,10 +384,13 @@ def refresh_prices(
             "tickers": sorted(str(row.get("ticker") or "").upper() for row in output_rows),
         },
     )
+    if db_data_dir is not None:
+        _persist_refresh_to_db(db_data_dir, tickers, output_snapshots, output_histories)
     return {
         "mode": "price_only",
         "requested_count": len(tickers),
-        "source": "deployed_static_snapshot",
+        "source": "sqlite_db_with_deployed_static_fallback" if db_snapshots or db_histories else "deployed_static_snapshot",
+        "database": _display_path(db_data_dir / DB_FILE) if db_data_dir is not None else None,
         "collected_count": len(results),
         "failed_count": len(failures),
         "skipped_low_fidelity_count": 0,
@@ -332,12 +405,15 @@ def main() -> int:
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL)
     parser.add_argument("--cache-bust", default=str(int(time.time())))
     parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA_DIR)
+    parser.add_argument("--db-data-dir", type=Path, default=DEFAULT_DB_DATA_DIR)
     parser.add_argument("--universe", type=Path, default=DEFAULT_UNIVERSE)
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--log-level", default="INFO")
     args = parser.parse_args()
     logging.basicConfig(level=getattr(logging, args.log_level.upper(), logging.INFO))
+    data_dir = args.data_dir if args.data_dir.is_absolute() else ROOT / args.data_dir
+    db_data_dir = args.db_data_dir if args.db_data_dir.is_absolute() else ROOT / args.db_data_dir
 
     universe = _load_json(args.universe)
     tickers = _universe_tickers(universe)
@@ -345,12 +421,12 @@ def main() -> int:
         raise SystemExit("The stock universe is empty.")
     snapshots = hydrate_deployed_data(
         args.base_url,
-        args.data_dir,
+        data_dir,
         tickers,
         cache_bust=args.cache_bust,
         workers=args.workers,
     )
-    report = refresh_prices(snapshots, args.data_dir, tickers, workers=args.workers)
+    report = refresh_prices(snapshots, data_dir, tickers, workers=args.workers, db_data_dir=db_data_dir)
     _write_json(args.output, report)
     print(json.dumps(report, indent=2))
     return 0

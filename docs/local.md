@@ -6,7 +6,7 @@ The current goal is:
 
 `local collectors -> data/invest_os.sqlite -> derived metrics -> static export -> review -> commit publishable data`
 
-GitHub Actions now persist tracked static exports back to the repo. They do not persist `data/invest_os.sqlite` yet because that file is ignored and large enough to require Git LFS or a hosted database decision.
+GitHub Actions persist both the tracked SQLite database and the static exports back to the repo. `data/invest_os.sqlite` is tracked with Git LFS, so local backfills and remote update workflows share the same source-of-truth file.
 
 ## 1. What Local Is Responsible For
 
@@ -24,15 +24,13 @@ For example, UBER's adjusted EPS growth YoY was missed by the daily Action becau
 
 Local writes to `data/invest_os.sqlite`.
 
-Important: this SQLite file is currently local state, not a tracked repo file. It is large enough that committing it directly to git is probably not viable without Git LFS or another persistence mechanism. The current publishable repo artifact is the exported static data under `frontend/public/data/`.
+Important: this SQLite file is tracked through Git LFS. A local backfill should update the database first, then regenerate static files under `frontend/public/data/`, then commit both the LFS pointer change and the exported static data.
 
-The intended end state is that both local scripts and GitHub Actions modify a persistent database, then export static JSON from that database. Until that persistence layer is chosen, local remains the quality-control workflow by updating SQLite and committing the resulting exported static JSON.
+Both local scripts and GitHub Actions modify the persistent SQLite database, then export or refresh static JSON for GitHub Pages.
 
-Possible persistence choices:
+Longer-term persistence choices remain open if the dataset outgrows Git LFS:
 
-- Keep SQLite local and commit only exported static JSON.
 - Track a smaller normalized data artifact instead of the full SQLite database.
-- Use Git LFS for the SQLite database, if repo-size and Action checkout tradeoffs are acceptable.
 - Use Supabase/Postgres as the shared persistent database and keep SQLite as a local cache or development mirror.
 
 ## 3. Local Backfill Loop
@@ -116,11 +114,9 @@ The daily remote refresh should:
 - Add or update only facts that are newer or better.
 - Preserve known-good backfilled metrics when a shallow daily search does not rediscover them.
 - Export static JSON from the updated database.
-- Commit tracked static data changes back to `main`.
+- Commit `data/invest_os.sqlite` and tracked static data changes back to `main`.
 
-Once a shared persistent database is chosen, the daily remote refresh should read that database as its baseline and update it directly.
-
-The price refresh continues to run more frequently and commits tracked static data changes. Once a shared persistent database is chosen, it should also update that database rather than treating GitHub Pages as the only baseline.
+The price refresh continues to run more frequently. It reads the checked-out SQLite database when available, falls back to the deployed static dataset when needed, updates price-derived metrics and histories, and commits both the database and tracked static data changes.
 
 See [data-refresh.md](data-refresh.md) for the automated refresh model:
 

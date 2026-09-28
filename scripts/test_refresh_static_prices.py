@@ -9,10 +9,18 @@ from unittest.mock import Mock, patch
 
 import requests
 
-from refresh_static_prices import fetch_updated_history, hydrate_deployed_data, merge_price_history, refresh_snapshot_prices
+from refresh_static_prices import fetch_updated_history, hydrate_deployed_data, merge_price_history, refresh_prices, refresh_snapshot_prices
 
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataFilingExhibit, OpenDataMetric, OpenDataSnapshot
 from app.entry_engine.providers.open_data_provider import JsonFileCache, OpenDataProvider
+from app.services.open_data_stock_store import _preserve_enriched_metrics
+from app.services.storage import (
+    connect,
+    load_stock_open_data_snapshot,
+    load_stock_price_history,
+    replace_stock_open_data_snapshot,
+    replace_stock_price_history,
+)
 
 
 def point(day: date, close: float, *, low: float | None = None) -> HistoricalPricePoint:
@@ -372,6 +380,110 @@ class RefreshStaticPricesTests(unittest.TestCase):
         self.assertIn("support_1y_distance", updated.price_opportunity)
         self.assertIn("support_5y_distance", updated.price_opportunity)
         self.assertEqual(updated.generated_at, refreshed_at)
+
+    def test_price_refresh_prefers_and_updates_sqlite_baseline(self) -> None:
+        db_metric = OpenDataMetric(
+            value=20,
+            source="db",
+            tier="computed_from_public_facts",
+            as_of="2026-01-01",
+            notes="SQLite baseline.",
+        )
+        deployed_metric = OpenDataMetric(
+            value=5,
+            source="deployed",
+            tier="computed_from_public_facts",
+            as_of="2025-01-01",
+            notes="Deployed fallback.",
+        )
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            data_dir = root / "static"
+            db_data_dir = root / "db"
+            history_dir = data_dir / "open-data" / "price-history"
+            history_dir.mkdir(parents=True)
+            (history_dir / "TEST.json").write_text(
+                json.dumps([point(date(2026, 1, 1), 1, low=1).model_dump(mode="json")]),
+                encoding="utf-8",
+            )
+            with connect(db_data_dir) as conn:
+                replace_stock_open_data_snapshot(
+                    conn,
+                    OpenDataSnapshot(
+                        ticker="TEST",
+                        business_health={"revenue_growth_yoy": db_metric},
+                        metrics={"revenue_growth_yoy": db_metric},
+                    ),
+                )
+                replace_stock_price_history(conn, "TEST", [point(date(2026, 1, 1), 100, low=99)])
+                conn.commit()
+
+            class FakeOpenDataProvider:
+                def __init__(self, **_: object) -> None:
+                    pass
+
+                def fetch_price_history_since(self, ticker: str, start_date: str) -> list[HistoricalPricePoint]:
+                    return [point(date(2026, 1, 2), 102, low=101)]
+
+            with patch("refresh_static_prices.OpenDataProvider", FakeOpenDataProvider):
+                report = refresh_prices(
+                    [
+                        OpenDataSnapshot(
+                            ticker="TEST",
+                            business_health={"revenue_growth_yoy": deployed_metric},
+                            metrics={"revenue_growth_yoy": deployed_metric},
+                        ).model_dump(mode="json")
+                    ],
+                    data_dir,
+                    ["TEST"],
+                    workers=1,
+                    db_data_dir=db_data_dir,
+                )
+
+            self.assertEqual(report["source"], "sqlite_db_with_deployed_static_fallback")
+            with connect(db_data_dir) as conn:
+                saved_snapshot = load_stock_open_data_snapshot(conn, "TEST")
+                saved_history = load_stock_price_history(conn, "TEST")
+
+            self.assertIsNotNone(saved_snapshot)
+            self.assertEqual(saved_snapshot.metrics["revenue_growth_yoy"].value if saved_snapshot else None, 20)
+            self.assertEqual(saved_history[-1].close, 102)
+            self.assertEqual(saved_history[-1].low, 101)
+
+            static_rows = json.loads((data_dir / "open-data" / "stocks.json").read_text(encoding="utf-8"))
+            self.assertEqual(static_rows[0]["metrics"]["revenue_growth_yoy"]["value"], 20)
+
+    def test_shallow_snapshot_preserves_existing_adjusted_eps_metric(self) -> None:
+        adjusted = OpenDataMetric(
+            value=35,
+            source="sec_archive_exhibit",
+            tier="computed_from_public_facts",
+            as_of="2026-08-05",
+            notes="Existing local backfill.",
+        )
+        unavailable = OpenDataMetric(
+            value=None,
+            source="sec_archive_exhibit",
+            tier="unavailable_open_free",
+            as_of="2026-09-01",
+            notes="Shallow refresh missed the exhibit.",
+        )
+
+        merged = _preserve_enriched_metrics(
+            OpenDataSnapshot(
+                ticker="UBER",
+                business_health={"eps_adjusted_growth_yoy": adjusted},
+                metrics={"eps_adjusted_growth_yoy": adjusted},
+            ),
+            OpenDataSnapshot(
+                ticker="UBER",
+                business_health={"eps_adjusted_growth_yoy": unavailable},
+                metrics={"eps_adjusted_growth_yoy": unavailable},
+            ),
+        )
+
+        self.assertEqual(merged.metrics["eps_adjusted_growth_yoy"].value, 35)
+        self.assertEqual(merged.business_health["eps_adjusted_growth_yoy"].as_of, "2026-08-05")
 
 
 if __name__ == "__main__":

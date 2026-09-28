@@ -22,6 +22,32 @@ from app.services.storage import (
 from app.services.stock_derived_signals import StockDerivedSignalsFile
 
 
+PRESERVED_ENRICHED_METRICS = ("eps_adjusted_growth_yoy",)
+
+
+def _metric_has_value(snapshot: OpenDataSnapshot, key: str) -> bool:
+    metric = snapshot.metrics.get(key) or snapshot.business_health.get(key)
+    return metric is not None and metric.value is not None and metric.tier != "unavailable_open_free"
+
+
+def _preserve_enriched_metrics(existing: OpenDataSnapshot | None, incoming: OpenDataSnapshot) -> OpenDataSnapshot:
+    if existing is None:
+        return incoming
+    business_health = dict(incoming.business_health)
+    metrics = dict(incoming.metrics)
+    changed = False
+    for key in PRESERVED_ENRICHED_METRICS:
+        if _metric_has_value(incoming, key) or not _metric_has_value(existing, key):
+            continue
+        preserved = existing.metrics.get(key) or existing.business_health[key]
+        business_health[key] = preserved
+        metrics[key] = preserved
+        changed = True
+    if not changed:
+        return incoming
+    return incoming.model_copy(update={"business_health": business_health, "metrics": metrics})
+
+
 def load_cached_price_history(ticker: str, cache_dir: Path | None = None) -> list[HistoricalPricePoint]:
     path = (cache_dir or PROJECT_DIR / ".cache" / "open_data") / f"price_history_{ticker.upper().strip()}.json"
     if not path.exists():
@@ -45,6 +71,7 @@ def load_cached_price_history(ticker: str, cache_dir: Path | None = None) -> lis
 
 def save_stock_snapshot_to_db(settings: Settings, snapshot: OpenDataSnapshot) -> None:
     with connect(settings.data_dir) as conn:
+        snapshot = _preserve_enriched_metrics(load_stock_open_data_snapshot(conn, snapshot.ticker), snapshot)
         replace_stock_open_data_snapshot(conn, snapshot)
         price_history = load_cached_price_history(snapshot.ticker)
         if price_history:

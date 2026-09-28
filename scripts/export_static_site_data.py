@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 from app.entry_engine.open_data_models import HistoricalPricePoint  # noqa: E402
 from app.entry_engine.utils.file_storage import load_stock_universe  # noqa: E402
 from app.services.open_data_stock_store import load_cached_price_history  # noqa: E402
-from app.services.storage import DB_FILE  # noqa: E402
+from app.services.storage import DB_FILE, init_db  # noqa: E402
 
 
 DEFAULT_OUTPUT_DIR = ROOT / "frontend" / "public" / "data"
@@ -58,7 +58,7 @@ def _load_price_history(conn: sqlite3.Connection, ticker: str) -> list[dict[str,
         return [point.model_dump(mode="json") for point in cached]
     rows = conn.execute(
         """
-        SELECT priced_at, price, source
+        SELECT priced_at, price, source, high, low, volume
         FROM historical_prices
         WHERE asset = ? AND currency = 'USD'
         ORDER BY priced_at
@@ -71,6 +71,9 @@ def _load_price_history(conn: sqlite3.Connection, ticker: str) -> list[dict[str,
             point = HistoricalPricePoint(
                 date=str(row["priced_at"]).split("T", 1)[0],
                 close=float(row["price"]),
+                high=row["high"],
+                low=row["low"],
+                volume=row["volume"],
                 source=str(row["source"]),
             )
         except (TypeError, ValueError):
@@ -133,6 +136,7 @@ def export_static_site_data(data_dir: Path, output_dir: Path, universe_path: Pat
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     try:
+        init_db(conn)
         snapshots = _load_snapshot_rows(conn)
         active = _load_active_tickers(conn)
         if active:

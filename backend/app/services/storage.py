@@ -68,18 +68,33 @@ def init_db(conn: sqlite3.Connection) -> None:
         );
         """
     )
+    _ensure_historical_price_columns(conn)
+
+
+def _ensure_historical_price_columns(conn: sqlite3.Connection) -> None:
+    columns = {str(row[1]) for row in conn.execute("PRAGMA table_info(historical_prices)")}
+    for column, column_type in {
+        "high": "REAL",
+        "low": "REAL",
+        "volume": "REAL",
+    }.items():
+        if column not in columns:
+            conn.execute(f"ALTER TABLE historical_prices ADD COLUMN {column} {column_type}")
 
 
 def replace_stock_price_history(conn: sqlite3.Connection, ticker: str, points: Iterable[HistoricalPricePoint]) -> None:
     fetched_at = datetime.now(timezone.utc).isoformat()
     conn.executemany(
         """
-        INSERT INTO historical_prices (asset, currency, priced_at, price, source, fetched_at)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO historical_prices (asset, currency, priced_at, price, source, fetched_at, high, low, volume)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(asset, currency, priced_at) DO UPDATE SET
             price = excluded.price,
             source = excluded.source,
-            fetched_at = excluded.fetched_at
+            fetched_at = excluded.fetched_at,
+            high = excluded.high,
+            low = excluded.low,
+            volume = excluded.volume
         """,
         [
             (
@@ -89,6 +104,9 @@ def replace_stock_price_history(conn: sqlite3.Connection, ticker: str, points: I
                 point.close,
                 point.source,
                 fetched_at,
+                point.high,
+                point.low,
+                point.volume,
             )
             for point in points
             if point.close > 0
@@ -99,7 +117,7 @@ def replace_stock_price_history(conn: sqlite3.Connection, ticker: str, points: I
 def load_stock_price_history(conn: sqlite3.Connection, ticker: str) -> list[HistoricalPricePoint]:
     rows = conn.execute(
         """
-        SELECT priced_at, price, source
+        SELECT priced_at, price, source, high, low, volume
         FROM historical_prices
         WHERE asset = ? AND currency = 'USD'
         ORDER BY priced_at
@@ -110,6 +128,9 @@ def load_stock_price_history(conn: sqlite3.Connection, ticker: str) -> list[Hist
         HistoricalPricePoint(
             date=str(row["priced_at"]).split("T", 1)[0],
             close=row["price"],
+            high=row["high"],
+            low=row["low"],
+            volume=row["volume"],
             source=row["source"],
         )
         for row in rows
