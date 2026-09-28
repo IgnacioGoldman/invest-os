@@ -100,7 +100,12 @@ def _patch_eps_metrics(
         return snapshot, False
 
     before = snapshot.model_dump(mode="json")
-    adjusted_metric = adjusted or _unavailable_adjusted_metric(snapshot)
+    existing_adjusted = snapshot.business_health.get("eps_adjusted_growth_yoy")
+    adjusted_metric = adjusted or (
+        existing_adjusted
+        if existing_adjusted is not None and _metric_value(existing_adjusted) is not None
+        else _unavailable_adjusted_metric(snapshot)
+    )
     alignment = _eps_alignment_metric(adjusted_metric, gaap, _snapshot_as_of(snapshot))
 
     snapshot.business_health["eps_gaap_growth_yoy"] = gaap

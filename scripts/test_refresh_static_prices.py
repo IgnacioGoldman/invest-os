@@ -11,7 +11,7 @@ import requests
 
 from refresh_static_prices import fetch_updated_history, hydrate_deployed_data, merge_price_history, refresh_snapshot_prices
 
-from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataMetric, OpenDataSnapshot
+from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataFilingExhibit, OpenDataMetric, OpenDataSnapshot
 from app.entry_engine.providers.open_data_provider import JsonFileCache, OpenDataProvider
 
 
@@ -181,6 +181,49 @@ class RefreshStaticPricesTests(unittest.TestCase):
             )
             self.assertIsNone(deep_provider.fetch_adjusted_eps_growth_yoy(123))
             deep_session.get.assert_called_once()
+
+    def test_adjusted_eps_prefers_item_202_earnings_filings_before_901_only_filings(self) -> None:
+        provider = OpenDataProvider(max_sec_archive_lookups=2)
+        submissions = {
+            "filings": {
+                "recent": {
+                    "form": ["8-K", "8-K", "8-K"],
+                    "filingDate": ["2026-09-15", "2026-08-07", "2026-08-05"],
+                    "accessionNumber": [
+                        "0001552781-26-000486",
+                        "0001552781-26-000414",
+                        "0001543151-26-000027",
+                    ],
+                    "items": ["8.01,9.01", "1.01,1.02,2.03,9.01", "2.02,9.01"],
+                    "primaryDocument": ["e26383_uber-8k.htm", "e26328_uber-8k.htm", "uber-20260805.htm"],
+                    "primaryDocDescription": ["", "", "8-K"],
+                }
+            }
+        }
+        tried_accessions: list[str] = []
+
+        def exhibits(_: int, accession_number: str) -> list[OpenDataFilingExhibit]:
+            tried_accessions.append(accession_number)
+            if accession_number == "0001543151-26-000027":
+                return [
+                    OpenDataFilingExhibit(
+                        document="uberq226earningspressrelea.htm",
+                        type="EX-99.1",
+                        url="https://www.sec.gov/Archives/edgar/data/1543151/000154315126000027/uberq226earningspressrelea.htm",
+                    )
+                ]
+            return []
+
+        with (
+            patch.object(provider, "_earnings_release_exhibits", side_effect=exhibits),
+            patch.object(provider, "_fetch_sec_document_text", return_value="Non-GAAP EPS of $0.81, up 35% year-over-year"),
+        ):
+            metric = provider._adjusted_eps_growth_from_submissions(1543151, submissions)
+
+        self.assertIsNotNone(metric)
+        self.assertEqual(metric.value if metric else None, 35)
+        self.assertEqual(tried_accessions[0], "0001543151-26-000027")
+        self.assertNotIn("0001552781-26-000486", tried_accessions[:2])
 
     def test_hydrate_falls_back_to_local_data_for_new_tickers(self) -> None:
         with TemporaryDirectory() as directory:

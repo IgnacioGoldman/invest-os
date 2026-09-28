@@ -1082,26 +1082,15 @@ class OpenDataProvider:
         recent = submissions.get("filings", {}).get("recent", {})
         if not isinstance(recent, dict):
             return None
-        forms = recent.get("form") if isinstance(recent.get("form"), list) else []
         archive_lookups = 0
-        for index, raw_form in enumerate(forms):
-            form = str(raw_form or "")
-            if form not in {"8-K", "6-K"}:
-                continue
-            accession_number = self._recent_value(recent, "accessionNumber", index)
-            filing_date = self._recent_value(recent, "filingDate", index)
-            if not accession_number or not filing_date:
-                continue
-            items = self._filing_items(self._recent_value(recent, "items", index))
-            if form == "8-K" and items and not any(item.startswith("2.02") or item.startswith("9.01") for item in items):
-                continue
+        for filing in self._adjusted_eps_candidate_filings(recent):
             if archive_lookups >= self.max_sec_archive_lookups:
                 break
             archive_lookups += 1
-            for exhibit in self._earnings_release_exhibits(cik, accession_number):
+            for exhibit in self._earnings_release_exhibits(cik, filing["accession_number"]):
                 if not exhibit.url:
                     continue
-                text = self._fetch_sec_document_text(cik, accession_number, exhibit.document, exhibit.url)
+                text = self._fetch_sec_document_text(cik, filing["accession_number"], exhibit.document, exhibit.url)
                 if not text:
                     continue
                 parsed = self._parse_adjusted_eps_growth_yoy(text)
@@ -1111,13 +1100,59 @@ class OpenDataProvider:
                     value=parsed,
                     source=f"sec_earnings_release:{exhibit.url}",
                     tier="exact_public_fact",
-                    as_of=filing_date,
+                    as_of=filing["filing_date"],
                     notes=(
                         "Adjusted EPS growth YoY parsed from an official SEC earnings-release exhibit. "
                         "Accepted only when a high-confidence Non-GAAP EPS or Adjusted EPS row states a YoY percentage."
                     ),
                 )
         return None
+
+    def _adjusted_eps_candidate_filings(self, recent: dict[str, Any]) -> list[dict[str, str]]:
+        forms = recent.get("form") if isinstance(recent.get("form"), list) else []
+        candidates: list[tuple[int, int, dict[str, str]]] = []
+        for index, raw_form in enumerate(forms):
+            form = str(raw_form or "")
+            if form not in {"8-K", "6-K"}:
+                continue
+            accession_number = self._recent_value(recent, "accessionNumber", index)
+            filing_date = self._recent_value(recent, "filingDate", index)
+            if not accession_number or not filing_date:
+                continue
+            items = self._filing_items(self._recent_value(recent, "items", index))
+            primary_document = self._recent_value(recent, "primaryDocument", index) or ""
+            primary_description = self._recent_value(recent, "primaryDocDescription", index) or ""
+            haystack = " ".join([primary_document, primary_description]).lower()
+
+            score = 0
+            if form == "8-K":
+                if any(item.startswith("2.02") for item in items):
+                    score = 100
+                elif items and any(item.startswith("9.01") for item in items):
+                    score = 20
+                elif not items:
+                    score = 10
+                else:
+                    continue
+            else:
+                score = 70
+            if "earnings" in haystack or "results" in haystack:
+                score += 10
+            if "press" in haystack or "release" in haystack:
+                score += 5
+            candidates.append(
+                (
+                    -score,
+                    index,
+                    {
+                        "accession_number": accession_number,
+                        "filing_date": filing_date,
+                        "form": form,
+                    },
+                )
+            )
+        candidates.sort()
+        return [candidate for _, _, candidate in candidates]
 
     def _earnings_release_exhibits(self, cik: int, accession_number: str) -> list[OpenDataFilingExhibit]:
         exhibits = self._fetch_filing_exhibits(cik, accession_number)
