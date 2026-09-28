@@ -1,4 +1,4 @@
-name: Update remote GitHub Pages
+name: Update SEC fundamentals
 
 on:
   workflow_dispatch:
