@@ -11,9 +11,11 @@ import threading
 import time
 from datetime import date, datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
-from io import StringIO
+from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
+from zipfile import ZipFile
+import xml.etree.ElementTree as ET
 
 import requests
 
@@ -85,6 +87,13 @@ ADR_RATIO_BY_TICKER = {
         "ratio": 5.0,
         "source": "TSMC ADS ratio: 1 ADS represents 5 common shares.",
     },
+}
+ISSUER_FINANCIAL_WORKBOOKS = {
+    "AXFO.ST": {
+        "url": "https://www.axfood.com/globalassets/startsida/investerare/finansiell-information/axfood-financial-data-2606.xlsx",
+        "currency": "SEK",
+        "name": "Axfood financial data",
+    }
 }
 SUPPORTED_FX_CURRENCIES = {"USD", "EUR", "GBP", "SEK", "DKK", "CHF", "CAD", "TWD", "JPY", "CNY", "HKD"}
 ADJUSTED_EPS_LABEL_RE = re.compile(
@@ -201,6 +210,46 @@ def _yfinance_fact_row(value: float, period_end: date, *, annual: bool) -> dict[
         "fy": period_end.year,
         "frame": f"YF{period_end.year}" if annual else f"YF{period_end.year}{_fiscal_period(period_end, annual=annual)}",
     }
+
+
+def _issuer_fact_row(value: float, period_end: date, *, annual: bool, scale: float = 1.0) -> dict[str, Any]:
+    fp = _fiscal_period(period_end, annual=annual)
+    return {
+        "val": value * scale,
+        "start": _period_start(period_end, annual=annual).isoformat(),
+        "end": period_end.isoformat(),
+        "filed": period_end.isoformat(),
+        "form": "ISSUER-ANNUAL" if annual else "ISSUER-QUARTER",
+        "fp": fp,
+        "fy": period_end.year,
+        "frame": f"ISSUER{period_end.year}" if annual else f"ISSUER{period_end.year}{fp}",
+    }
+
+
+def _period_end_from_issuer_header(header: Any, *, annual: bool) -> date | None:
+    text = str(header or "").strip()
+    if annual:
+        try:
+            return date(int(text[:4]), 12, 31)
+        except ValueError:
+            return None
+    match = re.fullmatch(r"Q([1-4])\s+(\d{4})", text)
+    if not match:
+        return None
+    quarter = int(match.group(1))
+    year = int(match.group(2))
+    month = quarter * 3
+    day = 31 if month in {3, 12} else 30
+    return date(year, month, day)
+
+
+def _xlsx_column_index(reference: str) -> int:
+    column = 0
+    for character in reference:
+        if not character.isalpha():
+            break
+        column = column * 26 + ord(character.upper()) - 64
+    return max(1, column)
 
 
 def _frame_value(frame: Any, row_name: str, column: Any) -> float | None:
@@ -338,7 +387,7 @@ class OpenDataProvider:
         metadata = self.resolve_company_metadata(symbol)
         raw_cik = metadata.get("cik")
         cik = int(raw_cik) if raw_cik is not None else None
-        companyfacts = self.fetch_companyfacts(cik) if cik is not None else self.fetch_yfinance_companyfacts(symbol, metadata)
+        companyfacts = self.fetch_companyfacts(cik) if cik is not None else self.fetch_non_sec_companyfacts(symbol, metadata)
         price_history = self.fetch_price_history(symbol)
         price_currency = str(metadata.get("currency") or "USD").upper()
         price = self._latest_price_from_history(symbol, price_history, currency=price_currency) or self.fetch_latest_price(symbol)
@@ -366,6 +415,37 @@ class OpenDataProvider:
             adr_ratio=float(adr["ratio"]),
             adr_ratio_source=adr["source"],
         )
+
+    def fetch_non_sec_companyfacts(self, ticker: str, metadata: dict[str, Any]) -> dict[str, Any]:
+        symbol = ticker.upper().strip()
+        issuer_facts = self.fetch_issuer_workbook_companyfacts(symbol, metadata)
+        if issuer_facts is not None:
+            return issuer_facts
+        return self.fetch_yfinance_companyfacts(symbol, metadata)
+
+    def fetch_issuer_workbook_companyfacts(self, ticker: str, metadata: dict[str, Any]) -> dict[str, Any] | None:
+        symbol = ticker.upper().strip()
+        config = ISSUER_FINANCIAL_WORKBOOKS.get(symbol)
+        if config is None:
+            return None
+        cache_name = f"issuer_companyfacts_{symbol.replace('/', '_')}.json"
+        cached = None if self.force_refresh else self.cache.get(cache_name, timedelta(hours=12))
+        if cached is not None:
+            return cached
+        response = self._get(
+            str(config["url"]),
+            timeout=max(self.request_timeout, 30),
+            headers={"User-Agent": "Invest OS issuer financial workbook collector/0.1"},
+        )
+        facts = self._issuer_workbook_companyfacts_from_xlsx(
+            symbol,
+            metadata,
+            response.content,
+            currency=str(config.get("currency") or metadata.get("currency") or "USD").upper(),
+            workbook_name=str(config.get("name") or "issuer financial data"),
+        )
+        self.cache.set(cache_name, facts)
+        return facts
 
     def resolve_company_metadata(self, ticker: str) -> dict[str, Any]:
         symbol = ticker.upper().strip()
@@ -406,6 +486,18 @@ class OpenDataProvider:
 
         if symbol == "GOOGL":
             return dict(GOOGL_FALLBACK_METADATA)
+        if symbol in ISSUER_FINANCIAL_WORKBOOKS:
+            issuer_config = ISSUER_FINANCIAL_WORKBOOKS[symbol]
+            return {
+                "ticker": symbol,
+                "name": universe_metadata.get("name") or issuer_config.get("name") or symbol,
+                "cik": None,
+                "exchange": universe_metadata.get("exchange"),
+                "country": universe_metadata.get("country") or universe_metadata.get("region"),
+                "sector": universe_metadata.get("sector"),
+                "industry": universe_metadata.get("industry"),
+                "currency": universe_metadata.get("currency") or issuer_config.get("currency"),
+            }
         yahoo_metadata = self._resolve_yfinance_metadata(symbol, universe_metadata)
         if yahoo_metadata is not None:
             return yahoo_metadata
@@ -525,6 +617,131 @@ class OpenDataProvider:
             "balance_quarterly": self._safe_yfinance_frame(ticker, "quarterly_balance_sheet", symbol),
         }
         return self._yfinance_companyfacts_from_frames(symbol, metadata, info, frames, currency)
+
+    def _issuer_workbook_companyfacts_from_xlsx(
+        self,
+        symbol: str,
+        metadata: dict[str, Any],
+        payload: bytes,
+        *,
+        currency: str,
+        workbook_name: str,
+    ) -> dict[str, Any]:
+        workbook_rows = self._xlsx_rows_by_sheet(payload)
+        facts: dict[str, Any] = {"issuer": {}}
+
+        def add_fact(concept: str, unit: str, row: dict[str, Any]) -> None:
+            facts["issuer"].setdefault(concept, {"units": {}})
+            facts["issuer"][concept]["units"].setdefault(unit, [])
+            facts["issuer"][concept]["units"][unit].append(row)
+
+        def add_sheet(sheet_name: str, mappings: dict[str, tuple[str, str, float]], *, annual: bool) -> None:
+            rows = workbook_rows.get(sheet_name) or []
+            if len(rows) < 5:
+                return
+            headers = rows[3]
+            for row in rows[4:]:
+                label = str(row[1] if len(row) > 1 else "").strip()
+                mapping = mappings.get(label)
+                if mapping is None:
+                    continue
+                concept, unit_kind, scale = mapping
+                for index, header in enumerate(headers[2:], start=2):
+                    period_end = _period_end_from_issuer_header(header, annual=annual)
+                    if period_end is None or index >= len(row):
+                        continue
+                    value = _finite_float(row[index])
+                    if value is None:
+                        continue
+                    unit = "shares" if unit_kind == "shares" else f"{currency}/shares" if unit_kind == "eps" else currency
+                    add_fact(concept, unit, _issuer_fact_row(value, period_end, annual=annual, scale=scale))
+
+        money_scale = 1_000_000.0
+        income_mappings = {
+            "Net sales": ("RevenueFromContractWithCustomerExcludingAssessedTax", "currency", money_scale),
+            "Gross profit": ("GrossProfit", "currency", money_scale),
+            "Cost of goods sold": ("CostOfRevenue", "currency", money_scale),
+            "Operating profit": ("OperatingIncomeLoss", "currency", money_scale),
+            "Profit for the period": ("NetIncomeLoss", "currency", money_scale),
+            "Net profit for the year": ("NetIncomeLoss", "currency", money_scale),
+            "Earnings per share after dilution": ("EarningsPerShareDiluted", "eps", 1.0),
+        }
+        cashflow_mappings = {
+            "Cash flow from operating activities": ("NetCashProvidedByUsedInOperatingActivities", "currency", money_scale),
+            "Aquisitions of of property, plant and equipment": ("PaymentsToAcquirePropertyPlantAndEquipment", "currency", money_scale),
+        }
+        balance_mappings = {
+            "Cash and bank balances": ("CashAndCashEquivalentsAtCarryingValue", "currency", money_scale),
+            "Total shareholders' equity": ("StockholdersEquity", "currency", money_scale),
+            "Equity attributable to equity holders of the parent": ("StockholdersEquity", "currency", money_scale),
+            "Other interest-bearing liabilities": ("DebtCurrent", "currency", money_scale),
+        }
+
+        add_sheet("Income_statement-Y", income_mappings, annual=True)
+        add_sheet("Income_statement-Q", income_mappings, annual=False)
+        add_sheet("Cash_flow-Y", cashflow_mappings, annual=True)
+        add_sheet("Cash_flow-Q", cashflow_mappings, annual=False)
+        add_sheet("Balance_sheet-Y", balance_mappings, annual=True)
+        add_sheet("Balance_sheet-Q", balance_mappings, annual=False)
+
+        return {
+            "entityName": metadata.get("name") or symbol,
+            "source": f"issuer_financial_workbook:{workbook_name}",
+            "facts": facts,
+        }
+
+    def _xlsx_rows_by_sheet(self, payload: bytes) -> dict[str, list[list[Any]]]:
+        main_ns = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+        rel_ns = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+        package_rel_ns = "http://schemas.openxmlformats.org/package/2006/relationships"
+        with ZipFile(BytesIO(payload)) as archive:
+            workbook = ET.fromstring(archive.read("xl/workbook.xml"))
+            relationships = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
+            relationship_targets = {
+                relationship.attrib["Id"]: relationship.attrib["Target"]
+                for relationship in relationships.findall(f"{{{package_rel_ns}}}Relationship")
+            }
+            shared_strings: list[str] = []
+            if "xl/sharedStrings.xml" in archive.namelist():
+                shared_root = ET.fromstring(archive.read("xl/sharedStrings.xml"))
+                for item in shared_root.findall(f"{{{main_ns}}}si"):
+                    shared_strings.append("".join(text.text or "" for text in item.iter(f"{{{main_ns}}}t")))
+            sheets: dict[str, list[list[Any]]] = {}
+            for sheet in workbook.find(f"{{{main_ns}}}sheets") or []:
+                name = str(sheet.attrib.get("name") or "")
+                relationship_id = sheet.attrib.get(f"{{{rel_ns}}}id")
+                target = relationship_targets.get(str(relationship_id))
+                if not name or not target:
+                    continue
+                path = f"xl/{target}"
+                sheets[name] = self._xlsx_sheet_rows(archive.read(path), shared_strings, main_ns)
+            return sheets
+
+    def _xlsx_sheet_rows(self, payload: bytes, shared_strings: list[str], main_ns: str) -> list[list[Any]]:
+        root = ET.fromstring(payload)
+        rows: list[list[Any]] = []
+        for row in root.findall(f".//{{{main_ns}}}sheetData/{{{main_ns}}}row"):
+            cells: list[tuple[int, Any]] = []
+            for cell in row.findall(f"{{{main_ns}}}c"):
+                ref = str(cell.attrib.get("r") or "")
+                value_element = cell.find(f"{{{main_ns}}}v")
+                if value_element is None or value_element.text is None:
+                    value: Any = ""
+                elif cell.attrib.get("t") == "s":
+                    try:
+                        value = shared_strings[int(value_element.text)]
+                    except (IndexError, ValueError):
+                        value = ""
+                else:
+                    value = value_element.text
+                cells.append((_xlsx_column_index(ref), value))
+            if not cells:
+                continue
+            values = [""] * max(column for column, _ in cells)
+            for column, value in cells:
+                values[column - 1] = value
+            rows.append(values)
+        return rows
 
     def _safe_yfinance_frame(self, ticker: Any, attribute: str, symbol: str) -> Any:
         try:

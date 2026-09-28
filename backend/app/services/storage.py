@@ -66,6 +66,15 @@ def init_db(conn: sqlite3.Connection) -> None:
             ticker TEXT PRIMARY KEY,
             added_at TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS stock_sec_refresh_state (
+            ticker TEXT PRIMARY KEY,
+            cik INTEGER,
+            accession_number TEXT,
+            filing_date TEXT,
+            form TEXT,
+            checked_at TEXT NOT NULL
+        );
         """
     )
     _ensure_historical_price_columns(conn)
@@ -208,6 +217,48 @@ def seed_active_stock_tickers(conn: sqlite3.Connection, tickers: Iterable[str]) 
         VALUES (?, ?)
         """,
         [(ticker.upper(), now) for ticker in tickers if ticker.strip()],
+    )
+
+
+def load_stock_sec_refresh_state(conn: sqlite3.Connection, ticker: str) -> sqlite3.Row | None:
+    return conn.execute(
+        """
+        SELECT ticker, cik, accession_number, filing_date, form, checked_at
+        FROM stock_sec_refresh_state
+        WHERE ticker = ?
+        """,
+        (ticker.upper(),),
+    ).fetchone()
+
+
+def replace_stock_sec_refresh_state(
+    conn: sqlite3.Connection,
+    *,
+    ticker: str,
+    cik: int | None,
+    accession_number: str | None,
+    filing_date: str | None,
+    form: str | None,
+) -> None:
+    conn.execute(
+        """
+        INSERT INTO stock_sec_refresh_state (ticker, cik, accession_number, filing_date, form, checked_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(ticker) DO UPDATE SET
+            cik = excluded.cik,
+            accession_number = excluded.accession_number,
+            filing_date = excluded.filing_date,
+            form = excluded.form,
+            checked_at = excluded.checked_at
+        """,
+        (
+            ticker.upper(),
+            cik,
+            accession_number,
+            filing_date,
+            form,
+            datetime.now(timezone.utc).isoformat(),
+        ),
     )
 
 

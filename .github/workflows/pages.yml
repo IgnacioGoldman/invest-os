@@ -43,6 +43,7 @@ jobs:
         run: >-
           python scripts/open_data_poc.py
           --universe-file data/stocks/stocks.json
+          --incremental-sec
           --skip-filing-details
           --min-coverage 0
           --workers 4
@@ -55,6 +56,7 @@ jobs:
       - name: Enrich adjusted EPS metrics
         run: >-
           python scripts/enrich_adjusted_eps.py
+          --tickers-from-report /tmp/open-data-refresh-report.json
           --max-sec-archive-lookups 2
           --request-timeout 20
           --request-retries 1

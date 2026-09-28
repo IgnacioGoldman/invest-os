@@ -15,7 +15,7 @@ Local runs should fill gaps that need deeper history or more careful crawling:
 - Adjusted EPS growth YoY from official earnings-release exhibits.
 - EPS alignment, once adjusted EPS and GAAP EPS are both available.
 - Historical metric depth, such as at least four periods for revenue growth YoY and comparable metric histories where the source data supports it.
-- Non-SEC or non-US symbols, such as `AXFO.ST`, where Yahoo Finance statement tables may be the current open/free source.
+- Non-SEC or non-US symbols, such as `AXFO.ST`, where an issuer-published workbook or report should be preferred over Yahoo Finance statement tables when available.
 - Backfills for any ticker where the daily refresh can see that a metric is missing but should not spend a large request budget to repair it.
 
 For example, UBER's adjusted EPS growth YoY was missed by the daily Action because the relevant earnings release was not one of the newest SEC archive filings selected by the small daily cap. Local backfill should be able to search farther back, find the official exhibit, parse the metric, write it to SQLite, rebuild derived signals, and export static data.
@@ -104,13 +104,16 @@ For each active ticker, local should aim to persist enough history to make metri
 
 The current scripts compute many snapshot metrics but do not yet guarantee a minimum historical depth for every metric. That should become a local backfill concern first, then a daily validation concern once the database model supports it.
 
+For non-SEC tickers, prefer deterministic issuer data when it is available. `AXFO.ST` uses Axfood's official financial-data workbook, which provides quarterly and annual statement history back to 2015 and fills much deeper revenue growth YoY history than Yahoo Finance's limited quarterly table.
+
 ## 5. Relationship To GitHub Actions
 
 Local is for completeness and repair. GitHub Actions are for updates.
 
 The daily remote refresh should:
 
-- Fetch latest SEC Company Facts, recent submissions, prices, and estimates.
+- Fetch recent SEC submissions for each ticker and use them as a cheap change detector.
+- Recollect only tickers whose latest relevant SEC filing changed; preserve unchanged DB snapshots.
 - Add or update only facts that are newer or better.
 - Preserve known-good backfilled metrics when a shallow daily search does not rediscover them.
 - Export static JSON from the updated database.

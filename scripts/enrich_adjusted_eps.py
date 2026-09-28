@@ -100,6 +100,23 @@ def _candidate_snapshots(snapshots: list[OpenDataSnapshot], tickers: set[str] | 
     return candidates
 
 
+def _tickers_from_refresh_report(path: Path) -> set[str]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    rows = payload.get("results") if isinstance(payload, dict) else []
+    if not isinstance(rows, list):
+        return set()
+    tickers: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        if row.get("collection_status") == "preserved":
+            continue
+        ticker = str(row.get("ticker") or "").upper().strip()
+        if ticker and row.get("saved_to"):
+            tickers.add(ticker)
+    return tickers
+
+
 def _patch_eps_metrics(
     snapshot: OpenDataSnapshot,
     adjusted: OpenDataMetric | None,
@@ -221,6 +238,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Enrich saved stock snapshots with adjusted EPS and EPS alignment.")
     parser.add_argument("--data-dir", type=Path, default=ROOT / "data")
     parser.add_argument("--tickers", help="Comma-separated ticker allowlist.")
+    parser.add_argument("--tickers-from-report", type=Path, help="Only enrich tickers collected in an open_data_poc report.")
     parser.add_argument("--limit", type=int, help="Maximum number of candidate snapshots to process.")
     parser.add_argument("--dry-run", action="store_true", help="Report changes without saving to SQLite.")
     parser.add_argument("--cache-only", action="store_true", help="Use only cached adjusted EPS metrics; do not make SEC requests.")
@@ -235,6 +253,10 @@ def main() -> int:
 
     logging.basicConfig(level=getattr(logging, args.log_level.upper(), logging.INFO), format="%(asctime)s %(levelname)s %(message)s")
     tickers = {ticker.strip().upper() for ticker in args.tickers.split(",") if ticker.strip()} if args.tickers else None
+    if args.tickers_from_report:
+        report_path = args.tickers_from_report if args.tickers_from_report.is_absolute() else ROOT / args.tickers_from_report
+        report_tickers = _tickers_from_refresh_report(report_path)
+        tickers = report_tickers if tickers is None else tickers & report_tickers
     report = enrich_adjusted_eps(
         data_dir=args.data_dir if args.data_dir.is_absolute() else ROOT / args.data_dir,
         tickers=tickers,

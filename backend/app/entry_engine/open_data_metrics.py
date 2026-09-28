@@ -111,7 +111,7 @@ DEBT_DIRECT_CONCEPTS = (
     "LeaseLiabilities",
 )
 
-SEC_TAXONOMIES = ("us-gaap", "ifrs-full", "yfinance")
+SEC_TAXONOMIES = ("us-gaap", "ifrs-full", "yfinance", "issuer")
 MONETARY_UNITS = ("USD", "EUR", "GBP", "SEK", "DKK", "CHF", "CAD", "TWD", "JPY", "CNY", "HKD")
 USD_UNITS = MONETARY_UNITS
 SHARE_UNITS = ("shares",)
@@ -1609,6 +1609,10 @@ def _data_gaps(
             "Fundamentals were normalized from Yahoo Finance statement tables rather than SEC companyfacts; "
             "statement rows are open/free vendor data and may lag issuer filings."
         )
+    if "issuer" in taxonomies:
+        gaps.append(
+            "Fundamentals were normalized from issuer-published financial data rather than SEC companyfacts."
+        )
     if "us-gaap" not in taxonomies and "ifrs-full" in taxonomies:
         gaps.append(
             "SEC companyfacts uses IFRS taxonomy. Foreign-currency fundamentals are supported; current valuation can use "
@@ -2558,16 +2562,17 @@ def _is_ytd_quarter(point: FactPoint) -> bool:
 
 def _is_10k(point: FactPoint) -> bool:
     form = point.form.upper()
-    return form.startswith("10-K") or form.startswith("20-F") or form.startswith("40-F") or form == "YF-ANNUAL"
+    return form.startswith("10-K") or form.startswith("20-F") or form.startswith("40-F") or form in {"YF-ANNUAL", "ISSUER-ANNUAL"}
 
 
 def _is_10q(point: FactPoint) -> bool:
-    return point.form.upper().startswith("10-Q")
+    form = point.form.upper()
+    return form.startswith("10-Q") or form == "ISSUER-QUARTER"
 
 
 def _is_quarterly_form(point: FactPoint) -> bool:
     form = point.form.upper()
-    return form.startswith("10-Q") or form.startswith("6-K") or form == "YF-QUARTER"
+    return form.startswith("10-Q") or form.startswith("6-K") or form in {"YF-QUARTER", "ISSUER-QUARTER"}
 
 
 def _annual_points(companyfacts: dict[str, Any], concepts: tuple[str, ...], units: tuple[str, ...]) -> list[FactPoint]:
@@ -2870,6 +2875,8 @@ def _parse_date(raw: Any) -> date | None:
 def _source(point: FactPoint) -> str:
     if point.taxonomy == "yfinance" or point.form.upper().startswith("YF-"):
         return f"yfinance_statement:{point.taxonomy}/{point.concept}:{point.unit}:{point.form}:{point.end.isoformat()}"
+    if point.taxonomy == "issuer" or point.form.upper().startswith("ISSUER-"):
+        return f"issuer_statement:{point.taxonomy}/{point.concept}:{point.unit}:{point.form}:{point.end.isoformat()}"
     return f"sec_companyfacts:{point.taxonomy}/{point.concept}:{point.unit}:{point.form}:{point.end.isoformat()}"
 
 

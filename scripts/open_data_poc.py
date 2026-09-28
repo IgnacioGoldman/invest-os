@@ -16,11 +16,18 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
+from app.entry_engine.open_data_models import OpenDataCompanyFiling, OpenDataSnapshot  # noqa: E402
 from app.config import get_settings  # noqa: E402
 from app.services.open_data_stock_store import (  # noqa: E402
     activate_stock,
     load_cached_price_history,
     save_stock_snapshot_to_db,
+)
+from app.services.storage import (  # noqa: E402
+    connect,
+    load_stock_open_data_snapshot,
+    load_stock_sec_refresh_state,
+    replace_stock_sec_refresh_state,
 )
 
 
@@ -38,6 +45,92 @@ EPS_DEPENDENT_METRICS = {
     "valuation.peg",
 }
 logger = logging.getLogger(__name__)
+SEC_FUNDAMENTAL_FORMS = {"10-K", "10-K/A", "10-Q", "10-Q/A", "20-F", "20-F/A", "40-F", "40-F/A"}
+SEC_EARNINGS_TERMS = ("earnings", "results", "press", "release", "quarter", "interim", "half-year")
+
+
+def _parse_date_key(value: Any) -> tuple[int, int, int]:
+    try:
+        parts = str(value)[:10].split("-")
+        if len(parts) != 3:
+            return (0, 0, 0)
+        return (int(parts[0]), int(parts[1]), int(parts[2]))
+    except (TypeError, ValueError):
+        return (0, 0, 0)
+
+
+def _filing_payload_text(filing: dict[str, Any]) -> str:
+    return " ".join(
+        str(filing.get(key) or "")
+        for key in ("primary_document", "primaryDocument", "primary_doc_description", "primaryDocDescription", "description")
+    ).lower()
+
+
+def _is_relevant_sec_filing(filing: dict[str, Any]) -> bool:
+    form = str(filing.get("form") or "").upper()
+    if form in SEC_FUNDAMENTAL_FORMS:
+        return True
+    items = str(filing.get("items") or "")
+    if form == "8-K" and "2.02" in items:
+        return True
+    if form == "6-K" and any(term in _filing_payload_text(filing) for term in SEC_EARNINGS_TERMS):
+        return True
+    return False
+
+
+def _latest_relevant_sec_filing(submissions: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(submissions, dict):
+        return None
+    recent = submissions.get("filings", {}).get("recent") if isinstance(submissions.get("filings"), dict) else None
+    if not isinstance(recent, dict):
+        return None
+    forms = recent.get("form") if isinstance(recent.get("form"), list) else []
+    candidates: list[dict[str, Any]] = []
+    for index, form in enumerate(forms):
+        filing = {
+            "form": form,
+            "filing_date": _recent_value(recent, "filingDate", index),
+            "accession_number": _recent_value(recent, "accessionNumber", index),
+            "items": _recent_value(recent, "items", index),
+            "primary_document": _recent_value(recent, "primaryDocument", index),
+            "primary_doc_description": _recent_value(recent, "primaryDocDescription", index),
+        }
+        if _is_relevant_sec_filing(filing):
+            candidates.append(filing)
+    return max(candidates, key=lambda filing: (_parse_date_key(filing.get("filing_date")), str(filing.get("accession_number") or ""))) if candidates else None
+
+
+def _recent_value(recent: dict[str, Any], key: str, index: int) -> Any:
+    values = recent.get(key)
+    return values[index] if isinstance(values, list) and index < len(values) else None
+
+
+def _latest_relevant_context_filing(snapshot: OpenDataSnapshot | None) -> dict[str, Any] | None:
+    if snapshot is None or snapshot.company_context is None:
+        return None
+    candidates: list[dict[str, Any]] = []
+    for context_filing in snapshot.company_context.recent_filings:
+        filing = _context_filing_payload(context_filing)
+        if _is_relevant_sec_filing(filing):
+            candidates.append(filing)
+    return max(candidates, key=lambda filing: (_parse_date_key(filing.get("filing_date")), str(filing.get("accession_number") or ""))) if candidates else None
+
+
+def _context_filing_payload(filing: OpenDataCompanyFiling) -> dict[str, Any]:
+    return {
+        "form": filing.form,
+        "filing_date": filing.filing_date,
+        "accession_number": filing.accession_number,
+        "items": ",".join(filing.items),
+        "primary_document": filing.primary_document,
+        "primary_doc_description": filing.primary_document_description,
+    }
+
+
+def _state_accession(state: Any) -> str | None:
+    if state is None:
+        return None
+    return str(state["accession_number"]) if state["accession_number"] else None
 
 
 def _metric_unavailable_reason(metric: Any) -> str:
@@ -180,6 +273,121 @@ def _metric_coverage(snapshot: Any) -> dict[str, Any]:
     }
 
 
+def _sec_state_kwargs(ticker: str, cik: int | None, filing: dict[str, Any] | None) -> dict[str, Any]:
+    return {
+        "ticker": ticker,
+        "cik": cik,
+        "accession_number": str(filing.get("accession_number") or "") if filing else None,
+        "filing_date": str(filing.get("filing_date") or "") if filing else None,
+        "form": str(filing.get("form") or "") if filing else None,
+    }
+
+
+def _save_sec_refresh_state(ticker: str, cik: int | None, filing: dict[str, Any] | None) -> None:
+    settings = get_settings()
+    with connect(settings.data_dir) as conn:
+        replace_stock_sec_refresh_state(conn, **_sec_state_kwargs(ticker, cik, filing))
+        conn.commit()
+
+
+def _preserved_result(
+    *,
+    index: int,
+    item: dict[str, Any],
+    snapshot: OpenDataSnapshot,
+    latest_filing: dict[str, Any] | None,
+    reason: str,
+    duration_seconds: float,
+) -> dict[str, Any]:
+    coverage = _metric_coverage(snapshot)
+    return {
+        **item,
+        "_index": index,
+        "ticker": snapshot.ticker,
+        "name": snapshot.name or item.get("name"),
+        "cik": snapshot.cik,
+        "source": snapshot.source,
+        "generated_at": snapshot.generated_at.isoformat(),
+        "saved_to": "data/invest_os.sqlite",
+        "analysis": None,
+        "collection_status": "preserved",
+        "skip_reason": reason,
+        "latest_sec_accession": latest_filing.get("accession_number") if latest_filing else None,
+        "latest_sec_filing_date": latest_filing.get("filing_date") if latest_filing else None,
+        "latest_sec_form": latest_filing.get("form") if latest_filing else None,
+        "duration_seconds": round(duration_seconds, 2),
+        "attempts": 0,
+        **coverage,
+    }
+
+
+def _filter_incremental_sec_work_items(
+    work_items: list[tuple[int, dict[str, Any]]],
+    provider: OpenDataProvider,
+    *,
+    save: bool,
+) -> tuple[list[tuple[int, dict[str, Any]]], list[dict[str, Any]]]:
+    if not save:
+        return work_items, []
+    settings = get_settings()
+    collect_items: list[tuple[int, dict[str, Any]]] = []
+    preserved: list[dict[str, Any]] = []
+    with connect(settings.data_dir) as conn:
+        for index, item in work_items:
+            started = time.monotonic()
+            ticker = item["ticker"]
+            try:
+                existing_snapshot = load_stock_open_data_snapshot(conn, ticker)
+                try:
+                    cik = provider.resolve_cik(ticker)
+                except Exception:
+                    if existing_snapshot is not None:
+                        preserved.append(
+                            _preserved_result(
+                                index=index,
+                                item=item,
+                                snapshot=existing_snapshot,
+                                latest_filing=None,
+                                reason="no_sec_cik_preserved_existing_snapshot",
+                                duration_seconds=time.monotonic() - started,
+                            )
+                        )
+                        continue
+                    collect_items.append((index, item))
+                    continue
+
+                submissions = provider._fetch_sec_submissions(cik)
+                latest_filing = _latest_relevant_sec_filing(submissions)
+                existing_filing = _latest_relevant_context_filing(existing_snapshot)
+                state = load_stock_sec_refresh_state(conn, ticker)
+                known_accession = _state_accession(state) or (
+                    str(existing_filing.get("accession_number") or "") if existing_filing else None
+                )
+                latest_accession = str(latest_filing.get("accession_number") or "") if latest_filing else None
+
+                if existing_snapshot is not None and (latest_accession is None or latest_accession == known_accession):
+                    replace_stock_sec_refresh_state(conn, **_sec_state_kwargs(ticker, cik, latest_filing or existing_filing))
+                    preserved.append(
+                        _preserved_result(
+                            index=index,
+                            item=item,
+                            snapshot=existing_snapshot,
+                            latest_filing=latest_filing or existing_filing,
+                            reason="sec_filings_unchanged",
+                            duration_seconds=time.monotonic() - started,
+                        )
+                    )
+                    continue
+                item["_latest_sec_cik"] = cik
+                item["_latest_sec_filing"] = latest_filing
+                collect_items.append((index, item))
+            except Exception as exc:
+                logger.warning("%s: incremental SEC preflight failed; collecting normally: %s", ticker, exc)
+                collect_items.append((index, item))
+        conn.commit()
+    return collect_items, preserved
+
+
 def _collect_ticker(
     provider: OpenDataProvider,
     ticker: str,
@@ -289,6 +497,7 @@ def _build_report(
     for collection in (ordered_results, ordered_skipped, ordered_failures):
         for row in collection:
             row.pop("_index", None)
+    preserved_count = sum(1 for row in ordered_results if row.get("collection_status") == "preserved")
     return {
         "mode": mode,
         "requested_count": requested_count,
@@ -297,12 +506,25 @@ def _build_report(
         "min_coverage_percent": min_coverage,
         "include_filing_details": include_filing_details,
         "collected_count": len(ordered_results),
+        "refreshed_count": len(ordered_results) - preserved_count,
+        "preserved_count": preserved_count,
         "failed_count": len(ordered_failures),
         "skipped_low_fidelity_count": len(ordered_skipped),
         "results": ordered_results,
         "skipped_low_fidelity": ordered_skipped,
         "failures": ordered_failures,
     }
+
+
+def _record_collected_sec_state(result: dict[str, Any], item: dict[str, Any], *, incremental_sec: bool, save: bool) -> None:
+    if not incremental_sec or not save or not result.get("saved_to"):
+        return
+    cik = item.get("_latest_sec_cik") or result.get("cik")
+    try:
+        parsed_cik = int(cik) if cik is not None else None
+    except (TypeError, ValueError):
+        parsed_cik = None
+    _save_sec_refresh_state(result["ticker"], parsed_cik, item.get("_latest_sec_filing"))
 
 
 def main() -> None:
@@ -340,6 +562,11 @@ def main() -> None:
         ),
     )
     parser.add_argument("--no-save", action="store_true", help="Do not persist snapshots to SQLite.")
+    parser.add_argument(
+        "--incremental-sec",
+        action="store_true",
+        help="Preserve existing SQLite snapshots unless SEC recent submissions contain a newer relevant filing.",
+    )
     parser.add_argument("--output", type=Path, help="Write the JSON run report to a file as well as stdout.")
     parser.add_argument("--workers", type=int, default=3, help="Number of tickers to collect in parallel.")
     parser.add_argument("--ticker-retries", type=int, default=2, help="Retry a whole ticker collection this many times.")
@@ -391,6 +618,14 @@ def main() -> None:
     skipped_low_fidelity: list[dict[str, Any]] = []
 
     work_items = list(enumerate(universe[:max_results] if mode == "top_volume" else universe))
+    if args.incremental_sec:
+        work_items, preserved_results = _filter_incremental_sec_work_items(work_items, provider, save=save)
+        results.extend(preserved_results)
+        logger.info(
+            "Incremental SEC preflight preserved %s ticker(s) and selected %s ticker(s) for collection.",
+            len(preserved_results),
+            len(work_items),
+        )
     logger.info(
         "Collecting %s tickers with %s worker(s), ticker retries=%s, request timeout=%.1fs",
         len(work_items),
@@ -411,6 +646,8 @@ def main() -> None:
             return
         assert result is not None
         result["_index"] = index
+        result.setdefault("collection_status", "collected")
+        _record_collected_sec_state(result, item, incremental_sec=args.incremental_sec, save=save)
         if result["collectable_coverage_percent"] < args.min_coverage:
             skipped_low_fidelity.append(
                 {
