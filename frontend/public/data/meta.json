@@ -5,7 +5,7 @@
   "market_date_counts": {
     "2026-09-28": 77
   },
-  "source": "github_actions_price_refresh",
+  "source": "github_actions_static_export",
   "stock_count": 77,
   "tickers": [
     "AAPL",
