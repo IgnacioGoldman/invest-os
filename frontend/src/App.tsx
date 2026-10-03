@@ -33,6 +33,41 @@ import "./styles.css";
 
 const isActiveRefreshJob = (job: RefreshJob) => job.status === "queued" || job.status === "running";
 const isExplorationBetaRefreshJob = (job: RefreshJob) => job.source === "exploration_beta";
+const APP_BASE_PATH = import.meta.env.BASE_URL;
+
+function normalizeRouteValue(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function readableStockSlug(snapshot: Pick<OpenDataStockSnapshot, "ticker" | "name">) {
+  const rawName = snapshot.name?.trim();
+  const firstNamePart = rawName?.split(/[,.]/)[0]?.trim().split(/\s+/)[0];
+  const candidate = firstNamePart || snapshot.ticker;
+  const slug = candidate.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return slug || snapshot.ticker;
+}
+
+function routeSegmentFromLocation() {
+  const pathname = window.location.pathname;
+  const base = APP_BASE_PATH.endsWith("/") ? APP_BASE_PATH : `${APP_BASE_PATH}/`;
+  if (!pathname.startsWith(base)) return null;
+  const segment = pathname.slice(base.length).split("/")[0];
+  return segment ? decodeURIComponent(segment) : null;
+}
+
+function stockFromRouteSegment(stocks: OpenDataStockSnapshot[], segment: string | null) {
+  if (!segment) return null;
+  const normalizedSegment = normalizeRouteValue(segment);
+  return stocks.find((snapshot) => (
+    normalizeRouteValue(readableStockSlug(snapshot)) === normalizedSegment
+    || normalizeRouteValue(snapshot.ticker) === normalizedSegment
+  )) ?? null;
+}
+
+function stockRoutePath(snapshot: OpenDataStockSnapshot) {
+  const base = APP_BASE_PATH.endsWith("/") ? APP_BASE_PATH : `${APP_BASE_PATH}/`;
+  return `${base}${encodeURIComponent(readableStockSlug(snapshot))}`;
+}
 
 function currentMatchDate() {
   return new Intl.DateTimeFormat("sv-SE", {
@@ -58,6 +93,7 @@ export default function App() {
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
   const [watchlistTickers, setWatchlistTickers] = useState<string[]>([]);
   const [filterBadgeCounts, setFilterBadgeCounts] = useState<Record<string, number>>({});
+  const [routeSegment, setRouteSegment] = useState(() => routeSegmentFromLocation());
 
   const loadStocks = useCallback(async () => {
     setLoading(true);
@@ -94,6 +130,23 @@ export default function App() {
     void loadJobs();
     void loadUniverse();
   }, [loadJobs, loadStocks, loadUniverse]);
+
+  useEffect(() => {
+    const updateRouteSegment = () => setRouteSegment(routeSegmentFromLocation());
+    window.addEventListener("popstate", updateRouteSegment);
+    return () => window.removeEventListener("popstate", updateRouteSegment);
+  }, []);
+
+  const routeSnapshot = useMemo(
+    () => stockFromRouteSegment(stocks, routeSegment),
+    [routeSegment, stocks],
+  );
+
+  useEffect(() => {
+    if (routeSnapshot && selectedTicker !== routeSnapshot.ticker) {
+      setSelectedTicker(routeSnapshot.ticker);
+    }
+  }, [routeSnapshot, selectedTicker]);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -237,6 +290,20 @@ export default function App() {
     setWatchlistTickers((current) => current.filter((symbol) => symbol !== ticker));
   };
 
+  const selectStockForSharing = (ticker: string) => {
+    setSelectedTicker(ticker);
+    const snapshot = stocks.find((item) => item.ticker === ticker);
+    if (!snapshot) return;
+    window.history.pushState({}, "", stockRoutePath(snapshot));
+    setRouteSegment(routeSegmentFromLocation());
+  };
+
+  const closeSharedStockView = () => {
+    const base = APP_BASE_PATH.endsWith("/") ? APP_BASE_PATH : `${APP_BASE_PATH}/`;
+    window.history.pushState({}, "", base);
+    setRouteSegment(null);
+  };
+
   const stockSearchNeedle = stockSearch.trim().toLowerCase();
   const stockSearchResults = universe
     .filter((item) => {
@@ -338,7 +405,9 @@ export default function App() {
           snapshots={stocks}
           selectedTicker={selectedTicker}
           loading={loading}
-          onSelectTicker={setSelectedTicker}
+          onSelectTicker={selectStockForSharing}
+          routeDetailOpen={Boolean(routeSnapshot)}
+          onCloseDetail={closeSharedStockView}
           actions={betaActions}
           headerActions={() => (
             <PersonalizationControls

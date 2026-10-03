@@ -36,6 +36,8 @@ type Props = {
   selectedTicker: string;
   loading: boolean;
   onSelectTicker: (ticker: string) => void;
+  routeDetailOpen?: boolean;
+  onCloseDetail?: () => void;
   actions?: ReactNode;
   headerActions?: (openTicker: (ticker: string) => void) => ReactNode;
   editMode?: boolean;
@@ -2218,6 +2220,8 @@ export function MobileStockExplorer({
   selectedTicker,
   loading,
   onSelectTicker,
+  routeDetailOpen,
+  onCloseDetail,
   actions,
   headerActions,
   editMode = false,
@@ -2314,6 +2318,11 @@ export function MobileStockExplorer({
     setPage((value) => Math.min(value, totalPages));
   }, [totalPages]);
 
+  useEffect(() => {
+    if (routeDetailOpen === undefined) return;
+    setDetailOpen(routeDetailOpen);
+  }, [routeDetailOpen]);
+
   const goToPage = (nextPage: number) => {
     const boundedPage = Math.max(1, Math.min(totalPages, nextPage));
     if (boundedPage === currentPage) return;
@@ -2388,10 +2397,15 @@ export function MobileStockExplorer({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const closeDetail = () => {
+    setDetailOpen(false);
+    onCloseDetail?.();
+  };
+
   if (detailOpen && selectedSnapshot) {
     return (
       <div className="mobile-stock-app">
-        <StockDetail snapshot={selectedSnapshot} onBack={() => setDetailOpen(false)} />
+        <StockDetail snapshot={selectedSnapshot} onBack={closeDetail} />
       </div>
     );
   }
