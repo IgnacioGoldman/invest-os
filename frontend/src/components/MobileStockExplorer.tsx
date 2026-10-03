@@ -1550,7 +1550,12 @@ function WatchlistSheet({
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Find a symbol or company"
             aria-label="Find stocks for watchlist"
-            autoFocus
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="none"
+            enterKeyHint="search"
+            inputMode="search"
+            spellCheck={false}
           />
           {query && <button type="button" onClick={() => setQuery("")} aria-label="Clear watchlist search"><X size={16} /></button>}
         </label>
