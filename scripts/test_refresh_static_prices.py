@@ -99,6 +99,8 @@ class RefreshStaticPricesTests(unittest.TestCase):
 
         self.assertEqual(provider._parse_adjusted_eps_growth_yoy(table), 35)
         self.assertEqual(provider._parse_adjusted_eps_growth_yoy("Non-GAAP EPS of $0.81, up 35% year-over-year"), 35)
+        self.assertEqual(provider._parse_adjusted_eps_growth_yoy("Core EPS increased 17% to $4.66"), 17)
+        self.assertEqual(provider._parse_adjusted_eps_growth_yoy("Adjusted diluted earnings per share rose 12% year-over-year"), 12)
         self.assertIsNone(
             provider._parse_adjusted_eps_growth_yoy(
                 "Outlook for Q3: Non-GAAP EPS of $0.84 to $0.88, representing growth of 28% to 35% YoY"
@@ -210,7 +212,8 @@ class RefreshStaticPricesTests(unittest.TestCase):
         }
         tried_accessions: list[str] = []
 
-        def exhibits(_: int, accession_number: str) -> list[OpenDataFilingExhibit]:
+        def exhibits(_: int, filing: dict[str, str] | str) -> list[OpenDataFilingExhibit]:
+            accession_number = filing["accession_number"] if isinstance(filing, dict) else filing
             tried_accessions.append(accession_number)
             if accession_number == "0001543151-26-000027":
                 return [
@@ -252,6 +255,31 @@ class RefreshStaticPricesTests(unittest.TestCase):
 
         self.assertEqual(candidates[0]["accession_number"], "0001628280-26-056699")
         self.assertEqual(candidates[1]["accession_number"], "0000006951-17-000030")
+
+    def test_adjusted_eps_prioritizes_financial_6k_period_reports(self) -> None:
+        provider = OpenDataProvider(max_sec_archive_lookups=3)
+        recent = {
+            "form": ["6-K", "6-K", "6-K"],
+            "filingDate": ["2026-03-31", "2025-07-29", "2025-04-29"],
+            "reportDate": ["2026-03-31", "2025-06-30", "2025-04-29"],
+            "accessionNumber": ["0001654954-26-003013", "0001104659-25-071432", "0001654954-25-004737"],
+            "items": ["", "", ""],
+            "primaryDocument": ["a7230y.htm", "azn-20250630x6k.htm", "a5242g.htm"],
+            "primaryDocDescription": [
+                "EFZIMFOTASE ALFA PH3 PROGRAM SHOW POSITIVE RESULTS",
+                "FORM 6-K",
+                "1ST QUARTER RESULTS",
+            ],
+        }
+
+        candidates = provider._adjusted_eps_candidate_filings(recent)
+
+        self.assertEqual(candidates[0]["accession_number"], "0001654954-25-004737")
+        self.assertEqual(candidates[1]["accession_number"], "0001104659-25-071432")
+        self.assertEqual(candidates[2]["accession_number"], "0001654954-26-003013")
+
+        targeted = provider._adjusted_eps_candidate_filings(recent, target_report_date="2025-06-30")
+        self.assertEqual(targeted[0]["accession_number"], "0001104659-25-071432")
 
     def test_hydrate_falls_back_to_local_data_for_new_tickers(self) -> None:
         with TemporaryDirectory() as directory:

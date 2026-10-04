@@ -338,7 +338,19 @@ function formatMetric(metric: OpenDataMetric | undefined, kind: MetricKind) {
   return formatNumber(value);
 }
 
-function growthSignal(value?: number | null): Signal {
+function unavailableMetric(metric?: OpenDataMetric | null) {
+  return metric?.tier === "unavailable_open_free";
+}
+
+function metricSignalValue(valueOrMetric?: number | OpenDataMetric | null) {
+  return typeof valueOrMetric === "number" || valueOrMetric == null ? valueOrMetric : valueOrMetric.value;
+}
+
+function growthSignal(valueOrMetric?: number | OpenDataMetric | null): Signal {
+  const value = metricSignalValue(valueOrMetric);
+  if (value == null && unavailableMetric(typeof valueOrMetric === "object" ? valueOrMetric : null)) {
+    return { label: "Unavailable", tone: "neutral" };
+  }
   if (value == null) return { label: "Unclear", tone: "neutral" };
   if (value >= 20) return { label: "Strong", tone: "positive" };
   if (value >= 8) return { label: "Solid", tone: "positive" };
@@ -534,8 +546,8 @@ function inferredSupportLevel(currentPrice?: number | null, supportDistance?: nu
 }
 
 function signalFor(snapshot: OpenDataStockSnapshot, key: FilterKey): Signal {
-  if (key === "revenue") return growthSignal(snapshot.business_health.revenue_growth_yoy?.value);
-  if (key === "eps") return growthSignal(epsGaapMetric(snapshot)?.value);
+  if (key === "revenue") return growthSignal(snapshot.business_health.revenue_growth_yoy);
+  if (key === "eps") return growthSignal(epsGaapMetric(snapshot));
   if (key === "fcf_margin") return fcfMarginSignal(snapshot.business_health.fcf_margin?.value);
   if (key === "valuation") return valuationSignal(snapshot);
   if (key === "momentum") return revenueMomentum(snapshot);
@@ -617,7 +629,7 @@ function rowMetric(
   }
   if (key === "revenue" || key === "eps") {
     const metric = key === "revenue" ? snapshot.business_health.revenue_growth_yoy : epsGaapMetric(snapshot);
-    return { value: formatPercent(metric?.value, true), signal: growthSignal(metric?.value), secondary: null };
+    return { value: formatPercent(metric?.value, true), signal: growthSignal(metric), secondary: null };
   }
   if (key === "fcf_margin") {
     const metric = snapshot.business_health.fcf_margin;
@@ -1995,7 +2007,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
   if (detailKey === "eps_adjusted" || detailKey === "eps_alignment") {
     const signal = detailKey === "eps_alignment"
       ? epsAlignmentSignal(epsAlignment)
-      : growthSignal(epsAdjusted?.value);
+      : growthSignal(epsAdjusted);
     const currentValue = detailKey === "eps_alignment"
       ? epsAlignment?.value == null ? epsAlignmentSignal(epsAlignment).label : `${formatNumber(epsAlignment.value)} pp gap`
       : formatMetric(epsAdjusted, "percent");
@@ -2090,11 +2102,11 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
   const [error, setError] = useState<string | null>(null);
   const currentPrice = snapshot.price_opportunity.current_price?.value;
   const dailyChange = snapshot.price_opportunity.change_1d?.value;
-  const revenueSignal = growthSignal(snapshot.business_health.revenue_growth_yoy?.value);
+  const revenueSignal = growthSignal(snapshot.business_health.revenue_growth_yoy);
   const epsAdjusted = epsAdjustedMetric(snapshot);
   const epsGaap = epsGaapMetric(snapshot);
-  const epsAdjustedSignal = growthSignal(epsAdjusted?.value);
-  const epsGaapSignal = growthSignal(epsGaap?.value);
+  const epsAdjustedSignal = growthSignal(epsAdjusted);
+  const epsGaapSignal = growthSignal(epsGaap);
   const epsAlignment = epsAlignmentMetric(snapshot);
   const epsAlignmentStatus = epsAlignmentSignal(epsAlignment);
   const fcfMarginMetric = snapshot.business_health.fcf_margin;

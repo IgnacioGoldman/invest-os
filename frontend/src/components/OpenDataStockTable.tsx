@@ -812,9 +812,9 @@ function filterValueFor(
   if (field === "industry") return snapshot.industry ?? "";
   if (field === "exchange") return snapshot.exchange ?? "";
   if (field === "region") return snapshot.country ?? "";
-  if (field === "temp:revenue_growth_signal") return revenueGrowthSignal(snapshot.business_health.revenue_growth_yoy?.value).label;
+  if (field === "temp:revenue_growth_signal") return revenueGrowthSignal(snapshot.business_health.revenue_growth_yoy).label;
   if (field === "temp:revenue_momentum") return revenueGrowthMomentum(snapshot).label;
-  if (field === "temp:eps_growth_signal") return epsGrowthSignal(epsGaapMetric(snapshot)?.value).label;
+  if (field === "temp:eps_growth_signal") return epsGrowthSignal(epsGaapMetric(snapshot)).label;
   if (field.startsWith("temp:support:")) {
     const key = field.slice("temp:support:".length);
     return supportSignalLabel(snapshot.price_opportunity[key]?.value);
@@ -976,16 +976,34 @@ function quarterlyEpsGrowthPoints(snapshot: OpenDataStockSnapshot) {
   return quarterlyMetricGrowthPoints(snapshot, "eps_diluted");
 }
 
-function revenueGrowthSignal(value?: number | null): { label: string; tone: Tone; detail: string } {
-  if (value == null) return { label: "Unclear", tone: "neutral", detail: "Comparable quarterly revenue YoY is unavailable." };
+function unavailableMetric(metric?: OpenDataMetric | null) {
+  return metric?.tier === "unavailable_open_free";
+}
+
+function metricSignalValue(valueOrMetric?: number | OpenDataMetric | null) {
+  return typeof valueOrMetric === "number" || valueOrMetric == null ? valueOrMetric : valueOrMetric.value;
+}
+
+function revenueGrowthSignal(valueOrMetric?: number | OpenDataMetric | null): { label: string; tone: Tone; detail: string } {
+  const value = metricSignalValue(valueOrMetric);
+  if (value == null) {
+    return unavailableMetric(typeof valueOrMetric === "object" ? valueOrMetric : null)
+      ? { label: "Unavailable", tone: "neutral", detail: "Comparable quarterly revenue YoY is unavailable." }
+      : { label: "Unclear", tone: "neutral", detail: "Comparable quarterly revenue YoY is unavailable." };
+  }
   if (value >= 20) return { label: "Strong", tone: "good", detail: "Latest-quarter revenue YoY is at least 20%." };
   if (value >= 8) return { label: "Solid", tone: "good", detail: "Latest-quarter revenue YoY is at least 8%." };
   if (value >= 0) return { label: "Mixed", tone: "watch", detail: "Latest-quarter revenue YoY is positive but below 8%." };
   return { label: "Weak", tone: "caution", detail: "Latest-quarter revenue YoY is negative." };
 }
 
-function epsGrowthSignal(value?: number | null): { label: string; tone: Tone; detail: string } {
-  if (value == null) return { label: "Unclear", tone: "neutral", detail: "Comparable quarterly EPS YoY is unavailable." };
+function epsGrowthSignal(valueOrMetric?: number | OpenDataMetric | null): { label: string; tone: Tone; detail: string } {
+  const value = metricSignalValue(valueOrMetric);
+  if (value == null) {
+    return unavailableMetric(typeof valueOrMetric === "object" ? valueOrMetric : null)
+      ? { label: "Unavailable", tone: "neutral", detail: "Comparable quarterly EPS YoY is unavailable." }
+      : { label: "Unclear", tone: "neutral", detail: "Comparable quarterly EPS YoY is unavailable." };
+  }
   if (value >= 20) return { label: "Strong", tone: "good", detail: "Latest-quarter EPS YoY is at least 20%." };
   if (value >= 8) return { label: "Solid", tone: "good", detail: "Latest-quarter EPS YoY is at least 8%." };
   if (value >= 0) return { label: "Mixed", tone: "watch", detail: "Latest-quarter EPS YoY is positive but below 8%." };
@@ -1805,8 +1823,8 @@ function StocksInsightsTempTable({
               {rows.map((snapshot) => {
                 const revenueGrowth = snapshot.business_health.revenue_growth_yoy;
                 const epsGrowth = epsGaapMetric(snapshot);
-	                const growthSignal = revenueGrowthSignal(revenueGrowth?.value);
-	                const epsSignal = epsGrowthSignal(epsGrowth?.value);
+	                const growthSignal = revenueGrowthSignal(revenueGrowth);
+	                const epsSignal = epsGrowthSignal(epsGrowth);
 	                const momentum = revenueGrowthMomentum(snapshot);
 	                const support = closestSupportInsight(snapshot);
 	                const supportSignal = supportSignalLabel(support?.value);
@@ -2236,7 +2254,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
           label: "Revenue Growth",
           values: uniqueOptions(
             snapshots.map((snapshot) => {
-              const signal = revenueGrowthSignal(snapshot.business_health.revenue_growth_yoy?.value);
+              const signal = revenueGrowthSignal(snapshot.business_health.revenue_growth_yoy);
               return { value: signal.label, label: signal.label };
             }),
           ),
@@ -2256,7 +2274,7 @@ export const OpenDataStockTable = memo(function OpenDataStockTable({
           label: "GAAP EPS Growth",
           values: uniqueOptions(
             snapshots.map((snapshot) => {
-              const signal = epsGrowthSignal(epsGaapMetric(snapshot)?.value);
+              const signal = epsGrowthSignal(epsGaapMetric(snapshot));
               return { value: signal.label, label: signal.label };
             }),
           ),

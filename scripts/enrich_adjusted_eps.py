@@ -120,6 +120,8 @@ def _tickers_from_refresh_report(path: Path) -> set[str]:
 def _patch_eps_metrics(
     snapshot: OpenDataSnapshot,
     adjusted: OpenDataMetric | None,
+    *,
+    verified_unavailable: bool = True,
 ) -> tuple[OpenDataSnapshot, bool]:
     gaap = snapshot.business_health.get("eps_gaap_growth_yoy") or snapshot.business_health.get("eps_growth_yoy")
     if gaap is None:
@@ -127,6 +129,8 @@ def _patch_eps_metrics(
 
     before = snapshot.model_dump(mode="json")
     existing_adjusted = snapshot.business_health.get("eps_adjusted_growth_yoy")
+    if adjusted is None and not verified_unavailable:
+        return snapshot, False
     if (
         adjusted is not None
         and existing_adjusted is not None
@@ -192,8 +196,18 @@ def enrich_adjusted_eps(
         for index, snapshot in enumerate(snapshots, start=1):
             assert snapshot.cik is not None
             started = time.monotonic()
-            adjusted = _cached_adjusted_eps(cache, snapshot.cik) if cache_only else provider.fetch_adjusted_eps_growth_yoy(snapshot.cik)
-            patched, changed = _patch_eps_metrics(snapshot, adjusted)
+            gaap = snapshot.business_health.get("eps_gaap_growth_yoy") or snapshot.business_health.get("eps_growth_yoy")
+            target_report_date = gaap.as_of if gaap is not None else None
+            adjusted = (
+                _cached_adjusted_eps(cache, snapshot.cik)
+                if cache_only
+                else provider.fetch_adjusted_eps_growth_yoy(snapshot.cik, target_report_date=target_report_date)
+            )
+            patched, changed = _patch_eps_metrics(
+                snapshot,
+                adjusted,
+                verified_unavailable=cache_only or provider.last_adjusted_eps_lookup_complete,
+            )
             if changed:
                 changed_count += 1
                 if not dry_run:
