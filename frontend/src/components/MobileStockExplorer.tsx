@@ -843,8 +843,8 @@ const BUILT_IN_PRESET_COPY: Record<BuiltInPreset, BuiltInPresetCopy> = {
       "Companies with strong latest revenue growth and cheap or fair valuation that are going through a shorter-term correction, with price at or near support zones identified across the past 1M, 3M, and 6M.",
   },
   earnings: {
-    name: "Upcoming earnings with strong YoY",
-    summary: "Companies reporting earnings this week with Strong or Solid latest revenue growth YoY.",
+    name: "Earnings next 30d + strong YoY",
+    summary: "Companies reporting earnings this week or in the next 30 days with Strong or Solid latest revenue growth YoY.",
   },
 };
 
@@ -880,7 +880,7 @@ function exportFilterContext(
     : preset === "pullback"
       ? "Strong growth, fair value on pullback"
       : preset === "earnings"
-        ? "Upcoming earnings with strong YoY"
+        ? "Earnings next 30d + strong YoY"
         : null;
   return {
     name: activeSavedFilter?.name ?? presetName ?? builtInPresetName(preset) ?? "Custom filter",
