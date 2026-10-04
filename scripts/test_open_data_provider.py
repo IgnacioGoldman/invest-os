@@ -13,7 +13,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from app.entry_engine.open_data_metrics import compute_open_data_snapshot  # noqa: E402
+from app.entry_engine.open_data_metrics import _support_distance_metric, compute_open_data_snapshot  # noqa: E402
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataMetric  # noqa: E402
 from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
 from app.entry_engine.utils.file_storage import load_stock_universe  # noqa: E402
@@ -175,6 +175,26 @@ class OpenDataProviderTests(unittest.TestCase):
         self.assertEqual(metric.value, 14)
         self.assertEqual(metric.source, "yfinance:earningsTimestampStart:2027-01-15/2027-01-18")
         self.assertIn("2027-01-15 to 2027-01-18", metric.notes)
+
+    def test_support_metric_keeps_zone_when_price_is_inside_lower_half(self) -> None:
+        history_path = ROOT / "frontend" / "public" / "data" / "open-data" / "price-history" / "PEP.json"
+        points = [HistoricalPricePoint(**row) for row in json.loads(history_path.read_text(encoding="utf-8"))]
+
+        metric = _support_distance_metric(
+            "support_2y_distance",
+            "2Y",
+            365 * 2,
+            points,
+            points[-1].close,
+            "test_history",
+            points[-1].date,
+            points[-1].date,
+        )
+
+        self.assertIsNotNone(metric.value)
+        assert metric.value is not None
+        self.assertLess(metric.value, 0)
+        self.assertIn("Support zone: $125.74-$133.43", metric.notes)
 
 
 if __name__ == "__main__":

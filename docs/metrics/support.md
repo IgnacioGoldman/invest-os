@@ -34,7 +34,7 @@ For each window, such as 1M, 3M, 6M, 1Y, 2Y, or 5Y, the app:
 3. Groups nearby swing lows into price clusters.
 4. Uses a wider cluster for more volatile stocks, capped at 4%.
 5. Requires enough separated touches for the window.
-6. Filters out zones above the latest close, stale zones, and areas that look more like reclaimed resistance than support.
+6. Filters out zones entirely above the latest close, stale zones, and areas that look more like reclaimed resistance than support.
 7. Reports the distance from the latest close to the selected zone midpoint.
 
 Short windows can be more tactical. The 1M window can use one touch. Longer windows, including 3M, 6M, 1Y, 2Y, and 5Y, need at least two touches separated by at least 15 days.

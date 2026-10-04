@@ -1870,7 +1870,7 @@ def _valid_support_zones(
     for zone in _support_zones(points, latest_date, lookback_days):
         if _zone_age_days(zone, latest_date) > max_age_days:
             continue
-        if zone.midpoint > current_price * 1.005:
+        if zone.low > current_price * 1.005:
             continue
         if _is_reclaim_or_resistance_test(points, zone, current_price):
             continue
@@ -1924,7 +1924,7 @@ def _support_distance_metric(
         tier="computed_from_public_facts",
         as_of=as_of,
         notes=(
-            f"Primary {label} support floor below/reclaimed by the latest close. "
+            f"Primary {label} support floor below, overlapping, or reclaimed by the latest close. "
             f"Support zone: ${zone.low:.2f}-${zone.high:.2f}; midpoint ${zone.midpoint:.2f}; "
             f"distance {distance:+.2f}%; touches {zone.touches}; "
             f"first touch {zone.first_touch}; last touch {zone.last_touch}; "
