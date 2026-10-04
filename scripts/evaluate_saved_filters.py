@@ -57,9 +57,29 @@ def _strong_yoy_expression(support_fields: list[str]) -> dict[str, Any]:
     }
 
 
+def _upcoming_earnings_expression() -> dict[str, Any]:
+    return {
+        "operator": "and",
+        "groups": [
+            {
+                "operator": "or",
+                "conditions": [{"field": "upcoming_earnings", "value": "This week"}],
+            },
+            {
+                "operator": "or",
+                "conditions": [
+                    {"field": "revenue", "value": "Strong"},
+                    {"field": "revenue", "value": "Solid"},
+                ],
+            },
+        ],
+    }
+
+
 BUILT_IN_FILTERS = {
     "builtin:pullback": _strong_yoy_expression(["support_1m", "support_3m", "support_6m"]),
     "builtin:support": _strong_yoy_expression(["support_1y", "support_2y", "support_5y"]),
+    "builtin:earnings_this_week": _upcoming_earnings_expression(),
 }
 
 
@@ -93,6 +113,18 @@ def _support_signal(value: float | None) -> str:
     if value <= 6:
         return "Near support"
     return "Above support"
+
+
+def _upcoming_earnings_signal(value: float | None) -> str:
+    if value is None:
+        return "Unclear"
+    if value <= 7:
+        return "This week"
+    if value <= 21:
+        return "Soon"
+    if value <= 45:
+        return "Upcoming"
+    return "Later"
 
 
 def _valuation_signal(snapshot: dict[str, Any]) -> str:
@@ -171,6 +203,8 @@ def signal_for(snapshot: dict[str, Any], field: str) -> str:
         return _revenue_momentum(snapshot)
     if field == "valuation":
         return _valuation_signal(snapshot)
+    if field == "upcoming_earnings":
+        return _upcoming_earnings_signal(_metric_value(snapshot, "price_opportunity", "days_to_next_earnings"))
     metric = SUPPORT_METRICS.get(field)
     return _support_signal(_metric_value(snapshot, "price_opportunity", metric)) if metric else "Unclear"
 

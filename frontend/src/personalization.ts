@@ -3,6 +3,7 @@ import { requireSupabase } from "./supabase";
 
 export const PULLBACK_FILTER_KEY = "builtin:pullback";
 export const SUPPORT_FILTER_KEY = "builtin:support";
+export const EARNINGS_THIS_WEEK_FILTER_KEY = "builtin:earnings_this_week";
 
 export function savedFilterKey(filterId: string) {
   return `saved:${filterId}`;

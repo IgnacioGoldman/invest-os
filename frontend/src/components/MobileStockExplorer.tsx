@@ -24,6 +24,7 @@ import {
   type OpenDataStockSnapshot,
 } from "../api";
 import {
+  EARNINGS_THIS_WEEK_FILTER_KEY,
   PULLBACK_FILTER_KEY,
   SUPPORT_FILTER_KEY,
   savedFilterKey,
@@ -73,6 +74,7 @@ export type FilterKey =
   | "eps"
   | "fcf_margin"
   | "valuation"
+  | "upcoming_earnings"
   | "support_1m"
   | "support_3m"
   | "support_6m"
@@ -165,7 +167,7 @@ type FilterDefinition = {
   key: FilterKey;
   label: string;
   shortLabel: string;
-  section: "Growth" | "Quality" | "Support";
+  section: "Growth" | "Quality" | "Catalyst" | "Support";
   description: string;
   options: Array<{ label: string; tone: Tone }>;
 };
@@ -183,7 +185,7 @@ const SUPPORT_FILTER_KEYS = ["support_1m", "support_3m", "support_6m", "support_
 const PULLBACK_SUPPORT_FILTER_KEYS = ["support_1m", "support_3m", "support_6m"] as const;
 const SUPPORT_PRESET_FILTER_KEYS = ["support_1y", "support_2y", "support_5y"] as const;
 type SupportFilterKey = typeof SUPPORT_FILTER_KEYS[number];
-type BuiltInPreset = "pullback" | "support";
+type BuiltInPreset = "pullback" | "support" | "earnings";
 type BuiltInPresetCopy = {
   name: string;
   summary: string;
@@ -256,6 +258,20 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
       { label: "Fair", tone: "positive" },
       { label: "Pricey", tone: "warning" },
       { label: "Very pricey", tone: "negative" },
+      { label: "Unclear", tone: "neutral" },
+    ],
+  },
+  {
+    key: "upcoming_earnings",
+    label: "Upcoming earnings",
+    shortLabel: "Earnings",
+    section: "Catalyst",
+    description: "Days until the next expected earnings release date or earnings window.",
+    options: [
+      { label: "This week", tone: "warning" },
+      { label: "Soon", tone: "info" },
+      { label: "Upcoming", tone: "neutral" },
+      { label: "Later", tone: "neutral" },
       { label: "Unclear", tone: "neutral" },
     ],
   },
@@ -572,6 +588,7 @@ function signalFor(snapshot: OpenDataStockSnapshot, key: FilterKey): Signal {
   if (key === "fcf_margin") return fcfMarginSignal(snapshot.business_health.fcf_margin?.value);
   if (key === "valuation") return valuationSignal(snapshot);
   if (key === "momentum") return revenueMomentum(snapshot);
+  if (key === "upcoming_earnings") return upcomingEarningsSignal(upcomingEarningsMetric(snapshot));
   return supportSignal(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
 }
 
@@ -625,6 +642,7 @@ function sortValue(
   if (key === "fcf_margin") return finiteNumber(snapshot.business_health.fcf_margin?.value);
   if (key === "valuation") return valuationSortScore(snapshot);
   if (key === "momentum") return revenueMomentum(snapshot).change;
+  if (key === "upcoming_earnings") return finiteNumber(upcomingEarningsMetric(snapshot)?.value);
   return finiteNumber(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
 }
 
@@ -669,6 +687,14 @@ function rowMetric(
       value: formatPercent(momentum.change, true),
       signal: momentum,
       secondary: null,
+    };
+  }
+  if (key === "upcoming_earnings") {
+    const metric = upcomingEarningsMetric(snapshot);
+    return {
+      value: formatMetric(metric, "days"),
+      signal: upcomingEarningsSignal(metric),
+      secondary: "Next report",
     };
   }
   if (key === "support_best") {
@@ -721,6 +747,14 @@ function createValuationConditions() {
   ];
 }
 
+function createStrongOrSolidYoyGroup(): FilterGroup {
+  return {
+    id: nextFilterId("group"),
+    operator: "or",
+    conditions: [createCondition("revenue", "Strong"), createCondition("revenue", "Solid")],
+  };
+}
+
 function createStrongYoyExpression(preset: BuiltInPreset): FilterExpression {
   const supportFields = preset === "pullback" ? PULLBACK_SUPPORT_FILTER_KEYS : SUPPORT_PRESET_FILTER_KEYS;
   return {
@@ -731,11 +765,7 @@ function createStrongYoyExpression(preset: BuiltInPreset): FilterExpression {
         operator: "or",
         conditions: createSupportConditions(supportFields),
       },
-      {
-        id: nextFilterId("group"),
-        operator: "or",
-        conditions: [createCondition("revenue", "Strong"), createCondition("revenue", "Solid")],
-      },
+      createStrongOrSolidYoyGroup(),
       {
         id: nextFilterId("group"),
         operator: "or",
@@ -743,6 +773,24 @@ function createStrongYoyExpression(preset: BuiltInPreset): FilterExpression {
       },
     ],
   };
+}
+
+function createUpcomingEarningsExpression(): FilterExpression {
+  return {
+    operator: "and",
+    groups: [
+      {
+        id: nextFilterId("group"),
+        operator: "or",
+        conditions: [createCondition("upcoming_earnings", "This week")],
+      },
+      createStrongOrSolidYoyGroup(),
+    ],
+  };
+}
+
+function createBuiltInPresetExpression(preset: BuiltInPreset): FilterExpression {
+  return preset === "earnings" ? createUpcomingEarningsExpression() : createStrongYoyExpression(preset);
 }
 
 function createEmptyFilterExpression(): FilterExpression {
@@ -767,7 +815,7 @@ function filterExpressionMatches(snapshot: OpenDataStockSnapshot, expression: Fi
 }
 
 function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
-  if (expression.operator !== "and" || expression.groups.length !== 3) return null;
+  if (expression.operator !== "and") return null;
   const signatures = expression.groups.map((group) => ({
     operator: group.operator,
     conditions: group.conditions.map((condition) => `${condition.field}:${condition.value}`).sort(),
@@ -777,6 +825,13 @@ function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
     (group) => group.operator === "or" && group.conditions.join("|") === growthSignature.join("|"),
   );
   if (!hasGrowthGroup) return null;
+  if (
+    expression.groups.length === 2
+    && signatures.some((group) => group.operator === "or" && group.conditions.join("|") === "upcoming_earnings:This week")
+  ) {
+    return "earnings";
+  }
+  if (expression.groups.length !== 3) return null;
   const valuationSignature = ["valuation:Cheap", "valuation:Fair"];
   const hasValuationGroup = signatures.some(
     (group) => group.operator === "or" && group.conditions.join("|") === valuationSignature.join("|"),
@@ -805,6 +860,10 @@ const BUILT_IN_PRESET_COPY: Record<BuiltInPreset, BuiltInPresetCopy> = {
     name: "Strong YoY, fair value and pullback",
     summary:
       "Companies with strong latest revenue growth and cheap or fair valuation that are going through a shorter-term correction, with price at or near support zones identified across the past 1M, 3M, and 6M.",
+  },
+  earnings: {
+    name: "Upcoming earnings with strong YoY",
+    summary: "Companies reporting earnings this week with Strong or Solid latest revenue growth YoY.",
   },
 };
 
@@ -839,7 +898,9 @@ function exportFilterContext(
     ? "Strong growth, fair value at support"
     : preset === "pullback"
       ? "Strong growth, fair value on pullback"
-      : null;
+      : preset === "earnings"
+        ? "Upcoming earnings with strong YoY"
+        : null;
   return {
     name: activeSavedFilter?.name ?? presetName ?? builtInPresetName(preset) ?? "Custom filter",
     summary: builtInPresetSummary(preset) ?? filterExpressionSummary(expression, count),
@@ -1077,6 +1138,7 @@ function FilterSheet({
   onExpressionChange,
   onApplyPullbackPreset,
   onApplySupportPreset,
+  onApplyEarningsPreset,
   onSortKeyChange,
   onSortDirectionChange,
   onClear,
@@ -1094,6 +1156,7 @@ function FilterSheet({
   onExpressionChange: (expression: FilterExpression) => void;
   onApplyPullbackPreset: () => void;
   onApplySupportPreset: () => void;
+  onApplyEarningsPreset: () => void;
   onSortKeyChange: (key: SortKey) => void;
   onSortDirectionChange: (direction: SortDirection) => void;
   onClear: () => void;
@@ -1488,6 +1551,7 @@ function FilterSheet({
                 <p>Use groups for parentheses, then choose whether groups and conditions use AND or OR.</p>
                 <div>
                   <button type="button" onClick={addGroup}><Plus size={16} />New filter</button>
+                  <button type="button" onClick={onApplyEarningsPreset}>Use Earnings preset</button>
                   <button type="button" onClick={onApplySupportPreset}>Use Support preset</button>
                   <button type="button" onClick={onApplyPullbackPreset}>Use Pullback preset</button>
                 </div>
@@ -2409,8 +2473,8 @@ export function MobileStockExplorer({
   const toggleBuiltInPreset = (preset: BuiltInPreset) => {
     setFilterExpression(builtInPreset === preset
       ? { operator: "and", groups: [] }
-      : createStrongYoyExpression(preset));
-    setSortKey(preset === "pullback" ? "support_1m" : "support_best");
+      : createBuiltInPresetExpression(preset));
+    setSortKey(preset === "earnings" ? "upcoming_earnings" : preset === "pullback" ? "support_1m" : "support_best");
     setSortDirection("asc");
     setActiveSavedFilterId(null);
   };
@@ -2521,6 +2585,11 @@ export function MobileStockExplorer({
             {builtInPreset === "pullback" && <Check size={15} />}
             Strong YoY and on pullback
             <FilterNewBadge count={personalization?.filterBadgeCounts[PULLBACK_FILTER_KEY]} />
+          </button>
+          <button type="button" className={builtInPreset === "earnings" ? "active" : ""} onClick={() => toggleBuiltInPreset("earnings")}>
+            {builtInPreset === "earnings" && <Check size={15} />}
+            Earnings this week + strong YoY
+            <FilterNewBadge count={personalization?.filterBadgeCounts[EARNINGS_THIS_WEEK_FILTER_KEY]} />
           </button>
           {personalization?.signedIn && personalization.savedFilters.map((filter) => (
             <button
@@ -2687,6 +2756,7 @@ export function MobileStockExplorer({
         onExpressionChange={setFilterExpression}
         onApplyPullbackPreset={() => toggleBuiltInPreset("pullback")}
         onApplySupportPreset={() => toggleBuiltInPreset("support")}
+        onApplyEarningsPreset={() => toggleBuiltInPreset("earnings")}
         onSortKeyChange={setSortKey}
         onSortDirectionChange={setSortDirection}
         onSelectSavedFilter={selectSavedFilter}

@@ -60,6 +60,7 @@ def snapshot(
     fcf_yield: float | None = 4,
     price_to_sales: float | None = 6,
     ev_to_ebitda: float | None = 18,
+    days_to_next_earnings: float | None = None,
 ) -> dict:
     return {
         "ticker": ticker,
@@ -74,6 +75,7 @@ def snapshot(
             "support_1y_distance": {"value": support_1y},
             "support_2y_distance": {"value": support_2y},
             "support_5y_distance": {"value": support_5y},
+            "days_to_next_earnings": {"value": days_to_next_earnings},
         },
         "valuation": {
             "forward_pe": {"value": forward_pe},
@@ -129,6 +131,12 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
         app_like = snapshot("APP_LIKE", 50, 1, 1, forward_pe=14.9, fcf_yield=4.3, price_to_sales=15.4, ev_to_ebitda=19.6)
         self.assertEqual(signal_for(app_like, "valuation"), "Pricey")
 
+        earnings = snapshot("EARNINGS", 20, 2.5, 25, days_to_next_earnings=7)
+        self.assertEqual(signal_for(earnings, "upcoming_earnings"), "This week")
+        self.assertEqual(signal_for(snapshot("SOON", 20, 2.5, 25, days_to_next_earnings=21), "upcoming_earnings"), "Soon")
+        self.assertEqual(signal_for(snapshot("NEXT", 20, 2.5, 25, days_to_next_earnings=45), "upcoming_earnings"), "Upcoming")
+        self.assertEqual(signal_for(snapshot("LATER", 20, 2.5, 25, days_to_next_earnings=46), "upcoming_earnings"), "Later")
+
     def test_pullback_preset_uses_one_three_and_six_month_support(self) -> None:
         row = snapshot("PULLBACK", 12, 12, 30, support_6m=1)
         self.assertTrue(expression_matches(row, BUILT_IN_FILTERS["builtin:pullback"]))
@@ -152,13 +160,26 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
         six_month_only = snapshot("MID", 25, 12, 30, support_6m=1)
         self.assertFalse(expression_matches(six_month_only, BUILT_IN_FILTERS["builtin:support"]))
 
+    def test_upcoming_earnings_preset_requires_this_week_and_strong_or_solid_yoy(self) -> None:
+        strong = snapshot("STRONG", 25, 12, 30, days_to_next_earnings=7)
+        self.assertTrue(expression_matches(strong, BUILT_IN_FILTERS["builtin:earnings_this_week"]))
+
+        solid = snapshot("SOLID", 12, 12, 30, days_to_next_earnings=3)
+        self.assertTrue(expression_matches(solid, BUILT_IN_FILTERS["builtin:earnings_this_week"]))
+
+        weak_growth = snapshot("WEAK", 2, 12, 30, days_to_next_earnings=3)
+        self.assertFalse(expression_matches(weak_growth, BUILT_IN_FILTERS["builtin:earnings_this_week"]))
+
+        later_earnings = snapshot("LATER", 25, 12, 30, days_to_next_earnings=8)
+        self.assertFalse(expression_matches(later_earnings, BUILT_IN_FILTERS["builtin:earnings_this_week"]))
+
     def test_first_run_is_quiet_then_new_match_creates_daily_badge_event(self) -> None:
         client = FakeSupabase()
         evaluated, events = evaluate([snapshot("TEST", 12, 12, 30)], client)
-        self.assertEqual((evaluated, events), (2, 0))
+        self.assertEqual((evaluated, events), (3, 0))
 
         evaluated, events = evaluate([snapshot("TEST", 12, 1, 30)], client)
-        self.assertEqual((evaluated, events), (2, 1))
+        self.assertEqual((evaluated, events), (3, 1))
         self.assertEqual(client.events[0]["filter_key"], "builtin:pullback")
         self.assertEqual(client.events[0]["ticker"], "TEST")
 
