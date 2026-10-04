@@ -101,6 +101,12 @@ class RefreshStaticPricesTests(unittest.TestCase):
         self.assertEqual(provider._parse_adjusted_eps_growth_yoy("Non-GAAP EPS of $0.81, up 35% year-over-year"), 35)
         self.assertEqual(provider._parse_adjusted_eps_growth_yoy("Core EPS increased 17% to $4.66"), 17)
         self.assertEqual(provider._parse_adjusted_eps_growth_yoy("Adjusted diluted earnings per share rose 12% year-over-year"), 12)
+        self.assertAlmostEqual(
+            provider._parse_adjusted_eps_growth_yoy(
+                "The company achieved adjusted 3 EPS of $0.86 for the period, compared to $0.75 a year ago."
+            ),
+            (0.86 - 0.75) / 0.75 * 100,
+        )
         self.assertIsNone(
             provider._parse_adjusted_eps_growth_yoy(
                 "Outlook for Q3: Non-GAAP EPS of $0.84 to $0.88, representing growth of 28% to 35% YoY"

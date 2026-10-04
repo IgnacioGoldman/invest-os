@@ -97,8 +97,8 @@ ISSUER_FINANCIAL_WORKBOOKS = {
 }
 SUPPORTED_FX_CURRENCIES = {"USD", "EUR", "GBP", "SEK", "DKK", "CHF", "CAD", "TWD", "JPY", "CNY", "HKD"}
 ADJUSTED_EPS_LABEL_RE = re.compile(
-    r"\b(?:(?:non[-\s]?gaap|adjusted|core)\s+(?:diluted\s+)?(?:eps|earnings\s+per\s+share)|"
-    r"(?:adjusted|core)\s+(?:diluted\s+)?earnings\s+per\s+share)\b",
+    r"\b(?:(?:non[-\s]?gaap|adjusted|core)(?:\s+\d+)?\s+(?:diluted\s+)?(?:eps|earnings\s+per\s+share)|"
+    r"(?:adjusted|core)(?:\s+\d+)?\s+(?:diluted\s+)?earnings\s+per\s+share)\b",
     re.IGNORECASE,
 )
 ADJUSTED_EPS_SKIP_RE = re.compile(
@@ -108,6 +108,11 @@ ADJUSTED_EPS_SKIP_RE = re.compile(
 )
 ADJUSTED_EPS_GROWTH_RE = re.compile(
     r"(?:grew|growth(?:\s+of)?|increased|up|rose)\s*(?:by\s*)?([+-]?\d+(?:\.\d+)?)\s*%",
+    re.IGNORECASE,
+)
+ADJUSTED_EPS_VALUE_COMPARISON_RE = re.compile(
+    r"(?:of|was|were)?\s*\$?\s*([+-]?\d+(?:\.\d+)?)\b.*?\bcompared\s+to\s+\$?\s*([+-]?\d+(?:\.\d+)?)\b"
+    r".*?\b(?:a\s+year\s+ago|year[-\s]?ago|prior\s+year|same\s+period)",
     re.IGNORECASE,
 )
 RESULTS_FILING_RE = re.compile(r"\b(?:earnings|results?|financial|quarter|q[1-4]|interim|half[-\s]?year|full[-\s]?year)\b", re.IGNORECASE)
@@ -1382,7 +1387,8 @@ class OpenDataProvider:
                     as_of=filing["filing_date"],
                     notes=(
                         "Adjusted EPS growth YoY parsed from an official SEC earnings-release exhibit. "
-                        "Accepted only when a high-confidence Non-GAAP, Adjusted, or Core EPS row states a YoY percentage."
+                        "Accepted only when a high-confidence Non-GAAP, Adjusted, or Core EPS row states a YoY "
+                        "percentage or current/prior-year EPS values."
                     ),
                 )
         return None
@@ -1556,6 +1562,12 @@ class OpenDataProvider:
             percent_matches = re.findall(r"([+-]?\d+(?:\.\d+)?)\s*(?:\|\s*)?%", after_label)
             if len(percent_matches) == 1:
                 return float(percent_matches[0])
+            value_match = ADJUSTED_EPS_VALUE_COMPARISON_RE.search(after_label)
+            if value_match:
+                latest_eps = float(value_match.group(1))
+                prior_eps = float(value_match.group(2))
+                if latest_eps > 0 and prior_eps > 0:
+                    return ((latest_eps - prior_eps) / prior_eps) * 100
         return None
 
     def _document_text_lines(self, raw_text: str) -> list[str]:
