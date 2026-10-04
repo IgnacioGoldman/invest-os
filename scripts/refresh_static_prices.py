@@ -18,8 +18,12 @@ import requests
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from app.entry_engine.open_data_metrics import backfill_fcf_margin_metric, compute_price_opportunity_metrics  # noqa: E402
-from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataSnapshot  # noqa: E402
+from app.entry_engine.open_data_metrics import (  # noqa: E402
+    backfill_fcf_margin_metric,
+    compute_price_opportunity_metrics,
+    refresh_next_earnings_countdown,
+)
+from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataMetric, OpenDataSnapshot  # noqa: E402
 from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
 from app.services.storage import (  # noqa: E402
     DB_FILE,
@@ -230,11 +234,16 @@ def refresh_snapshot_prices(
     snapshot: OpenDataSnapshot,
     history: list[HistoricalPricePoint],
     *,
+    next_earnings_release: OpenDataMetric | None = None,
     refreshed_at: datetime | None = None,
 ) -> OpenDataSnapshot:
     snapshot = backfill_fcf_margin_metric(snapshot)
     timestamp = refreshed_at or datetime.now(timezone.utc)
     price_metrics = compute_price_opportunity_metrics(history, fallback_as_of=timestamp.date().isoformat())
+    price_metrics["days_to_next_earnings"] = next_earnings_release or refresh_next_earnings_countdown(
+        snapshot.price_opportunity.get("days_to_next_earnings") or snapshot.metrics.get("days_to_next_earnings"),
+        timestamp.date().isoformat(),
+    )
     metrics = {key: value for key, value in snapshot.metrics.items() if key != "support_1d_distance"}
     metrics.update(price_metrics)
     return snapshot.model_copy(
@@ -318,9 +327,11 @@ def refresh_prices(
         baseline = db_histories.get(ticker) or _load_static_price_history(data_dir, ticker)
         provider = OpenDataProvider(include_filing_details=False)
         history = fetch_updated_history(provider, ticker, baseline)
+        next_earnings_release = provider.fetch_next_earnings_release(ticker, as_of=refreshed_at.date())
         snapshot = refresh_snapshot_prices(
             OpenDataSnapshot.model_validate(raw_snapshot),
             history,
+            next_earnings_release=next_earnings_release,
             refreshed_at=refreshed_at,
         )
         return snapshot, history

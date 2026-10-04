@@ -35,6 +35,7 @@ const COLUMNS = [
   ["business_health", "debt", "Debt", "compact"],
   ["business_health", "debt_to_equity", "D/E", "ratio"],
   ["price_opportunity", "current_price", "Price", "ratio"],
+  ["price_opportunity", "days_to_next_earnings", "Earnings", "days"],
   ["price_opportunity", "support_1m_distance", "Near Support 1M", "percent"],
   ["price_opportunity", "support_3m_distance", "Near Support 3M", "percent"],
   ["price_opportunity", "support_6m_distance", "Near Support 6M", "percent"],
@@ -60,7 +61,7 @@ const COLUMNS = [
   ["valuation", "fcf_yield", "FCF Yield", "percent"],
 ] as const;
 
-type MetricKind = "percent" | "ratio" | "compact";
+type MetricKind = "percent" | "ratio" | "compact" | "days";
 type HistoricalRow = OpenDataStockSnapshot["historical_series"][string][number];
 type DetailKind = "charts" | "analysis" | null;
 type Tone = "good" | "watch" | "caution" | "bad" | "neutral";
@@ -449,6 +450,7 @@ function formatValue(metric: OpenDataMetric | undefined, kind: string) {
   if (metric.value == null && notes.includes("not meaningful")) return "Not meaningful";
   if (kind === "percent") return formatPercent(metric.value);
   if (kind === "ratio") return formatRatio(metric.value);
+  if (kind === "days") return metric.value == null ? "-" : `${formatRatio(metric.value)}d`;
   return formatCompact(metric.value);
 }
 
@@ -709,6 +711,7 @@ function computeDerivedMetrics(snapshot: OpenDataStockSnapshot, context: Derived
 function formatByKind(value: number | null | undefined, kind: MetricKind) {
   if (kind === "percent") return formatPercent(value);
   if (kind === "compact") return formatCompact(value);
+  if (kind === "days") return value == null ? "-" : `${formatRatio(value)}d`;
   return formatRatio(value);
 }
 

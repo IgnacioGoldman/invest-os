@@ -64,6 +64,7 @@ type GrowthDetailKey =
   | "eps_gaap"
   | "eps_alignment"
   | "fcf_margin"
+  | "upcoming_earnings"
   | "support"
   | "forward_pe";
 export type FilterKey =
@@ -96,7 +97,7 @@ export type FilterExpression = {
   groups: FilterGroup[];
 };
 type ChartRange = "1W" | "1M" | "3M" | "6M" | "1Y" | "2Y" | "5Y" | "ALL";
-type MetricKind = "percent" | "ratio" | "compact" | "price";
+type MetricKind = "percent" | "ratio" | "compact" | "price" | "days";
 
 type Signal = {
   label: string;
@@ -145,6 +146,12 @@ const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: str
     question: "What are you paying for expected earnings?",
     description:
       "Compares the current share price with expected earnings per share over the next 12 months. It is a compact first-pass valuation check, not a full valuation model.",
+  },
+  upcoming_earnings: {
+    title: "Upcoming Earnings",
+    question: "Is there an earnings catalyst coming soon?",
+    description:
+      "Counts the days until the next expected earnings release date or earnings window. Earnings releases can be catalysts for sharp price moves, so a lower value means the next scheduled information event is closer.",
   },
   support: {
     title: "Proximity to Support",
@@ -335,6 +342,7 @@ function formatMetric(metric: OpenDataMetric | undefined, kind: MetricKind) {
   if (kind === "percent") return formatPercent(value, true);
   if (kind === "compact") return formatCompact(value);
   if (kind === "price") return formatPrice(value);
+  if (kind === "days") return `${formatNumber(value)}d`;
   return formatNumber(value);
 }
 
@@ -424,6 +432,19 @@ function valuationDetailText(snapshot: OpenDataStockSnapshot) {
     `P/S: ${formatMetric(snapshot.valuation.price_to_sales, "ratio")}.`,
     `EV/EBITDA: ${formatMetric(snapshot.valuation.ev_to_ebitda, "ratio")}.`,
   ].join(" ");
+}
+
+function upcomingEarningsMetric(snapshot: OpenDataStockSnapshot) {
+  return snapshot.price_opportunity.days_to_next_earnings ?? snapshot.metrics.days_to_next_earnings;
+}
+
+function upcomingEarningsSignal(metric?: OpenDataMetric): Signal {
+  const days = finiteNumber(metric?.value);
+  if (days == null) return { label: "Unclear", tone: "neutral" };
+  if (days <= 7) return { label: "This week", tone: "warning" };
+  if (days <= 21) return { label: "Soon", tone: "info" };
+  if (days <= 45) return { label: "Upcoming", tone: "neutral" };
+  return { label: "Later", tone: "neutral" };
 }
 
 function epsGaapMetric(snapshot: OpenDataStockSnapshot) {
@@ -983,6 +1004,7 @@ function buildStockExportMarkdown({
       "",
       "Price setup",
       "",
+      `- Upcoming earnings: ${formatMetric(upcomingEarningsMetric(snapshot), "days")}`,
       `- Current price: ${formatPrice(currentPrice)}`,
       `- Distance from ATH: ${metricPercent(snapshot.price_opportunity.distance_from_ath)}`,
       `- Primary support: ${formatPrice(supportLevel)}`,
@@ -1937,6 +1959,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
   const epsGaap = epsGaapMetric(snapshot);
   const epsAlignment = epsAlignmentMetric(snapshot);
   const fcfMarginMetric = snapshot.business_health.fcf_margin;
+  const upcomingEarnings = upcomingEarningsMetric(snapshot);
   const support = closestSupport(snapshot);
   const supports = supportWindows(snapshot);
   const currentPrice = finiteNumber(snapshot.price_opportunity.current_price?.value);
@@ -1999,6 +2022,31 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
           <strong>{formatMetric(snapshot.valuation.forward_pe, "ratio")}</strong>
           <small>{valuationDetailText(snapshot)}</small>
           <StockStatus signal={valuationStatus} />
+        </div>
+      </section>
+    );
+  }
+
+  if (detailKey === "upcoming_earnings") {
+    const signal = upcomingEarningsSignal(upcomingEarnings);
+    const days = finiteNumber(upcomingEarnings?.value);
+    const detailText = days == null
+      ? upcomingEarnings?.notes ?? "The next expected earnings release date is unavailable from the open/free earnings calendar."
+      : `${signal.label}: next expected earnings release is in ${formatNumber(days)} days. ${upcomingEarnings?.notes ?? ""}`.trim();
+
+    return (
+      <section className="mobile-growth-detail-panel">
+        <div className="mobile-growth-copy">
+          <span>Metric definition</span>
+          <h2>{copy.title}</h2>
+          <p className="metric-question">{copy.question}</p>
+          <p>{copy.description}</p>
+        </div>
+        <div className="mobile-growth-formula">
+          <span>Current value</span>
+          <strong>{formatMetric(upcomingEarnings, "days")}</strong>
+          <small>{detailText}</small>
+          <StockStatus signal={signal} />
         </div>
       </section>
     );
@@ -2112,6 +2160,8 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
   const fcfMarginMetric = snapshot.business_health.fcf_margin;
   const fcfMarginStatus = fcfMarginSignal(fcfMarginMetric?.value);
   const valuationStatus = valuationSignal(snapshot);
+  const upcomingEarnings = upcomingEarningsMetric(snapshot);
+  const upcomingEarningsStatus = upcomingEarningsSignal(upcomingEarnings);
   const momentum = revenueMomentum(snapshot);
   const support = closestSupport(snapshot);
   const supportStatus = supportSignal(support?.value);
@@ -2210,6 +2260,13 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
             signal={valuationStatus}
             value={formatMetric(snapshot.valuation.forward_pe, "ratio")}
             onClick={() => setActiveGrowthDetail("forward_pe")}
+          />
+          <MobileGrowthSignalButton
+            active={activeGrowthDetail === "upcoming_earnings"}
+            label="Upcoming Earnings"
+            signal={upcomingEarningsStatus}
+            value={formatMetric(upcomingEarnings, "days")}
+            onClick={() => setActiveGrowthDetail("upcoming_earnings")}
           />
           <MobileGrowthSignalButton
             active={activeGrowthDetail === "support"}

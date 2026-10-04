@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Any
@@ -128,6 +129,10 @@ SUPPORT_DISTANCE_WINDOWS = {
     "support_2y_distance": ("2Y", 365 * 2),
     "support_5y_distance": ("5Y", 365 * 5),
 }
+NEXT_EARNINGS_SOURCE_RE = re.compile(
+    r"^yfinance:(?:earningsTimestamp(?:Start|End)?|calendar:Earnings Date):"
+    r"(?P<start>\d{4}-\d{2}-\d{2})(?:/(?P<end>\d{4}-\d{2}-\d{2}))?$"
+)
 
 
 @dataclass(frozen=True)
@@ -244,6 +249,7 @@ def compute_open_data_snapshot(
     adjusted_eps_growth_yoy: OpenDataMetric | None = None,
     statement_currency_rates: dict[str, OpenDataMetric] | None = None,
     market_cap_estimate: OpenDataMetric | None = None,
+    next_earnings_release: OpenDataMetric | None = None,
     adr_ratio: float = 1.0,
     adr_ratio_source: str | None = None,
     generated_as_of: str | None = None,
@@ -680,6 +686,12 @@ def compute_open_data_snapshot(
     }
     price_opportunity = {
         "current_price": price_metrics["current_price"],
+        "days_to_next_earnings": next_earnings_release
+        or _unavailable(
+            "days_to_next_earnings",
+            "Next earnings release date was unavailable from open/free public inputs.",
+            as_of,
+        ),
         "change_1d": price_metrics["change_1d"],
         "change_1w": price_metrics["change_1w"],
         "change_1m": price_metrics["change_1m"],
@@ -1736,6 +1748,28 @@ def compute_price_opportunity_metrics(
 ) -> dict[str, OpenDataMetric]:
     """Recompute price-only metrics without rebuilding SEC fundamentals."""
     return _price_opportunity_metrics(history, latest_price, fallback_as_of or date.today().isoformat())
+
+
+def refresh_next_earnings_countdown(metric: OpenDataMetric | None, as_of: str | None = None) -> OpenDataMetric:
+    """Roll an existing yfinance earnings-date metric forward to a new as-of date."""
+    as_of_date = _parse_date(as_of or date.today().isoformat()) or date.today()
+    if metric is None:
+        return _unavailable(
+            "days_to_next_earnings",
+            "Next earnings release date was unavailable from open/free public inputs.",
+            as_of_date.isoformat(),
+        )
+    match = NEXT_EARNINGS_SOURCE_RE.match(metric.source)
+    if match is None:
+        return metric.model_copy(update={"as_of": as_of_date.isoformat()})
+    start = _parse_date(match.group("start"))
+    end = _parse_date(match.group("end") or match.group("start"))
+    if start is None or end is None:
+        return _unavailable("days_to_next_earnings", "Stored earnings release date could not be parsed.", as_of_date.isoformat())
+    if end < as_of_date:
+        return _unavailable("days_to_next_earnings", "Stored earnings release window is no longer upcoming.", as_of_date.isoformat())
+    days = max(0, (start - as_of_date).days)
+    return metric.model_copy(update={"value": float(days), "as_of": as_of_date.isoformat()})
 
 
 def _price_low(point: HistoricalPricePoint) -> float:

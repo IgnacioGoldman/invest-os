@@ -387,9 +387,30 @@ class RefreshStaticPricesTests(unittest.TestCase):
         snapshot = OpenDataSnapshot(
             ticker="TEST",
             business_health={"revenue_growth_yoy": metric},
-            price_opportunity={"current_price": old_price, "support_1d_distance": obsolete_support},
+            price_opportunity={
+                "current_price": old_price,
+                "support_1d_distance": obsolete_support,
+                "days_to_next_earnings": OpenDataMetric(
+                    value=30,
+                    source="yfinance:earningsTimestamp:2026-02-21",
+                    tier="proxy_estimate",
+                    as_of="2026-01-22",
+                    notes="Existing earnings estimate.",
+                ),
+            },
             valuation={"pe": metric},
-            metrics={"revenue_growth_yoy": metric, "current_price": old_price, "support_1d_distance": obsolete_support},
+            metrics={
+                "revenue_growth_yoy": metric,
+                "current_price": old_price,
+                "support_1d_distance": obsolete_support,
+                "days_to_next_earnings": OpenDataMetric(
+                    value=30,
+                    source="yfinance:earningsTimestamp:2026-02-21",
+                    tier="proxy_estimate",
+                    as_of="2026-01-22",
+                    notes="Existing earnings estimate.",
+                ),
+            },
         )
         start = date(2025, 1, 1)
         history = [point(start + timedelta(days=index), 100 + index / 10, low=99 + index / 10) for index in range(400)]
@@ -407,6 +428,8 @@ class RefreshStaticPricesTests(unittest.TestCase):
         self.assertIn("support_3m_distance", updated.price_opportunity)
         self.assertIn("support_1y_distance", updated.price_opportunity)
         self.assertIn("support_5y_distance", updated.price_opportunity)
+        self.assertEqual(updated.price_opportunity["days_to_next_earnings"].value, 20)
+        self.assertEqual(updated.price_opportunity["days_to_next_earnings"].as_of, "2026-02-01")
         self.assertEqual(updated.generated_at, refreshed_at)
 
     def test_price_refresh_prefers_and_updates_sqlite_baseline(self) -> None:
@@ -453,6 +476,15 @@ class RefreshStaticPricesTests(unittest.TestCase):
                 def fetch_price_history_since(self, ticker: str, start_date: str) -> list[HistoricalPricePoint]:
                     return [point(date(2026, 1, 2), 102, low=101)]
 
+                def fetch_next_earnings_release(self, ticker: str, *, as_of: date | str | None = None) -> OpenDataMetric:
+                    return OpenDataMetric(
+                        value=13,
+                        source="yfinance:earningsTimestamp:2026-01-15",
+                        tier="proxy_estimate",
+                        as_of="2026-01-02",
+                        notes="Fake upcoming earnings.",
+                    )
+
             with patch("refresh_static_prices.OpenDataProvider", FakeOpenDataProvider):
                 report = refresh_prices(
                     [
@@ -475,6 +507,7 @@ class RefreshStaticPricesTests(unittest.TestCase):
 
             self.assertIsNotNone(saved_snapshot)
             self.assertEqual(saved_snapshot.metrics["revenue_growth_yoy"].value if saved_snapshot else None, 20)
+            self.assertEqual(saved_snapshot.metrics["days_to_next_earnings"].value if saved_snapshot else None, 13)
             self.assertEqual(saved_history[-1].close, 102)
             self.assertEqual(saved_history[-1].low, 101)
 

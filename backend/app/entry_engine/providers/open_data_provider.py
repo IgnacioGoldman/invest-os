@@ -401,6 +401,7 @@ class OpenDataProvider:
         price = self._latest_price_from_history(symbol, price_history, currency=price_currency) or self.fetch_latest_price(symbol)
         forward_pe_estimate = self.fetch_forward_pe_estimate(symbol)
         market_cap_estimate = self.fetch_market_cap_estimate(symbol)
+        next_earnings_release = self.fetch_next_earnings_release(symbol)
         company_context = self.fetch_company_context(cik) if cik is not None else self._yfinance_company_context(symbol)
         adjusted_eps_growth_yoy = self.fetch_adjusted_eps_growth_yoy(cik) if cik is not None else None
         statement_currency_rates = self.fetch_statement_currency_rates(companyfacts, price)
@@ -420,6 +421,7 @@ class OpenDataProvider:
             adjusted_eps_growth_yoy=adjusted_eps_growth_yoy,
             statement_currency_rates=statement_currency_rates,
             market_cap_estimate=market_cap_estimate,
+            next_earnings_release=next_earnings_release,
             adr_ratio=float(adr["ratio"]),
             adr_ratio_source=adr["source"],
         )
@@ -1052,6 +1054,47 @@ class OpenDataProvider:
         if estimate is not None:
             self.cache.set(f"market_cap_estimate_{symbol}.json", estimate.model_dump(mode="json"))
         return estimate
+
+    def fetch_next_earnings_release(self, ticker: str, *, as_of: date | str | None = None) -> OpenDataMetric | None:
+        symbol = ticker.upper().strip()
+        as_of_date = self._coerce_date(as_of) or date.today()
+        info = self._fetch_yfinance_info(symbol) or {}
+        candidates: list[tuple[date, date, str]] = []
+
+        exact = self._date_from_yfinance_event_value(info.get("earningsTimestamp"))
+        if exact is not None:
+            candidates.append((exact, exact, "earningsTimestamp"))
+        start = self._date_from_yfinance_event_value(info.get("earningsTimestampStart"))
+        end = self._date_from_yfinance_event_value(info.get("earningsTimestampEnd"))
+        if start is not None or end is not None:
+            range_start = start or end
+            range_end = end or start
+            if range_start is not None and range_end is not None:
+                candidates.append((min(range_start, range_end), max(range_start, range_end), "earningsTimestampStart"))
+
+        calendar = self._fetch_yfinance_calendar(symbol)
+        if isinstance(calendar, dict):
+            calendar_date = self._date_from_yfinance_event_value(calendar.get("Earnings Date"))
+            if calendar_date is not None:
+                candidates.append((calendar_date, calendar_date, "calendar:Earnings Date"))
+
+        upcoming = [(start, end, source_key) for start, end, source_key in candidates if end >= as_of_date]
+        if not upcoming:
+            return None
+        start, end, source_key = min(upcoming, key=lambda item: (item[0], item[1], item[2]))
+        days = max(0, (start - as_of_date).days)
+        source_date = start.isoformat() if start == end else f"{start.isoformat()}/{end.isoformat()}"
+        expected = start.isoformat() if start == end else f"{start.isoformat()} to {end.isoformat()}"
+        return OpenDataMetric(
+            value=float(days),
+            source=f"yfinance:{source_key}:{source_date}",
+            tier="proxy_estimate",
+            as_of=as_of_date.isoformat(),
+            notes=(
+                f"Days until the next expected earnings release window ({expected}) from Yahoo Finance/yfinance. "
+                "This is an open/free market-calendar estimate and can change before the company confirms the date."
+            ),
+        )
 
     def fetch_statement_currency_rates(
         self,
@@ -1726,6 +1769,52 @@ class OpenDataProvider:
             return None
         self._yfinance_info_cache[symbol] = info
         return info
+
+    def _fetch_yfinance_calendar(self, ticker: str) -> dict[str, Any] | None:
+        try:
+            import yfinance as yf  # type: ignore[import-not-found]
+        except ImportError:
+            return None
+
+        try:
+            calendar = yf.Ticker(ticker).calendar
+        except Exception as exc:
+            logger.warning("yfinance calendar fetch failed for %s: %s", ticker, exc)
+            return None
+        return calendar if isinstance(calendar, dict) else None
+
+    def _coerce_date(self, value: Any) -> date | None:
+        if value is None:
+            return None
+        if isinstance(value, datetime):
+            return value.date()
+        if isinstance(value, date):
+            return value
+        if isinstance(value, (int, float)) and math.isfinite(float(value)):
+            timestamp = float(value)
+            if timestamp > 10_000_000_000:
+                timestamp /= 1000
+            try:
+                return datetime.fromtimestamp(timestamp, tz=timezone.utc).date()
+            except (OSError, OverflowError, ValueError):
+                return None
+        if hasattr(value, "date"):
+            try:
+                parsed = value.date()
+            except (TypeError, ValueError):
+                parsed = None
+            if isinstance(parsed, date):
+                return parsed
+        try:
+            return date.fromisoformat(str(value)[:10])
+        except ValueError:
+            return None
+
+    def _date_from_yfinance_event_value(self, value: Any) -> date | None:
+        if isinstance(value, (list, tuple)):
+            parsed_dates = [parsed for item in value if (parsed := self._coerce_date(item)) is not None]
+            return min(parsed_dates) if parsed_dates else None
+        return self._coerce_date(value)
 
     def _fetch_stooq_price(self, ticker: str) -> LatestPrice | None:
         for query_symbol in _stooq_symbols(ticker, "USD"):

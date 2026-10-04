@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.entry_engine.open_data_metrics import compute_open_data_snapshot  # noqa: E402
-from app.entry_engine.open_data_models import HistoricalPricePoint  # noqa: E402
+from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataMetric  # noqa: E402
 from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
 from app.entry_engine.utils.file_storage import load_stock_universe  # noqa: E402
 
@@ -137,6 +137,13 @@ class OpenDataProviderTests(unittest.TestCase):
             company_context=provider._yfinance_company_context("TEST.ST"),
             statement_currency_rates={},
             market_cap_estimate=None,
+            next_earnings_release=OpenDataMetric(
+                value=19,
+                source="yfinance:earningsTimestampStart:2026-10-15/2026-10-17",
+                tier="proxy_estimate",
+                as_of="2026-09-26",
+                notes="Test earnings window.",
+            ),
             generated_as_of=date(2026, 9, 26).isoformat(),
         )
 
@@ -145,9 +152,29 @@ class OpenDataProviderTests(unittest.TestCase):
         self.assertEqual(snapshot.business_health["revenue_growth_yoy"].value, (260 - 220) / 220 * 100)
         self.assertEqual(snapshot.metrics["capex_ttm"].source.split(":", 1)[0], "yfinance_statement")
         self.assertEqual(snapshot.business_health["free_cash_flow"].value, 32)
+        self.assertEqual(snapshot.price_opportunity["days_to_next_earnings"].value, 19)
         valuation = snapshot.historical_series["valuation_history"][-1].metrics
         self.assertIsNotNone(valuation["pe"].value)
         self.assertIsNotNone(valuation["price_to_sales"].value)
+
+    def test_next_earnings_metric_uses_upcoming_yfinance_window(self) -> None:
+        class FakeProvider(OpenDataProvider):
+            def _fetch_yfinance_info(self, ticker: str) -> dict[str, object] | None:
+                return {
+                    "earningsTimestampStart": 1_799_971_200,
+                    "earningsTimestampEnd": 1_800_230_400,
+                }
+
+            def _fetch_yfinance_calendar(self, ticker: str) -> dict[str, object] | None:
+                return {"Earnings Date": [date(2027, 2, 1)]}
+
+        metric = FakeProvider().fetch_next_earnings_release("TEST", as_of=date(2027, 1, 1))
+
+        self.assertIsNotNone(metric)
+        assert metric is not None
+        self.assertEqual(metric.value, 14)
+        self.assertEqual(metric.source, "yfinance:earningsTimestampStart:2027-01-15/2027-01-18")
+        self.assertIn("2027-01-15 to 2027-01-18", metric.notes)
 
 
 if __name__ == "__main__":
