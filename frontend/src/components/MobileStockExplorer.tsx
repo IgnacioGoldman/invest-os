@@ -270,6 +270,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     options: [
       { label: "This week", tone: "warning" },
       { label: "Soon", tone: "info" },
+      { label: "Next 30 days", tone: "info" },
       { label: "Upcoming", tone: "neutral" },
       { label: "Later", tone: "neutral" },
       { label: "Unclear", tone: "neutral" },
@@ -459,6 +460,7 @@ function upcomingEarningsSignal(metric?: OpenDataMetric): Signal {
   if (days == null) return { label: "Unclear", tone: "neutral" };
   if (days <= 7) return { label: "This week", tone: "warning" };
   if (days <= 21) return { label: "Soon", tone: "info" };
+  if (days <= 30) return { label: "Next 30 days", tone: "info" };
   if (days <= 45) return { label: "Upcoming", tone: "neutral" };
   return { label: "Later", tone: "neutral" };
 }
@@ -782,7 +784,11 @@ function createUpcomingEarningsExpression(): FilterExpression {
       {
         id: nextFilterId("group"),
         operator: "or",
-        conditions: [createCondition("upcoming_earnings", "This week")],
+        conditions: [
+          createCondition("upcoming_earnings", "This week"),
+          createCondition("upcoming_earnings", "Soon"),
+          createCondition("upcoming_earnings", "Next 30 days"),
+        ],
       },
       createStrongOrSolidYoyGroup(),
     ],
@@ -827,7 +833,12 @@ function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
   if (!hasGrowthGroup) return null;
   if (
     expression.groups.length === 2
-    && signatures.some((group) => group.operator === "or" && group.conditions.join("|") === "upcoming_earnings:This week")
+    && signatures.some(
+      (group) =>
+        group.operator === "or"
+        && group.conditions.join("|")
+          === "upcoming_earnings:Next 30 days|upcoming_earnings:Soon|upcoming_earnings:This week",
+    )
   ) {
     return "earnings";
   }
@@ -2588,7 +2599,7 @@ export function MobileStockExplorer({
           </button>
           <button type="button" className={builtInPreset === "earnings" ? "active" : ""} onClick={() => toggleBuiltInPreset("earnings")}>
             {builtInPreset === "earnings" && <Check size={15} />}
-            Earnings this week + strong YoY
+            Earnings next 30d + strong YoY
             <FilterNewBadge count={personalization?.filterBadgeCounts[EARNINGS_THIS_WEEK_FILTER_KEY]} />
           </button>
           {personalization?.signedIn && personalization.savedFilters.map((filter) => (

@@ -28,7 +28,8 @@ Suggested tags:
 
 - **This week:** Earnings are expected within 7 days. The catalyst is very close.
 - **Soon:** Earnings are expected in 8 to 21 days. The stock is approaching a meaningful event window.
-- **Upcoming:** Earnings are expected in 22 to 45 days. The catalyst is visible, but not immediate.
+- **Next 30 days:** Earnings are expected in 22 to 30 days. The catalyst is visible inside a near-term monthly window.
+- **Upcoming:** Earnings are expected in 31 to 45 days. The catalyst is visible, but not immediate.
 - **Later:** Earnings are more than 45 days away. The next release is probably not the dominant near-term setup.
 - **Unclear:** The next expected earnings date is unavailable from the current open/free calendar source.
 

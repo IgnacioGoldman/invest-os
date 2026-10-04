@@ -63,7 +63,11 @@ def _upcoming_earnings_expression() -> dict[str, Any]:
         "groups": [
             {
                 "operator": "or",
-                "conditions": [{"field": "upcoming_earnings", "value": "This week"}],
+                "conditions": [
+                    {"field": "upcoming_earnings", "value": "This week"},
+                    {"field": "upcoming_earnings", "value": "Soon"},
+                    {"field": "upcoming_earnings", "value": "Next 30 days"},
+                ],
             },
             {
                 "operator": "or",
@@ -122,6 +126,8 @@ def _upcoming_earnings_signal(value: float | None) -> str:
         return "This week"
     if value <= 21:
         return "Soon"
+    if value <= 30:
+        return "Next 30 days"
     if value <= 45:
         return "Upcoming"
     return "Later"

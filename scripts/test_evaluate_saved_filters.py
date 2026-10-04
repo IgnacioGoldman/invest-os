@@ -134,6 +134,7 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
         earnings = snapshot("EARNINGS", 20, 2.5, 25, days_to_next_earnings=7)
         self.assertEqual(signal_for(earnings, "upcoming_earnings"), "This week")
         self.assertEqual(signal_for(snapshot("SOON", 20, 2.5, 25, days_to_next_earnings=21), "upcoming_earnings"), "Soon")
+        self.assertEqual(signal_for(snapshot("NEXT_30", 20, 2.5, 25, days_to_next_earnings=30), "upcoming_earnings"), "Next 30 days")
         self.assertEqual(signal_for(snapshot("NEXT", 20, 2.5, 25, days_to_next_earnings=45), "upcoming_earnings"), "Upcoming")
         self.assertEqual(signal_for(snapshot("LATER", 20, 2.5, 25, days_to_next_earnings=46), "upcoming_earnings"), "Later")
 
@@ -160,17 +161,17 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
         six_month_only = snapshot("MID", 25, 12, 30, support_6m=1)
         self.assertFalse(expression_matches(six_month_only, BUILT_IN_FILTERS["builtin:support"]))
 
-    def test_upcoming_earnings_preset_requires_this_week_and_strong_or_solid_yoy(self) -> None:
+    def test_upcoming_earnings_preset_requires_next_30_days_and_strong_or_solid_yoy(self) -> None:
         strong = snapshot("STRONG", 25, 12, 30, days_to_next_earnings=7)
         self.assertTrue(expression_matches(strong, BUILT_IN_FILTERS["builtin:earnings_this_week"]))
 
-        solid = snapshot("SOLID", 12, 12, 30, days_to_next_earnings=3)
+        solid = snapshot("SOLID", 12, 12, 30, days_to_next_earnings=30)
         self.assertTrue(expression_matches(solid, BUILT_IN_FILTERS["builtin:earnings_this_week"]))
 
         weak_growth = snapshot("WEAK", 2, 12, 30, days_to_next_earnings=3)
         self.assertFalse(expression_matches(weak_growth, BUILT_IN_FILTERS["builtin:earnings_this_week"]))
 
-        later_earnings = snapshot("LATER", 25, 12, 30, days_to_next_earnings=8)
+        later_earnings = snapshot("LATER", 25, 12, 30, days_to_next_earnings=31)
         self.assertFalse(expression_matches(later_earnings, BUILT_IN_FILTERS["builtin:earnings_this_week"]))
 
     def test_first_run_is_quiet_then_new_match_creates_daily_badge_event(self) -> None:
