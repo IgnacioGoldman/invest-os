@@ -127,7 +127,7 @@ const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: str
     title: "GAAP EPS growth YoY",
     question: "Is reported earnings per share improving?",
     description:
-      "Compares GAAP diluted earnings per share with the same quarter last year. Strong GAAP growth can be useful, but unusual gains or charges may make it diverge from adjusted EPS.",
+      "Compares GAAP diluted earnings per share with the same quarter last year. Strong GAAP growth can be useful, but unusual gains or charges can make it noisy, so cross-check it against cash flow and margins.",
   },
   support: {
     title: "Proximity to support",
@@ -388,6 +388,7 @@ function supportSignalTone(value?: number | null): Tone {
   if (value == null) return "neutral";
   if (value <= 2.5) return "good";
   if (value <= 6) return "watch";
+  if (value <= 25) return "good";
   return "neutral";
 }
 
@@ -996,7 +997,7 @@ function revenueGrowthSignal(valueOrMetric?: number | OpenDataMetric | null): { 
   }
   if (value >= 20) return { label: "Strong", tone: "good", detail: "Latest-quarter revenue YoY is at least 20%." };
   if (value >= 8) return { label: "Solid", tone: "good", detail: "Latest-quarter revenue YoY is at least 8%." };
-  if (value >= 0) return { label: "Mixed", tone: "watch", detail: "Latest-quarter revenue YoY is positive but below 8%." };
+  if (value >= 0) return { label: "Flat", tone: "watch", detail: "Latest-quarter revenue YoY is positive but below 8%." };
   return { label: "Weak", tone: "caution", detail: "Latest-quarter revenue YoY is negative." };
 }
 

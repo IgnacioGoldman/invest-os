@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import csv
-import html
 import json
 import logging
 import math
@@ -96,31 +95,6 @@ ISSUER_FINANCIAL_WORKBOOKS = {
     }
 }
 SUPPORTED_FX_CURRENCIES = {"USD", "EUR", "GBP", "SEK", "DKK", "CHF", "CAD", "TWD", "JPY", "CNY", "HKD"}
-ADJUSTED_EPS_LABEL_RE = re.compile(
-    r"\b(?:(?:non[-\s]?gaap|adjusted|core)(?:\s+\d+)?\s+(?:diluted\s+)?(?:eps|earnings\s+per\s+share)|"
-    r"(?:adjusted|core)(?:\s+\d+)?\s+(?:diluted\s+)?earnings\s+per\s+share)\b",
-    re.IGNORECASE,
-)
-ADJUSTED_EPS_SKIP_RE = re.compile(
-    r"\b(?:outlook|guidance|anticipate|anticipated|expect|expected|forecast|estimate|estimated|definition|"
-    r"reconciliation|limitation|weighted-average|weighted average|per share amounts|q[1-4]\s+\d{4}\s+outlook)\b",
-    re.IGNORECASE,
-)
-ADJUSTED_EPS_GROWTH_RE = re.compile(
-    r"(?:grew|growth(?:\s+of)?|increased|up|rose)\s*(?:by\s*)?([+-]?\d+(?:\.\d+)?)\s*%",
-    re.IGNORECASE,
-)
-ADJUSTED_EPS_VALUE_COMPARISON_RE = re.compile(
-    r"(?:of|was|were)?\s*\$?\s*([+-]?\d+(?:\.\d+)?)\b.*?\bcompared\s+to\s+\$?\s*([+-]?\d+(?:\.\d+)?)\b"
-    r".*?\b(?:a\s+year\s+ago|year[-\s]?ago|prior\s+year|same\s+period)",
-    re.IGNORECASE,
-)
-RESULTS_FILING_RE = re.compile(r"\b(?:earnings|results?|financial|quarter|q[1-4]|interim|half[-\s]?year|full[-\s]?year)\b", re.IGNORECASE)
-FINANCIAL_RESULTS_FILING_RE = re.compile(
-    r"\b(?:earnings|financial|quarter(?:ly)?|q[1-4]|[1-4](?:st|nd|rd|th)\s+quarter|9m|ytd|"
-    r"half[-\s]?year|full[-\s]?year|final\s+results?)\b",
-    re.IGNORECASE,
-)
 
 
 class RequestPacer:
@@ -330,7 +304,6 @@ class OpenDataProvider:
         self.force_refresh = force_refresh
         self.stooq_api_key = os.getenv("STOOQ_API_KEY") or None
         self._yfinance_info_cache: dict[str, dict[str, Any] | None] = {}
-        self.last_adjusted_eps_lookup_complete = False
 
     def _get(
         self,
@@ -408,7 +381,6 @@ class OpenDataProvider:
         market_cap_estimate = self.fetch_market_cap_estimate(symbol)
         next_earnings_release = self.fetch_next_earnings_release(symbol)
         company_context = self.fetch_company_context(cik) if cik is not None else self._yfinance_company_context(symbol)
-        adjusted_eps_growth_yoy = self.fetch_adjusted_eps_growth_yoy(cik) if cik is not None else None
         statement_currency_rates = self.fetch_statement_currency_rates(companyfacts, price)
         adr = ADR_RATIO_BY_TICKER.get(symbol, {"ratio": 1.0, "source": None})
         return compute_open_data_snapshot(
@@ -423,7 +395,6 @@ class OpenDataProvider:
             industry=metadata.get("industry"),
             forward_pe_estimate=forward_pe_estimate,
             company_context=company_context,
-            adjusted_eps_growth_yoy=adjusted_eps_growth_yoy,
             statement_currency_rates=statement_currency_rates,
             market_cap_estimate=market_cap_estimate,
             next_earnings_release=next_earnings_release,
@@ -947,44 +918,6 @@ class OpenDataProvider:
             return None
         return self._company_context_from_submissions(cik, submissions)
 
-    def fetch_adjusted_eps_growth_yoy(self, cik: int, target_report_date: str | None = None) -> OpenDataMetric | None:
-        self.last_adjusted_eps_lookup_complete = False
-        target_suffix = f"_{target_report_date}" if target_report_date else ""
-        cache_name = f"adjusted_eps_growth_CIK{cik:010d}{target_suffix}.json"
-        cached = None if self.force_refresh else self.cache.get(cache_name, timedelta(hours=12))
-        if cached is not None:
-            if isinstance(cached, dict) and cached.get("unavailable") is True:
-                cached_lookup_limit = cached.get("max_sec_archive_lookups")
-                try:
-                    lookup_limit = int(cached_lookup_limit) if cached_lookup_limit is not None else None
-                except (TypeError, ValueError):
-                    lookup_limit = None
-                if lookup_limit is not None and lookup_limit >= self.max_sec_archive_lookups:
-                    self.last_adjusted_eps_lookup_complete = True
-                    return None
-            else:
-                try:
-                    metric = OpenDataMetric.model_validate(cached)
-                    self.last_adjusted_eps_lookup_complete = True
-                    return metric
-                except ValueError:
-                    pass
-        if not self.include_filing_details or self.max_sec_archive_lookups <= 0:
-            return None
-
-        submissions = self._fetch_sec_submissions(cik)
-        if submissions is None:
-            return None
-        metric = self._adjusted_eps_growth_from_submissions(cik, submissions, target_report_date=target_report_date)
-        self.last_adjusted_eps_lookup_complete = True
-        self.cache.set(
-            cache_name,
-            metric.model_dump(mode="json")
-            if metric is not None
-            else {"unavailable": True, "max_sec_archive_lookups": self.max_sec_archive_lookups},
-        )
-        return metric
-
     def _fetch_sec_submissions(self, cik: int) -> dict[str, Any] | None:
         cache_name = f"sec_submissions_CIK{cik:010d}.json"
         submissions = None if self.force_refresh else self.cache.get(cache_name, timedelta(hours=12))
@@ -1354,233 +1287,6 @@ class OpenDataProvider:
             if len(exhibits) >= 8:
                 break
         return exhibits
-
-    def _adjusted_eps_growth_from_submissions(
-        self,
-        cik: int,
-        submissions: dict[str, Any],
-        target_report_date: str | None = None,
-    ) -> OpenDataMetric | None:
-        if not self.include_filing_details or self.max_sec_archive_lookups <= 0:
-            return None
-        recent = submissions.get("filings", {}).get("recent", {})
-        if not isinstance(recent, dict):
-            return None
-        archive_lookups = 0
-        for filing in self._adjusted_eps_candidate_filings(recent, target_report_date=target_report_date):
-            if archive_lookups >= self.max_sec_archive_lookups:
-                break
-            archive_lookups += 1
-            for exhibit in self._earnings_release_exhibits(cik, filing):
-                if not exhibit.url:
-                    continue
-                text = self._fetch_sec_document_text(cik, filing["accession_number"], exhibit.document, exhibit.url)
-                if not text:
-                    continue
-                parsed = self._parse_adjusted_eps_growth_yoy(text)
-                if parsed is None:
-                    continue
-                return OpenDataMetric(
-                    value=parsed,
-                    source=f"sec_earnings_release:{exhibit.url}",
-                    tier="exact_public_fact",
-                    as_of=filing["filing_date"],
-                    notes=(
-                        "Adjusted EPS growth YoY parsed from an official SEC earnings-release exhibit. "
-                        "Accepted only when a high-confidence Non-GAAP, Adjusted, or Core EPS row states a YoY "
-                        "percentage or current/prior-year EPS values."
-                    ),
-                )
-        return None
-
-    def _adjusted_eps_candidate_filings(
-        self,
-        recent: dict[str, Any],
-        target_report_date: str | None = None,
-    ) -> list[dict[str, str]]:
-        forms = recent.get("form") if isinstance(recent.get("form"), list) else []
-        candidates: list[tuple[int, int, int, int, dict[str, str]]] = []
-        for index, raw_form in enumerate(forms):
-            form = str(raw_form or "")
-            if form not in {"8-K", "6-K"}:
-                continue
-            accession_number = self._recent_value(recent, "accessionNumber", index)
-            filing_date = self._recent_value(recent, "filingDate", index)
-            if not accession_number or not filing_date:
-                continue
-            items = self._filing_items(self._recent_value(recent, "items", index))
-            primary_document = self._recent_value(recent, "primaryDocument", index) or ""
-            primary_description = self._recent_value(recent, "primaryDocDescription", index) or ""
-            report_date = self._recent_value(recent, "reportDate", index) or ""
-            haystack = " ".join([primary_document, primary_description]).lower()
-
-            priority: int
-            if form == "8-K":
-                if any(item.startswith("2.02") for item in items):
-                    priority = 0
-                elif items and any(item.startswith("9.01") for item in items):
-                    priority = 3 if ("earnings" in haystack or "results" in haystack or "press" in haystack or "release" in haystack) else 4
-                elif not items:
-                    priority = 5
-                else:
-                    continue
-            else:
-                if FINANCIAL_RESULTS_FILING_RE.search(haystack):
-                    priority = 1
-                elif report_date and report_date != filing_date and primary_document.lower().endswith((".htm", ".html")):
-                    priority = 2
-                elif "press" in haystack or "release" in haystack:
-                    priority = 3
-                else:
-                    priority = 4
-            exact_target_rank, target_distance = self._adjusted_eps_target_rank(filing_date, report_date, target_report_date)
-            candidates.append(
-                (
-                    exact_target_rank,
-                    priority,
-                    target_distance,
-                    index,
-                    {
-                        "accession_number": accession_number,
-                        "filing_date": filing_date,
-                        "form": form,
-                        "primary_document": primary_document,
-                        "primary_description": primary_description,
-                        "report_date": report_date,
-                    },
-                )
-            )
-        candidates.sort()
-        return [candidate for _, _, _, _, candidate in candidates]
-
-    def _adjusted_eps_target_rank(self, filing_date: str, report_date: str, target_report_date: str | None) -> tuple[int, int]:
-        if not target_report_date:
-            return 0, 0
-        if report_date == target_report_date:
-            return 0, 0
-        try:
-            target = date.fromisoformat(target_report_date[:10])
-            filed = date.fromisoformat(filing_date[:10])
-        except ValueError:
-            return 1, 10_000
-        distance = abs((filed - target).days)
-        if target <= filed <= target + timedelta(days=75):
-            return 1, distance
-        return 1, 1000 + distance
-
-    def _earnings_release_exhibits(self, cik: int, filing: dict[str, str] | str) -> list[OpenDataFilingExhibit]:
-        if isinstance(filing, str):
-            accession_number = filing
-            primary_document = ""
-            primary_description = ""
-            form = ""
-            report_date = ""
-        else:
-            accession_number = filing["accession_number"]
-            primary_document = filing.get("primary_document", "")
-            primary_description = filing.get("primary_description", "")
-            form = filing.get("form", "")
-            report_date = filing.get("report_date", "")
-        exhibits = self._fetch_filing_exhibits(cik, accession_number)
-        scored: list[tuple[int, OpenDataFilingExhibit]] = []
-        primary_url = f"{SEC_ARCHIVES_BASE_URL}/{cik}/{accession_number.replace('-', '')}/{primary_document}" if primary_document else None
-        for exhibit in exhibits:
-            haystack = " ".join(
-                value.lower()
-                for value in (exhibit.document, exhibit.description or "", exhibit.type or "")
-                if value
-            )
-            if "99" not in haystack and "earnings" not in haystack and "press" not in haystack:
-                continue
-            score = 0
-            if (exhibit.type or "").upper().startswith("EX-99"):
-                score += 4
-            if "earnings" in haystack:
-                score += 3
-            if "result" in haystack or "financial" in haystack:
-                score += 2
-            if "press" in haystack or "release" in haystack:
-                score += 2
-            if "99.1" in haystack:
-                score += 1
-            scored.append((score, exhibit))
-        scored.sort(key=lambda item: item[0], reverse=True)
-        selected = [exhibit for score, exhibit in scored if score >= 3][:3]
-        primary_haystack = " ".join([primary_document, primary_description, form])
-        is_period_report = bool(report_date and filing.get("filing_date") and report_date != filing.get("filing_date")) if isinstance(filing, dict) else False
-        if primary_url and (RESULTS_FILING_RE.search(primary_haystack) or is_period_report):
-            primary = OpenDataFilingExhibit(
-                document=primary_document,
-                description=primary_description or "Primary filing document",
-                type=form or None,
-                url=primary_url,
-            )
-            if all(exhibit.document != primary.document for exhibit in selected):
-                selected.append(primary)
-        return selected
-
-    def _fetch_sec_document_text(self, cik: int, accession_number: str, document_name: str, url: str) -> str | None:
-        accession = accession_number.replace("-", "")
-        safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "_", document_name)[:120]
-        cache_name = f"sec_document_CIK{cik:010d}_{accession}_{safe_name}.json"
-        cached = None if self.force_refresh else self.cache.get(cache_name, timedelta(days=7))
-        if isinstance(cached, dict) and isinstance(cached.get("text"), str):
-            return cached["text"]
-        try:
-            response = self._get(
-                url,
-                pacer=SEC_REQUEST_PACER,
-                retry_after_on_429=SEC_429_COOLDOWN_SECONDS,
-                retry_after_by_status={503: SEC_503_COOLDOWN_SECONDS},
-                retry_sleep_cap=SEC_RETRY_AFTER_MAX_SECONDS,
-                headers={
-                    "User-Agent": self.sec_user_agent,
-                    "Accept": "text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8",
-                    "Accept-Encoding": "gzip, deflate",
-                },
-            )
-        except requests.RequestException:
-            return None
-        text = response.text
-        self.cache.set(cache_name, {"text": text})
-        return text
-
-    def _parse_adjusted_eps_growth_yoy(self, raw_text: str) -> float | None:
-        lines = self._document_text_lines(raw_text)
-        for line in lines:
-            if not ADJUSTED_EPS_LABEL_RE.search(line):
-                continue
-            if ADJUSTED_EPS_SKIP_RE.search(line):
-                continue
-            label_match = ADJUSTED_EPS_LABEL_RE.search(line)
-            if label_match is None:
-                continue
-            after_label = line[label_match.end():]
-            growth_match = ADJUSTED_EPS_GROWTH_RE.search(after_label)
-            if growth_match:
-                return float(growth_match.group(1))
-            percent_matches = re.findall(r"([+-]?\d+(?:\.\d+)?)\s*(?:\|\s*)?%", after_label)
-            if len(percent_matches) == 1:
-                return float(percent_matches[0])
-            value_match = ADJUSTED_EPS_VALUE_COMPARISON_RE.search(after_label)
-            if value_match:
-                latest_eps = float(value_match.group(1))
-                prior_eps = float(value_match.group(2))
-                if latest_eps > 0 and prior_eps > 0:
-                    return ((latest_eps - prior_eps) / prior_eps) * 100
-        return None
-
-    def _document_text_lines(self, raw_text: str) -> list[str]:
-        text = re.sub(r"</(?:td|th)[^>]*>", " | ", raw_text, flags=re.IGNORECASE)
-        text = re.sub(r"</(?:tr|p|div|br|li|h[1-6])[^>]*>", "\n", text, flags=re.IGNORECASE)
-        text = re.sub(r"<[^>]+>", " ", text)
-        text = html.unescape(text).replace("\xa0", " ")
-        lines = []
-        for raw_line in text.splitlines():
-            line = re.sub(r"\s+", " ", raw_line).strip(" \t|")
-            if line:
-                lines.append(line)
-        return lines
 
     def _is_meaningful_filing_exhibit(
         self,

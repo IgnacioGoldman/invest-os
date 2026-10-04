@@ -61,9 +61,7 @@ type Tone = "positive" | "warning" | "negative" | "neutral" | "info";
 type GrowthDetailKey =
   | "revenue"
   | "momentum"
-  | "eps_adjusted"
   | "eps_gaap"
-  | "eps_alignment"
   | "fcf_margin"
   | "upcoming_earnings"
   | "support"
@@ -119,23 +117,11 @@ const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: str
     description:
       "Compares the latest revenue growth rate with the previous quarter's growth rate. A positive percentage-point change means growth is accelerating; a negative change means it is decelerating.",
   },
-  eps_adjusted: {
-    title: "Adjusted EPS Growth YoY",
-    question: "Are underlying earnings improving?",
-    description:
-      "Adjusted EPS growth aims to show underlying earnings growth by excluding unusual or non-recurring items when a reliable adjusted EPS source is available.",
-  },
   eps_gaap: {
     title: "GAAP EPS Growth YoY",
     question: "Are reported earnings improving?",
     description:
-      "GAAP EPS growth shows reported accounting earnings per share versus the same quarter last year. Strong GAAP growth can be useful, but unusual gains or charges may make it diverge from adjusted EPS.",
-  },
-  eps_alignment: {
-    title: "EPS Alignment",
-    question: "Are adjusted and reported earnings telling the same story?",
-    description:
-      "Compares adjusted EPS growth with GAAP EPS growth. A smaller gap means underlying adjusted earnings and reported accounting earnings are better aligned.",
+      "GAAP EPS growth shows reported accounting earnings per share versus the same quarter last year. It can be affected by unusual gains, charges, or accounting items, so use it alongside cash-flow and margin metrics.",
   },
   fcf_margin: {
     title: "Free Cash Flow Margin",
@@ -201,7 +187,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     options: [
       { label: "Strong", tone: "positive" },
       { label: "Solid", tone: "positive" },
-      { label: "Mixed", tone: "warning" },
+      { label: "Flat", tone: "warning" },
       { label: "Weak", tone: "negative" },
       { label: "Unclear", tone: "neutral" },
     ],
@@ -224,7 +210,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     label: "GAAP EPS growth YoY",
     shortLabel: "GAAP EPS",
     section: "Growth",
-    description: "Reported GAAP earnings-per-share growth in the latest quarter. Adjusted EPS is exported separately when available.",
+    description: "Reported GAAP earnings-per-share growth in the latest quarter.",
     options: [
       { label: "Strong", tone: "positive" },
       { label: "Solid", tone: "positive" },
@@ -268,10 +254,8 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     section: "Catalyst",
     description: "Days until the next expected earnings release date or earnings window.",
     options: [
-      { label: "This week", tone: "warning" },
-      { label: "Soon", tone: "info" },
-      { label: "Next 30 days", tone: "info" },
-      { label: "Upcoming", tone: "neutral" },
+      { label: "This week", tone: "positive" },
+      { label: "Next 30 days", tone: "positive" },
       { label: "Later", tone: "neutral" },
       { label: "Unclear", tone: "neutral" },
     ],
@@ -285,7 +269,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     options: [
       { label: "At support", tone: "positive" as const },
       { label: "Near support", tone: "warning" as const },
-      { label: "Above support", tone: "neutral" as const },
+      { label: "Above support", tone: "positive" as const },
       { label: "Far", tone: "info" as const },
     ],
   })),
@@ -383,6 +367,11 @@ function growthSignal(valueOrMetric?: number | OpenDataMetric | null): Signal {
   return { label: "Weak", tone: "negative" };
 }
 
+function revenueGrowthSignal(valueOrMetric?: number | OpenDataMetric | null): Signal {
+  const signal = growthSignal(valueOrMetric);
+  return signal.label === "Mixed" ? { ...signal, label: "Flat" } : signal;
+}
+
 function fcfMarginSignal(value?: number | null): Signal {
   if (value == null) return { label: "Unclear", tone: "neutral" };
   if (value >= 20) return { label: "Strong", tone: "positive" };
@@ -458,10 +447,8 @@ function upcomingEarningsMetric(snapshot: OpenDataStockSnapshot) {
 function upcomingEarningsSignal(metric?: OpenDataMetric): Signal {
   const days = finiteNumber(metric?.value);
   if (days == null) return { label: "Unclear", tone: "neutral" };
-  if (days <= 7) return { label: "This week", tone: "warning" };
-  if (days <= 21) return { label: "Soon", tone: "info" };
-  if (days <= 30) return { label: "Next 30 days", tone: "info" };
-  if (days <= 45) return { label: "Upcoming", tone: "neutral" };
+  if (days <= 7) return { label: "This week", tone: "positive" };
+  if (days <= 30) return { label: "Next 30 days", tone: "positive" };
   return { label: "Later", tone: "neutral" };
 }
 
@@ -469,27 +456,11 @@ function epsGaapMetric(snapshot: OpenDataStockSnapshot) {
   return snapshot.business_health.eps_gaap_growth_yoy ?? snapshot.business_health.eps_growth_yoy;
 }
 
-function epsAdjustedMetric(snapshot: OpenDataStockSnapshot) {
-  return snapshot.business_health.eps_adjusted_growth_yoy;
-}
-
-function epsAlignmentMetric(snapshot: OpenDataStockSnapshot) {
-  return snapshot.business_health.eps_alignment;
-}
-
-function epsAlignmentSignal(metric?: OpenDataMetric): Signal {
-  const value = finiteNumber(metric?.value);
-  if (value == null) return { label: "Needs adjusted EPS", tone: "neutral" };
-  if (value <= 10) return { label: "Aligned", tone: "positive" };
-  if (value <= 25) return { label: "Some divergence", tone: "warning" };
-  return { label: "Misaligned", tone: "negative" };
-}
-
 function supportSignal(value?: number | null): Signal {
   if (value == null || value > 25) return { label: "Far", tone: "info" };
   if (value <= 2.5) return { label: "At support", tone: "positive" };
   if (value <= 6) return { label: "Near support", tone: "warning" };
-  return { label: "Above support", tone: "neutral" };
+  return { label: "Above support", tone: "positive" };
 }
 
 function historicalRowSortValue(row: OpenDataStockSnapshot["historical_series"][string][number]) {
@@ -585,7 +556,7 @@ function inferredSupportLevel(currentPrice?: number | null, supportDistance?: nu
 }
 
 function signalFor(snapshot: OpenDataStockSnapshot, key: FilterKey): Signal {
-  if (key === "revenue") return growthSignal(snapshot.business_health.revenue_growth_yoy);
+  if (key === "revenue") return revenueGrowthSignal(snapshot.business_health.revenue_growth_yoy);
   if (key === "eps") return growthSignal(epsGaapMetric(snapshot));
   if (key === "fcf_margin") return fcfMarginSignal(snapshot.business_health.fcf_margin?.value);
   if (key === "valuation") return valuationSignal(snapshot);
@@ -670,7 +641,7 @@ function rowMetric(
   }
   if (key === "revenue" || key === "eps") {
     const metric = key === "revenue" ? snapshot.business_health.revenue_growth_yoy : epsGaapMetric(snapshot);
-    return { value: formatPercent(metric?.value, true), signal: growthSignal(metric), secondary: null };
+    return { value: formatPercent(metric?.value, true), signal: key === "revenue" ? revenueGrowthSignal(metric) : growthSignal(metric), secondary: null };
   }
   if (key === "fcf_margin") {
     const metric = snapshot.business_health.fcf_margin;
@@ -786,7 +757,6 @@ function createUpcomingEarningsExpression(): FilterExpression {
         operator: "or",
         conditions: [
           createCondition("upcoming_earnings", "This week"),
-          createCondition("upcoming_earnings", "Soon"),
           createCondition("upcoming_earnings", "Next 30 days"),
         ],
       },
@@ -837,7 +807,7 @@ function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
       (group) =>
         group.operator === "or"
         && group.conditions.join("|")
-          === "upcoming_earnings:Next 30 days|upcoming_earnings:Soon|upcoming_earnings:This week",
+          === "upcoming_earnings:Next 30 days|upcoming_earnings:This week",
     )
   ) {
     return "earnings";
@@ -991,13 +961,7 @@ function exportContextBullets(snapshot: OpenDataStockSnapshot) {
 
 function exportQualityFlags(snapshot: OpenDataStockSnapshot) {
   const context = snapshot.company_context;
-  const epsAlignment = epsAlignmentMetric(snapshot);
-  const epsFlags = epsAlignment?.value == null
-    ? [epsAlignment?.notes ?? "Adjusted EPS unavailable; GAAP EPS growth may include one-off accounting effects."]
-    : finiteNumber(epsAlignment.value) != null && epsAlignment.value > 25
-      ? [`Adjusted and GAAP EPS growth diverge by ${formatNumber(epsAlignment.value)} percentage points.`]
-      : [];
-  const gaps = [...epsFlags, ...(snapshot.data_gaps ?? []), ...(context?.known_context_gaps ?? [])]
+  const gaps = [...(snapshot.data_gaps ?? []), ...(context?.known_context_gaps ?? [])]
     .map(markdownValue)
     .filter((gap, index, all) => gap !== "-" && all.indexOf(gap) === index)
     .slice(0, 6);
@@ -1059,9 +1023,7 @@ function buildStockExportMarkdown({
       "",
       `- Revenue growth YoY: ${metricPercent(snapshot.business_health.revenue_growth_yoy)}`,
       `- Revenue growth momentum: ${momentum.change == null ? "-" : `${formatNumber(momentum.change)} pp`}`,
-      `- Adjusted EPS growth YoY: ${metricPercent(epsAdjustedMetric(snapshot))}`,
       `- GAAP EPS growth YoY: ${metricPercent(epsGaapMetric(snapshot))}`,
-      `- EPS alignment: ${epsAlignmentSignal(epsAlignmentMetric(snapshot)).label}${epsAlignmentMetric(snapshot)?.value == null ? "" : ` (${formatNumber(epsAlignmentMetric(snapshot)?.value)} pp gap)`}`,
       `- FCF margin: ${metricPercent(snapshot.business_health.fcf_margin)}`,
       `- Operating margin: ${metricPercent(snapshot.business_health.operating_margin)}`,
       `- Diluted share count YoY: ${formatPercent(shareCountChange, true)}`,
@@ -2030,9 +1992,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
   const copy = GROWTH_DETAIL_COPY[detailKey];
   const revenueDetail = revenueGrowthDetail(snapshot);
   const momentum = revenueMomentum(snapshot);
-  const epsAdjusted = epsAdjustedMetric(snapshot);
   const epsGaap = epsGaapMetric(snapshot);
-  const epsAlignment = epsAlignmentMetric(snapshot);
   const fcfMarginMetric = snapshot.business_health.fcf_margin;
   const upcomingEarnings = upcomingEarningsMetric(snapshot);
   const support = closestSupport(snapshot);
@@ -2127,37 +2087,6 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
     );
   }
 
-  if (detailKey === "eps_adjusted" || detailKey === "eps_alignment") {
-    const signal = detailKey === "eps_alignment"
-      ? epsAlignmentSignal(epsAlignment)
-      : growthSignal(epsAdjusted);
-    const currentValue = detailKey === "eps_alignment"
-      ? epsAlignment?.value == null ? epsAlignmentSignal(epsAlignment).label : `${formatNumber(epsAlignment.value)} pp gap`
-      : formatMetric(epsAdjusted, "percent");
-    const detailText = detailKey === "eps_alignment"
-      ? epsAlignment?.value == null
-        ? epsAlignment?.notes ?? "Adjusted EPS growth is unavailable, so alignment cannot be assessed."
-        : `${epsAlignmentSignal(epsAlignment).label}: adjusted EPS and GAAP EPS differ by ${formatNumber(epsAlignment.value)} percentage points.`
-      : epsAdjusted?.notes ?? "Adjusted EPS was not found in an official earnings-release exhibit with high-confidence parsing.";
-
-    return (
-      <section className="mobile-growth-detail-panel">
-        <div className="mobile-growth-copy">
-          <span>Metric definition</span>
-          <h2>{copy.title}</h2>
-          <p className="metric-question">{copy.question}</p>
-          <p>{copy.description}</p>
-        </div>
-        <div className="mobile-growth-formula">
-          <span>Current value</span>
-          <strong>{currentValue}</strong>
-          <small>{detailText}</small>
-          <StockStatus signal={signal} />
-        </div>
-      </section>
-    );
-  }
-
   const metric = detailKey === "eps_gaap"
     ? epsGaap
     : detailKey === "fcf_margin"
@@ -2225,13 +2154,9 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
   const [error, setError] = useState<string | null>(null);
   const currentPrice = snapshot.price_opportunity.current_price?.value;
   const dailyChange = snapshot.price_opportunity.change_1d?.value;
-  const revenueSignal = growthSignal(snapshot.business_health.revenue_growth_yoy);
-  const epsAdjusted = epsAdjustedMetric(snapshot);
+  const revenueSignal = revenueGrowthSignal(snapshot.business_health.revenue_growth_yoy);
   const epsGaap = epsGaapMetric(snapshot);
-  const epsAdjustedSignal = growthSignal(epsAdjusted);
   const epsGaapSignal = growthSignal(epsGaap);
-  const epsAlignment = epsAlignmentMetric(snapshot);
-  const epsAlignmentStatus = epsAlignmentSignal(epsAlignment);
   const fcfMarginMetric = snapshot.business_health.fcf_margin;
   const fcfMarginStatus = fcfMarginSignal(fcfMarginMetric?.value);
   const valuationStatus = valuationSignal(snapshot);
@@ -2302,25 +2227,11 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
             onClick={() => setActiveGrowthDetail("momentum")}
           />
           <MobileGrowthSignalButton
-            active={activeGrowthDetail === "eps_adjusted"}
-            label="Adjusted EPS Growth YoY"
-            signal={epsAdjustedSignal}
-            value={formatPercent(epsAdjusted?.value, true)}
-            onClick={() => setActiveGrowthDetail("eps_adjusted")}
-          />
-          <MobileGrowthSignalButton
             active={activeGrowthDetail === "eps_gaap"}
             label="GAAP EPS Growth YoY"
             signal={epsGaapSignal}
             value={formatPercent(epsGaap?.value, true)}
             onClick={() => setActiveGrowthDetail("eps_gaap")}
-          />
-          <MobileGrowthSignalButton
-            active={activeGrowthDetail === "eps_alignment"}
-            label="EPS Alignment"
-            signal={epsAlignmentStatus}
-            value={epsAlignment?.value == null ? "-" : `${formatNumber(epsAlignment.value)} pp`}
-            onClick={() => setActiveGrowthDetail("eps_alignment")}
           />
           <MobileGrowthSignalButton
             active={activeGrowthDetail === "fcf_margin"}

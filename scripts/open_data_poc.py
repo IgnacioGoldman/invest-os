@@ -37,9 +37,7 @@ DEFAULT_SKIP_TICKERS = {"GOOGL"}
 REQUIRED_GROUPS = ("business_health", "price_opportunity", "valuation")
 EPS_DEPENDENT_METRICS = {
     "business_health.eps_growth_yoy",
-    "business_health.eps_adjusted_growth_yoy",
     "business_health.eps_gaap_growth_yoy",
-    "business_health.eps_alignment",
     "business_health.eps_cagr_3y",
     "valuation.forward_pe",
     "valuation.peg",
@@ -549,7 +547,7 @@ def main() -> None:
         "--skip-filing-details",
         action="store_true",
         help=(
-            "Skip per-filing SEC archive exhibit lookups, including archive-derived adjusted EPS parsing. "
+            "Skip per-filing SEC archive exhibit lookups. "
             "Recent filing metadata is still collected; this is recommended for large universe runs."
         ),
     )

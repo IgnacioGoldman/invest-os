@@ -1,15 +1,17 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataSnapshot
 from app.services.stock_derived_signals import StockDerivedSignals, StockDerivedSignalsFile
 
 
 DB_FILE = "invest_os.sqlite"
+DEPRECATED_STOCK_METRIC_KEYS = frozenset({"eps_adjusted_growth_yoy", "eps_alignment"})
 
 
 def db_path(data_dir: Path) -> Path:
@@ -22,6 +24,23 @@ def connect(data_dir: Path) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     init_db(conn)
     return conn
+
+
+def strip_deprecated_stock_metrics_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    for section in ("business_health", "metrics"):
+        metrics = payload.get(section)
+        if isinstance(metrics, dict):
+            for key in DEPRECATED_STOCK_METRIC_KEYS:
+                metrics.pop(key, None)
+    return payload
+
+
+def _strip_deprecated_stock_metrics(snapshot: OpenDataSnapshot) -> OpenDataSnapshot:
+    business_health = {
+        key: value for key, value in snapshot.business_health.items() if key not in DEPRECATED_STOCK_METRIC_KEYS
+    }
+    metrics = {key: value for key, value in snapshot.metrics.items() if key not in DEPRECATED_STOCK_METRIC_KEYS}
+    return snapshot.model_copy(update={"business_health": business_health, "metrics": metrics})
 
 
 def init_db(conn: sqlite3.Connection) -> None:
@@ -176,6 +195,7 @@ def replace_stock_metric_series(conn: sqlite3.Connection, snapshot: OpenDataSnap
 
 
 def replace_stock_open_data_snapshot(conn: sqlite3.Connection, snapshot: OpenDataSnapshot) -> None:
+    snapshot = _strip_deprecated_stock_metrics(snapshot)
     conn.execute(
         """
         INSERT INTO stock_open_data_snapshots (ticker, generated_at, payload)
@@ -191,7 +211,13 @@ def replace_stock_open_data_snapshot(conn: sqlite3.Connection, snapshot: OpenDat
 
 def load_stock_open_data_snapshots(conn: sqlite3.Connection) -> list[OpenDataSnapshot]:
     rows = conn.execute("SELECT payload FROM stock_open_data_snapshots ORDER BY ticker")
-    return [OpenDataSnapshot.model_validate_json(row["payload"]) for row in rows]
+    snapshots: list[OpenDataSnapshot] = []
+    for row in rows:
+        payload = json.loads(row["payload"])
+        if isinstance(payload, dict):
+            strip_deprecated_stock_metrics_payload(payload)
+        snapshots.append(OpenDataSnapshot.model_validate(payload))
+    return snapshots
 
 
 def load_stock_open_data_snapshot(conn: sqlite3.Connection, ticker: str) -> OpenDataSnapshot | None:
@@ -199,7 +225,12 @@ def load_stock_open_data_snapshot(conn: sqlite3.Connection, ticker: str) -> Open
         "SELECT payload FROM stock_open_data_snapshots WHERE ticker = ?",
         (ticker.upper(),),
     ).fetchone()
-    return OpenDataSnapshot.model_validate_json(row["payload"]) if row else None
+    if row is None:
+        return None
+    payload = json.loads(row["payload"])
+    if isinstance(payload, dict):
+        strip_deprecated_stock_metrics_payload(payload)
+    return OpenDataSnapshot.model_validate(payload)
 
 
 def load_active_stock_tickers(conn: sqlite3.Connection) -> list[str]:

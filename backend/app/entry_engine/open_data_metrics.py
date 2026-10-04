@@ -246,7 +246,6 @@ def compute_open_data_snapshot(
     industry: str | None = None,
     forward_pe_estimate: OpenDataMetric | None = None,
     company_context: OpenDataCompanyContext | None = None,
-    adjusted_eps_growth_yoy: OpenDataMetric | None = None,
     statement_currency_rates: dict[str, OpenDataMetric] | None = None,
     market_cap_estimate: OpenDataMetric | None = None,
     next_earnings_release: OpenDataMetric | None = None,
@@ -361,13 +360,6 @@ def compute_open_data_snapshot(
     eps_cagr_3y = _quarterly_eps_growth_metric(companyfacts, "eps_cagr_3y", 3, as_of)
     if eps_cagr_3y.value is None:
         eps_cagr_3y = _eps_growth_metric(companyfacts, "eps_cagr_3y", 3, as_of)
-    eps_adjusted_growth_yoy = adjusted_eps_growth_yoy or _unavailable(
-        "eps_adjusted_growth_yoy",
-        "Adjusted EPS growth was not found in an official earnings-release exhibit with high-confidence parsing.",
-        as_of,
-    )
-    eps_alignment = _eps_alignment_metric(eps_adjusted_growth_yoy, eps_gaap_growth_yoy, as_of)
-
     shares = _shares_diluted_metric(companyfacts, as_of)
     cash = _latest_fact_metric(
         companyfacts,
@@ -669,9 +661,7 @@ def compute_open_data_snapshot(
         "revenue_growth_yoy": revenue_growth_yoy,
         "revenue_cagr_3y": revenue_cagr_3y,
         "eps_growth_yoy": eps_growth_yoy,
-        "eps_adjusted_growth_yoy": eps_adjusted_growth_yoy,
         "eps_gaap_growth_yoy": eps_gaap_growth_yoy,
-        "eps_alignment": eps_alignment,
         "eps_cagr_3y": eps_cagr_3y,
         "gross_margin": gross_margin_quarterly,
         "operating_margin": operating_margin_quarterly,
@@ -732,9 +722,7 @@ def compute_open_data_snapshot(
         "revenue_growth_yoy": revenue_growth_yoy,
         "revenue_cagr_3y": revenue_cagr_3y,
         "eps_growth_yoy": eps_growth_yoy,
-        "eps_adjusted_growth_yoy": eps_adjusted_growth_yoy,
         "eps_gaap_growth_yoy": eps_gaap_growth_yoy,
-        "eps_alignment": eps_alignment,
         "eps_cagr_3y": eps_cagr_3y,
         **business_health,
         **price_opportunity,
@@ -950,32 +938,6 @@ def _quarterly_eps_growth_metric(companyfacts: dict[str, Any], metric_name: str,
             notes=f"{label} computed from comparable SEC quarterly diluted EPS facts.",
         )
     return _eps_not_meaningful_metric(metric_name, latest.value, prior.value, latest.source, prior.source, latest.end.isoformat(), years)
-
-
-def _eps_alignment_metric(adjusted: OpenDataMetric, gaap: OpenDataMetric, fallback_as_of: str) -> OpenDataMetric:
-    if adjusted.value is None:
-        return _unavailable(
-            "eps_alignment",
-            "Adjusted EPS growth was unavailable, so GAAP/adjusted EPS alignment could not be assessed.",
-            fallback_as_of,
-        )
-    if gaap.value is None:
-        return _unavailable(
-            "eps_alignment",
-            "GAAP EPS growth was unavailable, so GAAP/adjusted EPS alignment could not be assessed.",
-            fallback_as_of,
-        )
-    gap = abs(adjusted.value - gaap.value)
-    return OpenDataMetric(
-        value=gap,
-        source=f"{adjusted.source}; {gaap.source}",
-        tier="computed_from_public_facts" if adjusted.tier == "computed_from_public_facts" and gaap.tier == "computed_from_public_facts" else "proxy_estimate",
-        as_of=_max_as_of(adjusted.as_of, gaap.as_of),
-        notes=(
-            "Absolute percentage-point gap between adjusted EPS growth and GAAP EPS growth. "
-            "Lower means the underlying adjusted earnings trend and reported GAAP earnings trend are better aligned."
-        ),
-    )
 
 
 def _eps_growth_metric(companyfacts: dict[str, Any], metric_name: str, years: int, fallback_as_of: str) -> OpenDataMetric:

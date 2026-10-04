@@ -133,10 +133,9 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
 
         earnings = snapshot("EARNINGS", 20, 2.5, 25, days_to_next_earnings=7)
         self.assertEqual(signal_for(earnings, "upcoming_earnings"), "This week")
-        self.assertEqual(signal_for(snapshot("SOON", 20, 2.5, 25, days_to_next_earnings=21), "upcoming_earnings"), "Soon")
+        self.assertEqual(signal_for(snapshot("NEXT_21", 20, 2.5, 25, days_to_next_earnings=21), "upcoming_earnings"), "Next 30 days")
         self.assertEqual(signal_for(snapshot("NEXT_30", 20, 2.5, 25, days_to_next_earnings=30), "upcoming_earnings"), "Next 30 days")
-        self.assertEqual(signal_for(snapshot("NEXT", 20, 2.5, 25, days_to_next_earnings=45), "upcoming_earnings"), "Upcoming")
-        self.assertEqual(signal_for(snapshot("LATER", 20, 2.5, 25, days_to_next_earnings=46), "upcoming_earnings"), "Later")
+        self.assertEqual(signal_for(snapshot("LATER", 20, 2.5, 25, days_to_next_earnings=31), "upcoming_earnings"), "Later")
 
     def test_pullback_preset_uses_one_three_and_six_month_support(self) -> None:
         row = snapshot("PULLBACK", 12, 12, 30, support_6m=1)

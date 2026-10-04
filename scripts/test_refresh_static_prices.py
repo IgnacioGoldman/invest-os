@@ -11,9 +11,8 @@ import requests
 
 from refresh_static_prices import fetch_updated_history, hydrate_deployed_data, merge_price_history, refresh_prices, refresh_snapshot_prices
 
-from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataFilingExhibit, OpenDataMetric, OpenDataSnapshot
+from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataMetric, OpenDataSnapshot
 from app.entry_engine.providers.open_data_provider import JsonFileCache, OpenDataProvider
-from app.services.open_data_stock_store import _preserve_enriched_metrics
 from app.services.storage import (
     connect,
     load_stock_open_data_snapshot,
@@ -93,39 +92,6 @@ class SequenceSession:
 
 
 class RefreshStaticPricesTests(unittest.TestCase):
-    def test_adjusted_eps_parser_accepts_actuals_and_rejects_outlook(self) -> None:
-        provider = OpenDataProvider()
-        table = "<tr><td>Non-GAAP EPS (1)</td><td>$</td><td>0.60</td><td>$</td><td>0.81</td><td>35</td><td>%</td></tr>"
-
-        self.assertEqual(provider._parse_adjusted_eps_growth_yoy(table), 35)
-        self.assertEqual(provider._parse_adjusted_eps_growth_yoy("Non-GAAP EPS of $0.81, up 35% year-over-year"), 35)
-        self.assertEqual(provider._parse_adjusted_eps_growth_yoy("Core EPS increased 17% to $4.66"), 17)
-        self.assertEqual(provider._parse_adjusted_eps_growth_yoy("Adjusted diluted earnings per share rose 12% year-over-year"), 12)
-        self.assertAlmostEqual(
-            provider._parse_adjusted_eps_growth_yoy(
-                "The company achieved adjusted 3 EPS of $0.86 for the period, compared to $0.75 a year ago."
-            ),
-            (0.86 - 0.75) / 0.75 * 100,
-        )
-        self.assertIsNone(
-            provider._parse_adjusted_eps_growth_yoy(
-                "Outlook for Q3: Non-GAAP EPS of $0.84 to $0.88, representing growth of 28% to 35% YoY"
-            )
-        )
-
-    def test_skip_filing_details_skips_archive_adjusted_eps_lookup(self) -> None:
-        session = Mock()
-        with TemporaryDirectory() as directory:
-            provider = OpenDataProvider(
-                cache=JsonFileCache(Path(directory)),
-                session=session,
-                include_filing_details=False,
-            )
-
-            self.assertIsNone(provider.fetch_adjusted_eps_growth_yoy(123456))
-
-        session.get.assert_not_called()
-
     def test_get_uses_retry_after_for_429(self) -> None:
         session = SequenceSession(
             [
@@ -173,119 +139,42 @@ class RefreshStaticPricesTests(unittest.TestCase):
         self.assertEqual(second, [])
         session.get.assert_called_once()
 
-    def test_adjusted_eps_unavailable_cache_respects_lookup_depth(self) -> None:
+    def test_stock_snapshot_storage_strips_deprecated_adjusted_eps_metrics(self) -> None:
+        metric = OpenDataMetric(
+            value=12,
+            source="test",
+            tier="computed_from_public_facts",
+            as_of="2026-06-30",
+            notes="test metric",
+        )
         with TemporaryDirectory() as directory:
-            cache = JsonFileCache(Path(directory))
-            cache.set("adjusted_eps_growth_CIK0000000123.json", {"unavailable": True, "max_sec_archive_lookups": 1})
+            data_dir = Path(directory)
+            with connect(data_dir) as conn:
+                replace_stock_open_data_snapshot(
+                    conn,
+                    OpenDataSnapshot(
+                        ticker="OLD",
+                        business_health={
+                            "eps_growth_yoy": metric,
+                            "eps_adjusted_growth_yoy": metric,
+                            "eps_alignment": metric,
+                        },
+                        metrics={
+                            "eps_growth_yoy": metric,
+                            "eps_adjusted_growth_yoy": metric,
+                            "eps_alignment": metric,
+                        },
+                    ),
+                )
+                conn.commit()
+                loaded = load_stock_open_data_snapshot(conn, "OLD")
 
-            shallow_session = Mock()
-            shallow_provider = OpenDataProvider(
-                cache=cache,
-                session=shallow_session,
-                max_sec_archive_lookups=1,
-            )
-            self.assertIsNone(shallow_provider.fetch_adjusted_eps_growth_yoy(123))
-            shallow_session.get.assert_not_called()
-
-            deep_session = Mock()
-            deep_session.get.return_value = FakeResponse({"filings": {"recent": {"form": []}}})
-            deep_provider = OpenDataProvider(
-                cache=cache,
-                session=deep_session,
-                max_sec_archive_lookups=2,
-                retry_attempts=1,
-            )
-            self.assertIsNone(deep_provider.fetch_adjusted_eps_growth_yoy(123))
-            deep_session.get.assert_called_once()
-
-    def test_adjusted_eps_prefers_item_202_earnings_filings_before_901_only_filings(self) -> None:
-        provider = OpenDataProvider(max_sec_archive_lookups=2)
-        submissions = {
-            "filings": {
-                "recent": {
-                    "form": ["8-K", "8-K", "8-K"],
-                    "filingDate": ["2026-09-15", "2026-08-07", "2026-08-05"],
-                    "accessionNumber": [
-                        "0001552781-26-000486",
-                        "0001552781-26-000414",
-                        "0001543151-26-000027",
-                    ],
-                    "items": ["8.01,9.01", "1.01,1.02,2.03,9.01", "2.02,9.01"],
-                    "primaryDocument": ["e26383_uber-8k.htm", "e26328_uber-8k.htm", "uber-20260805.htm"],
-                    "primaryDocDescription": ["", "", "8-K"],
-                }
-            }
-        }
-        tried_accessions: list[str] = []
-
-        def exhibits(_: int, filing: dict[str, str] | str) -> list[OpenDataFilingExhibit]:
-            accession_number = filing["accession_number"] if isinstance(filing, dict) else filing
-            tried_accessions.append(accession_number)
-            if accession_number == "0001543151-26-000027":
-                return [
-                    OpenDataFilingExhibit(
-                        document="uberq226earningspressrelea.htm",
-                        type="EX-99.1",
-                        url="https://www.sec.gov/Archives/edgar/data/1543151/000154315126000027/uberq226earningspressrelea.htm",
-                    )
-                ]
-            return []
-
-        with (
-            patch.object(provider, "_earnings_release_exhibits", side_effect=exhibits),
-            patch.object(provider, "_fetch_sec_document_text", return_value="Non-GAAP EPS of $0.81, up 35% year-over-year"),
-        ):
-            metric = provider._adjusted_eps_growth_from_submissions(1543151, submissions)
-
-        self.assertIsNotNone(metric)
-        self.assertEqual(metric.value if metric else None, 35)
-        self.assertEqual(tried_accessions[0], "0001543151-26-000027")
-        self.assertNotIn("0001552781-26-000486", tried_accessions[:2])
-
-    def test_adjusted_eps_prefers_newer_item_202_before_older_earnings_named_item_202(self) -> None:
-        provider = OpenDataProvider(max_sec_archive_lookups=2)
-        submissions = {
-            "filings": {
-                "recent": {
-                    "form": ["8-K", "8-K"],
-                    "filingDate": ["2026-08-13", "2017-11-16"],
-                    "accessionNumber": ["0001628280-26-056699", "0000006951-17-000030"],
-                    "items": ["2.02,9.01", "2.02,9.01"],
-                    "primaryDocument": ["amat-20260813.htm", "exhibit991q42017earningsre.htm"],
-                    "primaryDocDescription": ["8-K", "Earnings Release"],
-                }
-            }
-        }
-
-        candidates = provider._adjusted_eps_candidate_filings(submissions["filings"]["recent"])
-
-        self.assertEqual(candidates[0]["accession_number"], "0001628280-26-056699")
-        self.assertEqual(candidates[1]["accession_number"], "0000006951-17-000030")
-
-    def test_adjusted_eps_prioritizes_financial_6k_period_reports(self) -> None:
-        provider = OpenDataProvider(max_sec_archive_lookups=3)
-        recent = {
-            "form": ["6-K", "6-K", "6-K"],
-            "filingDate": ["2026-03-31", "2025-07-29", "2025-04-29"],
-            "reportDate": ["2026-03-31", "2025-06-30", "2025-04-29"],
-            "accessionNumber": ["0001654954-26-003013", "0001104659-25-071432", "0001654954-25-004737"],
-            "items": ["", "", ""],
-            "primaryDocument": ["a7230y.htm", "azn-20250630x6k.htm", "a5242g.htm"],
-            "primaryDocDescription": [
-                "EFZIMFOTASE ALFA PH3 PROGRAM SHOW POSITIVE RESULTS",
-                "FORM 6-K",
-                "1ST QUARTER RESULTS",
-            ],
-        }
-
-        candidates = provider._adjusted_eps_candidate_filings(recent)
-
-        self.assertEqual(candidates[0]["accession_number"], "0001654954-25-004737")
-        self.assertEqual(candidates[1]["accession_number"], "0001104659-25-071432")
-        self.assertEqual(candidates[2]["accession_number"], "0001654954-26-003013")
-
-        targeted = provider._adjusted_eps_candidate_filings(recent, target_report_date="2025-06-30")
-        self.assertEqual(targeted[0]["accession_number"], "0001104659-25-071432")
+            self.assertIsNotNone(loaded)
+            self.assertIn("eps_growth_yoy", loaded.business_health if loaded else {})
+            self.assertNotIn("eps_adjusted_growth_yoy", loaded.business_health if loaded else {})
+            self.assertNotIn("eps_alignment", loaded.business_health if loaded else {})
+            self.assertNotIn("eps_adjusted_growth_yoy", loaded.metrics if loaded else {})
+            self.assertNotIn("eps_alignment", loaded.metrics if loaded else {})
 
     def test_hydrate_falls_back_to_local_data_for_new_tickers(self) -> None:
         with TemporaryDirectory() as directory:
@@ -519,39 +408,6 @@ class RefreshStaticPricesTests(unittest.TestCase):
 
             static_rows = json.loads((data_dir / "open-data" / "stocks.json").read_text(encoding="utf-8"))
             self.assertEqual(static_rows[0]["metrics"]["revenue_growth_yoy"]["value"], 20)
-
-    def test_shallow_snapshot_preserves_existing_adjusted_eps_metric(self) -> None:
-        adjusted = OpenDataMetric(
-            value=35,
-            source="sec_archive_exhibit",
-            tier="computed_from_public_facts",
-            as_of="2026-08-05",
-            notes="Existing local backfill.",
-        )
-        unavailable = OpenDataMetric(
-            value=None,
-            source="sec_archive_exhibit",
-            tier="unavailable_open_free",
-            as_of="2026-09-01",
-            notes="Shallow refresh missed the exhibit.",
-        )
-
-        merged = _preserve_enriched_metrics(
-            OpenDataSnapshot(
-                ticker="UBER",
-                business_health={"eps_adjusted_growth_yoy": adjusted},
-                metrics={"eps_adjusted_growth_yoy": adjusted},
-            ),
-            OpenDataSnapshot(
-                ticker="UBER",
-                business_health={"eps_adjusted_growth_yoy": unavailable},
-                metrics={"eps_adjusted_growth_yoy": unavailable},
-            ),
-        )
-
-        self.assertEqual(merged.metrics["eps_adjusted_growth_yoy"].value, 35)
-        self.assertEqual(merged.business_health["eps_adjusted_growth_yoy"].as_of, "2026-08-05")
-
 
 if __name__ == "__main__":
     unittest.main()

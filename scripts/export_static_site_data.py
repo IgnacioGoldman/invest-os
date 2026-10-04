@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 from app.entry_engine.open_data_models import HistoricalPricePoint  # noqa: E402
 from app.entry_engine.utils.file_storage import load_stock_universe  # noqa: E402
 from app.services.open_data_stock_store import load_cached_price_history  # noqa: E402
-from app.services.storage import DB_FILE, init_db  # noqa: E402
+from app.services.storage import DB_FILE, init_db, strip_deprecated_stock_metrics_payload  # noqa: E402
 
 
 DEFAULT_OUTPUT_DIR = ROOT / "frontend" / "public" / "data"
@@ -43,6 +43,7 @@ def _load_snapshot_rows(conn: sqlite3.Connection) -> list[dict[str, Any]]:
             continue
         if isinstance(payload, dict):
             payload["ticker"] = str(payload.get("ticker") or row["ticker"]).upper()
+            strip_deprecated_stock_metrics_payload(payload)
             snapshots.append(payload)
     return snapshots
 

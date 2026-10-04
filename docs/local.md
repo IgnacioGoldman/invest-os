@@ -12,13 +12,11 @@ GitHub Actions persist both the tracked SQLite database and the static exports b
 
 Local runs should fill gaps that need deeper history or more careful crawling:
 
-- Adjusted EPS growth YoY from official earnings-release exhibits.
-- EPS alignment, once adjusted EPS and GAAP EPS are both available.
 - Historical metric depth, such as at least four periods for revenue growth YoY and comparable metric histories where the source data supports it.
 - Non-SEC or non-US symbols, such as `AXFO.ST`, where an issuer-published workbook or report should be preferred over Yahoo Finance statement tables when available.
 - Backfills for any ticker where the daily refresh can see that a metric is missing but should not spend a large request budget to repair it.
 
-For example, UBER's adjusted EPS growth YoY was missed by the daily Action because the relevant earnings release was not one of the newest SEC archive filings selected by the small daily cap. Local backfill should be able to search farther back, find the official exhibit, parse the metric, write it to SQLite, rebuild derived signals, and export static data.
+Adjusted EPS growth YoY and EPS alignment were intentionally removed because coverage was too sparse across the tracked universe for a reliable deterministic metric.
 
 ## 2. Persistence Model
 
@@ -45,27 +43,7 @@ python scripts/open_data_poc.py \
   --min-coverage 0
 ```
 
-Then run a deeper adjusted EPS enrichment pass. Local runs may use a larger archive lookup cap than the daily Action:
-
-```sh
-python scripts/enrich_adjusted_eps.py \
-  --max-sec-archive-lookups 8 \
-  --request-timeout 20 \
-  --request-retries 1 \
-  --retry-backoff 1 \
-  --output /tmp/adjusted-eps-local-report.json
-```
-
-For a focused retry while debugging:
-
-```sh
-python scripts/enrich_adjusted_eps.py \
-  --tickers UBER \
-  --max-sec-archive-lookups 12 \
-  --output /tmp/adjusted-eps-uber-report.json
-```
-
-After enrichment, rebuild derived signals and export static data:
+After collection, rebuild derived signals and export static data:
 
 ```sh
 python scripts/build_stock_derived_signals.py
@@ -87,9 +65,8 @@ for ticker in ("UBER", "AXFO.ST"):
         continue
     health = row.get("business_health") or {}
     print(ticker)
-    print("  adjusted EPS:", health.get("eps_adjusted_growth_yoy"))
-    print("  EPS alignment:", health.get("eps_alignment"))
     print("  revenue growth YoY:", health.get("revenue_growth_yoy"))
+    print("  GAAP EPS growth YoY:", health.get("eps_gaap_growth_yoy") or health.get("eps_growth_yoy"))
 PY
 ```
 
@@ -115,7 +92,6 @@ The daily remote refresh should:
 - Fetch recent SEC submissions for each ticker and use them as a cheap change detector.
 - Recollect only tickers whose latest relevant SEC filing changed; preserve unchanged DB snapshots.
 - Add or update only facts that are newer or better.
-- Preserve known-good backfilled metrics when a shallow daily search does not rediscover them.
 - Export static JSON from the updated database.
 - Commit `data/invest_os.sqlite` and tracked static data changes back to `main`.
 

@@ -8,7 +8,7 @@ The goal is not to predict the future or produce a buy/sell command. The goal is
 
 Stock insights use public open-data snapshots, mainly:
 
-- Business facts: latest-quarter revenue growth, adjusted EPS growth, GAAP EPS growth, EPS alignment, margins, free cash flow, returns on equity/capital, cash, debt, and share count.
+- Business facts: latest-quarter revenue growth, GAAP EPS growth, margins, free cash flow, returns on equity/capital, cash, debt, and share count.
 - Price facts: current price, 1 day to 5 year price changes, distance from all-time high, distance from 52 week high/low, volatility, and support-zone distance.
 - Valuation facts: trailing PE, forward PE estimate when available, PEG proxy, price/sales, EV/EBITDA proxy, FCF yield, and valuation history.
 - Context facts: recent SEC filings, known data gaps, peer ranks, valuation percentiles, net cash/debt, FCF conversion, and price versus fundamentals.
@@ -29,23 +29,11 @@ _Is the company’s growth getting stronger or weaker?_
 
 Looks at how the revenue growth rate is changing between quarters. A company growing 8% → 12% → 16% is accelerating, while 25% → 20% → 15% is still growing strongly but slowing down. This helps you detect improvement or deterioration before revenue actually turns negative.
 
-### Adjusted EPS Growth YoY
-
-_Is the company generating more underlying earnings for shareholders?_
-
-Compares adjusted earnings per share with the same quarter last year. It aims to show how the ongoing business is performing by excluding certain unusual or non-recurring items reported by the company. The app only fills this when it can parse a high-confidence Adjusted EPS or Non-GAAP EPS YoY percentage from an official SEC earnings-release exhibit. For example, Adjusted EPS +25% suggests underlying earnings per share are improving, while Adjusted EPS -10% suggests the core earnings trend is weakening.
-
 ### GAAP EPS Growth YoY
 
 _Is the company reporting more profit per share than a year ago?_
 
-Compares GAAP diluted earnings per share with the same quarter last year. It reflects the company’s official reported earnings after operating costs, interest, taxes, changes in share count, and other accounting gains or losses. Because unusual items can affect GAAP earnings, a very strong or weak result does not always mean the underlying business changed by the same amount. For example, GAAP EPS +80% may look very strong, but part of that increase could come from a large investment gain.
-
-### EPS Alignment
-
-_Are adjusted and reported earnings telling the same story?_
-
-Compares the adjusted and GAAP EPS trends to see how closely they agree. High alignment means both measures point to a similar earnings trend, while low alignment suggests that unusual or excluded items are materially affecting reported earnings. For example, Adjusted EPS +25% / GAAP EPS +22% shows strong alignment, while Adjusted EPS +25% / GAAP EPS +80% signals a large divergence that may need further investigation.
+Compares GAAP diluted earnings per share with the same quarter last year. It reflects the company’s official reported earnings after operating costs, interest, taxes, changes in share count, and other accounting gains or losses. Because unusual items can affect GAAP earnings, a very strong or weak result does not always mean the underlying business changed by the same amount. Cross-check it with free cash flow, margins, and revenue growth.
 
 ### Free Cash Flow Margin
 

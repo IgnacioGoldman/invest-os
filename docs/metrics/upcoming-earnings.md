@@ -27,10 +27,8 @@ Upcoming Earnings is a catalyst-timing metric, so its tags should describe event
 Suggested tags:
 
 - **This week:** Earnings are expected within 7 days. The catalyst is very close.
-- **Soon:** Earnings are expected in 8 to 21 days. The stock is approaching a meaningful event window.
-- **Next 30 days:** Earnings are expected in 22 to 30 days. The catalyst is visible inside a near-term monthly window.
-- **Upcoming:** Earnings are expected in 31 to 45 days. The catalyst is visible, but not immediate.
-- **Later:** Earnings are more than 45 days away. The next release is probably not the dominant near-term setup.
+- **Next 30 days:** Earnings are expected in 8 to 30 days. The catalyst is visible inside a near-term monthly window.
+- **Later:** Earnings are more than 30 days away. The next release is probably not the dominant near-term setup.
 - **Unclear:** The next expected earnings date is unavailable from the current open/free calendar source.
 
 These thresholds should be treated as a first-pass timing signal. Earnings dates from open/free calendar sources can be estimates and may change before the company confirms the release. Read the tag together with valuation, support distance, recent price action, and the quality of the business trend.

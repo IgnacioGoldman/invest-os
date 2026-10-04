@@ -53,16 +53,6 @@ jobs:
           --retry-backoff 1
           --output /tmp/open-data-refresh-report.json
 
-      - name: Enrich adjusted EPS metrics
-        run: >-
-          python scripts/enrich_adjusted_eps.py
-          --tickers-from-report /tmp/open-data-refresh-report.json
-          --max-sec-archive-lookups 2
-          --request-timeout 20
-          --request-retries 1
-          --retry-backoff 1
-          --output /tmp/adjusted-eps-enrichment-report.json
-
       - name: Build derived stock signals
         run: python scripts/build_stock_derived_signals.py
 

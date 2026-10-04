@@ -16,6 +16,15 @@ Example:
 
 That means the latest close is about 4% above the detected support area.
 
+## Tags
+
+Support is a price-setup metric, so its tags describe distance from a detected support zone:
+
+- **At support:** The latest close is within 2.5% of the support-zone midpoint.
+- **Near support:** The latest close is more than 2.5% and up to 6% above the support-zone midpoint.
+- **Above support:** The latest close is more than 6% and up to 25% above the support-zone midpoint.
+- **Far:** The latest close is more than 25% above support, or no usable support zone was detected for the window.
+
 ## How It Is Calculated
 
 For each window, such as 1M, 3M, 6M, 1Y, 2Y, or 5Y, the app:

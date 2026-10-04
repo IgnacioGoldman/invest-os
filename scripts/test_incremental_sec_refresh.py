@@ -6,7 +6,6 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
-from enrich_adjusted_eps import _tickers_from_refresh_report
 from open_data_poc import _filter_incremental_sec_work_items, _latest_relevant_sec_filing
 
 from app.entry_engine.open_data_models import OpenDataCompanyContext, OpenDataCompanyFiling, OpenDataSnapshot
@@ -98,25 +97,6 @@ class IncrementalSecRefreshTests(unittest.TestCase):
                 state = load_stock_sec_refresh_state(conn, "TEST")
             self.assertIsNotNone(state)
             self.assertEqual(state["accession_number"], "quarterly")
-
-    def test_tickers_from_refresh_report_excludes_preserved_rows(self) -> None:
-        with TemporaryDirectory() as directory:
-            report_path = Path(directory) / "report.json"
-            report_path.write_text(
-                json.dumps(
-                    {
-                        "results": [
-                            {"ticker": "AAA", "saved_to": "data/invest_os.sqlite", "collection_status": "collected"},
-                            {"ticker": "BBB", "saved_to": "data/invest_os.sqlite", "collection_status": "preserved"},
-                            {"ticker": "CCC", "collection_status": "collected"},
-                        ]
-                    }
-                ),
-                encoding="utf-8",
-            )
-
-            self.assertEqual(_tickers_from_refresh_report(report_path), {"AAA"})
-
 
 if __name__ == "__main__":
     unittest.main()
