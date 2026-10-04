@@ -108,6 +108,11 @@ def _growth_signal(value: float | None) -> str:
     return "Weak"
 
 
+def _revenue_growth_signal(value: float | None) -> str:
+    signal = _growth_signal(value)
+    return "Flat" if signal == "Mixed" else signal
+
+
 def _support_signal(value: float | None) -> str:
     if value is None or value > 25:
         return "Far"
@@ -196,7 +201,7 @@ def _revenue_momentum(snapshot: dict[str, Any]) -> str:
 
 def signal_for(snapshot: dict[str, Any], field: str) -> str:
     if field == "revenue":
-        return _growth_signal(_metric_value(snapshot, "business_health", "revenue_growth_yoy"))
+        return _revenue_growth_signal(_metric_value(snapshot, "business_health", "revenue_growth_yoy"))
     if field == "eps":
         value = _metric_value(snapshot, "business_health", "eps_gaap_growth_yoy")
         return _growth_signal(value if value is not None else _metric_value(snapshot, "business_health", "eps_growth_yoy"))

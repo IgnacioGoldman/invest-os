@@ -127,6 +127,10 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
         self.assertEqual(signal_for(row, "support_1m"), "At support")
         self.assertEqual(signal_for(row, "support_5y"), "Above support")
         self.assertEqual(signal_for(row, "valuation"), "Cheap")
+        self.assertEqual(signal_for(snapshot("FLAT", 4, 2.5, 25), "revenue"), "Flat")
+        mixed_eps = snapshot("MIXED_EPS", 20, 2.5, 25)
+        mixed_eps["business_health"]["eps_growth_yoy"]["value"] = 4
+        self.assertEqual(signal_for(mixed_eps, "eps"), "Mixed")
 
         app_like = snapshot("APP_LIKE", 50, 1, 1, forward_pe=14.9, fcf_yield=4.3, price_to_sales=15.4, ev_to_ebitda=19.6)
         self.assertEqual(signal_for(app_like, "valuation"), "Pricey")
