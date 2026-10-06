@@ -93860,15 +93860,15 @@
     "close": 631.75,
     "high": 633.5,
     "low": 619.989990234375,
-    "volume": 13690000.0,
+    "volume": 13717500.0,
     "source": "yfinance_history"
   },
   {
     "date": "2026-10-06",
-    "close": 653.4149780273438,
+    "close": 649.4199829101562,
     "high": 658.52001953125,
     "low": 628.0,
-    "volume": 17812001.0,
+    "volume": 24224687.0,
     "source": "yfinance_history"
   }
 ]
