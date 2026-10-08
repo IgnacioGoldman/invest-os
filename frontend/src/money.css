@@ -1,0 +1,240 @@
+.my-space-tabs {
+  background: linear-gradient(115deg, #202123, #17181a);
+  border-radius: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 0 0 40px;
+  padding: 3px;
+}
+
+.mobile-stock-app .my-space-tabs button {
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 17px;
+  color: var(--mobile-muted);
+  font-size: 1.05rem;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 48px;
+  padding: 10px;
+}
+
+.mobile-stock-app .my-space-tabs button[aria-selected="true"] {
+  border-color: #9acbff;
+  color: var(--mobile-text);
+}
+
+.money-panel { padding-bottom: 24px; }
+
+.mobile-stock-app .money-add {
+  align-items: center;
+  background: linear-gradient(110deg, #111214, #0d0e10);
+  border: 0;
+  border-radius: 28px;
+  color: var(--mobile-blue);
+  display: flex;
+  font-size: 1.3rem;
+  font-weight: 500;
+  gap: 12px;
+  justify-content: center;
+  min-height: 68px;
+  width: 100%;
+}
+
+.money-hint {
+  color: var(--mobile-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 22px 0;
+  text-align: center;
+}
+
+.money-form,
+.money-summary {
+  background: var(--mobile-surface);
+  border-radius: 22px;
+  padding: 20px;
+}
+
+.money-form header,
+.money-summary header {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.money-panel h2 {
+  color: var(--mobile-text);
+  font-size: 1.1rem;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.money-form fieldset {
+  border: 0;
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.money-form label {
+  color: var(--mobile-muted);
+  display: grid;
+  font-size: 0.85rem;
+  gap: 8px;
+  min-width: 0;
+}
+
+.money-input-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) 100px;
+}
+
+.money-panel input,
+.money-panel select {
+  background: var(--mobile-surface-raised);
+  border: 1px solid var(--mobile-border);
+  border-radius: 12px;
+  color: var(--mobile-text);
+  font: inherit;
+  font-size: 1rem;
+  min-height: 48px;
+  min-width: 0;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.money-panel input:focus,
+.money-panel select:focus { outline: 2px solid #9acbff; outline-offset: 2px; }
+
+.money-status-choice {
+  background: var(--mobile-surface-raised);
+  border-radius: 12px;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+}
+
+.mobile-stock-app .money-status-choice button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: var(--mobile-muted);
+  font-size: 0.95rem;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px;
+}
+
+.mobile-stock-app .money-status-choice button[aria-pressed="true"] {
+  background: #243548;
+  border-color: #9acbff;
+  color: var(--mobile-text);
+}
+
+.mobile-stock-app .money-save {
+  background: var(--mobile-blue);
+  border: 0;
+  border-radius: 12px;
+  color: #001729;
+  font-size: 1rem;
+  font-weight: 750;
+  justify-content: center;
+  min-height: 48px;
+  width: 100%;
+}
+
+.mobile-stock-app .money-icon {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  color: var(--mobile-muted);
+  display: inline-flex;
+  flex: 0 0 44px;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0;
+  width: 44px;
+}
+
+.mobile-stock-app .money-icon:hover { background: var(--mobile-surface-soft); color: var(--mobile-text); }
+.money-panel button:focus-visible { outline: 2px solid #9acbff; outline-offset: 3px; }
+.money-panel button:disabled { opacity: 0.5; cursor: wait; }
+
+.money-list { list-style: none; margin: 24px 0 32px; padding: 0; }
+
+.money-list li {
+  align-items: center;
+  border-bottom: 1px solid var(--mobile-border);
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  min-height: 88px;
+  padding: 16px 0;
+}
+
+.money-entry-info { display: grid; gap: 7px; min-width: 0; }
+.money-entry-info strong { color: var(--mobile-text); font-size: 1.15rem; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.money-entry-info > span { color: var(--mobile-muted); font-size: 0.88rem; overflow-wrap: anywhere; }
+.money-entry-actions { align-items: center; display: flex; flex-shrink: 0; }
+
+.money-error,
+.money-load-error { color: #ff8f89; font-size: 0.9rem; line-height: 1.5; }
+
+.mobile-stock-app .money-delete-confirm,
+.mobile-stock-app .money-error button,
+.mobile-stock-app .money-load-error button {
+  background: var(--mobile-surface-soft);
+  border: 0;
+  border-radius: 10px;
+  color: inherit;
+  min-height: 44px;
+  padding: 8px 12px;
+}
+
+.money-display-currency {
+  align-items: center;
+  color: var(--mobile-muted);
+  display: flex;
+  font-size: 0.8rem;
+  gap: 8px;
+}
+
+.money-display-currency select { width: auto; }
+.money-total { color: var(--mobile-text); display: block; font-size: clamp(1.4rem, 5vw, 2rem); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.money-chart-layout { align-items: center; display: flex; gap: 28px; margin-top: 24px; }
+.money-pie { aspect-ratio: 1; border-radius: 50%; flex: 0 0 144px; width: 144px; }
+.money-pie.empty { background: #333438; }
+.money-legend { display: grid; flex: 1; gap: 22px; margin: 0; min-width: 0; }
+.money-legend dt { align-items: center; color: var(--mobile-muted); display: flex; flex-wrap: wrap; font-size: 0.88rem; gap: 7px; }
+.money-legend dt i { border-radius: 50%; height: 9px; width: 9px; }
+.money-legend dt i.invested { background: var(--mobile-blue); }
+.money-legend dt i.uninvested { background: #55565d; }
+.money-legend dt span { margin-left: auto; }
+.money-legend dd { color: var(--mobile-text); font-size: 1rem; font-variant-numeric: tabular-nums; margin: 7px 0 0; overflow-wrap: anywhere; }
+.money-rates-note { color: var(--mobile-muted); font-size: 0.75rem; margin: 24px 0 0; }
+.money-rates-note a { color: inherit; }
+
+@media (max-width: 720px) {
+  .my-space-tabs { border-radius: 16px; margin-bottom: 32px; }
+  .mobile-stock-app .my-space-tabs button { border-radius: 13px; font-size: 0.95rem; }
+  .mobile-stock-app .money-add { border-radius: 22px; font-size: 1.15rem; min-height: 60px; }
+  .money-hint { font-size: 0.88rem; }
+  .money-form, .money-summary { padding: 16px; }
+  .money-chart-layout { gap: 16px; }
+  .money-pie { flex-basis: 108px; width: 108px; }
+}
+
+@media (max-width: 360px) {
+  .money-display-currency { font-size: 0; gap: 0; }
+  .money-chart-layout { align-items: start; flex-direction: column; }
+  .money-legend { width: 100%; }
+}

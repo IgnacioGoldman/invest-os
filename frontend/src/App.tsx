@@ -30,6 +30,7 @@ import {
 } from "./personalization";
 import { isSupabaseConfigured, signInWithGoogle, signOut, supabase } from "./supabase";
 import "./styles.css";
+import "./money.css";
 
 const isActiveRefreshJob = (job: RefreshJob) => job.status === "queued" || job.status === "running";
 const isExplorationBetaRefreshJob = (job: RefreshJob) => job.source === "exploration_beta";
@@ -419,6 +420,7 @@ export default function App() {
           )}
           personalization={isSupabaseConfigured ? {
             signedIn: Boolean(session),
+            userId: session?.user.id ?? null,
             savedFilters,
             watchlistTickers,
             filterBadgeCounts,

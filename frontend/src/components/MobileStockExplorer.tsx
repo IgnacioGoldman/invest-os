@@ -1,4 +1,5 @@
 import { calculateRevenueGrowthMomentum, formatMomentumPp, revenueMomentumDetail, REVENUE_MOMENTUM_DESCRIPTION } from "../revenueGrowthMomentum";
+import { MoneyPanel } from "./MoneyPanel";
 import {
   ArrowDown,
   ArrowLeft,
@@ -47,6 +48,7 @@ type Props = {
   onRemoveStock?: (ticker: string) => void;
   personalization?: {
     signedIn: boolean;
+    userId: string | null;
     savedFilters: SavedFilter[];
     watchlistTickers: string[];
     filterBadgeCounts: Record<string, number>;
@@ -2293,6 +2295,7 @@ export function MobileStockExplorer({
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [watchlistOpen, setWatchlistOpen] = useState(false);
+  const [spaceTab, setSpaceTab] = useState<"watchlist" | "money">("watchlist");
   const [detailOpen, setDetailOpen] = useState(false);
   const [activeSavedFilterId, setActiveSavedFilterId] = useState<string | null>(null);
   const [exportMode, setExportMode] = useState(false);
@@ -2485,14 +2488,37 @@ export function MobileStockExplorer({
       <main className="mobile-stock-main">
         <header className="mobile-stock-header">
           <div>
-            <h1>{signedIn ? "Watchlist" : "Stocks"}</h1>
-            <p>{signedIn ? `My stocks${dateLabel ? ` · ${dateLabel}` : ""}` : dateLabel}</p>
+            <h1>{signedIn ? "My space" : "Stocks"}</h1>
+            {!signedIn && <p>{dateLabel}</p>}
           </div>
           <div className="mobile-header-actions">
             {headerActions?.(openDetail)}
           </div>
         </header>
 
+        {signedIn && (
+          <div className="my-space-tabs" role="tablist" aria-label="My space">
+            {(["watchlist", "money"] as const).map((tab) => (
+              <button type="button" key={tab} role="tab" id={`space-${tab}-tab`} aria-controls={`space-${tab}`}
+                aria-selected={spaceTab === tab} tabIndex={spaceTab === tab ? 0 : -1}
+                onClick={() => setSpaceTab(tab)}
+                onKeyDown={(event) => {
+                  if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+                    event.preventDefault();
+                    const next = event.key === "Home" ? "watchlist" : event.key === "End" ? "money" : tab === "money" ? "watchlist" : "money";
+                    setSpaceTab(next);
+                    document.getElementById(`space-${next}-tab`)?.focus();
+                  }
+                }}>
+                {tab === "watchlist" ? "Watchlist" : "Money"}
+              </button>
+            ))}
+          </div>
+        )}
+        {signedIn && spaceTab === "money" && personalization?.userId ? (
+          <MoneyPanel key={personalization.userId} userId={personalization.userId} />
+        ) : (
+        <div id="space-watchlist" role={signedIn ? "tabpanel" : undefined} aria-labelledby={signedIn ? "space-watchlist-tab" : undefined}>
         <label className="mobile-stock-search">
           <Search size={20} />
           <input
@@ -2673,6 +2699,8 @@ export function MobileStockExplorer({
               </nav>
             )}
           </>
+        )}
+        </div>
         )}
       </main>
 
