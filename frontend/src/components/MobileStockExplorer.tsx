@@ -1,3 +1,4 @@
+import { calculateRevenueGrowthMomentum, formatMomentumPp, revenueMomentumDetail, REVENUE_MOMENTUM_DESCRIPTION } from "../revenueGrowthMomentum";
 import {
   ArrowDown,
   ArrowLeft,
@@ -115,7 +116,7 @@ const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: str
     title: "Revenue Growth Momentum",
     question: "Is the company's growth getting stronger or weaker?",
     description:
-      "Compares the latest revenue growth rate with the previous quarter's growth rate. A positive percentage-point change means growth is accelerating; a negative change means it is decelerating.",
+      REVENUE_MOMENTUM_DESCRIPTION,
   },
   eps_gaap: {
     title: "GAAP EPS Growth YoY",
@@ -537,16 +538,11 @@ function quarterlyMetricPoints(snapshot: OpenDataStockSnapshot, metric: string) 
 }
 
 function revenueMomentum(snapshot: OpenDataStockSnapshot) {
-  const points = revenueGrowthPoints(snapshot);
-  const latest = points[points.length - 1];
-  const previous = points[points.length - 2];
-  if (!latest || !previous) {
-    return { label: "Unclear", tone: "neutral" as Tone, change: null, latest: null, previous: null };
-  }
-  const change = latest.value - previous.value;
-  if (change >= 3) return { label: "Accelerating", tone: "positive" as Tone, change, latest, previous };
-  if (change <= -3) return { label: "Decelerating", tone: "negative" as Tone, change, latest, previous };
-  return { label: "Stable", tone: "warning" as Tone, change, latest, previous };
+  const momentum = calculateRevenueGrowthMomentum(snapshot);
+  const tone: Tone = momentum.label === "Accelerating" ? "positive"
+    : momentum.label === "Decelerating" ? "negative"
+    : momentum.label === "Stable" ? "warning" : "neutral";
+  return { ...momentum, tone };
 }
 
 function inferredSupportLevel(currentPrice?: number | null, supportDistance?: number | null) {
@@ -657,9 +653,9 @@ function rowMetric(
   if (key === "momentum") {
     const momentum = revenueMomentum(snapshot);
     return {
-      value: formatPercent(momentum.change, true),
+      value: formatMomentumPp(momentum.change),
       signal: momentum,
-      secondary: null,
+      secondary: momentum.latestMovement,
     };
   }
   if (key === "upcoming_earnings") {
@@ -1022,7 +1018,7 @@ function buildStockExportMarkdown({
       "Business",
       "",
       `- Revenue growth YoY: ${metricPercent(snapshot.business_health.revenue_growth_yoy)}`,
-      `- Revenue growth momentum: ${momentum.change == null ? "-" : `${formatNumber(momentum.change)} pp`}`,
+      `- Revenue growth momentum: ${momentum.label}, ${formatMomentumPp(momentum.change)}; latest quarter ${momentum.latestMovement ?? "unclear"} (${formatMomentumPp(momentum.latestChange)})`,
       `- GAAP EPS growth YoY: ${metricPercent(epsGaapMetric(snapshot))}`,
       `- FCF margin: ${metricPercent(snapshot.business_health.fcf_margin)}`,
       `- Operating margin: ${metricPercent(snapshot.business_health.operating_margin)}`,
@@ -1967,6 +1963,7 @@ function MobileGrowthSignalButton({
   label,
   signal,
   value,
+  secondary,
   onClick,
   className = "",
 }: {
@@ -1974,6 +1971,7 @@ function MobileGrowthSignalButton({
   label: string;
   signal: Signal;
   value: string;
+  secondary?: string | null;
   onClick: () => void;
   className?: string;
 }) {
@@ -1984,6 +1982,7 @@ function MobileGrowthSignalButton({
         <StockStatus signal={signal} />
         <strong>{value}</strong>
       </span>
+      {secondary && <small>{secondary}</small>}
     </button>
   );
 }
@@ -2095,12 +2094,10 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
         ? revenueDetail?.growth
         : undefined;
   const currentValue = detailKey === "momentum"
-    ? formatPercent(momentum.change, true)
+    ? formatMomentumPp(momentum.change)
     : formatMetric(metric, "percent");
   const detailText = detailKey === "momentum"
-    ? momentum.change == null
-      ? "Needs at least two comparable quarterly revenue YoY points."
-      : `${momentum.label}: ${formatPercent(momentum.latest?.value, true)} vs ${formatPercent(momentum.previous?.value, true)} in ${momentum.previous?.period ?? "the prior quarter"}.`
+    ? revenueMomentumDetail(momentum)
     : detailKey === "fcf_margin"
       ? fcfMarginMetric?.notes ?? "Trailing-12-month free cash flow margin is unavailable."
     : detailKey === "eps_gaap"
@@ -2139,7 +2136,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
           detailKey === "revenue"
             ? revenueDetail?.latest.period ? [revenueDetail.latest.period] : undefined
             : detailKey === "momentum"
-              ? [momentum.previous?.period, momentum.latest?.period].filter((period): period is string => Boolean(period))
+              ? momentum.points.map((point) => point.period)
               : undefined
         }
       />
@@ -2223,7 +2220,8 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
             active={activeGrowthDetail === "momentum"}
             label="Revenue Growth Momentum"
             signal={momentum}
-            value={formatPercent(momentum.change, true)}
+            value={formatMomentumPp(momentum.change)}
+            secondary={momentum.latestMovement ? `${momentum.latestMovement} · ${formatMomentumPp(momentum.latestChange)} latest quarter` : null}
             onClick={() => setActiveGrowthDetail("momentum")}
           />
           <MobileGrowthSignalButton

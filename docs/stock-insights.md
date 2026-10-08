@@ -27,7 +27,7 @@ Compares the company's revenue in its latest reported quarter with the same quar
 
 _Is the company’s growth getting stronger or weaker?_
 
-Looks at how the revenue growth rate is changing between quarters. A company growing 8% → 12% → 16% is accelerating, while 25% → 20% → 15% is still growing strongly but slowing down. This helps you detect improvement or deterioration before revenue actually turns negative.
+Compares median revenue growth YoY over the latest three quarters with the median over the preceding three. A difference of at least +3 percentage points is Accelerating, at most −3 pp is Decelerating, and smaller changes are Stable. The latest-quarter movement is shown separately so a rebound after one weak quarter is not mistaken for sustained acceleration. Requires six consecutive comparable quarterly growth observations. See [Revenue Growth Momentum](metrics/revenue-growth-momentum.md) for the formula, tags, and data-update behavior.
 
 ### GAAP EPS Growth YoY
 

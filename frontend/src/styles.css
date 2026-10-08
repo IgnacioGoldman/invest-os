@@ -11051,6 +11051,12 @@ body:has(.mobile-sheet-backdrop) {
   width: 100%;
 }
 
+.mobile-growth-signal > small {
+  color: var(--mobile-muted);
+  font-size: 0.62rem;
+  line-height: 1.3;
+}
+
 .mobile-growth-detail-panel {
   display: grid;
   gap: 14px;

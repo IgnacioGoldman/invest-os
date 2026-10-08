@@ -13,6 +13,9 @@ from zoneinfo import ZoneInfo
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "backend"))
+from app.services.revenue_growth_momentum import calculate_revenue_growth_momentum  # noqa: E402
+
 DEFAULT_STOCKS_PATH = ROOT / "frontend" / "public" / "data" / "open-data" / "stocks.json"
 MATCH_TIMEZONE = ZoneInfo("Europe/Stockholm")
 SUPPORT_METRICS = {
@@ -171,32 +174,8 @@ def _valuation_signal(snapshot: dict[str, Any]) -> str:
     return "Unclear"
 
 
-def _period_key(period: str) -> tuple[int, int, str]:
-    if period.startswith("FY") and " Q" in period:
-        year, quarter = period[2:].split(" Q", 1)
-        if year.isdigit() and quarter.isdigit():
-            return int(year), int(quarter), period
-    return 0, 0, period
-
-
 def _revenue_momentum(snapshot: dict[str, Any]) -> str:
-    rows = sorted(
-        snapshot.get("historical_series", {}).get("quarterly_revenue", []),
-        key=lambda row: _period_key(str(row.get("period", ""))),
-    )
-    points = [
-        _number(row.get("metrics", {}).get("revenue_growth_yoy", {}).get("value"))
-        for row in rows
-    ]
-    points = [point for point in points if point is not None]
-    if len(points) < 2:
-        return "Unclear"
-    change = points[-1] - points[-2]
-    if change >= 3:
-        return "Accelerating"
-    if change <= -3:
-        return "Decelerating"
-    return "Stable"
+    return calculate_revenue_growth_momentum(snapshot)["label"]
 
 
 def signal_for(snapshot: dict[str, Any], field: str) -> str:

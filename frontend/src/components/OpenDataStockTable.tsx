@@ -1,3 +1,4 @@
+import { calculateRevenueGrowthMomentum, formatMomentumPp, revenueMomentumDetail, REVENUE_MOMENTUM_DESCRIPTION } from "../revenueGrowthMomentum";
 import type { OpenDataCompanyContext, OpenDataMetric, OpenDataPricePoint, OpenDataStockSnapshot, StockEntryAnalysis, StockEntryAnalysisSection } from "../api";
 import { fetchOpenDataStockPriceHistory } from "../api";
 import { ArrowDown, ArrowUp, ArrowUpDown, BarChart3, ChevronDown, ChevronLeft, ChevronRight, Filter, GripVertical, Info, SlidersHorizontal, X } from "lucide-react";
@@ -121,7 +122,7 @@ const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: str
     title: "Momentum revenue growth YoY",
     question: "Is the company's growth getting stronger or weaker?",
     description:
-      "Compares the latest revenue growth rate with the previous quarter's growth rate. A positive percentage-point change means growth is accelerating; a negative change means it is decelerating.",
+      REVENUE_MOMENTUM_DESCRIPTION,
   },
   eps: {
     title: "GAAP EPS growth YoY",
@@ -1014,65 +1015,13 @@ function epsGrowthSignal(valueOrMetric?: number | OpenDataMetric | null): { labe
   return { label: "Weak", tone: "caution", detail: "Latest-quarter EPS YoY is negative." };
 }
 
-function formatSignedPp(value?: number | null) {
-  if (value == null) return "-";
-  const prefix = value > 0 ? "+" : "";
-  return `${prefix}${formatRatio(value)} pp`;
-}
 
-function formatSignedPercentDelta(value?: number | null) {
-  return formatSignedPercent(value);
-}
-
-function revenueGrowthMomentum(snapshot: OpenDataStockSnapshot): {
-  label: string;
-  tone: Tone;
-  change: number | null;
-  latest?: { period: string; value: number };
-  previous?: { period: string; value: number };
-  detail: string;
-} {
-  const points = quarterlyRevenueGrowthPoints(snapshot);
-  const latest = points[points.length - 1];
-  const previous = points[points.length - 2];
-  if (!latest || !previous) {
-    return {
-      label: "Unclear",
-      tone: "neutral",
-      change: null,
-      detail: "Needs at least two comparable quarterly revenue YoY points.",
-    };
-  }
-
-  const change = latest.value - previous.value;
-  if (change >= 3) {
-    return {
-      label: "Accelerating",
-      tone: "good",
-      change,
-      latest,
-      previous,
-      detail: `${latest.period} revenue YoY is ${formatSignedPp(change)} above ${previous.period}.`,
-    };
-  }
-  if (change <= -3) {
-    return {
-      label: "Decelerating",
-      tone: "caution",
-      change,
-      latest,
-      previous,
-      detail: `${latest.period} revenue YoY is ${formatSignedPp(change)} below ${previous.period}.`,
-    };
-  }
-  return {
-    label: "Stable",
-    tone: "watch",
-    change,
-    latest,
-    previous,
-    detail: `${latest.period} revenue YoY is within 3 pp of ${previous.period}.`,
-  };
+function revenueGrowthMomentum(snapshot: OpenDataStockSnapshot) {
+  const momentum = calculateRevenueGrowthMomentum(snapshot);
+  const tone: Tone = momentum.label === "Accelerating" ? "good"
+    : momentum.label === "Decelerating" ? "caution"
+    : momentum.label === "Stable" ? "watch" : "neutral";
+  return { ...momentum, tone, detail: revenueMomentumDetail(momentum) };
 }
 
 function dateMs(value: string) {
@@ -1543,14 +1492,14 @@ function MomentumMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot }
         <p>{copy.description}</p>
         <div className="growth-formula">
           <span>Current value</span>
-          <strong>{momentum.change == null ? "-" : formatSignedPercentDelta(momentum.change)}</strong>
+          <strong>{momentum.change == null ? "-" : formatMomentumPp(momentum.change)}</strong>
           <small>{momentum.detail}</small>
         </div>
       </div>
       <div className="growth-detail-chart">
         <QuarterlyRevenueGrowthBarChart
           snapshot={snapshot}
-          selectedPeriods={[momentum.previous?.period, momentum.latest?.period].filter((period): period is string => Boolean(period))}
+          selectedPeriods={momentum.points.map((point) => point.period)}
         />
       </div>
     </div>
@@ -1862,8 +1811,8 @@ function StocksInsightsTempTable({
 	                          signal={momentum.label}
 	                          value={
 	                            momentum.change == null
-	                              ? "Needs 2 quarters"
-	                              : `${formatSignedPercentDelta(momentum.change)} vs ${momentum.previous?.period ?? "previous quarter"}`
+	                              ? "Needs 6 quarters"
+	                              : `${formatMomentumPp(momentum.change)} · ${momentum.latestMovement}`
 	                          }
 	                          onClick={() => toggleGrowthDetail(snapshot.ticker, "momentum")}
 	                        />

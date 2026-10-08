@@ -21,6 +21,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Validate momentum filter semantics
+        run: python3 -m unittest discover -s scripts -p 'test_revenue_growth_momentum.py'
+
       - name: Download deployed stock data
         if: ${{ env.SUPABASE_CONFIGURED == 'true' }}
         run: >-
