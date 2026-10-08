@@ -1965,7 +1965,6 @@ function MobileGrowthSignalButton({
   label,
   signal,
   value,
-  secondary,
   onClick,
   className = "",
 }: {
@@ -1973,7 +1972,6 @@ function MobileGrowthSignalButton({
   label: string;
   signal: Signal;
   value: string;
-  secondary?: string | null;
   onClick: () => void;
   className?: string;
 }) {
@@ -1984,7 +1982,6 @@ function MobileGrowthSignalButton({
         <StockStatus signal={signal} />
         <strong>{value}</strong>
       </span>
-      {secondary && <small>{secondary}</small>}
     </button>
   );
 }
@@ -2223,7 +2220,6 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
             label="Revenue Growth Momentum"
             signal={momentum}
             value={formatMomentumPp(momentum.change)}
-            secondary={momentum.latestMovement ? `${momentum.latestMovement} · ${formatMomentumPp(momentum.latestChange)} latest quarter` : null}
             onClick={() => setActiveGrowthDetail("momentum")}
           />
           <MobileGrowthSignalButton
