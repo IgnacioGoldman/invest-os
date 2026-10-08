@@ -109,7 +109,7 @@ const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: str
     title: "Latest Revenue Growth YoY",
     question: "Is the business growing right now?",
     description:
-      "Compares the latest quarter's revenue with the same quarter last year. It tells you whether customers are spending more with the company and whether the overall business is expanding. For example, +15% means the company generated 15% more revenue than one year ago.",
+      "Compares the company's revenue in its latest reported quarter with the same quarter one year earlier. It shows how quickly the company's sales are growing or declining. For example, +15% means the company generated 15% more revenue than in the same quarter last year.",
   },
   momentum: {
     title: "Revenue Growth Momentum",
