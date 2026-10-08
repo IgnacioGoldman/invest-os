@@ -148,6 +148,7 @@ class FactPoint:
     fp: str | None
     fy: int | None
     frame: str | None
+    source_url: str | None = None
 
     @property
     def duration_days(self) -> int | None:
@@ -2856,6 +2857,7 @@ def _parse_fact_point(taxonomy: str, concept: str, unit: str, row: dict[str, Any
         fp=str(row.get("fp") or "") or None,
         fy=fy_int,
         frame=str(row.get("frame") or "") or None,
+        source_url=str(row.get("source_url") or "") or None,
     )
 
 
@@ -2872,7 +2874,8 @@ def _source(point: FactPoint) -> str:
     if point.taxonomy == "yfinance" or point.form.upper().startswith("YF-"):
         return f"yfinance_statement:{point.taxonomy}/{point.concept}:{point.unit}:{point.form}:{point.end.isoformat()}"
     if point.taxonomy == "issuer" or point.form.upper().startswith("ISSUER-"):
-        return f"issuer_statement:{point.taxonomy}/{point.concept}:{point.unit}:{point.form}:{point.end.isoformat()}"
+        source = f"issuer_statement:{point.taxonomy}/{point.concept}:{point.unit}:{point.form}:{point.end.isoformat()}"
+        return f"{source}:{point.source_url}" if point.source_url else source
     return f"sec_companyfacts:{point.taxonomy}/{point.concept}:{point.unit}:{point.form}:{point.end.isoformat()}"
 
 

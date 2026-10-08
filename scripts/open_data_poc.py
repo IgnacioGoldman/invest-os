@@ -29,6 +29,7 @@ from app.services.storage import (  # noqa: E402
     load_stock_sec_refresh_state,
     replace_stock_sec_refresh_state,
 )
+from app.services.stock_data_quality import fundamental_gap_reasons, retain_verified_history  # noqa: E402
 
 
 YAHOO_MOST_ACTIVE_URL = "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved"
@@ -324,6 +325,8 @@ def _filter_incremental_sec_work_items(
     provider: OpenDataProvider,
     *,
     save: bool,
+    repair_data_gaps: bool = False,
+    repair_current_data: bool = False,
 ) -> tuple[list[tuple[int, dict[str, Any]]], list[dict[str, Any]]]:
     if not save:
         return work_items, []
@@ -339,14 +342,14 @@ def _filter_incremental_sec_work_items(
                 try:
                     cik = provider.resolve_cik(ticker)
                 except Exception:
-                    if existing_snapshot is not None:
+                    if existing_snapshot is not None and existing_snapshot.cik is not None:
                         preserved.append(
                             _preserved_result(
                                 index=index,
                                 item=item,
                                 snapshot=existing_snapshot,
                                 latest_filing=None,
-                                reason="no_sec_cik_preserved_existing_snapshot",
+                                reason="sec_metadata_unavailable_preserved_existing_snapshot",
                                 duration_seconds=time.monotonic() - started,
                             )
                         )
@@ -363,7 +366,8 @@ def _filter_incremental_sec_work_items(
                 )
                 latest_accession = str(latest_filing.get("accession_number") or "") if latest_filing else None
 
-                if existing_snapshot is not None and (latest_accession is None or latest_accession == known_accession):
+                repairs = fundamental_gap_reasons(existing_snapshot, include_history=repair_data_gaps) if (repair_data_gaps or repair_current_data) and existing_snapshot is not None else []
+                if existing_snapshot is not None and not repairs and (latest_accession is None or latest_accession == known_accession):
                     replace_stock_sec_refresh_state(conn, **_sec_state_kwargs(ticker, cik, latest_filing or existing_filing))
                     preserved.append(
                         _preserved_result(
@@ -378,6 +382,8 @@ def _filter_incremental_sec_work_items(
                     continue
                 item["_latest_sec_cik"] = cik
                 item["_latest_sec_filing"] = latest_filing
+                if repairs:
+                    item["repair_reasons"] = repairs
                 collect_items.append((index, item))
             except Exception as exc:
                 logger.warning("%s: incremental SEC preflight failed; collecting normally: %s", ticker, exc)
@@ -395,6 +401,10 @@ def _collect_ticker(
     include_analysis: bool = False,
 ) -> dict[str, Any]:
     snapshot = provider.get_open_data_snapshot(ticker)
+    if save:
+        with connect(get_settings().data_dir) as conn:
+            previous = load_stock_open_data_snapshot(conn, snapshot.ticker)
+        snapshot = retain_verified_history(snapshot, previous)
     if not load_cached_price_history(snapshot.ticker):
         raise RuntimeError(f"{snapshot.ticker}: historical prices were unavailable.")
     coverage = _metric_coverage(snapshot)
@@ -565,6 +575,8 @@ def main() -> None:
         action="store_true",
         help="Preserve existing SQLite snapshots unless SEC recent submissions contain a newer relevant filing.",
     )
+    parser.add_argument("--repair-data-gaps", action="store_true", help="Recollect symbols with missing fundamentals or an unusable latest six-quarter revenue window, even when SEC filings are unchanged.")
+    parser.add_argument("--repair-current-data", action="store_true", help="Retry missing current fundamentals on the daily refresh; historical windows/CAGR gaps never trigger collection.")
     parser.add_argument("--output", type=Path, help="Write the JSON run report to a file as well as stdout.")
     parser.add_argument("--workers", type=int, default=3, help="Number of tickers to collect in parallel.")
     parser.add_argument("--ticker-retries", type=int, default=2, help="Retry a whole ticker collection this many times.")
@@ -617,7 +629,7 @@ def main() -> None:
 
     work_items = list(enumerate(universe[:max_results] if mode == "top_volume" else universe))
     if args.incremental_sec:
-        work_items, preserved_results = _filter_incremental_sec_work_items(work_items, provider, save=save)
+        work_items, preserved_results = _filter_incremental_sec_work_items(work_items, provider, save=save, repair_data_gaps=args.repair_data_gaps, repair_current_data=args.repair_current_data)
         results.extend(preserved_results)
         logger.info(
             "Incremental SEC preflight preserved %s ticker(s) and selected %s ticker(s) for collection.",

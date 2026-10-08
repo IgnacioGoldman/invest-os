@@ -4,19 +4,21 @@ Current flows:
 
 `On demand: committed static JSON -> GitHub Pages`
 
-`Daily: tracked SQLite -> SEC recent-submissions gate -> changed SEC tickers only -> tracked SQLite -> static JSON -> commit tracked data -> GitHub Pages`
+`Daily: tracked SQLite -> SEC recent-submissions and current-input checks -> changed/currently incomplete SEC tickers + non-SEC tickers -> latest primary sources and bounded fallback -> tracked SQLite -> static JSON -> coverage audit -> commit tracked data -> GitHub Pages`
 
 `Every four hours: tracked SQLite + deployed JSON fallback + recent prices -> tracked SQLite + updated static JSON -> commit tracked data -> GitHub Pages`
 
 ## 1. GitHub Actions fetches the content
 
-Both workflows read the universe from `data/stocks/stocks.json`. (**Symbols:** 22 manually selected stocks: `INOD`, `ORCL`, `CRM`, `AZN`, `NFLX`, `UBER`, `V`, `MA`, `CALM`, `DXCM`, `MSTR`, `MELI`, `MSFT`, `AAPL`, `META`, `GOOG`, `AMZN`, `NVDA`, `TSLA`, `DT`, `DDOG`, and `YPF`.)
+Both workflows read the active universe from `data/stocks/stocks.json`. The exported dataset currently contains 77 symbols.
 
 - **Deploy local GitHub Pages, on demand:** build and deploy the static data already committed under `frontend/public/data/`. This does not fetch SEC data, refresh prices, or modify the dataset.
 - **Update stock prices, every four hours:** check out the LFS-tracked SQLite database, use it as the preferred baseline, fall back to the last successful deployed dataset when needed, fetch recent daily candles, merge them into existing history, recalculate price, return, support, and `days_to_next_earnings` metrics, commit the updated database and tracked static data changes, then deploy. SEC data is reused unchanged. If one price source is temporarily empty, its existing history is retained and the global date validation decides whether publishing is safe.
-- **Update SEC fundamentals, once daily:** check out the LFS-tracked SQLite database, fetch recent SEC submission metadata for each ticker, and only recollect tickers whose latest relevant SEC filing changed. Recollected tickers refresh Company Facts, recent filing context, prices needed by the snapshot, and the current Yahoo Finance earnings-calendar estimate. Unchanged tickers preserve their existing DB snapshots; the four-hour price refresh still rolls the earnings countdown forward. The workflow then rebuilds derived signals, exports static data, commits the updated database and tracked static data changes, then deploys.
+- **Update stock fundamentals, once daily:** check out the LFS-tracked SQLite database, fetch recent SEC submission metadata, and recollect tickers whose relevant filing changed or whose current fundamental inputs remain incomplete. Historical quarter gaps, momentum windows and three-year CAGR gaps never trigger daily recollection. Healthy unchanged SEC tickers preserve their snapshots. Existing non-SEC tickers are recollected so issuer and vendor updates are not skipped by the SEC gate. Collection refreshes price inputs and Yahoo's earnings-calendar estimate; the four-hour price refresh still rolls the countdown forward. The workflow rebuilds signals, exports static data, audits coverage, commits the database, static exports, normalized issuer facts and coverage report, then deploys.
 - **Other data:** Yahoo Finance supplies forward PE, market-cap estimates, and the next expected earnings release date/window used for `days_to_next_earnings`. Frankfurter or Yahoo Finance supplies currency conversion when required.
-- **Non-SEC issuer data:** when a deterministic issuer-published workbook is configured, such as Axfood's financial-data workbook for `AXFO.ST`, the provider uses that source before falling back to Yahoo Finance statement tables.
+- **Non-SEC issuer data:** configured issuer workbooks, such as Axfood's for `AXFO.ST`, are preferred. A failed workbook fetch/parse tries Yahoo statement tables. NIBE checks its official archive for the newest report only, parses that supported consolidated PDF if it is new, and persists it in `data/stocks/issuer_facts/NIBE-B.ST.json`. The daily run never downloads older missing reports. Failed discovery/download/parse retains verified issuer history and records the failure. Yahoo supplies additional NIBE facts when available.
+- **Missing SEC inputs:** the provider checks Yahoo statement tables as a second source for missing current fundamental inputs. It accepts only money facts in the verified SEC reporting currency and matching calendar fiscal periods. It excludes vendor EPS/share-count facts from this fallback to avoid mixing ADR and ordinary-share accounting. Non-calendar fiscal labels or incompatible currencies are reported as unsupported fallback cases. Available SEC snapshot values retain their source and accounting basis.
+- **History retention:** a thinner refresh cannot erase persisted historical observations. Missing current values can retain a previous verified observation with its original `as_of`; explicitly not-meaningful metrics, such as PEG after earnings turn negative, remain unavailable. Fallback failures and unresolved gaps are visible in snapshot notes and the coverage audit.
 
 Four symbols are processed in parallel. The refresh is rejected if a symbol fails, is missing, has invalid prices, or has an inconsistent market date.
 
@@ -24,7 +26,9 @@ Four symbols are processed in parallel. The refresh is rejected if a symbol fail
 
 The SQLite database at `data/invest_os.sqlite` is the repo-persisted source of truth and is tracked with Git LFS. Update workflows check it out, mutate it, and commit the updated LFS pointer back to `main`.
 
-The daily SEC workflow stores the latest relevant SEC accession it has checked per ticker in SQLite. On later runs, unchanged tickers are reported as preserved instead of being recollected from scratch. Local backfills remain responsible for deeper archive searches and historical repairs.
+The daily fundamentals workflow stores the latest checked relevant SEC accession in SQLite. On later runs, healthy unchanged SEC tickers are reported as preserved. `--repair-current-data` overrides this skip only for missing current fundamental inputs. The daily run makes a bounded second-source attempt and retains previously collected history without fetching it again. Local `--repair-data-gaps` runs and the explicit NIBE backfill remain responsible for deeper archive searches, older missing quarters, CAGR history, unsupported PDF layouts, fiscal-period alignment repairs, and adding deterministic parsers for additional issuers. There is no universal parser or arbitrary web crawl for every investor-relations site.
+
+`data/stocks/data-coverage.json` is regenerated after export and committed with the data. The refresh report records repair reasons and source-attempt notes; the coverage audit distinguishes missing inputs from mathematically unavailable metrics and identifies gaps in the latest six revenue quarters. Both reports are uploaded as workflow artifacts.
 
 The four-hour price workflow prefers the checked-out SQLite database for snapshots and price history, uses the deployed JSON as a fallback baseline, and commits both the refreshed database and tracked static files back to `main`.
 
@@ -45,4 +49,4 @@ After validation, Vite builds the frontend in static-data mode and GitHub Pages 
 
 The browser loads all stock snapshots once, then searches, filters, and sorts them locally. Opening a symbol loads its separate price-history file and displays its charts.
 
-There is currently **no stock-list pagination** because the universe contains only 22 symbols. Before expanding to the full US market, the stock list should move behind a paginated API instead of downloading every snapshot at once.
+There is currently **no stock-list pagination**. Before expanding to the full US market, the stock list should move behind a paginated API instead of downloading every snapshot at once.

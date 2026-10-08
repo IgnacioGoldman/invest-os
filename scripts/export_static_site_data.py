@@ -161,17 +161,40 @@ def export_static_site_data(data_dir: Path, output_dir: Path, universe_path: Pat
         conn.close()
 
 
+def export_static_snapshot(data_dir: Path, output_dir: Path, ticker: str) -> None:
+    """Publish one repaired snapshot while keeping newer exported price data."""
+    path = output_dir / "open-data" / "stocks.json"
+    snapshots = json.loads(path.read_text(encoding="utf-8"))
+    symbol = ticker.upper().strip()
+    with sqlite3.connect(data_dir / DB_FILE) as conn:
+        row = conn.execute("SELECT payload FROM stock_open_data_snapshots WHERE ticker = ?", (symbol,)).fetchone()
+    if row is None or not any(s["ticker"] == symbol for s in snapshots):
+        raise ValueError(f"Scoped export requires an existing SQLite and static symbol: {symbol}")
+    updated = json.loads(row[0])
+    strip_deprecated_stock_metrics_payload(updated)
+    snapshots = [updated if s["ticker"] == symbol else s for s in snapshots]
+    _write_json(path, snapshots)
+    meta_path = output_dir / "meta.json"
+    metadata = json.loads(meta_path.read_text(encoding="utf-8"))
+    metadata.update(_snapshot_metadata(snapshots))
+    _write_json(meta_path, metadata)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Export SQLite stock data into static JSON files for GitHub Pages.")
     parser.add_argument("--data-dir", type=Path, default=ROOT / "data")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--universe-file", type=Path, default=ROOT / "data" / "stocks" / "stocks.json")
+    parser.add_argument("--snapshot-ticker", help="Export only this existing snapshot and metadata; preserve other symbols and price histories.")
     args = parser.parse_args()
 
     data_dir = args.data_dir if args.data_dir.is_absolute() else ROOT / args.data_dir
     output_dir = args.output_dir if args.output_dir.is_absolute() else ROOT / args.output_dir
     universe_path = args.universe_file if args.universe_file.is_absolute() else ROOT / args.universe_file
-    export_static_site_data(data_dir, output_dir, universe_path)
+    if args.snapshot_ticker:
+        export_static_snapshot(data_dir, output_dir, args.snapshot_ticker)
+    else:
+        export_static_site_data(data_dir, output_dir, universe_path)
     display_path = output_dir.relative_to(ROOT) if output_dir.is_relative_to(ROOT) else output_dir
     print(f"Exported static site data to {display_path}")
 

@@ -83,6 +83,55 @@ The current scripts compute many snapshot metrics but do not yet guarantee a min
 
 For non-SEC tickers, prefer deterministic issuer data when it is available. `AXFO.ST` uses Axfood's official financial-data workbook, which provides quarterly and annual statement history back to 2015 and fills much deeper revenue growth YoY history than Yahoo Finance's limited quarterly table.
 
+### NIBE issuer backfill
+
+`NIBE-B.ST` previously had five Yahoo quarterly revenue observations, from Q2 2025 through Q2 2026. Only Q2 2026 had a matching prior-year quarter, so only one YoY growth value could be calculated. The missing history was a collector limitation: NIBE's public reports had not been parsed. The reports themselves were available.
+
+The local backfill now imports consolidated tables from NIBE's 2024 and 2025 year-end reports and Q1/Q2 2026 reports. It persists normalized facts, publication dates, and source URLs in `data/stocks/issuer_facts/NIBE-B.ST.json`. Regular non-SEC collection checks the issuer archive for new reports, merges this durable history with Yahoo statements, and prefers issuer facts for overlapping periods. Archive or PDF failures retain verified history and are reported. The daily fundamentals workflow also commits updated issuer facts. The imported history contains 15 revenue quarters, Q4 2022 through Q2 2026, and 11 comparable YoY growth values. It also extends reported operating/net profit, EPS, recent gross profit, balance-sheet facts, and cash flow. Adjusted operating profit is kept out of reported-profit metrics. Issuer cash-flow capex uses investments in existing operations, excluding acquisitions.
+
+To discover and import new NIBE reports, collect the symbol, rebuild signals, and export:
+
+```sh
+.venv/bin/python scripts/backfill_nibe_issuer_data.py
+.venv/bin/python scripts/build_stock_derived_signals.py
+.venv/bin/python scripts/export_static_site_data.py
+```
+
+The backfill checks NIBE's report archive for new quarterly reports and year-end reports from 2024 onward. It rejects unrecognized PDF layouts instead of guessing columns. For a downloaded PDF, use `--pdf PATH --year YYYY --quarter N --filed YYYY-MM-DD --url ORIGINAL_URL`; `--facts-only` updates normalized issuer facts without recollecting the snapshot. Commit the normalized issuer facts along with SQLite and the static export so subsequent refreshes retain the history.
+
+For an isolated repair when other exported symbols have newer price data than the local SQLite database, `scripts/export_static_site_data.py --snapshot-ticker NIBE-B.ST` publishes just the repaired snapshot and recomputes static metadata. It preserves the other exported snapshots and price-history files. Use this only after ensuring the repaired SQLite snapshot retains the latest price metrics.
+
+### Coverage audit
+
+```sh
+.venv/bin/python scripts/audit_stock_data_coverage.py --output data/stocks/data-coverage.json
+.venv/bin/python scripts/validate_revenue_growth_momentum.py --output /tmp/revenue-growth-momentum-report.json
+```
+
+The audit checks all exported symbols, distinguishes missing fundamental inputs from mathematically unavailable growth/valuation metrics, and validates the latest six revenue-growth quarters. Four growth observations meet the basic history target above; momentum requires six consecutive growth observations, usually at least ten consecutive revenue quarters. A large total history count does not guarantee that the latest six quarters are usable.
+
+The 2026-10-08 audit after the NIBE repair covers 77 symbols. Remaining revenue-history gaps:
+
+| Symbols | Remaining issue |
+| --- | --- |
+| `YPF` | No quarterly revenue history; latest quarterly revenue growth, EPS growth, profitability, FCF, and return metrics are also unavailable. Current SEC facts provide annual statements. |
+| `AZN`, `B`, `CRM`, `NVS`, `ORCL`, `SPGI`, `STX` | Latest six revenue quarters contain a gap or duplicate fiscal period. These need period alignment/history repair, despite having older growth observations. |
+| `BX` | FY2025 Q2 lacks a comparable prior-year revenue value. |
+
+Other missing current inputs, as reported by the collector:
+
+| Metric | Symbols |
+| --- | --- |
+| Quarterly free cash flow | `AZN`, `YPF` |
+| Gross margin | `UBER`, `V`, `MA`, `HWM`, `UNP`, `INTU`, `YPF` |
+| Operating margin | `COP`, `YPF` |
+| ROIC inputs | `INOD`, `DDOG`, `ISRG`, `COP`, `YPF` |
+| Debt / debt-to-equity inputs | `DDOG`, `ISRG` |
+| EPS CAGR | `V` |
+| EV/EBITDA inputs | `AXFO.ST`, `DT`, `DDOG`, `PLTR`, `TER`, `ISRG` |
+
+Some metrics, such as gross margin for financial businesses, may not be comparable or explicitly reported. A missing debt fact also does not prove zero debt. These entries require source review rather than fabricated values. Negative earnings-growth cases and other explicitly not-meaningful metrics are listed separately in the JSON audit; an empty PEG is often intentional.
+
 ## 5. Relationship To GitHub Actions
 
 Local is for completeness and repair. GitHub Actions are for updates.
@@ -90,7 +139,8 @@ Local is for completeness and repair. GitHub Actions are for updates.
 The daily remote refresh should:
 
 - Fetch recent SEC submissions for each ticker and use them as a cheap change detector.
-- Recollect only tickers whose latest relevant SEC filing changed; preserve unchanged DB snapshots.
+- Recollect SEC tickers whose latest relevant filing changed or whose current fundamental inputs remain incomplete; preserve healthy unchanged snapshots. Historical momentum/CAGR gaps must not trigger daily collection.
+- Recollect non-SEC tickers, check the newest supported issuer report, and try a bounded Yahoo statement fallback when current primary-source collection is unavailable or incomplete. Preserve verified history and report unresolved gaps. Older report downloads stay in the local backfill workflow.
 - Add or update only facts that are newer or better.
 - Export static JSON from the updated database.
 - Commit `data/invest_os.sqlite` and tracked static data changes back to `main`.

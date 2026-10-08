@@ -1,0 +1,1443 @@
+{
+  "entityName": "NIBE Industrier AB (publ)",
+  "source": "issuer_financial_reports:NIBE",
+  "reports": [
+    {
+      "year": 2024,
+      "quarter": 4,
+      "filed": "2025-02-14",
+      "url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf"
+    },
+    {
+      "year": 2025,
+      "quarter": 4,
+      "filed": "2026-02-12",
+      "url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf"
+    },
+    {
+      "year": 2026,
+      "quarter": 1,
+      "filed": "2026-05-19",
+      "url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf"
+    },
+    {
+      "year": 2026,
+      "quarter": 2,
+      "filed": "2026-08-21",
+      "url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf"
+    }
+  ],
+  "facts": {
+    "issuer": {
+      "RevenueFromContractWithCustomerExcludingAssessedTax": {
+        "units": {
+          "SEK": [
+            {
+              "val": 11667000000.0,
+              "end": "2022-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2022,
+              "fp": "Q4",
+              "start": "2022-10-01"
+            },
+            {
+              "val": 11646000000.0,
+              "end": "2023-03-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q1",
+              "start": "2023-01-01"
+            },
+            {
+              "val": 11833000000.0,
+              "end": "2023-06-30",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q2",
+              "start": "2023-04-01"
+            },
+            {
+              "val": 11514000000.0,
+              "end": "2023-09-30",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q3",
+              "start": "2023-07-01"
+            },
+            {
+              "val": 46649000000.0,
+              "end": "2023-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2023,
+              "fp": "FY",
+              "start": "2023-01-01"
+            },
+            {
+              "val": 11656000000.0,
+              "end": "2023-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q4",
+              "start": "2023-10-01"
+            },
+            {
+              "val": 9494000000.0,
+              "end": "2024-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q1",
+              "start": "2024-01-01"
+            },
+            {
+              "val": 10035000000.0,
+              "end": "2024-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q2",
+              "start": "2024-04-01"
+            },
+            {
+              "val": 9967000000.0,
+              "end": "2024-09-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q3",
+              "start": "2024-07-01"
+            },
+            {
+              "val": 40521000000.0,
+              "end": "2024-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2024,
+              "fp": "FY",
+              "start": "2024-01-01"
+            },
+            {
+              "val": 11025000000.0,
+              "end": "2024-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q4",
+              "start": "2024-10-01"
+            },
+            {
+              "val": 9673000000.0,
+              "end": "2025-03-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q1",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 19755000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 10082000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-04-01"
+            },
+            {
+              "val": 10086000000.0,
+              "end": "2025-09-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q3",
+              "start": "2025-07-01"
+            },
+            {
+              "val": 40841000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2025,
+              "fp": "FY",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 11000000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q4",
+              "start": "2025-10-01"
+            },
+            {
+              "val": 9650000000.0,
+              "end": "2026-03-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q1",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 20499000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 10849000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-04-01"
+            }
+          ]
+        }
+      },
+      "OperatingIncomeLoss": {
+        "units": {
+          "SEK": [
+            {
+              "val": 1888000000.0,
+              "end": "2022-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2022,
+              "fp": "Q4",
+              "start": "2022-10-01"
+            },
+            {
+              "val": 1755000000.0,
+              "end": "2023-03-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q1",
+              "start": "2023-01-01"
+            },
+            {
+              "val": 1847000000.0,
+              "end": "2023-06-30",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q2",
+              "start": "2023-04-01"
+            },
+            {
+              "val": 1779000000.0,
+              "end": "2023-09-30",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q3",
+              "start": "2023-07-01"
+            },
+            {
+              "val": 6973000000.0,
+              "end": "2023-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2023,
+              "fp": "FY",
+              "start": "2023-01-01"
+            },
+            {
+              "val": 1592000000.0,
+              "end": "2023-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q4",
+              "start": "2023-10-01"
+            },
+            {
+              "val": -579000000.0,
+              "end": "2024-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q1",
+              "start": "2024-01-01"
+            },
+            {
+              "val": 669000000.0,
+              "end": "2024-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q2",
+              "start": "2024-04-01"
+            },
+            {
+              "val": 912000000.0,
+              "end": "2024-09-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q3",
+              "start": "2024-07-01"
+            },
+            {
+              "val": 2671000000.0,
+              "end": "2024-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2024,
+              "fp": "FY",
+              "start": "2024-01-01"
+            },
+            {
+              "val": 1669000000.0,
+              "end": "2024-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q4",
+              "start": "2024-10-01"
+            },
+            {
+              "val": 782000000.0,
+              "end": "2025-03-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q1",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 1726000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 944000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-04-01"
+            },
+            {
+              "val": 1139000000.0,
+              "end": "2025-09-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q3",
+              "start": "2025-07-01"
+            },
+            {
+              "val": 4125000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2025,
+              "fp": "FY",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 1260000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q4",
+              "start": "2025-10-01"
+            },
+            {
+              "val": 868000000.0,
+              "end": "2026-03-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q1",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 2100000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 1232000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-04-01"
+            }
+          ]
+        }
+      },
+      "NetIncomeLoss": {
+        "units": {
+          "SEK": [
+            {
+              "val": 1370000000.0,
+              "end": "2022-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2022,
+              "fp": "Q4",
+              "start": "2022-10-01"
+            },
+            {
+              "val": 1274000000.0,
+              "end": "2023-03-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q1",
+              "start": "2023-01-01"
+            },
+            {
+              "val": 1323000000.0,
+              "end": "2023-06-30",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q2",
+              "start": "2023-04-01"
+            },
+            {
+              "val": 1220000000.0,
+              "end": "2023-09-30",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q3",
+              "start": "2023-07-01"
+            },
+            {
+              "val": 4796000000.0,
+              "end": "2023-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2023,
+              "fp": "FY",
+              "start": "2023-01-01"
+            },
+            {
+              "val": 979000000.0,
+              "end": "2023-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q4",
+              "start": "2023-10-01"
+            },
+            {
+              "val": -861000000.0,
+              "end": "2024-03-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q1",
+              "start": "2024-01-01"
+            },
+            {
+              "val": 216000000.0,
+              "end": "2024-06-30",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q2",
+              "start": "2024-04-01"
+            },
+            {
+              "val": 433000000.0,
+              "end": "2024-09-30",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q3",
+              "start": "2024-07-01"
+            },
+            {
+              "val": 1162000000.0,
+              "end": "2024-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2024,
+              "fp": "FY",
+              "start": "2024-01-01"
+            },
+            {
+              "val": 1374000000.0,
+              "end": "2024-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q4",
+              "start": "2024-10-01"
+            },
+            {
+              "val": 391000000.0,
+              "end": "2025-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q1",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 885000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 494000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-04-01"
+            },
+            {
+              "val": 610000000.0,
+              "end": "2025-09-30",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q3",
+              "start": "2025-07-01"
+            },
+            {
+              "val": 2280000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2025,
+              "fp": "FY",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 785000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q4",
+              "start": "2025-10-01"
+            },
+            {
+              "val": 504000000.0,
+              "end": "2026-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q1",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 1257000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 753000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-04-01"
+            }
+          ]
+        }
+      },
+      "CostOfRevenue": {
+        "units": {
+          "SEK": [
+            {
+              "val": 31026000000.0,
+              "end": "2023-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2023,
+              "fp": "FY",
+              "start": "2023-01-01"
+            },
+            {
+              "val": 7773000000.0,
+              "end": "2023-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q4",
+              "start": "2023-10-01"
+            },
+            {
+              "val": 29547000000.0,
+              "end": "2024-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2024,
+              "fp": "FY",
+              "start": "2024-01-01"
+            },
+            {
+              "val": 7618000000.0,
+              "end": "2024-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q4",
+              "start": "2024-10-01"
+            },
+            {
+              "val": 6804000000.0,
+              "end": "2025-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q1",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 13837000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 7033000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-04-01"
+            },
+            {
+              "val": 27976000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2025,
+              "fp": "FY",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 7307000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q4",
+              "start": "2025-10-01"
+            },
+            {
+              "val": 6672000000.0,
+              "end": "2026-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q1",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 14043000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 7369000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-04-01"
+            }
+          ]
+        }
+      },
+      "GrossProfit": {
+        "units": {
+          "SEK": [
+            {
+              "val": 15623000000.0,
+              "end": "2023-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2023,
+              "fp": "FY",
+              "start": "2023-01-01"
+            },
+            {
+              "val": 3883000000.0,
+              "end": "2023-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q4",
+              "start": "2023-10-01"
+            },
+            {
+              "val": 10974000000.0,
+              "end": "2024-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2024,
+              "fp": "FY",
+              "start": "2024-01-01"
+            },
+            {
+              "val": 3407000000.0,
+              "end": "2024-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q4",
+              "start": "2024-10-01"
+            },
+            {
+              "val": 2869000000.0,
+              "end": "2025-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q1",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 5918000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 3049000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-04-01"
+            },
+            {
+              "val": 12865000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2025,
+              "fp": "FY",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 3693000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q4",
+              "start": "2025-10-01"
+            },
+            {
+              "val": 2978000000.0,
+              "end": "2026-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q1",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 6456000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 3480000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-04-01"
+            }
+          ]
+        }
+      },
+      "DepreciationAndAmortisationExpense": {
+        "units": {
+          "SEK": [
+            {
+              "val": 1772000000.0,
+              "end": "2023-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2023,
+              "fp": "FY",
+              "start": "2023-01-01"
+            },
+            {
+              "val": 514000000.0,
+              "end": "2023-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q4",
+              "start": "2023-10-01"
+            },
+            {
+              "val": 2049000000.0,
+              "end": "2024-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2024,
+              "fp": "FY",
+              "start": "2024-01-01"
+            },
+            {
+              "val": 534000000.0,
+              "end": "2024-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q4",
+              "start": "2024-10-01"
+            },
+            {
+              "val": 527000000.0,
+              "end": "2025-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q1",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 1038000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 511000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-04-01"
+            },
+            {
+              "val": 2138000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2025,
+              "fp": "FY",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 558000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q4",
+              "start": "2025-10-01"
+            },
+            {
+              "val": 567000000.0,
+              "end": "2026-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q1",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 1165000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 598000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-04-01"
+            }
+          ]
+        }
+      },
+      "EarningsPerShareDiluted": {
+        "units": {
+          "SEK/shares": [
+            {
+              "val": 2.37,
+              "end": "2023-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2023,
+              "fp": "FY",
+              "start": "2023-01-01"
+            },
+            {
+              "val": 0.49,
+              "end": "2023-12-31",
+              "filed": "2025-02-14",
+              "source_url": "https://www.nibegroup.com/download/18.19fa117e194a6feb97e332c/1739474819197/GB-Q4-24.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2023,
+              "fp": "Q4",
+              "start": "2023-10-01"
+            },
+            {
+              "val": 0.58,
+              "end": "2024-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2024,
+              "fp": "FY",
+              "start": "2024-01-01"
+            },
+            {
+              "val": 0.68,
+              "end": "2024-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2024,
+              "fp": "Q4",
+              "start": "2024-10-01"
+            },
+            {
+              "val": 0.19,
+              "end": "2025-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q1",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 0.44,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 0.24,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-04-01"
+            },
+            {
+              "val": 1.13,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2025,
+              "fp": "FY",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 0.39,
+              "end": "2025-12-31",
+              "filed": "2026-02-12",
+              "source_url": "https://www.nibegroup.com/download/18.7a7a546d19c4da3cab34/1770881343351/12-2-GB-Q4-25.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q4",
+              "start": "2025-10-01"
+            },
+            {
+              "val": 0.25,
+              "end": "2026-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q1",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 0.62,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 0.37,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-04-01"
+            }
+          ]
+        }
+      },
+      "NetCashProvidedByUsedInOperatingActivities": {
+        "units": {
+          "SEK": [
+            {
+              "val": 243000000.0,
+              "end": "2025-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q1",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 609000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 366000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-04-01"
+            },
+            {
+              "val": 4888000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2025,
+              "fp": "FY",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 539000000.0,
+              "end": "2026-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q1",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 1665000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 1125000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-04-01"
+            }
+          ]
+        }
+      },
+      "CapitalExpenditures": {
+        "units": {
+          "SEK": [
+            {
+              "val": 619000000.0,
+              "end": "2025-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q1",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 1101000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 482000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2",
+              "start": "2025-04-01"
+            },
+            {
+              "val": 2000000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2025,
+              "fp": "FY",
+              "start": "2025-01-01"
+            },
+            {
+              "val": 216000000.0,
+              "end": "2026-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q1",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 545000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-01-01"
+            },
+            {
+              "val": 329000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2",
+              "start": "2026-04-01"
+            }
+          ]
+        }
+      },
+      "CashAndCashEquivalentsAtCarryingValue": {
+        "units": {
+          "SEK": [
+            {
+              "val": 4256000000.0,
+              "end": "2025-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q1"
+            },
+            {
+              "val": 5207000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2"
+            },
+            {
+              "val": 4783000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2025,
+              "fp": "FY"
+            },
+            {
+              "val": 4668000000.0,
+              "end": "2026-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q1"
+            },
+            {
+              "val": 4793000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2"
+            }
+          ]
+        }
+      },
+      "DebtCurrent": {
+        "units": {
+          "SEK": [
+            {
+              "val": 23600000000.0,
+              "end": "2025-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q1"
+            },
+            {
+              "val": 25808000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2"
+            },
+            {
+              "val": 22557000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2025,
+              "fp": "FY"
+            },
+            {
+              "val": 22758000000.0,
+              "end": "2026-03-31",
+              "filed": "2026-05-19",
+              "source_url": "https://www.nibegroup.com/download/18.39edb3519e022fddbd637/1779172899766/GB-NIBE-Q1-report-2026-F1.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q1"
+            },
+            {
+              "val": 23341000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2"
+            }
+          ]
+        }
+      },
+      "StockholdersEquity": {
+        "units": {
+          "SEK": [
+            {
+              "val": 29863000000.0,
+              "end": "2025-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2025,
+              "fp": "Q2"
+            },
+            {
+              "val": 30290000000.0,
+              "end": "2025-12-31",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-ANNUAL",
+              "fy": 2025,
+              "fp": "FY"
+            },
+            {
+              "val": 32326000000.0,
+              "end": "2026-06-30",
+              "filed": "2026-08-21",
+              "source_url": "https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
+              "form": "ISSUER-QUARTER",
+              "fy": 2026,
+              "fp": "Q2"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

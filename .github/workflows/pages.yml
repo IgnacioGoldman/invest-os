@@ -1,4 +1,4 @@
-name: Update SEC fundamentals
+name: Update stock fundamentals
 
 on:
   workflow_dispatch:
@@ -39,11 +39,18 @@ jobs:
       - name: Install data dependencies
         run: python -m pip install --disable-pip-version-check -r backend/requirements.txt
 
+      - name: Test fundamentals fallback and issuer collectors
+        run: |
+          python -m unittest discover -s scripts -p 'test_nibe_reports.py'
+          python -m unittest discover -s scripts -p 'test_fundamentals_fallback.py'
+          python -m unittest discover -s scripts -p 'test_incremental_sec_refresh.py'
+
       - name: Refresh fundamentals and price data
         run: >-
           python scripts/open_data_poc.py
           --universe-file data/stocks/stocks.json
           --incremental-sec
+          --repair-current-data
           --skip-filing-details
           --min-coverage 0
           --workers 4
@@ -59,6 +66,9 @@ jobs:
       - name: Export refreshed static data
         run: python scripts/export_static_site_data.py
 
+      - name: Audit remaining fundamental coverage gaps
+        run: python scripts/audit_stock_data_coverage.py --output data/stocks/data-coverage.json
+
       - name: Validate refreshed static data
         run: >-
           python scripts/validate_static_stock_refresh.py
@@ -69,7 +79,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/invest_os.sqlite frontend/public/data
+          git add data/invest_os.sqlite frontend/public/data data/stocks/issuer_facts data/stocks/data-coverage.json
           if git diff --cached --quiet; then
             echo "No tracked data changes to persist."
           else
@@ -85,7 +95,7 @@ jobs:
           name: stock-refresh-report-${{ github.run_id }}
           path: |
             /tmp/open-data-refresh-report.json
-            /tmp/adjusted-eps-enrichment-report.json
+            data/stocks/data-coverage.json
           if-no-files-found: warn
           retention-days: 14
 

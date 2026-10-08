@@ -29,6 +29,41 @@ class FakeProvider:
 
 
 class IncrementalSecRefreshTests(unittest.TestCase):
+    def test_daily_refresh_does_not_recollect_for_history_only_gaps(self) -> None:
+        with TemporaryDirectory() as directory:
+            data_dir = Path(directory)
+            with connect(data_dir) as conn:
+                replace_stock_open_data_snapshot(conn, OpenDataSnapshot(ticker="TEST", cik=123))
+                conn.commit()
+            with patch("open_data_poc.get_settings", return_value=FakeSettings(data_dir)):
+                collect, preserved = _filter_incremental_sec_work_items([(0, {"ticker": "TEST"})], FakeProvider({}), save=True, repair_current_data=True)
+            self.assertFalse(collect)
+            self.assertEqual(len(preserved), 1)
+
+    def test_unchanged_filing_with_revenue_gap_is_recollected(self) -> None:
+        with TemporaryDirectory() as directory:
+            data_dir = Path(directory)
+            with connect(data_dir) as conn:
+                replace_stock_open_data_snapshot(conn, OpenDataSnapshot(ticker="TEST", cik=123))
+                conn.commit()
+            with patch("open_data_poc.get_settings", return_value=FakeSettings(data_dir)):
+                collect, preserved = _filter_incremental_sec_work_items([(0, {"ticker": "TEST"})], FakeProvider({}), save=True, repair_data_gaps=True)
+            self.assertFalse(preserved)
+            self.assertIn("historical_series.latest_six_revenue_growth_quarters", collect[0][1]["repair_reasons"])
+
+    def test_existing_non_sec_symbol_is_refreshed(self) -> None:
+        with TemporaryDirectory() as directory:
+            data_dir = Path(directory)
+            with connect(data_dir) as conn:
+                replace_stock_open_data_snapshot(conn, OpenDataSnapshot(ticker="NIBE-B.ST", cik=None))
+                conn.commit()
+            provider = FakeProvider({})
+            provider.resolve_cik = lambda ticker: (_ for _ in ()).throw(TypeError("No CIK"))
+            with patch("open_data_poc.get_settings", return_value=FakeSettings(data_dir)):
+                collect, preserved = _filter_incremental_sec_work_items([(0, {"ticker": "NIBE-B.ST"})], provider, save=True)
+            self.assertEqual(len(collect), 1)
+            self.assertFalse(preserved)
+
     def test_latest_relevant_sec_filing_ignores_unrelated_newer_filings(self) -> None:
         submissions = {
             "filings": {

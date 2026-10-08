@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+from copy import deepcopy
 import json
 import logging
 import math
@@ -20,6 +21,7 @@ import requests
 
 from app.config import PROJECT_DIR
 from app.entry_engine.open_data_metrics import compute_open_data_snapshot
+from app.services.stock_data_quality import fundamental_gap_reasons
 from app.entry_engine.open_data_models import (
     HistoricalPricePoint,
     LatestPrice,
@@ -383,10 +385,9 @@ class OpenDataProvider:
         company_context = self.fetch_company_context(cik) if cik is not None else self._yfinance_company_context(symbol)
         statement_currency_rates = self.fetch_statement_currency_rates(companyfacts, price)
         adr = ADR_RATIO_BY_TICKER.get(symbol, {"ratio": 1.0, "source": None})
-        return compute_open_data_snapshot(
+        snapshot_args = dict(
             ticker=symbol,
             cik=cik,
-            companyfacts=companyfacts,
             price=price,
             price_history=price_history,
             exchange=metadata.get("exchange"),
@@ -401,10 +402,88 @@ class OpenDataProvider:
             adr_ratio=float(adr["ratio"]),
             adr_ratio_source=adr["source"],
         )
+        snapshot = compute_open_data_snapshot(companyfacts=companyfacts, **snapshot_args)
+        attempts = list(companyfacts.get("collection_notes", []))
+        if cik is not None and fundamental_gap_reasons(snapshot, include_history=False):
+            try:
+                supplemented, note = self._supplement_sec_companyfacts(symbol, metadata, companyfacts)
+                attempts.append(note)
+                if supplemented is not None:
+                    candidate = compute_open_data_snapshot(companyfacts=supplemented, **snapshot_args)
+                    # The second source fills gaps; existing reported snapshot
+                    # values keep their original source and accounting basis.
+                    groups = {}
+                    metrics = dict(candidate.metrics)
+                    for group in ("business_health", "valuation"):
+                        updated = dict(getattr(candidate, group))
+                        for key, metric in getattr(snapshot, group).items():
+                            if metric.value is not None:
+                                updated[key] = metric
+                                if key in metrics:
+                                    metrics[key] = metric
+                        groups[group] = updated
+                    snapshot = candidate.model_copy(update={**groups, "metrics": metrics})
+            except Exception as exc:
+                logger.warning("%s: secondary fundamentals source failed: %s", symbol, exc)
+                attempts.append(f"Yahoo statement fallback failed; retained primary-source data: {exc}")
+        if attempts:
+            snapshot = snapshot.model_copy(update={"data_gaps": list(dict.fromkeys([*snapshot.data_gaps, *attempts]))})
+        return snapshot
+
+    def _supplement_sec_companyfacts(self, symbol: str, metadata: dict[str, Any], primary: dict[str, Any]) -> tuple[dict[str, Any] | None, str]:
+        from app.entry_engine.open_data_metrics import REVENUE_CONCEPTS, USD_UNITS, _annual_points, _quarterly_metric_facts
+
+        quarters = _quarterly_metric_facts(primary, REVENUE_CONCEPTS, USD_UNITS)
+        annual = _annual_points(primary, REVENUE_CONCEPTS, USD_UNITS)
+        if not annual:
+            return None, "Secondary statement fallback skipped: primary reporting currency/year-end could not be verified."
+        currency = annual[0].unit
+        # Yahoo's normalized periods currently use calendar quarters. Mixing
+        # these with non-calendar SEC fiscal labels would create fake history.
+        if annual[0].end.month != 12 or any(q.fy != q.end.year or q.fp != f"Q{(q.end.month - 1) // 3 + 1}" for q in quarters):
+            return None, "Secondary statement fallback skipped: Yahoo calendar quarters do not match verified SEC fiscal periods."
+        vendor = self.fetch_yfinance_companyfacts(symbol, metadata)
+        money = {}
+        for concept, data in vendor.get("facts", {}).get("yfinance", {}).items():
+            rows = data.get("units", {}).get(currency)
+            if rows:
+                money[concept] = {"units": {currency: rows}}
+        vendor_revenue = money.get("RevenueFromContractWithCustomerExcludingAssessedTax")
+        if not vendor_revenue:
+            return None, f"Secondary statement fallback skipped: no Yahoo revenue statements in verified {currency} reporting currency."
+        supplemented = deepcopy(primary)
+        supplemented.setdefault("facts", {})["yfinance"] = money
+        return supplemented, "Checked Yahoo statement tables for missing same-currency calendar-quarter fundamentals; retained available SEC snapshot metrics."
 
     def fetch_non_sec_companyfacts(self, ticker: str, metadata: dict[str, Any]) -> dict[str, Any]:
         symbol = ticker.upper().strip()
-        issuer_facts = self.fetch_issuer_workbook_companyfacts(symbol, metadata)
+        issuer_path = PROJECT_DIR / "data" / "stocks" / "issuer_facts" / f"{symbol}.json"
+        if issuer_path.exists():
+            issuer_facts = json.loads(issuer_path.read_text(encoding="utf-8"))
+            if symbol == "NIBE-B.ST":
+                from app.entry_engine.providers.nibe_reports import refresh_nibe_reports
+                issuer_facts, failures = refresh_nibe_reports(self, issuer_facts)
+                issuer_path.write_text(json.dumps(issuer_facts, indent=2) + "\n", encoding="utf-8")
+                issuer_facts["collection_notes"] = failures
+            try:
+                companyfacts = self.fetch_yfinance_companyfacts(symbol, metadata)
+            except Exception as exc:
+                logger.exception("Vendor statements unavailable for %s; retaining issuer history", symbol)
+                issuer_facts.setdefault("collection_notes", []).append(f"Yahoo statements unavailable; retained issuer history: {exc}")
+                return issuer_facts
+            # Issuer dates are actual publication dates, so the metric engine
+            # prefers them to overlapping vendor facts dated at period end.
+            companyfacts.setdefault("facts", {})["issuer"] = issuer_facts["facts"]["issuer"]
+            companyfacts["issuer_reports"] = issuer_facts.get("reports", [])
+            companyfacts["collection_notes"] = issuer_facts.get("collection_notes", [])
+            return companyfacts
+        try:
+            issuer_facts = self.fetch_issuer_workbook_companyfacts(symbol, metadata)
+        except Exception as exc:
+            logger.warning("%s: issuer workbook failed; trying Yahoo statements: %s", symbol, exc)
+            companyfacts = self.fetch_yfinance_companyfacts(symbol, metadata)
+            companyfacts.setdefault("collection_notes", []).append(f"Issuer workbook unavailable; used Yahoo statements: {exc}")
+            return companyfacts
         if issuer_facts is not None:
             return issuer_facts
         return self.fetch_yfinance_companyfacts(symbol, metadata)
@@ -472,8 +551,8 @@ class OpenDataProvider:
 
         if symbol == "GOOGL":
             return dict(GOOGL_FALLBACK_METADATA)
-        if symbol in ISSUER_FINANCIAL_WORKBOOKS:
-            issuer_config = ISSUER_FINANCIAL_WORKBOOKS[symbol]
+        if symbol in ISSUER_FINANCIAL_WORKBOOKS or symbol == "NIBE-B.ST":
+            issuer_config = ISSUER_FINANCIAL_WORKBOOKS.get(symbol, {"currency": "SEK", "name": "NIBE Industrier AB (publ)"})
             return {
                 "ticker": symbol,
                 "name": universe_metadata.get("name") or issuer_config.get("name") or symbol,
@@ -537,6 +616,7 @@ class OpenDataProvider:
                             "country": row.get("country"),
                             "sector": row.get("sector"),
                             "industry": row.get("industry"),
+                            "currency": row.get("currency"),
                         }
             self.cache.set("stocks_universe_metadata.json", universe)
         if not isinstance(universe, dict):
@@ -864,6 +944,16 @@ class OpenDataProvider:
         taxonomy[concept]["units"][unit].append(_yfinance_fact_row(value, period_end, annual=annual))
 
     def _yfinance_company_context(self, symbol: str) -> OpenDataCompanyContext:
+        issuer_path = PROJECT_DIR / "data" / "stocks" / "issuer_facts" / f"{symbol}.json"
+        if issuer_path.exists():
+            issuer = json.loads(issuer_path.read_text(encoding="utf-8"))
+            return OpenDataCompanyContext(
+                source="issuer_financial_reports; yfinance",
+                as_of=max((r["filed"] for r in issuer.get("reports", [])), default=date.today().isoformat()),
+                recent_filings=[],
+                known_context_gaps=["SEC submissions are unavailable for this non-SEC-listed ticker."],
+                notes="Consolidated issuer report tables provide historical fundamentals. Yahoo Finance supplies market metadata and additional statement facts. News context is not classified.",
+            )
         return OpenDataCompanyContext(
             source="yfinance",
             as_of=date.today().isoformat(),
