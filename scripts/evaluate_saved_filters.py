@@ -107,13 +107,33 @@ def _growth_signal(value: float | None) -> str:
     if value >= 8:
         return "Solid"
     if value >= 0:
-        return "Mixed"
+        return "Modest"
     return "Weak"
 
 
 def _revenue_growth_signal(value: float | None) -> str:
     signal = _growth_signal(value)
-    return "Flat" if signal == "Mixed" else signal
+    return "Flat" if signal == "Modest" else signal
+
+
+def _fcf_margin_signal(value: float | None) -> str:
+    if value is None:
+        return "Unclear"
+    if value >= 20:
+        return "Strong"
+    if value >= 10:
+        return "Solid"
+    if value >= 0:
+        return "Thin"
+    return "Weak"
+
+
+def _filter_value(condition: dict[str, Any]) -> Any:
+    value = condition.get("value")
+    if value == "Mixed":
+        # Older saved expressions keep their original meaning after the rename.
+        return {"eps": "Modest", "fcf_margin": "Thin"}.get(condition.get("field"), value)
+    return value
 
 
 def _support_signal(value: float | None) -> str:
@@ -186,6 +206,8 @@ def signal_for(snapshot: dict[str, Any], field: str) -> str:
         return _growth_signal(value if value is not None else _metric_value(snapshot, "business_health", "eps_growth_yoy"))
     if field == "momentum":
         return _revenue_momentum(snapshot)
+    if field == "fcf_margin":
+        return _fcf_margin_signal(_metric_value(snapshot, "business_health", "fcf_margin"))
     if field == "valuation":
         return _valuation_signal(snapshot)
     if field == "upcoming_earnings":
@@ -205,7 +227,7 @@ def expression_matches(snapshot: dict[str, Any], expression: dict[str, Any]) -> 
             group_results.append(True)
             continue
         results = [
-            signal_for(snapshot, str(condition.get("field", ""))) == condition.get("value")
+            signal_for(snapshot, str(condition.get("field", ""))) == _filter_value(condition)
             for condition in conditions
             if isinstance(condition, dict)
         ]

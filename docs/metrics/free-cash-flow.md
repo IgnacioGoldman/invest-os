@@ -27,8 +27,8 @@ Free Cash Flow Margin is a business-quality metric, so its tags should describe 
 Suggested tags:
 
 - **Strong:** FCF margin is 20% or higher. The business is converting a large share of revenue into cash.
-- **Solid:** FCF margin is 10% to 20%. Cash generation looks healthy.
-- **Mixed:** FCF margin is 0% to 10%. The business is generating cash, but the margin is thin.
+- **Solid:** FCF margin is at least 10% but below 20%. Cash generation looks healthy.
+- **Thin:** FCF margin is at least 0% but below 10%. Free cash flow is at break-even or represents a small share of revenue.
 - **Weak:** FCF margin is below 0%. The business is not producing positive free cash flow over the trailing 12 months.
 - **Unclear:** Revenue or free cash flow data is missing, revenue is not meaningful, or the company type makes FCF margin hard to compare.
 

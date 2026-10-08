@@ -128,9 +128,9 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
         self.assertEqual(signal_for(row, "support_5y"), "Above support")
         self.assertEqual(signal_for(row, "valuation"), "Cheap")
         self.assertEqual(signal_for(snapshot("FLAT", 4, 2.5, 25), "revenue"), "Flat")
-        mixed_eps = snapshot("MIXED_EPS", 20, 2.5, 25)
-        mixed_eps["business_health"]["eps_growth_yoy"]["value"] = 4
-        self.assertEqual(signal_for(mixed_eps, "eps"), "Mixed")
+        modest_eps = snapshot("MODEST_EPS", 20, 2.5, 25)
+        modest_eps["business_health"]["eps_growth_yoy"]["value"] = 4
+        self.assertEqual(signal_for(modest_eps, "eps"), "Modest")
 
         app_like = snapshot("APP_LIKE", 50, 1, 1, forward_pe=14.9, fcf_yield=4.3, price_to_sales=15.4, ev_to_ebitda=19.6)
         self.assertEqual(signal_for(app_like, "valuation"), "Pricey")
@@ -140,6 +140,42 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
         self.assertEqual(signal_for(snapshot("NEXT_21", 20, 2.5, 25, days_to_next_earnings=21), "upcoming_earnings"), "Next 30 days")
         self.assertEqual(signal_for(snapshot("NEXT_30", 20, 2.5, 25, days_to_next_earnings=30), "upcoming_earnings"), "Next 30 days")
         self.assertEqual(signal_for(snapshot("LATER", 20, 2.5, 25, days_to_next_earnings=31), "upcoming_earnings"), "Later")
+
+    def test_metric_specific_labels_cover_boundaries(self) -> None:
+        row = snapshot("BOUNDARY", 4, 12, 30)
+        for value, eps_label, fcf_label in [
+            (-0.01, "Weak", "Weak"),
+            (0, "Modest", "Thin"),
+            (7.99, "Modest", "Thin"),
+            (8, "Solid", "Thin"),
+            (9.99, "Solid", "Thin"),
+            (10, "Solid", "Solid"),
+            (19.99, "Solid", "Solid"),
+            (20, "Strong", "Strong"),
+            (None, "Unclear", "Unclear"),
+        ]:
+            with self.subTest(value=value):
+                row["business_health"]["eps_gaap_growth_yoy"] = {"value": value}
+                row["business_health"]["fcf_margin"] = {"value": value}
+                self.assertEqual(signal_for(row, "eps"), eps_label)
+                self.assertEqual(signal_for(row, "fcf_margin"), fcf_label)
+                self.assertEqual(signal_for(row, "revenue"), "Flat")
+
+    def test_old_and_new_saved_metric_labels_match_the_same_band(self) -> None:
+        row = snapshot("SAVED", 20, 12, 30)
+        row["business_health"]["eps_gaap_growth_yoy"] = {"value": 4}
+        row["business_health"]["fcf_margin"] = {"value": 5}
+        for field, label in [("eps", "Modest"), ("fcf_margin", "Thin")]:
+            for saved_label in [label, "Mixed"]:
+                with self.subTest(field=field, label=saved_label):
+                    expression = {"operator": "and", "groups": [
+                        {"operator": "and", "conditions": [{"field": field, "value": saved_label}]},
+                    ]}
+                    self.assertTrue(expression_matches(row, expression))
+                    outside_band = snapshot("OUTSIDE", 20, 12, 30)
+                    outside_band["business_health"]["eps_gaap_growth_yoy"] = {"value": 20}
+                    outside_band["business_health"]["fcf_margin"] = {"value": 20}
+                    self.assertFalse(expression_matches(outside_band, expression))
 
     def test_pullback_preset_uses_one_three_and_six_month_support(self) -> None:
         row = snapshot("PULLBACK", 12, 12, 30, support_6m=1)

@@ -215,7 +215,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     options: [
       { label: "Strong", tone: "positive" },
       { label: "Solid", tone: "positive" },
-      { label: "Mixed", tone: "warning" },
+      { label: "Modest", tone: "warning" },
       { label: "Weak", tone: "negative" },
       { label: "Unclear", tone: "neutral" },
     ],
@@ -229,7 +229,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     options: [
       { label: "Strong", tone: "positive" },
       { label: "Solid", tone: "positive" },
-      { label: "Mixed", tone: "warning" },
+      { label: "Thin", tone: "warning" },
       { label: "Weak", tone: "negative" },
       { label: "Unclear", tone: "neutral" },
     ],
@@ -364,20 +364,20 @@ function growthSignal(valueOrMetric?: number | OpenDataMetric | null): Signal {
   if (value == null) return { label: "Unclear", tone: "neutral" };
   if (value >= 20) return { label: "Strong", tone: "positive" };
   if (value >= 8) return { label: "Solid", tone: "positive" };
-  if (value >= 0) return { label: "Mixed", tone: "warning" };
+  if (value >= 0) return { label: "Modest", tone: "warning" };
   return { label: "Weak", tone: "negative" };
 }
 
 function revenueGrowthSignal(valueOrMetric?: number | OpenDataMetric | null): Signal {
   const signal = growthSignal(valueOrMetric);
-  return signal.label === "Mixed" ? { ...signal, label: "Flat" } : signal;
+  return signal.label === "Modest" ? { ...signal, label: "Flat" } : signal;
 }
 
 function fcfMarginSignal(value?: number | null): Signal {
   if (value == null) return { label: "Unclear", tone: "neutral" };
   if (value >= 20) return { label: "Strong", tone: "positive" };
   if (value >= 10) return { label: "Solid", tone: "positive" };
-  if (value >= 0) return { label: "Mixed", tone: "warning" };
+  if (value >= 0) return { label: "Thin", tone: "warning" };
   return { label: "Weak", tone: "negative" };
 }
 
@@ -2400,7 +2400,19 @@ export function MobileStockExplorer({
   };
 
   const selectSavedFilter = (filter: SavedFilter) => {
-    setFilterExpression(filter.expression);
+    // Preserve saved filters created before the metric-specific labels were introduced.
+    setFilterExpression({
+      ...filter.expression,
+      groups: filter.expression.groups.map((group) => ({
+        ...group,
+        conditions: group.conditions.map((condition) => ({
+          ...condition,
+          value: condition.value === "Mixed" && condition.field === "eps" ? "Modest"
+            : condition.value === "Mixed" && condition.field === "fcf_margin" ? "Thin"
+              : condition.value,
+        })),
+      })),
+    });
     setSortKey(filter.sort_key);
     setSortDirection(filter.sort_direction);
     setActiveSavedFilterId(filter.id);
