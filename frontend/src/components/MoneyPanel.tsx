@@ -147,7 +147,7 @@ export function MoneyPanel({ userId }: { userId: string }) {
   const percentage = (value: number) => `${new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(value)}%`;
 
   return (
-    <section className="money-panel" id="space-money" role="tabpanel" aria-labelledby="space-money-tab">
+    <section className="money-panel" id="space-portfolio" role="tabpanel" aria-labelledby="space-portfolio-tab">
       {loading ? <p className="money-hint" role="status">Loading your amounts…</p> : loadError ? (
         <div className="money-load-error" role="alert">
           <p>{loadError}</p><button type="button" onClick={() => { setLoading(true); void load(); }}>Try again</button>
@@ -156,7 +156,7 @@ export function MoneyPanel({ userId }: { userId: string }) {
         <>
           {!formOpen ? (
             <button type="button" className="money-add" ref={addButton} onClick={() => openForm()}>
-              <Plus size={24} />Add amount
+              <Plus size={18} />Add amount
             </button>
           ) : (
             <form className="money-form" onSubmit={(event) => void submit(event)}>
@@ -204,8 +204,8 @@ export function MoneyPanel({ userId }: { userId: string }) {
             </ul>
           )}
           {entries.length > 0 && (
-            <section className="money-summary" aria-label="Invested and uninvested money">
-              <header><h2>Your money</h2><label className="money-display-currency">Show in
+            <section className="money-summary" aria-label="Portfolio allocation">
+              <header><h2>Portfolio total</h2><label className="money-display-currency">Show in
                 <select value={displayCurrency} onChange={(event) => setDisplayCurrency(event.target.value as MoneyCurrency)}>
                   {MONEY_CURRENCIES.map((code) => <option key={code}>{code}</option>)}
                 </select>

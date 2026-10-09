@@ -58,7 +58,7 @@ export function PersonalizationControls({ configured, session, onSignIn, onSignO
           <section className="mobile-personal-sheet" role="dialog" aria-modal="true" aria-label="Account">
             <div className="mobile-sheet-handle" aria-hidden="true" />
             <header>
-              <div><h2>Account</h2><p>Sync your watchlist, money and filters across devices.</p></div>
+              <div><h2>Account</h2><p>Sync your watchlist, portfolio and filters across devices.</p></div>
               <button type="button" className="mobile-icon-button" onClick={() => setOpen(false)} aria-label="Close">
                 <X size={20} />
               </button>
@@ -71,7 +71,7 @@ export function PersonalizationControls({ configured, session, onSignIn, onSignO
                     {avatar ? <img src={avatar} alt="" referrerPolicy="no-referrer" /> : <UserRound size={24} />}
                     <div><strong>{name}</strong><span>{session.user.email}</span></div>
                   </div>
-                  <p>Your watchlist, money, custom filters, and daily match badges are private to this account.</p>
+                  <p>Your watchlist, portfolio, custom filters, and daily match badges are private to this account.</p>
                   <button type="button" className="mobile-secondary-action" disabled={busy} onClick={() => void run(async () => {
                     await onSignOut();
                     setOpen(false);

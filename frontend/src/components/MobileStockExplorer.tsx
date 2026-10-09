@@ -6,6 +6,7 @@ import {
   ArrowUp,
   Bookmark,
   Check,
+  CircleCheck,
   ChevronLeft,
   ChevronRight,
   Download,
@@ -14,6 +15,7 @@ import {
   RotateCcw,
   Save,
   Search,
+  SlidersHorizontal,
   Trash2,
   X,
 } from "lucide-react";
@@ -450,8 +452,8 @@ function upcomingEarningsMetric(snapshot: OpenDataStockSnapshot) {
 function upcomingEarningsSignal(metric?: OpenDataMetric): Signal {
   const days = finiteNumber(metric?.value);
   if (days == null) return { label: "Unclear", tone: "neutral" };
-  if (days <= 7) return { label: "This week", tone: "positive" };
-  if (days <= 30) return { label: "Next 30 days", tone: "positive" };
+  if (days <= 7) return { label: "This week", tone: "info" };
+  if (days <= 30) return { label: "Next 30 days", tone: "info" };
   return { label: "Later", tone: "neutral" };
 }
 
@@ -1088,8 +1090,15 @@ async function shareOrDownloadMarkdown(markdown: string, filename: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function StockStatus({ signal }: { signal: Signal }) {
-  return <span className={`mobile-status ${signal.tone}`}>{signal.label}</span>;
+function StockStatus({ signal, context, compact = false }: { signal: Signal; context?: string | null; compact?: boolean }) {
+  const label = context ? `${context} · ${signal.label}` : signal.label;
+  const displayLabel = compact && context?.endsWith(" support") && signal.label === "At support" ? context : label;
+  return (
+    <span className={`mobile-status ${signal.tone}${compact ? " mobile-row-status" : ""}`} title={label} aria-label={label}>
+      {compact && signal.tone === "positive" && <CircleCheck size={13} aria-hidden="true" />}
+      <span>{displayLabel}</span>
+    </span>
+  );
 }
 
 function FilterNewBadge({ count }: { count?: number }) {
@@ -1300,10 +1309,11 @@ function FilterSheet({
                           type="button"
                           key={filter.id}
                           className={activeSavedFilterId === filter.id ? "active" : ""}
+                          title={filter.name}
                           onClick={() => onSelectSavedFilter(filter)}
                         >
                           <Bookmark size={15} fill={activeSavedFilterId === filter.id ? "currentColor" : "none"} />
-                          <span>{filter.name}</span>
+                          <span className="mobile-filter-chip-label">{filter.name}</span>
                           <FilterNewBadge count={personalization.filterBadgeCounts[savedFilterKey(filter.id)]} />
                         </button>
                       ))}
@@ -1391,6 +1401,7 @@ function FilterSheet({
             <div className="mobile-filter-name">
               <span>{activeSavedFilter ? "Saved filter" : builtInPreset ? "Built-in filter" : "Filter"}</span>
               <strong>{activeSavedFilter?.name ?? builtInName ?? (count > 0 ? "Custom filter" : "No filter selected")}</strong>
+              {builtInPreset && <p>{builtInPresetSummary(builtInPreset)}</p>}
             </div>
 
             {expression.groups.length > 0 ? (
@@ -1544,7 +1555,7 @@ function FilterSheet({
             Clear
           </button>
           <button type="button" className="mobile-done-button" onClick={onClose}>
-            Show stocks{count > 0 ? ` (${count} condition${count === 1 ? "" : "s"})` : ""}
+            Show stocks
           </button>
         </footer>
       </section>
@@ -2201,7 +2212,7 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
           </div>
           <div className="mobile-detail-price">
             <strong>{formatPrice(currentPrice)}</strong>
-            <span className={dailyChange != null && dailyChange < 0 ? "negative" : "positive"}>{formatPercent(dailyChange, true)} today</span>
+            <span className={dailyChange == null || dailyChange === 0 ? undefined : dailyChange < 0 ? "negative" : "positive"}>{formatPercent(dailyChange, true)} today</span>
           </div>
 	        </section>
 	
@@ -2291,7 +2302,7 @@ export function MobileStockExplorer({
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [watchlistOpen, setWatchlistOpen] = useState(false);
-  const [spaceTab, setSpaceTab] = useState<"watchlist" | "money">("watchlist");
+  const [spaceTab, setSpaceTab] = useState<"watchlist" | "portfolio">("watchlist");
   const [detailOpen, setDetailOpen] = useState(false);
   const [activeSavedFilterId, setActiveSavedFilterId] = useState<string | null>(null);
   const [exportMode, setExportMode] = useState(false);
@@ -2301,7 +2312,6 @@ export function MobileStockExplorer({
   const listTopRef = useRef<HTMLDivElement | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
   const builtInPreset = builtInPresetFor(filterExpression);
-  const builtInSummary = builtInPresetSummary(builtInPreset);
   const activeSavedFilter = personalization?.savedFilters.find((item) => item.id === activeSavedFilterId) ?? null;
   const currentFilterContext = exportFilterContext(filterExpression, activeFilterCount(filterExpression), builtInPreset, activeSavedFilter);
   const relevantSupportKeys = builtInPreset === "support"
@@ -2494,24 +2504,24 @@ export function MobileStockExplorer({
 
         {signedIn && (
           <div className="my-space-tabs" role="tablist" aria-label="My space">
-            {(["watchlist", "money"] as const).map((tab) => (
+            {(["watchlist", "portfolio"] as const).map((tab) => (
               <button type="button" key={tab} role="tab" id={`space-${tab}-tab`} aria-controls={`space-${tab}`}
                 aria-selected={spaceTab === tab} tabIndex={spaceTab === tab ? 0 : -1}
                 onClick={() => setSpaceTab(tab)}
                 onKeyDown={(event) => {
                   if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
                     event.preventDefault();
-                    const next = event.key === "Home" ? "watchlist" : event.key === "End" ? "money" : tab === "money" ? "watchlist" : "money";
+                    const next = event.key === "Home" ? "watchlist" : event.key === "End" ? "portfolio" : tab === "portfolio" ? "watchlist" : "portfolio";
                     setSpaceTab(next);
                     document.getElementById(`space-${next}-tab`)?.focus();
                   }
                 }}>
-                {tab === "watchlist" ? "Watchlist" : "Money"}
+                {tab === "watchlist" ? "Watchlist" : "Portfolio"}
               </button>
             ))}
           </div>
         )}
-        {signedIn && spaceTab === "money" && personalization?.userId ? (
+        {signedIn && spaceTab === "portfolio" && personalization?.userId ? (
           <MoneyPanel key={personalization.userId} userId={personalization.userId} />
         ) : (
         <div id="space-watchlist" role={signedIn ? "tabpanel" : undefined} aria-labelledby={signedIn ? "space-watchlist-tab" : undefined}>
@@ -2521,7 +2531,7 @@ export function MobileStockExplorer({
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Symbol, name or sector"
+            placeholder="Search companies"
             aria-label="Search stocks"
           />
           {query && (
@@ -2529,55 +2539,56 @@ export function MobileStockExplorer({
           )}
         </label>
 
-        <div className="mobile-quick-filters" aria-label="Quick filters">
-          <button type="button" className={builtInPreset === "support" ? "active" : ""} onClick={() => toggleBuiltInPreset("support")}>
-            {builtInPreset === "support" && <Check size={15} />}
-            Strong YoY and on support
-            <FilterNewBadge count={personalization?.filterBadgeCounts[SUPPORT_FILTER_KEY]} />
-          </button>
-          <button type="button" className={builtInPreset === "pullback" ? "active" : ""} onClick={() => toggleBuiltInPreset("pullback")}>
-            {builtInPreset === "pullback" && <Check size={15} />}
-            Strong YoY and on pullback
-            <FilterNewBadge count={personalization?.filterBadgeCounts[PULLBACK_FILTER_KEY]} />
-          </button>
-          <button type="button" className={builtInPreset === "earnings" ? "active" : ""} onClick={() => toggleBuiltInPreset("earnings")}>
-            {builtInPreset === "earnings" && <Check size={15} />}
-            Earnings next 30d + strong YoY
-            <FilterNewBadge count={personalization?.filterBadgeCounts[EARNINGS_THIS_WEEK_FILTER_KEY]} />
-          </button>
-          {personalization?.signedIn && personalization.savedFilters.map((filter) => (
+        <div className="mobile-filter-toolbar">
+          <div className="mobile-quick-filters" role="group" aria-label="Quick filters">
+            <button type="button" className={builtInPreset === "support" ? "active" : ""} aria-pressed={builtInPreset === "support"} title={builtInPresetSummary("support") ?? undefined} onClick={() => toggleBuiltInPreset("support")}>
+              {builtInPreset === "support" && <Check size={15} />}
+              Strong YoY + Support
+              <FilterNewBadge count={personalization?.filterBadgeCounts[SUPPORT_FILTER_KEY]} />
+            </button>
+            <button type="button" className={builtInPreset === "pullback" ? "active" : ""} aria-pressed={builtInPreset === "pullback"} title={builtInPresetSummary("pullback") ?? undefined} onClick={() => toggleBuiltInPreset("pullback")}>
+              {builtInPreset === "pullback" && <Check size={15} />}
+              Strong YoY + Pullback
+              <FilterNewBadge count={personalization?.filterBadgeCounts[PULLBACK_FILTER_KEY]} />
+            </button>
+            <button type="button" className={builtInPreset === "earnings" ? "active" : ""} aria-pressed={builtInPreset === "earnings"} title={builtInPresetSummary("earnings") ?? undefined} onClick={() => toggleBuiltInPreset("earnings")}>
+              {builtInPreset === "earnings" && <Check size={15} />}
+              YoY + Earnings
+              <FilterNewBadge count={personalization?.filterBadgeCounts[EARNINGS_THIS_WEEK_FILTER_KEY]} />
+            </button>
+            {personalization?.signedIn && personalization.savedFilters.map((filter) => (
+              <button
+                type="button"
+                key={filter.id}
+                className={activeSavedFilterId === filter.id ? "active" : ""}
+                aria-pressed={activeSavedFilterId === filter.id}
+                title={filter.name}
+                onClick={() => selectSavedFilter(filter)}
+              >
+                {activeSavedFilterId === filter.id && <Check size={15} />}
+                <span className="mobile-filter-chip-label">{filter.name}</span>
+                <FilterNewBadge count={personalization.filterBadgeCounts[savedFilterKey(filter.id)]} />
+              </button>
+            ))}
             <button
               type="button"
-              key={filter.id}
-              className={activeSavedFilterId === filter.id ? "active" : ""}
-              onClick={() => selectSavedFilter(filter)}
+              className="mobile-filter-create-button"
+              onClick={createCustomFilter}
+              aria-label="Create custom filter"
+              title="Create custom filter"
             >
-              {activeSavedFilterId === filter.id && <Check size={15} />}
-              {filter.name}
-              <FilterNewBadge count={personalization.filterBadgeCounts[savedFilterKey(filter.id)]} />
+              <Plus size={18} />
             </button>
-          ))}
-          <button
-            type="button"
-            className="mobile-filter-create-button"
-            onClick={createCustomFilter}
-            aria-label="Create custom filter"
-            title="Create custom filter"
-          >
-            <Plus size={18} />
+          </div>
+          <button type="button" className={`mobile-options-button ${filterCount > 0 ? "active" : ""}`} onClick={() => setSheetOpen(true)} aria-label="Filter and sort stocks" aria-haspopup="dialog">
+            <SlidersHorizontal size={18} aria-hidden="true" />
           </button>
         </div>
 
-        {filterCount > 0 && (
-          <p className="mobile-filter-expression-summary" aria-label="Active filter description">
-            {builtInSummary ?? currentFilterContext.summary ?? (
-              <>
-                {filterExpression.groups.length} group{filterExpression.groups.length === 1 ? "" : "s"}
-                {filterExpression.groups.length > 1 ? ` joined by ${filterExpression.operator.toUpperCase()}` : ""}
-                {` · ${filterCount} condition${filterCount === 1 ? "" : "s"}`}
-              </>
-            )}
-          </p>
+        {filterCount > 0 && !builtInPreset && (
+          <button type="button" className="mobile-filter-expression-summary" onClick={() => setSheetOpen(true)}>
+            {filterCount} condition{filterCount === 1 ? "" : "s"} · Edit filter
+          </button>
         )}
 
         <div className="mobile-list-summary" ref={listTopRef}>
@@ -2646,13 +2657,12 @@ export function MobileStockExplorer({
                         </span>
                       )}
                       <div className="mobile-stock-identity">
-                        <strong>{snapshot.ticker}{!exportMode && <ChevronRight size={18} />}</strong>
+                        <strong>{snapshot.ticker}</strong>
                         <span>{snapshot.name ?? snapshot.industry ?? ""}</span>
                       </div>
                       <div className="mobile-stock-value">
                         <strong>{metric.value}</strong>
-                        <StockStatus signal={metric.signal} />
-                        {metric.secondary && <small>{metric.secondary}</small>}
+                        <StockStatus signal={metric.signal} context={metric.secondary} compact />
                       </div>
                     </button>
                     {editMode && !exportMode && (
