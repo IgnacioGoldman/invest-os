@@ -8,7 +8,7 @@
     "sector": "Technology",
     "industry": "Information Technology Services",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 57.796311201685135,
@@ -244,10 +244,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $2.72-$2.91; midpoint $2.82; distance +2103.36%; touches 4; first touch 2022-09-23; last touch 2022-12-27; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -12012,10 +12012,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -12029,7 +12029,7 @@
     "sector": "Technology",
     "industry": "Software",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 45.374614864357106,
@@ -12265,11 +12265,11 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $59.56-$65.04; midpoint $62.30; distance +126.97%; touches 2; first touch 2022-06-13; last touch 2022-09-29; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 62.0,
-        "source": "yfinance:calendar:Earnings Date:2026-12-10",
+        "value": 63.0,
+        "source": "yfinance:calendar:Earnings Date:2026-12-14",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
-        "notes": "Days until the next expected earnings release window (2026-12-10) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
+        "as_of": "2026-10-12",
+        "notes": "Days until the next expected earnings release window (2026-12-14) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
     "valuation": {
@@ -25213,11 +25213,11 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 62.0,
-        "source": "yfinance:calendar:Earnings Date:2026-12-10",
+        "value": 63.0,
+        "source": "yfinance:calendar:Earnings Date:2026-12-14",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
-        "notes": "Days until the next expected earnings release window (2026-12-10) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
+        "as_of": "2026-10-12",
+        "notes": "Days until the next expected earnings release window (2026-12-14) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
   },
@@ -25230,7 +25230,7 @@
     "sector": "Technology",
     "industry": "Software",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 10.83431027745213,
@@ -25466,10 +25466,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $133.32-$140.34; midpoint $136.83; distance +67.46%; touches 2; first touch 2022-10-13; last touch 2022-11-04; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 54.0,
+        "value": 51.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-12-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -38181,10 +38181,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 54.0,
+        "value": 51.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-12-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -38198,7 +38198,7 @@
     "sector": "Healthcare",
     "industry": "Drug Manufacturers",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 10.785415997430132,
@@ -38434,10 +38434,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $103.19-$116.38; midpoint $109.79; distance +45.01%; touches 7; first touch 2021-11-18; last touch 2022-10-13; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 18.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-30",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-30) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -42614,10 +42614,10 @@
         "notes": "Proxy EV/EBITDA from open/free public facts."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 18.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-30",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-30) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -42631,7 +42631,7 @@
     "sector": "Consumer Defensive",
     "industry": "Grocery Stores",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 0.8816782707330991,
@@ -42867,10 +42867,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $214.23-$243.95; midpoint $229.09; distance +12.75%; touches 18; first touch 2021-12-16; last touch 2026-09-11; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -53610,10 +53610,10 @@
         "notes": "ev_to_ebitda: Inputs required for this open/free computation were unavailable."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -53627,7 +53627,7 @@
     "sector": "Industrials",
     "industry": "Building Products & Equipment",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 7.607617536203135,
@@ -53863,10 +53863,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $29.49-$31.79; midpoint $30.64; distance +44.12%; touches 2; first touch 2025-04-07; last touch 2025-11-21; cluster tolerance 3.7%."
       },
       "days_to_next_earnings": {
-        "value": 39.0,
+        "value": 36.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-17",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-17) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -57488,10 +57488,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 39.0,
+        "value": 36.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-17",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-17) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -57729,7 +57729,7 @@
     "sector": "Communication Services",
     "industry": "Entertainment",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 13.365374252899542,
@@ -57965,10 +57965,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $15.95-$17.37; midpoint $16.66; distance +322.02%; touches 3; first touch 2022-05-12; last touch 2022-06-30; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 11.0,
+        "value": 8.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-20",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-20) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -71075,10 +71075,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 11.0,
+        "value": 8.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-20",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-20) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -71092,7 +71092,7 @@
     "sector": "Consumer Cyclical",
     "industry": "Internet Content & Information",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 12.172950754881038,
@@ -71328,10 +71328,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $19.75-$21.00; midpoint $20.38; distance +250.93%; touches 2; first touch 2022-06-16; last touch 2022-07-14; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 26.0,
+        "value": 23.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -77969,10 +77969,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 26.0,
+        "value": 23.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -77986,7 +77986,7 @@
     "sector": "Consumer Cyclical",
     "industry": "Business Services",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 17.05232436939754,
@@ -78215,10 +78215,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $172.16-$177.28; midpoint $174.72; distance +120.61%; touches 2; first touch 2022-09-28; last touch 2022-10-13; cluster tolerance 2.8%."
       },
       "days_to_next_earnings": {
-        "value": 18.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -91050,10 +91050,10 @@
         "notes": "Proxy EV/EBITDA from open/free public facts."
       },
       "days_to_next_earnings": {
-        "value": 18.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -91067,7 +91067,7 @@
     "sector": "Consumer Cyclical",
     "industry": "Business Services",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 14.066150252059511,
@@ -91303,10 +91303,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $272.84-$285.79; midpoint $279.32; distance +110.92%; touches 2; first touch 2022-09-28; last touch 2022-10-13; cluster tolerance 2.9%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -103917,10 +103917,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -103934,7 +103934,7 @@
     "sector": "Consumer Defensive",
     "industry": "Farm Products",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": -41.5124831725923,
@@ -104173,7 +104173,7 @@
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "days_to_next_earnings: Next earnings release date was unavailable from open/free public inputs."
       }
     },
@@ -115952,7 +115952,7 @@
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "days_to_next_earnings: Next earnings release date was unavailable from open/free public inputs."
       }
     }
@@ -115966,7 +115966,7 @@
     "sector": "Healthcare",
     "industry": "Medical Devices",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 13.075792930602367,
@@ -116202,10 +116202,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $55.32-$58.81; midpoint $57.07; distance +47.39%; touches 4; first touch 2025-04-04; last touch 2026-05-14; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -127966,10 +127966,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -127983,7 +127983,7 @@
     "sector": "Technology",
     "industry": "Software",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 6.882817413178674,
@@ -128219,10 +128219,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $12.99-$13.68; midpoint $13.33; distance +1057.49%; touches 2; first touch 2022-05-12; last touch 2022-12-30; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -140007,10 +140007,10 @@
         "notes": "Proxy EV/EBITDA from open/free public facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -140024,7 +140024,7 @@
     "sector": "Consumer Cyclical",
     "industry": "Internet Retail",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 46.88736206537581,
@@ -140260,10 +140260,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $588.67-$623.69; midpoint $606.18; distance +211.76%; touches 2; first touch 2022-06-14; last touch 2022-06-30; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 26.0,
+        "value": 23.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -152089,10 +152089,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 26.0,
+        "value": 23.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -152106,7 +152106,7 @@
     "sector": "Technology",
     "industry": "Software",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 17.74702057796209,
@@ -152342,10 +152342,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $209.16-$223.74; midpoint $216.45; distance +147.20%; touches 3; first touch 2022-10-13; last touch 2023-01-06; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 16.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -165263,10 +165263,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 16.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -165280,7 +165280,7 @@
     "sector": "Technology",
     "industry": "Consumer Electronics",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 16.35650176528138,
@@ -165516,10 +165516,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $121.69-$131.61; midpoint $126.65; distance +165.80%; touches 2; first touch 2022-06-16; last touch 2023-01-03; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 24.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -178603,10 +178603,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 24.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -178620,7 +178620,7 @@
     "sector": "Communication Services",
     "industry": "Internet Content & Information",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 27.95900328310464,
@@ -178856,10 +178856,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $106.15-$115.14; midpoint $110.65; distance +549.52%; touches 2; first touch 2022-11-22; last touch 2022-12-07; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 16.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -189970,10 +189970,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 16.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -189987,7 +189987,7 @@
     "sector": "Communication Services",
     "industry": "Internet Content & Information",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 24.23362508814867,
@@ -190223,10 +190223,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $81.78-$88.10; midpoint $84.94; distance +309.54%; touches 2; first touch 2022-11-03; last touch 2022-12-28; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 16.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -199151,10 +199151,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 16.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -199168,7 +199168,7 @@
     "sector": "Consumer Cyclical",
     "industry": "Internet Retail",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 19.620517346245126,
@@ -199404,10 +199404,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $84.15-$93.35; midpoint $88.75; distance +195.69%; touches 4; first touch 2022-11-09; last touch 2023-03-02; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -212517,10 +212517,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -212534,7 +212534,7 @@
     "sector": "Technology",
     "industry": "Semiconductors",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 105.85114348672529,
@@ -212770,10 +212770,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $12.70-$13.54; midpoint $13.12; distance +1648.08%; touches 2; first touch 2022-09-01; last touch 2022-11-03; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 39.0,
+        "value": 36.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-17",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-17) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -225168,10 +225168,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 39.0,
+        "value": 36.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-17",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-17) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -225185,7 +225185,7 @@
     "sector": "Consumer Cyclical",
     "industry": "Auto Manufacturers",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 25.51564722617354,
@@ -225421,10 +225421,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $157.30-$171.10; midpoint $164.20; distance +133.07%; touches 7; first touch 2022-11-22; last touch 2024-06-11; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 12.0,
+        "value": 9.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -237206,10 +237206,10 @@
         "notes": "Proxy EV/EBITDA from open/free public facts."
       },
       "days_to_next_earnings": {
-        "value": 12.0,
+        "value": 9.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -237223,7 +237223,7 @@
     "sector": "Technology",
     "industry": "Software",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 16.17244406084437,
@@ -237459,10 +237459,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.91-$33.90; midpoint $32.40; distance +95.96%; touches 7; first touch 2022-09-23; last touch 2026-05-13; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 26.0,
+        "value": 23.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -243951,10 +243951,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 26.0,
+        "value": 23.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -243968,7 +243968,7 @@
     "sector": "Technology",
     "industry": "Software",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 35.644443369297015,
@@ -244204,10 +244204,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $60.11-$64.25; midpoint $62.18; distance +371.62%; touches 4; first touch 2023-01-06; last touch 2023-04-25; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -250489,10 +250489,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -250506,7 +250506,7 @@
     "sector": "Energy",
     "industry": "Integrated Oil & Gas",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": null,
@@ -250742,10 +250742,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $3.45-$3.69; midpoint $3.57; distance +1301.29%; touches 3; first touch 2021-12-20; last touch 2022-08-05; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 16.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -252861,10 +252861,10 @@
         "notes": "Proxy EV/EBITDA from open/free public facts."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 16.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -252878,7 +252878,7 @@
     "sector": "Technology",
     "industry": "Computer Software: Prepackaged Software",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 92.8334945705726,
@@ -253114,10 +253114,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $6.31-$6.80; midpoint $6.56; distance +3088.05%; touches 2; first touch 2022-05-12; last touch 2023-01-19; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 24.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -258734,10 +258734,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 24.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -258751,7 +258751,7 @@
     "sector": "Technology",
     "industry": "Computer Software: Programming Data Processing",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 52.82461863080474,
@@ -258987,10 +258987,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $9.88-$10.38; midpoint $10.13; distance +2634.60%; touches 2; first touch 2022-12-08; last touch 2023-01-19; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 26.0,
+        "value": 23.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -264296,10 +264296,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 26.0,
+        "value": 23.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -264313,7 +264313,7 @@
     "sector": "Healthcare",
     "industry": "Biotechnology: Pharmaceutical Preparations",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 47.669642684972715,
@@ -264549,10 +264549,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $227.23-$244.26; midpoint $235.75; distance +400.23%; touches 4; first touch 2021-10-26; last touch 2022-02-14; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -277638,10 +277638,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -277655,7 +277655,7 @@
     "sector": "Technology",
     "industry": "Semiconductors",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 345.71551446081065,
@@ -277891,10 +277891,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $47.46-$51.34; midpoint $49.40; distance +1983.04%; touches 3; first touch 2022-09-23; last touch 2022-12-22; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 75.0,
+        "value": 72.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-23",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-12-23) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -290152,10 +290152,10 @@
         "notes": "Proxy EV/EBITDA from open/free public facts."
       },
       "days_to_next_earnings": {
-        "value": 75.0,
+        "value": 72.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-23",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-12-23) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -290169,7 +290169,7 @@
     "sector": "Industrials",
     "industry": "Electrical Products",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 103.89630513794938,
@@ -290405,10 +290405,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $64.45-$69.17; midpoint $66.81; distance +502.72%; touches 2; first touch 2022-10-13; last touch 2025-04-07; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 12.0,
+        "value": 9.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -302831,10 +302831,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 12.0,
+        "value": 9.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -302848,7 +302848,7 @@
     "sector": "Technology",
     "industry": "Semiconductors",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 39.63239858517096,
@@ -303084,10 +303084,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $135.73-$146.69; midpoint $141.21; distance +187.65%; touches 5; first touch 2022-03-14; last touch 2022-10-27; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 46.0,
+        "value": 43.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-24",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-24) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -316195,10 +316195,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 46.0,
+        "value": 43.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-24",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-24) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -316212,7 +316212,7 @@
     "sector": "Technology",
     "industry": "Semiconductors",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 85.50025075225676,
@@ -316448,10 +316448,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $43.25-$45.25; midpoint $44.25; distance +717.00%; touches 2; first touch 2022-09-30; last touch 2022-11-03; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 61.0,
+        "value": 58.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-12-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -323751,10 +323751,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 61.0,
+        "value": 58.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-12-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -323768,7 +323768,7 @@
     "sector": "Utilities",
     "industry": "Telecommunications Equipment",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 37.04687198874843,
@@ -324007,7 +324007,7 @@
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "days_to_next_earnings: Next earnings release date was unavailable from open/free public inputs."
       }
     },
@@ -336453,7 +336453,7 @@
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "days_to_next_earnings: Next earnings release date was unavailable from open/free public inputs."
       }
     }
@@ -336467,7 +336467,7 @@
     "sector": "Technology",
     "industry": "Industrial Machinery/Components",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 24.115840946135474,
@@ -336703,10 +336703,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $9.29-$9.80; midpoint $9.55; distance +2443.18%; touches 3; first touch 2022-03-08; last touch 2022-09-29; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 12.0,
+        "value": 9.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -343842,10 +343842,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 12.0,
+        "value": 9.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -343859,7 +343859,7 @@
     "sector": "Technology",
     "industry": "Semiconductors",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 50.11060507482108,
@@ -344095,10 +344095,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $56.87-$61.25; midpoint $59.06; distance +929.63%; touches 2; first touch 2022-11-03; last touch 2023-01-06; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 25.0,
+        "value": 22.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -356548,10 +356548,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 25.0,
+        "value": 22.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -356565,7 +356565,7 @@
     "sector": "Technology",
     "industry": "Electronic Components",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 43.83877159309021,
@@ -356801,10 +356801,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $23.38-$26.02; midpoint $24.70; distance +1508.48%; touches 6; first touch 2022-09-29; last touch 2023-05-11; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -369747,10 +369747,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -369764,7 +369764,7 @@
     "sector": "Healthcare",
     "industry": "Biotechnology: Pharmaceutical Preparations",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 12.324168797953964,
@@ -370000,10 +370000,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $72.61-$75.72; midpoint $74.17; distance +93.82%; touches 2; first touch 2022-09-26; last touch 2022-10-13; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 18.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -374034,10 +374034,10 @@
         "notes": "Proxy EV/EBITDA from open/free public facts."
       },
       "days_to_next_earnings": {
-        "value": 18.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -374051,7 +374051,7 @@
     "sector": "Healthcare",
     "industry": "Biotechnology: Pharmaceutical Preparations",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 10.160150424690398,
@@ -374287,10 +374287,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $113.02-$117.47; midpoint $115.25; distance +139.89%; touches 2; first touch 2021-11-10; last touch 2021-11-30; cluster tolerance 3.6%."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 18.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-30",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-30) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -384850,10 +384850,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 18.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-30",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-30) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -384867,7 +384867,7 @@
     "sector": "Healthcare",
     "industry": "Biotechnology: Biological Products (No Diagnostic Substances)",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 9.532628826669571,
@@ -385103,10 +385103,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $194.67-$208.28; midpoint $201.48; distance +105.92%; touches 2; first touch 2021-10-29; last touch 2021-12-01; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 25.0,
+        "value": 22.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -398211,10 +398211,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 25.0,
+        "value": 22.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -398228,7 +398228,7 @@
     "sector": "Communication Services",
     "industry": "Computer Communications Equipment",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 37.68595791001451,
@@ -398464,10 +398464,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $21.83-$23.28; midpoint $22.56; distance +860.79%; touches 2; first touch 2022-06-16; last touch 2022-07-05; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 25.0,
+        "value": 22.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -408230,10 +408230,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 25.0,
+        "value": 22.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -408247,7 +408247,7 @@
     "sector": "Technology",
     "industry": "Semiconductors",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 24.82881402355519,
@@ -408483,10 +408483,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $79.90-$86.39; midpoint $83.15; distance +509.80%; touches 3; first touch 2022-07-05; last touch 2022-11-03; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 34.0,
+        "value": 31.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-12",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-12) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -421571,10 +421571,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 34.0,
+        "value": 31.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-12",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-12) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -421588,7 +421588,7 @@
     "sector": "Technology",
     "industry": "Semiconductors",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 22.819244604316545,
@@ -421824,10 +421824,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $136.69-$148.89; midpoint $142.79; distance +98.71%; touches 4; first touch 2022-07-05; last touch 2025-04-11; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 12.0,
+        "value": 9.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -434932,10 +434932,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 12.0,
+        "value": 9.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -434949,7 +434949,7 @@
     "sector": "Healthcare",
     "industry": "Biotechnology: Pharmaceutical Preparations",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 5.738038959980439,
@@ -435185,10 +435185,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $38.61-$40.66; midpoint $39.64; distance +49.16%; touches 3; first touch 2024-05-30; last touch 2024-07-05; cluster tolerance 3.8%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -448257,10 +448257,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -448274,7 +448274,7 @@
     "sector": "Industrials",
     "industry": "Engineering & Construction",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 41.10419493143887,
@@ -448510,10 +448510,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $92.03-$100.49; midpoint $96.26; distance +633.36%; touches 2; first touch 2022-01-24; last touch 2022-02-14; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -460927,10 +460927,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -460944,7 +460944,7 @@
     "sector": "Industrials",
     "industry": "Metal Fabrications",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 24.062347783731123,
@@ -461180,10 +461180,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $26.86-$29.08; midpoint $27.97; distance +705.33%; touches 2; first touch 2021-12-01; last touch 2021-12-20; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -474290,10 +474290,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -474307,7 +474307,7 @@
     "sector": "Energy",
     "industry": "Integrated oil Companies",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 53.83295363768159,
@@ -474543,10 +474543,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $58.36-$61.16; midpoint $59.76; distance +661.44%; touches 2; first touch 2021-11-26; last touch 2021-12-20; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 25.0,
+        "value": 22.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -485884,10 +485884,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 25.0,
+        "value": 22.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -485901,7 +485901,7 @@
     "sector": "Technology",
     "industry": "Computer Software: Prepackaged Software",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 12.89245156980628,
@@ -486137,10 +486137,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $220.18-$238.19; midpoint $229.18; distance +5.71%; touches 4; first touch 2026-03-27; last touch 2026-09-28; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 61.0,
+        "value": 58.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-12-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -499414,10 +499414,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 61.0,
+        "value": 58.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-12-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -499431,7 +499431,7 @@
     "sector": "Materials",
     "industry": "Precious Metals",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 16.413662239089184,
@@ -499667,10 +499667,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $13.48-$14.82; midpoint $14.15; distance +190.12%; touches 5; first touch 2022-09-01; last touch 2024-02-14; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 31.0,
+        "value": 28.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -504119,10 +504119,10 @@
         "notes": "Proxy EV/EBITDA from open/free public facts."
       },
       "days_to_next_earnings": {
-        "value": 31.0,
+        "value": 28.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -504136,7 +504136,7 @@
     "sector": "Industrials",
     "industry": "Mining & Quarrying of Nonmetallic Minerals (No Fuels)",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 9.80965506353054,
@@ -504372,10 +504372,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $3.26-$3.62; midpoint $3.44; distance +395.90%; touches 4; first touch 2022-07-06; last touch 2024-02-13; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -516626,10 +516626,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -516643,7 +516643,7 @@
     "sector": "Technology",
     "industry": "Industrial Machinery/Components",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 29.98892174700318,
@@ -516879,10 +516879,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $36.84-$40.50; midpoint $38.67; distance +724.56%; touches 3; first touch 2022-07-05; last touch 2022-12-22; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 12.0,
+        "value": 9.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -529149,10 +529149,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 12.0,
+        "value": 9.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -529166,7 +529166,7 @@
     "sector": "Energy",
     "industry": "Integrated oil Companies",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 48.80390779216434,
@@ -529402,10 +529402,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $63.83-$67.01; midpoint $65.42; distance +563.02%; touches 2; first touch 2021-11-30; last touch 2021-12-20; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -541799,10 +541799,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -541816,7 +541816,7 @@
     "sector": "Technology",
     "industry": "Electronic Components",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 44.074074074074076,
@@ -542045,10 +542045,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $46.52-$50.67; midpoint $48.60; distance +1511.21%; touches 4; first touch 2022-10-14; last touch 2022-12-22; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 18.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -554289,10 +554289,10 @@
         "notes": "Proxy EV/EBITDA from open/free public facts."
       },
       "days_to_next_earnings": {
-        "value": 18.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -554306,7 +554306,7 @@
     "sector": "Financials",
     "industry": "Finance: Consumer Services",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 10.43155943870797,
@@ -554542,10 +554542,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $282.83-$319.28; midpoint $301.05; distance +35.46%; touches 9; first touch 2022-05-12; last touch 2023-04-10; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 18.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -567328,10 +567328,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 18.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -567345,7 +567345,7 @@
     "sector": "Healthcare",
     "industry": "Industrial Specialties",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 18.536885245901637,
@@ -567581,10 +567581,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $176.47-$190.57; midpoint $183.52; distance +131.02%; touches 3; first touch 2022-06-16; last touch 2022-10-13; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 11.0,
+        "value": 8.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-20",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-20) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -580675,10 +580675,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 11.0,
+        "value": 8.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-20",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-20) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -580692,7 +580692,7 @@
     "sector": "Consumer Defensive",
     "industry": "Beverages (Production/Distribution)",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 20.1686593960105,
@@ -580928,10 +580928,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $18.79-$19.62; midpoint $19.20; distance +127.24%; touches 2; first touch 2022-02-24; last touch 2022-03-24; cluster tolerance 3.2%."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -593380,10 +593380,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -593397,7 +593397,7 @@
     "sector": "Healthcare",
     "industry": "Biotechnology: Pharmaceutical Preparations",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 12.453199311903397,
@@ -593633,10 +593633,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $174.33-$188.62; midpoint $181.48; distance +181.07%; touches 2; first touch 2021-10-18; last touch 2021-11-11; cluster tolerance 3.8%."
       },
       "days_to_next_earnings": {
-        "value": 24.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -606246,10 +606246,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 24.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -606263,7 +606263,7 @@
     "sector": "Industrials",
     "industry": "Construction/Ag Equipment/Trucks",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 23.984549459834632,
@@ -606499,10 +606499,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $157.39-$172.68; midpoint $165.03; distance +385.04%; touches 2; first touch 2022-07-06; last touch 2022-09-27; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -619614,10 +619614,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -619631,7 +619631,7 @@
     "sector": "Energy",
     "industry": "Oil & Gas Production",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 72.9990118577075,
@@ -619867,10 +619867,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $29.35-$31.00; midpoint $30.17; distance +59.94%; touches 3; first touch 2024-12-20; last touch 2025-05-30; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -632963,10 +632963,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -632980,7 +632980,7 @@
     "sector": "Financials",
     "industry": "Finance: Consumer Services",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 26.412669417578655,
@@ -633216,10 +633216,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $8.45-$8.98; midpoint $8.71; distance +826.33%; touches 3; first touch 2022-12-22; last touch 2023-05-04; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -638693,10 +638693,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -638710,7 +638710,7 @@
     "sector": "Communication Services",
     "industry": "Computer Communications Equipment",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 17.576501056362027,
@@ -638946,10 +638946,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $37.83-$41.84; midpoint $39.83; distance +197.21%; touches 4; first touch 2022-05-19; last touch 2022-10-13; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 34.0,
+        "value": 31.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-12",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-12) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -651867,10 +651867,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 34.0,
+        "value": 31.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-12",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-12) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -651884,7 +651884,7 @@
     "sector": "Consumer Defensive",
     "industry": "Beverages (Production/Distribution)",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 12.067571210351334,
@@ -652120,10 +652120,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $50.77-$53.07; midpoint $51.92; distance +69.59%; touches 2; first touch 2021-12-01; last touch 2023-10-06; cluster tolerance 3.0%."
       },
       "days_to_next_earnings": {
-        "value": 18.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -665063,10 +665063,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 18.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -665080,7 +665080,7 @@
     "sector": "Consumer Cyclical",
     "industry": "Diversified Commercial Services",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 16.5374677002584,
@@ -665316,10 +665316,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $85.14-$94.84; midpoint $89.99; distance +84.32%; touches 5; first touch 2022-06-16; last touch 2022-12-07; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -670627,10 +670627,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -670644,7 +670644,7 @@
     "sector": "Healthcare",
     "industry": "Medical/Dental Instruments",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 9.415476585851877,
@@ -670880,10 +670880,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $185.06-$197.21; midpoint $191.13; distance +45.10%; touches 2; first touch 2022-06-22; last touch 2022-07-18; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -683990,10 +683990,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 17.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -684007,7 +684007,7 @@
     "sector": "Industrials",
     "industry": "Aerospace",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": -6.114760432766615,
@@ -684243,10 +684243,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $161.41-$176.32; midpoint $168.87; distance +23.01%; touches 4; first touch 2022-02-24; last touch 2023-10-26; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -697037,10 +697037,10 @@
         "notes": "Proxy EV/EBITDA from open/free public facts."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -697054,7 +697054,7 @@
     "sector": "Healthcare",
     "industry": "Medical/Dental Instruments",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 7.528156490812092,
@@ -697290,10 +697290,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $34.28-$36.87; midpoint $35.58; distance +20.11%; touches 2; first touch 2022-06-16; last touch 2022-07-14; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 16.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -710400,10 +710400,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 16.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -710417,7 +710417,7 @@
     "sector": "Technology",
     "industry": "Electronic Components",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 15.208012244148419,
@@ -710646,10 +710646,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $29.61-$32.58; midpoint $31.09; distance +528.99%; touches 7; first touch 2022-03-08; last touch 2022-11-03; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 16.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -722903,10 +722903,10 @@
         "notes": "Proxy EV/EBITDA from open/free public facts."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 16.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -722920,7 +722920,7 @@
     "sector": "Energy",
     "industry": "Oil & Gas Production",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 11.633428300094966,
@@ -723156,10 +723156,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.74-$32.19; midpoint $31.47; distance +91.03%; touches 2; first touch 2021-10-15; last touch 2022-01-24; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 31.0,
+        "value": 28.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -736254,10 +736254,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 31.0,
+        "value": 28.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -736271,7 +736271,7 @@
     "sector": "Financials",
     "industry": "Investment Managers",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 35.886688757779034,
@@ -736507,10 +736507,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $74.67-$83.29; midpoint $78.98; distance +44.71%; touches 8; first touch 2022-09-28; last touch 2023-05-24; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -748768,10 +748768,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -748785,7 +748785,7 @@
     "sector": "Technology",
     "industry": "Semiconductors",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 36.54852699267235,
@@ -749021,10 +749021,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $34.39-$36.01; midpoint $35.20; distance +682.11%; touches 2; first touch 2022-10-13; last touch 2022-12-28; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 53.0,
+        "value": 50.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-01",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-12-01) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -754345,10 +754345,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 53.0,
+        "value": 50.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-01",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-12-01) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -754362,7 +754362,7 @@
     "sector": "Energy",
     "industry": "Integrated oil Companies",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 43.31669439822518,
@@ -754598,10 +754598,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $64.74-$69.60; midpoint $67.17; distance +99.64%; touches 2; first touch 2021-12-02; last touch 2021-12-20; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -767688,10 +767688,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -767705,7 +767705,7 @@
     "sector": "Consumer Cyclical",
     "industry": "Department/Specialty Retail Stores",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 5.267541945975963,
@@ -767941,10 +767941,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $83.65-$90.25; midpoint $86.95; distance +76.70%; touches 4; first touch 2025-04-08; last touch 2025-11-06; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 40.0,
+        "value": 37.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-18",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-18) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -780878,10 +780878,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 40.0,
+        "value": 37.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-18",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-18) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -780895,7 +780895,7 @@
     "sector": "Healthcare",
     "industry": "Biotechnology: Electromedical & Electrotherapeutic Apparatus",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 13.732804849615295,
@@ -781131,10 +781131,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $67.56-$72.27; midpoint $69.91; distance +26.55%; touches 2; first touch 2023-10-12; last touch 2023-10-30; cluster tolerance 3.7%."
       },
       "days_to_next_earnings": {
-        "value": 39.0,
+        "value": 36.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-17",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-17) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -790601,10 +790601,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 39.0,
+        "value": 36.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-17",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-17) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -790618,7 +790618,7 @@
     "sector": "Technology",
     "industry": "Computer peripheral equipment",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 34.447817687182116,
@@ -790847,10 +790847,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $64.79-$69.74; midpoint $67.26; distance +522.60%; touches 2; first touch 2022-12-28; last touch 2023-01-12; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 41.0,
+        "value": 38.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-19",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-19) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -801797,10 +801797,10 @@
         "notes": "Proxy EV/EBITDA from open/free public facts."
       },
       "days_to_next_earnings": {
-        "value": 41.0,
+        "value": 38.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-19",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-19) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -801814,7 +801814,7 @@
     "sector": "Consumer Defensive",
     "industry": "Beverages (Production/Distribution)",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 6.4023585320777965,
@@ -802053,7 +802053,7 @@
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "days_to_next_earnings: Stored earnings release window is no longer upcoming."
       }
     },
@@ -814996,7 +814996,7 @@
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "days_to_next_earnings: Stored earnings release window is no longer upcoming."
       }
     }
@@ -815010,7 +815010,7 @@
     "sector": "Industrials",
     "industry": "Railroads",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 11.537211569710758,
@@ -815246,10 +815246,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $180.90-$193.61; midpoint $187.25; distance +48.64%; touches 6; first touch 2022-10-13; last touch 2023-05-25; cluster tolerance 3.0%."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -828355,10 +828355,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -828372,7 +828372,7 @@
     "sector": "Industrials",
     "industry": "Military/Government/Technical",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 10.509501514734234,
@@ -828608,10 +828608,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $317.75-$340.09; midpoint $328.92; distance +54.93%; touches 3; first touch 2021-11-03; last touch 2021-12-20; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -841715,10 +841715,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 10.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -841732,7 +841732,7 @@
     "sector": "Technology",
     "industry": "Computer Software: Prepackaged Software",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 13.651788044896893,
@@ -841968,10 +841968,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $247.78-$267.57; midpoint $257.67; distance +17.49%; touches 3; first touch 2026-06-22; last touch 2026-09-28; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 41.0,
+        "value": 38.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-19",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-19) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -854854,10 +854854,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 41.0,
+        "value": 38.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-19",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-19) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
@@ -854871,7 +854871,7 @@
     "sector": "Industrials",
     "industry": "Metal Fabrications",
     "source": "open_free_public",
-    "generated_at": "2026-10-09T21:03:37.271287Z",
+    "generated_at": "2026-10-12T06:13:13.301475Z",
     "business_health": {
       "revenue_growth_yoy": {
         "value": 9.763852274448158,
@@ -855107,10 +855107,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $226.24-$243.27; midpoint $234.76; distance +310.02%; touches 3; first touch 2022-06-17; last touch 2022-09-27; cluster tolerance 3.6%."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -868032,10 +868032,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 27.0,
+        "value": 24.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-09",
+        "as_of": "2026-10-12",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     }
