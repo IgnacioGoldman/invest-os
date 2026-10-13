@@ -9506,14 +9506,6 @@ body:has(.mobile-sheet-backdrop) {
   gap: 13px;
 }
 
-.mobile-export-hint {
-  color: var(--mobile-muted);
-  font-size: 0.76rem;
-  font-weight: 650;
-  line-height: 1.4;
-  margin: -3px 4px 12px;
-}
-
 .mobile-stock-list {
   background: transparent;
   border: 0;
@@ -9564,7 +9556,7 @@ body:has(.mobile-sheet-backdrop) {
   position: relative;
 }
 
-.mobile-stock-row.export-selected {
+.mobile-stock-row.analysis-selected {
   background: var(--mobile-blue-soft);
 }
 
@@ -9591,11 +9583,11 @@ body:has(.mobile-sheet-backdrop) {
   background: rgba(255, 255, 255, 0.035);
 }
 
-.mobile-stock-app .mobile-stock-row-main.export-selecting {
+.mobile-stock-app .mobile-stock-row-main.analysis-selecting {
   grid-template-columns: 28px minmax(0, 1fr) minmax(115px, auto);
 }
 
-.mobile-export-check {
+.mobile-analysis-check {
   align-items: center;
   border: 1px solid var(--mobile-border-strong);
   border-radius: 50%;
@@ -9606,7 +9598,7 @@ body:has(.mobile-sheet-backdrop) {
   width: 24px;
 }
 
-.mobile-export-check.selected {
+.mobile-analysis-check.selected {
   background: var(--mobile-blue);
   border-color: var(--mobile-blue);
 }

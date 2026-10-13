@@ -1,0 +1,141 @@
+.mobile-stock-app .mobile-list-summary .stock-analysis-trigger {
+  border: 1px solid var(--mobile-border-strong);
+  border-radius: 999px;
+  color: var(--mobile-text);
+  gap: 7px;
+  padding: 0 12px;
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.mobile-stock-app .stock-analysis-trigger:hover:not(:disabled) { background: var(--mobile-blue-soft); }
+.stock-analysis-trigger > svg { color: var(--mobile-blue); }
+
+.stock-analysis-selection-hint {
+  color: var(--mobile-muted);
+  font-size: .8rem;
+  line-height: 1.5;
+  margin: 12px 0 4px;
+}
+
+.stock-analysis-selection-bar {
+  align-items: center;
+  background: var(--mobile-surface-raised);
+  border: 1px solid var(--mobile-border-strong);
+  border-radius: 14px;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  box-shadow: 0 8px 32px #0008;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  left: 50%;
+  max-width: calc(100vw - 32px);
+  padding: 12px;
+  position: fixed;
+  transform: translateX(-50%);
+  width: 872px;
+  z-index: 60;
+}
+
+.mobile-stock-main.analysis-selecting { padding-bottom: 120px; }
+
+.stock-analysis-selection-bar > div { display: grid; gap: 4px; min-width: 0; }
+.stock-analysis-selection-bar strong { font-size: .86rem; }
+.stock-analysis-selection-bar small { color: var(--mobile-muted); font-size: .75rem; }
+.mobile-stock-app .stock-analysis-prepare {
+  align-items: center;
+  background: var(--mobile-blue);
+  border: 0;
+  border-radius: 999px;
+  color: #071725;
+  display: inline-flex;
+  font-size: .82rem;
+  font-weight: 650;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+.mobile-stock-app .stock-analysis-prepare:disabled { opacity: .45; }
+
+.stock-analysis-dialog {
+  background: var(--mobile-surface);
+  border: 1px solid var(--mobile-border-strong);
+  border-radius: 22px;
+  color: var(--mobile-text);
+  margin: auto;
+  max-height: 90dvh;
+  max-width: calc(100vw - 32px);
+  padding: 0;
+  width: 620px;
+}
+.stock-analysis-dialog::backdrop { background: #000b; }
+.stock-analysis-content { padding: 24px; }
+.stock-analysis-content > header { align-items: center; display: flex; gap: 10px; }
+.stock-analysis-content > header > svg { color: var(--mobile-blue); flex: 0 0 auto; }
+.stock-analysis-content h2 { font-size: 1.25rem; line-height: 1.3; margin: 0; }
+.stock-analysis-content > p { color: var(--mobile-muted); font-size: .88rem; line-height: 1.55; margin: 16px 0; }
+.mobile-stock-app .stock-analysis-close {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  color: var(--mobile-muted);
+  display: inline-flex;
+  flex: 0 0 44px;
+  justify-content: center;
+  margin-left: auto;
+  min-height: 44px;
+  padding: 0;
+}
+.stock-analysis-tickers { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.stock-analysis-tickers > span { background: var(--mobile-surface-soft); border-radius: 6px; font-size: .78rem; font-weight: 600; padding: 6px 9px; }
+.stock-analysis-buttons { display: grid; gap: 10px; }
+.mobile-stock-app .stock-analysis-copy, .stock-analysis-open {
+  align-items: center;
+  border: 1px solid var(--mobile-border-strong);
+  border-radius: 999px;
+  display: flex;
+  font-size: .95rem;
+  font-weight: 600;
+  gap: 8px;
+  justify-content: center;
+  min-height: 48px;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+.mobile-stock-app .stock-analysis-copy { background: var(--mobile-text); color: #101214; }
+.mobile-stock-app .stock-analysis-copy:disabled { opacity: .6; }
+.stock-analysis-open { background: transparent; color: var(--mobile-text); }
+.stock-analysis-open:hover { background: var(--mobile-surface-soft); }
+.stock-analysis-content > .stock-analysis-instruction { color: var(--mobile-green); font-size: .8rem; }
+.stock-analysis-content > .stock-analysis-copy-error { color: var(--mobile-red); font-size: .8rem; }
+.stock-analysis-preview { border-top: 1px solid var(--mobile-border); margin-top: 20px; padding-top: 16px; }
+.stock-analysis-preview h3 { color: var(--mobile-muted); font-size: .78rem; font-weight: 600; margin: 0 0 8px; }
+.stock-analysis-preview p { font-size: .85rem; line-height: 1.6; margin: 0; }
+.stock-analysis-full { margin-top: 16px; }
+.stock-analysis-full summary { color: var(--mobile-blue); cursor: pointer; font-size: .8rem; min-height: 44px; padding: 12px 0; }
+.stock-analysis-full textarea {
+  background: var(--mobile-bg);
+  border: 1px solid var(--mobile-border-strong);
+  border-radius: 10px;
+  color: var(--mobile-text);
+  display: block;
+  font-size: 16px;
+  line-height: 1.5;
+  max-height: 260px;
+  padding: 12px;
+  resize: vertical;
+  width: 100%;
+}
+.mobile-stock-app .stock-analysis-full button { background: transparent; border: 0; color: var(--mobile-blue); font-size: .8rem; min-height: 44px; padding: 8px 0; }
+
+@media (max-width: 430px) {
+  .stock-analysis-content { padding: 18px; }
+  .stock-analysis-content h2 { font-size: 1.1rem; }
+  .stock-analysis-content > header { gap: 8px; }
+  .stock-analysis-content > header > svg { width: 21px; }
+  .stock-analysis-selection-bar { gap: 8px; }
+  .mobile-stock-app .stock-analysis-prepare { font-size: .78rem; padding: 0 12px; }
+  .stock-analysis-selection-bar small { font-size: .7rem; }
+}

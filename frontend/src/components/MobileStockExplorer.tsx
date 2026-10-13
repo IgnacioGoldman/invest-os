@@ -1,5 +1,7 @@
 import { calculateRevenueGrowthMomentum, formatMomentumPp, revenueMomentumDetail, REVENUE_MOMENTUM_DESCRIPTION } from "../revenueGrowthMomentum";
 import { MoneyPanel } from "./MoneyPanel";
+import { prepareStockAnalysis, type StockAnalysisBrief } from "../aiAnalysis";
+import { StockAnalysisDialog, type AnalysisCopyStatus } from "./StockAnalysisDialog";
 import { FilterSelector, type FilterShortcut } from "./FilterSelector";
 import { WatchlistDialog, WatchlistGroups, type WatchlistGroupActions } from "./WatchlistGroups";
 import type { WatchlistGroup, WatchlistItem } from "../watchlist";
@@ -14,7 +16,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Download,
+  Sparkles,
   LogIn,
   Plus,
   RotateCcw,
@@ -797,240 +799,6 @@ function builtInPresetName(preset: BuiltInPreset | null) {
 
 function builtInPresetSummary(preset: BuiltInPreset | null) {
   return preset ? BUILT_IN_PRESET_COPY[preset].summary : null;
-}
-
-function markdownValue(value?: string | number | null) {
-  if (value == null || value === "") return "-";
-  return String(value).replace(/\s+/g, " ").trim();
-}
-
-function filterExpressionSummary(expression: FilterExpression, count: number) {
-  return [
-    `${expression.groups.length} group${expression.groups.length === 1 ? "" : "s"}`,
-    expression.groups.length > 1 ? `joined by ${expression.operator.toUpperCase()}` : "",
-    `${count} condition${count === 1 ? "" : "s"}`,
-  ].filter(Boolean).join(" | ");
-}
-
-function exportFilterContext(
-  expression: FilterExpression,
-  count: number,
-  preset: BuiltInPreset | null,
-  activeSavedFilter?: SavedFilter | null,
-) {
-  const presetName = preset === "support"
-    ? "Strong growth, fair value at support"
-    : preset === "pullback"
-      ? builtInPresetName("pullback")
-      : preset === "earnings"
-        ? "Earnings next 30d + strong YoY"
-        : null;
-  return {
-    name: activeSavedFilter?.name ?? presetName ?? builtInPresetName(preset) ?? "Custom filter",
-    summary: builtInPresetSummary(preset) ?? filterExpressionSummary(expression, count),
-  };
-}
-
-function exportDate() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function metricPercent(metric?: OpenDataMetric) {
-  return formatPercent(metric?.value, true);
-}
-
-function metricRatio(metric?: OpenDataMetric) {
-  return metric?.value == null ? "-" : formatNumber(metric.value);
-}
-
-function historicalMetricValues(snapshot: OpenDataStockSnapshot, series: string, metric: string) {
-  return historicalRows(snapshot, series)
-    .map((row) => metricValue(row, metric))
-    .filter((value): value is number => value != null);
-}
-
-function percentileOfExportValue(values: number[], value?: number | null) {
-  const clean = values.filter(Number.isFinite);
-  if (value == null || clean.length < 2) return null;
-  return (clean.filter((item) => item <= value).length / clean.length) * 100;
-}
-
-function historicalPercentChangeForExport(snapshot: OpenDataStockSnapshot, series: string, metric: string, periodsBack: number) {
-  const values = historicalMetricValues(snapshot, series, metric);
-  const latest = values[values.length - 1];
-  const prior = values[values.length - 1 - periodsBack];
-  if (latest == null || prior == null || prior === 0) return null;
-  return ((latest / prior) - 1) * 100;
-}
-
-function netCashDebtLabel(snapshot: OpenDataStockSnapshot) {
-  const cash = finiteNumber(snapshot.business_health.cash?.value);
-  const debt = finiteNumber(snapshot.business_health.debt?.value);
-  if (cash == null || debt == null) return "-";
-  const netCash = cash - debt;
-  return netCash >= 0 ? `Net cash ${formatCompact(netCash)}` : `Net debt ${formatCompact(Math.abs(netCash))}`;
-}
-
-function supportStatus(distance?: number | null) {
-  if (distance == null) return "-";
-  if (distance < -2.5) return "Below support";
-  if (distance < 0) return "Slightly below support";
-  return supportSignal(distance).label;
-}
-
-function supportStrength(supports: ReturnType<typeof supportWindows>) {
-  const useful = supports.filter((support) => support.value <= 6);
-  if (useful.length >= 3) return "Strong";
-  if (useful.length >= 1) return "Moderate";
-  return "Weak";
-}
-
-function supportConfluence(supports: ReturnType<typeof supportWindows>) {
-  const useful = supports.filter((support) => support.value <= 6).map((support) => support.window);
-  return useful.length ? useful.join(" / ") : "-";
-}
-
-function exportContextBullets(snapshot: OpenDataStockSnapshot) {
-  const context = snapshot.company_context;
-  const filings = context?.recent_filings.slice(0, 5).map((filing) => {
-    const description = filing.primary_document_description || filing.primary_document || filing.notes;
-    return `${filing.filing_date} ${filing.form}: ${markdownValue(description)}`;
-  }) ?? [];
-  const notes = context?.notes && !context.notes.toLowerCase().includes("recent sec filings")
-    ? [markdownValue(context.notes)]
-    : [];
-  return [...notes, ...filings];
-}
-
-function exportQualityFlags(snapshot: OpenDataStockSnapshot) {
-  const context = snapshot.company_context;
-  const gaps = [...(snapshot.data_gaps ?? []), ...(context?.known_context_gaps ?? [])]
-    .map(markdownValue)
-    .filter((gap, index, all) => gap !== "-" && all.indexOf(gap) === index)
-    .slice(0, 6);
-  return gaps.length ? gaps : ["None material"];
-}
-
-function buildStockExportMarkdown({
-  snapshots,
-  filterName,
-}: {
-  snapshots: OpenDataStockSnapshot[];
-  filterName: string;
-}) {
-  const lines = [
-    "Stock comparison brief exported from Invest OS.",
-    "",
-    `Generated: ${exportDate()}`,
-    `Strategy: ${filterName}`,
-    `Selected stocks: ${snapshots.map((snapshot) => snapshot.ticker).join(", ")}`,
-    "",
-    "Compare these stocks for a medium/long-term investor.",
-    "",
-    "For each stock, evaluate:",
-    "",
-    "- Business strength",
-    "- Valuation",
-    "- Financial quality",
-    "- Price setup / support",
-    "- Material risks or caveats",
-    "",
-    "Then explain:",
-    "",
-    "- Why each stock surfaced",
-    "- What could invalidate the setup",
-    "- The main trade-offs between them",
-    "",
-    "Use the app data below as the primary source of truth. Challenge misleading metrics when necessary.",
-    "",
-  ];
-
-  snapshots.forEach((snapshot) => {
-    const momentum = revenueMomentum(snapshot);
-    const bestSupport = closestSupport(snapshot);
-    const supports = supportWindows(snapshot);
-    const currentPrice = finiteNumber(snapshot.price_opportunity.current_price?.value);
-    const supportLevel = bestSupport ? inferredSupportLevel(currentPrice, bestSupport.value) : null;
-    const pePercentile = percentileOfExportValue(
-      historicalMetricValues(snapshot, "valuation_history", "pe"),
-      finiteNumber(snapshot.valuation.pe?.value),
-    );
-    const shareCountChange = historicalPercentChangeForExport(snapshot, "annual_fundamentals", "shares_diluted", 1);
-    const contextBullets = exportContextBullets(snapshot);
-    const qualityFlags = exportQualityFlags(snapshot);
-
-    lines.push(
-      `## ${snapshot.ticker} - ${markdownValue(snapshot.name ?? snapshot.ticker)}`,
-      "",
-      "Business",
-      "",
-      `- Revenue growth YoY: ${metricPercent(snapshot.business_health.revenue_growth_yoy)}`,
-      `- Revenue growth momentum: ${momentum.label}, ${formatMomentumPp(momentum.change)}; latest quarter ${momentum.latestMovement ?? "unclear"} (${formatMomentumPp(momentum.latestChange)})`,
-      `- GAAP EPS growth YoY: ${metricPercent(epsGaapMetric(snapshot))}`,
-      `- FCF margin: ${metricPercent(snapshot.business_health.fcf_margin)}`,
-      `- Operating margin: ${metricPercent(snapshot.business_health.operating_margin)}`,
-      `- Diluted share count YoY: ${formatPercent(shareCountChange, true)}`,
-      `- Net cash/debt: ${netCashDebtLabel(snapshot)}`,
-      "",
-      "Valuation",
-      "",
-      `- Forward P/E: ${metricRatio(snapshot.valuation.forward_pe)}`,
-      `- FCF yield: ${metricPercent(snapshot.valuation.fcf_yield)}`,
-      `- EV/EBITDA: ${metricRatio(snapshot.valuation.ev_to_ebitda)}`,
-      `- Historical valuation percentile: ${formatPercent(pePercentile)}`,
-      "",
-      "Price setup",
-      "",
-      `- Upcoming earnings: ${formatMetric(upcomingEarningsMetric(snapshot), "days")}`,
-      `- Current price: ${formatPrice(currentPrice)}`,
-      `- Distance from ATH: ${metricPercent(snapshot.price_opportunity.distance_from_ath)}`,
-      `- Primary support: ${formatPrice(supportLevel)}`,
-      `- Distance from support: ${formatPercent(bestSupport?.value, true)}`,
-      `- Support strength: ${supportStrength(supports)}`,
-      `- Confluence: ${supportConfluence(supports)}`,
-      `- Status: ${supportStatus(bestSupport?.value)}`,
-      "",
-      "Context",
-      "",
-      ...(contextBullets.length ? contextBullets.map((item) => `- ${item}`) : ["- None supplied"]),
-      "",
-      "Quality flags",
-      "",
-      ...qualityFlags.map((item) => `- ${item}`),
-      "",
-    );
-  });
-
-  return `${lines.join("\n").trim()}\n`;
-}
-
-function exportFileName(snapshots: OpenDataStockSnapshot[]) {
-  const symbols = snapshots.map((snapshot) => snapshot.ticker).join("-").toLowerCase();
-  const date = new Date().toISOString().slice(0, 10);
-  return `stock-brief-${symbols || "selection"}-${date}.md`;
-}
-
-async function shareOrDownloadMarkdown(markdown: string, filename: string) {
-  const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
-  const file = new File([blob], filename, { type: "text/markdown" });
-
-  if (navigator.canShare?.({ files: [file] })) {
-    await navigator.share({
-      title: "Stock comparison brief",
-      text: "Stock comparison brief exported from Invest OS.",
-      files: [file],
-    });
-    return;
-  }
-
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function StockStatus({ signal, context, compact = false }: { signal: Signal; context?: string | null; compact?: boolean }) {
@@ -2184,15 +1952,17 @@ export function MobileStockExplorer({
   currentUser.current = personalization?.userId;
   const [detailOpen, setDetailOpen] = useState(false);
   const [activeSavedFilterId, setActiveSavedFilterId] = useState<string | null>(null);
-  const [exportMode, setExportMode] = useState(false);
-  const [exportSelection, setExportSelection] = useState<string[]>([]);
-  const [exportError, setExportError] = useState<string | null>(null);
+  const [analysisMode, setAnalysisMode] = useState(false);
+  const [analysisSelection, setAnalysisSelection] = useState<string[]>([]);
+  const [analysisBrief, setAnalysisBrief] = useState<StockAnalysisBrief | null>(null);
+  const [analysisCopyStatus, setAnalysisCopyStatus] = useState<AnalysisCopyStatus>("copying");
+  const analysisCopyRevision = useRef(0);
   const [page, setPage] = useState(1);
   const listTopRef = useRef<HTMLDivElement | null>(null);
+  const analysisPrepareRef = useRef<HTMLButtonElement | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
   const builtInPreset = builtInPresetFor(filterExpression);
   const activeSavedFilter = personalization?.savedFilters.find((item) => item.id === activeSavedFilterId) ?? null;
-  const currentFilterContext = exportFilterContext(filterExpression, activeFilterCount(filterExpression), builtInPreset, activeSavedFilter);
   const relevantSupportKeys = builtInPreset === "support"
     ? SUPPORT_PRESET_FILTER_KEYS
     : builtInPreset === "pullback"
@@ -2290,8 +2060,10 @@ export function MobileStockExplorer({
     setWatchlistSaveError(null);
     setAddedTicker(null);
     setRevealTicker(null);
-    setExportMode(false);
-    setExportSelection([]);
+    setAnalysisMode(false);
+    setAnalysisSelection([]);
+    setAnalysisBrief(null);
+    analysisCopyRevision.current++;
   }, [personalization?.userId]);
 
   useEffect(() => {
@@ -2309,9 +2081,9 @@ export function MobileStockExplorer({
   }, [addedTicker]);
 
   useEffect(() => {
-    const visibleTickers = new Set(visibleSnapshots.map((snapshot) => snapshot.ticker));
-    setExportSelection((tickers) => tickers.filter((ticker) => visibleTickers.has(ticker)));
-  }, [visibleSnapshots]);
+    const availableTickers = new Set(snapshots.map((snapshot) => snapshot.ticker));
+    setAnalysisSelection((tickers) => tickers.filter((ticker) => availableTickers.has(ticker)));
+  }, [snapshots]);
 
   useEffect(() => {
     setPage((value) => Math.min(value, totalPages));
@@ -2400,16 +2172,16 @@ export function MobileStockExplorer({
     : defaultShortcuts.find((filter) => filter.preset === builtInPreset)?.key ?? null;
   const activeFilterName = filterCount > 0 ? activeSavedFilter?.name ?? builtInPresetName(builtInPreset) ?? "Custom filter" : null;
 
-  const startExport = () => {
-    setExportSelection([]);
-    setExportError(null);
-    setExportMode(true);
+  const startAnalysis = () => {
+    setAnalysisSelection([]);
+    setAnalysisMode(true);
   };
 
-  const cancelExport = () => {
-    setExportMode(false);
-    setExportSelection([]);
-    setExportError(null);
+  const cancelAnalysis = () => {
+    setAnalysisMode(false);
+    setAnalysisSelection([]);
+    setAnalysisBrief(null);
+    analysisCopyRevision.current++;
   };
 
   const selectSpaceTab = (tab: SpaceTab) => {
@@ -2421,7 +2193,7 @@ export function MobileStockExplorer({
       };
     }
     setSpaceTab(tab);
-    cancelExport();
+    cancelAnalysis();
     setWatchlistSaveError(null);
     if (tab === "portfolio") return;
     const view = listViews.current[tab];
@@ -2465,29 +2237,42 @@ export function MobileStockExplorer({
     document.getElementById("space-watchlist-tab")?.focus();
   };
 
-  const toggleExportSelection = (ticker: string) => {
-    setExportSelection((tickers) => (
+  const toggleAnalysisSelection = (ticker: string) => {
+    setAnalysisSelection((tickers) => (
       tickers.includes(ticker)
         ? tickers.filter((item) => item !== ticker)
         : [...tickers, ticker]
     ));
   };
 
-  const exportSelectedStocks = async () => {
-    const selectedSnapshots = visibleSnapshots.filter((snapshot) => exportSelection.includes(snapshot.ticker));
-    if (selectedSnapshots.length === 0) return;
-    setExportError(null);
+  const copyAnalysisPrompt = async (prompt: string) => {
+    const revision = ++analysisCopyRevision.current;
+    setAnalysisCopyStatus("copying");
     try {
-      const markdown = buildStockExportMarkdown({
-        snapshots: selectedSnapshots,
-        filterName: currentFilterContext.name,
-      });
-      await shareOrDownloadMarkdown(markdown, exportFileName(selectedSnapshots));
-      cancelExport();
-    } catch (exc) {
-      if (exc instanceof DOMException && exc.name === "AbortError") return;
-      setExportError(exc instanceof Error ? exc.message : "Could not export selected stocks.");
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard is unavailable.");
+      await navigator.clipboard.writeText(prompt);
+      if (revision === analysisCopyRevision.current) setAnalysisCopyStatus("copied");
+    } catch {
+      if (revision === analysisCopyRevision.current) setAnalysisCopyStatus("error");
     }
+  };
+
+  const closeAnalysisBrief = () => {
+    analysisCopyRevision.current++;
+    setAnalysisBrief(null);
+  };
+
+  const prepareSelectedStocks = () => {
+    const selectedSnapshots = analysisSelection.flatMap((ticker) => {
+      const snapshot = snapshots.find((item) => item.ticker === ticker);
+      return snapshot ? [snapshot] : [];
+    });
+    if (selectedSnapshots.length === 0) return;
+    analysisPrepareRef.current?.focus({ preventScroll: true });
+    const brief = prepareStockAnalysis(selectedSnapshots, activeFilterName ?? "All stocks");
+    setAnalysisBrief(brief);
+    // Start the clipboard write in the tap handler so mobile browsers retain user activation.
+    void copyAnalysisPrompt(brief.prompt);
   };
 
   const openDetail = (ticker: string) => {
@@ -2503,18 +2288,18 @@ export function MobileStockExplorer({
 
   const renderStockRow = (snapshot: OpenDataStockSnapshot) => {
     const metric = rowMetric(snapshot, sortKey, relevantSupportKeys);
-    const exportSelected = exportSelection.includes(snapshot.ticker);
+    const analysisSelected = analysisSelection.includes(snapshot.ticker);
     return (
-      <article className={`mobile-stock-row ${exportSelected ? "export-selected" : ""}`} key={snapshot.ticker}>
+      <article className={`mobile-stock-row ${analysisSelected ? "analysis-selected" : ""}`} key={snapshot.ticker}>
         <button
           type="button"
-          className={`mobile-stock-row-main ${exportMode ? "export-selecting" : ""}`}
-          onClick={() => exportMode ? toggleExportSelection(snapshot.ticker) : openDetail(snapshot.ticker)}
-          aria-pressed={exportMode ? exportSelected : undefined}
+          className={`mobile-stock-row-main ${analysisMode ? "analysis-selecting" : ""}`}
+          onClick={() => analysisMode ? toggleAnalysisSelection(snapshot.ticker) : openDetail(snapshot.ticker)}
+          aria-pressed={analysisMode ? analysisSelected : undefined}
         >
-          {exportMode && (
-            <span className={`mobile-export-check ${exportSelected ? "selected" : ""}`} aria-hidden="true">
-              {exportSelected && <Check size={14} />}
+          {analysisMode && (
+            <span className={`mobile-analysis-check ${analysisSelected ? "selected" : ""}`} aria-hidden="true">
+              {analysisSelected && <Check size={14} />}
             </span>
           )}
           <div className="mobile-stock-identity">
@@ -2526,7 +2311,7 @@ export function MobileStockExplorer({
             <StockStatus signal={metric.signal} context={metric.secondary} compact />
           </div>
         </button>
-        {signedIn && spaceTab === "explore" && !exportMode && !editMode && (
+        {signedIn && spaceTab === "explore" && !analysisMode && !editMode && (
           <button type="button" className={`mobile-watchlist-bookmark${watchlist.has(snapshot.ticker) || savingTicker === snapshot.ticker ? " saved" : ""}`}
             onClick={() => void toggleWatchlistFromExplore(snapshot.ticker)}
             disabled={savingTicker !== null || personalization?.watchlistLoading || Boolean(personalization?.watchlistLoadError)}
@@ -2537,7 +2322,7 @@ export function MobileStockExplorer({
             {watchlist.has(snapshot.ticker) || savingTicker === snapshot.ticker ? <BookmarkCheck size={21} /> : <BookmarkPlus size={21} />}
           </button>
         )}
-        {editMode && !exportMode && (
+        {editMode && !analysisMode && (
           <button
             type="button"
             className="mobile-remove-stock"
@@ -2574,7 +2359,7 @@ export function MobileStockExplorer({
 
   return (
     <div className="mobile-stock-app">
-      <main className="mobile-stock-main">
+      <main className={`mobile-stock-main${analysisMode ? " analysis-selecting" : ""}`}>
         <header className="mobile-stock-header">
           <div>
             <h1>{signedIn ? "My space" : "Stocks"}</h1>
@@ -2658,36 +2443,23 @@ export function MobileStockExplorer({
         <div className="mobile-list-summary" ref={listTopRef}>
           <span>{listSummaryLabel}</span>
           <div className="mobile-list-actions">
-            {exportMode ? (
-              <>
-                <button type="button" onClick={cancelExport}>Cancel</button>
-                <button
-                  type="button"
-                  className="mobile-export-confirm"
-                  onClick={() => void exportSelectedStocks()}
-                  disabled={exportSelection.length === 0}
-                >
-                  <Download size={15} />Export {exportSelection.length}
-                </button>
-              </>
+            {analysisMode ? (
+              <button type="button" onClick={cancelAnalysis}>Cancel</button>
             ) : (
-              <button type="button" onClick={startExport} disabled={visibleSnapshots.length === 0}>
-                <Download size={15} />Export
+              <button type="button" className="stock-analysis-trigger" onClick={startAnalysis} disabled={visibleSnapshots.length === 0}>
+                <Sparkles size={17} />Analyze with AI
               </button>
             )}
-            {!exportMode && isWatchlistView && (
+            {!analysisMode && isWatchlistView && (
               <button type="button" disabled={personalization?.watchlistLoading} onClick={() => openWatchlistPicker()}>
                 <Plus size={15} />Add
               </button>
             )}
           </div>
         </div>
-        {exportMode && (
-          <p className="mobile-export-hint">
-            Select stocks from this filtered list, then export a compact AI comparison brief.
-          </p>
+        {analysisMode && (
+          <p className="stock-analysis-selection-hint">Select stocks to compare. We'll prepare a prompt with their financial data for you to paste into an AI.</p>
         )}
-        {exportError && <p className="mobile-personal-error">{exportError}</p>}
         {watchlistSaveError && <p className="mobile-personal-error" role="alert">{watchlistSaveError}</p>}
         {!isWatchlistView && signedIn && personalization?.watchlistLoadError && (
           <p className="mobile-personal-error" role="alert">Could not load your watchlist. <button type="button" onClick={() => void personalization.onReloadWatchlist()}>Try again</button></p>
@@ -2728,6 +2500,12 @@ export function MobileStockExplorer({
             {pagination}
           </>
         )}
+        {analysisMode && (
+          <div className="stock-analysis-selection-bar">
+            <div><strong role="status">{analysisSelection.length} stock{analysisSelection.length === 1 ? "" : "s"} selected</strong><small>Select → Prepare → Ask AI</small></div>
+            <button ref={analysisPrepareRef} type="button" className="stock-analysis-prepare" onClick={prepareSelectedStocks} disabled={analysisSelection.length === 0}><Sparkles size={17} />Prepare prompt</button>
+          </div>
+        )}
         </div>
         )}
       </main>
@@ -2738,6 +2516,9 @@ export function MobileStockExplorer({
           <button type="button" onClick={viewAddedStock}>View</button>
         </div>
       )}
+
+      {analysisBrief && <StockAnalysisDialog brief={analysisBrief} copyStatus={analysisCopyStatus}
+        onCopy={() => void copyAnalysisPrompt(analysisBrief.prompt)} onClose={closeAnalysisBrief} />}
 
       {sheetOpen && <FilterSheet
         open={sheetOpen}
