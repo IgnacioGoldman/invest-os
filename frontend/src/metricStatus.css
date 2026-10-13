@@ -1,0 +1,42 @@
+:root {
+  --metric-strong: #22c55e;
+  --metric-positive: #86d9a8;
+  --metric-warning: #f3cc65;
+  --metric-negative: #f57878;
+  --metric-neutral: #9ca3af;
+}
+
+.metric-tone-strong { --metric-status-color: var(--metric-strong); }
+.metric-tone-positive { --metric-status-color: var(--metric-positive); }
+.metric-tone-warning { --metric-status-color: var(--metric-warning); }
+.metric-tone-negative { --metric-status-color: var(--metric-negative); }
+.metric-tone-neutral { --metric-status-color: var(--metric-neutral); }
+
+.metric-status-color {
+  color: var(--metric-status-color);
+}
+
+.metric-status {
+  align-items: center;
+  display: inline-flex;
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 500;
+  gap: 6px;
+  line-height: 1.3;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.metric-status-dot {
+  background: currentColor;
+  border-radius: 50%;
+  flex: 0 0 6px;
+  height: 6px;
+  width: 6px;
+}
+
+.metric-status-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

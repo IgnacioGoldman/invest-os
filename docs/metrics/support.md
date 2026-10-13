@@ -25,6 +25,8 @@ Support is a price-setup metric, so its tags describe distance from a detected s
 - **Above support:** The latest close is more than 6% and up to 25% above the support-zone midpoint.
 - **Far:** The latest close is more than 25% above support, or no usable support zone was detected for the window.
 
+Tags follow the app's shared color scale: strong green for **At support**, green for **Near support**, yellow for **Above support**, and red for **Far** when a usable zone exists. If no usable zone was detected, **Far** is gray and its tooltip explains the missing data. Each status uses the same dot and label, such as `1M · Near support`, while the percentage stays white.
+
 ## How It Is Calculated
 
 For each window, such as 1M, 3M, 6M, 1Y, 2Y, or 5Y, the app:

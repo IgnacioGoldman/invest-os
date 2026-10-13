@@ -5,6 +5,8 @@ import { ArrowDown, ArrowUp, ArrowUpDown, BarChart3, ChevronDown, ChevronLeft, C
 import type { ComponentProps, ReactNode } from "react";
 import { Fragment, memo, useEffect, useMemo, useRef, useState } from "react";
 import { formatDateTime } from "../format";
+import { MetricStatus } from "./MetricStatus";
+import { growthSignal as sharedGrowthSignal, metricSignal, revenueGrowthSignal as sharedRevenueGrowthSignal, supportSignal as sharedSupportSignal, type MetricSignal, type MetricTone } from "../metricStatus";
 
 type Props = {
   snapshots: OpenDataStockSnapshot[];
@@ -368,10 +370,7 @@ function formatSignedPercent(value?: number | null) {
 }
 
 function supportSignalLabel(value?: number | null) {
-  if (value == null) return "Far";
-  if (value <= 2.5) return "At support";
-  if (value <= 6) return "Near support";
-  return "Above support";
+  return sharedSupportSignal(value).label;
 }
 
 function formatSupportSignal(value?: number | null) {
@@ -385,12 +384,8 @@ function inferredSupportLevel(currentPrice?: number | null, supportDistance?: nu
   return divisor > 0 ? currentPrice / divisor : null;
 }
 
-function supportSignalTone(value?: number | null): Tone {
-  if (value == null) return "neutral";
-  if (value <= 2.5) return "good";
-  if (value <= 6) return "watch";
-  if (value <= 25) return "good";
-  return "neutral";
+function supportSignalTone(value?: number | null): MetricTone {
+  return sharedSupportSignal(value).tone;
 }
 
 function supportWindowLabel(key: string) {
@@ -981,47 +976,18 @@ function quarterlyEpsGrowthPoints(snapshot: OpenDataStockSnapshot) {
   return quarterlyMetricGrowthPoints(snapshot, "eps_diluted");
 }
 
-function unavailableMetric(metric?: OpenDataMetric | null) {
-  return metric?.tier === "unavailable_open_free";
+function revenueGrowthSignal(valueOrMetric?: number | OpenDataMetric | null): MetricSignal {
+  return sharedRevenueGrowthSignal(valueOrMetric);
 }
 
-function metricSignalValue(valueOrMetric?: number | OpenDataMetric | null) {
-  return typeof valueOrMetric === "number" || valueOrMetric == null ? valueOrMetric : valueOrMetric.value;
-}
-
-function revenueGrowthSignal(valueOrMetric?: number | OpenDataMetric | null): { label: string; tone: Tone; detail: string } {
-  const value = metricSignalValue(valueOrMetric);
-  if (value == null) {
-    return unavailableMetric(typeof valueOrMetric === "object" ? valueOrMetric : null)
-      ? { label: "Unavailable", tone: "neutral", detail: "Comparable quarterly revenue YoY is unavailable." }
-      : { label: "Unclear", tone: "neutral", detail: "Comparable quarterly revenue YoY is unavailable." };
-  }
-  if (value >= 20) return { label: "Strong", tone: "good", detail: "Latest-quarter revenue YoY is at least 20%." };
-  if (value >= 8) return { label: "Solid", tone: "good", detail: "Latest-quarter revenue YoY is at least 8%." };
-  if (value >= 0) return { label: "Flat", tone: "watch", detail: "Latest-quarter revenue YoY is positive but below 8%." };
-  return { label: "Weak", tone: "caution", detail: "Latest-quarter revenue YoY is negative." };
-}
-
-function epsGrowthSignal(valueOrMetric?: number | OpenDataMetric | null): { label: string; tone: Tone; detail: string } {
-  const value = metricSignalValue(valueOrMetric);
-  if (value == null) {
-    return unavailableMetric(typeof valueOrMetric === "object" ? valueOrMetric : null)
-      ? { label: "Unavailable", tone: "neutral", detail: "Comparable quarterly EPS YoY is unavailable." }
-      : { label: "Unclear", tone: "neutral", detail: "Comparable quarterly EPS YoY is unavailable." };
-  }
-  if (value >= 20) return { label: "Strong", tone: "good", detail: "Latest-quarter EPS YoY is at least 20%." };
-  if (value >= 8) return { label: "Solid", tone: "good", detail: "Latest-quarter EPS YoY is at least 8%." };
-  if (value >= 0) return { label: "Mixed", tone: "watch", detail: "Latest-quarter EPS YoY is positive but below 8%." };
-  return { label: "Weak", tone: "caution", detail: "Latest-quarter EPS YoY is negative." };
+function epsGrowthSignal(valueOrMetric?: number | OpenDataMetric | null): MetricSignal {
+  return sharedGrowthSignal(valueOrMetric);
 }
 
 
 function revenueGrowthMomentum(snapshot: OpenDataStockSnapshot) {
   const momentum = calculateRevenueGrowthMomentum(snapshot);
-  const tone: Tone = momentum.label === "Accelerating" ? "good"
-    : momentum.label === "Decelerating" ? "caution"
-    : momentum.label === "Stable" ? "watch" : "neutral";
-  return { ...momentum, tone, detail: revenueMomentumDetail(momentum) };
+  return { ...momentum, tone: metricSignal(momentum.label).tone, detail: revenueMomentumDetail(momentum) };
 }
 
 function dateMs(value: string) {
@@ -1429,7 +1395,7 @@ function GrowthMetricButton({
   active: boolean;
   detailKey: GrowthDetailKey;
   label: string;
-  tone: Tone;
+  tone: MetricTone;
   signal: string;
   value: string;
   onClick: () => void;
@@ -1444,7 +1410,7 @@ function GrowthMetricButton({
     >
       <span>{label}</span>
       <span className="growth-metric-summary">
-        <em className={`analysis-tag table-assessment-tag ${tone}`}>{signal}</em>
+        <MetricStatus signal={{ label: signal, tone }} />
         <strong>{value}</strong>
       </span>
     </button>

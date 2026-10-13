@@ -33,4 +33,6 @@ Suggested tags:
 - **Unclear:** Latest or comparable prior-year revenue data is missing, revenue is not meaningful, or the company type makes quarterly revenue growth hard to compare.
 - **Unavailable:** Comparable quarterly revenue YoY is not available from the current open-data source.
 
+Tags use the same visual scale as support and other company metrics: strong green for **Strong**, green for **Solid**, yellow for **Flat**, red for **Weak**, and gray for **Unclear** or **Unavailable**. Each status has the same dot and label, while the percentage stays white.
+
 These thresholds should be treated as a first-pass signal. A mature utility, bank, retailer, or industrial business may look healthy with lower revenue growth than a software or platform company, so the tag should be read together with margins, EPS growth, free cash flow, sector, and valuation.

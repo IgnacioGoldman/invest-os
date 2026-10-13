@@ -1,12 +1,13 @@
 import { calculateRevenueGrowthMomentum, formatMomentumPp, revenueMomentumDetail, REVENUE_MOMENTUM_DESCRIPTION } from "../revenueGrowthMomentum";
 import { MoneyPanel } from "./MoneyPanel";
+import { MetricStatus } from "./MetricStatus";
+import { fcfMarginSignal, growthSignal, metricSignal, revenueGrowthSignal, supportSignal, type MetricSignal as Signal, type MetricTone as Tone } from "../metricStatus";
 import {
   ArrowDown,
   ArrowLeft,
   ArrowUp,
   Bookmark,
   Check,
-  CircleCheck,
   ChevronLeft,
   ChevronRight,
   Download,
@@ -62,7 +63,6 @@ type Props = {
   };
 };
 
-type Tone = "positive" | "warning" | "negative" | "neutral" | "info";
 type GrowthDetailKey =
   | "revenue"
   | "momentum"
@@ -103,11 +103,6 @@ export type FilterExpression = {
 };
 type ChartRange = "1W" | "1M" | "3M" | "6M" | "1Y" | "2Y" | "5Y" | "ALL";
 type MetricKind = "percent" | "ratio" | "compact" | "price" | "days";
-
-type Signal = {
-  label: string;
-  tone: Tone;
-};
 
 const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: string; description: string }> = {
   revenue: {
@@ -189,13 +184,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     shortLabel: "Revenue YoY",
     section: "Growth",
     description: "Year-over-year revenue growth in the latest reported quarter.",
-    options: [
-      { label: "Strong", tone: "positive" },
-      { label: "Solid", tone: "positive" },
-      { label: "Flat", tone: "warning" },
-      { label: "Weak", tone: "negative" },
-      { label: "Unclear", tone: "neutral" },
-    ],
+    options: ["Strong", "Solid", "Flat", "Weak", "Unclear"].map(metricSignal),
   },
   {
     key: "momentum",
@@ -203,12 +192,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     shortLabel: "Momentum",
     section: "Growth",
     description: "Change in revenue growth rate versus the previous quarter.",
-    options: [
-      { label: "Accelerating", tone: "positive" },
-      { label: "Stable", tone: "warning" },
-      { label: "Decelerating", tone: "negative" },
-      { label: "Unclear", tone: "neutral" },
-    ],
+    options: ["Accelerating", "Stable", "Decelerating", "Unclear"].map(metricSignal),
   },
   {
     key: "eps",
@@ -216,13 +200,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     shortLabel: "GAAP EPS",
     section: "Growth",
     description: "Reported GAAP earnings-per-share growth in the latest quarter.",
-    options: [
-      { label: "Strong", tone: "positive" },
-      { label: "Solid", tone: "positive" },
-      { label: "Modest", tone: "warning" },
-      { label: "Weak", tone: "negative" },
-      { label: "Unclear", tone: "neutral" },
-    ],
+    options: ["Strong", "Solid", "Modest", "Weak", "Unclear"].map(metricSignal),
   },
   {
     key: "fcf_margin",
@@ -230,13 +208,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     shortLabel: "FCF Mgn",
     section: "Quality",
     description: "Trailing-12-month free cash flow divided by trailing-12-month revenue.",
-    options: [
-      { label: "Strong", tone: "positive" },
-      { label: "Solid", tone: "positive" },
-      { label: "Thin", tone: "warning" },
-      { label: "Weak", tone: "negative" },
-      { label: "Unclear", tone: "neutral" },
-    ],
+    options: ["Strong", "Solid", "Thin", "Weak", "Unclear"].map(metricSignal),
   },
   {
     key: "valuation",
@@ -244,13 +216,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     shortLabel: "Valuation",
     section: "Quality",
     description: "Composite valuation check using forward P/E, FCF yield, price/sales, and EV/EBITDA when available.",
-    options: [
-      { label: "Cheap", tone: "positive" },
-      { label: "Fair", tone: "positive" },
-      { label: "Pricey", tone: "warning" },
-      { label: "Very pricey", tone: "negative" },
-      { label: "Unclear", tone: "neutral" },
-    ],
+    options: ["Cheap", "Fair", "Pricey", "Very pricey", "Unclear"].map(metricSignal),
   },
   {
     key: "upcoming_earnings",
@@ -258,12 +224,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     shortLabel: "Earnings",
     section: "Catalyst",
     description: "Days until the next expected earnings release date or earnings window.",
-    options: [
-      { label: "This week", tone: "positive" },
-      { label: "Next 30 days", tone: "positive" },
-      { label: "Later", tone: "neutral" },
-      { label: "Unclear", tone: "neutral" },
-    ],
+    options: ["This week", "Next 30 days", "Later", "Unclear"].map(metricSignal),
   },
   ...(["1m", "3m", "6m", "1y", "2y", "5y"] as const).map((range) => ({
     key: `support_${range}` as FilterKey,
@@ -271,12 +232,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     shortLabel: `${range.toUpperCase()} support`,
     section: "Support" as const,
     description: `Distance from the ${range.toUpperCase()} support level. Closer to 0% means nearer support.`,
-    options: [
-      { label: "At support", tone: "positive" as const },
-      { label: "Near support", tone: "warning" as const },
-      { label: "Above support", tone: "positive" as const },
-      { label: "Far", tone: "info" as const },
-    ],
+    options: ["At support", "Near support", "Above support", "Far"].map(metricSignal),
   })),
 ];
 
@@ -352,39 +308,6 @@ function formatMetric(metric: OpenDataMetric | undefined, kind: MetricKind) {
   return formatNumber(value);
 }
 
-function unavailableMetric(metric?: OpenDataMetric | null) {
-  return metric?.tier === "unavailable_open_free";
-}
-
-function metricSignalValue(valueOrMetric?: number | OpenDataMetric | null) {
-  return typeof valueOrMetric === "number" || valueOrMetric == null ? valueOrMetric : valueOrMetric.value;
-}
-
-function growthSignal(valueOrMetric?: number | OpenDataMetric | null): Signal {
-  const value = metricSignalValue(valueOrMetric);
-  if (value == null && unavailableMetric(typeof valueOrMetric === "object" ? valueOrMetric : null)) {
-    return { label: "Unavailable", tone: "neutral" };
-  }
-  if (value == null) return { label: "Unclear", tone: "neutral" };
-  if (value >= 20) return { label: "Strong", tone: "positive" };
-  if (value >= 8) return { label: "Solid", tone: "positive" };
-  if (value >= 0) return { label: "Modest", tone: "warning" };
-  return { label: "Weak", tone: "negative" };
-}
-
-function revenueGrowthSignal(valueOrMetric?: number | OpenDataMetric | null): Signal {
-  const signal = growthSignal(valueOrMetric);
-  return signal.label === "Modest" ? { ...signal, label: "Flat" } : signal;
-}
-
-function fcfMarginSignal(value?: number | null): Signal {
-  if (value == null) return { label: "Unclear", tone: "neutral" };
-  if (value >= 20) return { label: "Strong", tone: "positive" };
-  if (value >= 10) return { label: "Solid", tone: "positive" };
-  if (value >= 0) return { label: "Thin", tone: "warning" };
-  return { label: "Weak", tone: "negative" };
-}
-
 function valuationSignal(snapshot: OpenDataStockSnapshot): Signal {
   const forwardPe = finiteNumber(snapshot.valuation.forward_pe?.value);
   const fcfYield = finiteNumber(snapshot.valuation.fcf_yield?.value);
@@ -392,7 +315,7 @@ function valuationSignal(snapshot: OpenDataStockSnapshot): Signal {
   const evToEbitda = finiteNumber(snapshot.valuation.ev_to_ebitda?.value);
 
   if (forwardPe == null && fcfYield == null && priceSales == null && evToEbitda == null) {
-    return { label: "Unclear", tone: "neutral" };
+    return metricSignal("Unclear");
   }
   if (
     (forwardPe != null && forwardPe >= 50)
@@ -400,7 +323,7 @@ function valuationSignal(snapshot: OpenDataStockSnapshot): Signal {
     || (priceSales != null && priceSales >= 20)
     || (evToEbitda != null && evToEbitda >= 40)
   ) {
-    return { label: "Very pricey", tone: "negative" };
+    return metricSignal("Very pricey");
   }
   if (
     (forwardPe != null && forwardPe >= 35)
@@ -408,7 +331,7 @@ function valuationSignal(snapshot: OpenDataStockSnapshot): Signal {
     || (priceSales != null && priceSales >= 12)
     || (evToEbitda != null && evToEbitda >= 25)
   ) {
-    return { label: "Pricey", tone: "warning" };
+    return metricSignal("Pricey");
   }
   if (
     forwardPe != null
@@ -416,16 +339,16 @@ function valuationSignal(snapshot: OpenDataStockSnapshot): Signal {
     && (fcfYield == null || fcfYield >= 4)
     && (priceSales == null || priceSales <= 8)
   ) {
-    return { label: "Cheap", tone: "positive" };
+    return metricSignal("Cheap");
   }
   if (
     (forwardPe != null && forwardPe <= 25)
     || (fcfYield != null && fcfYield >= 3)
     || (priceSales != null && priceSales <= 8)
   ) {
-    return { label: "Fair", tone: "positive" };
+    return metricSignal("Fair");
   }
-  return { label: "Unclear", tone: "neutral" };
+  return metricSignal("Unclear");
 }
 
 function valuationSortScore(snapshot: OpenDataStockSnapshot) {
@@ -451,21 +374,11 @@ function upcomingEarningsMetric(snapshot: OpenDataStockSnapshot) {
 
 function upcomingEarningsSignal(metric?: OpenDataMetric): Signal {
   const days = finiteNumber(metric?.value);
-  if (days == null) return { label: "Unclear", tone: "neutral" };
-  if (days <= 7) return { label: "This week", tone: "info" };
-  if (days <= 30) return { label: "Next 30 days", tone: "info" };
-  return { label: "Later", tone: "neutral" };
+  return metricSignal(days == null ? "Unclear" : days <= 7 ? "This week" : days <= 30 ? "Next 30 days" : "Later");
 }
 
 function epsGaapMetric(snapshot: OpenDataStockSnapshot) {
   return snapshot.business_health.eps_gaap_growth_yoy ?? snapshot.business_health.eps_growth_yoy;
-}
-
-function supportSignal(value?: number | null): Signal {
-  if (value == null || value > 25) return { label: "Far", tone: "info" };
-  if (value <= 2.5) return { label: "At support", tone: "positive" };
-  if (value <= 6) return { label: "Near support", tone: "warning" };
-  return { label: "Above support", tone: "positive" };
 }
 
 function historicalRowSortValue(row: OpenDataStockSnapshot["historical_series"][string][number]) {
@@ -543,10 +456,7 @@ function quarterlyMetricPoints(snapshot: OpenDataStockSnapshot, metric: string) 
 
 function revenueMomentum(snapshot: OpenDataStockSnapshot) {
   const momentum = calculateRevenueGrowthMomentum(snapshot);
-  const tone: Tone = momentum.label === "Accelerating" ? "positive"
-    : momentum.label === "Decelerating" ? "negative"
-    : momentum.label === "Stable" ? "warning" : "neutral";
-  return { ...momentum, tone };
+  return { ...momentum, tone: metricSignal(momentum.label).tone };
 }
 
 function inferredSupportLevel(currentPrice?: number | null, supportDistance?: number | null) {
@@ -626,13 +536,7 @@ function rowMetric(
 ) {
   if (key === "symbol") {
     const dailyChange = snapshot.price_opportunity.change_1d?.value;
-    const dailySignal: Signal = dailyChange == null
-      ? { label: "Unavailable", tone: "neutral" }
-      : dailyChange > 0
-        ? { label: "Up today", tone: "positive" }
-        : dailyChange < 0
-          ? { label: "Down today", tone: "negative" }
-          : { label: "Flat today", tone: "neutral" };
+    const dailySignal = metricSignal(dailyChange == null ? "Unavailable" : dailyChange > 0 ? "Up today" : dailyChange < 0 ? "Down today" : "Flat today");
     return {
       value: formatPrice(snapshot.price_opportunity.current_price?.value),
       signal: dailySignal,
@@ -675,11 +579,11 @@ function rowMetric(
     return {
       value: formatPercent(support?.value, true),
       signal: supportSignal(support?.value),
-      secondary: support?.label ?? null,
+      secondary: support?.window ?? null,
     };
   }
   const value = snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value;
-  return { value: formatPercent(value, true), signal: supportSignal(value), secondary: null };
+  return { value: formatPercent(value, true), signal: supportSignal(value), secondary: key.replace("support_", "").toUpperCase() };
 }
 
 let filterId = 0;
@@ -1091,13 +995,8 @@ async function shareOrDownloadMarkdown(markdown: string, filename: string) {
 }
 
 function StockStatus({ signal, context, compact = false }: { signal: Signal; context?: string | null; compact?: boolean }) {
-  const label = context ? `${context} · ${signal.label}` : signal.label;
-  const displayLabel = compact && context?.endsWith(" support") && signal.label === "At support" ? context : label;
   return (
-    <span className={`mobile-status ${signal.tone}${compact ? " mobile-row-status" : ""}`} title={label} aria-label={label}>
-      {compact && signal.tone === "positive" && <CircleCheck size={13} aria-hidden="true" />}
-      <span>{displayLabel}</span>
-    </span>
+    <MetricStatus signal={signal} context={context} className={`mobile-status${compact ? " mobile-row-status" : ""}`} />
   );
 }
 
@@ -1491,10 +1390,11 @@ function FilterSheet({
                                   <label>
                                     <span>Condition</span>
                                     <select
+                                      className={`mobile-condition-value metric-status-color metric-tone-${metricSignal(condition.value).tone}`}
                                       value={condition.value}
                                       onChange={(event) => updateCondition(group.id, condition.id, condition.field, event.target.value)}
                                     >
-                                      {definition.options.map((option) => <option key={option.label} value={option.label}>{option.label}</option>)}
+                                      {definition.options.map((option) => <option key={option.label} value={option.label} className={`metric-status-color metric-tone-${option.tone}`}>{option.label}</option>)}
                                     </select>
                                   </label>
                                   <button
@@ -2029,7 +1929,8 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
         </div>
         <div className="mobile-growth-formula">
           <span>Current value</span>
-          <strong>{supportSignal(support?.value).label}</strong>
+          <strong>{formatPercent(support?.value, true)}</strong>
+          <StockStatus signal={supportSignal(support?.value)} context={support?.window} />
           <small>{detailText}</small>
           {supports.length > 0 && (
             <div className="mobile-support-window-list" aria-label="All support proximities">
@@ -2037,7 +1938,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
                 const level = inferredSupportLevel(currentPrice, item.value);
                 return (
                   <div className="mobile-support-window-row" key={item.key}>
-                    <span>{item.window}</span>
+                    <StockStatus signal={supportSignal(item.value)} context={item.window} />
                     <strong>{formatPercent(item.value, true)}</strong>
                     <small>{level == null ? "No level" : formatPrice(level)}</small>
                   </div>
@@ -2064,8 +1965,8 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
         <div className="mobile-growth-formula">
           <span>Current value</span>
           <strong>{formatMetric(snapshot.valuation.forward_pe, "ratio")}</strong>
-          <small>{valuationDetailText(snapshot)}</small>
           <StockStatus signal={valuationStatus} />
+          <small>{valuationDetailText(snapshot)}</small>
         </div>
       </section>
     );
@@ -2089,8 +1990,8 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
         <div className="mobile-growth-formula">
           <span>Current value</span>
           <strong>{formatMetric(upcomingEarnings, "days")}</strong>
-          <small>{detailText}</small>
           <StockStatus signal={signal} />
+          <small>{detailText}</small>
         </div>
       </section>
     );
@@ -2101,11 +2002,15 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
     : detailKey === "fcf_margin"
       ? fcfMarginMetric
       : detailKey === "revenue"
-        ? revenueDetail?.growth
+        ? snapshot.business_health.revenue_growth_yoy
         : undefined;
   const currentValue = detailKey === "momentum"
     ? formatMomentumPp(momentum.change)
     : formatMetric(metric, "percent");
+  const signal = detailKey === "momentum" ? momentum
+    : detailKey === "fcf_margin" ? fcfMarginSignal(fcfMarginMetric?.value)
+    : detailKey === "eps_gaap" ? growthSignal(epsGaap)
+    : revenueGrowthSignal(snapshot.business_health.revenue_growth_yoy);
   const detailText = detailKey === "momentum"
     ? revenueMomentumDetail(momentum)
     : detailKey === "fcf_margin"
@@ -2137,6 +2042,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
       <div className="mobile-growth-formula">
         <span>Current value</span>
         <strong>{currentValue}</strong>
+        <StockStatus signal={signal} />
         <small>{detailText}</small>
       </div>
       <GrowthChart
