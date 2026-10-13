@@ -1,3 +1,69 @@
+.mobile-stock-row:has(.mobile-watchlist-bookmark) {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.mobile-stock-row:has(.mobile-watchlist-bookmark) .mobile-stock-row-main {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+
+.mobile-stock-app .mobile-watchlist-bookmark {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--mobile-control-radius);
+  color: var(--mobile-blue);
+  display: inline-flex;
+  flex: 0 0 44px;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0;
+}
+
+.mobile-stock-app .mobile-watchlist-bookmark:hover:not(:disabled) {
+  background: var(--mobile-blue-soft);
+}
+
+.mobile-stock-app .mobile-watchlist-bookmark:disabled:not(.saved) {
+  opacity: .45;
+}
+
+.mobile-stock-app .mobile-watchlist-bookmark.saved {
+  color: var(--mobile-green);
+}
+
+.mobile-watchlist-confirmation {
+  align-items: center;
+  background: var(--mobile-surface-raised);
+  border: 1px solid var(--mobile-border-strong);
+  border-radius: 12px;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .35);
+  display: flex;
+  font-size: .85rem;
+  gap: 8px;
+  left: 50%;
+  max-width: calc(100vw - 32px);
+  padding: 4px 16px;
+  position: fixed;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 70;
+}
+
+.mobile-stock-app .mobile-watchlist-confirmation button {
+  background: transparent;
+  border: 0;
+  color: var(--mobile-blue);
+  font-size: inherit;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 0 4px;
+}
+
 .watchlist-groups {
   display: grid;
   gap: 12px;

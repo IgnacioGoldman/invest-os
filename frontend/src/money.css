@@ -1,6 +1,6 @@
 .my-space-tabs {
   display: flex;
-  gap: 24px;
+  gap: 0;
   margin: 0 0 16px;
 }
 
@@ -10,6 +10,8 @@
   border-bottom: 2px solid transparent;
   border-radius: 0;
   color: var(--mobile-muted);
+  flex: 1;
+  min-width: 0;
   font-size: 0.95rem;
   font-weight: 600;
   justify-content: center;

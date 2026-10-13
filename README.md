@@ -2,7 +2,7 @@
 
 A local stock exploration app focused on one workflow: public/open-data stock screening.
 
-The app serves cached stock fundamentals, derived metrics, support-distance metrics, and price history from local SQLite. Signed-in users have a personal space with Watchlist and Portfolio tabs.
+The app serves cached stock fundamentals, derived metrics, support-distance metrics, and price history from local SQLite. Signed-in users have a personal space with Explore, Watchlist, and Portfolio tabs.
 
 ## Run Locally
 
@@ -20,9 +20,11 @@ Open http://localhost:5173/.
 
 Supabase is optional. Without its environment values, the public stock explorer shows the full stock universe. With Supabase configured, users can sign in with Google, build a private watchlist, save custom filter views, and see a daily `+N` badge when watched symbols newly enter a filter. The Portfolio tab saves amounts by source in EUR, USD or SEK, with an invested/uninvested status. Users can add, edit or delete amounts and choose a currency for the combined total and pie chart. Conversions use daily ECB reference rates via [Frankfurter](https://frankfurter.dev/), with the rate date shown; original balances are never converted in storage. If rates are unavailable, mixed-currency totals wait for a retry rather than adding incompatible currencies.
 
-The watchlist supports named, colored groups with collapsible sections. Use a group's `+` to search and add symbols directly to it, or move an already watched symbol there. Drag the handles to reorder groups and symbols; the menus also provide move controls for touch and keyboard use. Choose **Group order** in the sort sheet to return to your saved arrangement after sorting by a metric. Deleting a group keeps its symbols in **Ungrouped**. Groups, their collapsed state, and symbol placement sync with your account.
+My space opens on **Explore**, using the same stock list, search, filters, and stock details as the public view. Tap a stock's bookmark-plus icon to save it directly to **My Watchlist**, then use the confirmation's **View** action or switch to **Watchlist** to organize it. Explore and Watchlist keep separate search and filter settings.
 
-1. Create a Supabase project and run the SQL files in `supabase/migrations/` in filename order in its SQL Editor. Existing projects should run only migrations they have not applied. For Portfolio, apply `202610080001_money_entries.sql` before deploying the frontend. For grouped watchlists, also apply `202610130001_watchlist_groups.sql` before deploying the frontend; existing watched symbols remain in Ungrouped in their original order. These migrations create private tables with per-user read/write policies.
+The watchlist supports named, colored groups with collapsible sections. Use a group's `+` to search and add symbols directly to it, or move an already watched symbol there. Drag the handles to reorder groups and symbols; the menus also provide move controls for touch and keyboard use. Choose **Group order** in the sort sheet to return to your saved arrangement after sorting by a metric. Deleting a group keeps its symbols in **My Watchlist**. Groups, their collapsed state, and symbol placement sync with your account.
+
+1. Create a Supabase project and run the SQL files in `supabase/migrations/` in filename order in its SQL Editor. Existing projects should run only migrations they have not applied. For Portfolio, apply `202610080001_money_entries.sql` before deploying the frontend. For grouped watchlists, also apply `202610130001_watchlist_groups.sql` before deploying the frontend; existing watched symbols remain in My Watchlist in their original order. These migrations create private tables with per-user read/write policies.
 2. In Supabase Authentication, enable Google and configure the Google OAuth client. Use `https://<project-ref>.supabase.co/auth/v1/callback` as the Google client's authorized redirect URI, then add these app redirect URLs to the Supabase allow list:
    - `http://localhost:5173/**`
    - `https://ignaciogoldman.github.io/invest-os/**`

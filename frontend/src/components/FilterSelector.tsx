@@ -11,6 +11,7 @@ export type FilterShortcut = {
 
 type Props = {
   userId: string | null;
+  scopeLabel?: string;
   filters: FilterShortcut[];
   activeKey: string | null;
   activeName: string | null;
@@ -31,7 +32,7 @@ function readHiddenFilters(storageKey: string): string[] {
   }
 }
 
-export function FilterSelector({ userId, filters, activeKey, activeName, onSelect, onClear, onCreate, onEditCurrent, onEdit, onDelete }: Props) {
+export function FilterSelector({ userId, scopeLabel = "Stocks", filters, activeKey, activeName, onSelect, onClear, onCreate, onEditCurrent, onEdit, onDelete }: Props) {
   const storageKey = `invest-os:filter-visibility:${userId ?? "guest"}`;
   const [hiddenKeys, setHiddenKeys] = useState(() => readHiddenFilters(storageKey));
   const [view, setView] = useState<"choose" | "manage" | null>(null);
@@ -159,7 +160,7 @@ export function FilterSelector({ userId, filters, activeKey, activeName, onSelec
             <header className="filter-picker-header">
               {view === "manage" && <button type="button" className="filter-picker-icon" aria-label="Back to filter selector" onClick={() => setView("choose")} disabled={deletingKey !== null}><ArrowLeft size={20} /></button>}
               <h2>{view === "manage" ? "Manage filters" : "Choose a filter"}</h2>
-              <span>{userId ? "Watchlist" : "Stocks"}</span>
+              <span>{scopeLabel}</span>
               <button type="button" className="filter-picker-icon" aria-label="Close filters" onClick={close} disabled={deletingKey !== null}><X size={21} /></button>
             </header>
             <div className="filter-picker-scroll">

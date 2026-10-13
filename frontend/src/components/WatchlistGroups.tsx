@@ -229,7 +229,7 @@ export function WatchlistGroups({
       <span className="watchlist-sr-only" role="status" aria-live="polite">{announcement}</span>
       {sections.map((group) => {
         const id = group?.id ?? null;
-        const label = group?.name ?? "Ungrouped";
+        const label = group?.name ?? "My Watchlist";
         const total = items.filter((item) => groupFor(item.ticker) === id).length;
         const matching = matchingSnapshots.filter((snapshot) => groupFor(snapshot.ticker) === id);
         const rows = pagedSnapshots.filter((snapshot) => groupFor(snapshot.ticker) === id);
@@ -289,7 +289,7 @@ export function WatchlistGroups({
             {editorGroup && <div className="watchlist-reorder-actions"><button type="button" disabled={busy || editorIndex <= 0} onClick={() => reorderEditor(-1)}><ArrowUp size={16} />Move up</button><button type="button" disabled={busy || editorIndex >= groups.length - 1} onClick={() => reorderEditor(1)}><ArrowDown size={16} />Move down</button></div>}
             {error && <p className="watchlist-error" role="alert">{error}</p>}
             <button className="watchlist-primary" type="submit" disabled={busy || !name.trim()}>{busy ? "Saving…" : editorGroup ? "Save changes" : "Create group"}</button>
-            {editorGroup && <div className="watchlist-delete-group"><button type="button" disabled={busy} onClick={() => void run(() => actions.onDeleteWatchlistGroup(editorGroup.id), `${editorGroup.name} deleted. Symbols moved to Ungrouped.`, true)}><Trash2 size={16} />Delete group</button><p>Symbols will stay watched in Ungrouped.</p></div>}
+            {editorGroup && <div className="watchlist-delete-group"><button type="button" disabled={busy} onClick={() => void run(() => actions.onDeleteWatchlistGroup(editorGroup.id), `${editorGroup.name} deleted. Symbols moved to My Watchlist.`, true)}><Trash2 size={16} />Delete group</button><p>Symbols will stay watched in My Watchlist.</p></div>}
           </form>
         </WatchlistDialog>
       )}
@@ -298,7 +298,7 @@ export function WatchlistGroups({
           <p className="watchlist-dialog-hint">Choose a group</p>
           <div className="watchlist-move-options">{sections.map((group) => {
             const id = group?.id ?? null;
-            return <button type="button" key={id ?? "ungrouped"} disabled={busy || currentItem?.group_id === id} onClick={() => moveSymbol(id)}><span className="watchlist-group-dot" style={{ backgroundColor: group?.color ?? "#8b8e97" }} /><span>{group?.name ?? "Ungrouped"}</span>{currentItem?.group_id === id && <Check size={17} />}</button>;
+            return <button type="button" key={id ?? "ungrouped"} disabled={busy || currentItem?.group_id === id} onClick={() => moveSymbol(id)}><span className="watchlist-group-dot" style={{ backgroundColor: group?.color ?? "#8b8e97" }} /><span>{group?.name ?? "My Watchlist"}</span>{currentItem?.group_id === id && <Check size={17} />}</button>;
           })}</div>
           <div className="watchlist-reorder-actions"><button type="button" disabled={busy || siblingIndex <= 0} onClick={() => moveSymbol(currentItem?.group_id ?? null, siblings[siblingIndex - 1]?.ticker)}><ArrowUp size={16} />Move up</button><button type="button" disabled={busy || siblingIndex >= siblings.length - 1} onClick={() => moveSymbol(currentItem?.group_id ?? null, siblings[siblingIndex + 2]?.ticker)}><ArrowDown size={16} />Move down</button></div>
           {error && <p className="watchlist-error" role="alert">{error}</p>}

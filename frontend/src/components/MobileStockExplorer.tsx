@@ -9,6 +9,8 @@ import {
   ArrowDown,
   ArrowLeft,
   ArrowUp,
+  BookmarkCheck,
+  BookmarkPlus,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -94,6 +96,17 @@ export type FilterKey =
   | "support_5y";
 export type SortKey = "watchlist_order" | "symbol" | "support_best" | Exclude<FilterKey, "forward_pe">;
 export type SortDirection = "asc" | "desc";
+const SPACE_TABS = ["explore", "watchlist", "portfolio"] as const;
+type SpaceTab = typeof SPACE_TABS[number];
+type StockListTab = Exclude<SpaceTab, "portfolio">;
+type StockListView = {
+  query: string;
+  expression: FilterExpression;
+  sortKey: SortKey;
+  sortDirection: SortDirection;
+  savedFilterId: string | null;
+  page: number;
+};
 export type LogicOperator = "and" | "or";
 export type FilterCondition = {
   id: string;
@@ -1033,6 +1046,7 @@ function FilterSheet({
   sortDirection,
   actions,
   personalization,
+  watchlistView = false,
   activeSavedFilterId,
   onClose,
   onApply,
@@ -1051,6 +1065,7 @@ function FilterSheet({
   sortDirection: SortDirection;
   actions?: ReactNode;
   personalization?: Props["personalization"];
+  watchlistView?: boolean;
   activeSavedFilterId: string | null;
   onClose: () => void;
   onApply: () => void;
@@ -1258,7 +1273,7 @@ function FilterSheet({
               </div>
             </div>
             <div className="mobile-chip-scroll">
-              {SORT_OPTIONS.filter((option) => option.key !== "watchlist_order" || personalization?.signedIn).map((option) => (
+              {SORT_OPTIONS.filter((option) => option.key !== "watchlist_order" || watchlistView).map((option) => (
                 <button
                   type="button"
                   key={option.key}
@@ -1462,7 +1477,7 @@ function WatchlistSheet({
   const needle = query.trim().toLowerCase();
   const rows = snapshots.filter((snapshot) => !needle || [snapshot.ticker, snapshot.name, snapshot.sector, snapshot.industry]
     .filter(Boolean).some((value) => String(value).toLowerCase().includes(needle)));
-  const groupName = groups.find((group) => group.id === targetGroup)?.name ?? "Ungrouped";
+  const groupName = groups.find((group) => group.id === targetGroup)?.name ?? "My Watchlist";
   const add = async (ticker: string) => {
     if (busyRef.current) return;
     busyRef.current = true;
@@ -1477,7 +1492,7 @@ function WatchlistSheet({
       <label className="watchlist-picker-target">Add to
         <select value={targetGroup ?? ""} disabled={busyTicker !== null} onChange={(event) => setTargetGroup(event.target.value || null)} aria-label="Destination group">
           {groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}
-          <option value="">Ungrouped</option>
+          <option value="">My Watchlist</option>
         </select>
       </label>
       <label className="mobile-watchlist-search">
@@ -1491,7 +1506,7 @@ function WatchlistSheet({
         {rows.map((snapshot) => {
           const item = items.find((entry) => entry.ticker === snapshot.ticker);
           const isAdded = Boolean(item && item.group_id === targetGroup);
-          const otherGroup = item ? groups.find((group) => group.id === item.group_id)?.name ?? "Ungrouped" : null;
+          const otherGroup = item ? groups.find((group) => group.id === item.group_id)?.name ?? "My Watchlist" : null;
           return (
             <div className="mobile-watchlist-option" key={snapshot.ticker}>
               <span><strong>{snapshot.ticker}</strong><small>{snapshot.name ?? snapshot.industry ?? ""}</small>
@@ -2157,7 +2172,16 @@ export function MobileStockExplorer({
   }>({ expression: createEmptyFilterExpression(), sortKey: "support_best", sortDirection: "asc", savedFilterId: null });
   const [watchlistOpen, setWatchlistOpen] = useState(false);
   const [watchlistTargetGroup, setWatchlistTargetGroup] = useState<string | null>(null);
-  const [spaceTab, setSpaceTab] = useState<"watchlist" | "portfolio">("watchlist");
+  const [spaceTab, setSpaceTab] = useState<SpaceTab>("explore");
+  const listViews = useRef<Partial<Record<StockListTab, StockListView>>>({});
+  const restoringListPage = useRef<number | null>(null);
+  const [savingTicker, setSavingTicker] = useState<string | null>(null);
+  const savingWatchlist = useRef(false);
+  const [watchlistSaveError, setWatchlistSaveError] = useState<string | null>(null);
+  const [addedTicker, setAddedTicker] = useState<string | null>(null);
+  const [revealTicker, setRevealTicker] = useState<string | null>(null);
+  const currentUser = useRef(personalization?.userId);
+  currentUser.current = personalization?.userId;
   const [detailOpen, setDetailOpen] = useState(false);
   const [activeSavedFilterId, setActiveSavedFilterId] = useState<string | null>(null);
   const [exportMode, setExportMode] = useState(false);
@@ -2175,6 +2199,7 @@ export function MobileStockExplorer({
       ? PULLBACK_SUPPORT_FILTER_KEYS
       : SUPPORT_FILTER_KEYS;
   const signedIn = personalization?.signedIn ?? false;
+  const isWatchlistView = signedIn && spaceTab === "watchlist";
   const watchlistTickers = personalization?.watchlistTickers ?? [];
   const watchlist = useMemo(() => new Set(watchlistTickers), [watchlistTickers]);
   const watchlistItems = personalization?.watchlistItems ?? [];
@@ -2183,8 +2208,8 @@ export function MobileStockExplorer({
   const groupOrder = useMemo(() => new Map([...watchlistGroups].sort((a, b) => a.position - b.position || a.id.localeCompare(b.id))
     .map((group, index) => [group.id, index])), [personalization?.watchlistGroups]);
   const baseSnapshots = useMemo(
-    () => signedIn ? snapshots.filter((snapshot) => watchlist.has(snapshot.ticker)) : snapshots,
-    [signedIn, snapshots, watchlist],
+    () => isWatchlistView ? snapshots.filter((snapshot) => watchlist.has(snapshot.ticker)) : snapshots,
+    [isWatchlistView, snapshots, watchlist],
   );
 
   const visibleSnapshots = useMemo(() => {
@@ -2197,7 +2222,7 @@ export function MobileStockExplorer({
         return matchesSearch && filterExpressionMatches(snapshot, filterExpression);
       })
       .sort((left, right) => {
-        if (signedIn) {
+        if (isWatchlistView) {
           const leftItem = watchlistOrder.get(left.ticker);
           const rightItem = watchlistOrder.get(right.ticker);
           const rank = (id?: string | null) => id ? groupOrder.get(id) ?? groupOrder.size : groupOrder.size;
@@ -2215,11 +2240,11 @@ export function MobileStockExplorer({
           : String(leftValue).localeCompare(String(rightValue), undefined, { numeric: true, sensitivity: "base" });
         return (sortDirection === "asc" ? comparison : -comparison) || left.ticker.localeCompare(right.ticker);
       });
-  }, [baseSnapshots, filterExpression, query, relevantSupportKeys, sortDirection, sortKey, signedIn, watchlistOrder, groupOrder]);
+  }, [baseSnapshots, filterExpression, query, relevantSupportKeys, sortDirection, sortKey, isWatchlistView, watchlistOrder, groupOrder]);
   const expandedSnapshots = useMemo(() => {
     const collapsed = new Set(watchlistGroups.filter((group) => group.collapsed).map((group) => group.id));
-    return signedIn ? visibleSnapshots.filter((snapshot) => !collapsed.has(watchlistOrder.get(snapshot.ticker)?.group_id ?? "")) : visibleSnapshots;
-  }, [visibleSnapshots, signedIn, personalization?.watchlistGroups, watchlistOrder]);
+    return isWatchlistView ? visibleSnapshots.filter((snapshot) => !collapsed.has(watchlistOrder.get(snapshot.ticker)?.group_id ?? "")) : visibleSnapshots;
+  }, [visibleSnapshots, isWatchlistView, personalization?.watchlistGroups, watchlistOrder]);
   const totalPages = Math.max(1, Math.ceil(expandedSnapshots.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const pageStart = expandedSnapshots.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
@@ -2229,8 +2254,8 @@ export function MobileStockExplorer({
     return expandedSnapshots.slice(start, start + PAGE_SIZE);
   }, [currentPage, expandedSnapshots]);
   const listSummaryLabel = expandedSnapshots.length === 0
-    ? signedIn ? `0 of ${watchlistTickers.length} watched` : `0 of ${snapshots.length} stocks`
-    : signedIn
+    ? isWatchlistView ? `0 of ${watchlistTickers.length} watched` : `0 of ${snapshots.length} stocks`
+    : isWatchlistView
       ? `${pageStart}-${pageEnd} of ${watchlistTickers.length} watched`
       : `${pageStart}-${pageEnd} of ${visibleSnapshots.length} stocks`;
 
@@ -2245,16 +2270,43 @@ export function MobileStockExplorer({
     : "";
 
   useEffect(() => {
-    setPage(1);
-  }, [filterExpression, query, signedIn, sortDirection, sortKey, watchlistTickers]);
+    setPage(restoringListPage.current ?? 1);
+    restoringListPage.current = null;
+  }, [filterExpression, query, sortDirection, sortKey, spaceTab]);
 
   useEffect(() => {
-    setSortKey(personalization?.userId ? "watchlist_order" : "support_best");
+    listViews.current = {};
+    restoringListPage.current = null;
+    setSpaceTab("explore");
+    setQuery("");
+    setPage(1);
+    setSortKey("support_best");
     setSortDirection("asc");
     setFilterExpression(createEmptyFilterExpression());
     setActiveSavedFilterId(null);
     setSheetOpen(false);
+    setWatchlistOpen(false);
+    setSavingTicker(null);
+    setWatchlistSaveError(null);
+    setAddedTicker(null);
+    setRevealTicker(null);
+    setExportMode(false);
+    setExportSelection([]);
   }, [personalization?.userId]);
+
+  useEffect(() => {
+    if (!revealTicker || !isWatchlistView) return;
+    const index = expandedSnapshots.findIndex((snapshot) => snapshot.ticker === revealTicker);
+    if (index < 0) return;
+    setPage(Math.floor(index / PAGE_SIZE) + 1);
+    setRevealTicker(null);
+  }, [revealTicker, isWatchlistView, expandedSnapshots]);
+
+  useEffect(() => {
+    if (!addedTicker) return;
+    const timeout = window.setTimeout(() => setAddedTicker(null), 6000);
+    return () => window.clearTimeout(timeout);
+  }, [addedTicker]);
 
   useEffect(() => {
     const visibleTickers = new Set(visibleSnapshots.map((snapshot) => snapshot.ticker));
@@ -2307,7 +2359,7 @@ export function MobileStockExplorer({
 
   const selectSavedFilter = (filter: SavedFilter) => {
     setFilterExpression(savedExpression(filter));
-    setSortKey(filter.sort_key);
+    setSortKey(filter.sort_key === "watchlist_order" && !isWatchlistView ? "support_best" : filter.sort_key);
     setSortDirection(filter.sort_direction);
     setActiveSavedFilterId(filter.id);
   };
@@ -2315,7 +2367,7 @@ export function MobileStockExplorer({
   const openFilterBuilder = (filter?: SavedFilter) => {
     setFilterDraft({
       expression: filter ? savedExpression(filter) : { operator: "and", groups: [createFilterGroup()] },
-      sortKey: filter?.sort_key ?? sortKey,
+      sortKey: filter?.sort_key === "watchlist_order" && !isWatchlistView ? "support_best" : filter?.sort_key ?? sortKey,
       sortDirection: filter?.sort_direction ?? sortDirection,
       savedFilterId: filter?.id ?? null,
     });
@@ -2325,7 +2377,7 @@ export function MobileStockExplorer({
   const applyFilterDraft = () => {
     const saved = personalization?.savedFilters.find((filter) => filter.id === filterDraft.savedFilterId);
     setFilterExpression(filterDraft.expression);
-    setSortKey(filterDraft.sortKey);
+    setSortKey(filterDraft.sortKey === "watchlist_order" && !isWatchlistView ? "support_best" : filterDraft.sortKey);
     setSortDirection(filterDraft.sortDirection);
     setActiveSavedFilterId(saved && JSON.stringify(savedExpression(saved)) === JSON.stringify(filterDraft.expression) ? saved.id : null);
     setSheetOpen(false);
@@ -2358,6 +2410,57 @@ export function MobileStockExplorer({
     setExportMode(false);
     setExportSelection([]);
     setExportError(null);
+  };
+
+  const selectSpaceTab = (tab: SpaceTab) => {
+    if (tab === spaceTab) return;
+    if (spaceTab !== "portfolio") {
+      listViews.current[spaceTab] = {
+        query, expression: filterExpression, sortKey, sortDirection,
+        savedFilterId: activeSavedFilterId, page: currentPage,
+      };
+    }
+    setSpaceTab(tab);
+    cancelExport();
+    setWatchlistSaveError(null);
+    if (tab === "portfolio") return;
+    const view = listViews.current[tab];
+    restoringListPage.current = view?.page ?? 1;
+    setQuery(view?.query ?? "");
+    setFilterExpression(view?.expression ?? createEmptyFilterExpression());
+    setSortKey(view?.sortKey ?? (tab === "watchlist" ? "watchlist_order" : "support_best"));
+    setSortDirection(view?.sortDirection ?? "asc");
+    setActiveSavedFilterId(view?.savedFilterId ?? null);
+    setPage(view?.page ?? 1);
+  };
+
+  const saveFromExplore = async (ticker: string) => {
+    if (!personalization || watchlist.has(ticker) || savingWatchlist.current) return;
+    const userId = personalization.userId;
+    savingWatchlist.current = true;
+    setSavingTicker(ticker);
+    setWatchlistSaveError(null);
+    setAddedTicker(null);
+    try {
+      await personalization.onAddToWatchlist(ticker);
+      if (currentUser.current === userId) setAddedTicker(ticker);
+    } catch (exc) {
+      if (currentUser.current === userId) setWatchlistSaveError(exc instanceof Error ? exc.message : `Could not add ${ticker}. Please try again.`);
+    } finally {
+      savingWatchlist.current = false;
+      if (currentUser.current === userId) setSavingTicker(null);
+    }
+  };
+
+  const viewAddedStock = () => {
+    selectSpaceTab("watchlist");
+    setQuery("");
+    clearFilter();
+    setSortKey("watchlist_order");
+    setSortDirection("asc");
+    setRevealTicker(addedTicker);
+    setAddedTicker(null);
+    document.getElementById("space-watchlist-tab")?.focus();
   };
 
   const toggleExportSelection = (ticker: string) => {
@@ -2421,6 +2524,16 @@ export function MobileStockExplorer({
             <StockStatus signal={metric.signal} context={metric.secondary} compact />
           </div>
         </button>
+        {signedIn && spaceTab === "explore" && !exportMode && !editMode && (
+          <button type="button" className={`mobile-watchlist-bookmark${watchlist.has(snapshot.ticker) || savingTicker === snapshot.ticker ? " saved" : ""}`}
+            onClick={() => void saveFromExplore(snapshot.ticker)}
+            disabled={watchlist.has(snapshot.ticker) || savingTicker !== null || personalization?.watchlistLoading || Boolean(personalization?.watchlistLoadError)}
+            aria-label={savingTicker === snapshot.ticker ? `Saving ${snapshot.ticker} to Watchlist` : watchlist.has(snapshot.ticker) ? `${snapshot.ticker} is in Watchlist` : `Add ${snapshot.ticker} to Watchlist`}
+            aria-busy={savingTicker === snapshot.ticker}
+            title={watchlist.has(snapshot.ticker) ? "Saved to Watchlist" : "Add to Watchlist"}>
+            {watchlist.has(snapshot.ticker) || savingTicker === snapshot.ticker ? <BookmarkCheck size={21} /> : <BookmarkPlus size={21} />}
+          </button>
+        )}
         {editMode && !exportMode && (
           <button
             type="button"
@@ -2471,19 +2584,20 @@ export function MobileStockExplorer({
 
         {signedIn && (
           <div className="my-space-tabs" role="tablist" aria-label="My space">
-            {(["watchlist", "portfolio"] as const).map((tab) => (
+            {SPACE_TABS.map((tab, index) => (
               <button type="button" key={tab} role="tab" id={`space-${tab}-tab`} aria-controls={`space-${tab}`}
                 aria-selected={spaceTab === tab} tabIndex={spaceTab === tab ? 0 : -1}
-                onClick={() => setSpaceTab(tab)}
+                onClick={() => selectSpaceTab(tab)}
                 onKeyDown={(event) => {
                   if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
                     event.preventDefault();
-                    const next = event.key === "Home" ? "watchlist" : event.key === "End" ? "portfolio" : tab === "portfolio" ? "watchlist" : "portfolio";
-                    setSpaceTab(next);
+                    const next = event.key === "Home" ? "explore" : event.key === "End" ? "portfolio"
+                      : SPACE_TABS[(index + (event.key === "ArrowRight" ? 1 : -1) + SPACE_TABS.length) % SPACE_TABS.length];
+                    selectSpaceTab(next);
                     document.getElementById(`space-${next}-tab`)?.focus();
                   }
                 }}>
-                {tab === "watchlist" ? "Watchlist" : "Portfolio"}
+                {tab === "explore" ? "Explore" : tab === "watchlist" ? "Watchlist" : "Portfolio"}
               </button>
             ))}
           </div>
@@ -2491,7 +2605,7 @@ export function MobileStockExplorer({
         {signedIn && spaceTab === "portfolio" && personalization?.userId ? (
           <MoneyPanel key={personalization.userId} userId={personalization.userId} />
         ) : (
-        <div id="space-watchlist" role={signedIn ? "tabpanel" : undefined} aria-labelledby={signedIn ? "space-watchlist-tab" : undefined}>
+        <div id={isWatchlistView ? "space-watchlist" : "space-explore"} role={signedIn ? "tabpanel" : undefined} aria-labelledby={signedIn ? `space-${spaceTab}-tab` : undefined}>
         <label className="mobile-stock-search">
           <Search size={20} />
           <input
@@ -2508,6 +2622,7 @@ export function MobileStockExplorer({
 
         <FilterSelector key={personalization?.userId ?? "guest"}
           userId={personalization?.userId ?? null}
+          scopeLabel={isWatchlistView ? "Watchlist" : "Stocks"}
           filters={filterShortcuts}
           activeKey={activeShortcutKey}
           activeName={activeFilterName}
@@ -2557,7 +2672,7 @@ export function MobileStockExplorer({
                 <Download size={15} />Export
               </button>
             )}
-            {!exportMode && signedIn && (
+            {!exportMode && isWatchlistView && (
               <button type="button" disabled={personalization?.watchlistLoading} onClick={() => openWatchlistPicker()}>
                 <Plus size={15} />Add
               </button>
@@ -2570,16 +2685,20 @@ export function MobileStockExplorer({
           </p>
         )}
         {exportError && <p className="mobile-personal-error">{exportError}</p>}
+        {watchlistSaveError && <p className="mobile-personal-error" role="alert">{watchlistSaveError}</p>}
+        {!isWatchlistView && signedIn && personalization?.watchlistLoadError && (
+          <p className="mobile-personal-error" role="alert">Could not load your watchlist. <button type="button" onClick={() => void personalization.onReloadWatchlist()}>Try again</button></p>
+        )}
 
-        {signedIn && personalization?.watchlistLoadError ? (
+        {isWatchlistView && personalization?.watchlistLoadError ? (
           <div className="mobile-list-state" role="alert">
             <strong>Could not load your watchlist</strong>
             <p>{personalization.watchlistLoadError}</p>
             <button type="button" className="mobile-empty-watchlist-button" onClick={() => void personalization.onReloadWatchlist()}>Try again</button>
           </div>
-        ) : loading || (signedIn && personalization?.watchlistLoading) ? (
+        ) : loading || (isWatchlistView && personalization?.watchlistLoading) ? (
           <div className="mobile-list-state">Loading stock insights...</div>
-        ) : signedIn && personalization ? (
+        ) : isWatchlistView && personalization ? (
           <>
             <WatchlistGroups key={personalization.userId ?? "watchlist"}
               groups={watchlistGroups} items={watchlistItems}
@@ -2595,13 +2714,8 @@ export function MobileStockExplorer({
           </>
         ) : visibleSnapshots.length === 0 ? (
           <div className="mobile-list-state">
-            <strong>{snapshots.length === 0 ? "No stock metrics loaded" : signedIn && baseSnapshots.length === 0 ? "Your watchlist is empty" : "No stocks match"}</strong>
-            <p>{snapshots.length === 0 ? "The data bundle is empty." : signedIn && baseSnapshots.length === 0 ? "Add symbols to build your personal list." : "Try removing a filter or changing the search."}</p>
-            {signedIn && baseSnapshots.length === 0 && (
-              <button type="button" className="mobile-empty-watchlist-button" onClick={() => openWatchlistPicker()}>
-                <Plus size={17} />Add symbols
-              </button>
-            )}
+            <strong>{snapshots.length === 0 ? "No stock metrics loaded" : "No stocks match"}</strong>
+            <p>{snapshots.length === 0 ? "The data bundle is empty." : "Try removing a filter or changing the search."}</p>
           </div>
         ) : (
           <>
@@ -2615,6 +2729,13 @@ export function MobileStockExplorer({
         )}
       </main>
 
+      {signedIn && addedTicker && (
+        <div className="mobile-watchlist-confirmation">
+          <span role="status" aria-live="polite">Added to Watchlist</span><span aria-hidden="true">·</span>
+          <button type="button" onClick={viewAddedStock}>View</button>
+        </div>
+      )}
+
       {sheetOpen && <FilterSheet
         open={sheetOpen}
         expression={filterDraft.expression}
@@ -2622,6 +2743,7 @@ export function MobileStockExplorer({
         sortDirection={filterDraft.sortDirection}
         actions={actions}
         personalization={personalization}
+        watchlistView={isWatchlistView}
         activeSavedFilterId={filterDraft.savedFilterId}
         onClose={() => setSheetOpen(false)}
         onApply={applyFilterDraft}
