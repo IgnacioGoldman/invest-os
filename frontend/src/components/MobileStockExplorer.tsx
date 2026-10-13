@@ -1,12 +1,12 @@
 import { calculateRevenueGrowthMomentum, formatMomentumPp, revenueMomentumDetail, REVENUE_MOMENTUM_DESCRIPTION } from "../revenueGrowthMomentum";
 import { MoneyPanel } from "./MoneyPanel";
+import { FilterSelector, type FilterShortcut } from "./FilterSelector";
 import { MetricStatus } from "./MetricStatus";
 import { fcfMarginSignal, forwardPeSignal, growthSignal, metricSignal, revenueGrowthSignal, supportSignal, type MetricSignal as Signal, type MetricTone as Tone } from "../metricStatus";
 import {
   ArrowDown,
   ArrowLeft,
   ArrowUp,
-  Bookmark,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -755,7 +755,7 @@ function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
 
 const BUILT_IN_PRESET_COPY: Record<BuiltInPreset, BuiltInPresetCopy> = {
   support: {
-    name: "Strong YoY, fair value and support",
+    name: "Strong growth + support",
     summary:
       "Companies with strong latest revenue growth, cheap or fair valuation, and current price at or near support zones identified across the past 1Y, 2Y, and 5Y.",
   },
@@ -765,7 +765,7 @@ const BUILT_IN_PRESET_COPY: Record<BuiltInPreset, BuiltInPresetCopy> = {
       "Companies with Strong or Solid latest revenue growth YoY, cheap or fair valuation, and Cheap or Fair forward P/E (positive and up to 25×), with price at or near support zones identified across the past 1M, 3M, and 6M.",
   },
   earnings: {
-    name: "Earnings next 30d + strong YoY",
+    name: "Growth + upcoming earnings",
     summary: "Companies reporting earnings this week or in the next 30 days with Strong or Solid latest revenue growth YoY.",
   },
 };
@@ -1018,11 +1018,6 @@ function StockStatus({ signal, context, compact = false }: { signal: Signal; con
   );
 }
 
-function FilterNewBadge({ count }: { count?: number }) {
-  if (!count) return null;
-  return <span className="mobile-filter-new-badge">+{count}</span>;
-}
-
 function FilterSheet({
   open,
   expression,
@@ -1032,6 +1027,7 @@ function FilterSheet({
   personalization,
   activeSavedFilterId,
   onClose,
+  onApply,
   onExpressionChange,
   onApplyPullbackPreset,
   onApplySupportPreset,
@@ -1039,7 +1035,6 @@ function FilterSheet({
   onSortKeyChange,
   onSortDirectionChange,
   onClear,
-  onSelectSavedFilter,
   onSavedFilter,
 }: {
   open: boolean;
@@ -1050,6 +1045,7 @@ function FilterSheet({
   personalization?: Props["personalization"];
   activeSavedFilterId: string | null;
   onClose: () => void;
+  onApply: () => void;
   onExpressionChange: (expression: FilterExpression) => void;
   onApplyPullbackPreset: () => void;
   onApplySupportPreset: () => void;
@@ -1057,21 +1053,26 @@ function FilterSheet({
   onSortKeyChange: (key: SortKey) => void;
   onSortDirectionChange: (direction: SortDirection) => void;
   onClear: () => void;
-  onSelectSavedFilter: (filter: SavedFilter) => void;
-  onSavedFilter: (filter: SavedFilter | null) => void;
+  onSavedFilter: (filter: SavedFilter) => void;
 }) {
-  const [saveFormOpen, setSaveFormOpen] = useState(false);
-  const [saveName, setSaveName] = useState("");
+  const [saveName, setSaveName] = useState(() => personalization?.savedFilters.find((filter) => filter.id === activeSavedFilterId)?.name ?? "My stock filter");
   const [saveBusy, setSaveBusy] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const busyRef = useRef(false);
   useEffect(() => {
     if (!open) return undefined;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+    const dialog = dialogRef.current;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialog?.showModal();
+    return () => {
+      dialog?.close();
+      document.body.style.overflow = previousOverflow;
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
     };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose, open]);
+  }, [open]);
 
   if (!open) return null;
   const count = activeFilterCount(expression);
@@ -1079,14 +1080,13 @@ function FilterSheet({
   const builtInName = builtInPresetName(builtInPreset);
   const activeSavedFilter = personalization?.savedFilters.find((item) => item.id === activeSavedFilterId) ?? null;
 
-  const openSaveForm = () => {
-    setSaveName(activeSavedFilter?.name ?? builtInName ?? "My stock filter");
-    setSaveError(null);
-    setSaveFormOpen(true);
+  const close = () => {
+    if (!busyRef.current) onClose();
   };
 
   const submitSavedFilter = async () => {
-    if (!personalization || !saveName.trim() || count === 0) return;
+    if (!personalization?.signedIn || !saveName.trim() || count === 0 || busyRef.current) return;
+    busyRef.current = true;
     setSaveBusy(true);
     setSaveError(null);
     try {
@@ -1098,37 +1098,25 @@ function FilterSheet({
         sortDirection,
       });
       onSavedFilter(saved);
-      setSaveFormOpen(false);
     } catch (exc) {
       setSaveError(exc instanceof Error ? exc.message : "Could not save this filter.");
     } finally {
+      busyRef.current = false;
       setSaveBusy(false);
     }
   };
 
   const requestSignIn = async () => {
-    if (!personalization) return;
+    if (!personalization || busyRef.current) return;
+    busyRef.current = true;
     setSaveBusy(true);
     setSaveError(null);
     try {
       await personalization.onRequestSignIn();
     } catch (exc) {
       setSaveError(exc instanceof Error ? exc.message : "Could not start Google sign-in.");
-      setSaveBusy(false);
-    }
-  };
-
-  const removeSavedFilter = async () => {
-    if (!personalization || !activeSavedFilter) return;
-    setSaveBusy(true);
-    setSaveError(null);
-    try {
-      await personalization.onDeleteFilter(activeSavedFilter.id);
-      onSavedFilter(null);
-      setSaveFormOpen(false);
-    } catch (exc) {
-      setSaveError(exc instanceof Error ? exc.message : "Could not delete this filter.");
     } finally {
+      busyRef.current = false;
       setSaveBusy(false);
     }
   };
@@ -1181,17 +1169,17 @@ function FilterSheet({
   };
 
   return (
-    <div className="mobile-sheet-backdrop" role="presentation" onMouseDown={(event) => {
-      if (event.currentTarget === event.target) onClose();
-    }}>
-      <section className="mobile-filter-sheet" role="dialog" aria-modal="true" aria-label="Filter and sort stocks">
+    <dialog ref={dialogRef} className="mobile-builder-dialog" aria-label={activeSavedFilter ? "Edit filter" : "New filter"}
+      onCancel={(event) => { event.preventDefault(); close(); }}
+      onClick={(event) => { if (event.currentTarget === event.target) close(); }}>
+      <section className="mobile-filter-sheet">
         <div className="mobile-sheet-handle" aria-hidden="true" />
         <header className="mobile-sheet-header">
           <div>
-            <h2>Filter &amp; sort</h2>
+            <h2>{activeSavedFilter ? "Edit filter" : "New filter"}</h2>
             <p>Combine metrics to narrow the list.</p>
           </div>
-          <button type="button" className="mobile-icon-button" onClick={onClose} aria-label="Close filter and sort">
+          <button type="button" className="mobile-icon-button" onClick={close} disabled={saveBusy} aria-label="Cancel filter editing">
             <X size={20} />
           </button>
         </header>
@@ -1200,12 +1188,7 @@ function FilterSheet({
           {personalization && (
             <section className="mobile-filter-section mobile-saved-filter-section">
               <div className="mobile-filter-title-row">
-                <h3>Saved filters</h3>
-                {personalization.signedIn && count > 0 && (
-                  <button type="button" className="mobile-save-filter-trigger" onClick={openSaveForm}>
-                    <Save size={15} />{activeSavedFilter ? "Save changes" : "Save current"}
-                  </button>
-                )}
+                <h3>{activeSavedFilter ? "My filter" : "Save filter"}</h3>
               </div>
 
               {!personalization.signedIn ? (
@@ -1215,57 +1198,29 @@ function FilterSheet({
                     <span><strong>Sign in to save filters</strong><small>Sync views and see daily new-match badges.</small></span>
                     <ChevronRight size={17} />
                   </button>
-                  {saveError && <p className="mobile-personal-error">{saveError}</p>}
+                  {saveError && <p className="mobile-personal-error" role="alert">{saveError}</p>}
                 </>
               ) : (
-                <>
-                  {personalization.savedFilters.length > 0 ? (
-                    <div className="mobile-saved-filter-list">
-                      {personalization.savedFilters.map((filter) => (
-                        <button
-                          type="button"
-                          key={filter.id}
-                          className={activeSavedFilterId === filter.id ? "active" : ""}
-                          title={filter.name}
-                          onClick={() => onSelectSavedFilter(filter)}
-                        >
-                          <Bookmark size={15} fill={activeSavedFilterId === filter.id ? "currentColor" : "none"} />
-                          <span className="mobile-filter-chip-label">{filter.name}</span>
-                          <FilterNewBadge count={personalization.filterBadgeCounts[savedFilterKey(filter.id)]} />
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="mobile-saved-filter-hint">Build conditions below, then save the view for quick access.</p>
-                  )}
-
-                  {saveFormOpen && (
-                    <div className="mobile-save-filter-form">
-                      <label>
-                        <span>Filter name</span>
-                        <input
-                          type="text"
-                          value={saveName}
-                          onChange={(event) => setSaveName(event.target.value)}
-                          maxLength={80}
-                          autoFocus
-                        />
-                      </label>
-                      {saveError && <p className="mobile-personal-error">{saveError}</p>}
-                      <div className="mobile-save-filter-actions">
-                        {activeSavedFilter && (
-                          <button type="button" className="danger" disabled={saveBusy} onClick={() => void removeSavedFilter()}>
-                            <Trash2 size={16} />Delete
-                          </button>
-                        )}
-                        <button type="button" onClick={() => setSaveFormOpen(false)} disabled={saveBusy}>Cancel</button>
-                        <button type="button" className="primary" onClick={() => void submitSavedFilter()} disabled={saveBusy || !saveName.trim()}>
-                          <Save size={16} />{activeSavedFilter ? "Update" : "Save"}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </>
+                <div className="mobile-save-filter-form">
+                  <label>
+                    <span>Filter name</span>
+                    <input
+                      type="text"
+                      value={saveName}
+                      onChange={(event) => setSaveName(event.target.value)}
+                      maxLength={80}
+                      disabled={saveBusy}
+                      autoFocus
+                    />
+                  </label>
+                  {saveError && <p className="mobile-personal-error" role="alert">{saveError}</p>}
+                  <div className="mobile-save-filter-actions">
+                    <button type="button" onClick={close} disabled={saveBusy}>Cancel</button>
+                    <button type="button" className="primary" onClick={() => void submitSavedFilter()} disabled={saveBusy || !saveName.trim() || count === 0}>
+                      <Save size={16} />{activeSavedFilter ? "Update" : "Save"}
+                    </button>
+                  </div>
+                </div>
               )}
             </section>
           )}
@@ -1472,12 +1427,12 @@ function FilterSheet({
             <RotateCcw size={16} />
             Clear
           </button>
-          <button type="button" className="mobile-done-button" onClick={onClose}>
+          <button type="button" className="mobile-done-button" onClick={onApply} disabled={saveBusy}>
             Show stocks
           </button>
         </footer>
       </section>
-    </div>
+    </dialog>
   );
 }
 
@@ -2225,6 +2180,12 @@ export function MobileStockExplorer({
   const [sortKey, setSortKey] = useState<SortKey>("support_best");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [filterDraft, setFilterDraft] = useState<{
+    expression: FilterExpression;
+    sortKey: SortKey;
+    sortDirection: SortDirection;
+    savedFilterId: string | null;
+  }>({ expression: createEmptyFilterExpression(), sortKey: "support_best", sortDirection: "asc", savedFilterId: null });
   const [watchlistOpen, setWatchlistOpen] = useState(false);
   const [spaceTab, setSpaceTab] = useState<"watchlist" | "portfolio">("watchlist");
   const [detailOpen, setDetailOpen] = useState(false);
@@ -2301,6 +2262,12 @@ export function MobileStockExplorer({
   }, [filterExpression, query, signedIn, sortDirection, sortKey, watchlistTickers]);
 
   useEffect(() => {
+    setFilterExpression(createEmptyFilterExpression());
+    setActiveSavedFilterId(null);
+    setSheetOpen(false);
+  }, [personalization?.userId]);
+
+  useEffect(() => {
     const visibleTickers = new Set(visibleSnapshots.map((snapshot) => snapshot.ticker));
     setExportSelection((tickers) => tickers.filter((ticker) => visibleTickers.has(ticker)));
   }, [visibleSnapshots]);
@@ -2323,39 +2290,74 @@ export function MobileStockExplorer({
     });
   };
 
-  const toggleBuiltInPreset = (preset: BuiltInPreset) => {
-    setFilterExpression(builtInPreset === preset
-      ? { operator: "and", groups: [] }
-      : createBuiltInPresetExpression(preset));
+  const clearFilter = () => {
+    setFilterExpression(createEmptyFilterExpression());
+    setActiveSavedFilterId(null);
+  };
+
+  const applyBuiltInPreset = (preset: BuiltInPreset) => {
+    setFilterExpression(createBuiltInPresetExpression(preset));
     setSortKey(preset === "earnings" ? "upcoming_earnings" : preset === "pullback" ? "support_1m" : "support_best");
     setSortDirection("asc");
     setActiveSavedFilterId(null);
   };
 
-  const selectSavedFilter = (filter: SavedFilter) => {
-    // Preserve saved filters created before the metric-specific labels were introduced.
-    setFilterExpression({
-      ...filter.expression,
-      groups: filter.expression.groups.map((group) => ({
-        ...group,
-        conditions: group.conditions.map((condition) => ({
-          ...condition,
-          value: condition.value === "Mixed" && condition.field === "eps" ? "Modest"
-            : condition.value === "Mixed" && condition.field === "fcf_margin" ? "Thin"
-              : condition.value,
-        })),
+  const savedExpression = (filter: SavedFilter): FilterExpression => ({
+    ...filter.expression,
+    groups: filter.expression.groups.map((group) => ({
+      ...group,
+      conditions: group.conditions.map((condition) => ({
+        ...condition,
+        // Preserve filters saved before metric-specific labels were introduced.
+        value: condition.value === "Mixed" && condition.field === "eps" ? "Modest"
+          : condition.value === "Mixed" && condition.field === "fcf_margin" ? "Thin"
+            : condition.value,
       })),
-    });
+    })),
+  });
+
+  const selectSavedFilter = (filter: SavedFilter) => {
+    setFilterExpression(savedExpression(filter));
     setSortKey(filter.sort_key);
     setSortDirection(filter.sort_direction);
     setActiveSavedFilterId(filter.id);
   };
 
-  const createCustomFilter = () => {
-    setFilterExpression({ operator: "and", groups: [createFilterGroup()] });
-    setActiveSavedFilterId(null);
+  const openFilterBuilder = (filter?: SavedFilter) => {
+    setFilterDraft({
+      expression: filter ? savedExpression(filter) : { operator: "and", groups: [createFilterGroup()] },
+      sortKey: filter?.sort_key ?? sortKey,
+      sortDirection: filter?.sort_direction ?? sortDirection,
+      savedFilterId: filter?.id ?? null,
+    });
     setSheetOpen(true);
   };
+
+  const applyFilterDraft = () => {
+    const saved = personalization?.savedFilters.find((filter) => filter.id === filterDraft.savedFilterId);
+    setFilterExpression(filterDraft.expression);
+    setSortKey(filterDraft.sortKey);
+    setSortDirection(filterDraft.sortDirection);
+    setActiveSavedFilterId(saved && JSON.stringify(savedExpression(saved)) === JSON.stringify(filterDraft.expression) ? saved.id : null);
+    setSheetOpen(false);
+  };
+
+  const applyDraftPreset = (preset: BuiltInPreset) => {
+    setFilterDraft((draft) => ({ ...draft, expression: createBuiltInPresetExpression(preset) }));
+  };
+
+  const defaultShortcuts: Array<FilterShortcut & { preset: BuiltInPreset }> = [
+    { key: SUPPORT_FILTER_KEY, name: BUILT_IN_PRESET_COPY.support.name, isDefault: true, preset: "support" },
+    { key: PULLBACK_FILTER_KEY, name: BUILT_IN_PRESET_COPY.pullback.name, isDefault: true, preset: "pullback" },
+    { key: EARNINGS_THIS_WEEK_FILTER_KEY, name: BUILT_IN_PRESET_COPY.earnings.name, isDefault: true, preset: "earnings" },
+  ];
+  const filterShortcuts: FilterShortcut[] = [
+    ...defaultShortcuts,
+    ...(personalization?.savedFilters ?? []).map((filter) => ({ key: savedFilterKey(filter.id), name: filter.name, isDefault: false })),
+  ].map((filter) => ({ ...filter, badgeCount: personalization?.filterBadgeCounts[filter.key] }));
+  const activeShortcutKey = activeSavedFilter ? savedFilterKey(activeSavedFilter.id)
+    : defaultShortcuts.find((filter) => filter.preset === builtInPreset)?.key ?? null;
+  const activeFilterName = filterCount > 0 ? activeSavedFilter?.name ?? builtInPresetName(builtInPreset) ?? "Custom filter" : null;
 
   const startExport = () => {
     setExportSelection([]);
@@ -2463,57 +2465,37 @@ export function MobileStockExplorer({
           )}
         </label>
 
-        <div className="mobile-filter-toolbar">
-          <div className="mobile-quick-filters" role="group" aria-label="Quick filters">
-            <button type="button" className={builtInPreset === "support" ? "active" : ""} aria-pressed={builtInPreset === "support"} title={builtInPresetSummary("support") ?? undefined} onClick={() => toggleBuiltInPreset("support")}>
-              {builtInPreset === "support" && <Check size={15} />}
-              Strong YoY + Support
-              <FilterNewBadge count={personalization?.filterBadgeCounts[SUPPORT_FILTER_KEY]} />
-            </button>
-            <button type="button" className={builtInPreset === "pullback" ? "active" : ""} aria-pressed={builtInPreset === "pullback"} title={builtInPresetSummary("pullback") ?? undefined} onClick={() => toggleBuiltInPreset("pullback")}>
-              {builtInPreset === "pullback" && <Check size={15} />}
-              {builtInPresetName("pullback")}
-              <FilterNewBadge count={personalization?.filterBadgeCounts[PULLBACK_FILTER_KEY]} />
-            </button>
-            <button type="button" className={builtInPreset === "earnings" ? "active" : ""} aria-pressed={builtInPreset === "earnings"} title={builtInPresetSummary("earnings") ?? undefined} onClick={() => toggleBuiltInPreset("earnings")}>
-              {builtInPreset === "earnings" && <Check size={15} />}
-              YoY + Earnings
-              <FilterNewBadge count={personalization?.filterBadgeCounts[EARNINGS_THIS_WEEK_FILTER_KEY]} />
-            </button>
-            {personalization?.signedIn && personalization.savedFilters.map((filter) => (
-              <button
-                type="button"
-                key={filter.id}
-                className={activeSavedFilterId === filter.id ? "active" : ""}
-                aria-pressed={activeSavedFilterId === filter.id}
-                title={filter.name}
-                onClick={() => selectSavedFilter(filter)}
-              >
-                {activeSavedFilterId === filter.id && <Check size={15} />}
-                <span className="mobile-filter-chip-label">{filter.name}</span>
-                <FilterNewBadge count={personalization.filterBadgeCounts[savedFilterKey(filter.id)]} />
-              </button>
-            ))}
-            <button
-              type="button"
-              className="mobile-filter-create-button"
-              onClick={createCustomFilter}
-              aria-label="Create custom filter"
-              title="Create custom filter"
-            >
-              <Plus size={18} />
-            </button>
-          </div>
-          <button type="button" className={`mobile-options-button ${filterCount > 0 ? "active" : ""}`} onClick={() => setSheetOpen(true)} aria-label="Filter and sort stocks" aria-haspopup="dialog">
-            <SlidersHorizontal size={18} aria-hidden="true" />
-          </button>
-        </div>
+        <FilterSelector key={personalization?.userId ?? "guest"}
+          userId={personalization?.userId ?? null}
+          filters={filterShortcuts}
+          activeKey={activeShortcutKey}
+          activeName={activeFilterName}
+          onClear={clearFilter}
+          onSelect={(key) => {
+            const preset = defaultShortcuts.find((filter) => filter.key === key)?.preset;
+            if (preset) applyBuiltInPreset(preset);
+            else {
+              const filter = personalization?.savedFilters.find((item) => savedFilterKey(item.id) === key);
+              if (filter) selectSavedFilter(filter);
+            }
+          }}
+          onCreate={() => openFilterBuilder()}
+          onEditCurrent={() => {
+            setFilterDraft({ expression: filterExpression, sortKey, sortDirection, savedFilterId: null });
+            setSheetOpen(true);
+          }}
+          onEdit={(key) => {
+            const filter = personalization?.savedFilters.find((item) => savedFilterKey(item.id) === key);
+            if (filter) openFilterBuilder(filter);
+          }}
+          onDelete={async (key) => {
+            const filter = personalization?.savedFilters.find((item) => savedFilterKey(item.id) === key);
+            if (!filter || !personalization) return;
+            await personalization.onDeleteFilter(filter.id);
+            if (activeSavedFilterId === filter.id) clearFilter();
+          }}
+        />
 
-        {filterCount > 0 && !builtInPreset && (
-          <button type="button" className="mobile-filter-expression-summary" onClick={() => setSheetOpen(true)}>
-            {filterCount} condition{filterCount === 1 ? "" : "s"} · Edit filter
-          </button>
-        )}
 
         <div className="mobile-list-summary" ref={listTopRef}>
           <span>{listSummaryLabel}</span>
@@ -2634,28 +2616,25 @@ export function MobileStockExplorer({
         )}
       </main>
 
-      <FilterSheet
+      {sheetOpen && <FilterSheet
         open={sheetOpen}
-        expression={filterExpression}
-        sortKey={sortKey}
-        sortDirection={sortDirection}
+        expression={filterDraft.expression}
+        sortKey={filterDraft.sortKey}
+        sortDirection={filterDraft.sortDirection}
         actions={actions}
         personalization={personalization}
-        activeSavedFilterId={activeSavedFilterId}
+        activeSavedFilterId={filterDraft.savedFilterId}
         onClose={() => setSheetOpen(false)}
-        onExpressionChange={setFilterExpression}
-        onApplyPullbackPreset={() => toggleBuiltInPreset("pullback")}
-        onApplySupportPreset={() => toggleBuiltInPreset("support")}
-        onApplyEarningsPreset={() => toggleBuiltInPreset("earnings")}
-        onSortKeyChange={setSortKey}
-        onSortDirectionChange={setSortDirection}
-        onSelectSavedFilter={selectSavedFilter}
-        onSavedFilter={(filter) => setActiveSavedFilterId(filter?.id ?? null)}
-        onClear={() => {
-          setFilterExpression({ operator: "and", groups: [] });
-          setActiveSavedFilterId(null);
-        }}
-      />
+        onApply={applyFilterDraft}
+        onExpressionChange={(expression) => setFilterDraft((draft) => ({ ...draft, expression }))}
+        onApplyPullbackPreset={() => applyDraftPreset("pullback")}
+        onApplySupportPreset={() => applyDraftPreset("support")}
+        onApplyEarningsPreset={() => applyDraftPreset("earnings")}
+        onSortKeyChange={(sortKey) => setFilterDraft((draft) => ({ ...draft, sortKey }))}
+        onSortDirectionChange={(sortDirection) => setFilterDraft((draft) => ({ ...draft, sortDirection }))}
+        onSavedFilter={(filter) => { selectSavedFilter(filter); setSheetOpen(false); }}
+        onClear={() => setFilterDraft((draft) => ({ ...draft, expression: createEmptyFilterExpression() }))}
+      />}
       {personalization?.signedIn && (
         <WatchlistSheet
           open={watchlistOpen}

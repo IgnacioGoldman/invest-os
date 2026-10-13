@@ -1,0 +1,333 @@
+.filter-selector-row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  margin: 12px 0 8px;
+}
+
+.mobile-stock-app .filter-selector {
+  align-items: center;
+  background: var(--mobile-surface-raised);
+  border: 1px solid var(--mobile-border-strong);
+  border-radius: 12px;
+  color: var(--mobile-text);
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  min-height: 64px;
+  min-width: 0;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.mobile-stock-app .filter-selector.active {
+  border-color: var(--mobile-blue);
+}
+
+.filter-selector > svg {
+  color: var(--mobile-blue);
+  flex-shrink: 0;
+}
+
+.filter-selector > svg:last-child {
+  color: var(--mobile-muted);
+}
+
+.filter-selector-copy {
+  display: grid;
+  flex: 1;
+  gap: 3px;
+  min-width: 0;
+}
+
+.filter-selector-copy > small {
+  color: var(--mobile-muted);
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.filter-selector-copy > strong {
+  font-size: 0.9rem;
+  font-weight: 550;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.mobile-stock-app .filter-selector-clear {
+  background: transparent;
+  border: 0;
+  color: var(--mobile-text);
+  font-size: 0.85rem;
+  min-height: 44px;
+  padding: 0 8px;
+}
+
+.filter-picker-sheet {
+  animation: mobile-sheet-in 220ms ease-out;
+  background: #0c0d0f;
+  border: 1px solid var(--mobile-border-strong);
+  border-bottom: 0;
+  border-radius: 24px 24px 0 0;
+  bottom: 0;
+  box-shadow: 0 -24px 80px #0008;
+  color: var(--mobile-text);
+  margin: auto auto 0;
+  max-height: 92dvh;
+  max-width: 620px;
+  overflow: hidden;
+  padding: 0;
+  position: fixed;
+  width: calc(100% - 36px);
+}
+
+.filter-picker-sheet::backdrop {
+  background: #000b;
+}
+
+.mobile-builder-dialog {
+  background: transparent;
+  border: 0;
+  bottom: 0;
+  margin: auto auto 0;
+  max-height: 96dvh;
+  max-width: 840px;
+  padding: 0;
+  position: fixed;
+  width: calc(100% - 36px);
+}
+
+.mobile-builder-dialog::backdrop {
+  background: #000b;
+}
+
+.filter-picker-content {
+  display: flex;
+  flex-direction: column;
+  max-height: 92dvh;
+}
+
+.filter-picker-content > .mobile-sheet-handle {
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.filter-picker-header {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+  padding: 12px 20px;
+}
+
+.filter-picker-header > h2 {
+  color: var(--mobile-text);
+  flex: 1;
+  font-size: 1.2rem;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.filter-picker-header > span {
+  color: var(--mobile-muted);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+}
+
+.filter-picker-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 20px 20px;
+}
+
+.filter-picker-section {
+  margin-top: 20px;
+}
+
+.filter-picker-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.filter-picker-heading > h3 {
+  color: var(--mobile-text);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.filter-picker-heading > span {
+  color: var(--mobile-muted);
+  font-size: 0.8rem;
+  padding-right: 10px;
+}
+
+.filter-picker-list {
+  background: var(--mobile-surface-raised);
+  border-radius: 12px;
+  padding: 0 12px;
+}
+
+.filter-picker-row {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-height: 66px;
+}
+
+.filter-picker-row + .filter-picker-row {
+  border-top: 1px solid var(--mobile-border-strong);
+}
+
+.filter-picker-name,
+.filter-picker-choice > span:first-child {
+  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: 12px 0;
+}
+
+.filter-picker-controls {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+}
+
+.mobile-stock-app .filter-picker-icon,
+.mobile-stock-app .filter-picker-visibility {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--mobile-muted);
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 44px;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0;
+  width: 44px;
+}
+
+.filter-picker-visibility > span {
+  align-items: center;
+  border: 1.5px solid #65676c;
+  border-radius: 50%;
+  display: flex;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+}
+
+.filter-picker-visibility > span.visible {
+  background: var(--mobile-text);
+  border-color: var(--mobile-text);
+  color: var(--mobile-bg);
+}
+
+.mobile-stock-app .filter-picker-choice,
+.mobile-stock-app .filter-picker-all {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--mobile-text);
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  min-height: 56px;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}
+
+.mobile-stock-app .filter-picker-all {
+  background: var(--mobile-surface-raised);
+  border-radius: 12px;
+  margin-top: 10px;
+  padding: 0 12px;
+}
+
+.mobile-stock-app .filter-picker-choice.active,
+.mobile-stock-app .filter-picker-all.active {
+  color: var(--mobile-blue);
+}
+
+.mobile-stock-app .filter-picker-new,
+.mobile-stock-app .filter-picker-manage {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--mobile-text);
+  display: inline-flex;
+  font-size: 0.9rem;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 8px;
+}
+
+.filter-picker-empty,
+.filter-picker-hint,
+.filter-picker-footer > p {
+  color: var(--mobile-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.filter-picker-footer {
+  align-items: center;
+  border-top: 1px solid var(--mobile-border);
+  display: flex;
+  flex-shrink: 0;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 12px 20px max(12px, env(safe-area-inset-bottom));
+}
+
+.mobile-stock-app .filter-picker-done {
+  background: var(--mobile-blue);
+  border: 0;
+  border-radius: 10px;
+  color: #001729;
+  min-height: 44px;
+  padding: 0 20px;
+}
+
+.filter-picker-sheet button:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
+@media (max-width: 620px) {
+  .mobile-builder-dialog {
+    width: 100%;
+  }
+
+  .filter-picker-sheet {
+    border-left: 0;
+    border-right: 0;
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+  }
+
+  .filter-picker-header,
+  .filter-picker-footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .filter-picker-scroll {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filter-picker-sheet {
+    animation: none;
+  }
+}

@@ -51,7 +51,7 @@ export async function fetchSavedFilters(userId: string) {
     .from("saved_filters")
     .select("*")
     .eq("user_id", userId)
-    .order("updated_at", { ascending: false });
+    .order("created_at", { ascending: true }).order("id", { ascending: true });
   throwIfError(error);
   return (data ?? []) as SavedFilter[];
 }

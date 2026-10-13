@@ -265,7 +265,9 @@ export default function App() {
   const persistFilter = async (input: Omit<SaveFilterInput, "userId">) => {
     if (!session) throw new Error("Sign in before saving a filter.");
     const saved = await saveFilter({ ...input, userId: session.user.id });
-    setSavedFilters((current) => [saved, ...current.filter((item) => item.id !== saved.id)]);
+    setSavedFilters((current) => current.some((item) => item.id === saved.id)
+      ? current.map((item) => item.id === saved.id ? saved : item)
+      : [...current, saved]);
     return saved;
   };
 
