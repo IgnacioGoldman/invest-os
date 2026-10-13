@@ -409,20 +409,11 @@ class OpenDataProvider:
                 supplemented, note = self._supplement_sec_companyfacts(symbol, metadata, companyfacts)
                 attempts.append(note)
                 if supplemented is not None:
-                    candidate = compute_open_data_snapshot(companyfacts=supplemented, **snapshot_args)
-                    # The second source fills gaps; existing reported snapshot
-                    # values keep their original source and accounting basis.
-                    groups = {}
-                    metrics = dict(candidate.metrics)
-                    for group in ("business_health", "valuation"):
-                        updated = dict(getattr(candidate, group))
-                        for key, metric in getattr(snapshot, group).items():
-                            if metric.value is not None:
-                                updated[key] = metric
-                                if key in metrics:
-                                    metrics[key] = metric
-                        groups[group] = updated
-                    snapshot = candidate.model_copy(update={**groups, "metrics": metrics})
+                    # Preserve source priority in the facts, then compute cards,
+                    # histories and aliases together from that one fact set.
+                    snapshot = compute_open_data_snapshot(
+                        companyfacts=supplemented, align_fcf_periods=True, **snapshot_args,
+                    )
             except Exception as exc:
                 logger.warning("%s: secondary fundamentals source failed: %s", symbol, exc)
                 attempts.append(f"Yahoo statement fallback failed; retained primary-source data: {exc}")
@@ -431,6 +422,7 @@ class OpenDataProvider:
         return snapshot
 
     def _supplement_sec_companyfacts(self, symbol: str, metadata: dict[str, Any], primary: dict[str, Any]) -> tuple[dict[str, Any] | None, str]:
+        from app.entry_engine import open_data_metrics as metric_engine
         from app.entry_engine.open_data_metrics import REVENUE_CONCEPTS, USD_UNITS, _annual_points, _quarterly_metric_facts
 
         quarters = _quarterly_metric_facts(primary, REVENUE_CONCEPTS, USD_UNITS)
@@ -451,9 +443,45 @@ class OpenDataProvider:
         vendor_revenue = money.get("RevenueFromContractWithCustomerExcludingAssessedTax")
         if not vendor_revenue:
             return None, f"Secondary statement fallback skipped: no Yahoo revenue statements in verified {currency} reporting currency."
+        # Equivalent SEC concepts can use a different name (for example IFRS
+        # capex versus Yahoo's US-GAAP-shaped alias). Exclude overlaps across
+        # the whole family, including SEC quarters derived from YTD facts.
+        families = (
+            metric_engine.REVENUE_CONCEPTS, metric_engine.NET_INCOME_CONCEPTS,
+            metric_engine.GROSS_PROFIT_CONCEPTS, metric_engine.COST_OF_REVENUE_CONCEPTS,
+            metric_engine.OPERATING_INCOME_CONCEPTS, metric_engine.OPERATING_CASH_FLOW_CONCEPTS,
+            metric_engine.CAPEX_CONCEPTS, metric_engine.CASH_CONCEPTS,
+            metric_engine.EQUITY_CONCEPTS, metric_engine.DEPRECIATION_AMORTIZATION_CONCEPTS,
+            metric_engine.DEBT_DIRECT_CONCEPTS,
+        )
+        for concepts in families:
+            known_annual = {point.end.isoformat() for point in _annual_points(primary, concepts, (currency,))}
+            known_quarters = {point.end.isoformat() for point in _quarterly_metric_facts(primary, concepts, (currency,))}
+            known_instants = {
+                point.end.isoformat()
+                for concept in concepts
+                for point in metric_engine._fact_points(primary, concept, (currency,))
+                if point.start is None
+            }
+            for concept in concepts:
+                if concept not in money:
+                    continue
+                rows = money[concept]["units"][currency]
+                rows = [
+                    row for row in rows
+                    if row.get("end") not in (
+                        known_instants if concepts in (metric_engine.CASH_CONCEPTS, metric_engine.EQUITY_CONCEPTS, metric_engine.DEBT_DIRECT_CONCEPTS)
+                        else known_annual if row.get("fp") == "FY"
+                        else known_quarters
+                    )
+                ]
+                if rows:
+                    money[concept]["units"][currency] = rows
+                else:
+                    del money[concept]
         supplemented = deepcopy(primary)
         supplemented.setdefault("facts", {})["yfinance"] = money
-        return supplemented, "Checked Yahoo statement tables for missing same-currency calendar-quarter fundamentals; retained available SEC snapshot metrics."
+        return supplemented, "Checked Yahoo statement tables for missing same-currency calendar-quarter fundamentals; retained overlapping SEC facts and calculated related metrics together."
 
     def fetch_non_sec_companyfacts(self, ticker: str, metadata: dict[str, Any]) -> dict[str, Any]:
         symbol = ticker.upper().strip()

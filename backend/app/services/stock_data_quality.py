@@ -2,7 +2,22 @@
 from __future__ import annotations
 
 from app.entry_engine.open_data_models import OpenDataSnapshot
+from app.entry_engine.open_data_metrics import backfill_fcf_margin_metric
 from app.services.revenue_growth_momentum import calculate_revenue_growth_momentum
+
+
+FCF_BUNDLE_KEYS = (
+    "revenue_ttm", "operating_cash_flow_ttm", "capex_ttm", "free_cash_flow_ttm",
+    "fcf_margin", "fcf_margin_ttm",
+)
+
+
+def _complete_fcf_bundle(snapshot: OpenDataSnapshot) -> bool:
+    inputs = [snapshot.metrics.get(key) for key in FCF_BUNDLE_KEYS[:4]]
+    return (
+        all(metric is not None and metric.value is not None for metric in inputs)
+        and len({metric.as_of for metric in inputs if metric is not None}) == 1
+    )
 
 
 def fundamental_gap_reasons(snapshot: OpenDataSnapshot, *, include_history: bool = True) -> list[str]:
@@ -45,6 +60,8 @@ def retain_verified_history(snapshot: OpenDataSnapshot, previous: OpenDataSnapsh
     for group in ("business_health", "valuation"):
         metrics = dict(getattr(snapshot, group))
         for name, old in getattr(previous, group).items():
+            if group == "business_health" and name == "fcf_margin":
+                continue
             new = metrics.get(name)
             if new is not None and any(term in new.notes.lower() for term in ("not meaningful", "loss-making", "crossed from", "positive 3-year eps")):
                 continue
@@ -53,9 +70,47 @@ def retain_verified_history(snapshot: OpenDataSnapshot, previous: OpenDataSnapsh
         groups[group] = metrics
     all_metrics = dict(snapshot.metrics)
     for name, old in previous.metrics.items():
+        if name in FCF_BUNDLE_KEYS:
+            continue
         new = all_metrics.get(name)
         if new is not None and any(term in new.notes.lower() for term in ("not meaningful", "loss-making", "crossed from", "positive 3-year eps")):
             continue
         if old.value is not None and (new is None or new.value is None or old.as_of > new.as_of):
             all_metrics[name] = old
-    return snapshot.model_copy(update={**groups, "metrics": all_metrics, "historical_series": histories})
+    # Related TTM inputs must survive an outage as a complete calculation,
+    # rather than independently restoring newer-looking values from old data.
+    selected = snapshot
+    if _complete_fcf_bundle(previous) and (
+        not _complete_fcf_bundle(snapshot)
+        or previous.metrics["revenue_ttm"].as_of > snapshot.metrics["revenue_ttm"].as_of
+    ):
+        selected = previous
+    for key in FCF_BUNDLE_KEYS:
+        if key in selected.metrics:
+            all_metrics[key] = selected.metrics[key]
+        else:
+            all_metrics.pop(key, None)
+    groups["business_health"].pop("fcf_margin", None)
+    all_metrics.pop("fcf_margin", None)
+    all_metrics.pop("fcf_margin_ttm", None)
+
+    # Retained history can contain a newer quarter than a thin current source.
+    # Use its actual dated growth fact for both the card and flattened alias.
+    for row in sorted(histories.get("quarterly_revenue", []), key=lambda r: r.as_of, reverse=True):
+        growth = row.metrics.get("revenue_growth_yoy")
+        if growth is not None and growth.value is not None:
+            groups["business_health"]["revenue_growth_yoy"] = growth
+            all_metrics["revenue_growth_yoy"] = growth
+            break
+    result = snapshot.model_copy(update={**groups, "metrics": all_metrics, "historical_series": histories})
+    result = backfill_fcf_margin_metric(result)
+    if "fcf_margin" not in result.business_health:
+        unavailable = selected.business_health.get("fcf_margin")
+        if unavailable is not None and unavailable.value is None:
+            result = result.model_copy(update={
+                "business_health": {**result.business_health, "fcf_margin": unavailable},
+                "metrics": {**result.metrics, "fcf_margin_ttm": unavailable},
+            })
+    if "fcf_margin" in result.business_health:
+        result = result.model_copy(update={"metrics": {**result.metrics, "fcf_margin": result.business_health["fcf_margin"]}})
+    return result

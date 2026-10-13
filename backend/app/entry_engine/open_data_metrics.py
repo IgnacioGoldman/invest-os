@@ -253,6 +253,7 @@ def compute_open_data_snapshot(
     adr_ratio: float = 1.0,
     adr_ratio_source: str | None = None,
     generated_as_of: str | None = None,
+    align_fcf_periods: bool = False,
 ) -> OpenDataSnapshot:
     as_of = generated_as_of or date.today().isoformat()
     name = companyfacts.get("entityName") if isinstance(companyfacts.get("entityName"), str) else None
@@ -267,6 +268,11 @@ def compute_open_data_snapshot(
         "operating_cash_flow_ttm",
         as_of,
     )
+    capex = _ttm_metric(companyfacts, CAPEX_CONCEPTS, USD_UNITS, "capex_ttm", as_of)
+    if align_fcf_periods:
+        revenue, operating_cash_flow, capex = _align_fcf_ttm_inputs(
+            companyfacts, revenue, operating_cash_flow, capex, as_of,
+        )
     gross_profit = _ttm_metric(companyfacts, GROSS_PROFIT_CONCEPTS, USD_UNITS, "gross_profit_ttm", as_of)
     cost_of_revenue = _ttm_metric(companyfacts, COST_OF_REVENUE_CONCEPTS, USD_UNITS, "cost_of_revenue_ttm", as_of)
     if gross_profit.value is None and revenue.value is not None and cost_of_revenue.value is not None:
@@ -328,7 +334,6 @@ def compute_open_data_snapshot(
                 fallback_as_of=as_of,
                 tier="proxy_estimate",
             )
-    capex = _ttm_metric(companyfacts, CAPEX_CONCEPTS, USD_UNITS, "capex_ttm", as_of)
     if capex.value is not None and capex.value < 0:
         capex = capex.model_copy(
             update={
@@ -765,11 +770,15 @@ def _ttm_metric(
     units: tuple[str, ...],
     metric_name: str,
     fallback_as_of: str,
+    *,
+    period_end: str | None = None,
 ) -> OpenDataMetric:
     annual_fallback: OpenDataMetric | None = None
     computed: OpenDataMetric | None = None
     for concept in concepts:
         points = _fact_points(companyfacts, concept, units)
+        if period_end is not None:
+            points = [point for point in points if point.end.isoformat() <= period_end]
         selected = _select_ttm(points)
         if selected:
             metric = OpenDataMetric(
@@ -789,6 +798,41 @@ def _ttm_metric(
     if annual_fallback is not None:
         return annual_fallback
     return _unavailable(metric_name, "SEC companyfacts did not include usable public facts for this metric.", fallback_as_of)
+
+
+def _align_fcf_ttm_inputs(
+    companyfacts: dict[str, Any],
+    revenue: OpenDataMetric,
+    operating_cash_flow: OpenDataMetric,
+    capex: OpenDataMetric,
+    fallback_as_of: str,
+) -> tuple[OpenDataMetric, OpenDataMetric, OpenDataMetric]:
+    """Use the latest complete reporting period when adding statement facts."""
+    inputs = (revenue, operating_cash_flow, capex)
+    if any(metric.value is None for metric in inputs):
+        return inputs
+    definitions = (
+        (REVENUE_CONCEPTS, "revenue_ttm"),
+        (OPERATING_CASH_FLOW_CONCEPTS, "operating_cash_flow_ttm"),
+        (CAPEX_CONCEPTS, "capex_ttm"),
+    )
+    while all(metric.value is not None for metric in inputs):
+        dates = {metric.as_of for metric in inputs}
+        if len(dates) == 1:
+            return inputs
+        # Each iteration moves to an earlier fact date, so this is bounded by
+        # the available annual and quarterly reporting periods.
+        period_end = min(dates)
+        inputs = tuple(
+            _ttm_metric(companyfacts, concepts, USD_UNITS, name, fallback_as_of, period_end=period_end)
+            for concepts, name in definitions
+        )
+    # Keep known revenue and cash flow, but do not calculate FCF from capex
+    # belonging to a different period. A persisted complete bundle can be kept
+    # by the history-retention layer.
+    return revenue, operating_cash_flow, _unavailable(
+        "capex_ttm", "Capex for the same revenue and cash-flow reporting period was unavailable.", fallback_as_of,
+    )
 
 
 def _latest_fact_metric(
@@ -2436,7 +2480,11 @@ def _quarterly_metric_facts(
         for quarter in _quarterly_facts(_fact_points(companyfacts, concept, units)):
             key = (quarter.fy, quarter.fp)
             current = by_period.get(key)
-            if current is None or _quarterly_sort_key(quarter) >= _quarterly_sort_key(current):
+            # Concept order expresses accounting priority. A later alias for
+            # the same period (such as product sales versus total revenue)
+            # must not replace the preferred concept. Restatements within one
+            # concept have already been selected by _quarterly_facts.
+            if current is None or quarter.end > current.end:
                 by_period[key] = quarter
     return sorted(by_period.values(), key=_quarterly_sort_key, reverse=True)
 

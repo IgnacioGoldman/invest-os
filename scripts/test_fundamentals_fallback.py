@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import ExitStack
 from pathlib import Path
 import sys
 from types import SimpleNamespace
@@ -10,9 +11,11 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 from app.entry_engine.open_data_models import OpenDataMetric, OpenDataSnapshot, OpenDataPeriodMetrics
+from app.entry_engine.open_data_metrics import compute_open_data_snapshot
 from app.entry_engine.providers.open_data_provider import OpenDataProvider
 from app.entry_engine.providers.nibe_reports import refresh_nibe_reports
 from app.services.stock_data_quality import retain_verified_history
+from validate_static_stock_refresh import _validate_fcf_margin, _validate_latest_revenue_growth
 
 
 def primary_facts():
@@ -22,7 +25,152 @@ def primary_facts():
     ]}}}}}
 
 
+def statement_row(value, end, *, quarterly=False):
+    year = int(end[:4])
+    return {"val": value, "start": f"{year}-04-01" if quarterly else f"{year}-01-01", "end": end,
+            "filed": f"{year}-08-01" if quarterly else f"{year + 1}-02-01",
+            "form": "10-Q" if quarterly else "10-K", "fp": "Q2" if quarterly else "FY", "fy": year}
+
+
+def facts_for(taxonomy, rows):
+    return {"facts": {taxonomy: {name: {"units": {"USD": values}} for name, values in rows.items()}}}
+
+
+def fallback_snapshot(primary, vendor):
+    provider = OpenDataProvider()
+    with ExitStack() as stack:
+        for name, value in {
+            "resolve_company_metadata": {"cik": 123}, "fetch_companyfacts": primary,
+            "fetch_price_history": [], "fetch_latest_price": None,
+            "fetch_forward_pe_estimate": None, "fetch_market_cap_estimate": None,
+            "fetch_next_earnings_release": None, "fetch_company_context": None,
+            "fetch_statement_currency_rates": {}, "fetch_yfinance_companyfacts": vendor,
+        }.items():
+            stack.enter_context(patch.object(provider, name, return_value=value))
+        return provider.get_open_data_snapshot("TEST")
+
+
 class FundamentalsFallbackTests(unittest.TestCase):
+    def assert_consistent(self, snapshot):
+        errors = []
+        payload = snapshot.model_dump(mode="json")
+        _validate_fcf_margin(snapshot.ticker, payload, errors)
+        _validate_latest_revenue_growth(snapshot.ticker, payload, errors)
+        self.assertFalse(errors, errors)
+        margin = snapshot.business_health.get("fcf_margin")
+        if margin is not None:
+            self.assertEqual(margin, snapshot.metrics["fcf_margin_ttm"])
+            self.assertEqual(margin, snapshot.metrics["fcf_margin"])
+
+    def test_azn_newer_vendor_quarter_updates_growth_card_and_history_together(self):
+        primary = facts_for("ifrs-full", {
+            "RevenueFromSaleOfGoods": [statement_row(100, "2024-06-30", quarterly=True), statement_row(110, "2025-06-30", quarterly=True)],
+            "Revenue": [statement_row(400, "2025-12-31")],
+            "CashFlowsFromUsedInOperatingActivities": [statement_row(100, "2025-12-31")],
+            "PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities": [statement_row(20, "2025-12-31")],
+        })
+        vendor = facts_for("yfinance", {
+            "RevenueFromContractWithCustomerExcludingAssessedTax": [statement_row(999, "2025-06-30", quarterly=True), statement_row(132, "2026-06-30", quarterly=True)],
+            # Yahoo's alias must not replace the reported IFRS capex value.
+            "PaymentsToAcquirePropertyPlantAndEquipment": [statement_row(60, "2025-12-31")],
+        })
+        snapshot = fallback_snapshot(primary, vendor)
+        self.assertAlmostEqual(snapshot.business_health["revenue_growth_yoy"].value, 20)
+        self.assertEqual(snapshot.business_health["revenue_growth_yoy"].as_of, "2026-06-30")
+        self.assertEqual(snapshot.metrics["capex_ttm"].value, 20)
+        self.assertAlmostEqual(snapshot.business_health["fcf_margin"].value, 20)
+        self.assert_consistent(snapshot)
+
+    def test_total_revenue_takes_priority_over_product_sales_in_the_same_period(self):
+        primary = facts_for("ifrs-full", {
+            "Revenue": [statement_row(100, "2025-06-30", quarterly=True), statement_row(120, "2026-06-30", quarterly=True)],
+            "RevenueFromSaleOfGoods": [statement_row(80, "2025-06-30", quarterly=True), statement_row(100, "2026-06-30", quarterly=True)],
+        })
+        snapshot = compute_open_data_snapshot(ticker="TEST", cik=123, companyfacts=primary, price=None)
+        self.assertEqual(snapshot.business_health["revenue_growth_yoy"].value, 20)
+        self.assertEqual(snapshot.historical_series["quarterly_revenue"][-1].metrics["revenue"].value, 120)
+        self.assert_consistent(snapshot)
+
+    def test_cop_capex_gap_recalculates_fcf_for_a_complete_common_period(self):
+        def ytd(value, year):
+            row = statement_row(value, f"{year}-06-30", quarterly=True)
+            row["start"] = f"{year}-01-01"
+            return row
+        primary = facts_for("us-gaap", {
+            "Revenues": [statement_row(400, "2025-12-31"), ytd(200, 2025), ytd(250, 2026)],
+            "NetCashProvidedByUsedInOperatingActivities": [statement_row(100, "2025-12-31"), ytd(40, 2025), ytd(60, 2026)],
+            "PaymentsToAcquireProductiveAssets": [statement_row(10, "2022-12-31")],
+        })
+        vendor = facts_for("yfinance", {
+            "RevenueFromContractWithCustomerExcludingAssessedTax": [statement_row(999, "2025-12-31")],
+            "PaymentsToAcquirePropertyPlantAndEquipment": [statement_row(30, "2025-12-31")],
+        })
+        snapshot = fallback_snapshot(primary, vendor)
+        self.assertEqual(snapshot.metrics["revenue_ttm"].value, 400)
+        self.assertEqual(snapshot.metrics["operating_cash_flow_ttm"].value, 100)
+        self.assertEqual(snapshot.metrics["free_cash_flow_ttm"].value, 70)
+        self.assertAlmostEqual(snapshot.business_health["fcf_margin"].value, 17.5)
+        self.assertEqual({snapshot.metrics[key].as_of for key in ("revenue_ttm", "operating_cash_flow_ttm", "capex_ttm", "free_cash_flow_ttm")}, {"2025-12-31"})
+        previous = compute_open_data_snapshot(ticker="TEST", cik=123, companyfacts=primary, price=None)
+        # The previous calculation had a newer-looking date but stale capex.
+        self.assertEqual(previous.metrics["revenue_ttm"].as_of, "2026-06-30")
+        retained = retain_verified_history(snapshot, previous)
+        self.assertEqual(retained.metrics["revenue_ttm"].value, 400)
+        self.assertEqual(retained.metrics["capex_ttm"].value, 30)
+        self.assert_consistent(retained)
+
+    def test_thin_refresh_retains_complete_fcf_inputs_and_percentage_together(self):
+        facts = facts_for("us-gaap", {
+            "Revenues": [statement_row(400, "2025-12-31")],
+            "NetCashProvidedByUsedInOperatingActivities": [statement_row(100, "2025-12-31")],
+            "PaymentsToAcquirePropertyPlantAndEquipment": [statement_row(20, "2025-12-31")],
+        })
+        previous = compute_open_data_snapshot(ticker="TEST", cik=123, companyfacts=facts, price=None)
+        current = compute_open_data_snapshot(ticker="TEST", cik=123, companyfacts={}, price=None)
+        result = retain_verified_history(current, previous)
+        self.assertEqual(result.metrics["free_cash_flow_ttm"].value, 80)
+        self.assertEqual(result.business_health["fcf_margin"].value, 20)
+        self.assert_consistent(result)
+
+    def test_fallback_without_a_common_fcf_period_keeps_known_revenue(self):
+        primary = facts_for("us-gaap", {
+            "Revenues": [statement_row(400, "2025-12-31")],
+            "NetCashProvidedByUsedInOperatingActivities": [statement_row(100, "2025-12-31")],
+        })
+        vendor = facts_for("yfinance", {
+            "RevenueFromContractWithCustomerExcludingAssessedTax": [statement_row(999, "2025-12-31")],
+            "PaymentsToAcquirePropertyPlantAndEquipment": [statement_row(20, "2022-12-31")],
+        })
+        snapshot = fallback_snapshot(primary, vendor)
+        self.assertEqual(snapshot.metrics["revenue_ttm"].value, 400)
+        self.assertEqual(snapshot.metrics["operating_cash_flow_ttm"].value, 100)
+        self.assertIsNone(snapshot.business_health["fcf_margin"].value)
+        retained = retain_verified_history(snapshot, OpenDataSnapshot(ticker="TEST"))
+        self.assertIsNone(retained.business_health["fcf_margin"].value)
+        self.assert_consistent(retained)
+
+    def test_thin_refresh_keeps_newer_complete_fcf_bundle(self):
+        def snapshot(year, sales, cash_flow, capex):
+            return compute_open_data_snapshot(ticker="TEST", cik=123, price=None, companyfacts=facts_for("us-gaap", {
+                "Revenues": [statement_row(sales, f"{year}-12-31")],
+                "NetCashProvidedByUsedInOperatingActivities": [statement_row(cash_flow, f"{year}-12-31")],
+                "PaymentsToAcquirePropertyPlantAndEquipment": [statement_row(capex, f"{year}-12-31")],
+            }))
+        result = retain_verified_history(snapshot(2024, 300, 80, 20), snapshot(2025, 400, 100, 20))
+        self.assertEqual(result.metrics["revenue_ttm"].value, 400)
+        self.assertEqual(result.business_health["fcf_margin"].as_of, "2025-12-31")
+        self.assert_consistent(result)
+
+    def test_retained_newer_revenue_history_updates_card_and_alias(self):
+        old_growth = OpenDataMetric(value=20, source="issuer", tier="exact_public_fact", as_of="2026-06-30", notes="Reported")
+        current_growth = old_growth.model_copy(update={"value": 10, "as_of": "2025-06-30"})
+        previous = OpenDataSnapshot(ticker="TEST", historical_series={"quarterly_revenue": [OpenDataPeriodMetrics(period="FY2026 Q2", as_of="2026-06-30", metrics={"revenue_growth_yoy": old_growth})]})
+        current = OpenDataSnapshot(ticker="TEST", business_health={"revenue_growth_yoy": current_growth}, metrics={"revenue_growth_yoy": current_growth})
+        result = retain_verified_history(current, previous)
+        self.assertEqual(result.business_health["revenue_growth_yoy"], old_growth)
+        self.assertEqual(result.metrics["revenue_growth_yoy"], old_growth)
+        self.assert_consistent(result)
+
     def test_snapshot_fallback_fills_current_growth_without_overriding_sec_revenue(self):
         def row(value, year):
             return {"val": value, "start": f"{year}-04-01", "end": f"{year}-06-30", "filed": f"{year}-06-30", "form": "YF-QUARTER", "fp": "Q2", "fy": year}
