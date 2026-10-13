@@ -75,3 +75,9 @@ export function supportSignal(value?: number | null): MetricSignal {
   }
   return metricSignal(distance <= 2.5 ? "At support" : distance <= 6 ? "Near support" : distance <= 25 ? "Above support" : "Far");
 }
+
+export function forwardPeSignal(valueOrMetric?: number | OpenDataMetric | null): MetricSignal {
+  const value = signalValue(valueOrMetric);
+  if (value == null || value <= 0) return metricSignal("Unclear");
+  return metricSignal(value <= 18 ? "Cheap" : value <= 25 ? "Fair" : value >= 50 ? "Very pricey" : value >= 35 ? "Pricey" : "Unclear");
+}

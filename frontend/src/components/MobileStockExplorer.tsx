@@ -1,7 +1,7 @@
 import { calculateRevenueGrowthMomentum, formatMomentumPp, revenueMomentumDetail, REVENUE_MOMENTUM_DESCRIPTION } from "../revenueGrowthMomentum";
 import { MoneyPanel } from "./MoneyPanel";
 import { MetricStatus } from "./MetricStatus";
-import { fcfMarginSignal, growthSignal, metricSignal, revenueGrowthSignal, supportSignal, type MetricSignal as Signal, type MetricTone as Tone } from "../metricStatus";
+import { fcfMarginSignal, forwardPeSignal, growthSignal, metricSignal, revenueGrowthSignal, supportSignal, type MetricSignal as Signal, type MetricTone as Tone } from "../metricStatus";
 import {
   ArrowDown,
   ArrowLeft,
@@ -77,6 +77,7 @@ export type FilterKey =
   | "eps"
   | "fcf_margin"
   | "valuation"
+  | "forward_pe"
   | "upcoming_earnings"
   | "support_1m"
   | "support_3m"
@@ -84,7 +85,7 @@ export type FilterKey =
   | "support_1y"
   | "support_2y"
   | "support_5y";
-export type SortKey = "symbol" | "support_best" | FilterKey;
+export type SortKey = "symbol" | "support_best" | Exclude<FilterKey, "forward_pe">;
 export type SortDirection = "asc" | "desc";
 export type LogicOperator = "and" | "or";
 export type FilterCondition = {
@@ -219,6 +220,14 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
     options: ["Cheap", "Fair", "Pricey", "Very pricey", "Unclear"].map(metricSignal),
   },
   {
+    key: "forward_pe",
+    label: "Forward P/E",
+    shortLabel: "Forward P/E",
+    section: "Quality",
+    description: "Expected earnings multiple: Cheap is positive and up to 18×; Fair is above 18× and up to 25×. Missing or non-positive values are Unclear.",
+    options: ["Cheap", "Fair", "Pricey", "Very pricey", "Unclear"].map(metricSignal),
+  },
+  {
     key: "upcoming_earnings",
     label: "Upcoming earnings",
     shortLabel: "Earnings",
@@ -239,7 +248,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
 const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
   { key: "symbol", label: "Symbol" },
   { key: "support_best", label: "Priority support" },
-  ...FILTER_DEFINITIONS.map(({ key, shortLabel }) => ({ key, label: shortLabel })),
+  ...FILTER_DEFINITIONS.flatMap(({ key, shortLabel }) => key === "forward_pe" ? [] : [{ key, label: shortLabel }]),
 ];
 
 const CHART_RANGES: Array<{ key: ChartRange; days: number | null }> = [
@@ -470,6 +479,7 @@ function signalFor(snapshot: OpenDataStockSnapshot, key: FilterKey): Signal {
   if (key === "eps") return growthSignal(epsGaapMetric(snapshot));
   if (key === "fcf_margin") return fcfMarginSignal(snapshot.business_health.fcf_margin?.value);
   if (key === "valuation") return valuationSignal(snapshot);
+  if (key === "forward_pe") return forwardPeSignal(snapshot.valuation.forward_pe);
   if (key === "momentum") return revenueMomentum(snapshot);
   if (key === "upcoming_earnings") return upcomingEarningsSignal(upcomingEarningsMetric(snapshot));
   return supportSignal(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
@@ -617,10 +627,10 @@ function createSupportConditions(fields: readonly Extract<FilterKey, `support_${
   ]);
 }
 
-function createValuationConditions() {
+function createValuationConditions(field: "valuation" | "forward_pe" = "valuation") {
   return [
-    createCondition("valuation", "Cheap"),
-    createCondition("valuation", "Fair"),
+    createCondition(field, "Cheap"),
+    createCondition(field, "Fair"),
   ];
 }
 
@@ -648,6 +658,11 @@ function createStrongYoyExpression(preset: BuiltInPreset): FilterExpression {
         operator: "or",
         conditions: createValuationConditions(),
       },
+      ...(preset === "pullback" ? [{
+        id: nextFilterId("group"),
+        operator: "or" as const,
+        conditions: createValuationConditions("forward_pe"),
+      }] : []),
     ],
   };
 }
@@ -716,7 +731,6 @@ function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
   ) {
     return "earnings";
   }
-  if (expression.groups.length !== 3) return null;
   const valuationSignature = ["valuation:Cheap", "valuation:Fair"];
   const hasValuationGroup = signatures.some(
     (group) => group.operator === "or" && group.conditions.join("|") === valuationSignature.join("|"),
@@ -726,10 +740,14 @@ function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
     .flatMap((key) => [`${key}:At support`, `${key}:Near support`])
     .sort()
     .join("|");
-  if (signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature(PULLBACK_SUPPORT_FILTER_KEYS))) {
+  if (
+    expression.groups.length === 4
+    && signatures.some((group) => group.operator === "or" && group.conditions.join("|") === "forward_pe:Cheap|forward_pe:Fair")
+    && signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature(PULLBACK_SUPPORT_FILTER_KEYS))
+  ) {
     return "pullback";
   }
-  if (signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature(SUPPORT_PRESET_FILTER_KEYS))) {
+  if (expression.groups.length === 3 && signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature(SUPPORT_PRESET_FILTER_KEYS))) {
     return "support";
   }
   return null;
@@ -742,9 +760,9 @@ const BUILT_IN_PRESET_COPY: Record<BuiltInPreset, BuiltInPresetCopy> = {
       "Companies with strong latest revenue growth, cheap or fair valuation, and current price at or near support zones identified across the past 1Y, 2Y, and 5Y.",
   },
   pullback: {
-    name: "Strong YoY, fair value and pullback",
+    name: "Strong YoY + Pullback + Fair Price",
     summary:
-      "Companies with strong latest revenue growth and cheap or fair valuation that are going through a shorter-term correction, with price at or near support zones identified across the past 1M, 3M, and 6M.",
+      "Companies with Strong or Solid latest revenue growth YoY, cheap or fair valuation, and Cheap or Fair forward P/E (positive and up to 25×), with price at or near support zones identified across the past 1M, 3M, and 6M.",
   },
   earnings: {
     name: "Earnings next 30d + strong YoY",
@@ -782,7 +800,7 @@ function exportFilterContext(
   const presetName = preset === "support"
     ? "Strong growth, fair value at support"
     : preset === "pullback"
-      ? "Strong growth, fair value on pullback"
+      ? builtInPresetName("pullback")
       : preset === "earnings"
         ? "Earnings next 30d + strong YoY"
         : null;
@@ -2454,7 +2472,7 @@ export function MobileStockExplorer({
             </button>
             <button type="button" className={builtInPreset === "pullback" ? "active" : ""} aria-pressed={builtInPreset === "pullback"} title={builtInPresetSummary("pullback") ?? undefined} onClick={() => toggleBuiltInPreset("pullback")}>
               {builtInPreset === "pullback" && <Check size={15} />}
-              Strong YoY + Pullback
+              {builtInPresetName("pullback")}
               <FilterNewBadge count={personalization?.filterBadgeCounts[PULLBACK_FILTER_KEY]} />
             </button>
             <button type="button" className={builtInPreset === "earnings" ? "active" : ""} aria-pressed={builtInPreset === "earnings"} title={builtInPresetSummary("earnings") ?? undefined} onClick={() => toggleBuiltInPreset("earnings")}>

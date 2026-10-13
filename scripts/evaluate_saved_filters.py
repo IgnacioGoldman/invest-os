@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import sys
 from datetime import datetime, timezone
@@ -36,14 +37,14 @@ def _support_conditions(fields: list[str]) -> list[dict[str, str]]:
     ]
 
 
-def _valuation_conditions() -> list[dict[str, str]]:
+def _valuation_conditions(field: str = "valuation") -> list[dict[str, str]]:
     return [
-        {"field": "valuation", "value": "Cheap"},
-        {"field": "valuation", "value": "Fair"},
+        {"field": field, "value": "Cheap"},
+        {"field": field, "value": "Fair"},
     ]
 
 
-def _strong_yoy_expression(support_fields: list[str]) -> dict[str, Any]:
+def _strong_yoy_expression(support_fields: list[str], *, fair_forward_pe: bool = False) -> dict[str, Any]:
     return {
         "operator": "and",
         "groups": [
@@ -56,6 +57,7 @@ def _strong_yoy_expression(support_fields: list[str]) -> dict[str, Any]:
                 ],
             },
             {"operator": "or", "conditions": _valuation_conditions()},
+            *([{"operator": "or", "conditions": _valuation_conditions("forward_pe")}] if fair_forward_pe else []),
         ],
     }
 
@@ -83,7 +85,7 @@ def _upcoming_earnings_expression() -> dict[str, Any]:
 
 
 BUILT_IN_FILTERS = {
-    "builtin:pullback": _strong_yoy_expression(["support_1m", "support_3m", "support_6m"]),
+    "builtin:pullback": _strong_yoy_expression(["support_1m", "support_3m", "support_6m"], fair_forward_pe=True),
     "builtin:support": _strong_yoy_expression(["support_1y", "support_2y", "support_5y"]),
     "builtin:earnings_this_week": _upcoming_earnings_expression(),
 }
@@ -198,6 +200,20 @@ def _revenue_momentum(snapshot: dict[str, Any]) -> str:
     return calculate_revenue_growth_momentum(snapshot)["label"]
 
 
+def _forward_pe_signal(value: float | None) -> str:
+    if value is None or not math.isfinite(value) or value <= 0:
+        return "Unclear"
+    if value <= 18:
+        return "Cheap"
+    if value <= 25:
+        return "Fair"
+    if value >= 50:
+        return "Very pricey"
+    if value >= 35:
+        return "Pricey"
+    return "Unclear"
+
+
 def signal_for(snapshot: dict[str, Any], field: str) -> str:
     if field == "revenue":
         return _revenue_growth_signal(_metric_value(snapshot, "business_health", "revenue_growth_yoy"))
@@ -210,6 +226,8 @@ def signal_for(snapshot: dict[str, Any], field: str) -> str:
         return _fcf_margin_signal(_metric_value(snapshot, "business_health", "fcf_margin"))
     if field == "valuation":
         return _valuation_signal(snapshot)
+    if field == "forward_pe":
+        return _forward_pe_signal(_metric_value(snapshot, "valuation", "forward_pe"))
     if field == "upcoming_earnings":
         return _upcoming_earnings_signal(_metric_value(snapshot, "price_opportunity", "days_to_next_earnings"))
     metric = SUPPORT_METRICS.get(field)
