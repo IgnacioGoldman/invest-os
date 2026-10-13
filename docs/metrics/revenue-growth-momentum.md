@@ -59,4 +59,19 @@ Run the same validation locally:
 python3 scripts/validate_revenue_growth_momentum.py --output /tmp/revenue-growth-momentum-report.json
 ```
 
+SEC fact fiscal-year and quarter labels can describe the filing that contains a comparative observation. The collector validates them against actual statement dates and the issuer's fiscal calendar before grouping quarters, deriving Q4, or matching prior-year revenue. YoY comparisons must also have dates approximately one year apart.
+
+AZN, Barrick (B), Novartis (NVS), and YPF use durable, source-linked quarterly revenue facts in `data/stocks/issuer_facts/` to supplement sparse SEC histories. These contain reported consolidated revenue in USD, with a consistent company-specific revenue definition. New issuer reports are checked at most weekly; failed downloads or unrecognized tables retain verified history. Six consecutive YoY growth observations generally require ten consecutive quarterly revenue amounts.
+
+The daily refresh includes `--repair-revenue-history`: it upgrades older revenue histories once and retries remaining unavailable momentum windows at most weekly even when filings have not changed. Price refreshes preserve newer repaired revenue histories rather than restoring an older deployed snapshot. Corrected fiscal labels supersede older labels for the same reporting date.
+
+To preview or apply a rebuild using downloaded SEC facts:
+
+```sh
+python scripts/backfill_revenue_history.py --facts-dir .cache/open_data
+python scripts/backfill_revenue_history.py --facts-dir .cache/open_data --apply
+```
+
+The rebuild checks for momentum coverage regressions, updates the latest revenue growth card and its alias together, and preserves existing prices. It does not refresh other financial metrics; a normal fundamentals collection computes those from the normalized facts.
+
 The median deliberately responds more slowly than a two-quarter comparison. One new strong quarter is early evidence, not enough on its own to establish sustained acceleration. One weak quarter still matters economically even when it has little influence on the median, so read this signal alongside the six quarterly observations, latest movement, and revenue growth YoY.

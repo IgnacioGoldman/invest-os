@@ -1,0 +1,115 @@
+{
+  "entityName": "Barrick Mining Corporation",
+  "verified_on": "2026-10-13",
+  "revenue_definition": "Consolidated revenue in USD from the eight-quarter Quarterly Information table; excludes attributable/adjusted revenue.",
+  "facts": {
+    "issuer": {
+      "Revenues": {
+        "units": {
+          "USD": [
+            {
+              "val": 2747000000,
+              "start": "2024-01-01",
+              "end": "2024-03-31",
+              "fy": 2024,
+              "fp": "Q1",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-08-11",
+              "source_url": "https://s25.q4cdn.com/322814910/files/doc_financial/quarterly_results/2025/q2/Barrick_Q2_2025_MD-A.pdf"
+            },
+            {
+              "val": 3162000000,
+              "start": "2024-04-01",
+              "end": "2024-06-30",
+              "fy": 2024,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-08-11",
+              "source_url": "https://s25.q4cdn.com/322814910/files/doc_financial/quarterly_results/2025/q2/Barrick_Q2_2025_MD-A.pdf"
+            },
+            {
+              "val": 3368000000,
+              "start": "2024-07-01",
+              "end": "2024-09-30",
+              "fy": 2024,
+              "fp": "Q3",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://s25.q4cdn.com/322814910/files/doc_financial/quarterly_results/2026/q2/Barrick_Q2_2026_MD-A.pdf"
+            },
+            {
+              "val": 3645000000,
+              "start": "2024-10-01",
+              "end": "2024-12-31",
+              "fy": 2024,
+              "fp": "Q4",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://s25.q4cdn.com/322814910/files/doc_financial/quarterly_results/2026/q2/Barrick_Q2_2026_MD-A.pdf"
+            },
+            {
+              "val": 3130000000,
+              "start": "2025-01-01",
+              "end": "2025-03-31",
+              "fy": 2025,
+              "fp": "Q1",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://s25.q4cdn.com/322814910/files/doc_financial/quarterly_results/2026/q2/Barrick_Q2_2026_MD-A.pdf"
+            },
+            {
+              "val": 3681000000,
+              "start": "2025-04-01",
+              "end": "2025-06-30",
+              "fy": 2025,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://s25.q4cdn.com/322814910/files/doc_financial/quarterly_results/2026/q2/Barrick_Q2_2026_MD-A.pdf"
+            },
+            {
+              "val": 4148000000,
+              "start": "2025-07-01",
+              "end": "2025-09-30",
+              "fy": 2025,
+              "fp": "Q3",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://s25.q4cdn.com/322814910/files/doc_financial/quarterly_results/2026/q2/Barrick_Q2_2026_MD-A.pdf"
+            },
+            {
+              "val": 5997000000,
+              "start": "2025-10-01",
+              "end": "2025-12-31",
+              "fy": 2025,
+              "fp": "Q4",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://s25.q4cdn.com/322814910/files/doc_financial/quarterly_results/2026/q2/Barrick_Q2_2026_MD-A.pdf"
+            },
+            {
+              "val": 5218000000,
+              "start": "2026-01-01",
+              "end": "2026-03-31",
+              "fy": 2026,
+              "fp": "Q1",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://s25.q4cdn.com/322814910/files/doc_financial/quarterly_results/2026/q2/Barrick_Q2_2026_MD-A.pdf"
+            },
+            {
+              "val": 5292000000,
+              "start": "2026-04-01",
+              "end": "2026-06-30",
+              "fy": 2026,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://s25.q4cdn.com/322814910/files/doc_financial/quarterly_results/2026/q2/Barrick_Q2_2026_MD-A.pdf"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

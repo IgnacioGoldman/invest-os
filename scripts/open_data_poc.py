@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timedelta, timezone
 import json
 import logging
 import sys
@@ -327,6 +328,7 @@ def _filter_incremental_sec_work_items(
     save: bool,
     repair_data_gaps: bool = False,
     repair_current_data: bool = False,
+    repair_revenue_history: bool = False,
 ) -> tuple[list[tuple[int, dict[str, Any]]], list[dict[str, Any]]]:
     if not save:
         return work_items, []
@@ -367,6 +369,12 @@ def _filter_incremental_sec_work_items(
                 latest_accession = str(latest_filing.get("accession_number") or "") if latest_filing else None
 
                 repairs = fundamental_gap_reasons(existing_snapshot, include_history=repair_data_gaps) if (repair_data_gaps or repair_current_data) and existing_snapshot is not None else []
+                if repair_revenue_history and existing_snapshot is not None:
+                    from app.services.revenue_growth_momentum import calculate_revenue_growth_momentum
+                    checked = existing_snapshot.revenue_history_checked_at
+                    due = checked is None or datetime.now(timezone.utc) - checked >= timedelta(days=7)
+                    if existing_snapshot.revenue_history_version < 1 or (due and calculate_revenue_growth_momentum(existing_snapshot.model_dump(mode="json"))["label"] == "Unclear"):
+                        repairs.append("historical_series.revenue_history_repair")
                 if existing_snapshot is not None and not repairs and (latest_accession is None or latest_accession == known_accession):
                     replace_stock_sec_refresh_state(conn, **_sec_state_kwargs(ticker, cik, latest_filing or existing_filing))
                     preserved.append(
@@ -577,6 +585,7 @@ def main() -> None:
     )
     parser.add_argument("--repair-data-gaps", action="store_true", help="Recollect symbols with missing fundamentals or an unusable latest six-quarter revenue window, even when SEC filings are unchanged.")
     parser.add_argument("--repair-current-data", action="store_true", help="Retry missing current fundamentals on the daily refresh; historical windows/CAGR gaps never trigger collection.")
+    parser.add_argument("--repair-revenue-history", action="store_true", help="Upgrade revenue period parsing once; retry incomplete momentum windows at most weekly when filings are unchanged.")
     parser.add_argument("--output", type=Path, help="Write the JSON run report to a file as well as stdout.")
     parser.add_argument("--workers", type=int, default=3, help="Number of tickers to collect in parallel.")
     parser.add_argument("--ticker-retries", type=int, default=2, help="Retry a whole ticker collection this many times.")
@@ -629,7 +638,7 @@ def main() -> None:
 
     work_items = list(enumerate(universe[:max_results] if mode == "top_volume" else universe))
     if args.incremental_sec:
-        work_items, preserved_results = _filter_incremental_sec_work_items(work_items, provider, save=save, repair_data_gaps=args.repair_data_gaps, repair_current_data=args.repair_current_data)
+        work_items, preserved_results = _filter_incremental_sec_work_items(work_items, provider, save=save, repair_data_gaps=args.repair_data_gaps, repair_current_data=args.repair_current_data, repair_revenue_history=args.repair_revenue_history)
         results.extend(preserved_results)
         logger.info(
             "Incremental SEC preflight preserved %s ticker(s) and selected %s ticker(s) for collection.",

@@ -1,0 +1,115 @@
+{
+  "entityName": "Novartis AG",
+  "verified_on": "2026-10-13",
+  "revenue_definition": "Consolidated net sales from continuing operations, reported USD; excludes discontinued Sandoz.",
+  "facts": {
+    "issuer": {
+      "Revenues": {
+        "units": {
+          "USD": [
+            {
+              "val": 11829000000,
+              "start": "2024-01-01",
+              "end": "2024-03-31",
+              "fy": 2024,
+              "fp": "Q1",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-04-29",
+              "source_url": "https://www.novartis.com/sites/novartis_com/files/q1-2025-media-release-en.pdf"
+            },
+            {
+              "val": 12512000000,
+              "start": "2024-04-01",
+              "end": "2024-06-30",
+              "fy": 2024,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-07-17",
+              "source_url": "https://www.novartis.com/sites/novartis_com/files/q2-2025-media-release-en.pdf"
+            },
+            {
+              "val": 12823000000,
+              "start": "2024-07-01",
+              "end": "2024-09-30",
+              "fy": 2024,
+              "fp": "Q3",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-10-28",
+              "source_url": "https://www.novartis.com/sites/novartis_com/files/q3-2025-media-release-en.pdf"
+            },
+            {
+              "val": 13153000000,
+              "start": "2024-10-01",
+              "end": "2024-12-31",
+              "fy": 2024,
+              "fp": "Q4",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-02-04",
+              "source_url": "https://www.novartis.com/sites/novartis_com/files/q4-2025-media-release-en.pdf"
+            },
+            {
+              "val": 13233000000,
+              "start": "2025-01-01",
+              "end": "2025-03-31",
+              "fy": 2025,
+              "fp": "Q1",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-04-28",
+              "source_url": "https://www.novartis.com/sites/novartis_com/files/q1-2026-media-release-en.pdf"
+            },
+            {
+              "val": 14054000000,
+              "start": "2025-04-01",
+              "end": "2025-06-30",
+              "fy": 2025,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-07-21",
+              "source_url": "https://www.novartis.com/sites/novartis_com/files/q2-2026-media-release-en.pdf"
+            },
+            {
+              "val": 13909000000,
+              "start": "2025-07-01",
+              "end": "2025-09-30",
+              "fy": 2025,
+              "fp": "Q3",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-10-28",
+              "source_url": "https://www.novartis.com/sites/novartis_com/files/q3-2025-media-release-en.pdf"
+            },
+            {
+              "val": 13336000000,
+              "start": "2025-10-01",
+              "end": "2025-12-31",
+              "fy": 2025,
+              "fp": "Q4",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-02-04",
+              "source_url": "https://www.novartis.com/sites/novartis_com/files/q4-2025-media-release-en.pdf"
+            },
+            {
+              "val": 13113000000,
+              "start": "2026-01-01",
+              "end": "2026-03-31",
+              "fy": 2026,
+              "fp": "Q1",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-04-28",
+              "source_url": "https://www.novartis.com/sites/novartis_com/files/q1-2026-media-release-en.pdf"
+            },
+            {
+              "val": 14408000000,
+              "start": "2026-04-01",
+              "end": "2026-06-30",
+              "fy": 2026,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-07-21",
+              "source_url": "https://www.novartis.com/sites/novartis_com/files/q2-2026-media-release-en.pdf"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "entityName": "AstraZeneca PLC",
+  "verified_on": "2026-10-13",
+  "revenue_definition": "Consolidated Total Revenue, reported USD; product sales alone are excluded.",
+  "facts": {
+    "issuer": {
+      "Revenues": {
+        "units": {
+          "USD": [
+            {
+              "val": 12679000000,
+              "start": "2024-01-01",
+              "end": "2024-03-31",
+              "fy": 2024,
+              "fp": "Q1",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-04-29",
+              "source_url": "https://www.astrazeneca.com/content/dam/az/PDF/2025/q1/Q1-2025-results-announcement.pdf"
+            },
+            {
+              "val": 12938000000,
+              "start": "2024-04-01",
+              "end": "2024-06-30",
+              "fy": 2024,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-07-29",
+              "source_url": "https://www.astrazeneca.com/content/dam/az/PDF/2025/h1q2/H1-and-Q2-2025-results-announcement.pdf"
+            },
+            {
+              "val": 13565000000,
+              "start": "2024-07-01",
+              "end": "2024-09-30",
+              "fy": 2024,
+              "fp": "Q3",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-11-06",
+              "source_url": "https://www.astrazeneca.com/content/dam/az/PDF/2025/9m-q3/9M-and-Q3-2025-results-announcement.pdf"
+            },
+            {
+              "val": 14891000000,
+              "start": "2024-10-01",
+              "end": "2024-12-31",
+              "fy": 2024,
+              "fp": "Q4",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-02-10",
+              "source_url": "https://www.astrazeneca.com/content/dam/az/PDF/2025/Q4-FY/Full-year-Q4-2025-results-announcement.pdf"
+            },
+            {
+              "val": 13588000000,
+              "start": "2025-01-01",
+              "end": "2025-03-31",
+              "fy": 2025,
+              "fp": "Q1",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-04-29",
+              "source_url": "https://www.astrazeneca.com/content/dam/az/PDF/2026/eq1/Q1-2026-results-announcement.pdf"
+            },
+            {
+              "val": 14457000000,
+              "start": "2025-04-01",
+              "end": "2025-06-30",
+              "fy": 2025,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-07-27",
+              "source_url": "https://www.astrazeneca.com/content/dam/az/PDF/2026/h1q2/H1-and-Q2-2026-results-announcement.pdf"
+            },
+            {
+              "val": 15191000000,
+              "start": "2025-07-01",
+              "end": "2025-09-30",
+              "fy": 2025,
+              "fp": "Q3",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-11-06",
+              "source_url": "https://www.astrazeneca.com/content/dam/az/PDF/2025/9m-q3/9M-and-Q3-2025-results-announcement.pdf"
+            },
+            {
+              "val": 15503000000,
+              "start": "2025-10-01",
+              "end": "2025-12-31",
+              "fy": 2025,
+              "fp": "Q4",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-02-10",
+              "source_url": "https://www.astrazeneca.com/content/dam/az/PDF/2025/Q4-FY/Full-year-Q4-2025-results-announcement.pdf"
+            },
+            {
+              "val": 15288000000,
+              "start": "2026-01-01",
+              "end": "2026-03-31",
+              "fy": 2026,
+              "fp": "Q1",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-04-29",
+              "source_url": "https://www.astrazeneca.com/content/dam/az/PDF/2026/eq1/Q1-2026-results-announcement.pdf"
+            },
+            {
+              "val": 15384000000,
+              "start": "2026-04-01",
+              "end": "2026-06-30",
+              "fy": 2026,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-07-27",
+              "source_url": "https://www.astrazeneca.com/content/dam/az/PDF/2026/h1q2/H1-and-Q2-2026-results-announcement.pdf"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

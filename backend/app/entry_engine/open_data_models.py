@@ -96,6 +96,8 @@ class OpenDataSnapshot(BaseModel):
     industry: str | None = None
     source: str = "open_free_public"
     generated_at: datetime = Field(default_factory=utc_now)
+    revenue_history_version: int = 0
+    revenue_history_checked_at: datetime | None = None
     business_health: dict[str, OpenDataMetric] = Field(default_factory=dict)
     price_opportunity: dict[str, OpenDataMetric] = Field(default_factory=dict)
     valuation: dict[str, OpenDataMetric] = Field(default_factory=dict)

@@ -3,8 +3,10 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
+
+from app.entry_engine.fiscal_periods import normalize_companyfacts_periods
 
 from app.entry_engine.open_data_models import (
     OpenDataCompanyContext,
@@ -255,6 +257,7 @@ def compute_open_data_snapshot(
     generated_as_of: str | None = None,
     align_fcf_periods: bool = False,
 ) -> OpenDataSnapshot:
+    companyfacts = normalize_companyfacts_periods(companyfacts)
     as_of = generated_as_of or date.today().isoformat()
     name = companyfacts.get("entityName") if isinstance(companyfacts.get("entityName"), str) else None
     fx_rates = statement_currency_rates or {}
@@ -747,6 +750,8 @@ def compute_open_data_snapshot(
     }
 
     return OpenDataSnapshot(
+        revenue_history_version=1,
+        revenue_history_checked_at=datetime.now(timezone.utc),
         ticker=ticker.upper(),
         name=name,
         cik=cik,
@@ -941,7 +946,7 @@ def _quarterly_growth_metric(
             tier="computed_from_public_facts",
             as_of=latest.end.isoformat(),
             notes=(
-                f"{label} computed from SEC {latest.fp} {fact_label} facts. "
+                f"{label} computed from reported {latest.fp} {fact_label} facts. "
                 f"Latest quarter: {latest.notes} Prior-year quarter: {prior.notes} "
                 "Q2/Q3 single-quarter values may be derived from year-to-date 10-Q/6-K facts; "
                 "Q4 may be derived from annual facts minus Q3 year-to-date facts."
@@ -2404,7 +2409,7 @@ def _quarterly_facts(points: list[FactPoint]) -> list[QuarterlyFact]:
                     end=point.end,
                     filed=point.filed,
                     source=_source(point),
-                    notes="Single-quarter SEC fact.",
+                    notes="Reported single-quarter issuer fact." if point.taxonomy == "issuer" else "Single-quarter SEC fact.",
                 ),
             )
             if point.fp == "Q1":
@@ -2438,7 +2443,7 @@ def _quarterly_facts(points: list[FactPoint]) -> list[QuarterlyFact]:
             continue
         previous_fp = "Q1" if fp == "Q2" else "Q2" if fp == "Q3" else None
         previous = ytd_by_period.get((fy, previous_fp)) if previous_fp else None
-        if previous is None:
+        if previous is None or point.start != previous.start or point.unit != previous.unit or not 60 <= (point.end - previous.end).days <= 130:
             continue
         by_period[key] = QuarterlyFact(
             fy=fy,
@@ -2455,7 +2460,7 @@ def _quarterly_facts(points: list[FactPoint]) -> list[QuarterlyFact]:
         if key in by_period:
             continue
         q3 = ytd_by_period.get((fy, "Q3"))
-        if q3 is None:
+        if q3 is None or annual.start != q3.start or annual.unit != q3.unit or not 60 <= (annual.end - q3.end).days <= 130:
             continue
         by_period[key] = QuarterlyFact(
             fy=fy,
@@ -2475,6 +2480,7 @@ def _quarterly_metric_facts(
     concepts: tuple[str, ...],
     units: tuple[str, ...],
 ) -> list[QuarterlyFact]:
+    companyfacts = normalize_companyfacts_periods(companyfacts)
     by_period: dict[tuple[int | None, str], QuarterlyFact] = {}
     for concept in concepts:
         for quarter in _quarterly_facts(_fact_points(companyfacts, concept, units)):
@@ -2571,6 +2577,7 @@ def _matching_prior_year_quarter(quarters: list[QuarterlyFact], latest: Quarterl
         point
         for point in quarters
         if point.fp == latest.fp
+        and 330 * years <= (latest.end - point.end).days <= 400 * years
         and (
             (point.fy is not None and latest.fy is not None and point.fy == latest.fy - years)
             or (point.fy is None or latest.fy is None) and point.end.year == latest.end.year - years
@@ -2621,6 +2628,7 @@ def _is_quarterly_form(point: FactPoint) -> bool:
 
 
 def _annual_points(companyfacts: dict[str, Any], concepts: tuple[str, ...], units: tuple[str, ...]) -> list[FactPoint]:
+    companyfacts = normalize_companyfacts_periods(companyfacts)
     points: list[FactPoint] = []
     for concept in concepts:
         points.extend(point for point in _fact_points(companyfacts, concept, units) if _is_annual(point))
@@ -2863,7 +2871,7 @@ def _median(values: list[float]) -> float:
 
 def _fact_points(companyfacts: dict[str, Any], concept: str, units: tuple[str, ...]) -> list[FactPoint]:
     points: list[FactPoint] = []
-    facts = companyfacts.get("facts", {})
+    facts = normalize_companyfacts_periods(companyfacts).get("facts", {})
     if not isinstance(facts, dict):
         return points
     for taxonomy in SEC_TAXONOMIES:

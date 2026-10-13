@@ -376,6 +376,13 @@ class OpenDataProvider:
         raw_cik = metadata.get("cik")
         cik = int(raw_cik) if raw_cik is not None else None
         companyfacts = self.fetch_companyfacts(cik) if cik is not None else self.fetch_non_sec_companyfacts(symbol, metadata)
+        if cik is not None:
+            from app.entry_engine.providers.issuer_revenue import load_issuer_revenue, refresh_issuer_revenue, supplement_issuer_revenue
+            seed = load_issuer_revenue(symbol)
+            if seed is not None:
+                seed, failures = refresh_issuer_revenue(self, symbol, seed)
+                companyfacts = supplement_issuer_revenue(companyfacts, seed)
+                companyfacts.setdefault("collection_notes", []).extend(failures)
         price_history = self.fetch_price_history(symbol)
         price_currency = str(metadata.get("currency") or "USD").upper()
         price = self._latest_price_from_history(symbol, price_history, currency=price_currency) or self.fetch_latest_price(symbol)
@@ -404,7 +411,7 @@ class OpenDataProvider:
         )
         snapshot = compute_open_data_snapshot(companyfacts=companyfacts, **snapshot_args)
         attempts = list(companyfacts.get("collection_notes", []))
-        if cik is not None and fundamental_gap_reasons(snapshot, include_history=False):
+        if cik is not None and fundamental_gap_reasons(snapshot, include_history=True):
             try:
                 supplemented, note = self._supplement_sec_companyfacts(symbol, metadata, companyfacts)
                 attempts.append(note)

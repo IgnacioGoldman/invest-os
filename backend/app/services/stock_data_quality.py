@@ -43,11 +43,16 @@ def retain_verified_history(snapshot: OpenDataSnapshot, previous: OpenDataSnapsh
         return snapshot
     histories = dict(snapshot.historical_series)
     for name, old_rows in previous.historical_series.items():
+        corrected_dates = {row.as_of for row in histories.get(name, [])}
         rows = {(r.period, r.as_of): r for r in histories.get(name, [])}
         for old in old_rows:
             key = (old.period, old.as_of)
             new = rows.get(key)
             if new is None:
+                if name in {"quarterly_revenue", "quarterly_fundamentals"} and old.as_of in corrected_dates:
+                    # A fresh canonical fiscal label supersedes an older label
+                    # for the same statement date; retaining both creates gaps.
+                    continue
                 rows[key] = old
             else:
                 metrics = dict(new.metrics)

@@ -4,7 +4,7 @@
   "symbols": [
     {
       "ticker": "AAPL",
-      "revenue_growth_observations": 63,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -46,7 +46,7 @@
     },
     {
       "ticker": "ABBV",
-      "revenue_growth_observations": 46,
+      "revenue_growth_observations": 48,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Stable",
@@ -88,7 +88,7 @@
     },
     {
       "ticker": "ABNB",
-      "revenue_growth_observations": 18,
+      "revenue_growth_observations": 22,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -130,7 +130,7 @@
     },
     {
       "ticker": "ADBE",
-      "revenue_growth_observations": 66,
+      "revenue_growth_observations": 70,
       "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Stable",
@@ -172,7 +172,7 @@
     },
     {
       "ticker": "ADI",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -214,39 +214,39 @@
     },
     {
       "ticker": "AFRM",
-      "revenue_growth_observations": 19,
+      "revenue_growth_observations": 23,
       "latest_revenue_period": "FY2026 Q4",
       "revenue_momentum": {
-        "label": "Decelerating",
-        "change": -11.831823052840079,
-        "recentMedian": 26.412669417578655,
-        "priorMedian": 38.244492470418734,
-        "latestChange": 3.6828449849161586,
-        "latestMovement": "Improving",
+        "label": "Stable",
+        "change": -0.982321779865579,
+        "recentMedian": 32.64188166791166,
+        "priorMedian": 33.62420344777724,
+        "latestChange": 0.3952456356436045,
+        "latestMovement": "Steady",
         "points": [
           {
             "period": "FY2025 Q3",
-            "value": 39.78960649952813
+            "value": 35.923888801142745
           },
           {
             "period": "FY2025 Q4",
-            "value": 36.86670714502563
+            "value": 32.95463337302881
           },
           {
             "period": "FY2026 Q1",
-            "value": 38.244492470418734
+            "value": 33.62420344777724
           },
           {
             "period": "FY2026 Q2",
-            "value": 32.46402254510175
+            "value": 29.62184073750463
           },
           {
             "period": "FY2026 Q3",
-            "value": 22.729824432662497
+            "value": 32.64188166791166
           },
           {
             "period": "FY2026 Q4",
-            "value": 26.412669417578655
+            "value": 33.037127303555266
           }
         ],
         "reason": null
@@ -260,7 +260,7 @@
     },
     {
       "ticker": "AMAT",
-      "revenue_growth_observations": 63,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -302,7 +302,7 @@
     },
     {
       "ticker": "AMD",
-      "revenue_growth_observations": 61,
+      "revenue_growth_observations": 65,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Stable",
@@ -344,7 +344,7 @@
     },
     {
       "ticker": "AMGN",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Stable",
@@ -386,7 +386,7 @@
     },
     {
       "ticker": "AMZN",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -428,19 +428,19 @@
     },
     {
       "ticker": "ANET",
-      "revenue_growth_observations": 45,
+      "revenue_growth_observations": 49,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 7.543085909663958,
+        "change": 7.545196860359368,
         "recentMedian": 35.125698324022345,
-        "priorMedian": 27.582612414358387,
+        "priorMedian": 27.580501463662976,
         "latestChange": 2.5602595859921635,
         "latestMovement": "Steady",
         "points": [
           {
             "period": "FY2025 Q1",
-            "value": 27.582612414358387
+            "value": 27.580501463662976
           },
           {
             "period": "FY2025 Q2",
@@ -448,11 +448,11 @@
           },
           {
             "period": "FY2025 Q3",
-            "value": 27.46447141146899
+            "value": 27.467005356452596
           },
           {
             "period": "FY2025 Q4",
-            "value": 28.872441251613623
+            "value": 28.874844591794446
           },
           {
             "period": "FY2026 Q1",
@@ -472,35 +472,35 @@
     },
     {
       "ticker": "APP",
-      "revenue_growth_observations": 18,
+      "revenue_growth_observations": 20,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
-        "label": "Accelerating",
-        "change": 6.892935816245597,
-        "recentMedian": 24.152488408182904,
-        "priorMedian": 17.259552591937307,
-        "latestChange": 28.67213022262184,
-        "latestMovement": "Improving",
+        "label": "Decelerating",
+        "change": -9.25896926997548,
+        "recentMedian": 58.97241870827128,
+        "priorMedian": 68.23138797824676,
+        "latestChange": -6.147800077466535,
+        "latestMovement": "Weakening",
         "points": [
           {
             "period": "FY2025 Q1",
-            "value": 40.25139044432788
+            "value": 9.53195068588953
           },
           {
             "period": "FY2025 Q2",
-            "value": 16.538455484997485
+            "value": 77.03620880009564
           },
           {
             "period": "FY2025 Q3",
-            "value": 17.259552591937307
+            "value": 68.23138797824676
           },
           {
             "period": "FY2025 Q4",
-            "value": 20.772826507398495
+            "value": 65.87949618154113
           },
           {
             "period": "FY2026 Q1",
-            "value": 24.152488408182904
+            "value": 58.97241870827128
           },
           {
             "period": "FY2026 Q2",
@@ -514,7 +514,7 @@
     },
     {
       "ticker": "AVGO",
-      "revenue_growth_observations": 30,
+      "revenue_growth_observations": 34,
       "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -602,41 +602,91 @@
     },
     {
       "ticker": "AZN",
-      "revenue_growth_observations": 8,
+      "revenue_growth_observations": 27,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
-        "label": "Unclear",
-        "change": null,
-        "recentMedian": null,
-        "priorMedian": null,
-        "latestChange": null,
-        "latestMovement": null,
-        "points": [],
-        "reason": "The latest six revenue quarters contain a gap or duplicate fiscal period."
+        "label": "Decelerating",
+        "change": -5.32849036176204,
+        "recentMedian": 6.412118696825067,
+        "priorMedian": 11.740609058587108,
+        "latestChange": -6.098920455368044,
+        "latestMovement": "Weakening",
+        "points": [
+          {
+            "period": "FY2025 Q1",
+            "value": 7.16933512106633
+          },
+          {
+            "period": "FY2025 Q2",
+            "value": 11.740609058587108
+          },
+          {
+            "period": "FY2025 Q3",
+            "value": 11.986730556579433
+          },
+          {
+            "period": "FY2025 Q4",
+            "value": 4.109865019139077
+          },
+          {
+            "period": "FY2026 Q1",
+            "value": 12.511039152193112
+          },
+          {
+            "period": "FY2026 Q2",
+            "value": 6.412118696825067
+          }
+        ],
+        "reason": null
       },
       "missing_inputs": {},
       "not_meaningful": {}
     },
     {
       "ticker": "B",
-      "revenue_growth_observations": 7,
-      "latest_revenue_period": "FY2025 Q2",
+      "revenue_growth_observations": 13,
+      "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
-        "label": "Unclear",
-        "change": null,
-        "recentMedian": null,
-        "priorMedian": null,
-        "latestChange": null,
-        "latestMovement": null,
-        "points": [],
-        "reason": "The latest six revenue quarters contain a gap or duplicate fiscal period."
+        "label": "Accelerating",
+        "change": 48.11308673210423,
+        "recentMedian": 64.52674897119341,
+        "priorMedian": 16.413662239089184,
+        "latestChange": -22.943984002124708,
+        "latestMovement": "Weakening",
+        "points": [
+          {
+            "period": "FY2025 Q1",
+            "value": 13.942482708409173
+          },
+          {
+            "period": "FY2025 Q2",
+            "value": 16.413662239089184
+          },
+          {
+            "period": "FY2025 Q3",
+            "value": 23.159144893111637
+          },
+          {
+            "period": "FY2025 Q4",
+            "value": 64.52674897119341
+          },
+          {
+            "period": "FY2026 Q1",
+            "value": 66.70926517571884
+          },
+          {
+            "period": "FY2026 Q2",
+            "value": 43.76528117359413
+          }
+        ],
+        "reason": null
       },
       "missing_inputs": {},
       "not_meaningful": {}
     },
     {
       "ticker": "BMY",
-      "revenue_growth_observations": 63,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Stable",
@@ -678,7 +728,7 @@
     },
     {
       "ticker": "BSX",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Decelerating",
@@ -720,17 +770,42 @@
     },
     {
       "ticker": "BX",
-      "revenue_growth_observations": 55,
+      "revenue_growth_observations": 61,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
-        "label": "Unclear",
-        "change": null,
-        "recentMedian": null,
-        "priorMedian": null,
-        "latestChange": null,
-        "latestMovement": null,
-        "points": [],
-        "reason": "FY2025 Q2 has no comparable revenue YoY growth."
+        "label": "Accelerating",
+        "change": 46.688982140225285,
+        "recentMedian": 35.886688757779034,
+        "priorMedian": -10.802293382446253,
+        "latestChange": 25.91127639501289,
+        "latestMovement": "Improving",
+        "points": [
+          {
+            "period": "FY2025 Q1",
+            "value": -10.802293382446253
+          },
+          {
+            "period": "FY2025 Q2",
+            "value": 32.73942284688675
+          },
+          {
+            "period": "FY2025 Q3",
+            "value": -15.684645694440425
+          },
+          {
+            "period": "FY2025 Q4",
+            "value": 41.449474706940485
+          },
+          {
+            "period": "FY2026 Q1",
+            "value": 9.975412362766145
+          },
+          {
+            "period": "FY2026 Q2",
+            "value": 35.886688757779034
+          }
+        ],
+        "reason": null
       },
       "missing_inputs": {},
       "not_meaningful": {
@@ -742,7 +817,7 @@
     },
     {
       "ticker": "CALM",
-      "revenue_growth_observations": 55,
+      "revenue_growth_observations": 61,
       "latest_revenue_period": "FY2027 Q1",
       "revenue_momentum": {
         "label": "Decelerating",
@@ -787,7 +862,7 @@
     },
     {
       "ticker": "CAT",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 68,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -829,7 +904,7 @@
     },
     {
       "ticker": "CIEN",
-      "revenue_growth_observations": 61,
+      "revenue_growth_observations": 65,
       "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -871,7 +946,7 @@
     },
     {
       "ticker": "COP",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 66,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Decelerating",
@@ -913,24 +988,49 @@
     },
     {
       "ticker": "CRM",
-      "revenue_growth_observations": 45,
+      "revenue_growth_observations": 57,
       "latest_revenue_period": "FY2027 Q2",
       "revenue_momentum": {
-        "label": "Unclear",
-        "change": null,
-        "recentMedian": null,
-        "priorMedian": null,
-        "latestChange": null,
-        "latestMovement": null,
-        "points": [],
-        "reason": "The latest six revenue quarters contain a gap or duplicate fiscal period."
+        "label": "Accelerating",
+        "change": 3.4586440495640467,
+        "recentMedian": 12.088461923346342,
+        "priorMedian": 8.629817873782295,
+        "latestChange": -2.4325530860639972,
+        "latestMovement": "Steady",
+        "points": [
+          {
+            "period": "FY2026 Q1",
+            "value": 7.620716084528632
+          },
+          {
+            "period": "FY2026 Q2",
+            "value": 9.769436997319035
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 8.629817873782295
+          },
+          {
+            "period": "FY2026 Q4",
+            "value": 12.088461923346342
+          },
+          {
+            "period": "FY2027 Q1",
+            "value": 13.266863363516126
+          },
+          {
+            "period": "FY2027 Q2",
+            "value": 10.83431027745213
+          }
+        ],
+        "reason": null
       },
       "missing_inputs": {},
       "not_meaningful": {}
     },
     {
       "ticker": "CSCO",
-      "revenue_growth_observations": 62,
+      "revenue_growth_observations": 68,
       "latest_revenue_period": "FY2026 Q4",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -972,7 +1072,7 @@
     },
     {
       "ticker": "DDOG",
-      "revenue_growth_observations": 24,
+      "revenue_growth_observations": 28,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -1017,7 +1117,7 @@
     },
     {
       "ticker": "DT",
-      "revenue_growth_observations": 25,
+      "revenue_growth_observations": 29,
       "latest_revenue_period": "FY2027 Q1",
       "revenue_momentum": {
         "label": "Stable",
@@ -1063,39 +1163,39 @@
     },
     {
       "ticker": "DVN",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 67,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Decelerating",
-        "change": -12.879884929397702,
-        "recentMedian": -0.9230769230769231,
-        "priorMedian": 11.95680800632078,
-        "latestChange": 73.92208878078442,
+        "change": -15.77413942068765,
+        "recentMedian": -6.404724051782876,
+        "priorMedian": 9.369415368904773,
+        "latestChange": 87.62045698782657,
         "latestMovement": "Improving",
         "points": [
           {
             "period": "FY2025 Q1",
-            "value": 21.62523389468057
+            "value": 23.804226918798665
           },
           {
             "period": "FY2025 Q2",
-            "value": 3.954802259887006
+            "value": 9.369415368904773
           },
           {
             "period": "FY2025 Q3",
-            "value": 11.95680800632078
+            "value": 7.629224652087475
           },
           {
             "period": "FY2025 Q4",
-            "value": -12.257633162469356
+            "value": -6.404724051782876
           },
           {
             "period": "FY2026 Q1",
-            "value": -0.9230769230769231
+            "value": -14.487870619946092
           },
           {
             "period": "FY2026 Q2",
-            "value": 72.9990118577075
+            "value": 73.13258636788048
           }
         ],
         "reason": null
@@ -1105,7 +1205,7 @@
     },
     {
       "ticker": "DXCM",
-      "revenue_growth_observations": 55,
+      "revenue_growth_observations": 59,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Stable",
@@ -1147,7 +1247,7 @@
     },
     {
       "ticker": "GOOG",
-      "revenue_growth_observations": 37,
+      "revenue_growth_observations": 44,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -1189,23 +1289,23 @@
     },
     {
       "ticker": "HL",
-      "revenue_growth_observations": 49,
+      "revenue_growth_observations": 57,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 19.543294844546757,
-        "recentMedian": 57.432683219879166,
-        "priorMedian": 37.88938837533241,
-        "latestChange": -47.623028156348624,
+        "change": 71.1524342451221,
+        "recentMedian": 79.49209909675352,
+        "priorMedian": 8.339664851631422,
+        "latestChange": -47.92361581866962,
         "latestMovement": "Weakening",
         "points": [
           {
             "period": "FY2025 Q1",
-            "value": 37.88938837533241
+            "value": 8.339664851631422
           },
           {
             "period": "FY2025 Q2",
-            "value": 23.76077213350322
+            "value": -10.854565512075782
           },
           {
             "period": "FY2025 Q3",
@@ -1217,11 +1317,11 @@
           },
           {
             "period": "FY2026 Q1",
-            "value": 57.432683219879166
+            "value": 100.37256372544246
           },
           {
             "period": "FY2026 Q2",
-            "value": 9.80965506353054
+            "value": 52.448947906772844
           }
         ],
         "reason": null
@@ -1234,23 +1334,23 @@
     },
     {
       "ticker": "HON",
-      "revenue_growth_observations": 61,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
-        "label": "Decelerating",
-        "change": -14.787846400693464,
-        "recentMedian": -6.9130523315007135,
-        "priorMedian": 7.874794069192752,
-        "latestChange": 0.7982918987340986,
+        "label": "Accelerating",
+        "change": 6.235678508652717,
+        "recentMedian": 4.258742759064579,
+        "priorMedian": -1.9769357495881383,
+        "latestChange": 1.8161657282522543,
         "latestMovement": "Steady",
         "points": [
           {
             "period": "FY2025 Q1",
-            "value": 7.874794069192752
+            "value": -1.9769357495881383
           },
           {
             "period": "FY2025 Q2",
-            "value": 8.092304479482094
+            "value": -2.662629215829592
           },
           {
             "period": "FY2025 Q3",
@@ -1258,15 +1358,15 @@
           },
           {
             "period": "FY2025 Q4",
-            "value": -31.99841395717684
+            "value": 8.76803551609323
           },
           {
             "period": "FY2026 Q1",
-            "value": -6.9130523315007135
+            "value": 2.4425770308123247
           },
           {
             "period": "FY2026 Q2",
-            "value": -6.114760432766615
+            "value": 4.258742759064579
           }
         ],
         "reason": null
@@ -1276,7 +1376,7 @@
     },
     {
       "ticker": "HWM",
-      "revenue_growth_observations": 63,
+      "revenue_growth_observations": 64,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -1318,7 +1418,7 @@
     },
     {
       "ticker": "INOD",
-      "revenue_growth_observations": 57,
+      "revenue_growth_observations": 61,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Decelerating",
@@ -1363,7 +1463,7 @@
     },
     {
       "ticker": "INTU",
-      "revenue_growth_observations": 60,
+      "revenue_growth_observations": 66,
       "latest_revenue_period": "FY2026 Q4",
       "revenue_momentum": {
         "label": "Decelerating",
@@ -1407,7 +1507,7 @@
     },
     {
       "ticker": "ISRG",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Stable",
@@ -1449,7 +1549,7 @@
     },
     {
       "ticker": "KLAC",
-      "revenue_growth_observations": 60,
+      "revenue_growth_observations": 64,
       "latest_revenue_period": "FY2026 Q4",
       "revenue_momentum": {
         "label": "Decelerating",
@@ -1494,7 +1594,7 @@
     },
     {
       "ticker": "KO",
-      "revenue_growth_observations": 64,
+      "revenue_growth_observations": 68,
       "latest_revenue_period": "FY2026 Q1",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -1536,23 +1636,23 @@
     },
     {
       "ticker": "LLY",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Stable",
-        "change": 2.4997065535858525,
-        "recentMedian": 47.669642684972715,
-        "priorMedian": 45.16993613138686,
-        "latestChange": -7.878929417003164,
+        "change": 2.4911565317629467,
+        "recentMedian": 47.66679521789433,
+        "priorMedian": 45.175638686131386,
+        "latestChange": -7.8756668765357105,
         "latestMovement": "Weakening",
         "points": [
           {
             "period": "FY2025 Q1",
-            "value": 45.16993613138686
+            "value": 45.175638686131386
           },
           {
             "period": "FY2025 Q2",
-            "value": 37.64465442191315
+            "value": 37.64730863148954
           },
           {
             "period": "FY2025 Q3",
@@ -1560,15 +1660,15 @@
           },
           {
             "period": "FY2025 Q4",
-            "value": 42.55734216126744
+            "value": 42.55418196865463
           },
           {
             "period": "FY2026 Q1",
-            "value": 55.54857210197588
+            "value": 55.54246209443004
           },
           {
             "period": "FY2026 Q2",
-            "value": 47.669642684972715
+            "value": 47.66679521789433
           }
         ],
         "reason": null
@@ -1578,7 +1678,7 @@
     },
     {
       "ticker": "LMT",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -1620,7 +1720,7 @@
     },
     {
       "ticker": "LRCX",
-      "revenue_growth_observations": 58,
+      "revenue_growth_observations": 62,
       "latest_revenue_period": "FY2026 Q4",
       "revenue_momentum": {
         "label": "Decelerating",
@@ -1664,7 +1764,7 @@
     },
     {
       "ticker": "MA",
-      "revenue_growth_observations": 60,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Stable",
@@ -1706,7 +1806,7 @@
     },
     {
       "ticker": "MDT",
-      "revenue_growth_observations": 42,
+      "revenue_growth_observations": 45,
       "latest_revenue_period": "FY2027 Q1",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -1748,39 +1848,39 @@
     },
     {
       "ticker": "MELI",
-      "revenue_growth_observations": 30,
+      "revenue_growth_observations": 32,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 11.082002542890216,
-        "recentMedian": 44.71486518730613,
-        "priorMedian": 33.632862644415916,
-        "latestChange": 2.17249687806968,
+        "change": 12.059096244393892,
+        "recentMedian": 49.03117101937658,
+        "priorMedian": 36.97207477498269,
+        "latestChange": 0.7331883326116397,
         "latestMovement": "Steady",
         "points": [
           {
             "period": "FY2025 Q1",
-            "value": 35.237173281703775
+            "value": 36.97207477498269
           },
           {
             "period": "FY2025 Q2",
-            "value": 27.56972111553785
+            "value": 33.84585058150996
           },
           {
             "period": "FY2025 Q3",
-            "value": 33.632862644415916
+            "value": 39.47665662650602
           },
           {
             "period": "FY2025 Q4",
-            "value": 38.322813345356174
+            "value": 44.56180887935302
           },
           {
             "period": "FY2026 Q1",
-            "value": 44.71486518730613
+            "value": 49.03117101937658
           },
           {
             "period": "FY2026 Q2",
-            "value": 46.88736206537581
+            "value": 49.76435935198822
           }
         ],
         "reason": null
@@ -1790,7 +1890,7 @@
     },
     {
       "ticker": "META",
-      "revenue_growth_observations": 53,
+      "revenue_growth_observations": 57,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -1832,7 +1932,7 @@
     },
     {
       "ticker": "MNST",
-      "revenue_growth_observations": 61,
+      "revenue_growth_observations": 65,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -1874,7 +1974,7 @@
     },
     {
       "ticker": "MPC",
-      "revenue_growth_observations": 31,
+      "revenue_growth_observations": 39,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -1916,7 +2016,7 @@
     },
     {
       "ticker": "MRVL",
-      "revenue_growth_observations": 18,
+      "revenue_growth_observations": 22,
       "latest_revenue_period": "FY2027 Q2",
       "revenue_momentum": {
         "label": "Decelerating",
@@ -1961,7 +2061,7 @@
     },
     {
       "ticker": "MSFT",
-      "revenue_growth_observations": 62,
+      "revenue_growth_observations": 68,
       "latest_revenue_period": "FY2026 Q4",
       "revenue_momentum": {
         "label": "Stable",
@@ -2003,7 +2103,7 @@
     },
     {
       "ticker": "MSTR",
-      "revenue_growth_observations": 57,
+      "revenue_growth_observations": 61,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -2049,7 +2149,7 @@
     },
     {
       "ticker": "MU",
-      "revenue_growth_observations": 59,
+      "revenue_growth_observations": 65,
       "latest_revenue_period": "FY2026 Q4",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -2094,7 +2194,7 @@
     },
     {
       "ticker": "NFLX",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Stable",
@@ -2182,7 +2282,7 @@
     },
     {
       "ticker": "NVDA",
-      "revenue_growth_observations": 51,
+      "revenue_growth_observations": 67,
       "latest_revenue_period": "FY2027 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -2226,57 +2326,107 @@
     },
     {
       "ticker": "NVS",
-      "revenue_growth_observations": 7,
-      "latest_revenue_period": "FY2025 Q2",
+      "revenue_growth_observations": 13,
+      "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
-        "label": "Unclear",
-        "change": null,
-        "recentMedian": null,
-        "priorMedian": null,
-        "latestChange": null,
-        "latestMovement": null,
-        "points": [],
-        "reason": "The latest six revenue quarters contain a gap or duplicate fiscal period."
+        "label": "Decelerating",
+        "change": -10.47781760612564,
+        "recentMedian": 1.3913175701360907,
+        "priorMedian": 11.86913517626173,
+        "latestChange": 3.4256796912204788,
+        "latestMovement": "Improving",
+        "points": [
+          {
+            "period": "FY2025 Q1",
+            "value": 11.86913517626173
+          },
+          {
+            "period": "FY2025 Q2",
+            "value": 12.324168797953964
+          },
+          {
+            "period": "FY2025 Q3",
+            "value": 8.469156983545192
+          },
+          {
+            "period": "FY2025 Q4",
+            "value": 1.3913175701360907
+          },
+          {
+            "period": "FY2026 Q1",
+            "value": -0.906823849467241
+          },
+          {
+            "period": "FY2026 Q2",
+            "value": 2.5188558417532376
+          }
+        ],
+        "reason": null
       },
       "missing_inputs": {},
       "not_meaningful": {}
     },
     {
       "ticker": "ORCL",
-      "revenue_growth_observations": 64,
-      "latest_revenue_period": "FY2026 Q1",
+      "revenue_growth_observations": 69,
+      "latest_revenue_period": "FY2027 Q1",
       "revenue_momentum": {
-        "label": "Unclear",
-        "change": null,
-        "recentMedian": null,
-        "priorMedian": null,
-        "latestChange": null,
-        "latestMovement": null,
-        "points": [],
-        "reason": "The latest six revenue quarters contain a gap or duplicate fiscal period."
+        "label": "Accelerating",
+        "change": 9.489522060847245,
+        "recentMedian": 21.656050955414013,
+        "priorMedian": 12.166528894566769,
+        "latestChange": 8.974729123126181,
+        "latestMovement": "Improving",
+        "points": [
+          {
+            "period": "FY2025 Q4",
+            "value": 11.310982011618954
+          },
+          {
+            "period": "FY2026 Q1",
+            "value": 12.166528894566769
+          },
+          {
+            "period": "FY2026 Q2",
+            "value": 14.218649975104917
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 21.656050955414013
+          },
+          {
+            "period": "FY2026 Q4",
+            "value": 20.6313274224989
+          },
+          {
+            "period": "FY2027 Q1",
+            "value": 29.60605654562508
+          }
+        ],
+        "reason": null
       },
       "missing_inputs": {},
       "not_meaningful": {}
     },
     {
       "ticker": "OXY",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
-        "label": "Decelerating",
-        "change": -17.210460631932634,
-        "recentMedian": -23.122151991768337,
-        "priorMedian": -5.9116913598357055,
-        "latestChange": 48.86271950034333,
+        "label": "Stable",
+        "change": -0.6562565440880146,
+        "recentMedian": -8.309957924263674,
+        "priorMedian": -7.65370138017566,
+        "latestChange": 61.69527553552271,
         "latestMovement": "Improving",
         "points": [
           {
             "period": "FY2025 Q1",
-            "value": 13.857740585774058
+            "value": -4.535564853556486
           },
           {
             "period": "FY2025 Q2",
-            "value": -5.9116913598357055
+            "value": -22.86929734487311
           },
           {
             "period": "FY2025 Q3",
@@ -2284,15 +2434,15 @@
           },
           {
             "period": "FY2025 Q4",
-            "value": -74.0828402366864
+            "value": -14.703018500486856
           },
           {
             "period": "FY2026 Q1",
-            "value": -23.122151991768337
+            "value": -8.309957924263674
           },
           {
             "period": "FY2026 Q2",
-            "value": 25.74056750857499
+            "value": 53.38531761125903
           }
         ],
         "reason": null
@@ -2302,14 +2452,14 @@
     },
     {
       "ticker": "PANW",
-      "revenue_growth_observations": 52,
+      "revenue_growth_observations": 56,
       "latest_revenue_period": "FY2026 Q4",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 15.476633721109314,
+        "change": 15.487449274136871,
         "recentMedian": 31.148973350808213,
-        "priorMedian": 15.672339629698898,
-        "latestChange": 3.2988443363739037,
+        "priorMedian": 15.661524076671341,
+        "latestChange": 3.3147490466681333,
         "latestMovement": "Improving",
         "points": [
           {
@@ -2318,15 +2468,15 @@
           },
           {
             "period": "FY2025 Q4",
-            "value": 15.83923270153003
+            "value": 15.85198720877113
           },
           {
             "period": "FY2026 Q1",
-            "value": 15.672339629698898
+            "value": 15.661524076671341
           },
           {
             "period": "FY2026 Q2",
-            "value": 14.91095951094179
+            "value": 14.931324767390342
           },
           {
             "period": "FY2026 Q3",
@@ -2334,7 +2484,7 @@
           },
           {
             "period": "FY2026 Q4",
-            "value": 34.447817687182116
+            "value": 34.463722397476346
           }
         ],
         "reason": null
@@ -2347,7 +2497,7 @@
     },
     {
       "ticker": "PEP",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 67,
       "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -2391,39 +2541,39 @@
     },
     {
       "ticker": "PH",
-      "revenue_growth_observations": 62,
+      "revenue_growth_observations": 68,
       "latest_revenue_period": "FY2026 Q4",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 8.67919820446494,
-        "recentMedian": 9.763852274448158,
-        "priorMedian": 1.0846540699832172,
-        "latestChange": -0.8332045052260124,
+        "change": 8.689851996632456,
+        "recentMedian": 9.765401487697883,
+        "priorMedian": 1.0755494910654264,
+        "latestChange": -0.8394372219795372,
         "latestMovement": "Steady",
         "points": [
           {
             "period": "FY2025 Q3",
-            "value": -2.2467284518468946
+            "value": -2.253606171896493
           },
           {
             "period": "FY2025 Q4",
-            "value": 1.0846540699832172
+            "value": 1.0755494910654264
           },
           {
             "period": "FY2026 Q1",
-            "value": 3.67081132401737
+            "value": 3.6704730831973897
           },
           {
             "period": "FY2026 Q2",
-            "value": 9.096437328693396
+            "value": 9.08707569049125
           },
           {
             "period": "FY2026 Q3",
-            "value": 10.59705677967417
+            "value": 10.60483870967742
           },
           {
             "period": "FY2026 Q4",
-            "value": 9.763852274448158
+            "value": 9.765401487697883
           }
         ],
         "reason": null
@@ -2433,7 +2583,7 @@
     },
     {
       "ticker": "PLTR",
-      "revenue_growth_observations": 19,
+      "revenue_growth_observations": 23,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -2475,7 +2625,7 @@
     },
     {
       "ticker": "PWR",
-      "revenue_growth_observations": 30,
+      "revenue_growth_observations": 32,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -2517,34 +2667,84 @@
     },
     {
       "ticker": "SPGI",
-      "revenue_growth_observations": 60,
+      "revenue_growth_observations": 65,
       "latest_revenue_period": "FY2026 Q1",
       "revenue_momentum": {
-        "label": "Unclear",
-        "change": null,
-        "recentMedian": null,
-        "priorMedian": null,
-        "latestChange": null,
-        "latestMovement": null,
-        "points": [],
-        "reason": "The latest six revenue quarters contain a gap or duplicate fiscal period."
+        "label": "Stable",
+        "change": 0.8275495563201325,
+        "recentMedian": 9.020044543429844,
+        "priorMedian": 8.192494987109711,
+        "latestChange": 1.4115148952781258,
+        "latestMovement": "Steady",
+        "points": [
+          {
+            "period": "FY2024 Q4",
+            "value": 13.959390862944163
+          },
+          {
+            "period": "FY2025 Q1",
+            "value": 8.192494987109711
+          },
+          {
+            "period": "FY2025 Q2",
+            "value": 5.804451958298112
+          },
+          {
+            "period": "FY2025 Q3",
+            "value": 8.755244755244755
+          },
+          {
+            "period": "FY2025 Q4",
+            "value": 9.020044543429844
+          },
+          {
+            "period": "FY2026 Q1",
+            "value": 10.43155943870797
+          }
+        ],
+        "reason": null
       },
       "missing_inputs": {},
       "not_meaningful": {}
     },
     {
       "ticker": "STX",
-      "revenue_growth_observations": 56,
+      "revenue_growth_observations": 64,
       "latest_revenue_period": "FY2026 Q4",
       "revenue_momentum": {
-        "label": "Unclear",
-        "change": null,
-        "recentMedian": null,
-        "priorMedian": null,
-        "latestChange": null,
-        "latestMovement": null,
-        "points": [],
-        "reason": "The latest six revenue quarters contain a gap or duplicate fiscal period."
+        "label": "Accelerating",
+        "change": 14.556321026909263,
+        "recentMedian": 44.074074074074076,
+        "priorMedian": 29.517753047164813,
+        "latestChange": 4.412014305631324,
+        "latestMovement": "Improving",
+        "points": [
+          {
+            "period": "FY2025 Q3",
+            "value": 30.513595166163142
+          },
+          {
+            "period": "FY2025 Q4",
+            "value": 29.517753047164813
+          },
+          {
+            "period": "FY2026 Q1",
+            "value": 21.263837638376383
+          },
+          {
+            "period": "FY2026 Q2",
+            "value": 21.50537634408602
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 44.074074074074076
+          },
+          {
+            "period": "FY2026 Q4",
+            "value": 48.4860883797054
+          }
+        ],
+        "reason": null
       },
       "missing_inputs": {},
       "not_meaningful": {
@@ -2554,7 +2754,7 @@
     },
     {
       "ticker": "SYK",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Stable",
@@ -2596,7 +2796,7 @@
     },
     {
       "ticker": "TER",
-      "revenue_growth_observations": 61,
+      "revenue_growth_observations": 65,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -2640,7 +2840,7 @@
     },
     {
       "ticker": "TGT",
-      "revenue_growth_observations": 61,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -2682,7 +2882,7 @@
     },
     {
       "ticker": "TSLA",
-      "revenue_growth_observations": 57,
+      "revenue_growth_observations": 61,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -2726,7 +2926,7 @@
     },
     {
       "ticker": "TXN",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -2768,7 +2968,7 @@
     },
     {
       "ticker": "UBER",
-      "revenue_growth_observations": 26,
+      "revenue_growth_observations": 30,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Decelerating",
@@ -2810,7 +3010,7 @@
     },
     {
       "ticker": "UNP",
-      "revenue_growth_observations": 65,
+      "revenue_growth_observations": 69,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Stable",
@@ -2852,7 +3052,7 @@
     },
     {
       "ticker": "V",
-      "revenue_growth_observations": 62,
+      "revenue_growth_observations": 66,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -2900,7 +3100,7 @@
     },
     {
       "ticker": "VLO",
-      "revenue_growth_observations": 29,
+      "revenue_growth_observations": 33,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Accelerating",
@@ -2984,7 +3184,7 @@
     },
     {
       "ticker": "VRTX",
-      "revenue_growth_observations": 62,
+      "revenue_growth_observations": 66,
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Stable",
@@ -3026,31 +3226,31 @@
     },
     {
       "ticker": "WDC",
-      "revenue_growth_observations": 64,
+      "revenue_growth_observations": 62,
       "latest_revenue_period": "FY2026 Q4",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 75.02314277746139,
+        "change": 13.84875163301037,
         "recentMedian": 43.83877159309021,
-        "priorMedian": -31.184371184371184,
+        "priorMedian": 29.990019960079838,
         "latestChange": -1.6276625830213902,
         "latestMovement": "Steady",
         "points": [
           {
             "period": "FY2025 Q3",
-            "value": -33.64188602834828
+            "value": 30.93607305936073
           },
           {
             "period": "FY2025 Q4",
-            "value": -30.791710945802336
+            "value": 29.990019960079838
           },
           {
             "period": "FY2026 Q1",
-            "value": -31.184371184371184
+            "value": 27.39602169981917
           },
           {
             "period": "FY2026 Q2",
-            "value": -29.591598599766627
+            "value": 25.238688252386883
           },
           {
             "period": "FY2026 Q3",
@@ -3071,20 +3271,44 @@
     },
     {
       "ticker": "YPF",
-      "revenue_growth_observations": 0,
-      "latest_revenue_period": null,
+      "revenue_growth_observations": 6,
+      "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
-        "label": "Unclear",
-        "change": null,
-        "recentMedian": null,
-        "priorMedian": null,
-        "latestChange": null,
-        "latestMovement": null,
-        "points": [],
-        "reason": "Needs six consecutive quarters with comparable revenue YoY growth."
+        "label": "Accelerating",
+        "change": 13.292516252955084,
+        "recentMedian": 7.335069444444445,
+        "priorMedian": -5.957446808510639,
+        "latestChange": 34.31543691194427,
+        "latestMovement": "Improving",
+        "points": [
+          {
+            "period": "FY2025 Q1",
+            "value": 6.914153132250581
+          },
+          {
+            "period": "FY2025 Q2",
+            "value": -5.957446808510639
+          },
+          {
+            "period": "FY2025 Q3",
+            "value": -12.3466112894091
+          },
+          {
+            "period": "FY2025 Q4",
+            "value": -4.104399073879184
+          },
+          {
+            "period": "FY2026 Q1",
+            "value": 7.335069444444445
+          },
+          {
+            "period": "FY2026 Q2",
+            "value": 41.65050635638871
+          }
+        ],
+        "reason": null
       },
       "missing_inputs": {
-        "business_health.revenue_growth_yoy": "revenue_growth_yoy: Comparable quarterly SEC revenue facts were unavailable for latest-quarter growth.",
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: Quarterly SEC diluted EPS facts were unavailable.",
         "business_health.gross_margin": "gross_margin: Quarterly SEC facts were unavailable for gross_margin.",
         "business_health.operating_margin": "operating_margin: Quarterly SEC facts were unavailable for operating_margin.",

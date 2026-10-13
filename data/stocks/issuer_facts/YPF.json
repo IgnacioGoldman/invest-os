@@ -1,0 +1,115 @@
+{
+  "entityName": "YPF Sociedad Anonima",
+  "verified_on": "2026-10-13",
+  "revenue_definition": "Consolidated IFRS revenues in the issuer functional currency USD, as reported in the earnings release income statement.",
+  "facts": {
+    "issuer": {
+      "Revenues": {
+        "units": {
+          "USD": [
+            {
+              "val": 4310000000,
+              "start": "2024-01-01",
+              "end": "2024-03-31",
+              "fy": 2024,
+              "fp": "Q1",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-05-08",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/904851/000119312525115113/d932212d6k.htm"
+            },
+            {
+              "val": 4935000000,
+              "start": "2024-04-01",
+              "end": "2024-06-30",
+              "fy": 2024,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-08-07",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/904851/000119312525175497/d907911d6k.htm"
+            },
+            {
+              "val": 5297000000,
+              "start": "2024-07-01",
+              "end": "2024-09-30",
+              "fy": 2024,
+              "fp": "Q3",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-11-07",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/904851/000119312525272507/d66804d6k.htm"
+            },
+            {
+              "val": 4751000000,
+              "start": "2024-10-01",
+              "end": "2024-12-31",
+              "fy": 2024,
+              "fp": "Q4",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-02-26",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/904851/000119312526078200/d118508d6k.htm"
+            },
+            {
+              "val": 4608000000,
+              "start": "2025-01-01",
+              "end": "2025-03-31",
+              "fy": 2025,
+              "fp": "Q1",
+              "form": "ISSUER-QUARTER",
+              "filed": "2025-08-07",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/904851/000119312525175497/d907911d6k.htm"
+            },
+            {
+              "val": 4641000000,
+              "start": "2025-04-01",
+              "end": "2025-06-30",
+              "fy": 2025,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/904851/000155485526001760/MainDocument.htm"
+            },
+            {
+              "val": 4643000000,
+              "start": "2025-07-01",
+              "end": "2025-09-30",
+              "fy": 2025,
+              "fp": "Q3",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-02-26",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/904851/000119312526078200/d118508d6k.htm"
+            },
+            {
+              "val": 4556000000,
+              "start": "2025-10-01",
+              "end": "2025-12-31",
+              "fy": 2025,
+              "fp": "Q4",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-02-26",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/904851/000119312526078200/d118508d6k.htm"
+            },
+            {
+              "val": 4946000000,
+              "start": "2026-01-01",
+              "end": "2026-03-31",
+              "fy": 2026,
+              "fp": "Q1",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/904851/000155485526001760/MainDocument.htm"
+            },
+            {
+              "val": 6574000000,
+              "start": "2026-04-01",
+              "end": "2026-06-30",
+              "fy": 2026,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/904851/000155485526001760/MainDocument.htm"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

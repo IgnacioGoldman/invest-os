@@ -234,7 +234,9 @@ class FundamentalsFallbackTests(unittest.TestCase):
 
     def test_noncalendar_fiscal_periods_are_not_guessed(self):
         primary = primary_facts()
-        primary["facts"]["us-gaap"]["RevenueFromContractWithCustomerExcludingAssessedTax"]["units"]["USD"][1]["fp"] = "Q3"
+        rows = primary["facts"]["us-gaap"]["RevenueFromContractWithCustomerExcludingAssessedTax"]["units"]["USD"]
+        rows[0].update(start="2024-11-01", end="2025-10-31")
+        rows[1].update(start="2026-02-01", end="2026-04-30")
         with patch.object(OpenDataProvider, "fetch_yfinance_companyfacts") as fetch:
             facts, note = OpenDataProvider()._supplement_sec_companyfacts("CRM", {}, primary)
         self.assertIsNone(facts)

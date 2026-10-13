@@ -104,6 +104,12 @@ def _merge_stock_rows(deployed: list[Any], local: Any, tickers: list[str]) -> li
     rows: list[dict[str, Any]] = []
     for ticker in tickers:
         row = deployed_by_ticker.get(ticker) or local_by_ticker.get(ticker)
+        local = local_by_ticker.get(ticker)
+        if row is not None and local is not None:
+            def revenue_revision(value):
+                return (value.get("revenue_history_version", 0), value.get("revenue_history_checked_at") or "")
+            if revenue_revision(local) > revenue_revision(row):
+                row = local
         if row is not None:
             rows.append(row)
     return rows
