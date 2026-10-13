@@ -2434,18 +2434,20 @@ export function MobileStockExplorer({
     setPage(view?.page ?? 1);
   };
 
-  const saveFromExplore = async (ticker: string) => {
-    if (!personalization || watchlist.has(ticker) || savingWatchlist.current) return;
+  const toggleWatchlistFromExplore = async (ticker: string) => {
+    if (!personalization || savingWatchlist.current) return;
+    const isSaved = watchlist.has(ticker);
     const userId = personalization.userId;
     savingWatchlist.current = true;
     setSavingTicker(ticker);
     setWatchlistSaveError(null);
     setAddedTicker(null);
     try {
-      await personalization.onAddToWatchlist(ticker);
-      if (currentUser.current === userId) setAddedTicker(ticker);
+      if (isSaved) await personalization.onRemoveFromWatchlist(ticker);
+      else await personalization.onAddToWatchlist(ticker);
+      if (!isSaved && currentUser.current === userId) setAddedTicker(ticker);
     } catch (exc) {
-      if (currentUser.current === userId) setWatchlistSaveError(exc instanceof Error ? exc.message : `Could not add ${ticker}. Please try again.`);
+      if (currentUser.current === userId) setWatchlistSaveError(exc instanceof Error ? exc.message : `Could not ${isSaved ? "remove" : "add"} ${ticker}. Please try again.`);
     } finally {
       savingWatchlist.current = false;
       if (currentUser.current === userId) setSavingTicker(null);
@@ -2526,11 +2528,12 @@ export function MobileStockExplorer({
         </button>
         {signedIn && spaceTab === "explore" && !exportMode && !editMode && (
           <button type="button" className={`mobile-watchlist-bookmark${watchlist.has(snapshot.ticker) || savingTicker === snapshot.ticker ? " saved" : ""}`}
-            onClick={() => void saveFromExplore(snapshot.ticker)}
-            disabled={watchlist.has(snapshot.ticker) || savingTicker !== null || personalization?.watchlistLoading || Boolean(personalization?.watchlistLoadError)}
-            aria-label={savingTicker === snapshot.ticker ? `Saving ${snapshot.ticker} to Watchlist` : watchlist.has(snapshot.ticker) ? `${snapshot.ticker} is in Watchlist` : `Add ${snapshot.ticker} to Watchlist`}
+            onClick={() => void toggleWatchlistFromExplore(snapshot.ticker)}
+            disabled={savingTicker !== null || personalization?.watchlistLoading || Boolean(personalization?.watchlistLoadError)}
+            aria-label={savingTicker === snapshot.ticker ? watchlist.has(snapshot.ticker) ? `Removing ${snapshot.ticker} from Watchlist` : `Saving ${snapshot.ticker} to Watchlist` : watchlist.has(snapshot.ticker) ? `Remove ${snapshot.ticker} from Watchlist` : `Add ${snapshot.ticker} to Watchlist`}
+            aria-pressed={watchlist.has(snapshot.ticker)}
             aria-busy={savingTicker === snapshot.ticker}
-            title={watchlist.has(snapshot.ticker) ? "Saved to Watchlist" : "Add to Watchlist"}>
+            title={watchlist.has(snapshot.ticker) ? "Remove from Watchlist" : "Add to Watchlist"}>
             {watchlist.has(snapshot.ticker) || savingTicker === snapshot.ticker ? <BookmarkCheck size={21} /> : <BookmarkPlus size={21} />}
           </button>
         )}
