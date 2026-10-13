@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 import json
 import math
 from pathlib import Path
@@ -107,6 +107,37 @@ def _validate_fcf_margin(ticker: str, snapshot: dict[str, Any], errors: list[str
         errors.append(f"{ticker}: fcf_margin {value:.6f} does not match free_cash_flow_ttm / revenue_ttm {expected:.6f}.")
 
 
+def _market_session_group(snapshot: dict[str, Any]) -> str | None:
+    exchange = str(snapshot.get("exchange") or "").upper()
+    if "STOCKHOLM" in exchange:
+        return "Stockholm"
+    if exchange in {"NYSE", "NASDAQ", "US-LISTED"}:
+        return "US"
+    return None
+
+
+def _compatible_market_dates(stocks: list[dict[str, Any]]) -> bool:
+    """Allow adjacent US/Stockholm session dates, but keep each market uniform."""
+    by_market: dict[str, set[date]] = {}
+    for snapshot in stocks:
+        group = _market_session_group(snapshot)
+        price_metrics = snapshot.get("price_opportunity")
+        if not isinstance(price_metrics, dict):
+            return False
+        current = price_metrics.get("current_price")
+        market_date = _parse_date(current.get("as_of")) if isinstance(current, dict) else None
+        if group is None or market_date is None:
+            return False
+        by_market.setdefault(group, set()).add(market_date)
+    if set(by_market) != {"US", "Stockholm"} or any(len(dates) != 1 for dates in by_market.values()):
+        return False
+    older, newer = sorted(next(iter(dates)) for dates in by_market.values())
+    previous_weekday = newer - timedelta(days=1)
+    while previous_weekday.weekday() >= 5:
+        previous_weekday -= timedelta(days=1)
+    return newer.weekday() < 5 and older == previous_weekday
+
+
 def validate_refresh(report: dict[str, Any], universe: Any, stocks: Any, history_dir: Path) -> dict[str, Any]:
     errors: list[str] = []
     expected = _universe_tickers(universe)
@@ -175,14 +206,15 @@ def validate_refresh(report: dict[str, Any], universe: Any, stocks: Any, history
 
     date_counts = Counter(market_dates)
     market_as_of = date_counts.most_common(1)[0][0] if date_counts else None
-    if len(date_counts) > 1:
+    if len(date_counts) > 1 and not _compatible_market_dates(list(stock_by_ticker.values())):
         errors.append(f"Market dates are inconsistent: {dict(sorted(date_counts.items()))}.")
-    if market_as_of:
-        age_days = (datetime.now(timezone.utc).date() - date.fromisoformat(market_as_of)).days
+    today = datetime.now(timezone.utc).date()
+    for market_date in date_counts:
+        age_days = (today - date.fromisoformat(market_date)).days
         if age_days < 0:
-            errors.append(f"Market date {market_as_of} is in the future.")
+            errors.append(f"Market date {market_date} is in the future.")
         elif age_days > 7:
-            errors.append(f"Market date {market_as_of} is {age_days} days old.")
+            errors.append(f"Market date {market_date} is {age_days} days old.")
 
     return {
         "valid": not errors,

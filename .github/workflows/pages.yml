@@ -44,6 +44,7 @@ jobs:
           python -m unittest discover -s scripts -p 'test_nibe_reports.py'
           python -m unittest discover -s scripts -p 'test_fundamentals_fallback.py'
           python -m unittest discover -s scripts -p 'test_incremental_sec_refresh.py'
+          python -m unittest discover -s scripts -p 'test_validate_static_stock_refresh.py'
 
       - name: Refresh fundamentals and price data
         run: >-
