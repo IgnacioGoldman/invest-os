@@ -1,5 +1,5 @@
 {
-  "audited_on": "2026-10-08",
+  "audited_on": "2026-10-13",
   "symbol_count": 77,
   "symbols": [
     {
@@ -602,8 +602,8 @@
     },
     {
       "ticker": "AZN",
-      "revenue_growth_observations": 7,
-      "latest_revenue_period": "FY2025 Q2",
+      "revenue_growth_observations": 8,
+      "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Unclear",
         "change": null,
@@ -614,9 +614,7 @@
         "points": [],
         "reason": "The latest six revenue quarters contain a gap or duplicate fiscal period."
       },
-      "missing_inputs": {
-        "business_health.free_cash_flow": "free_cash_flow: Quarterly SEC facts were unavailable for free_cash_flow."
-      },
+      "missing_inputs": {},
       "not_meaningful": {}
     },
     {
@@ -877,43 +875,40 @@
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Decelerating",
-        "change": -20.72374858567748,
-        "recentMedian": -6.7615166793286825,
-        "priorMedian": 13.962231906348798,
-        "latestChange": 50.07821107755386,
+        "change": -19.83666836357038,
+        "recentMedian": -4.577102379366713,
+        "priorMedian": 15.259565984203666,
+        "latestChange": 41.40229518142327,
         "latestMovement": "Improving",
         "points": [
           {
             "period": "FY2025 Q1",
-            "value": 17.648492727715933
+            "value": 19.273541305603697
           },
           {
             "period": "FY2025 Q2",
-            "value": -0.3080568720379147
+            "value": 2.8193832599118944
           },
           {
             "period": "FY2025 Q3",
-            "value": 13.962231906348798
+            "value": 15.259565984203666
           },
           {
             "period": "FY2025 Q4",
-            "value": -10.676184499529338
+            "value": -5.92863163810059
           },
           {
             "period": "FY2026 Q1",
-            "value": -6.7615166793286825
+            "value": -4.577102379366713
           },
           {
             "period": "FY2026 Q2",
-            "value": 43.31669439822518
+            "value": 36.825192802056556
           }
         ],
         "reason": null
       },
-      "missing_inputs": {
-        "business_health.operating_margin": "operating_margin: Quarterly SEC facts were unavailable for operating_margin.",
-        "business_health.roic": "roic: Quarterly SEC facts were unavailable for roic."
-      },
+      "missing_inputs": {},
       "not_meaningful": {}
     },
     {
@@ -1014,14 +1009,9 @@
         ],
         "reason": null
       },
-      "missing_inputs": {
-        "business_health.roic": "roic: Quarterly SEC facts were unavailable for roic.",
-        "business_health.debt": "debt: SEC companyfacts did not include usable debt facts.",
-        "business_health.debt_to_equity": "debt_to_equity: Inputs required for this open/free computation were unavailable.",
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable."
-      },
+      "missing_inputs": {},
       "not_meaningful": {
-        "business_health.eps_cagr_3y": "eps_cagr_3y: EPS turned positive from a loss-making comparison period (latest 0.12, comparison -0.01); 3-year EPS CAGR is not meaningful.",
+        "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS turned positive from a loss-making comparison period (latest 0.31, comparison -0.16); 3-year GAAP EPS CAGR is not meaningful.",
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       }
     },
@@ -1323,9 +1313,7 @@
         ],
         "reason": null
       },
-      "missing_inputs": {
-        "business_health.gross_margin": "gross_margin: Quarterly SEC facts were unavailable for gross_margin."
-      },
+      "missing_inputs": {},
       "not_meaningful": {}
     },
     {
@@ -1367,11 +1355,9 @@
         ],
         "reason": null
       },
-      "missing_inputs": {
-        "business_health.roic": "roic: Quarterly SEC facts were unavailable for roic."
-      },
+      "missing_inputs": {},
       "not_meaningful": {
-        "business_health.eps_cagr_3y": "eps_cagr_3y: EPS turned positive from a loss-making comparison period (latest 0.41, comparison -0.03); 3-year EPS CAGR is not meaningful.",
+        "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS turned positive from a loss-making comparison period (latest 0.92, comparison -0.44); 3-year GAAP EPS CAGR is not meaningful.",
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       }
     },
@@ -1458,12 +1444,7 @@
         ],
         "reason": null
       },
-      "missing_inputs": {
-        "business_health.roic": "roic: Quarterly SEC facts were unavailable for roic.",
-        "business_health.debt": "debt: SEC companyfacts did not include usable debt facts.",
-        "business_health.debt_to_equity": "debt_to_equity: Inputs required for this open/free computation were unavailable.",
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable."
-      },
+      "missing_inputs": {},
       "not_meaningful": {}
     },
     {
@@ -1720,9 +1701,7 @@
         ],
         "reason": null
       },
-      "missing_inputs": {
-        "business_health.gross_margin": "gross_margin: Quarterly SEC facts were unavailable for gross_margin."
-      },
+      "missing_inputs": {},
       "not_meaningful": {}
     },
     {
@@ -2070,20 +2049,16 @@
     },
     {
       "ticker": "MU",
-      "revenue_growth_observations": 58,
-      "latest_revenue_period": "FY2026 Q3",
+      "revenue_growth_observations": 59,
+      "latest_revenue_period": "FY2026 Q4",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 158.01443314074476,
-        "recentMedian": 196.2870979759096,
-        "priorMedian": 38.27266483516483,
-        "latestChange": 149.42841648490105,
+        "change": 299.71551446081065,
+        "recentMedian": 345.71551446081065,
+        "priorMedian": 46.0,
+        "latestChange": 33.55094598991849,
         "latestMovement": "Improving",
         "points": [
-          {
-            "period": "FY2025 Q2",
-            "value": 38.27266483516483
-          },
           {
             "period": "FY2025 Q3",
             "value": 36.55850829540449
@@ -2103,12 +2078,17 @@
           {
             "period": "FY2026 Q3",
             "value": 345.71551446081065
+          },
+          {
+            "period": "FY2026 Q4",
+            "value": 379.26646045072914
           }
         ],
         "reason": null
       },
       "missing_inputs": {},
       "not_meaningful": {
+        "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS turned positive from a loss-making comparison period (latest 74.33, comparison -5.34); 3-year GAAP EPS CAGR is not meaningful.",
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       }
     },
@@ -2284,35 +2264,35 @@
       "latest_revenue_period": "FY2026 Q2",
       "revenue_momentum": {
         "label": "Decelerating",
-        "change": -14.603503807671077,
-        "recentMedian": -19.41831862248589,
-        "priorMedian": -4.814814814814815,
-        "latestChange": 31.051746922580858,
+        "change": -17.210460631932634,
+        "recentMedian": -23.122151991768337,
+        "priorMedian": -5.9116913598357055,
+        "latestChange": 48.86271950034333,
         "latestMovement": "Improving",
         "points": [
           {
             "period": "FY2025 Q1",
-            "value": 2.6741940276333382
+            "value": 13.857740585774058
           },
           {
             "period": "FY2025 Q2",
-            "value": -7.115554248750368
+            "value": -5.9116913598357055
           },
           {
             "period": "FY2025 Q3",
-            "value": -4.814814814814815
+            "value": -7.65370138017566
           },
           {
             "period": "FY2025 Q4",
-            "value": -75.83090379008746
+            "value": -74.0828402366864
           },
           {
             "period": "FY2026 Q1",
-            "value": -19.41831862248589
+            "value": -23.122151991768337
           },
           {
             "period": "FY2026 Q2",
-            "value": 11.633428300094966
+            "value": 25.74056750857499
           }
         ],
         "reason": null
@@ -2367,20 +2347,16 @@
     },
     {
       "ticker": "PEP",
-      "revenue_growth_observations": 64,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 65,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 5.40240297454702,
+        "change": 3.7521591238698973,
         "recentMedian": 6.4023585320777965,
-        "priorMedian": 0.9999555575307764,
-        "latestChange": -2.1025803596014256,
+        "priorMedian": 2.6501994082078992,
+        "latestChange": -0.8168632736911983,
         "latestMovement": "Steady",
         "points": [
-          {
-            "period": "FY2025 Q1",
-            "value": -1.8136986301369864
-          },
           {
             "period": "FY2025 Q2",
             "value": 0.9999555575307764
@@ -2400,12 +2376,18 @@
           {
             "period": "FY2026 Q2",
             "value": 6.4023585320777965
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 5.585495258386598
           }
         ],
         "reason": null
       },
       "missing_inputs": {},
-      "not_meaningful": {}
+      "not_meaningful": {
+        "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+      }
     },
     {
       "ticker": "PH",
@@ -2488,9 +2470,7 @@
         ],
         "reason": null
       },
-      "missing_inputs": {
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable."
-      },
+      "missing_inputs": {},
       "not_meaningful": {}
     },
     {
@@ -2825,9 +2805,7 @@
         ],
         "reason": null
       },
-      "missing_inputs": {
-        "business_health.gross_margin": "gross_margin: Quarterly SEC facts were unavailable for gross_margin."
-      },
+      "missing_inputs": {},
       "not_meaningful": {}
     },
     {
@@ -2869,9 +2847,7 @@
         ],
         "reason": null
       },
-      "missing_inputs": {
-        "business_health.gross_margin": "gross_margin: Quarterly SEC facts were unavailable for gross_margin."
-      },
+      "missing_inputs": {},
       "not_meaningful": {}
     },
     {
@@ -2914,7 +2890,8 @@
         "reason": null
       },
       "missing_inputs": {
-        "business_health.eps_cagr_3y": "eps_cagr_3y: Quarterly SEC diluted EPS facts were unavailable.",
+        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: Quarterly SEC diluted EPS facts were unavailable.",
+        "business_health.eps_cagr_3y": "eps_cagr_3y: A positive 3-year SEC EPS history was unavailable.",
         "business_health.gross_margin": "gross_margin: Quarterly SEC facts were unavailable for gross_margin."
       },
       "not_meaningful": {
