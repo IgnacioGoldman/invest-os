@@ -1,0 +1,310 @@
+import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, GripVertical, MoreHorizontal, Plus, Trash2, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
+import { WATCHLIST_COLORS, reorderGroupIds, type WatchlistGroup, type WatchlistGroupInput, type WatchlistItem } from "../watchlist";
+import type { OpenDataStockSnapshot } from "../api";
+
+export type WatchlistGroupActions = {
+  onMoveWatchlistItem: (ticker: string, groupId: string | null, beforeTicker?: string) => Promise<void>;
+  onCreateWatchlistGroup: (input: WatchlistGroupInput) => Promise<void>;
+  onUpdateWatchlistGroup: (id: string, input: Partial<WatchlistGroupInput & { collapsed: boolean }>) => Promise<void>;
+  onDeleteWatchlistGroup: (id: string) => Promise<void>;
+  onReorderWatchlistGroups: (ids: string[]) => Promise<void>;
+};
+
+// Native dialogs supply focus trapping, Escape dismissal and focus restoration.
+export function WatchlistDialog({ title, onClose, children, className = "" }: { title: string; onClose: () => void; children: ReactNode; className?: string }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = ref.current;
+    dialog?.showModal();
+    return () => dialog?.close();
+  }, []);
+  return (
+    <dialog ref={ref} className={`watchlist-dialog ${className}`} aria-label={title}
+      onCancel={(event) => { event.preventDefault(); onClose(); }}
+      onKeyDown={(event) => {
+        if (event.key !== "Tab") return;
+        const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+          'button:not(:disabled), input:not(:disabled), select:not(:disabled), [tabindex="0"]',
+        )).filter((control) => control.getClientRects().length > 0);
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }}
+      onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <div className="watchlist-dialog-content">
+        <header><h2>{title}</h2><button type="button" className="watchlist-icon" aria-label={`Close ${title}`} onClick={onClose}><X size={20} /></button></header>
+        {children}
+      </div>
+    </dialog>
+  );
+}
+
+type Drag = { kind: "group" | "symbol"; id: string; label: string; x: number; y: number; active: boolean };
+type Target = { groupId: string | null; ticker?: string; beforeTicker?: string; after?: boolean; beforeGroupId?: string | null };
+
+export function WatchlistGroups({
+  groups, items, matchingSnapshots, pagedSnapshots, renderRow, onAdd, onRevealGroup,
+  onManualOrder, onRemove, actions,
+}: {
+  groups: WatchlistGroup[];
+  items: WatchlistItem[];
+  matchingSnapshots: OpenDataStockSnapshot[];
+  pagedSnapshots: OpenDataStockSnapshot[];
+  renderRow: (snapshot: OpenDataStockSnapshot) => ReactNode;
+  onAdd: (groupId: string | null) => void;
+  onRevealGroup: (groupId: string | null) => void;
+  onManualOrder: () => void;
+  onRemove: (ticker: string) => Promise<void>;
+  actions: WatchlistGroupActions;
+}) {
+  const [editor, setEditor] = useState<WatchlistGroup | "new" | null>(null);
+  const [name, setName] = useState("");
+  const [color, setColor] = useState<string>(WATCHLIST_COLORS[0].value);
+  const [movingTicker, setMovingTicker] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
+  const [error, setError] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState("");
+  const [drag, setDrag] = useState<Drag | null>(null);
+  const dragRef = useRef<Drag | null>(null);
+  const suppressClick = useRef(false);
+  const origin = useRef({ x: 0, y: 0 });
+  const [target, setTarget] = useState<Target | null>(null);
+  const targetRef = useRef<Target | null>(null);
+  const orderedGroups = [...groups].sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
+  const groupIds = orderedGroups.map((group) => group.id);
+  const itemByTicker = useMemo(() => new Map(items.map((item) => [item.ticker, item])), [items]);
+  const groupFor = (ticker: string) => itemByTicker.get(ticker)?.group_id ?? null;
+  const currentItem = items.find((item) => item.ticker === movingTicker);
+  const siblings = [...items].sort((a, b) => a.position - b.position).filter((item) => item.group_id === currentItem?.group_id);
+  const siblingIndex = siblings.findIndex((item) => item.ticker === movingTicker);
+
+  const run = async (action: () => Promise<void>, message: string, close = false) => {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true);
+    setError(null);
+    try {
+      await action();
+      setAnnouncement(message);
+      if (close) { setEditor(null); setMovingTicker(null); }
+    } catch (exc) {
+      setError(exc instanceof Error ? exc.message : "Could not save your change. Please try again.");
+    } finally {
+      busyRef.current = false;
+      setBusy(false);
+    }
+  };
+
+  const openEditor = (group?: WatchlistGroup) => {
+    setError(null);
+    setName(group?.name ?? "");
+    setColor(group?.color ?? WATCHLIST_COLORS[groups.length % WATCHLIST_COLORS.length].value);
+    setEditor(group ?? "new");
+  };
+
+  const resetDrag = () => {
+    dragRef.current = null;
+    targetRef.current = null;
+    setDrag(null);
+    setTarget(null);
+  };
+
+  const locateTarget = (x: number, y: number) => {
+    const section = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-watchlist-group]");
+    let next: Target | null = null;
+    if (section) {
+      const groupId = section.dataset.watchlistGroup || null;
+      const row = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-watchlist-ticker]");
+      next = { groupId, ticker: row?.dataset.watchlistTicker };
+      if (row && dragRef.current?.kind === "symbol") {
+        const bounds = row.getBoundingClientRect();
+        const ticker = row.dataset.watchlistTicker;
+        next.after = y > bounds.top + bounds.height / 2;
+        const siblings = [...items].filter((item) => item.group_id === groupId).sort((a, b) => a.position - b.position);
+        const index = siblings.findIndex((item) => item.ticker === ticker);
+        next.beforeTicker = next.after ? siblings[index + 1]?.ticker : ticker;
+      }
+      if (dragRef.current?.kind === "group") {
+        const header = section.querySelector(".watchlist-group-header")?.getBoundingClientRect();
+        const index = groupIds.indexOf(groupId ?? "");
+        next.beforeGroupId = groupId && header && y > header.top + header.height / 2
+          ? groupIds[index + 1] ?? null : groupId;
+      }
+    }
+    targetRef.current = next;
+    setTarget(next);
+  };
+
+  useEffect(() => {
+    if (!drag?.active) return;
+    let frame = 0;
+    const scroll = () => {
+      const current = dragRef.current;
+      if (!current?.active) return;
+      const delta = current.y < 80 ? -10 : current.y > window.innerHeight - 80 ? 10 : 0;
+      if (delta) { window.scrollBy(0, delta); locateTarget(current.x, current.y); }
+      frame = requestAnimationFrame(scroll);
+    };
+    frame = requestAnimationFrame(scroll);
+    const escape = (event: KeyboardEvent) => { if (event.key === "Escape") resetDrag(); };
+    document.addEventListener("keydown", escape);
+    return () => { cancelAnimationFrame(frame); document.removeEventListener("keydown", escape); };
+  }, [drag?.active]);
+
+  const startDrag = (event: PointerEvent<HTMLButtonElement>, kind: Drag["kind"], id: string, label: string) => {
+    if (busy || event.button !== 0) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    origin.current = { x: event.clientX, y: event.clientY };
+    suppressClick.current = false;
+    dragRef.current = { kind, id, label, x: event.clientX, y: event.clientY, active: false };
+  };
+  const moveDrag = (event: PointerEvent<HTMLButtonElement>) => {
+    const current = dragRef.current;
+    if (!current) return;
+    const active = current.active || Math.hypot(event.clientX - origin.current.x, event.clientY - origin.current.y) > 6;
+    const next = { ...current, x: event.clientX, y: event.clientY, active };
+    dragRef.current = next;
+    setDrag(next);
+    if (active) { event.preventDefault(); locateTarget(event.clientX, event.clientY); }
+  };
+  const finishDrag = () => {
+    const current = dragRef.current;
+    const destination = targetRef.current;
+    suppressClick.current = Boolean(current?.active);
+    resetDrag();
+    if (!current?.active || !destination) return;
+    if (current.kind === "group") {
+      const ids = reorderGroupIds(groupIds, current.id, destination.beforeGroupId ?? null);
+      if (ids.join() !== groupIds.join()) void run(() => actions.onReorderWatchlistGroups(ids), `${current.label} reordered.`);
+    } else if (current.id !== destination.ticker) {
+      void run(async () => {
+        await actions.onMoveWatchlistItem(current.id, destination.groupId, destination.beforeTicker);
+        onManualOrder();
+      }, `${current.label} moved.`);
+    }
+  };
+  const grip = (kind: Drag["kind"], id: string, label: string) => (
+    <button type="button" className="watchlist-icon watchlist-grip" disabled={busy}
+      aria-label={`Reorder ${label}`} title="Drag to reorder, or use the menu"
+      onPointerDown={(event) => startDrag(event, kind, id, label)} onPointerMove={moveDrag}
+      onPointerUp={finishDrag} onPointerCancel={resetDrag} onLostPointerCapture={resetDrag}
+      onClick={() => {
+        if (suppressClick.current) { suppressClick.current = false; return; }
+        if (kind === "group") openEditor(groups.find((group) => group.id === id));
+        else { setError(null); setMovingTicker(id); }
+      }}>
+      <GripVertical size={16} />
+    </button>
+  );
+
+  const moveSymbol = (groupId: string | null, beforeTicker?: string) => {
+    if (!movingTicker) return;
+    void run(async () => {
+      await actions.onMoveWatchlistItem(movingTicker, groupId, beforeTicker);
+      onManualOrder();
+    }, `${movingTicker} moved.`, true);
+  };
+
+  const editorGroup = editor && editor !== "new" ? groups.find((group) => group.id === editor.id) ?? editor : null;
+  const editorIndex = editorGroup ? groupIds.indexOf(editorGroup.id) : -1;
+  const reorderEditor = (offset: number) => {
+    if (!editorGroup) return;
+    const ids = [...groupIds];
+    const index = editorIndex + offset;
+    [ids[editorIndex], ids[index]] = [ids[index], ids[editorIndex]];
+    void run(() => actions.onReorderWatchlistGroups(ids), `${editorGroup.name} reordered.`);
+  };
+  const sections: Array<WatchlistGroup | null> = [...orderedGroups, null];
+
+  return (
+    <div className="watchlist-groups" aria-busy={busy}>
+      <div className="watchlist-group-toolbar">
+        <button type="button" disabled={busy} onClick={() => openEditor()}><Plus size={16} />New group</button>
+      </div>
+      {error && !editor && !movingTicker && <p className="watchlist-error" role="alert">{error}</p>}
+      <span className="watchlist-sr-only" role="status" aria-live="polite">{announcement}</span>
+      {sections.map((group) => {
+        const id = group?.id ?? null;
+        const label = group?.name ?? "Ungrouped";
+        const total = items.filter((item) => groupFor(item.ticker) === id).length;
+        const matching = matchingSnapshots.filter((snapshot) => groupFor(snapshot.ticker) === id);
+        const rows = pagedSnapshots.filter((snapshot) => groupFor(snapshot.ticker) === id);
+        const dropping = Boolean(drag?.active && target && target.groupId === id);
+        return (
+          <section key={id ?? "ungrouped"} data-watchlist-group={id ?? ""}
+            className={`watchlist-group${group ? "" : " watchlist-ungrouped"}${dropping ? " watchlist-drop-target" : ""}${drag?.kind === "group" && drag.id === id ? " watchlist-dragging" : ""}`}
+            style={{ "--watchlist-group-color": group?.color ?? "#8b8e97" } as CSSProperties} aria-label={label}>
+            <header className="watchlist-group-header">
+              {group && grip("group", group.id, label)}
+              {group ? (
+                <button type="button" className="watchlist-group-toggle" aria-expanded={!group.collapsed}
+                  aria-controls={`watchlist-group-${id}`} disabled={busy}
+                  onClick={() => void run(() => actions.onUpdateWatchlistGroup(group.id, { collapsed: !group.collapsed }), `${label} ${group.collapsed ? "expanded" : "collapsed"}.`)}>
+                  {group.collapsed ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
+                  <span className="watchlist-group-dot" aria-hidden="true" /><strong>{label}</strong>
+                  <span className="watchlist-group-count">{matching.length === total ? total : `${matching.length}/${total}`}</span>
+                </button>
+              ) : <div className="watchlist-ungrouped-label"><strong>{label}</strong><span className="watchlist-group-count">{matching.length === total ? total : `${matching.length}/${total}`}</span></div>}
+              <div className="watchlist-group-actions">
+                <button type="button" className="watchlist-icon watchlist-add" disabled={busy} onClick={() => onAdd(id)} aria-label={`Add symbols to ${label}`} title={`Add symbols to ${label}`}><Plus size={19} /></button>
+                {group && <button type="button" className="watchlist-icon" disabled={busy} onClick={() => openEditor(group)} aria-label={`Edit ${label}`} title={`Edit ${label}`}><MoreHorizontal size={20} /></button>}
+              </div>
+            </header>
+            <div id={`watchlist-group-${id}`} className="watchlist-group-rows" hidden={group?.collapsed}>
+              {rows.map((snapshot) => (
+                <div key={snapshot.ticker} data-watchlist-ticker={snapshot.ticker}
+                  className={`watchlist-group-row${dropping && target?.ticker === snapshot.ticker && drag?.kind === "symbol" ? target.after ? " watchlist-insert-after" : " watchlist-insert-before" : ""}${drag?.id === snapshot.ticker ? " watchlist-dragging" : ""}`}>
+                  {grip("symbol", snapshot.ticker, snapshot.ticker)}
+                  {renderRow(snapshot)}
+                  <button type="button" className="watchlist-icon watchlist-row-menu" disabled={busy}
+                    onClick={() => { setError(null); setMovingTicker(snapshot.ticker); }} aria-label={`Move or remove ${snapshot.ticker}`} title={`Move or remove ${snapshot.ticker}`}><MoreHorizontal size={18} /></button>
+                </div>
+              ))}
+              {rows.length === 0 && (
+                <div className="watchlist-group-empty">
+                  {matching.length > 0 ? <button type="button" onClick={() => onRevealGroup(id)}>Show {matching.length} symbol{matching.length === 1 ? "" : "s"}</button>
+                    : total > 0 ? <span>No symbols match your filters.</span>
+                      : <button type="button" onClick={() => onAdd(id)}><Plus size={15} />Add symbols</button>}
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      })}
+      {drag?.active && <div className="watchlist-drag-preview" style={{ left: drag.x + 12, top: drag.y - 24 }} aria-hidden="true"><GripVertical size={14} />{drag.label}</div>}
+
+      {editor && (
+        <WatchlistDialog title={editor === "new" ? "New group" : "Edit group"} onClose={() => { if (!busy) { setEditor(null); setError(null); } }}>
+          <form onSubmit={(event) => {
+            event.preventDefault();
+            if (!name.trim()) { setError("Enter a group name."); return; }
+            void run(() => editorGroup ? actions.onUpdateWatchlistGroup(editorGroup.id, { name, color }) : actions.onCreateWatchlistGroup({ name, color }), `Group ${name.trim()} saved.`, true);
+          }}>
+            <label className="watchlist-name">Group name<input autoFocus value={name} onChange={(event) => setName(event.target.value)} maxLength={80} placeholder="e.g. Tech leaders" required disabled={busy} /></label>
+            <fieldset className="watchlist-colors"><legend>Color</legend>{WATCHLIST_COLORS.map((choice) => <button key={choice.value} type="button" disabled={busy} aria-label={choice.name} aria-pressed={color === choice.value} style={{ backgroundColor: choice.value }} onClick={() => setColor(choice.value)}>{color === choice.value && <Check size={17} />}</button>)}</fieldset>
+            {editorGroup && <div className="watchlist-reorder-actions"><button type="button" disabled={busy || editorIndex <= 0} onClick={() => reorderEditor(-1)}><ArrowUp size={16} />Move up</button><button type="button" disabled={busy || editorIndex >= groups.length - 1} onClick={() => reorderEditor(1)}><ArrowDown size={16} />Move down</button></div>}
+            {error && <p className="watchlist-error" role="alert">{error}</p>}
+            <button className="watchlist-primary" type="submit" disabled={busy || !name.trim()}>{busy ? "Saving…" : editorGroup ? "Save changes" : "Create group"}</button>
+            {editorGroup && <div className="watchlist-delete-group"><button type="button" disabled={busy} onClick={() => void run(() => actions.onDeleteWatchlistGroup(editorGroup.id), `${editorGroup.name} deleted. Symbols moved to Ungrouped.`, true)}><Trash2 size={16} />Delete group</button><p>Symbols will stay watched in Ungrouped.</p></div>}
+          </form>
+        </WatchlistDialog>
+      )}
+      {movingTicker && (
+        <WatchlistDialog title={`Move ${movingTicker}`} onClose={() => { if (!busy) { setMovingTicker(null); setError(null); } }}>
+          <p className="watchlist-dialog-hint">Choose a group</p>
+          <div className="watchlist-move-options">{sections.map((group) => {
+            const id = group?.id ?? null;
+            return <button type="button" key={id ?? "ungrouped"} disabled={busy || currentItem?.group_id === id} onClick={() => moveSymbol(id)}><span className="watchlist-group-dot" style={{ backgroundColor: group?.color ?? "#8b8e97" }} /><span>{group?.name ?? "Ungrouped"}</span>{currentItem?.group_id === id && <Check size={17} />}</button>;
+          })}</div>
+          <div className="watchlist-reorder-actions"><button type="button" disabled={busy || siblingIndex <= 0} onClick={() => moveSymbol(currentItem?.group_id ?? null, siblings[siblingIndex - 1]?.ticker)}><ArrowUp size={16} />Move up</button><button type="button" disabled={busy || siblingIndex >= siblings.length - 1} onClick={() => moveSymbol(currentItem?.group_id ?? null, siblings[siblingIndex + 2]?.ticker)}><ArrowDown size={16} />Move down</button></div>
+          {error && <p className="watchlist-error" role="alert">{error}</p>}
+          <button type="button" className="watchlist-remove" disabled={busy} onClick={() => void run(() => onRemove(movingTicker), `${movingTicker} removed from watchlist.`, true)}><Trash2 size={16} />Remove from watchlist</button>
+        </WatchlistDialog>
+      )}
+    </div>
+  );
+}

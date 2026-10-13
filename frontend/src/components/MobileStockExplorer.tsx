@@ -1,6 +1,8 @@
 import { calculateRevenueGrowthMomentum, formatMomentumPp, revenueMomentumDetail, REVENUE_MOMENTUM_DESCRIPTION } from "../revenueGrowthMomentum";
 import { MoneyPanel } from "./MoneyPanel";
 import { FilterSelector, type FilterShortcut } from "./FilterSelector";
+import { WatchlistDialog, WatchlistGroups, type WatchlistGroupActions } from "./WatchlistGroups";
+import type { WatchlistGroup, WatchlistItem } from "../watchlist";
 import { MetricStatus } from "./MetricStatus";
 import { fcfMarginSignal, forwardPeSignal, growthSignal, metricSignal, revenueGrowthSignal, supportSignal, type MetricSignal as Signal, type MetricTone as Tone } from "../metricStatus";
 import {
@@ -54,13 +56,18 @@ type Props = {
     userId: string | null;
     savedFilters: SavedFilter[];
     watchlistTickers: string[];
+    watchlistItems: WatchlistItem[];
+    watchlistGroups: WatchlistGroup[];
+    watchlistLoading: boolean;
+    watchlistLoadError: string | null;
+    onReloadWatchlist: () => Promise<void>;
     filterBadgeCounts: Record<string, number>;
     onRequestSignIn: () => Promise<void>;
     onSaveFilter: (input: Omit<SaveFilterInput, "userId">) => Promise<SavedFilter>;
     onDeleteFilter: (filterId: string) => Promise<void>;
-    onAddToWatchlist: (ticker: string) => Promise<void>;
+    onAddToWatchlist: (ticker: string, groupId?: string | null) => Promise<void>;
     onRemoveFromWatchlist: (ticker: string) => Promise<void>;
-  };
+  } & WatchlistGroupActions;
 };
 
 type GrowthDetailKey =
@@ -85,7 +92,7 @@ export type FilterKey =
   | "support_1y"
   | "support_2y"
   | "support_5y";
-export type SortKey = "symbol" | "support_best" | Exclude<FilterKey, "forward_pe">;
+export type SortKey = "watchlist_order" | "symbol" | "support_best" | Exclude<FilterKey, "forward_pe">;
 export type SortDirection = "asc" | "desc";
 export type LogicOperator = "and" | "or";
 export type FilterCondition = {
@@ -246,6 +253,7 @@ const FILTER_DEFINITIONS: FilterDefinition[] = [
 ];
 
 const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
+  { key: "watchlist_order", label: "Group order" },
   { key: "symbol", label: "Symbol" },
   { key: "support_best", label: "Priority support" },
   ...FILTER_DEFINITIONS.flatMap(({ key, shortLabel }) => key === "forward_pe" ? [] : [{ key, label: shortLabel }]),
@@ -525,7 +533,7 @@ function sortValue(
   key: SortKey,
   supportKeys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS,
 ): number | string | null {
-  if (key === "symbol") return snapshot.ticker;
+  if (key === "symbol" || key === "watchlist_order") return snapshot.ticker;
   if (key === "support_best") {
     const support = closestSupport(snapshot, supportKeys);
     return support ? Math.abs(support.value) : null;
@@ -584,7 +592,7 @@ function rowMetric(
       secondary: "Next report",
     };
   }
-  if (key === "support_best") {
+  if (key === "support_best" || key === "watchlist_order") {
     const support = closestSupport(snapshot, supportKeys);
     return {
       value: formatPercent(support?.value, true),
@@ -1250,7 +1258,7 @@ function FilterSheet({
               </div>
             </div>
             <div className="mobile-chip-scroll">
-              {SORT_OPTIONS.map((option) => (
+              {SORT_OPTIONS.filter((option) => option.key !== "watchlist_order" || personalization?.signedIn).map((option) => (
                 <button
                   type="button"
                   key={option.key}
@@ -1437,108 +1445,69 @@ function FilterSheet({
 }
 
 function WatchlistSheet({
-  open,
-  snapshots,
-  watchlistTickers,
-  onClose,
-  onAdd,
-  onRemove,
+  snapshots, items, groups, groupId, onClose, onAdd,
 }: {
-  open: boolean;
   snapshots: OpenDataStockSnapshot[];
-  watchlistTickers: string[];
+  items: WatchlistItem[];
+  groups: WatchlistGroup[];
+  groupId: string | null;
   onClose: () => void;
-  onAdd: (ticker: string) => Promise<void>;
-  onRemove: (ticker: string) => Promise<void>;
+  onAdd: (ticker: string, groupId: string | null) => Promise<void>;
 }) {
   const [query, setQuery] = useState("");
+  const [targetGroup, setTargetGroup] = useState<string | null>(groupId);
   const [busyTicker, setBusyTicker] = useState<string | null>(null);
+  const busyRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const close = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", close);
-    return () => document.removeEventListener("keydown", close);
-  }, [onClose, open]);
-
-  if (!open) return null;
-  const watched = new Set(watchlistTickers);
   const needle = query.trim().toLowerCase();
   const rows = snapshots.filter((snapshot) => !needle || [snapshot.ticker, snapshot.name, snapshot.sector, snapshot.industry]
-    .filter(Boolean)
-    .some((value) => String(value).toLowerCase().includes(needle)));
-
-  const update = async (ticker: string, action: (symbol: string) => Promise<void>) => {
+    .filter(Boolean).some((value) => String(value).toLowerCase().includes(needle)));
+  const groupName = groups.find((group) => group.id === targetGroup)?.name ?? "Ungrouped";
+  const add = async (ticker: string) => {
+    if (busyRef.current) return;
+    busyRef.current = true;
     setBusyTicker(ticker);
     setError(null);
-    try {
-      await action(ticker);
-    } catch (exc) {
-      setError(exc instanceof Error ? exc.message : `Could not update ${ticker}.`);
-    } finally {
-      setBusyTicker(null);
-    }
+    try { await onAdd(ticker, targetGroup); }
+    catch (exc) { setError(exc instanceof Error ? exc.message : `Could not add ${ticker}.`); }
+    finally { busyRef.current = false; setBusyTicker(null); }
   };
-
   return (
-    <div className="mobile-sheet-backdrop" role="presentation" onMouseDown={(event) => {
-      if (event.currentTarget === event.target) onClose();
-    }}>
-      <section className="mobile-watchlist-sheet" role="dialog" aria-modal="true" aria-label="Manage watchlist">
-        <div className="mobile-sheet-handle" aria-hidden="true" />
-        <header className="mobile-sheet-header">
-          <div><h2>Watchlist</h2><p>{watchlistTickers.length} symbol{watchlistTickers.length === 1 ? "" : "s"} saved</p></div>
-          <button type="button" className="mobile-icon-button" onClick={onClose} aria-label="Close watchlist">
-            <X size={20} />
-          </button>
-        </header>
-        <label className="mobile-watchlist-search">
-          <Search size={18} />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Find a symbol or company"
-            aria-label="Find stocks for watchlist"
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="none"
-            enterKeyHint="search"
-            inputMode="search"
-            spellCheck={false}
-          />
-          {query && <button type="button" onClick={() => setQuery("")} aria-label="Clear watchlist search"><X size={16} /></button>}
-        </label>
-        {error && <p className="mobile-watchlist-error">{error}</p>}
-        <div className="mobile-watchlist-picker">
-          {rows.map((snapshot) => {
-            const isWatched = watched.has(snapshot.ticker);
-            return (
-              <div className="mobile-watchlist-option" key={snapshot.ticker}>
-                <span><strong>{snapshot.ticker}</strong><small>{snapshot.name ?? snapshot.industry ?? ""}</small></span>
-                <button
-                  type="button"
-                  className={isWatched ? "remove" : "add"}
-                  disabled={busyTicker === snapshot.ticker}
-                  onClick={() => void update(snapshot.ticker, isWatched ? onRemove : onAdd)}
-                  aria-label={`${isWatched ? "Remove" : "Add"} ${snapshot.ticker} ${isWatched ? "from" : "to"} watchlist`}
-                  title={`${isWatched ? "Remove from" : "Add to"} watchlist`}
-                >
-                  {isWatched ? <><Check size={16} />Added</> : <><Plus size={16} />Add</>}
-                </button>
-              </div>
-            );
-          })}
-          {rows.length === 0 && <p className="mobile-watchlist-no-results">No stocks match your search.</p>}
-        </div>
-        <footer className="mobile-watchlist-footer">
-          <button type="button" onClick={onClose}>Done</button>
-        </footer>
-      </section>
-    </div>
+    <WatchlistDialog title="Add symbols" className="watchlist-picker-dialog" onClose={() => { if (!busyRef.current) onClose(); }}>
+      <label className="watchlist-picker-target">Add to
+        <select value={targetGroup ?? ""} disabled={busyTicker !== null} onChange={(event) => setTargetGroup(event.target.value || null)} aria-label="Destination group">
+          {groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}
+          <option value="">Ungrouped</option>
+        </select>
+      </label>
+      <label className="mobile-watchlist-search">
+        <Search size={18} />
+        <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find a symbol or company"
+          aria-label="Find stocks for watchlist" autoFocus autoComplete="off" autoCorrect="off" autoCapitalize="none" enterKeyHint="search" inputMode="search" spellCheck={false} />
+        {query && <button type="button" onClick={() => setQuery("")} aria-label="Clear watchlist search"><X size={16} /></button>}
+      </label>
+      {error && <p className="watchlist-error" role="alert">{error}</p>}
+      <div className="mobile-watchlist-picker">
+        {rows.map((snapshot) => {
+          const item = items.find((entry) => entry.ticker === snapshot.ticker);
+          const isAdded = Boolean(item && item.group_id === targetGroup);
+          const otherGroup = item ? groups.find((group) => group.id === item.group_id)?.name ?? "Ungrouped" : null;
+          return (
+            <div className="mobile-watchlist-option" key={snapshot.ticker}>
+              <span><strong>{snapshot.ticker}</strong><small>{snapshot.name ?? snapshot.industry ?? ""}</small>
+                {otherGroup && !isAdded && <small>In {otherGroup}</small>}
+              </span>
+              <button type="button" className={isAdded ? "remove" : "add"} disabled={busyTicker !== null || isAdded}
+                onClick={() => void add(snapshot.ticker)} aria-label={isAdded ? `${snapshot.ticker} is in ${groupName}` : `${item ? "Move" : "Add"} ${snapshot.ticker} to ${groupName}`}>
+                {busyTicker === snapshot.ticker ? "Saving…" : isAdded ? <><Check size={16} />Added</> : item ? "Move" : <><Plus size={16} />Add</>}
+              </button>
+            </div>
+          );
+        })}
+        {rows.length === 0 && <p className="mobile-watchlist-no-results">No stocks match your search.</p>}
+      </div>
+      <footer className="mobile-watchlist-footer"><button type="button" disabled={busyTicker !== null} onClick={onClose}>Done</button></footer>
+    </WatchlistDialog>
   );
 }
 
@@ -2187,6 +2156,7 @@ export function MobileStockExplorer({
     savedFilterId: string | null;
   }>({ expression: createEmptyFilterExpression(), sortKey: "support_best", sortDirection: "asc", savedFilterId: null });
   const [watchlistOpen, setWatchlistOpen] = useState(false);
+  const [watchlistTargetGroup, setWatchlistTargetGroup] = useState<string | null>(null);
   const [spaceTab, setSpaceTab] = useState<"watchlist" | "portfolio">("watchlist");
   const [detailOpen, setDetailOpen] = useState(false);
   const [activeSavedFilterId, setActiveSavedFilterId] = useState<string | null>(null);
@@ -2207,6 +2177,11 @@ export function MobileStockExplorer({
   const signedIn = personalization?.signedIn ?? false;
   const watchlistTickers = personalization?.watchlistTickers ?? [];
   const watchlist = useMemo(() => new Set(watchlistTickers), [watchlistTickers]);
+  const watchlistItems = personalization?.watchlistItems ?? [];
+  const watchlistGroups = personalization?.watchlistGroups ?? [];
+  const watchlistOrder = useMemo(() => new Map(watchlistItems.map((item) => [item.ticker, item])), [personalization?.watchlistItems]);
+  const groupOrder = useMemo(() => new Map([...watchlistGroups].sort((a, b) => a.position - b.position || a.id.localeCompare(b.id))
+    .map((group, index) => [group.id, index])), [personalization?.watchlistGroups]);
   const baseSnapshots = useMemo(
     () => signedIn ? snapshots.filter((snapshot) => watchlist.has(snapshot.ticker)) : snapshots,
     [signedIn, snapshots, watchlist],
@@ -2222,6 +2197,14 @@ export function MobileStockExplorer({
         return matchesSearch && filterExpressionMatches(snapshot, filterExpression);
       })
       .sort((left, right) => {
+        if (signedIn) {
+          const leftItem = watchlistOrder.get(left.ticker);
+          const rightItem = watchlistOrder.get(right.ticker);
+          const rank = (id?: string | null) => id ? groupOrder.get(id) ?? groupOrder.size : groupOrder.size;
+          const groupDifference = rank(leftItem?.group_id) - rank(rightItem?.group_id);
+          if (groupDifference) return groupDifference;
+          if (sortKey === "watchlist_order") return ((leftItem?.position ?? 0) - (rightItem?.position ?? 0)) * (sortDirection === "asc" ? 1 : -1) || left.ticker.localeCompare(right.ticker);
+        }
         const leftValue = sortValue(left, sortKey, relevantSupportKeys);
         const rightValue = sortValue(right, sortKey, relevantSupportKeys);
         if (leftValue == null && rightValue == null) return left.ticker.localeCompare(right.ticker);
@@ -2232,19 +2215,23 @@ export function MobileStockExplorer({
           : String(leftValue).localeCompare(String(rightValue), undefined, { numeric: true, sensitivity: "base" });
         return (sortDirection === "asc" ? comparison : -comparison) || left.ticker.localeCompare(right.ticker);
       });
-  }, [baseSnapshots, filterExpression, query, relevantSupportKeys, sortDirection, sortKey]);
-  const totalPages = Math.max(1, Math.ceil(visibleSnapshots.length / PAGE_SIZE));
+  }, [baseSnapshots, filterExpression, query, relevantSupportKeys, sortDirection, sortKey, signedIn, watchlistOrder, groupOrder]);
+  const expandedSnapshots = useMemo(() => {
+    const collapsed = new Set(watchlistGroups.filter((group) => group.collapsed).map((group) => group.id));
+    return signedIn ? visibleSnapshots.filter((snapshot) => !collapsed.has(watchlistOrder.get(snapshot.ticker)?.group_id ?? "")) : visibleSnapshots;
+  }, [visibleSnapshots, signedIn, personalization?.watchlistGroups, watchlistOrder]);
+  const totalPages = Math.max(1, Math.ceil(expandedSnapshots.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
-  const pageStart = visibleSnapshots.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-  const pageEnd = Math.min(currentPage * PAGE_SIZE, visibleSnapshots.length);
+  const pageStart = expandedSnapshots.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const pageEnd = Math.min(currentPage * PAGE_SIZE, expandedSnapshots.length);
   const pagedSnapshots = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return visibleSnapshots.slice(start, start + PAGE_SIZE);
-  }, [currentPage, visibleSnapshots]);
-  const listSummaryLabel = visibleSnapshots.length === 0
-    ? signedIn ? `0 of ${baseSnapshots.length} watched` : `0 of ${snapshots.length} stocks`
+    return expandedSnapshots.slice(start, start + PAGE_SIZE);
+  }, [currentPage, expandedSnapshots]);
+  const listSummaryLabel = expandedSnapshots.length === 0
+    ? signedIn ? `0 of ${watchlistTickers.length} watched` : `0 of ${snapshots.length} stocks`
     : signedIn
-      ? `${pageStart}-${pageEnd} of ${visibleSnapshots.length} watched`
+      ? `${pageStart}-${pageEnd} of ${watchlistTickers.length} watched`
       : `${pageStart}-${pageEnd} of ${visibleSnapshots.length} stocks`;
 
   const filterCount = activeFilterCount(filterExpression);
@@ -2262,6 +2249,8 @@ export function MobileStockExplorer({
   }, [filterExpression, query, signedIn, sortDirection, sortKey, watchlistTickers]);
 
   useEffect(() => {
+    setSortKey(personalization?.userId ? "watchlist_order" : "support_best");
+    setSortDirection("asc");
     setFilterExpression(createEmptyFilterExpression());
     setActiveSavedFilterId(null);
     setSheetOpen(false);
@@ -2407,6 +2396,58 @@ export function MobileStockExplorer({
     onCloseDetail?.();
   };
 
+  const renderStockRow = (snapshot: OpenDataStockSnapshot) => {
+    const metric = rowMetric(snapshot, sortKey, relevantSupportKeys);
+    const exportSelected = exportSelection.includes(snapshot.ticker);
+    return (
+      <article className={`mobile-stock-row ${exportSelected ? "export-selected" : ""}`} key={snapshot.ticker}>
+        <button
+          type="button"
+          className={`mobile-stock-row-main ${exportMode ? "export-selecting" : ""}`}
+          onClick={() => exportMode ? toggleExportSelection(snapshot.ticker) : openDetail(snapshot.ticker)}
+          aria-pressed={exportMode ? exportSelected : undefined}
+        >
+          {exportMode && (
+            <span className={`mobile-export-check ${exportSelected ? "selected" : ""}`} aria-hidden="true">
+              {exportSelected && <Check size={14} />}
+            </span>
+          )}
+          <div className="mobile-stock-identity">
+            <strong>{snapshot.ticker}</strong>
+            <span>{snapshot.name ?? snapshot.industry ?? ""}</span>
+          </div>
+          <div className="mobile-stock-value">
+            <strong>{metric.value}</strong>
+            <StockStatus signal={metric.signal} context={metric.secondary} compact />
+          </div>
+        </button>
+        {editMode && !exportMode && (
+          <button
+            type="button"
+            className="mobile-remove-stock"
+            onClick={() => onRemoveStock?.(snapshot.ticker)}
+            disabled={removingTicker === snapshot.ticker}
+            aria-label={`Remove ${snapshot.ticker}`}
+            title={`Remove ${snapshot.ticker}`}
+          >
+            <X size={17} />
+          </button>
+        )}
+      </article>
+    );
+  };
+  const openWatchlistPicker = (groupId: string | null = null) => {
+    setWatchlistTargetGroup(groupId);
+    setWatchlistOpen(true);
+  };
+  const pagination = totalPages > 1 && (
+    <nav className="mobile-pagination" aria-label="Stocks pagination">
+      <button type="button" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} aria-label="Previous page" title="Previous page"><ChevronLeft size={19} /></button>
+      <strong>{currentPage} / {totalPages}</strong>
+      <button type="button" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} aria-label="Next page" title="Next page"><ChevronRight size={19} /></button>
+    </nav>
+  );
+
   if (detailOpen && selectedSnapshot) {
     return (
       <div className="mobile-stock-app">
@@ -2496,7 +2537,6 @@ export function MobileStockExplorer({
           }}
         />
 
-
         <div className="mobile-list-summary" ref={listTopRef}>
           <span>{listSummaryLabel}</span>
           <div className="mobile-list-actions">
@@ -2518,8 +2558,8 @@ export function MobileStockExplorer({
               </button>
             )}
             {!exportMode && signedIn && (
-              <button type="button" onClick={() => setWatchlistOpen(true)}>
-                <Plus size={15} />Manage
+              <button type="button" disabled={personalization?.watchlistLoading} onClick={() => openWatchlistPicker()}>
+                <Plus size={15} />Add
               </button>
             )}
           </div>
@@ -2531,14 +2571,34 @@ export function MobileStockExplorer({
         )}
         {exportError && <p className="mobile-personal-error">{exportError}</p>}
 
-        {loading ? (
+        {signedIn && personalization?.watchlistLoadError ? (
+          <div className="mobile-list-state" role="alert">
+            <strong>Could not load your watchlist</strong>
+            <p>{personalization.watchlistLoadError}</p>
+            <button type="button" className="mobile-empty-watchlist-button" onClick={() => void personalization.onReloadWatchlist()}>Try again</button>
+          </div>
+        ) : loading || (signedIn && personalization?.watchlistLoading) ? (
           <div className="mobile-list-state">Loading stock insights...</div>
+        ) : signedIn && personalization ? (
+          <>
+            <WatchlistGroups key={personalization.userId ?? "watchlist"}
+              groups={watchlistGroups} items={watchlistItems}
+              matchingSnapshots={visibleSnapshots} pagedSnapshots={pagedSnapshots}
+              renderRow={renderStockRow} onAdd={openWatchlistPicker}
+              onRevealGroup={(groupId) => {
+                const index = expandedSnapshots.findIndex((snapshot) => (watchlistOrder.get(snapshot.ticker)?.group_id ?? null) === groupId);
+                if (index >= 0) goToPage(Math.floor(index / PAGE_SIZE) + 1);
+              }}
+              onManualOrder={() => { setSortKey("watchlist_order"); setSortDirection("asc"); }}
+              onRemove={personalization.onRemoveFromWatchlist} actions={personalization} />
+            {pagination}
+          </>
         ) : visibleSnapshots.length === 0 ? (
           <div className="mobile-list-state">
             <strong>{snapshots.length === 0 ? "No stock metrics loaded" : signedIn && baseSnapshots.length === 0 ? "Your watchlist is empty" : "No stocks match"}</strong>
             <p>{snapshots.length === 0 ? "The data bundle is empty." : signedIn && baseSnapshots.length === 0 ? "Add symbols to build your personal list." : "Try removing a filter or changing the search."}</p>
             {signedIn && baseSnapshots.length === 0 && (
-              <button type="button" className="mobile-empty-watchlist-button" onClick={() => setWatchlistOpen(true)}>
+              <button type="button" className="mobile-empty-watchlist-button" onClick={() => openWatchlistPicker()}>
                 <Plus size={17} />Add symbols
               </button>
             )}
@@ -2546,70 +2606,9 @@ export function MobileStockExplorer({
         ) : (
           <>
             <section className="mobile-stock-list" aria-label="Stocks">
-              {pagedSnapshots.map((snapshot) => {
-                const metric = rowMetric(snapshot, sortKey, relevantSupportKeys);
-                const exportSelected = exportSelection.includes(snapshot.ticker);
-                return (
-                  <article className={`mobile-stock-row ${exportSelected ? "export-selected" : ""}`} key={snapshot.ticker}>
-                    <button
-                      type="button"
-                      className={`mobile-stock-row-main ${exportMode ? "export-selecting" : ""}`}
-                      onClick={() => exportMode ? toggleExportSelection(snapshot.ticker) : openDetail(snapshot.ticker)}
-                      aria-pressed={exportMode ? exportSelected : undefined}
-                    >
-                      {exportMode && (
-                        <span className={`mobile-export-check ${exportSelected ? "selected" : ""}`} aria-hidden="true">
-                          {exportSelected && <Check size={14} />}
-                        </span>
-                      )}
-                      <div className="mobile-stock-identity">
-                        <strong>{snapshot.ticker}</strong>
-                        <span>{snapshot.name ?? snapshot.industry ?? ""}</span>
-                      </div>
-                      <div className="mobile-stock-value">
-                        <strong>{metric.value}</strong>
-                        <StockStatus signal={metric.signal} context={metric.secondary} compact />
-                      </div>
-                    </button>
-                    {editMode && !exportMode && (
-                      <button
-                        type="button"
-                        className="mobile-remove-stock"
-                        onClick={() => onRemoveStock?.(snapshot.ticker)}
-                        disabled={removingTicker === snapshot.ticker}
-                        aria-label={`Remove ${snapshot.ticker}`}
-                        title={`Remove ${snapshot.ticker}`}
-                      >
-                        <X size={17} />
-                      </button>
-                    )}
-                  </article>
-                );
-              })}
+              {pagedSnapshots.map(renderStockRow)}
             </section>
-            {visibleSnapshots.length > PAGE_SIZE && (
-              <nav className="mobile-pagination" aria-label="Stocks pagination">
-                <button
-                  type="button"
-                  onClick={() => goToPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  aria-label="Previous page"
-                  title="Previous page"
-                >
-                  <ChevronLeft size={19} />
-                </button>
-                <strong>{currentPage} / {totalPages}</strong>
-                <button
-                  type="button"
-                  onClick={() => goToPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  aria-label="Next page"
-                  title="Next page"
-                >
-                  <ChevronRight size={19} />
-                </button>
-              </nav>
-            )}
+            {pagination}
           </>
         )}
         </div>
@@ -2635,14 +2634,12 @@ export function MobileStockExplorer({
         onSavedFilter={(filter) => { selectSavedFilter(filter); setSheetOpen(false); }}
         onClear={() => setFilterDraft((draft) => ({ ...draft, expression: createEmptyFilterExpression() }))}
       />}
-      {personalization?.signedIn && (
-        <WatchlistSheet
-          open={watchlistOpen}
-          snapshots={snapshots}
-          watchlistTickers={personalization.watchlistTickers}
+      {personalization?.signedIn && watchlistOpen && (
+        <WatchlistSheet key={`${personalization.userId}:${watchlistTargetGroup ?? "ungrouped"}`}
+          snapshots={snapshots} items={watchlistItems} groups={watchlistGroups}
+          groupId={watchlistTargetGroup}
           onClose={() => setWatchlistOpen(false)}
           onAdd={personalization.onAddToWatchlist}
-          onRemove={personalization.onRemoveFromWatchlist}
         />
       )}
     </div>

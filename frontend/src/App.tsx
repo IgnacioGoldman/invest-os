@@ -1,6 +1,6 @@
 import type { Session } from "@supabase/supabase-js";
 import { Pencil, Plus, RefreshCcw, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchOpenDataStocks,
   fetchRefreshJobs,
@@ -29,8 +29,14 @@ import {
   type SaveFilterInput,
 } from "./personalization";
 import { isSupabaseConfigured, signInWithGoogle, signOut, supabase } from "./supabase";
+import {
+  createWatchlistGroup, deleteWatchlistGroup, fetchWatchlistGroups, moveWatchlistItem,
+  reorderWatchlistGroups, reorderWatchlistItems, updateWatchlistGroup,
+  type WatchlistGroup, type WatchlistGroupInput, type WatchlistItem,
+} from "./watchlist";
 import "./styles.css";
 import "./money.css";
+import "./watchlist.css";
 
 const isActiveRefreshJob = (job: RefreshJob) => job.status === "queued" || job.status === "running";
 const isExplorationBetaRefreshJob = (job: RefreshJob) => job.source === "exploration_beta";
@@ -92,7 +98,16 @@ export default function App() {
   const [mutatingTicker, setMutatingTicker] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
-  const [watchlistTickers, setWatchlistTickers] = useState<string[]>([]);
+  const [watchlistItems, setWatchlistItems] = useState<WatchlistItem[]>([]);
+  const [watchlistGroups, setWatchlistGroups] = useState<WatchlistGroup[]>([]);
+  const [personalizationLoadedUser, setPersonalizationLoadedUser] = useState<string | null>(null);
+  const [personalizationLoadError, setPersonalizationLoadError] = useState<string | null>(null);
+  const watchlistTickers = useMemo(() => watchlistItems.map((item) => item.ticker), [watchlistItems]);
+  const personalizationUser = useRef<string | null>(null);
+  personalizationUser.current = session?.user.id ?? null;
+  const personalizationRevision = useRef(0);
+  const watchlistMutating = useRef(false);
+  const watchlistMutationUser = useRef<string | null>(null);
   const [filterBadgeCounts, setFilterBadgeCounts] = useState<Record<string, number>>({});
   const [routeSegment, setRouteSegment] = useState(() => routeSegmentFromLocation());
 
@@ -167,28 +182,40 @@ export default function App() {
   }, []);
 
   const loadPersonalization = useCallback(async (userId: string) => {
+    if (watchlistMutationUser.current === userId) return;
+    const revision = ++personalizationRevision.current;
+    setPersonalizationLoadError(null);
     try {
       await ensureUserProfile(userId);
-      const [filters, tickers, events] = await Promise.all([
+      const [filters, items, groups, events] = await Promise.all([
         fetchSavedFilters(userId),
         fetchWatchlist(userId),
+        fetchWatchlistGroups(userId),
         fetchFilterMatchEvents(userId, currentMatchDate()),
       ]);
+      if (revision !== personalizationRevision.current || personalizationUser.current !== userId) return;
       setSavedFilters(filters);
-      setWatchlistTickers(tickers);
+      setWatchlistItems(items);
+      setWatchlistGroups(groups);
+      setPersonalizationLoadedUser(userId);
+      setPersonalizationLoadError(null);
       setFilterBadgeCounts(events.reduce<Record<string, number>>((counts, event) => {
         counts[event.filter_key] = (counts[event.filter_key] ?? 0) + 1;
         return counts;
       }, {}));
     } catch (exc) {
-      setError(exc instanceof Error ? exc.message : "Failed to load your account data.");
+      if (revision !== personalizationRevision.current || personalizationUser.current !== userId) return;
+      setPersonalizationLoadError(exc instanceof Error ? exc.message : "Failed to load your account data.");
     }
   }, []);
 
   useEffect(() => {
     if (!session) {
       setSavedFilters([]);
-      setWatchlistTickers([]);
+      setWatchlistItems([]);
+      setWatchlistGroups([]);
+      setPersonalizationLoadedUser(null);
+      setPersonalizationLoadError(null);
       setFilterBadgeCounts({});
       return undefined;
     }
@@ -281,17 +308,70 @@ export default function App() {
     });
   };
 
-  const addToWatchlist = async (ticker: string) => {
+  const mutateWatchlist = async (action: (userId: string, apply: (update: () => void) => void) => Promise<void>) => {
     if (!session) throw new Error("Sign in before editing your watchlist.");
-    const symbol = await addWatchlistItem(session.user.id, ticker);
-    setWatchlistTickers((current) => current.includes(symbol) ? current : [...current, symbol]);
+    if (personalizationLoadedUser !== session.user.id) throw new Error("Wait for your watchlist to load before making changes.");
+    if (watchlistMutating.current) throw new Error("Wait for your previous change to finish.");
+    const userId = session.user.id;
+    watchlistMutating.current = true;
+    watchlistMutationUser.current = userId;
+    personalizationRevision.current++;
+    try {
+      await action(userId, (update) => {
+        if (personalizationUser.current === userId) update();
+      });
+    } finally {
+      watchlistMutating.current = false;
+      watchlistMutationUser.current = null;
+    }
   };
 
-  const removeFromWatchlist = async (ticker: string) => {
-    if (!session) return;
-    await removeWatchlistItem(session.user.id, ticker);
-    setWatchlistTickers((current) => current.filter((symbol) => symbol !== ticker));
+  const moveInWatchlist = (ticker: string, groupId: string | null, beforeTicker?: string) => mutateWatchlist(async (_userId, apply) => {
+    const next = moveWatchlistItem(watchlistItems, ticker, groupId, beforeTicker);
+    await reorderWatchlistItems(next);
+    apply(() => setWatchlistItems(next));
+  });
+
+  const addToWatchlist = (ticker: string, groupId: string | null = null) => {
+    if (watchlistTickers.includes(ticker)) return moveInWatchlist(ticker, groupId);
+    return mutateWatchlist(async (userId, apply) => {
+      const position = Math.max(-1, ...watchlistItems.map((item) => item.position)) + 1;
+      const item = await addWatchlistItem(userId, ticker, groupId, position);
+      apply(() => setWatchlistItems((current) => [...current.filter((entry) => entry.ticker !== item.ticker), item]));
+    });
   };
+
+  const removeFromWatchlist = (ticker: string) => mutateWatchlist(async (userId, apply) => {
+    await removeWatchlistItem(userId, ticker);
+    apply(() => setWatchlistItems((current) => current.filter((item) => item.ticker !== ticker)));
+  });
+
+  const createGroup = (input: WatchlistGroupInput) => mutateWatchlist(async (userId, apply) => {
+    const position = Math.max(-1, ...watchlistGroups.map((group) => group.position)) + 1;
+    const group = await createWatchlistGroup(userId, input, position);
+    apply(() => setWatchlistGroups((current) => [...current, group]));
+  });
+
+  const updateGroup = (id: string, input: Partial<WatchlistGroupInput & { collapsed: boolean }>) => mutateWatchlist(async (userId, apply) => {
+    const saved = await updateWatchlistGroup(userId, id, input);
+    apply(() => setWatchlistGroups((current) => current.map((group) => group.id === id ? saved : group)));
+  });
+
+  const deleteGroup = (id: string) => mutateWatchlist(async (userId, apply) => {
+    await deleteWatchlistGroup(userId, id);
+    apply(() => {
+      setWatchlistGroups((current) => current.filter((group) => group.id !== id));
+      setWatchlistItems((current) => current.map((item) => item.group_id === id ? { ...item, group_id: null } : item));
+    });
+  });
+
+  const reorderGroups = (ids: string[]) => mutateWatchlist(async (_userId, apply) => {
+    await reorderWatchlistGroups(ids);
+    apply(() => setWatchlistGroups((current) => ids.flatMap((id, position) => {
+      const group = current.find((entry) => entry.id === id);
+      return group ? [{ ...group, position }] : [];
+    })));
+  });
 
   const selectStockForSharing = (ticker: string) => {
     setSelectedTicker(ticker);
@@ -425,12 +505,22 @@ export default function App() {
             userId: session?.user.id ?? null,
             savedFilters,
             watchlistTickers,
+            watchlistItems,
+            watchlistGroups,
+            watchlistLoading: personalizationLoadedUser !== session?.user.id,
+            watchlistLoadError: personalizationLoadError,
+            onReloadWatchlist: async () => { if (session) await loadPersonalization(session.user.id); },
             filterBadgeCounts,
             onRequestSignIn: signInWithGoogle,
             onSaveFilter: persistFilter,
             onDeleteFilter: removeSavedFilter,
             onAddToWatchlist: addToWatchlist,
             onRemoveFromWatchlist: removeFromWatchlist,
+            onMoveWatchlistItem: moveInWatchlist,
+            onCreateWatchlistGroup: createGroup,
+            onUpdateWatchlistGroup: updateGroup,
+            onDeleteWatchlistGroup: deleteGroup,
+            onReorderWatchlistGroups: reorderGroups,
           } : undefined}
           editMode={STATIC_DATA_MODE ? false : editMode}
           removingTicker={mutatingTicker}

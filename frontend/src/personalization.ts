@@ -1,5 +1,6 @@
 import type { FilterExpression, SortDirection, SortKey } from "./components/MobileStockExplorer";
 import { requireSupabase } from "./supabase";
+import type { WatchlistItem } from "./watchlist";
 
 export const PULLBACK_FILTER_KEY = "builtin:pullback";
 export const SUPPORT_FILTER_KEY = "builtin:support";
@@ -80,20 +81,23 @@ export async function deleteSavedFilter(filterId: string) {
 export async function fetchWatchlist(userId: string) {
   const { data, error } = await requireSupabase()
     .from("watchlist_items")
-    .select("ticker")
+    .select("ticker,group_id,position")
     .eq("user_id", userId)
-    .order("created_at", { ascending: true });
+    .order("position", { ascending: true }).order("ticker");
   throwIfError(error);
-  return (data ?? []).map((item) => String(item.ticker));
+  return (data ?? []) as WatchlistItem[];
 }
 
-export async function addWatchlistItem(userId: string, ticker: string) {
+export async function addWatchlistItem(userId: string, ticker: string, groupId: string | null, position: number) {
   const symbol = ticker.toUpperCase();
   const { error } = await requireSupabase()
     .from("watchlist_items")
-    .upsert({ user_id: userId, ticker: symbol }, { onConflict: "user_id,ticker", ignoreDuplicates: true });
+    .upsert({ user_id: userId, ticker: symbol, group_id: groupId, position }, { onConflict: "user_id,ticker", ignoreDuplicates: true });
   throwIfError(error);
-  return symbol;
+  const { data, error: readError } = await requireSupabase().from("watchlist_items")
+    .select("ticker,group_id,position").eq("user_id", userId).eq("ticker", symbol).single();
+  throwIfError(readError);
+  return data as WatchlistItem;
 }
 
 export async function removeWatchlistItem(userId: string, ticker: string) {
