@@ -1070,7 +1070,9 @@ class OpenDataProvider:
             except ValueError:
                 pass
 
-        history = self._fetch_stooq_history(symbol) or self._fetch_yfinance_history(symbol)
+        # Match the incremental price workflow's source order. A slow Stooq
+        # outage must not delay every ticker before trying available Yahoo bars.
+        history = self._fetch_yfinance_history(symbol) or self._fetch_stooq_history(symbol)
         if history:
             self.cache.set(f"price_history_{symbol}.json", [point.model_dump(mode="json") for point in history])
         return history

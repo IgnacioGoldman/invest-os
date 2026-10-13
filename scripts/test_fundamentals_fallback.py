@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
-from app.entry_engine.open_data_models import OpenDataMetric, OpenDataSnapshot, OpenDataPeriodMetrics
+from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataMetric, OpenDataSnapshot, OpenDataPeriodMetrics
 from app.entry_engine.open_data_metrics import compute_open_data_snapshot
 from app.entry_engine.providers.open_data_provider import OpenDataProvider
 from app.entry_engine.providers.nibe_reports import refresh_nibe_reports
@@ -51,6 +51,22 @@ def fallback_snapshot(primary, vendor):
 
 
 class FundamentalsFallbackTests(unittest.TestCase):
+    def test_full_collection_uses_yahoo_history_without_waiting_for_stooq(self):
+        history = [HistoricalPricePoint(date="2026-10-12", close=100, source="yfinance")]
+        cache = SimpleNamespace(get=lambda *args: None, set=lambda *args: None)
+        provider = OpenDataProvider(cache=cache)
+        with patch.object(provider, "_fetch_yfinance_history", return_value=history), patch.object(provider, "_fetch_stooq_history") as stooq:
+            self.assertEqual(provider.fetch_price_history("TEST"), history)
+        stooq.assert_not_called()
+
+    def test_full_collection_retains_stooq_as_history_fallback(self):
+        history = [HistoricalPricePoint(date="2026-10-12", close=100, source="stooq")]
+        cache = SimpleNamespace(get=lambda *args: None, set=lambda *args: None)
+        provider = OpenDataProvider(cache=cache)
+        with patch.object(provider, "_fetch_yfinance_history", return_value=[]), patch.object(provider, "_fetch_stooq_history", return_value=history) as stooq:
+            self.assertEqual(provider.fetch_price_history("TEST"), history)
+        stooq.assert_called_once_with("TEST")
+
     def assert_consistent(self, snapshot):
         errors = []
         payload = snapshot.model_dump(mode="json")
