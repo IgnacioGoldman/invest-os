@@ -784,7 +784,7 @@ const BUILT_IN_PRESET_COPY: Record<BuiltInPreset, BuiltInPresetCopy> = {
       "Companies with strong latest revenue growth, cheap or fair valuation, and current price at or near support zones identified across the past 1Y, 2Y, and 5Y.",
   },
   pullback: {
-    name: "Strong YoY + Pullback + Fair Price",
+    name: "Strong YoY + pullback + fair price",
     summary:
       "Companies with Strong or Solid latest revenue growth YoY, cheap or fair valuation, and Cheap or Fair forward P/E (positive and up to 25×), with price at or near support zones identified across the past 1M, 3M, and 6M.",
   },
@@ -2420,7 +2420,6 @@ export function MobileStockExplorer({
         <div className={isWatchlistView ? "watchlist-list-tools" : undefined}>
         <FilterSelector key={personalization?.userId ?? "guest"}
           userId={personalization?.userId ?? null}
-          scopeLabel={isWatchlistView ? "Watchlist" : "Stocks"}
           filters={filterShortcuts}
           activeKey={activeShortcutKey}
           activeName={activeFilterName}
@@ -2441,6 +2440,17 @@ export function MobileStockExplorer({
           onEdit={(key) => {
             const filter = personalization?.savedFilters.find((item) => savedFilterKey(item.id) === key);
             if (filter) openFilterBuilder(filter);
+          }}
+          onRename={async (key, name) => {
+            const filter = personalization?.savedFilters.find((item) => savedFilterKey(item.id) === key);
+            if (!filter || !personalization) throw new Error("This filter is no longer available.");
+            await personalization.onSaveFilter({
+              id: filter.id,
+              name,
+              expression: filter.expression,
+              sortKey: filter.sort_key,
+              sortDirection: filter.sort_direction,
+            });
           }}
           onDelete={async (key) => {
             const filter = personalization?.savedFilters.find((item) => savedFilterKey(item.id) === key);
