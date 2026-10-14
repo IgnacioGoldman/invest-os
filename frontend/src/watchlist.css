@@ -77,18 +77,6 @@
   justify-content: flex-end;
 }
 
-.mobile-stock-app .watchlist-group-toolbar button {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: transparent;
-  border: 0;
-  color: var(--mobile-muted);
-  min-height: 40px;
-  padding: 0 4px;
-  font-size: .82rem;
-}
-
 .watchlist-group {
   background: var(--mobile-surface);
   border: 1px solid transparent;
@@ -625,16 +613,8 @@
     transition: none;
   }
 }
-.watchlist-search-toolbar {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.watchlist-search-toolbar .mobile-stock-search {
-  flex: 1 1 240px;
-  min-width: 0;
+.my-space-tabs:has(#space-watchlist-tab[aria-selected="true"]) {
+  margin-bottom: 12px;
 }
 
 .mobile-stock-app .watchlist-add-stocks {
@@ -660,42 +640,71 @@
 
 .watchlist-list-tools {
   align-items: center;
-  border-bottom: 1px solid var(--mobile-border);
   display: flex;
   flex-wrap: wrap;
   gap: 8px 12px;
-  padding: 12px 0;
+  padding: 12px 0 4px;
 }
 
 .watchlist-list-tools .filter-selector-row {
+  flex: 1;
   margin: 0;
+  min-width: 0;
 }
 
 .watchlist-list-tools .mobile-list-summary {
   border: 0;
-  flex: 1;
-  gap: 12px;
+  flex: 0 0 auto;
   margin: 0;
-  min-width: 150px;
   padding: 0;
 }
 
-.watchlist-list-tools .stock-analysis-trigger > svg {
-  color: var(--mobile-blue);
+.watchlist-actions {
+  align-items: center;
+  border-bottom: 1px solid var(--mobile-border);
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 4px 0 10px;
 }
 
-@media (max-width: 620px) {
-  .watchlist-search-toolbar {
-    align-items: stretch;
-    flex-direction: column-reverse;
-  }
+.mobile-stock-app .watchlist-action {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--mobile-text);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: .85rem;
+  font-weight: 500;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 4px;
+  white-space: nowrap;
+}
 
-  .watchlist-search-toolbar .mobile-stock-search {
-    flex: auto;
-  }
+.watchlist-action > svg {
+  color: var(--mobile-blue);
+  flex-shrink: 0;
+}
 
-  .watchlist-search-toolbar .watchlist-add-stocks {
-    align-self: flex-end;
+.mobile-stock-app .watchlist-action:hover:not(:disabled),
+.mobile-stock-app .watchlist-action[aria-pressed="true"] {
+  background: var(--mobile-blue-soft);
+}
+
+.mobile-stock-app .watchlist-action:disabled {
+  cursor: default;
+  opacity: .45;
+}
+
+@media (max-width: 360px) {
+  .mobile-stock-app .watchlist-action {
+    font-size: .78rem;
+    gap: 6px;
+    padding: 0 2px;
   }
 }
 

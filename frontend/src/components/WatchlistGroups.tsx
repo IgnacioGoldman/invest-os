@@ -46,7 +46,7 @@ type Target = { groupId: string | null; ticker?: string; beforeTicker?: string; 
 
 export function WatchlistGroups({
   groups, items, matchingSnapshots, pagedSnapshots, renderRow, onRevealGroup,
-  onManualOrder, onRemove, actions,
+  onManualOrder, onRemove, actions, organizing,
 }: {
   groups: WatchlistGroup[];
   items: WatchlistItem[];
@@ -57,9 +57,9 @@ export function WatchlistGroups({
   onManualOrder: () => void;
   onRemove: (ticker: string) => Promise<void>;
   actions: WatchlistGroupActions;
+  organizing: boolean;
 }) {
   const [editor, setEditor] = useState<WatchlistGroup | "new" | null>(null);
-  const [organizing, setOrganizing] = useState(false);
   const [name, setName] = useState("");
   const [color, setColor] = useState<string>(WATCHLIST_COLORS[0].value);
   const [movingTicker, setMovingTicker] = useState<string | null>(null);
@@ -222,10 +222,9 @@ export function WatchlistGroups({
 
   return (
     <div className={`watchlist-groups${organizing ? " watchlist-organizing" : ""}${groups.length === 0 ? " watchlist-flat" : ""}`} aria-busy={busy}>
-      <div className="watchlist-group-toolbar">
-        {organizing && <button type="button" disabled={busy} onClick={() => openEditor()}><Plus size={16} />New group</button>}
-        <button type="button" disabled={busy} aria-expanded={organizing} onClick={() => setOrganizing(!organizing)}>{organizing ? "Done organizing" : "Organize"}</button>
-      </div>
+      {organizing && <div className="watchlist-group-toolbar">
+        <button type="button" className="watchlist-action" disabled={busy} onClick={() => openEditor()}><Plus size={18} aria-hidden="true" />New group</button>
+      </div>}
       {error && !editor && !movingTicker && <p className="watchlist-error" role="alert">{error}</p>}
       <span className="watchlist-sr-only" role="status" aria-live="polite">{announcement}</span>
       {sections.map((group) => {

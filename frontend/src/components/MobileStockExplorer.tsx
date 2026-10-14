@@ -17,6 +17,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  ListTree,
   Sparkles,
   LogIn,
   Plus,
@@ -1941,6 +1942,7 @@ export function MobileStockExplorer({
   }>({ expression: createEmptyFilterExpression(), sortKey: "support_best", sortDirection: "asc", savedFilterId: null });
   const [watchlistOpen, setWatchlistOpen] = useState(false);
   const [watchlistTargetGroup, setWatchlistTargetGroup] = useState<string | null>(null);
+  const [watchlistOrganizing, setWatchlistOrganizing] = useState(false);
   const [spaceTab, setSpaceTab] = useState<SpaceTab>("explore");
   const listViews = useRef<Partial<Record<StockListTab, StockListView>>>({});
   const restoringListPage = useRef<number | null>(null);
@@ -2053,6 +2055,7 @@ export function MobileStockExplorer({
     setActiveSavedFilterId(null);
     setSheetOpen(false);
     setWatchlistOpen(false);
+    setWatchlistOrganizing(false);
     setSavingTicker(null);
     setWatchlistSaveError(null);
     setAddedTicker(null);
@@ -2196,6 +2199,7 @@ export function MobileStockExplorer({
       };
     }
     setSpaceTab(tab);
+    setWatchlistOrganizing(false);
     cancelAnalysis();
     setWatchlistSaveError(null);
     if (tab === "portfolio") return;
@@ -2398,7 +2402,6 @@ export function MobileStockExplorer({
         ) : (
         <div id={isWatchlistView ? "space-watchlist" : "space-explore"} role={signedIn ? "tabpanel" : undefined} aria-labelledby={signedIn ? `space-${spaceTab}-tab` : undefined}>
         {showListControls && <>
-        <div className={isWatchlistView ? "watchlist-search-toolbar" : undefined}>
         <label className="mobile-stock-search">
           <Search size={20} />
           <input
@@ -2412,10 +2415,6 @@ export function MobileStockExplorer({
             <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X size={17} /></button>
           )}
         </label>
-        {isWatchlistView && <button type="button" className="watchlist-add-stocks" onClick={() => openWatchlistPicker()}>
-          <Plus size={18} aria-hidden="true" />Add stocks
-        </button>}
-        </div>
 
         <div className={isWatchlistView ? "watchlist-list-tools" : undefined}>
         <FilterSelector key={personalization?.userId ?? "guest"}
@@ -2462,17 +2461,32 @@ export function MobileStockExplorer({
 
         <div className="mobile-list-summary" ref={listTopRef}>
           <span>{isWatchlistView ? `${watchlistTickers.length} stock${watchlistTickers.length === 1 ? "" : "s"}` : listSummaryLabel}</span>
-          <div className="mobile-list-actions">
+          {!isWatchlistView && <div className="mobile-list-actions">
             {analysisMode ? (
               <button type="button" onClick={cancelAnalysis}>Cancel</button>
             ) : visibleSnapshots.length > 0 ? (
               <button type="button" className="stock-analysis-trigger" onClick={startAnalysis} disabled={visibleSnapshots.length === 0}>
-                <Sparkles size={17} aria-hidden="true" />Analyze{!isWatchlistView && <ChevronRight size={15} aria-hidden="true" />}
+                <Sparkles size={17} aria-hidden="true" />Analyze<ChevronRight size={15} aria-hidden="true" />
               </button>
             ) : null}
-          </div>
+          </div>}
         </div>
         </div>
+        {isWatchlistView && <div className="watchlist-actions" role="group" aria-label="Watchlist actions">
+          <button type="button" className="watchlist-action" onClick={() => openWatchlistPicker()}>
+            <Plus size={18} aria-hidden="true" />Add stocks
+          </button>
+          <button type="button" className="watchlist-action" onClick={analysisMode ? cancelAnalysis : startAnalysis}
+            disabled={!analysisMode && visibleSnapshots.length === 0}>
+            {analysisMode ? <X size={18} aria-hidden="true" /> : <Sparkles size={18} aria-hidden="true" />}
+            {analysisMode ? "Cancel" : "Analyze"}
+          </button>
+          <button type="button" className="watchlist-action" aria-pressed={watchlistOrganizing}
+            disabled={!watchlistOrganizing && visibleSnapshots.length === 0} onClick={() => setWatchlistOrganizing((current) => !current)}>
+            {watchlistOrganizing ? <Check size={18} aria-hidden="true" /> : <ListTree size={18} aria-hidden="true" />}
+            {watchlistOrganizing ? "Done" : "Organize"}
+          </button>
+        </div>}
         {analysisMode && (
           <p className="stock-analysis-selection-hint">Select companies to compare, then generate an AI brief.</p>
         )}
@@ -2511,6 +2525,7 @@ export function MobileStockExplorer({
           <>
             <WatchlistGroups key={personalization.userId ?? "watchlist"}
               groups={watchlistGroups} items={watchlistItems}
+              organizing={watchlistOrganizing}
               matchingSnapshots={visibleSnapshots} pagedSnapshots={pagedSnapshots}
               renderRow={renderStockRow}
               onRevealGroup={(groupId) => {
