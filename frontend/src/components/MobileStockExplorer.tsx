@@ -2020,15 +2020,11 @@ export function MobileStockExplorer({
   }, [visibleSnapshots, isWatchlistView, personalization?.watchlistGroups, watchlistOrder]);
   const totalPages = Math.max(1, Math.ceil(expandedSnapshots.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
-  const pageStart = expandedSnapshots.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-  const pageEnd = Math.min(currentPage * PAGE_SIZE, expandedSnapshots.length);
   const pagedSnapshots = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return expandedSnapshots.slice(start, start + PAGE_SIZE);
   }, [currentPage, expandedSnapshots]);
-  const listSummaryLabel = totalPages > 1
-    ? `${pageStart}–${pageEnd} of ${expandedSnapshots.length} stocks`
-    : `${visibleSnapshots.length} stock${visibleSnapshots.length === 1 ? "" : "s"}`;
+  const listSummaryLabel = `${visibleSnapshots.length} ${visibleSnapshots.length === 1 ? "company" : "companies"}`;
 
   const filterCount = activeFilterCount(filterExpression);
   const latestMarketDate = snapshots.reduce((latest, snapshot) => {

@@ -9581,8 +9581,14 @@ body:has(.mobile-sheet-backdrop) {
   width: 100%;
 }
 
-.mobile-stock-app .mobile-stock-row-main:hover {
+.mobile-stock-row:not(.analysis-selected):has(> button:active:not(:disabled)) {
   background: rgba(255, 255, 255, 0.035);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mobile-stock-row:not(.analysis-selected):has(> .mobile-stock-row-main:hover) {
+    background: rgba(255, 255, 255, 0.035);
+  }
 }
 
 .mobile-stock-app .mobile-stock-row-main.analysis-selecting {
