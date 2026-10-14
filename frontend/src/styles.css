@@ -9475,12 +9475,14 @@ body:has(.mobile-sheet-backdrop) {
 
 .mobile-list-summary {
   align-items: center;
+  border-bottom: 1px solid var(--mobile-border);
   color: var(--mobile-muted);
   display: flex;
   font-size: 0.8rem;
   font-weight: 500;
   justify-content: space-between;
   margin: 6px 0 0;
+  padding-bottom: 6px;
 }
 
 .mobile-stock-app .mobile-list-summary button {

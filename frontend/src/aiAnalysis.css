@@ -1,15 +1,16 @@
 .mobile-stock-app .mobile-list-summary .stock-analysis-trigger {
-  border: 1px solid var(--mobile-border-strong);
-  border-radius: 999px;
+  border: 0;
+  border-radius: 8px;
   color: var(--mobile-text);
   gap: 7px;
-  padding: 0 12px;
+  padding: 0 4px;
   font-size: .82rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .mobile-stock-app .stock-analysis-trigger:hover:not(:disabled) { background: var(--mobile-blue-soft); }
 .stock-analysis-trigger > svg { color: var(--mobile-blue); }
+.stock-analysis-trigger > svg:last-child { color: var(--mobile-muted); }
 
 .stock-analysis-selection-hint {
   color: var(--mobile-muted);
@@ -138,4 +139,10 @@
   .stock-analysis-selection-bar { gap: 8px; }
   .mobile-stock-app .stock-analysis-prepare { font-size: .78rem; padding: 0 12px; }
   .stock-analysis-selection-bar small { font-size: .7rem; }
+}
+
+@media (max-width: 360px) {
+  .stock-analysis-selection-bar { flex-wrap: wrap; }
+  .mobile-stock-app .stock-analysis-prepare { justify-content: center; width: 100%; }
+  .mobile-stock-main.analysis-selecting { padding-bottom: 150px; }
 }

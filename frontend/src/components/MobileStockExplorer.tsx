@@ -2023,11 +2023,9 @@ export function MobileStockExplorer({
     const start = (currentPage - 1) * PAGE_SIZE;
     return expandedSnapshots.slice(start, start + PAGE_SIZE);
   }, [currentPage, expandedSnapshots]);
-  const listSummaryLabel = expandedSnapshots.length === 0
-    ? isWatchlistView ? `0 of ${watchlistTickers.length} watched` : `0 of ${snapshots.length} stocks`
-    : isWatchlistView
-      ? `${pageStart}-${pageEnd} of ${watchlistTickers.length} watched`
-      : `${pageStart}-${pageEnd} of ${visibleSnapshots.length} stocks`;
+  const listSummaryLabel = totalPages > 1
+    ? `${pageStart}–${pageEnd} of ${expandedSnapshots.length} stocks`
+    : `${visibleSnapshots.length} stock${visibleSnapshots.length === 1 ? "" : "s"}`;
 
   const filterCount = activeFilterCount(filterExpression);
   const latestMarketDate = snapshots.reduce((latest, snapshot) => {
@@ -2447,7 +2445,7 @@ export function MobileStockExplorer({
               <button type="button" onClick={cancelAnalysis}>Cancel</button>
             ) : (
               <button type="button" className="stock-analysis-trigger" onClick={startAnalysis} disabled={visibleSnapshots.length === 0}>
-                <Sparkles size={17} />Analyze with AI
+                <Sparkles size={17} aria-hidden="true" />Analyze<ChevronRight size={15} aria-hidden="true" />
               </button>
             )}
             {!analysisMode && isWatchlistView && (
@@ -2458,7 +2456,7 @@ export function MobileStockExplorer({
           </div>
         </div>
         {analysisMode && (
-          <p className="stock-analysis-selection-hint">Select stocks to compare. We'll prepare a prompt with their financial data for you to paste into an AI.</p>
+          <p className="stock-analysis-selection-hint">Select companies to compare, then generate an AI brief.</p>
         )}
         {watchlistSaveError && <p className="mobile-personal-error" role="alert">{watchlistSaveError}</p>}
         {!isWatchlistView && signedIn && personalization?.watchlistLoadError && (
@@ -2502,8 +2500,8 @@ export function MobileStockExplorer({
         )}
         {analysisMode && (
           <div className="stock-analysis-selection-bar">
-            <div><strong role="status">{analysisSelection.length} stock{analysisSelection.length === 1 ? "" : "s"} selected</strong><small>Select → Prepare → Ask AI</small></div>
-            <button ref={analysisPrepareRef} type="button" className="stock-analysis-prepare" onClick={prepareSelectedStocks} disabled={analysisSelection.length === 0}><Sparkles size={17} />Prepare prompt</button>
+            <div><strong role="status">{analysisSelection.length} stock{analysisSelection.length === 1 ? "" : "s"} selected</strong></div>
+            <button ref={analysisPrepareRef} type="button" className="stock-analysis-prepare" onClick={prepareSelectedStocks} disabled={analysisSelection.length === 0}><Sparkles size={17} aria-hidden="true" />Generate AI brief</button>
           </div>
         )}
         </div>

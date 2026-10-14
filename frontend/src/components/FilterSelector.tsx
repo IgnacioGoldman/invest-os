@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, ChevronDown, Pencil, Plus, SlidersHorizontal, Trash2, X } from "lucide-react";
+import { ArrowLeft, Check, Pencil, Plus, SlidersHorizontal, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import "../filterSelector.css";
 
@@ -142,14 +142,17 @@ export function FilterSelector({ userId, scopeLabel = "Stocks", filters, activeK
 
   return (
     <>
-      <div className="filter-selector-row">
-        <button ref={selectorRef} type="button" className={`filter-selector ${activeName ? "active" : ""}`} aria-haspopup="dialog" aria-expanded={isOpen}
-          aria-label={`Choose filter, ${activeName ?? "all stocks"}`} onClick={() => { setError(null); setView("choose"); }}>
-          <SlidersHorizontal size={21} aria-hidden="true" />
-          <span className="filter-selector-copy"><small>Filter</small><strong>{activeName ?? "All stocks"}</strong></span>
-          <ChevronDown size={20} aria-hidden="true" />
+      <div className="filter-selector-row" role="group" aria-label="Stock filters">
+        <button ref={selectorRef} type="button" className="filter-selector" aria-haspopup="dialog" aria-expanded={isOpen}
+          aria-label={`Filters, ${activeName ? `1 active filter: ${activeName}` : "no active filters"}`} onClick={() => { setError(null); setView("choose"); }}>
+          <SlidersHorizontal size={18} aria-hidden="true" />
+          <span>Filters</span>
+          {activeName && <span className="filter-selector-count" aria-hidden="true">1</span>}
         </button>
-        {activeName && <button type="button" className="filter-selector-clear" onClick={onClear}>Clear</button>}
+        {activeName && <button type="button" className="filter-selector-chip" aria-label={`Remove ${activeName} filter`}
+          onClick={() => { onClear(); selectorRef.current?.focus({ preventScroll: true }); }}>
+          <span>{activeName}</span><X size={16} aria-hidden="true" />
+        </button>}
       </div>
       {isOpen && (
         <dialog ref={dialogRef} className="filter-picker-sheet" aria-label={view === "manage" ? "Manage filters" : "Choose a filter"}

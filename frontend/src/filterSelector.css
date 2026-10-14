@@ -1,66 +1,75 @@
 .filter-selector-row {
   align-items: center;
   display: flex;
-  gap: 12px;
-  margin: 12px 0 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 12px;
 }
 
 .mobile-stock-app .filter-selector {
   align-items: center;
   background: var(--mobile-surface-raised);
-  border: 1px solid var(--mobile-border-strong);
-  border-radius: 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
   color: var(--mobile-text);
-  display: flex;
-  flex: 1;
-  gap: 12px;
-  min-height: 64px;
-  min-width: 0;
-  padding: 12px 14px;
-  text-align: left;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  font-weight: 550;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
 }
 
-.mobile-stock-app .filter-selector.active {
-  border-color: var(--mobile-blue);
+.mobile-stock-app .filter-selector:hover {
+  background: var(--mobile-surface-soft);
 }
 
 .filter-selector > svg {
-  color: var(--mobile-blue);
+  color: var(--mobile-text);
   flex-shrink: 0;
 }
 
-.filter-selector > svg:last-child {
-  color: var(--mobile-muted);
+.filter-selector-count {
+  align-items: center;
+  background: #505862;
+  border-radius: 50%;
+  color: var(--mobile-text);
+  display: inline-flex;
+  font-size: 0.72rem;
+  height: 20px;
+  justify-content: center;
+  min-width: 20px;
+  padding: 0 4px;
 }
 
-.filter-selector-copy {
-  display: grid;
-  flex: 1;
-  gap: 3px;
-  min-width: 0;
+.mobile-stock-app .filter-selector-chip {
+  align-items: center;
+  background: var(--mobile-blue-soft);
+  border: 1px solid rgba(154, 199, 255, 0.55);
+  border-radius: 999px;
+  color: var(--mobile-blue);
+  display: inline-flex;
+  font-size: 0.8rem;
+  gap: 8px;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  text-align: left;
 }
 
-.filter-selector-copy > small {
-  color: var(--mobile-muted);
-  font-size: 0.65rem;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.filter-selector-copy > strong {
-  font-size: 0.9rem;
-  font-weight: 550;
+.filter-selector-chip > span {
   line-height: 1.4;
+  min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.mobile-stock-app .filter-selector-clear {
-  background: transparent;
-  border: 0;
-  color: var(--mobile-text);
-  font-size: 0.85rem;
-  min-height: 44px;
-  padding: 0 8px;
+.filter-selector-chip > svg {
+  flex-shrink: 0;
+}
+
+.mobile-stock-app .filter-selector-chip:hover {
+  border-color: var(--mobile-blue);
 }
 
 .filter-picker-sheet {
