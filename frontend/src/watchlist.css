@@ -23,8 +23,10 @@
   padding: 0;
 }
 
-.mobile-stock-app .mobile-watchlist-bookmark:hover:not(:disabled) {
-  background: var(--mobile-blue-soft);
+@media (hover: hover) and (pointer: fine) {
+  .mobile-stock-app .mobile-watchlist-bookmark:hover:not(:disabled) {
+    background: var(--mobile-blue-soft);
+  }
 }
 
 .mobile-stock-app .mobile-watchlist-bookmark:disabled:not(.saved) {
@@ -71,6 +73,7 @@
 
 .watchlist-group-toolbar {
   display: flex;
+  gap: 16px;
   justify-content: flex-end;
 }
 
@@ -80,7 +83,7 @@
   gap: 5px;
   background: transparent;
   border: 0;
-  color: var(--mobile-blue);
+  color: var(--mobile-muted);
   min-height: 40px;
   padding: 0 4px;
   font-size: .82rem;
@@ -119,10 +122,6 @@
 .mobile-stock-app .watchlist-icon:hover {
   background: rgba(255,255,255,.06);
   color: var(--mobile-text);
-}
-
-.mobile-stock-app .watchlist-icon.watchlist-add {
-  color: var(--mobile-blue);
 }
 
 .mobile-stock-app .watchlist-grip {
@@ -246,6 +245,14 @@
 
 .watchlist-ungrouped {
   background: transparent;
+}
+
+.watchlist-flat .watchlist-group-rows {
+  padding: 0;
+}
+
+.watchlist-flat .watchlist-group-row:first-child {
+  border-top: 0;
 }
 
 .watchlist-ungrouped-label {
@@ -617,4 +624,136 @@
   .watchlist-group {
     transition: none;
   }
+}
+.watchlist-search-toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.watchlist-search-toolbar .mobile-stock-search {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.mobile-stock-app .watchlist-add-stocks {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--mobile-border-strong);
+  border-radius: 999px;
+  color: var(--mobile-text);
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: .9rem;
+  font-weight: 500;
+  gap: 8px;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+}
+
+.mobile-stock-app .watchlist-add-stocks:hover {
+  background: var(--mobile-surface-raised);
+  border-color: var(--mobile-muted);
+}
+
+.watchlist-list-tools {
+  align-items: center;
+  border-bottom: 1px solid var(--mobile-border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 12px 0;
+}
+
+.watchlist-list-tools .filter-selector-row {
+  margin: 0;
+}
+
+.watchlist-list-tools .mobile-list-summary {
+  border: 0;
+  flex: 1;
+  gap: 12px;
+  margin: 0;
+  min-width: 150px;
+  padding: 0;
+}
+
+.watchlist-list-tools .stock-analysis-trigger > svg {
+  color: var(--mobile-blue);
+}
+
+@media (max-width: 620px) {
+  .watchlist-search-toolbar {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .watchlist-search-toolbar .mobile-stock-search {
+    flex: auto;
+  }
+
+  .watchlist-search-toolbar .watchlist-add-stocks {
+    align-self: flex-end;
+  }
+}
+
+.watchlist-empty {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: min(560px, 70dvh);
+  padding: 52px 12px;
+  text-align: center;
+}
+
+.watchlist-empty-icon {
+  align-items: center;
+  background: var(--mobile-blue-soft);
+  border-radius: 50%;
+  color: var(--mobile-blue);
+  display: flex;
+  height: 88px;
+  justify-content: center;
+  margin-bottom: 24px;
+  width: 88px;
+}
+
+.watchlist-empty h2 {
+  color: var(--mobile-text);
+  font-size: clamp(1.4rem, 4vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: -.025em;
+  margin: 0;
+}
+
+.watchlist-empty p {
+  color: #c7c7cc;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 20px 0 28px;
+  max-width: 620px;
+}
+
+.mobile-stock-app .watchlist-empty-add {
+  background: var(--mobile-text);
+  border-color: var(--mobile-text);
+  color: var(--mobile-bg);
+  font-size: 1rem;
+  min-height: 50px;
+  width: 100%;
+}
+
+.mobile-stock-app .watchlist-empty-add:hover {
+  background: #dddde1;
+  border-color: #dddde1;
+}
+
+.watchlist-empty small {
+  color: var(--mobile-muted);
+  font-size: .85rem;
+  line-height: 1.5;
+  margin-top: 18px;
 }

@@ -45,7 +45,7 @@ type Drag = { kind: "group" | "symbol"; id: string; label: string; x: number; y:
 type Target = { groupId: string | null; ticker?: string; beforeTicker?: string; after?: boolean; beforeGroupId?: string | null };
 
 export function WatchlistGroups({
-  groups, items, matchingSnapshots, pagedSnapshots, renderRow, onAdd, onRevealGroup,
+  groups, items, matchingSnapshots, pagedSnapshots, renderRow, onRevealGroup,
   onManualOrder, onRemove, actions,
 }: {
   groups: WatchlistGroup[];
@@ -53,13 +53,13 @@ export function WatchlistGroups({
   matchingSnapshots: OpenDataStockSnapshot[];
   pagedSnapshots: OpenDataStockSnapshot[];
   renderRow: (snapshot: OpenDataStockSnapshot) => ReactNode;
-  onAdd: (groupId: string | null) => void;
   onRevealGroup: (groupId: string | null) => void;
   onManualOrder: () => void;
   onRemove: (ticker: string) => Promise<void>;
   actions: WatchlistGroupActions;
 }) {
   const [editor, setEditor] = useState<WatchlistGroup | "new" | null>(null);
+  const [organizing, setOrganizing] = useState(false);
   const [name, setName] = useState("");
   const [color, setColor] = useState<string>(WATCHLIST_COLORS[0].value);
   const [movingTicker, setMovingTicker] = useState<string | null>(null);
@@ -221,44 +221,45 @@ export function WatchlistGroups({
   const sections: Array<WatchlistGroup | null> = [...orderedGroups, null];
 
   return (
-    <div className="watchlist-groups" aria-busy={busy}>
+    <div className={`watchlist-groups${organizing ? " watchlist-organizing" : ""}${groups.length === 0 ? " watchlist-flat" : ""}`} aria-busy={busy}>
       <div className="watchlist-group-toolbar">
-        <button type="button" disabled={busy} onClick={() => openEditor()}><Plus size={16} />New group</button>
+        {organizing && <button type="button" disabled={busy} onClick={() => openEditor()}><Plus size={16} />New group</button>}
+        <button type="button" disabled={busy} aria-expanded={organizing} onClick={() => setOrganizing(!organizing)}>{organizing ? "Done organizing" : "Organize"}</button>
       </div>
       {error && !editor && !movingTicker && <p className="watchlist-error" role="alert">{error}</p>}
       <span className="watchlist-sr-only" role="status" aria-live="polite">{announcement}</span>
       {sections.map((group) => {
         const id = group?.id ?? null;
-        const label = group?.name ?? "My Watchlist";
+        const label = group?.name ?? "Ungrouped";
         const total = items.filter((item) => groupFor(item.ticker) === id).length;
         const matching = matchingSnapshots.filter((snapshot) => groupFor(snapshot.ticker) === id);
         const rows = pagedSnapshots.filter((snapshot) => groupFor(snapshot.ticker) === id);
         const dropping = Boolean(drag?.active && target && target.groupId === id);
+        if (!group && groups.length > 0 && total === 0 && !organizing) return null;
         return (
           <section key={id ?? "ungrouped"} data-watchlist-group={id ?? ""}
             className={`watchlist-group${group ? "" : " watchlist-ungrouped"}${dropping ? " watchlist-drop-target" : ""}${drag?.kind === "group" && drag.id === id ? " watchlist-dragging" : ""}`}
             style={{ "--watchlist-group-color": group?.color ?? "#8b8e97" } as CSSProperties} aria-label={label}>
-            <header className="watchlist-group-header">
-              {group && grip("group", group.id, label)}
+            {(group || groups.length > 0) && <header className="watchlist-group-header">
+              {group && organizing && grip("group", group.id, label)}
               {group ? (
                 <button type="button" className="watchlist-group-toggle" aria-expanded={!group.collapsed}
                   aria-controls={`watchlist-group-${id}`} disabled={busy}
                   onClick={() => void run(() => actions.onUpdateWatchlistGroup(group.id, { collapsed: !group.collapsed }), `${label} ${group.collapsed ? "expanded" : "collapsed"}.`)}>
                   {group.collapsed ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
                   <span className="watchlist-group-dot" aria-hidden="true" /><strong>{label}</strong>
-                  <span className="watchlist-group-count">{matching.length === total ? total : `${matching.length}/${total}`}</span>
+                  {total > 0 && <span className="watchlist-group-count">{total}</span>}
                 </button>
-              ) : <div className="watchlist-ungrouped-label"><strong>{label}</strong><span className="watchlist-group-count">{matching.length === total ? total : `${matching.length}/${total}`}</span></div>}
+              ) : <div className="watchlist-ungrouped-label"><strong>{label}</strong>{total > 0 && <span className="watchlist-group-count">{total}</span>}</div>}
               <div className="watchlist-group-actions">
-                <button type="button" className="watchlist-icon watchlist-add" disabled={busy} onClick={() => onAdd(id)} aria-label={`Add symbols to ${label}`} title={`Add symbols to ${label}`}><Plus size={19} /></button>
                 {group && <button type="button" className="watchlist-icon" disabled={busy} onClick={() => openEditor(group)} aria-label={`Edit ${label}`} title={`Edit ${label}`}><MoreHorizontal size={20} /></button>}
               </div>
-            </header>
+            </header>}
             <div id={`watchlist-group-${id}`} className="watchlist-group-rows" hidden={group?.collapsed}>
               {rows.map((snapshot) => (
                 <div key={snapshot.ticker} data-watchlist-ticker={snapshot.ticker}
                   className={`watchlist-group-row${dropping && target?.ticker === snapshot.ticker && drag?.kind === "symbol" ? target.after ? " watchlist-insert-after" : " watchlist-insert-before" : ""}${drag?.id === snapshot.ticker ? " watchlist-dragging" : ""}`}>
-                  {grip("symbol", snapshot.ticker, snapshot.ticker)}
+                  {organizing && grip("symbol", snapshot.ticker, snapshot.ticker)}
                   {renderRow(snapshot)}
                   <button type="button" className="watchlist-icon watchlist-row-menu" disabled={busy}
                     onClick={() => { setError(null); setMovingTicker(snapshot.ticker); }} aria-label={`Move or remove ${snapshot.ticker}`} title={`Move or remove ${snapshot.ticker}`}><MoreHorizontal size={18} /></button>
@@ -268,7 +269,7 @@ export function WatchlistGroups({
                 <div className="watchlist-group-empty">
                   {matching.length > 0 ? <button type="button" onClick={() => onRevealGroup(id)}>Show {matching.length} symbol{matching.length === 1 ? "" : "s"}</button>
                     : total > 0 ? <span>No symbols match your filters.</span>
-                      : <button type="button" onClick={() => onAdd(id)}><Plus size={15} />Add symbols</button>}
+                      : <span>Move stocks here using their menu.</span>}
                 </div>
               )}
             </div>
@@ -289,7 +290,7 @@ export function WatchlistGroups({
             {editorGroup && <div className="watchlist-reorder-actions"><button type="button" disabled={busy || editorIndex <= 0} onClick={() => reorderEditor(-1)}><ArrowUp size={16} />Move up</button><button type="button" disabled={busy || editorIndex >= groups.length - 1} onClick={() => reorderEditor(1)}><ArrowDown size={16} />Move down</button></div>}
             {error && <p className="watchlist-error" role="alert">{error}</p>}
             <button className="watchlist-primary" type="submit" disabled={busy || !name.trim()}>{busy ? "Saving…" : editorGroup ? "Save changes" : "Create group"}</button>
-            {editorGroup && <div className="watchlist-delete-group"><button type="button" disabled={busy} onClick={() => void run(() => actions.onDeleteWatchlistGroup(editorGroup.id), `${editorGroup.name} deleted. Symbols moved to My Watchlist.`, true)}><Trash2 size={16} />Delete group</button><p>Symbols will stay watched in My Watchlist.</p></div>}
+            {editorGroup && <div className="watchlist-delete-group"><button type="button" disabled={busy} onClick={() => void run(() => actions.onDeleteWatchlistGroup(editorGroup.id), `${editorGroup.name} deleted. Stocks remain in your watchlist.`, true)}><Trash2 size={16} />Delete group</button><p>Stocks will stay in your watchlist.</p></div>}
           </form>
         </WatchlistDialog>
       )}
@@ -298,7 +299,7 @@ export function WatchlistGroups({
           <p className="watchlist-dialog-hint">Choose a group</p>
           <div className="watchlist-move-options">{sections.map((group) => {
             const id = group?.id ?? null;
-            return <button type="button" key={id ?? "ungrouped"} disabled={busy || currentItem?.group_id === id} onClick={() => moveSymbol(id)}><span className="watchlist-group-dot" style={{ backgroundColor: group?.color ?? "#8b8e97" }} /><span>{group?.name ?? "My Watchlist"}</span>{currentItem?.group_id === id && <Check size={17} />}</button>;
+            return <button type="button" key={id ?? "ungrouped"} disabled={busy || currentItem?.group_id === id} onClick={() => moveSymbol(id)}><span className="watchlist-group-dot" style={{ backgroundColor: group?.color ?? "#8b8e97" }} /><span>{group?.name ?? "Ungrouped"}</span>{currentItem?.group_id === id && <Check size={17} />}</button>;
           })}</div>
           <div className="watchlist-reorder-actions"><button type="button" disabled={busy || siblingIndex <= 0} onClick={() => moveSymbol(currentItem?.group_id ?? null, siblings[siblingIndex - 1]?.ticker)}><ArrowUp size={16} />Move up</button><button type="button" disabled={busy || siblingIndex >= siblings.length - 1} onClick={() => moveSymbol(currentItem?.group_id ?? null, siblings[siblingIndex + 2]?.ticker)}><ArrowDown size={16} />Move down</button></div>
           {error && <p className="watchlist-error" role="alert">{error}</p>}
