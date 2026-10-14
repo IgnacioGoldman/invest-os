@@ -47,12 +47,14 @@ jobs:
           python -m unittest discover -s scripts -p 'test_incremental_sec_refresh.py'
           python -m unittest discover -s scripts -p 'test_revenue_history_repair.py'
           python -m unittest discover -s scripts -p 'test_validate_static_stock_refresh.py'
+          python -m unittest discover -s scripts -p 'test_refresh_separation.py'
 
-      - name: Refresh fundamentals and price data
+      - name: Refresh fundamentals using saved prices
         run: >-
           python scripts/open_data_poc.py
           --universe-file data/stocks/stocks.json
           --incremental-sec
+          --reuse-saved-prices
           --repair-current-data
           --repair-revenue-history
           --skip-filing-details

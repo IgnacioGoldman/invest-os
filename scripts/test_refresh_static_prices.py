@@ -296,6 +296,8 @@ class RefreshStaticPricesTests(unittest.TestCase):
             valuation={"pe": metric},
             metrics={
                 "revenue_growth_yoy": metric,
+                "market_cap": metric.model_copy(update={"value": 1000}),
+                "net_income_ttm": metric.model_copy(update={"value": 50}),
                 "current_price": old_price,
                 "support_1d_distance": obsolete_support,
                 "days_to_next_earnings": OpenDataMetric(
@@ -314,7 +316,8 @@ class RefreshStaticPricesTests(unittest.TestCase):
         updated = refresh_snapshot_prices(snapshot, history, refreshed_at=refreshed_at)
 
         self.assertEqual(updated.business_health, snapshot.business_health)
-        self.assertEqual(updated.valuation, snapshot.valuation)
+        self.assertAlmostEqual(updated.valuation["pe"].value, 20 * history[-1].close / 100)
+        self.assertEqual(updated.valuation["pe"], updated.metrics["pe_ttm"])
         self.assertEqual(updated.metrics["revenue_growth_yoy"], metric)
         self.assertEqual(updated.price_opportunity["current_price"].value, history[-1].close)
         self.assertEqual(updated.metrics["current_price"].value, history[-1].close)
@@ -379,6 +382,9 @@ class RefreshStaticPricesTests(unittest.TestCase):
                         as_of="2026-01-02",
                         notes="Fake upcoming earnings.",
                     )
+
+                def fetch_forward_eps_estimate(self, ticker: str, *, currency: str) -> None:
+                    return None
 
             with patch("refresh_static_prices.OpenDataProvider", FakeOpenDataProvider):
                 report = refresh_prices(

@@ -35,7 +35,7 @@ An empty watchlist shows one **Add stocks** action. Search, filters, the stock c
 
 The publishable key is intentionally used by the browser; row-level security keeps each user's data private. Never expose `SUPABASE_SERVICE_ROLE_KEY` to Vite or any `VITE_*` variable.
 
-The price workflow refreshes and validates daily candles and price/support metrics every four hours on weekdays. The Pages workflow performs the slower SEC fundamentals refresh once each weekday. Both evaluate each user's watchlist filters against the resulting dataset. A separate lightweight workflow evaluates the deployed dataset every eight hours, keeping badges timely and providing regular database activity for the Free Supabase project. A filter's first evaluation establishes its baseline quietly. Later watched symbols entering a built-in or custom filter create a dated in-app badge event.
+The price workflow refreshes daily candles and recalculates price-dependent metrics and valuation ratios from saved financial inputs every four hours on weekdays, with SEC requests disabled. The Pages workflow performs the slower SEC fundamentals refresh once each weekday while reusing saved prices. Both evaluate each user's watchlist filters against the resulting dataset. A separate lightweight workflow evaluates the deployed dataset every eight hours, keeping badges timely and providing regular database activity for the Free Supabase project. A filter's first evaluation establishes its baseline quietly. Later watched symbols entering a built-in or custom filter create a dated in-app badge event.
 
 ## Kept Data
 
@@ -73,10 +73,10 @@ Exports active SQLite stock snapshots, the universe, and price history into `fro
 python scripts/refresh_static_prices.py --output /tmp/price-refresh-report.json
 ```
 
-Downloads the last successful Pages dataset and updates only candles and price/support metrics.
+Uses saved financial inputs to update candles, price/support metrics and current valuations, without SEC requests. The deployed Pages dataset supplies fallback data when needed.
 
 ## GitHub Pages
 
-The `.github/workflows/pages.yml` workflow refreshes SEC fundamentals and prices, rejects incomplete or incoherent refreshes, exports static JSON with `VITE_DATA_MODE=static`, and deploys `frontend/dist` to GitHub Pages. It runs manually and at `10:30 UTC` Monday through Friday.
+The `.github/workflows/pages.yml` workflow refreshes fundamentals using saved SQLite prices, rejects incomplete or incoherent refreshes, exports static JSON with `VITE_DATA_MODE=static`, and deploys `frontend/dist` to GitHub Pages. It runs manually and at `10:30 UTC` Monday through Friday.
 
-The `.github/workflows/price-refresh.yml` workflow runs on pushes to `main` and reuses the last successful deployed fundamentals. It refreshes prices at `00:30`, `04:30`, `08:30`, `12:30`, `16:30`, and `20:30 UTC` Monday through Friday. In the repository settings, set Pages source to GitHub Actions.
+The `.github/workflows/price-refresh.yml` workflow reuses saved fundamentals, refreshes prices and recalculates current valuations at `00:30`, `04:30`, `08:30`, `12:30`, `16:30`, and `20:30 UTC` Monday through Friday, and supports manual runs. In the repository settings, set Pages source to GitHub Actions.

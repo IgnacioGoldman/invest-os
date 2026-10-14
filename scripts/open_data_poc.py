@@ -17,7 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
-from app.entry_engine.open_data_models import OpenDataCompanyFiling, OpenDataSnapshot  # noqa: E402
+from app.entry_engine.open_data_models import LatestPrice, OpenDataCompanyFiling, OpenDataSnapshot  # noqa: E402
+from app.entry_engine.valuation_refresh import reprice_valuation  # noqa: E402
 from app.config import get_settings  # noqa: E402
 from app.services.open_data_stock_store import (  # noqa: E402
     activate_stock,
@@ -27,6 +28,8 @@ from app.services.open_data_stock_store import (  # noqa: E402
 from app.services.storage import (  # noqa: E402
     connect,
     load_stock_open_data_snapshot,
+    load_stock_price_history,
+    replace_stock_open_data_snapshot,
     load_stock_sec_refresh_state,
     replace_stock_sec_refresh_state,
 )
@@ -407,13 +410,28 @@ def _collect_ticker(
     *,
     min_coverage_to_save: float | None = None,
     include_analysis: bool = False,
+    reuse_saved_prices: bool = False,
 ) -> dict[str, Any]:
-    snapshot = provider.get_open_data_snapshot(ticker)
-    if save:
+    previous = None
+    if save or reuse_saved_prices:
         with connect(get_settings().data_dir) as conn:
-            previous = load_stock_open_data_snapshot(conn, snapshot.ticker)
+            previous = load_stock_open_data_snapshot(conn, ticker)
+            price_history = load_stock_price_history(conn, ticker) if reuse_saved_prices else []
+    if reuse_saved_prices:
+        if previous is None:
+            raise ValueError(f"{ticker}: a saved snapshot is required; bootstrap the stock before running incremental fundamentals.")
+        snapshot = provider.get_open_data_snapshot(ticker, saved_snapshot=previous, saved_price_history=price_history)
+    else:
+        snapshot = provider.get_open_data_snapshot(ticker)
+    if save:
         snapshot = retain_verified_history(snapshot, previous)
-    if not load_cached_price_history(snapshot.ticker):
+    if reuse_saved_prices:
+        current = snapshot.price_opportunity["current_price"]
+        snapshot = reprice_valuation(snapshot, LatestPrice(
+            ticker=ticker, price=current.value, as_of=current.as_of, source=current.source,
+            currency=snapshot.price_currency or ("SEK" if ticker.endswith(".ST") else "USD"),
+        ))
+    elif not load_cached_price_history(snapshot.ticker):
         raise RuntimeError(f"{snapshot.ticker}: historical prices were unavailable.")
     coverage = _metric_coverage(snapshot)
     should_save = (
@@ -423,7 +441,12 @@ def _collect_ticker(
     )
     if should_save:
         settings = get_settings()
-        save_stock_snapshot_to_db(settings, snapshot)
+        if reuse_saved_prices:
+            with connect(settings.data_dir) as conn:
+                replace_stock_open_data_snapshot(conn, snapshot)
+                conn.commit()
+        else:
+            save_stock_snapshot_to_db(settings, snapshot)
         activate_stock(settings, snapshot.ticker)
     return {
         "ticker": snapshot.ticker,
@@ -449,6 +472,7 @@ def _collect_item_with_retries(
     request_timeout: float,
     request_retries: int,
     retry_backoff: float,
+    reuse_saved_prices: bool = False,
 ) -> dict[str, Any]:
     ticker = item["ticker"]
     started = time.monotonic()
@@ -470,6 +494,7 @@ def _collect_item_with_retries(
                     save,
                     min_coverage_to_save=min_coverage,
                     include_analysis=include_analysis,
+                    reuse_saved_prices=reuse_saved_prices,
                 ),
             }
             result["duration_seconds"] = round(time.monotonic() - started, 2)
@@ -578,6 +603,7 @@ def main() -> None:
         ),
     )
     parser.add_argument("--no-save", action="store_true", help="Do not persist snapshots to SQLite.")
+    parser.add_argument("--reuse-saved-prices", action="store_true", help="Use SQLite prices/history and leave them unchanged; do not fetch new prices or market estimates.")
     parser.add_argument(
         "--incremental-sec",
         action="store_true",
@@ -610,7 +636,7 @@ def main() -> None:
     save = not args.no_save
 
     if args.ticker:
-        result = _collect_ticker(provider, args.ticker, save, include_analysis=args.include_analysis)
+        result = _collect_ticker(provider, args.ticker, save, include_analysis=args.include_analysis, reuse_saved_prices=args.reuse_saved_prices)
         output = json.dumps(result, indent=2, sort_keys=False)
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -732,6 +758,7 @@ def main() -> None:
                     request_timeout=args.request_timeout,
                     request_retries=args.request_retries,
                     retry_backoff=args.retry_backoff,
+                    reuse_saved_prices=args.reuse_saved_prices,
                 )
                 record_result(index, item, result)
             except Exception as exc:
@@ -752,6 +779,7 @@ def main() -> None:
                     request_timeout=args.request_timeout,
                     request_retries=args.request_retries,
                     retry_backoff=args.retry_backoff,
+                    reuse_saved_prices=args.reuse_saved_prices,
                 ): (index, item)
                 for index, item in work_items
             }

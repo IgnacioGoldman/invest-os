@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 import json
 from pathlib import Path
 import sys
@@ -177,8 +177,14 @@ class OpenDataProviderTests(unittest.TestCase):
         self.assertIn("2027-01-15 to 2027-01-18", metric.notes)
 
     def test_support_metric_keeps_zone_when_price_is_inside_lower_half(self) -> None:
-        history_path = ROOT / "frontend" / "public" / "data" / "open-data" / "price-history" / "PEP.json"
-        points = [HistoricalPricePoint(**row) for row in json.loads(history_path.read_text(encoding="utf-8"))]
+        # Refreshes replace deployed candles, so use a fixed support pattern.
+        points = [HistoricalPricePoint(
+            date=(date(2025, 1, 1) + timedelta(days=index)).isoformat(),
+            close=145, high=147, low=143, source="test",
+        ) for index in range(150)]
+        for index in (20, 50, 80, 110):
+            points[index] = points[index].model_copy(update={"close": 130, "low": 127, "high": 132})
+        points[-1] = points[-1].model_copy(update={"close": 126, "low": 125, "high": 127})
 
         metric = _support_distance_metric(
             "support_2y_distance",
@@ -194,7 +200,7 @@ class OpenDataProviderTests(unittest.TestCase):
         self.assertIsNotNone(metric.value)
         assert metric.value is not None
         self.assertLess(metric.value, 0)
-        self.assertIn("Support zone: $125.74-$133.43", metric.notes)
+        self.assertIn("Support zone: $124.46-$129.54", metric.notes)
 
 
 if __name__ == "__main__":

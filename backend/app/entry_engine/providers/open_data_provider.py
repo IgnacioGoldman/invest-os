@@ -14,6 +14,7 @@ from email.utils import parsedate_to_datetime
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 from zipfile import ZipFile
 import xml.etree.ElementTree as ET
 
@@ -288,6 +289,7 @@ class OpenDataProvider:
         include_filing_details: bool = True,
         max_sec_archive_lookups: int | None = None,
         force_refresh: bool = False,
+        allow_sec_requests: bool = True,
     ) -> None:
         self.cache = cache or JsonFileCache()
         self.session = session or requests.Session()
@@ -304,6 +306,7 @@ class OpenDataProvider:
             SEC_ARCHIVE_LOOKUP_LIMIT if max_sec_archive_lookups is None else max_sec_archive_lookups,
         )
         self.force_refresh = force_refresh
+        self.allow_sec_requests = allow_sec_requests
         self.stooq_api_key = os.getenv("STOOQ_API_KEY") or None
         self._yfinance_info_cache: dict[str, dict[str, Any] | None] = {}
 
@@ -318,6 +321,9 @@ class OpenDataProvider:
         retry_sleep_cap: float | None = None,
         **kwargs: Any,
     ) -> requests.Response:
+        hostname = (urlparse(url).hostname or "").lower()
+        if not self.allow_sec_requests and (hostname == "sec.gov" or hostname.endswith(".sec.gov")):
+            raise RuntimeError("SEC requests are disabled for the price refresh.")
         attempts = self.retry_attempts
         last_error: requests.RequestException | None = None
         for attempt in range(1, attempts + 1):
@@ -370,7 +376,10 @@ class OpenDataProvider:
             seconds = (retry_at - datetime.now(timezone.utc)).total_seconds()
         return max(0.0, seconds)
 
-    def get_open_data_snapshot(self, ticker: str) -> OpenDataSnapshot:
+    def get_open_data_snapshot(
+        self, ticker: str, *, saved_snapshot: OpenDataSnapshot | None = None,
+        saved_price_history: list[HistoricalPricePoint] | None = None,
+    ) -> OpenDataSnapshot:
         symbol = ticker.upper().strip()
         metadata = self.resolve_company_metadata(symbol)
         raw_cik = metadata.get("cik")
@@ -383,12 +392,24 @@ class OpenDataProvider:
                 seed, failures = refresh_issuer_revenue(self, symbol, seed)
                 companyfacts = supplement_issuer_revenue(companyfacts, seed)
                 companyfacts.setdefault("collection_notes", []).extend(failures)
-        price_history = self.fetch_price_history(symbol)
-        price_currency = str(metadata.get("currency") or "USD").upper()
-        price = self._latest_price_from_history(symbol, price_history, currency=price_currency) or self.fetch_latest_price(symbol)
-        forward_pe_estimate = self.fetch_forward_pe_estimate(symbol)
-        market_cap_estimate = self.fetch_market_cap_estimate(symbol)
-        next_earnings_release = self.fetch_next_earnings_release(symbol)
+        price_currency = str((saved_snapshot.price_currency if saved_snapshot else None) or metadata.get("currency") or "USD").upper()
+        if saved_snapshot is not None:
+            price_history = saved_price_history or []
+            current = saved_snapshot.price_opportunity.get("current_price")
+            if (not price_history or current is None or current.value is None or current.value <= 0
+                    or price_history[-1].date != current.as_of
+                    or not math.isclose(price_history[-1].close, current.value, rel_tol=1e-9)):
+                raise ValueError(f"{symbol}: saved price/history are missing or inconsistent; run the price refresh first.")
+            price = LatestPrice(ticker=symbol, price=current.value, currency=price_currency, source=current.source, as_of=current.as_of)
+            forward_pe_estimate = saved_snapshot.metrics.get("forward_pe_public_estimate")
+            market_cap_estimate = saved_snapshot.metrics.get("market_cap")
+            next_earnings_release = saved_snapshot.price_opportunity.get("days_to_next_earnings")
+        else:
+            price_history = self.fetch_price_history(symbol)
+            price = self._latest_price_from_history(symbol, price_history, currency=price_currency) or self.fetch_latest_price(symbol)
+            forward_pe_estimate = self.fetch_forward_pe_estimate(symbol)
+            market_cap_estimate = self.fetch_market_cap_estimate(symbol)
+            next_earnings_release = self.fetch_next_earnings_release(symbol)
         company_context = self.fetch_company_context(cik) if cik is not None else self._yfinance_company_context(symbol)
         statement_currency_rates = self.fetch_statement_currency_rates(companyfacts, price)
         adr = ADR_RATIO_BY_TICKER.get(symbol, {"ratio": 1.0, "source": None})
@@ -426,6 +447,13 @@ class OpenDataProvider:
                 attempts.append(f"Yahoo statement fallback failed; retained primary-source data: {exc}")
         if attempts:
             snapshot = snapshot.model_copy(update={"data_gaps": list(dict.fromkeys([*snapshot.data_gaps, *attempts]))})
+        if saved_snapshot is not None:
+            # Keep the entire price group and its flattened aliases. Financial
+            # calculations above used these same saved prices from the start.
+            snapshot = snapshot.model_copy(update={
+                "price_opportunity": dict(saved_snapshot.price_opportunity),
+                "metrics": {**snapshot.metrics, **saved_snapshot.price_opportunity},
+            })
         return snapshot
 
     def _supplement_sec_companyfacts(self, symbol: str, metadata: dict[str, Any], primary: dict[str, Any]) -> tuple[dict[str, Any] | None, str]:
@@ -1105,6 +1133,20 @@ class OpenDataProvider:
         if estimate is not None:
             self.cache.set(f"forward_pe_estimate_{symbol}.json", estimate.model_dump(mode="json"))
         return estimate
+
+    def fetch_forward_eps_estimate(self, ticker: str, *, currency: str) -> OpenDataMetric | None:
+        """Yahoo expected EPS in listing-share units; no SEC or price fetch."""
+        info = self._fetch_yfinance_info(ticker) or {}
+        if str(info.get("currency") or "").upper() != currency.upper():
+            return None
+        value = _finite_float(info.get("forwardEps"))
+        if value is None:
+            return None
+        return OpenDataMetric(
+            value=value, source="yfinance:forwardEps", tier="proxy_estimate",
+            as_of=date.today().isoformat(),
+            notes=f"Yahoo expected EPS per listed share in {currency.upper()}; estimate methodology is not independently verified.",
+        )
 
     def fetch_market_cap_estimate(self, ticker: str) -> OpenDataMetric | None:
         symbol = ticker.upper().strip()

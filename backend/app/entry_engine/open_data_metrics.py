@@ -550,7 +550,10 @@ def compute_open_data_snapshot(
         )
     )
 
-    forward_pe_proxy = _forward_pe_proxy(price, net_income, shares.value, eps_cagr_3y.value, fx_rates, as_of)
+    forward_pe_proxy = _forward_pe_proxy(
+        price, net_income, shares.value / adr_ratio if shares.value is not None else None,
+        eps_cagr_3y.value, fx_rates, as_of,
+    )
     forward_pe = (
         forward_pe_estimate
         if forward_pe_estimate is not None and forward_pe_estimate.value is not None
@@ -747,7 +750,33 @@ def compute_open_data_snapshot(
         "peg_proxy": peg,
         "eps_growth_3y_proxy": eps_cagr_3y,
         "ev_to_ebitda_proxy": ev_to_ebitda,
+        "ebitda_proxy": ebitda,
+        "enterprise_value_proxy": enterprise_value,
     }
+
+    valuation_inputs = {
+        "revenue": revenue_for_valuation,
+        "net_income": net_income_for_valuation,
+        "free_cash_flow": free_cash_flow_for_valuation,
+        "ebitda": ebitda_for_valuation,
+        "debt": debt_for_valuation,
+        "cash": cash_for_valuation,
+        "listing_shares": _computed_metric(
+            "listing_shares", market_cap.value, price.price if price else None,
+            lambda cap, quote: cap / quote, source=market_cap.source,
+            as_of=shares.as_of, notes=_market_cap_notes(adr_ratio, adr_ratio_source),
+            fallback_as_of=as_of, tier=market_cap.tier,
+        ),
+    }
+    for key, multiple in (("forward_eps_public", forward_pe_estimate), ("forward_eps_proxy", forward_pe_proxy)):
+        valuation_inputs[key] = _computed_metric(
+            key, price.price if price else None, multiple.value if multiple else None,
+            lambda quote, pe_value: quote / pe_value,
+            source=multiple.source if multiple else "unavailable_open_free",
+            as_of=multiple.as_of if multiple else as_of,
+            notes="Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate.",
+            fallback_as_of=as_of, tier="proxy_estimate",
+        )
 
     return OpenDataSnapshot(
         revenue_history_version=1,
@@ -759,6 +788,8 @@ def compute_open_data_snapshot(
         country=country,
         sector=sector,
         industry=industry,
+        price_currency=price.currency if price else None,
+        valuation_inputs=valuation_inputs,
         business_health=business_health,
         price_opportunity=price_opportunity,
         valuation=valuation,

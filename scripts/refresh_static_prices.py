@@ -23,7 +23,8 @@ from app.entry_engine.open_data_metrics import (  # noqa: E402
     compute_price_opportunity_metrics,
     refresh_next_earnings_countdown,
 )
-from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataMetric, OpenDataSnapshot  # noqa: E402
+from app.entry_engine.open_data_models import HistoricalPricePoint, LatestPrice, OpenDataMetric, OpenDataSnapshot  # noqa: E402
+from app.entry_engine.valuation_refresh import reprice_valuation, saved_valuation_inputs  # noqa: E402
 from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
 from app.services.storage import (  # noqa: E402
     DB_FILE,
@@ -241,6 +242,7 @@ def refresh_snapshot_prices(
     history: list[HistoricalPricePoint],
     *,
     next_earnings_release: OpenDataMetric | None = None,
+    forward_eps: OpenDataMetric | None = None,
     refreshed_at: datetime | None = None,
 ) -> OpenDataSnapshot:
     snapshot = backfill_fcf_margin_metric(snapshot)
@@ -252,13 +254,21 @@ def refresh_snapshot_prices(
     )
     metrics = {key: value for key, value in snapshot.metrics.items() if key != "support_1d_distance"}
     metrics.update(price_metrics)
-    return snapshot.model_copy(
+    updated = snapshot.model_copy(
         update={
             "generated_at": timestamp,
+            "valuation_inputs": saved_valuation_inputs(snapshot),
             "price_opportunity": price_metrics,
             "metrics": metrics,
         }
     )
+    current = price_metrics["current_price"]
+    if current.value is None or current.value <= 0:
+        raise ValueError(f"{snapshot.ticker}: current price is unavailable.")
+    return reprice_valuation(updated, LatestPrice(
+        ticker=snapshot.ticker, price=current.value, as_of=current.as_of, source=current.source,
+        currency=snapshot.price_currency or ("SEK" if snapshot.ticker.endswith(".ST") else "USD"),
+    ), forward_eps=forward_eps)
 
 
 def _load_db_baseline(
@@ -331,13 +341,16 @@ def refresh_prices(
         if raw_snapshot is None:
             raise ValueError(f"{ticker}: deployed snapshot is missing.")
         baseline = db_histories.get(ticker) or _load_static_price_history(data_dir, ticker)
-        provider = OpenDataProvider(include_filing_details=False)
+        provider = OpenDataProvider(include_filing_details=False, allow_sec_requests=False)
         history = fetch_updated_history(provider, ticker, baseline)
         next_earnings_release = provider.fetch_next_earnings_release(ticker, as_of=refreshed_at.date())
+        currency = raw_snapshot.get("price_currency") or ("SEK" if ticker.endswith(".ST") else "USD")
+        forward_eps = provider.fetch_forward_eps_estimate(ticker, currency=currency)
         snapshot = refresh_snapshot_prices(
             OpenDataSnapshot.model_validate(raw_snapshot),
             history,
             next_earnings_release=next_earnings_release,
+            forward_eps=forward_eps,
             refreshed_at=refreshed_at,
         )
         return snapshot, history
@@ -436,13 +449,17 @@ def main() -> int:
     tickers = _universe_tickers(universe)
     if not tickers:
         raise SystemExit("The stock universe is empty.")
-    snapshots = hydrate_deployed_data(
-        args.base_url,
-        data_dir,
-        tickers,
-        cache_bust=args.cache_bust,
-        workers=args.workers,
-    )
+    db_snapshots, db_histories = _load_db_baseline(db_data_dir, tickers)
+    if all(ticker in db_snapshots and ticker in db_histories for ticker in tickers):
+        snapshots = [db_snapshots[ticker] for ticker in tickers]
+    else:
+        snapshots = hydrate_deployed_data(
+            args.base_url,
+            data_dir,
+            tickers,
+            cache_bust=args.cache_bust,
+            workers=args.workers,
+        )
     report = refresh_prices(snapshots, data_dir, tickers, workers=args.workers, db_data_dir=db_data_dir)
     _write_json(args.output, report)
     print(json.dumps(report, indent=2))

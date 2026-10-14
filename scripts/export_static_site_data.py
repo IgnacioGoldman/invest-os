@@ -54,9 +54,6 @@ def _load_active_tickers(conn: sqlite3.Connection) -> set[str]:
 
 
 def _load_price_history(conn: sqlite3.Connection, ticker: str) -> list[dict[str, Any]]:
-    cached = load_cached_price_history(ticker)
-    if cached:
-        return [point.model_dump(mode="json") for point in cached]
     rows = conn.execute(
         """
         SELECT priced_at, price, source, high, low, volume
@@ -80,7 +77,9 @@ def _load_price_history(conn: sqlite3.Connection, ticker: str) -> list[dict[str,
         except (TypeError, ValueError):
             continue
         points.append(point.model_dump(mode="json"))
-    return points
+    if points:
+        return points
+    return [point.model_dump(mode="json") for point in load_cached_price_history(ticker)]
 
 
 def _build_universe_rows(universe_path: Path, loaded: set[str], active: set[str]) -> list[dict[str, Any]]:

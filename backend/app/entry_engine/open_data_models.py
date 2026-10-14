@@ -94,6 +94,10 @@ class OpenDataSnapshot(BaseModel):
     country: str | None = None
     sector: str | None = None
     industry: str | None = None
+    price_currency: str | None = None
+    # Denominators already converted to the listing currency, plus listing
+    # shares and expected EPS. Repricing these inputs never requires SEC data.
+    valuation_inputs: dict[str, OpenDataMetric] = Field(default_factory=dict)
     source: str = "open_free_public"
     generated_at: datetime = Field(default_factory=utc_now)
     revenue_history_version: int = 0

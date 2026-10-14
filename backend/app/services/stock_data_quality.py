@@ -107,7 +107,26 @@ def retain_verified_history(snapshot: OpenDataSnapshot, previous: OpenDataSnapsh
             groups["business_health"]["revenue_growth_yoy"] = growth
             all_metrics["revenue_growth_yoy"] = growth
             break
-    result = snapshot.model_copy(update={**groups, "metrics": all_metrics, "historical_series": histories})
+    # A retained financial input must keep its matching valuation denominator
+    # (including the original currency conversion), rather than a thin new one.
+    from app.entry_engine.valuation_refresh import saved_valuation_inputs
+    valuation_inputs = saved_valuation_inputs(snapshot)
+    old_inputs = saved_valuation_inputs(previous)
+    for key, raw_key in {
+        "revenue": "revenue_ttm", "net_income": "net_income_ttm",
+        "free_cash_flow": "free_cash_flow_ttm", "ebitda": "ebitda_proxy",
+        "debt": "debt", "cash": "cash", "listing_shares": "shares_diluted",
+    }.items():
+        raw = all_metrics.get(raw_key)
+        if (raw is not None and raw == previous.metrics.get(raw_key)
+                and raw != snapshot.metrics.get(raw_key) and key in old_inputs):
+            valuation_inputs[key] = old_inputs[key]
+    for key in ("forward_eps_public",):
+        if (key not in valuation_inputs or valuation_inputs[key].value is None) and key in old_inputs:
+            valuation_inputs[key] = old_inputs[key]
+    result = snapshot.model_copy(update={
+        **groups, "metrics": all_metrics, "historical_series": histories, "valuation_inputs": valuation_inputs,
+    })
     result = backfill_fcf_margin_metric(result)
     if "fcf_margin" not in result.business_health:
         unavailable = selected.business_health.get("fcf_margin")
