@@ -62,7 +62,7 @@
         "value": 2.08767,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -74,7 +74,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:24.896448Z",
     "business_health": {
@@ -312,10 +312,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $2.72-$2.91; midpoint $2.82; distance +1787.27%; touches 4; first touch 2022-09-23; last touch 2022-12-27; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -12988,10 +12988,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -13297,7 +13297,7 @@
         "value": 10.99899,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -13309,7 +13309,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.017108Z",
     "business_health": {
@@ -13547,10 +13547,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $59.56-$65.04; midpoint $62.30; distance +109.55%; touches 2; first touch 2022-06-13; last touch 2022-09-29; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 61.0,
+        "value": 60.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-14",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-12-14) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -26595,10 +26595,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 61.0,
+        "value": 60.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-14",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-12-14) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -26673,7 +26673,7 @@
         "value": 16.02297,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -26685,7 +26685,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.131432Z",
     "business_health": {
@@ -26923,10 +26923,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $133.32-$140.34; midpoint $136.83; distance +72.44%; touches 2; first touch 2022-10-13; last touch 2022-11-04; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 49.0,
+        "value": 48.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-12-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -39818,10 +39818,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 49.0,
+        "value": 48.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-12-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -39896,7 +39896,7 @@
         "value": 11.34333,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -39908,7 +39908,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.203312Z",
     "business_health": {
@@ -40146,10 +40146,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $103.19-$116.38; midpoint $109.79; distance +47.58%; touches 7; first touch 2021-11-18; last touch 2022-10-13; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 16.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-30",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-30) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -45145,10 +45145,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 16.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-30",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-30) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -45454,7 +45454,7 @@
         "value": 12.5,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in SEK; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -45466,7 +45466,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-14T15:23:39.171619Z",
     "business_health": {
@@ -45704,10 +45704,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $214.23-$243.95; midpoint $229.09; distance +14.63%; touches 18; first touch 2021-12-16; last touch 2026-09-11; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -58252,10 +58252,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -58568,7 +58568,7 @@
         "value": 1.69,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in SEK; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -58580,7 +58580,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-14T15:23:43.856463Z",
     "business_health": {
@@ -58818,10 +58818,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.63-$32.52; midpoint $31.58; distance +40.86%; touches 2; first touch 2025-11-21; last touch 2026-03-19; cluster tolerance 3.7%."
       },
       "days_to_next_earnings": {
-        "value": 34.0,
+        "value": 33.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-17",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-17) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -62616,10 +62616,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 34.0,
+        "value": 33.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-17",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-17) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -62932,7 +62932,7 @@
         "value": 3.80154,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -62944,7 +62944,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.316403Z",
     "business_health": {
@@ -63182,10 +63182,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $15.95-$17.37; midpoint $16.66; distance +323.64%; touches 3; first touch 2022-05-12; last touch 2022-06-30; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 6.0,
+        "value": 5.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-20",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-20) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -76372,10 +76372,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 6.0,
+        "value": 5.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-20",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-20) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -76450,7 +76450,7 @@
         "value": 4.41322,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -76462,7 +76462,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.388657Z",
     "business_health": {
@@ -76700,10 +76700,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $19.75-$21.00; midpoint $20.38; distance +240.03%; touches 2; first touch 2022-06-16; last touch 2022-07-14; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 20.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -83977,10 +83977,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 20.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -84283,10 +84283,10 @@
         "notes": "Latest open/free price multiplied by SEC diluted weighted-average shares."
       },
       "forward_eps_public": {
-        "value": 15.00381,
+        "value": 15.00006,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -84298,7 +84298,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-14T15:23:39.746715Z",
     "business_health": {
@@ -84536,10 +84536,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $172.18-$177.25; midpoint $174.72; distance +124.04%; touches 2; first touch 2022-09-28; last touch 2022-10-13; cluster tolerance 2.8%."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 12.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -84580,7 +84580,7 @@
         "notes": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       },
       "forward_pe": {
-        "value": 26.088706313648416,
+        "value": 26.095228464138227,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-14",
@@ -99898,10 +99898,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 12.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -100031,7 +100031,7 @@
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "forward_pe": {
-        "value": 26.088706313648416,
+        "value": 26.095228464138227,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-14",
@@ -100094,7 +100094,7 @@
         "notes": "forward_pe_proxy: Positive 3-year EPS CAGR or trailing EPS was unavailable; forward P/E proxy is not meaningful."
       },
       "forward_pe_public_estimate": {
-        "value": 26.088706313648416,
+        "value": 26.095228464138227,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-14",
@@ -100214,7 +100214,7 @@
         "value": 23.06058,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -100226,7 +100226,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.601087Z",
     "business_health": {
@@ -100464,10 +100464,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $272.91-$285.72; midpoint $279.31; distance +115.97%; touches 2; first touch 2022-09-28; last touch 2022-10-13; cluster tolerance 2.9%."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -113774,10 +113774,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -114083,7 +114083,7 @@
         "value": 1.015,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -114095,7 +114095,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.686766Z",
     "business_health": {
@@ -114336,7 +114336,7 @@
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "days_to_next_earnings: Next earnings release date was unavailable from open/free public inputs."
       }
     },
@@ -126215,7 +126215,7 @@
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "days_to_next_earnings: Next earnings release date was unavailable from open/free public inputs."
       },
       "enterprise_value_proxy": {
@@ -126290,7 +126290,7 @@
         "value": 3.12344,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -126302,7 +126302,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.766002Z",
     "business_health": {
@@ -126540,10 +126540,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $55.32-$58.81; midpoint $57.07; distance +46.27%; touches 4; first touch 2025-04-04; last touch 2026-05-14; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -138384,10 +138384,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -138462,7 +138462,7 @@
         "value": 49.49,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -138474,7 +138474,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.871291Z",
     "business_health": {
@@ -138712,10 +138712,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $12.99-$13.68; midpoint $13.33; distance +974.24%; touches 2; first touch 2022-05-12; last touch 2022-12-30; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -150580,10 +150580,10 @@
         "notes": "Current enterprise value divided by saved EBITDA in the listing currency."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -150658,7 +150658,7 @@
         "value": 56.25459,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -150670,7 +150670,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.968373Z",
     "business_health": {
@@ -150908,10 +150908,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $588.67-$623.69; midpoint $606.18; distance +203.39%; touches 2; first touch 2022-06-14; last touch 2022-06-30; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 20.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -162817,10 +162817,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 20.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -162892,10 +162892,10 @@
         "notes": "Input recovered from the previous stored valuation and its reference price."
       },
       "forward_eps_public": {
-        "value": 23.69909,
+        "value": 23.68911,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -162907,7 +162907,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.110738Z",
     "business_health": {
@@ -163145,10 +163145,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $209.16-$223.74; midpoint $216.45; distance +146.57%; touches 3; first touch 2022-10-13; last touch 2023-01-06; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 14.0,
+        "value": 13.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -163189,7 +163189,7 @@
         "notes": "Trailing P/E divided by saved 3-year EPS CAGR percentage."
       },
       "forward_pe": {
-        "value": 22.51943017396053,
+        "value": 22.528917398813473,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-14",
@@ -176061,7 +176061,7 @@
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "forward_pe": {
-        "value": 22.51943017396053,
+        "value": 22.528917398813473,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-14",
@@ -176131,7 +176131,7 @@
         "notes": "Current price divided by the saved historical-growth EPS proxy."
       },
       "forward_pe_public_estimate": {
-        "value": 22.51943017396053,
+        "value": 22.528917398813473,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-14",
@@ -176166,10 +176166,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 14.0,
+        "value": 13.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -176244,7 +176244,7 @@
         "value": 9.5906,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -176256,7 +176256,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.201365Z",
     "business_health": {
@@ -176494,10 +176494,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $121.71-$131.59; midpoint $126.65; distance +170.79%; touches 2; first touch 2022-06-16; last touch 2023-01-03; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 18.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -189681,10 +189681,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 18.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -189759,7 +189759,7 @@
         "value": 34.65286,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -189771,7 +189771,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.266545Z",
     "business_health": {
@@ -190009,10 +190009,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $106.15-$115.14; midpoint $110.65; distance +566.58%; touches 2; first touch 2022-11-22; last touch 2022-12-07; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 7.0,
+        "value": 6.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -201203,10 +201203,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 7.0,
+        "value": 6.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -201281,7 +201281,7 @@
         "value": 15.25175,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -201293,7 +201293,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.371887Z",
     "business_health": {
@@ -201531,10 +201531,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $81.78-$88.10; midpoint $84.94; distance +304.58%; touches 2; first touch 2022-11-03; last touch 2022-12-28; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 14.0,
+        "value": 13.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -210579,10 +210579,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 14.0,
+        "value": 13.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -210657,7 +210657,7 @@
         "value": 10.45377,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -210669,7 +210669,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.474426Z",
     "business_health": {
@@ -210907,10 +210907,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $84.15-$93.35; midpoint $88.75; distance +186.28%; touches 4; first touch 2022-11-09; last touch 2023-03-02; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -224100,10 +224100,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -224178,7 +224178,7 @@
         "value": 15.9146,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -224190,7 +224190,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.591635Z",
     "business_health": {
@@ -224428,10 +224428,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $12.70-$13.54; midpoint $13.12; distance +1587.23%; touches 2; first touch 2022-09-01; last touch 2022-11-03; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 34.0,
+        "value": 33.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-17",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-17) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -237026,10 +237026,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 34.0,
+        "value": 33.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-17",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-17) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -237104,7 +237104,7 @@
         "value": 2.17987,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -237116,7 +237116,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.677958Z",
     "business_health": {
@@ -237354,10 +237354,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $157.30-$171.10; midpoint $164.20; distance +123.60%; touches 7; first touch 2022-11-22; last touch 2024-06-11; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 7.0,
+        "value": 6.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -249219,10 +249219,10 @@
         "notes": "Current enterprise value divided by saved EBITDA in the listing currency."
       },
       "days_to_next_earnings": {
-        "value": 7.0,
+        "value": 6.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -249297,7 +249297,7 @@
         "value": 2.26466,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -249309,7 +249309,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-14T15:23:38.926543Z",
     "business_health": {
@@ -249547,10 +249547,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.91-$33.90; midpoint $32.40; distance +96.21%; touches 7; first touch 2022-09-23; last touch 2026-05-13; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 20.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -257964,10 +257964,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 20.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -258280,7 +258280,7 @@
         "value": 2.97446,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -258292,7 +258292,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.760172Z",
     "business_health": {
@@ -258530,10 +258530,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $60.11-$64.25; midpoint $62.18; distance +333.14%; touches 4; first touch 2023-01-06; last touch 2023-04-25; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 20.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -265726,10 +265726,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 20.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -266035,7 +266035,7 @@
         "value": 5.48506,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -266047,7 +266047,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-14T15:23:40.576226Z",
     "business_health": {
@@ -266285,10 +266285,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $3.45-$3.69; midpoint $3.57; distance +1363.18%; touches 3; first touch 2021-12-20; last touch 2022-08-05; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 14.0,
+        "value": 13.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -270162,10 +270162,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 14.0,
+        "value": 13.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -270478,7 +270478,7 @@
         "value": 2.35154,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -270490,7 +270490,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.826607Z",
     "business_health": {
@@ -270728,10 +270728,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $6.31-$6.80; midpoint $6.56; distance +2964.83%; touches 2; first touch 2022-05-12; last touch 2023-01-19; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 18.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -277063,10 +277063,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 18.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -277372,7 +277372,7 @@
         "value": 20.52566,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -277384,7 +277384,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.851572Z",
     "business_health": {
@@ -277622,10 +277622,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $9.88-$10.38; midpoint $10.13; distance +2488.02%; touches 2; first touch 2022-12-08; last touch 2023-01-19; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 20.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -283011,10 +283011,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 21.0,
+        "value": 20.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-04",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-04) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -283089,7 +283089,7 @@
         "value": 47.4758,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -283101,7 +283101,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.952260Z",
     "business_health": {
@@ -283339,10 +283339,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $227.23-$244.26; midpoint $235.75; distance +412.73%; touches 4; first touch 2021-10-26; last touch 2022-02-14; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -296508,10 +296508,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -296586,7 +296586,7 @@
         "value": 206.33243,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -296598,7 +296598,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.042772Z",
     "business_health": {
@@ -296836,10 +296836,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $47.46-$51.34; midpoint $49.40; distance +1750.50%; touches 3; first touch 2022-09-23; last touch 2022-12-22; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 70.0,
+        "value": 69.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-23",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-12-23) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -309416,10 +309416,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 70.0,
+        "value": 69.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-23",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-12-23) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -309725,7 +309725,7 @@
         "value": 11.65247,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -309737,7 +309737,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-14T15:23:42.945963Z",
     "business_health": {
@@ -309975,10 +309975,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $64.45-$69.17; midpoint $66.81; distance +438.00%; touches 2; first touch 2022-10-13; last touch 2025-04-07; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 12.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -325059,10 +325059,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 12.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -325375,7 +325375,7 @@
         "value": 16.33678,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -325387,7 +325387,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.289323Z",
     "business_health": {
@@ -325625,10 +325625,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $135.73-$146.69; midpoint $141.21; distance +185.80%; touches 5; first touch 2022-03-14; last touch 2022-10-27; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 41.0,
+        "value": 40.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-24",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-24) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -338816,10 +338816,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 41.0,
+        "value": 40.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-24",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-24) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -338894,7 +338894,7 @@
         "value": 19.39382,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -338906,7 +338906,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.381838Z",
     "business_health": {
@@ -339144,10 +339144,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $43.25-$45.25; midpoint $44.25; distance +682.45%; touches 2; first touch 2022-09-30; last touch 2022-11-03; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 56.0,
+        "value": 55.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-12-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -346527,10 +346527,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 56.0,
+        "value": 55.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-12-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -346605,7 +346605,7 @@
         "value": 11.82833,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -346617,7 +346617,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.492900Z",
     "business_health": {
@@ -346858,7 +346858,7 @@
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "days_to_next_earnings: Next earnings release date was unavailable from open/free public inputs."
       }
     },
@@ -359384,7 +359384,7 @@
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "days_to_next_earnings: Next earnings release date was unavailable from open/free public inputs."
       },
       "enterprise_value_proxy": {
@@ -359459,7 +359459,7 @@
         "value": 9.19281,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -359471,7 +359471,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.535102Z",
     "business_health": {
@@ -359709,10 +359709,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $9.29-$9.80; midpoint $9.55; distance +2234.20%; touches 3; first touch 2022-03-08; last touch 2022-09-29; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 14.0,
+        "value": 13.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -366928,10 +366928,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 14.0,
+        "value": 13.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -367006,7 +367006,7 @@
         "value": 15.72189,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -367018,7 +367018,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.617574Z",
     "business_health": {
@@ -367256,10 +367256,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $56.87-$61.25; midpoint $59.06; distance +866.51%; touches 2; first touch 2022-11-03; last touch 2023-01-06; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 19.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -379789,10 +379789,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 19.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -379867,7 +379867,7 @@
         "value": 33.09254,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -379879,7 +379879,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.739648Z",
     "business_health": {
@@ -380117,10 +380117,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $23.38-$26.02; midpoint $24.70; distance +1374.14%; touches 6; first touch 2022-09-29; last touch 2023-05-11; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -393103,10 +393103,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -393181,7 +393181,7 @@
         "value": 9.80263,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -393193,7 +393193,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.802243Z",
     "business_health": {
@@ -393431,10 +393431,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $72.61-$75.72; midpoint $74.17; distance +98.04%; touches 2; first touch 2022-09-26; last touch 2022-10-13; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 12.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -397645,10 +397645,10 @@
         "notes": "Current enterprise value divided by saved EBITDA in the listing currency."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 12.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -397723,7 +397723,7 @@
         "value": 16.21769,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -397735,7 +397735,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.869876Z",
     "business_health": {
@@ -397973,10 +397973,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $113.01-$117.48; midpoint $115.25; distance +145.97%; touches 2; first touch 2021-11-10; last touch 2021-11-30; cluster tolerance 3.6%."
       },
       "days_to_next_earnings": {
-        "value": 16.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-30",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-30) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -408436,10 +408436,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 16.0,
+        "value": 15.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-30",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-30) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -408745,7 +408745,7 @@
         "value": 24.51066,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -408757,7 +408757,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.989772Z",
     "business_health": {
@@ -408995,10 +408995,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $194.67-$208.28; midpoint $201.48; distance +111.49%; touches 2; first touch 2021-10-29; last touch 2021-12-01; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 19.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -422183,10 +422183,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 19.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -422261,7 +422261,7 @@
         "value": 5.22238,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -422273,7 +422273,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.060308Z",
     "business_health": {
@@ -422511,10 +422511,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $21.83-$23.28; midpoint $22.56; distance +766.28%; touches 2; first touch 2022-06-16; last touch 2022-07-05; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 19.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -432357,10 +432357,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 19.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -432435,7 +432435,7 @@
         "value": 18.46723,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -432447,7 +432447,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.169266Z",
     "business_health": {
@@ -432685,10 +432685,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $79.90-$86.39; midpoint $83.15; distance +437.16%; touches 3; first touch 2022-07-05; last touch 2022-11-03; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 29.0,
+        "value": 28.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-12",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-12) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -445873,10 +445873,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 29.0,
+        "value": 28.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-12",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-12) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -445951,7 +445951,7 @@
         "value": 10.64485,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -445963,7 +445963,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.275473Z",
     "business_health": {
@@ -446201,10 +446201,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $136.69-$148.89; midpoint $142.79; distance +96.55%; touches 4; first touch 2022-07-05; last touch 2025-04-11; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 7.0,
+        "value": 6.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -459389,10 +459389,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 7.0,
+        "value": 6.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -459467,7 +459467,7 @@
         "value": 6.62447,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -459479,7 +459479,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.408880Z",
     "business_health": {
@@ -459717,10 +459717,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $38.60-$40.67; midpoint $39.64; distance +49.56%; touches 3; first touch 2024-05-30; last touch 2024-07-05; cluster tolerance 3.8%."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -472889,10 +472889,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -472967,7 +472967,7 @@
         "value": 19.85855,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -472979,7 +472979,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.542141Z",
     "business_health": {
@@ -473217,10 +473217,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $92.03-$100.49; midpoint $96.26; distance +586.19%; touches 2; first touch 2022-01-24; last touch 2022-02-14; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -485674,10 +485674,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -485752,7 +485752,7 @@
         "value": 6.50136,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -485764,7 +485764,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.658991Z",
     "business_health": {
@@ -486002,10 +486002,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $26.86-$29.08; midpoint $27.97; distance +677.73%; touches 2; first touch 2021-12-01; last touch 2021-12-20; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -499748,10 +499748,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -500057,7 +500057,7 @@
         "value": 55.19104,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -500069,7 +500069,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.754728Z",
     "business_health": {
@@ -500307,10 +500307,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $58.36-$61.16; midpoint $59.76; distance +711.46%; touches 2; first touch 2021-11-26; last touch 2021-12-20; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 19.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -511808,10 +511808,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 20.0,
+        "value": 19.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-03",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -511886,7 +511886,7 @@
         "value": 27.50756,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -511898,7 +511898,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.878791Z",
     "business_health": {
@@ -512136,10 +512136,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $220.18-$238.19; midpoint $229.18; distance +5.02%; touches 4; first touch 2026-03-27; last touch 2026-09-28; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 56.0,
+        "value": 55.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-12-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -525493,10 +525493,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 56.0,
+        "value": 55.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-12-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -525571,7 +525571,7 @@
         "value": 4.36863,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -525583,7 +525583,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.965585Z",
     "business_health": {
@@ -525821,10 +525821,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $13.48-$14.82; midpoint $14.15; distance +174.79%; touches 5; first touch 2022-09-01; last touch 2024-02-14; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 26.0,
+        "value": 25.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -530453,10 +530453,10 @@
         "notes": "Current enterprise value divided by saved EBITDA in the listing currency."
       },
       "days_to_next_earnings": {
-        "value": 26.0,
+        "value": 25.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -530531,7 +530531,7 @@
         "value": 1.0375,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -530543,7 +530543,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.082649Z",
     "business_health": {
@@ -530781,10 +530781,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $3.26-$3.62; midpoint $3.44; distance +332.86%; touches 4; first touch 2022-07-06; last touch 2024-02-13; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -543155,10 +543155,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -543233,7 +543233,7 @@
         "value": 11.76569,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -543245,7 +543245,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.180507Z",
     "business_health": {
@@ -543483,10 +543483,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $36.84-$40.50; midpoint $38.67; distance +642.01%; touches 3; first touch 2022-07-05; last touch 2022-12-22; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 7.0,
+        "value": 6.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -555833,10 +555833,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 7.0,
+        "value": 6.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-21",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-21) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -555911,7 +555911,7 @@
         "value": 47.38085,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -555923,7 +555923,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.274646Z",
     "business_health": {
@@ -556161,10 +556161,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $63.83-$67.01; midpoint $65.42; distance +602.81%; touches 2; first touch 2021-11-30; last touch 2021-12-20; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -568638,10 +568638,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -568716,7 +568716,7 @@
         "value": 56.64135,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -568728,7 +568728,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.403442Z",
     "business_health": {
@@ -568959,10 +568959,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $46.52-$50.67; midpoint $48.60; distance +1368.28%; touches 4; first touch 2022-10-14; last touch 2022-12-22; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 12.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -581323,10 +581323,10 @@
         "notes": "Current enterprise value divided by saved EBITDA in the listing currency."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 12.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -581398,10 +581398,10 @@
         "notes": "Input recovered from the previous stored valuation and its reference price."
       },
       "forward_eps_public": {
-        "value": 20.19098,
+        "value": 20.18223,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -581413,7 +581413,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.501487Z",
     "business_health": {
@@ -581651,10 +581651,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $282.83-$319.28; midpoint $301.05; distance +35.71%; touches 9; first touch 2022-05-12; last touch 2023-04-10; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 12.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -581695,7 +581695,7 @@
         "notes": "Trailing P/E divided by saved 3-year EPS CAGR percentage."
       },
       "forward_pe": {
-        "value": 20.23527373729352,
+        "value": 20.244046734390537,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-14",
@@ -594432,7 +594432,7 @@
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "forward_pe": {
-        "value": 20.23527373729352,
+        "value": 20.244046734390537,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-14",
@@ -594502,7 +594502,7 @@
         "notes": "Current price divided by the saved historical-growth EPS proxy."
       },
       "forward_pe_public_estimate": {
-        "value": 20.23527373729352,
+        "value": 20.244046734390537,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-14",
@@ -594537,10 +594537,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 12.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -594615,7 +594615,7 @@
         "value": 12.10734,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -594627,7 +594627,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.621497Z",
     "business_health": {
@@ -594865,10 +594865,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $176.47-$190.57; midpoint $183.52; distance +128.99%; touches 3; first touch 2022-06-16; last touch 2022-10-13; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 6.0,
+        "value": 5.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-20",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-20) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -608870,10 +608870,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 6.0,
+        "value": 5.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-20",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-20) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -609179,7 +609179,7 @@
         "value": 1.30902,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -609191,7 +609191,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.692770Z",
     "business_health": {
@@ -609429,10 +609429,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $18.78-$19.63; midpoint $19.20; distance +130.26%; touches 2; first touch 2022-02-24; last touch 2022-03-24; cluster tolerance 3.2%."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -621961,10 +621961,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -622039,7 +622039,7 @@
         "value": 20.21763,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -622051,7 +622051,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.783779Z",
     "business_health": {
@@ -622289,10 +622289,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $176.86-$188.73; midpoint $182.80; distance +172.71%; touches 2; first touch 2021-10-27; last touch 2021-11-11; cluster tolerance 3.9%."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 18.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -634982,10 +634982,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 19.0,
+        "value": 18.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-02",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-02) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -635060,7 +635060,7 @@
         "value": 32.58861,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -635072,7 +635072,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.940652Z",
     "business_health": {
@@ -635310,10 +635310,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $157.39-$172.68; midpoint $165.03; distance +353.84%; touches 2; first touch 2022-07-06; last touch 2022-09-27; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -648485,10 +648485,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -648563,7 +648563,7 @@
         "value": 5.36697,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -648575,7 +648575,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.054809Z",
     "business_health": {
@@ -648813,10 +648813,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $29.35-$31.00; midpoint $30.17; distance +65.44%; touches 3; first touch 2024-12-20; last touch 2025-05-30; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -661989,10 +661989,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -662067,7 +662067,7 @@
         "value": 5.01587,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -662079,7 +662079,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.096521Z",
     "business_health": {
@@ -662317,10 +662317,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $8.45-$8.98; midpoint $8.71; distance +709.36%; touches 3; first touch 2022-12-22; last touch 2023-05-04; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -667874,10 +667874,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -667952,7 +667952,7 @@
         "value": 5.62203,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -667964,7 +667964,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.259322Z",
     "business_health": {
@@ -668202,10 +668202,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $37.83-$41.84; midpoint $39.83; distance +185.28%; touches 4; first touch 2022-05-19; last touch 2022-10-13; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 29.0,
+        "value": 28.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-12",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-12) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -681223,10 +681223,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 29.0,
+        "value": 28.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-12",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-12) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -681301,7 +681301,7 @@
         "value": 3.52475,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -681313,7 +681313,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.376401Z",
     "business_health": {
@@ -681551,10 +681551,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $50.80-$53.04; midpoint $51.92; distance +76.77%; touches 2; first touch 2021-12-01; last touch 2023-10-06; cluster tolerance 2.9%."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 12.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -694574,10 +694574,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 13.0,
+        "value": 12.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-27",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-27) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -694652,7 +694652,7 @@
         "value": 6.20058,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -694664,7 +694664,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.407683Z",
     "business_health": {
@@ -694902,10 +694902,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $85.14-$94.84; midpoint $89.99; distance +85.64%; touches 5; first touch 2022-06-16; last touch 2022-12-07; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -700293,10 +700293,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -700371,7 +700371,7 @@
         "value": 16.69173,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -700383,7 +700383,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.513260Z",
     "business_health": {
@@ -700621,10 +700621,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $185.06-$197.21; midpoint $191.13; distance +47.34%; touches 2; first touch 2022-06-22; last touch 2022-07-18; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -713811,10 +713811,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 15.0,
+        "value": 14.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-29",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-29) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -713889,7 +713889,7 @@
         "value": 9.81581,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -713901,7 +713901,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.619323Z",
     "business_health": {
@@ -714139,10 +714139,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $161.41-$176.32; midpoint $168.87; distance +22.94%; touches 4; first touch 2022-02-24; last touch 2023-10-26; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -727053,10 +727053,10 @@
         "notes": "Current enterprise value divided by saved EBITDA in the listing currency."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -727131,7 +727131,7 @@
         "value": 3.37691,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -727143,7 +727143,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.758326Z",
     "business_health": {
@@ -727381,10 +727381,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $34.28-$36.87; midpoint $35.58; distance +20.87%; touches 2; first touch 2022-06-16; last touch 2022-07-14; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 14.0,
+        "value": 13.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -740571,10 +740571,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 14.0,
+        "value": 13.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -740649,7 +740649,7 @@
         "value": 6.74039,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -740661,7 +740661,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.931719Z",
     "business_health": {
@@ -740892,10 +740892,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $29.61-$32.58; midpoint $31.09; distance +475.09%; touches 7; first touch 2022-03-08; last touch 2022-11-03; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 14.0,
+        "value": 13.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -753229,10 +753229,10 @@
         "notes": "Current enterprise value divided by saved EBITDA in the listing currency."
       },
       "days_to_next_earnings": {
-        "value": 14.0,
+        "value": 13.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-28",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-28) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -753307,7 +753307,7 @@
         "value": 4.4779,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -753319,7 +753319,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.028386Z",
     "business_health": {
@@ -753557,10 +753557,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $36.81-$41.32; midpoint $39.06; distance +57.20%; touches 7; first touch 2022-02-24; last touch 2025-12-16; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 26.0,
+        "value": 25.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -767541,10 +767541,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 26.0,
+        "value": 25.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-09",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-09) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -767850,7 +767850,7 @@
         "value": 7.41203,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -767862,7 +767862,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.134992Z",
     "business_health": {
@@ -768100,10 +768100,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $74.67-$83.29; midpoint $78.98; distance +34.48%; touches 8; first touch 2022-09-28; last touch 2023-05-24; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -780461,10 +780461,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -780539,7 +780539,7 @@
         "value": 7.29625,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -780551,7 +780551,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.166146Z",
     "business_health": {
@@ -780789,10 +780789,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $34.39-$36.01; midpoint $35.20; distance +596.88%; touches 2; first touch 2022-10-13; last touch 2022-12-28; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 48.0,
+        "value": 47.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-01",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-12-01) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -786193,10 +786193,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 48.0,
+        "value": 47.0,
         "source": "yfinance:calendar:Earnings Date:2026-12-01",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-12-01) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -786271,7 +786271,7 @@
         "value": 10.20413,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -786283,7 +786283,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.280328Z",
     "business_health": {
@@ -786521,10 +786521,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $64.74-$69.60; midpoint $67.17; distance +111.90%; touches 2; first touch 2021-12-02; last touch 2021-12-20; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -800480,10 +800480,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -800789,7 +800789,7 @@
         "value": 9.54525,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -800801,7 +800801,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.393451Z",
     "business_health": {
@@ -801039,10 +801039,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $83.65-$90.25; midpoint $86.95; distance +78.62%; touches 4; first touch 2025-04-08; last touch 2025-11-06; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 35.0,
+        "value": 34.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-18",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-18) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -814096,10 +814096,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 35.0,
+        "value": 34.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-18",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-18) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -814174,7 +814174,7 @@
         "value": 6.41145,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -814186,7 +814186,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.468054Z",
     "business_health": {
@@ -814424,10 +814424,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $67.58-$72.25; midpoint $69.91; distance +34.78%; touches 2; first touch 2023-10-12; last touch 2023-10-30; cluster tolerance 3.7%."
       },
       "days_to_next_earnings": {
-        "value": 34.0,
+        "value": 33.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-17",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-17) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -823934,10 +823934,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 34.0,
+        "value": 33.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-17",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-17) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -824012,7 +824012,7 @@
         "value": 4.87907,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -824024,7 +824024,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.542723Z",
     "business_health": {
@@ -824255,10 +824255,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $64.79-$69.74; midpoint $67.26; distance +457.58%; touches 2; first touch 2022-12-28; last touch 2023-01-12; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 36.0,
+        "value": 35.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-19",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-19) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -835285,10 +835285,10 @@
         "notes": "Current enterprise value divided by saved EBITDA in the listing currency."
       },
       "days_to_next_earnings": {
-        "value": 36.0,
+        "value": 35.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-19",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-19) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -835363,7 +835363,7 @@
         "value": 8.63872,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -835375,7 +835375,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.682656Z",
     "business_health": {
@@ -835616,7 +835616,7 @@
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "days_to_next_earnings: Next earnings release date was unavailable from open/free public inputs."
       }
     },
@@ -848624,7 +848624,7 @@
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "days_to_next_earnings: Next earnings release date was unavailable from open/free public inputs."
       },
       "change_1d": {
@@ -848930,7 +848930,7 @@
         "value": 14.23323,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -848942,7 +848942,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.770355Z",
     "business_health": {
@@ -849180,10 +849180,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $180.97-$193.53; midpoint $187.25; distance +52.97%; touches 6; first touch 2022-10-13; last touch 2023-05-25; cluster tolerance 3.0%."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -862925,10 +862925,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -863234,7 +863234,7 @@
         "value": 32.63732,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -863246,7 +863246,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.862679Z",
     "business_health": {
@@ -863484,10 +863484,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $317.75-$340.09; midpoint $328.92; distance +58.77%; touches 3; first touch 2021-11-03; last touch 2021-12-20; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -876671,10 +876671,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 8.0,
+        "value": 7.0,
         "source": "yfinance:calendar:Earnings Date:2026-10-22",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
@@ -876749,7 +876749,7 @@
         "value": 27.0764,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -876761,7 +876761,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-14T15:23:43.229810Z",
     "business_health": {
@@ -876999,10 +876999,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $247.78-$267.57; midpoint $257.67; distance +20.48%; touches 3; first touch 2026-06-22; last touch 2026-09-28; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
-        "value": 36.0,
+        "value": 35.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-19",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-19) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -892185,10 +892185,10 @@
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
-        "value": 36.0,
+        "value": 35.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-19",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-19) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
@@ -892501,7 +892501,7 @@
         "value": 39.72332,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "forward_eps_proxy": {
@@ -892513,7 +892513,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-14T23:20:13.461373Z",
+    "generated_at": "2026-10-15T04:55:32.850973Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:32.098495Z",
     "business_health": {
@@ -892751,10 +892751,10 @@
         "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $226.29-$243.22; midpoint $234.76; distance +307.37%; touches 3; first touch 2022-06-17; last touch 2022-09-27; cluster tolerance 3.6%."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       }
     },
@@ -905776,10 +905776,10 @@
         "notes": "Latest-quarter diluted EPS YoY growth computed from comparable SEC quarterly diluted EPS facts."
       },
       "days_to_next_earnings": {
-        "value": 22.0,
+        "value": 21.0,
         "source": "yfinance:calendar:Earnings Date:2026-11-05",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-14",
+        "as_of": "2026-10-15",
         "notes": "Days until the next expected earnings release window (2026-11-05) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "enterprise_value_proxy": {
