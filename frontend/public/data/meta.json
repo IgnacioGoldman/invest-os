@@ -1,9 +1,10 @@
 {
   "schema_version": 1,
-  "refreshed_at": "2026-10-16T04:45:48.857202Z",
+  "refreshed_at": "2026-10-16T13:22:43.272461Z",
   "market_as_of": "2026-10-15",
   "market_date_counts": {
-    "2026-10-15": 77
+    "2026-10-15": 75,
+    "2026-10-16": 2
   },
   "source": "github_actions_price_refresh",
   "stock_count": 77,

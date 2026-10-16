@@ -74,7 +74,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:24.896448Z",
     "business_health": {
@@ -13309,7 +13309,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.017108Z",
     "business_health": {
@@ -26685,7 +26685,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.131432Z",
     "business_health": {
@@ -39908,7 +39908,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.203312Z",
     "business_health": {
@@ -45466,7 +45466,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-15T15:15:37.489922Z",
     "business_health": {
@@ -45578,130 +45578,130 @@
     },
     "price_opportunity": {
       "current_price": {
-        "value": 264.5,
+        "value": 268.1000061035156,
         "source": "yfinance_history",
         "tier": "exact_public_fact",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Latest open/free daily close price."
       },
       "change_1d": {
-        "value": 0.7235315507705689,
+        "value": 1.3610609087015595,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_1w": {
-        "value": 2.798294810967731,
+        "value": 3.7940452085509717,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_1m": {
-        "value": 5.842339519849432,
+        "value": 6.178220239016089,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_3m": {
-        "value": 15.75492341356674,
+        "value": 16.463948591534873,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_6m": {
-        "value": -18.08609321782964,
+        "value": -16.19255666811003,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_1y": {
-        "value": -7.258068485636943,
+        "value": -6.5853637269980405,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_2y": {
-        "value": -5.603144726286089,
+        "value": -4.522785698558044,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_5y": {
-        "value": 27.753622595601275,
+        "value": 29.492427212200123,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "distance_from_ath": {
-        "value": -21.745562130177515,
+        "value": -20.68047156700721,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Distance from latest close to all-time high close, expressed as a percentage."
       },
       "distance_from_52w_high": {
-        "value": -21.745562130177515,
+        "value": -20.68047156700721,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Distance from latest close to 52-week high close, expressed as a percentage."
       },
       "distance_from_52w_low": {
-        "value": 16.263736263736263,
+        "value": 17.846156529017858,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1m_distance": {
-        "value": 6.182253520333026,
+        "value": 7.627458664976664,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 1M support floor below, overlapping, or reclaimed by the latest close. Support zone: $245.99-$252.21; midpoint $249.10; distance +6.18%; touches 1; first touch 2026-10-05; last touch 2026-10-05; cluster tolerance 2.5%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 1M support floor below, overlapping, or reclaimed by the latest close. Support zone: $245.99-$252.21; midpoint $249.10; distance +7.63%; touches 1; first touch 2026-10-05; last touch 2026-10-05; cluster tolerance 2.5%."
       },
       "support_3m_distance": {
-        "value": 12.352990939541709,
+        "value": 13.882183578976814,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 3M support floor below, overlapping, or reclaimed by the latest close. Support zone: $230.98-$239.86; midpoint $235.42; distance +12.35%; touches 2; first touch 2026-08-13; last touch 2026-09-11; cluster tolerance 2.5%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 3M support floor below, overlapping, or reclaimed by the latest close. Support zone: $230.98-$239.86; midpoint $235.42; distance +13.88%; touches 2; first touch 2026-08-13; last touch 2026-09-11; cluster tolerance 2.5%."
       },
       "support_6m_distance": {
-        "value": 14.20158204354178,
+        "value": 15.755935133855168,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 6M support floor below, overlapping, or reclaimed by the latest close. Support zone: $221.58-$241.64; midpoint $231.61; distance +14.20%; touches 3; first touch 2026-07-16; last touch 2026-09-11; cluster tolerance 4.0%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 6M support floor below, overlapping, or reclaimed by the latest close. Support zone: $221.58-$241.64; midpoint $231.61; distance +15.76%; touches 3; first touch 2026-07-16; last touch 2026-09-11; cluster tolerance 4.0%."
       },
       "support_1y_distance": {
-        "value": 14.20158204354178,
+        "value": 15.755935133855168,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 1Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $221.58-$241.64; midpoint $231.61; distance +14.20%; touches 3; first touch 2026-07-16; last touch 2026-09-11; cluster tolerance 4.0%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 1Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $221.58-$241.64; midpoint $231.61; distance +15.76%; touches 3; first touch 2026-07-16; last touch 2026-09-11; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 16.042872309693593,
+        "value": 17.6222864820353,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 2Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $214.23-$241.64; midpoint $227.93; distance +16.04%; touches 10; first touch 2024-10-30; last touch 2026-09-11; cluster tolerance 4.0%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 2Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $214.23-$241.64; midpoint $227.93; distance +17.62%; touches 10; first touch 2024-10-30; last touch 2026-09-11; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 15.457508558271767,
+        "value": 17.02895557341916,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $214.23-$243.95; midpoint $229.09; distance +15.46%; touches 18; first touch 2021-12-16; last touch 2026-09-11; cluster tolerance 4.0%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $214.23-$243.95; midpoint $229.09; distance +17.03%; touches 18; first touch 2021-12-16; last touch 2026-09-11; cluster tolerance 4.0%."
       },
       "days_to_next_earnings": {
         "value": 6.0,
@@ -45713,45 +45713,45 @@
     },
     "valuation": {
       "pe": {
-        "value": 23.79232497555313,
+        "value": 24.116153010066622,
         "source": "yfinance_history; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2026-03-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2025-03-31",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "price_to_sales": {
-        "value": 0.6491189372261552,
+        "value": 0.6579538413317194,
         "source": "yfinance_history; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-QUARTER:2026-03-31; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-QUARTER:2025-03-31",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved revenue in the listing currency."
       },
       "fcf_yield": {
-        "value": 8.939254873520309,
+        "value": 8.81921991875373,
         "source": "yfinance_history; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetCashProvidedByUsedInOperatingActivities:SEK:ISSUER-ANNUAL:4602-12-31; issuer_statement:issuer/PaymentsToAcquirePropertyPlantAndEquipment:SEK:ISSUER-ANNUAL:4602-12-31",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved free_cash_flow in the listing currency."
       },
       "ev_to_ebitda": {
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "ev_to_ebitda: Inputs required for this open/free computation were unavailable."
       },
       "peg": {
-        "value": 122.4182017675117,
+        "value": 124.08438805690471,
         "source": "yfinance_history; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2026-03-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2025-03-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-QUARTER:2026-06-30; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-QUARTER:2023-06-30",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Trailing P/E divided by saved 3-year EPS CAGR percentage."
       },
       "forward_pe": {
-        "value": 21.16,
+        "value": 21.44800048828125,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current price divided by saved expected EPS from Yahoo or its implied forward P/E input; not an SEC fact."
       }
     },
@@ -59158,10 +59158,10 @@
         "notes": "Diluted shares computed from annual SEC net income divided by annual diluted EPS; not a live shares-outstanding feed."
       },
       "market_cap": {
-        "value": 58230692307.692314,
+        "value": 59023247497.5586,
         "source": "yfinance_history; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current price multiplied by saved listing share count, including its ADR adjustment."
       },
       "revenue_growth_yoy": {
@@ -59263,10 +59263,10 @@
         "notes": "Latest debt divided by latest stockholders' equity."
       },
       "current_price": {
-        "value": 264.5,
+        "value": 268.1000061035156,
         "source": "yfinance_history",
         "tier": "exact_public_fact",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
@@ -59277,164 +59277,164 @@
         "notes": "Days until the next expected earnings release window (2026-10-22) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
-        "value": 0.7235315507705689,
+        "value": 1.3610609087015595,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_1w": {
-        "value": 2.798294810967731,
+        "value": 3.7940452085509717,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_1m": {
-        "value": 5.842339519849432,
+        "value": 6.178220239016089,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_3m": {
-        "value": 15.75492341356674,
+        "value": 16.463948591534873,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_6m": {
-        "value": -18.08609321782964,
+        "value": -16.19255666811003,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_1y": {
-        "value": -7.258068485636943,
+        "value": -6.5853637269980405,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_2y": {
-        "value": -5.603144726286089,
+        "value": -4.522785698558044,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_5y": {
-        "value": 27.753622595601275,
+        "value": 29.492427212200123,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "distance_from_ath": {
-        "value": -21.745562130177515,
+        "value": -20.68047156700721,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Distance from latest close to all-time high close, expressed as a percentage."
       },
       "distance_from_52w_high": {
-        "value": -21.745562130177515,
+        "value": -20.68047156700721,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Distance from latest close to 52-week high close, expressed as a percentage."
       },
       "distance_from_52w_low": {
-        "value": 16.263736263736263,
+        "value": 17.846156529017858,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1m_distance": {
-        "value": 6.182253520333026,
+        "value": 7.627458664976664,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 1M support floor below, overlapping, or reclaimed by the latest close. Support zone: $245.99-$252.21; midpoint $249.10; distance +6.18%; touches 1; first touch 2026-10-05; last touch 2026-10-05; cluster tolerance 2.5%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 1M support floor below, overlapping, or reclaimed by the latest close. Support zone: $245.99-$252.21; midpoint $249.10; distance +7.63%; touches 1; first touch 2026-10-05; last touch 2026-10-05; cluster tolerance 2.5%."
       },
       "support_3m_distance": {
-        "value": 12.352990939541709,
+        "value": 13.882183578976814,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 3M support floor below, overlapping, or reclaimed by the latest close. Support zone: $230.98-$239.86; midpoint $235.42; distance +12.35%; touches 2; first touch 2026-08-13; last touch 2026-09-11; cluster tolerance 2.5%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 3M support floor below, overlapping, or reclaimed by the latest close. Support zone: $230.98-$239.86; midpoint $235.42; distance +13.88%; touches 2; first touch 2026-08-13; last touch 2026-09-11; cluster tolerance 2.5%."
       },
       "support_6m_distance": {
-        "value": 14.20158204354178,
+        "value": 15.755935133855168,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 6M support floor below, overlapping, or reclaimed by the latest close. Support zone: $221.58-$241.64; midpoint $231.61; distance +14.20%; touches 3; first touch 2026-07-16; last touch 2026-09-11; cluster tolerance 4.0%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 6M support floor below, overlapping, or reclaimed by the latest close. Support zone: $221.58-$241.64; midpoint $231.61; distance +15.76%; touches 3; first touch 2026-07-16; last touch 2026-09-11; cluster tolerance 4.0%."
       },
       "support_1y_distance": {
-        "value": 14.20158204354178,
+        "value": 15.755935133855168,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 1Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $221.58-$241.64; midpoint $231.61; distance +14.20%; touches 3; first touch 2026-07-16; last touch 2026-09-11; cluster tolerance 4.0%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 1Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $221.58-$241.64; midpoint $231.61; distance +15.76%; touches 3; first touch 2026-07-16; last touch 2026-09-11; cluster tolerance 4.0%."
       },
       "support_2y_distance": {
-        "value": 16.042872309693593,
+        "value": 17.6222864820353,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 2Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $214.23-$241.64; midpoint $227.93; distance +16.04%; touches 10; first touch 2024-10-30; last touch 2026-09-11; cluster tolerance 4.0%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 2Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $214.23-$241.64; midpoint $227.93; distance +17.62%; touches 10; first touch 2024-10-30; last touch 2026-09-11; cluster tolerance 4.0%."
       },
       "support_5y_distance": {
-        "value": 15.457508558271767,
+        "value": 17.02895557341916,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $214.23-$243.95; midpoint $229.09; distance +15.46%; touches 18; first touch 2021-12-16; last touch 2026-09-11; cluster tolerance 4.0%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $214.23-$243.95; midpoint $229.09; distance +17.03%; touches 18; first touch 2021-12-16; last touch 2026-09-11; cluster tolerance 4.0%."
       },
       "pe": {
-        "value": 23.79232497555313,
+        "value": 24.116153010066622,
         "source": "yfinance_history; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2026-03-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2025-03-31",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "forward_pe": {
-        "value": 21.16,
+        "value": 21.44800048828125,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current price divided by saved expected EPS from Yahoo or its implied forward P/E input; not an SEC fact."
       },
       "peg": {
-        "value": 122.4182017675117,
+        "value": 124.08438805690471,
         "source": "yfinance_history; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2026-03-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2025-03-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-QUARTER:2026-06-30; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-QUARTER:2023-06-30",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Trailing P/E divided by saved 3-year EPS CAGR percentage."
       },
       "price_to_sales": {
-        "value": 0.6491189372261552,
+        "value": 0.6579538413317194,
         "source": "yfinance_history; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-QUARTER:2026-03-31; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-QUARTER:2025-03-31",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved revenue in the listing currency."
       },
       "ev_to_ebitda": {
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "ev_to_ebitda: Inputs required for this open/free computation were unavailable."
       },
       "fcf_yield": {
-        "value": 8.939254873520309,
+        "value": 8.81921991875373,
         "source": "yfinance_history; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetCashProvidedByUsedInOperatingActivities:SEK:ISSUER-ANNUAL:4602-12-31; issuer_statement:issuer/PaymentsToAcquirePropertyPlantAndEquipment:SEK:ISSUER-ANNUAL:4602-12-31",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved free_cash_flow in the listing currency."
       },
       "free_cash_flow_ttm": {
@@ -59445,38 +59445,38 @@
         "notes": "Operating cash flow TTM minus capex TTM. Capex is treated as a positive cash outflow."
       },
       "pe_ttm": {
-        "value": 23.79232497555313,
+        "value": 24.116153010066622,
         "source": "yfinance_history; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2026-03-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2025-03-31",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "price_to_sales_ttm": {
-        "value": 0.6491189372261552,
+        "value": 0.6579538413317194,
         "source": "yfinance_history; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-QUARTER:2026-03-31; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-QUARTER:2025-03-31",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved revenue in the listing currency."
       },
       "forward_pe_proxy": {
-        "value": 23.746173613143576,
+        "value": 24.06937349950448,
         "source": "yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2026-03-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2025-03-31; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-QUARTER:2026-06-30; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-QUARTER:2023-06-30",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current price divided by the saved historical-growth EPS proxy."
       },
       "forward_pe_public_estimate": {
-        "value": 21.16,
+        "value": 21.44800048828125,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current price divided by saved expected EPS from Yahoo or its implied forward P/E input; not an SEC fact."
       },
       "peg_proxy": {
-        "value": 122.4182017675117,
+        "value": 124.08438805690471,
         "source": "yfinance_history; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2026-03-31; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2025-03-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-QUARTER:2026-06-30; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-QUARTER:2023-06-30",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Trailing P/E divided by saved 3-year EPS CAGR percentage."
       },
       "eps_growth_3y_proxy": {
@@ -59490,7 +59490,7 @@
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "ev_to_ebitda: Inputs required for this open/free computation were unavailable."
       },
       "ebitda_proxy": {
@@ -59501,10 +59501,10 @@
         "notes": "ebitda_proxy: Inputs required for this open/free computation were unavailable."
       },
       "enterprise_value_proxy": {
-        "value": 60593805307.692314,
+        "value": 61386360497.5586,
         "source": "yfinance_history; yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31; issuer_statement:issuer/DebtCurrent:SEK:ISSUER-ANNUAL:4602-12-31; issuer_statement:issuer/CashAndCashEquivalentsAtCarryingValue:SEK:ISSUER-QUARTER:2026-06-30",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current market cap plus saved debt minus saved cash in the listing currency."
       },
       "fcf_margin_ttm": {
@@ -59598,7 +59598,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-15T15:15:40.770329Z",
     "business_health": {
@@ -59710,130 +59710,130 @@
     },
     "price_opportunity": {
       "current_price": {
-        "value": 44.36000061035156,
+        "value": 44.95000076293945,
         "source": "yfinance_history",
         "tier": "exact_public_fact",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Latest open/free daily close price."
       },
       "change_1d": {
-        "value": -0.2697817741001092,
+        "value": 1.330027377074048,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_1w": {
-        "value": 1.603299966527473,
+        "value": 1.788951354748793,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_1m": {
-        "value": 4.009376373492211,
+        "value": 5.343338860636507,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_3m": {
-        "value": 22.13656658337771,
+        "value": 22.47956356538022,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_6m": {
-        "value": 7.487279181763622,
+        "value": 8.052890412730084,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_1y": {
-        "value": 22.035770213121424,
+        "value": 23.28579783778015,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_2y": {
-        "value": -8.705493988377851,
+        "value": -7.529314547329398,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_5y": {
-        "value": -61.59307306463068,
+        "value": -61.082250421697445,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "distance_from_ath": {
-        "value": -67.58494802199941,
+        "value": -67.15381895639922,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Distance from latest close to all-time high close, expressed as a percentage."
       },
       "distance_from_52w_high": {
-        "value": -3.6490014590968185,
+        "value": -2.3675068004185893,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Distance from latest close to 52-week high close, expressed as a percentage."
       },
       "distance_from_52w_low": {
-        "value": 39.14680607941666,
+        "value": 40.99749669459704,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1m_distance": {
-        "value": 3.4273752427655944,
+        "value": 4.802987648883483,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 1M support floor below, overlapping, or reclaimed by the latest close. Support zone: $42.29-$43.49; midpoint $42.89; distance +3.43%; touches 1; first touch 2026-10-08; last touch 2026-10-08; cluster tolerance 2.8%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 1M support floor below, overlapping, or reclaimed by the latest close. Support zone: $42.28-$43.50; midpoint $42.89; distance +4.80%; touches 1; first touch 2026-10-08; last touch 2026-10-08; cluster tolerance 2.8%."
       },
       "support_3m_distance": {
-        "value": 4.238641427614931,
+        "value": 5.625022767460124,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 3M support floor below, overlapping, or reclaimed by the latest close. Support zone: $41.44-$43.67; midpoint $42.56; distance +4.24%; touches 2; first touch 2026-09-15; last touch 2026-10-08; cluster tolerance 3.6%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 3M support floor below, overlapping, or reclaimed by the latest close. Support zone: $41.44-$43.67; midpoint $42.56; distance +5.63%; touches 2; first touch 2026-09-15; last touch 2026-10-08; cluster tolerance 3.7%."
       },
       "support_6m_distance": {
-        "value": 29.889429968782473,
+        "value": 31.616983484355014,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 6M support floor below, overlapping, or reclaimed by the latest close. Support zone: $33.14-$35.17; midpoint $34.15; distance +29.89%; touches 2; first touch 2026-06-23; last touch 2026-07-09; cluster tolerance 3.7%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 6M support floor below, overlapping, or reclaimed by the latest close. Support zone: $33.13-$35.17; midpoint $34.15; distance +31.62%; touches 2; first touch 2026-06-23; last touch 2026-07-09; cluster tolerance 3.7%."
       },
       "support_1y_distance": {
-        "value": 40.48349544725784,
+        "value": 42.351951858604416,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 1Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.63-$32.52; midpoint $31.58; distance +40.48%; touches 2; first touch 2025-11-21; last touch 2026-03-19; cluster tolerance 3.7%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 1Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.63-$32.52; midpoint $31.58; distance +42.35%; touches 2; first touch 2025-11-21; last touch 2026-03-19; cluster tolerance 3.7%."
       },
       "support_2y_distance": {
-        "value": 40.48349544725784,
+        "value": 42.351951858604416,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 2Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.63-$32.52; midpoint $31.58; distance +40.48%; touches 2; first touch 2025-11-21; last touch 2026-03-19; cluster tolerance 3.7%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 2Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.63-$32.52; midpoint $31.58; distance +42.35%; touches 2; first touch 2025-11-21; last touch 2026-03-19; cluster tolerance 3.7%."
       },
       "support_5y_distance": {
-        "value": 40.48349544725784,
+        "value": 42.351951858604416,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.63-$32.52; midpoint $31.58; distance +40.48%; touches 2; first touch 2025-11-21; last touch 2026-03-19; cluster tolerance 3.7%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.63-$32.52; midpoint $31.58; distance +42.35%; touches 2; first touch 2025-11-21; last touch 2026-03-19; cluster tolerance 3.7%."
       },
       "days_to_next_earnings": {
         "value": 32.0,
@@ -59845,45 +59845,45 @@
     },
     "valuation": {
       "pe": {
-        "value": 33.722741567944695,
+        "value": 34.17126326309829,
         "source": "yfinance_history; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "price_to_sales": {
-        "value": 2.150600231770815,
+        "value": 2.1792038036247847,
         "source": "yfinance_history; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved revenue in the listing currency."
       },
       "fcf_yield": {
-        "value": 5.0317159883538425,
+        "value": 4.965671201912918,
         "source": "yfinance_history; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30; issuer_statement:issuer/NetCashProvidedByUsedInOperatingActivities:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/NetCashProvidedByUsedInOperatingActivities:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/NetCashProvidedByUsedInOperatingActivities:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/CapitalExpenditures:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/CapitalExpenditures:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/CapitalExpenditures:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved free_cash_flow in the listing currency."
       },
       "ev_to_ebitda": {
-        "value": 15.96403173243485,
+        "value": 16.139886187719792,
         "source": "yfinance_history; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30; issuer_statement:issuer/DebtCurrent:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/CashAndCashEquivalentsAtCarryingValue:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/OperatingIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/OperatingIncomeLoss:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/OperatingIncomeLoss:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/DepreciationAndAmortisationExpense:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/DepreciationAndAmortisationExpense:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/DepreciationAndAmortisationExpense:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current enterprise value divided by saved EBITDA in the listing currency."
       },
       "peg": {
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       },
       "forward_pe": {
-        "value": 26.248521071213943,
+        "value": 26.597633587538137,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current price divided by saved expected EPS from Yahoo or its implied forward P/E input; not an SEC fact."
       }
     },
@@ -63612,10 +63612,10 @@
         "notes": "Latest diluted weighted-average share count from SEC companyfacts; not a live shares-outstanding feed."
       },
       "market_cap": {
-        "value": 89432710638.18933,
+        "value": 90622190173.73666,
         "source": "yfinance_history; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current price multiplied by saved listing share count, including its ADR adjustment."
       },
       "revenue_growth_yoy": {
@@ -63717,10 +63717,10 @@
         "notes": "Latest debt divided by latest stockholders' equity."
       },
       "current_price": {
-        "value": 44.36000061035156,
+        "value": 44.95000076293945,
         "source": "yfinance_history",
         "tier": "exact_public_fact",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Latest open/free daily close price."
       },
       "days_to_next_earnings": {
@@ -63731,164 +63731,164 @@
         "notes": "Days until the next expected earnings release window (2026-11-17) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
       },
       "change_1d": {
-        "value": -0.2697817741001092,
+        "value": 1.330027377074048,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_1w": {
-        "value": 1.603299966527473,
+        "value": 1.788951354748793,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_1m": {
-        "value": 4.009376373492211,
+        "value": 5.343338860636507,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_3m": {
-        "value": 22.13656658337771,
+        "value": 22.47956356538022,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_6m": {
-        "value": 7.487279181763622,
+        "value": 8.052890412730084,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_1y": {
-        "value": 22.035770213121424,
+        "value": 23.28579783778015,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_2y": {
-        "value": -8.705493988377851,
+        "value": -7.529314547329398,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "change_5y": {
-        "value": -61.59307306463068,
+        "value": -61.082250421697445,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Price performance computed from open/free daily close history."
       },
       "distance_from_ath": {
-        "value": -67.58494802199941,
+        "value": -67.15381895639922,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Distance from latest close to all-time high close, expressed as a percentage."
       },
       "distance_from_52w_high": {
-        "value": -3.6490014590968185,
+        "value": -2.3675068004185893,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Distance from latest close to 52-week high close, expressed as a percentage."
       },
       "distance_from_52w_low": {
-        "value": 39.14680607941666,
+        "value": 40.99749669459704,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
       },
       "support_1m_distance": {
-        "value": 3.4273752427655944,
+        "value": 4.802987648883483,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 1M support floor below, overlapping, or reclaimed by the latest close. Support zone: $42.29-$43.49; midpoint $42.89; distance +3.43%; touches 1; first touch 2026-10-08; last touch 2026-10-08; cluster tolerance 2.8%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 1M support floor below, overlapping, or reclaimed by the latest close. Support zone: $42.28-$43.50; midpoint $42.89; distance +4.80%; touches 1; first touch 2026-10-08; last touch 2026-10-08; cluster tolerance 2.8%."
       },
       "support_3m_distance": {
-        "value": 4.238641427614931,
+        "value": 5.625022767460124,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 3M support floor below, overlapping, or reclaimed by the latest close. Support zone: $41.44-$43.67; midpoint $42.56; distance +4.24%; touches 2; first touch 2026-09-15; last touch 2026-10-08; cluster tolerance 3.6%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 3M support floor below, overlapping, or reclaimed by the latest close. Support zone: $41.44-$43.67; midpoint $42.56; distance +5.63%; touches 2; first touch 2026-09-15; last touch 2026-10-08; cluster tolerance 3.7%."
       },
       "support_6m_distance": {
-        "value": 29.889429968782473,
+        "value": 31.616983484355014,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 6M support floor below, overlapping, or reclaimed by the latest close. Support zone: $33.14-$35.17; midpoint $34.15; distance +29.89%; touches 2; first touch 2026-06-23; last touch 2026-07-09; cluster tolerance 3.7%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 6M support floor below, overlapping, or reclaimed by the latest close. Support zone: $33.13-$35.17; midpoint $34.15; distance +31.62%; touches 2; first touch 2026-06-23; last touch 2026-07-09; cluster tolerance 3.7%."
       },
       "support_1y_distance": {
-        "value": 40.48349544725784,
+        "value": 42.351951858604416,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 1Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.63-$32.52; midpoint $31.58; distance +40.48%; touches 2; first touch 2025-11-21; last touch 2026-03-19; cluster tolerance 3.7%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 1Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.63-$32.52; midpoint $31.58; distance +42.35%; touches 2; first touch 2025-11-21; last touch 2026-03-19; cluster tolerance 3.7%."
       },
       "support_2y_distance": {
-        "value": 40.48349544725784,
+        "value": 42.351951858604416,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 2Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.63-$32.52; midpoint $31.58; distance +40.48%; touches 2; first touch 2025-11-21; last touch 2026-03-19; cluster tolerance 3.7%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 2Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.63-$32.52; midpoint $31.58; distance +42.35%; touches 2; first touch 2025-11-21; last touch 2026-03-19; cluster tolerance 3.7%."
       },
       "support_5y_distance": {
-        "value": 40.48349544725784,
+        "value": 42.351951858604416,
         "source": "yfinance_history",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
-        "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.63-$32.52; midpoint $31.58; distance +40.48%; touches 2; first touch 2025-11-21; last touch 2026-03-19; cluster tolerance 3.7%."
+        "as_of": "2026-10-16",
+        "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $30.63-$32.52; midpoint $31.58; distance +42.35%; touches 2; first touch 2025-11-21; last touch 2026-03-19; cluster tolerance 3.7%."
       },
       "pe": {
-        "value": 33.722741567944695,
+        "value": 34.17126326309829,
         "source": "yfinance_history; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "forward_pe": {
-        "value": 26.248521071213943,
+        "value": 26.597633587538137,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current price divided by saved expected EPS from Yahoo or its implied forward P/E input; not an SEC fact."
       },
       "peg": {
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       },
       "price_to_sales": {
-        "value": 2.150600231770815,
+        "value": 2.1792038036247847,
         "source": "yfinance_history; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved revenue in the listing currency."
       },
       "ev_to_ebitda": {
-        "value": 15.96403173243485,
+        "value": 16.139886187719792,
         "source": "yfinance_history; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30; issuer_statement:issuer/DebtCurrent:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/CashAndCashEquivalentsAtCarryingValue:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/OperatingIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/OperatingIncomeLoss:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/OperatingIncomeLoss:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/DepreciationAndAmortisationExpense:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/DepreciationAndAmortisationExpense:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/DepreciationAndAmortisationExpense:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current enterprise value divided by saved EBITDA in the listing currency."
       },
       "fcf_yield": {
-        "value": 5.0317159883538425,
+        "value": 4.965671201912918,
         "source": "yfinance_history; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30; issuer_statement:issuer/NetCashProvidedByUsedInOperatingActivities:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/NetCashProvidedByUsedInOperatingActivities:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/NetCashProvidedByUsedInOperatingActivities:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/CapitalExpenditures:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/CapitalExpenditures:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/CapitalExpenditures:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved free_cash_flow in the listing currency."
       },
       "free_cash_flow_ttm": {
@@ -63899,38 +63899,38 @@
         "notes": "Operating cash flow TTM minus capex TTM. Capex is treated as a positive cash outflow."
       },
       "pe_ttm": {
-        "value": 33.722741567944695,
+        "value": 34.17126326309829,
         "source": "yfinance_history; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "price_to_sales_ttm": {
-        "value": 2.150600231770815,
+        "value": 2.1792038036247847,
         "source": "yfinance_history; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/RevenueFromContractWithCustomerExcludingAssessedTax:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
         "tier": "computed_from_public_facts",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Recalculated using current market cap and saved revenue in the listing currency."
       },
       "forward_pe_proxy": {
-        "value": 41.85184840731229,
+        "value": 42.408489448941076,
         "source": "yfinance_history; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/NetIncomeLoss:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30; issuer_statement:issuer/EarningsPerShareDiluted:SEK/shares:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; yfinance_statement:yfinance/EarningsPerShareDiluted:SEK/shares:YF-ANNUAL:2022-12-31",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current price divided by the saved historical-growth EPS proxy."
       },
       "forward_pe_public_estimate": {
-        "value": 26.248521071213943,
+        "value": 26.597633587538137,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current price divided by saved expected EPS from Yahoo or its implied forward P/E input; not an SEC fact."
       },
       "peg_proxy": {
         "value": null,
         "source": "open_data_provider",
         "tier": "unavailable_open_free",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       },
       "eps_growth_3y_proxy": {
@@ -63941,10 +63941,10 @@
         "notes": "3-year GAAP diluted EPS CAGR computed from annual SEC diluted EPS facts."
       },
       "ev_to_ebitda_proxy": {
-        "value": 15.96403173243485,
+        "value": 16.139886187719792,
         "source": "yfinance_history; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30; issuer_statement:issuer/DebtCurrent:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/CashAndCashEquivalentsAtCarryingValue:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/OperatingIncomeLoss:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/OperatingIncomeLoss:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/OperatingIncomeLoss:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/DepreciationAndAmortisationExpense:SEK:ISSUER-ANNUAL:2025-12-31:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/DepreciationAndAmortisationExpense:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/DepreciationAndAmortisationExpense:SEK:ISSUER-QUARTER:2025-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current enterprise value divided by saved EBITDA in the listing currency."
       },
       "ebitda_proxy": {
@@ -63955,10 +63955,10 @@
         "notes": "Proxy EBITDA: operating income plus depreciation/amortization where SEC facts are available."
       },
       "enterprise_value_proxy": {
-        "value": 107980710638.18933,
+        "value": 109170190173.73666,
         "source": "yfinance_history; yfinance_history; yfinance_statement:yfinance/WeightedAverageNumberOfDilutedSharesOutstanding:shares:YF-QUARTER:2026-06-30; issuer_statement:issuer/DebtCurrent:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf; issuer_statement:issuer/CashAndCashEquivalentsAtCarryingValue:SEK:ISSUER-QUARTER:2026-06-30:https://storage.mfn.se/2de10e82-345e-4a61-a2d0-934a1652c6e9/nibe-q2-report-2026-en.pdf",
         "tier": "proxy_estimate",
-        "as_of": "2026-10-15",
+        "as_of": "2026-10-16",
         "notes": "Current market cap plus saved debt minus saved cash in the listing currency."
       },
       "fcf_margin_ttm": {
@@ -64037,7 +64037,7 @@
         "notes": "Input recovered from the previous stored valuation and its reference price."
       },
       "forward_eps_public": {
-        "value": 3.80702,
+        "value": 3.80273,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-16",
@@ -64052,7 +64052,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.316403Z",
     "business_health": {
@@ -64334,7 +64334,7 @@
         "notes": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       },
       "forward_pe": {
-        "value": 19.072660666440303,
+        "value": 19.094177238550085,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -77375,7 +77375,7 @@
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "forward_pe": {
-        "value": 19.072660666440303,
+        "value": 19.094177238550085,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -77445,7 +77445,7 @@
         "notes": "Current price divided by the saved historical-growth EPS proxy."
       },
       "forward_pe_public_estimate": {
-        "value": 19.072660666440303,
+        "value": 19.094177238550085,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -77570,7 +77570,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.388657Z",
     "business_health": {
@@ -85406,7 +85406,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-15T15:15:37.147204Z",
     "business_health": {
@@ -102304,7 +102304,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.601087Z",
     "business_health": {
@@ -116173,7 +116173,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.686766Z",
     "business_health": {
@@ -128380,7 +128380,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.766002Z",
     "business_health": {
@@ -140552,7 +140552,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.871291Z",
     "business_health": {
@@ -152748,7 +152748,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:25.968373Z",
     "business_health": {
@@ -164985,7 +164985,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.110738Z",
     "business_health": {
@@ -178334,7 +178334,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.201365Z",
     "business_health": {
@@ -191849,7 +191849,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.266545Z",
     "business_health": {
@@ -203371,7 +203371,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.371887Z",
     "business_health": {
@@ -212747,7 +212747,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.474426Z",
     "business_health": {
@@ -226268,7 +226268,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.591635Z",
     "business_health": {
@@ -239194,7 +239194,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.677958Z",
     "business_health": {
@@ -251387,7 +251387,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-15T15:15:37.692115Z",
     "business_health": {
@@ -261042,7 +261042,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.760172Z",
     "business_health": {
@@ -268797,7 +268797,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-15T15:15:38.815487Z",
     "business_health": {
@@ -273330,7 +273330,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.826607Z",
     "business_health": {
@@ -280224,7 +280224,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.851572Z",
     "business_health": {
@@ -285941,7 +285941,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:26.952260Z",
     "business_health": {
@@ -299423,7 +299423,7 @@
         "notes": "Input recovered from the previous stored valuation and its reference price."
       },
       "forward_eps_public": {
-        "value": 204.46593,
+        "value": 206.89381,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-16",
@@ -299438,7 +299438,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.042772Z",
     "business_health": {
@@ -299720,7 +299720,7 @@
         "notes": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       },
       "forward_pe": {
-        "value": 4.554499569851931,
+        "value": 4.5010529325859245,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -312389,7 +312389,7 @@
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "forward_pe": {
-        "value": 4.554499569851931,
+        "value": 4.5010529325859245,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -312452,7 +312452,7 @@
         "notes": "forward_pe_proxy: Positive 3-year EPS CAGR or trailing EPS was unavailable; forward P/E proxy is not meaningful."
       },
       "forward_pe_public_estimate": {
-        "value": 4.554499569851931,
+        "value": 4.5010529325859245,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -312577,7 +312577,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-15T15:15:41.189425Z",
     "business_health": {
@@ -329266,7 +329266,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.289323Z",
     "business_health": {
@@ -342785,7 +342785,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.381838Z",
     "business_health": {
@@ -350496,7 +350496,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.492900Z",
     "business_health": {
@@ -363335,7 +363335,7 @@
         "notes": "Input recovered from the previous stored valuation and its reference price."
       },
       "forward_eps_public": {
-        "value": 9.19281,
+        "value": 9.19314,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-16",
@@ -363350,7 +363350,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.535102Z",
     "business_health": {
@@ -363632,7 +363632,7 @@
         "notes": "Trailing P/E divided by saved 3-year EPS CAGR percentage."
       },
       "forward_pe": {
-        "value": 23.360648158724047,
+        "value": 23.35980959715614,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -370702,7 +370702,7 @@
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "forward_pe": {
-        "value": 23.360648158724047,
+        "value": 23.35980959715614,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -370772,7 +370772,7 @@
         "notes": "Current price divided by the saved historical-growth EPS proxy."
       },
       "forward_pe_public_estimate": {
-        "value": 23.360648158724047,
+        "value": 23.35980959715614,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -370897,7 +370897,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.617574Z",
     "business_health": {
@@ -383758,7 +383758,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.739648Z",
     "business_health": {
@@ -397072,7 +397072,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.802243Z",
     "business_health": {
@@ -401614,7 +401614,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.869876Z",
     "business_health": {
@@ -412636,7 +412636,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:27.989772Z",
     "business_health": {
@@ -426152,7 +426152,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.060308Z",
     "business_health": {
@@ -436326,7 +436326,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.169266Z",
     "business_health": {
@@ -449842,7 +449842,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.275473Z",
     "business_health": {
@@ -463358,7 +463358,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.408880Z",
     "business_health": {
@@ -476858,7 +476858,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.542141Z",
     "business_health": {
@@ -489643,7 +489643,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.658991Z",
     "business_health": {
@@ -503948,7 +503948,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.754728Z",
     "business_health": {
@@ -515777,7 +515777,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.878791Z",
     "business_health": {
@@ -529447,7 +529447,7 @@
         "notes": "Input recovered from the previous stored valuation and its reference price."
       },
       "forward_eps_public": {
-        "value": 4.36863,
+        "value": 4.36292,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-16",
@@ -529462,7 +529462,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:28.965585Z",
     "business_health": {
@@ -529744,7 +529744,7 @@
         "notes": "Trailing P/E divided by saved 3-year EPS CAGR percentage."
       },
       "forward_pe": {
-        "value": 9.28208597135957,
+        "value": 9.294233961901787,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -534234,7 +534234,7 @@
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "forward_pe": {
-        "value": 9.28208597135957,
+        "value": 9.294233961901787,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -534304,7 +534304,7 @@
         "notes": "Current price divided by the saved historical-growth EPS proxy."
       },
       "forward_pe_public_estimate": {
-        "value": 9.28208597135957,
+        "value": 9.294233961901787,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -534422,7 +534422,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.082649Z",
     "business_health": {
@@ -547124,7 +547124,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.180507Z",
     "business_health": {
@@ -559802,7 +559802,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.274646Z",
     "business_health": {
@@ -572607,7 +572607,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.403442Z",
     "business_health": {
@@ -585277,7 +585277,7 @@
         "notes": "Input recovered from the previous stored valuation and its reference price."
       },
       "forward_eps_public": {
-        "value": 20.18639,
+        "value": 20.16456,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-16",
@@ -585292,7 +585292,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.501487Z",
     "business_health": {
@@ -585574,7 +585574,7 @@
         "notes": "Trailing P/E divided by saved 3-year EPS CAGR percentage."
       },
       "forward_pe": {
-        "value": 21.044376808265064,
+        "value": 21.067159291281026,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -598311,7 +598311,7 @@
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "forward_pe": {
-        "value": 21.044376808265064,
+        "value": 21.067159291281026,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -598381,7 +598381,7 @@
         "notes": "Current price divided by the saved historical-growth EPS proxy."
       },
       "forward_pe_public_estimate": {
-        "value": 21.044376808265064,
+        "value": 21.067159291281026,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -598506,7 +598506,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.621497Z",
     "business_health": {
@@ -613070,7 +613070,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.692770Z",
     "business_health": {
@@ -625930,7 +625930,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.783779Z",
     "business_health": {
@@ -638951,7 +638951,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:29.940652Z",
     "business_health": {
@@ -652454,7 +652454,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.054809Z",
     "business_health": {
@@ -665958,7 +665958,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.096521Z",
     "business_health": {
@@ -671843,7 +671843,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.259322Z",
     "business_health": {
@@ -685192,7 +685192,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.376401Z",
     "business_health": {
@@ -698543,7 +698543,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.407683Z",
     "business_health": {
@@ -704262,7 +704262,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.513260Z",
     "business_health": {
@@ -717780,7 +717780,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.619323Z",
     "business_health": {
@@ -731022,7 +731022,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.758326Z",
     "business_health": {
@@ -744540,7 +744540,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:30.931719Z",
     "business_health": {
@@ -757183,7 +757183,7 @@
         "notes": "Input recovered from the previous stored valuation and its reference price."
       },
       "forward_eps_public": {
-        "value": 4.71298,
+        "value": 4.70861,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-16",
@@ -757198,7 +757198,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.028386Z",
     "business_health": {
@@ -757480,7 +757480,7 @@
         "notes": "Trailing P/E divided by saved 3-year EPS CAGR percentage."
       },
       "forward_pe": {
-        "value": 12.872958970533572,
+        "value": 12.884906197146357,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -771553,7 +771553,7 @@
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "forward_pe": {
-        "value": 12.872958970533572,
+        "value": 12.884906197146357,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -771616,7 +771616,7 @@
         "notes": "Current price divided by the saved historical-growth EPS proxy."
       },
       "forward_pe_public_estimate": {
-        "value": 12.872958970533572,
+        "value": 12.884906197146357,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -771741,7 +771741,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.134992Z",
     "business_health": {
@@ -784430,7 +784430,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.166146Z",
     "business_health": {
@@ -790147,7 +790147,7 @@
         "notes": "Input recovered from the previous stored valuation and its reference price."
       },
       "forward_eps_public": {
-        "value": 10.49361,
+        "value": 10.5163,
         "source": "yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-16",
@@ -790162,7 +790162,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.280328Z",
     "business_health": {
@@ -790444,7 +790444,7 @@
         "notes": "Trailing P/E divided by saved 3-year EPS CAGR percentage."
       },
       "forward_pe": {
-        "value": 13.506314388236179,
+        "value": 13.477173124344025,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -804492,7 +804492,7 @@
         "notes": "Recalculated using current market cap and saved net_income in the listing currency."
       },
       "forward_pe": {
-        "value": 13.506314388236179,
+        "value": 13.477173124344025,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -804555,7 +804555,7 @@
         "notes": "Current price divided by the saved historical-growth EPS proxy."
       },
       "forward_pe_public_estimate": {
-        "value": 13.506314388236179,
+        "value": 13.477173124344025,
         "source": "yfinance_history; yfinance:forwardEps",
         "tier": "proxy_estimate",
         "as_of": "2026-10-15",
@@ -804680,7 +804680,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.393451Z",
     "business_health": {
@@ -818065,7 +818065,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.468054Z",
     "business_health": {
@@ -827903,7 +827903,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.542723Z",
     "business_health": {
@@ -839254,7 +839254,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.682656Z",
     "business_health": {
@@ -852821,7 +852821,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.770355Z",
     "business_health": {
@@ -867125,7 +867125,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:31.862679Z",
     "business_health": {
@@ -880640,7 +880640,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-15T15:15:39.564547Z",
     "business_health": {
@@ -897232,7 +897232,7 @@
       }
     },
     "source": "open_free_public",
-    "generated_at": "2026-10-16T04:45:48.857202Z",
+    "generated_at": "2026-10-16T13:22:43.272461Z",
     "revenue_history_version": 1,
     "revenue_history_checked_at": "2026-10-13T16:39:32.098495Z",
     "business_health": {
