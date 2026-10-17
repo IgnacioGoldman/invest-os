@@ -116,6 +116,28 @@ STRONG_YOY_SUPPORT = {
 
 
 class SavedFilterEvaluatorTests(unittest.TestCase):
+    def test_multi_select_values_match_any_value_and_require_every_metric(self) -> None:
+        expression = {
+            "icon": "trend",
+            "operator": "and",
+            "groups": [
+                {"operator": "or", "conditions": [
+                    {"field": "revenue", "value": "Strong"},
+                    {"field": "revenue", "value": "Solid"},
+                ]},
+                {"operator": "or", "conditions": [
+                    {"field": "valuation", "value": "Cheap"},
+                    {"field": "valuation", "value": "Fair"},
+                ]},
+            ],
+        }
+        for revenue in (25, 12):
+            for forward_pe in (15, 22):
+                with self.subTest(revenue=revenue, forward_pe=forward_pe):
+                    self.assertTrue(expression_matches(snapshot("MATCH", revenue, 1, 1, forward_pe=forward_pe), expression))
+        self.assertFalse(expression_matches(snapshot("WEAK", -5, 1, 1, forward_pe=15), expression))
+        self.assertFalse(expression_matches(snapshot("PRICEY", 25, 1, 1, forward_pe=40), expression))
+
     def test_grouped_and_or_expression_matches_frontend_semantics(self) -> None:
         self.assertTrue(expression_matches(snapshot("MATCH", 12, 18, 1.5), STRONG_YOY_SUPPORT))
         self.assertFalse(expression_matches(snapshot("NO_GROWTH", 2, 1, 30), STRONG_YOY_SUPPORT))
