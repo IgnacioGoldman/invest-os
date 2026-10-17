@@ -1,7 +1,6 @@
-import { calculateRevenueGrowthMomentum, formatMomentumPp, revenueMomentumDetail, REVENUE_MOMENTUM_DESCRIPTION } from "../revenueGrowthMomentum";
+import { calculateRevenueGrowthMomentum, formatMomentumPp, revenueMomentumDetail } from "../revenueGrowthMomentum";
 import { MoneyPanel } from "./MoneyPanel";
 import { IndustryStrengthDetail } from "./IndustryStrengthDetail";
-import { INDUSTRY_STRENGTH_COPY, industryStrengthContext, industryStrengthSignal } from "../industryStrength";
 import { prepareStockAnalysis, type StockAnalysisBrief } from "../aiAnalysis";
 import { StockAnalysisDialog, type AnalysisCopyStatus } from "./StockAnalysisDialog";
 import { FilterSelector, type FilterShortcut } from "./FilterSelector";
@@ -33,6 +32,9 @@ import {
 import { FILTER_ICONS, filterIcon, type FilterIconName } from "../filterIcons";
 import "../filterBuilder.css";
 import { expressionFromMetricRules, metricRulesFromExpression } from "../metricFilterRules";
+import { STOCK_METRICS, STOCK_METRIC_BY_KEY, SUPPORT_KEYS, SUPPORT_FILTER_KEYS, SUPPORT_TIMEFRAMES, epsGaapMetric,
+  upcomingEarningsMetric, upcomingEarningsSignal, isSupportField, stockMetricForField,
+  type StockMetricKey, type StockMetricField, type SupportFilterKey } from "../stockMetrics";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -81,30 +83,9 @@ type Props = {
   } & WatchlistGroupActions;
 };
 
-type GrowthDetailKey =
-  | "revenue"
-  | "momentum"
-  | "eps_gaap"
-  | "fcf_margin"
-  | "upcoming_earnings"
-  | "support"
-  | "industry_strength"
-  | "forward_pe";
-export type FilterKey =
-  | "revenue"
-  | "momentum"
-  | "eps"
-  | "fcf_margin"
-  | "valuation"
-  | "forward_pe"
-  | "upcoming_earnings"
-  | "support_1m"
-  | "support_3m"
-  | "support_6m"
-  | "support_1y"
-  | "support_2y"
-  | "support_5y";
-export type SortKey = "watchlist_order" | "symbol" | "support_best" | Exclude<FilterKey, "forward_pe">;
+type GrowthDetailKey = StockMetricKey;
+export type FilterKey = StockMetricField | "valuation";
+export type SortKey = "watchlist_order" | "symbol" | "support_best" | Exclude<FilterKey, "forward_pe" | "industry_strength">;
 export type SortDirection = "asc" | "desc";
 const SPACE_TABS = ["explore", "watchlist", "portfolio"] as const;
 type SpaceTab = typeof SPACE_TABS[number];
@@ -136,51 +117,6 @@ export type FilterExpression = {
 type ChartRange = "1W" | "1M" | "3M" | "6M" | "1Y" | "2Y" | "5Y" | "ALL";
 type MetricKind = "percent" | "ratio" | "compact" | "price" | "days";
 
-const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: string; description: string }> = {
-  industry_strength: INDUSTRY_STRENGTH_COPY,
-  revenue: {
-    title: "Latest Revenue Growth YoY",
-    question: "Is the business growing right now?",
-    description:
-      "Compares the company's revenue in its latest reported quarter with the same quarter one year earlier. It shows how quickly the company's sales are growing or declining. For example, +15% means the company generated 15% more revenue than in the same quarter last year.",
-  },
-  momentum: {
-    title: "Revenue Growth Momentum",
-    question: "Is the company's growth getting stronger or weaker?",
-    description:
-      REVENUE_MOMENTUM_DESCRIPTION,
-  },
-  eps_gaap: {
-    title: "GAAP EPS Growth YoY",
-    question: "Are reported earnings improving?",
-    description:
-      "GAAP EPS growth shows reported accounting earnings per share versus the same quarter last year. It can be affected by unusual gains, charges, or accounting items, so use it alongside cash-flow and margin metrics.",
-  },
-  fcf_margin: {
-    title: "Free Cash Flow Margin",
-    question: "Is the company turning revenue into actual cash?",
-    description:
-      "Compares trailing-12-month free cash flow with trailing-12-month revenue. TTM is used because a single quarter can be noisy when collections, inventory, working capital, or capex timing shift cash flow around.",
-  },
-  forward_pe: {
-    title: "Forward P/E",
-    question: "What are you paying for expected earnings?",
-    description:
-      "Compares the current share price with expected earnings per share over the next 12 months. It is a compact first-pass valuation check, not a full valuation model.",
-  },
-  upcoming_earnings: {
-    title: "Upcoming Earnings",
-    question: "Is there an earnings catalyst coming soon?",
-    description:
-      "Counts the days until the next expected earnings release date or earnings window. Earnings releases can be catalysts for sharp price moves, so a lower value means the next scheduled information event is closer.",
-  },
-  support: {
-    title: "Proximity to Support",
-    question: "Is the current price close to a nearby support zone?",
-    description:
-      "Compares the current price with a detected support zone from recent daily price history. Support means a clustered swing-low area with enough touches to look like a practical floor, not just the lowest price in the range.",
-  },
-};
 
 type FilterDefinition = {
   key: FilterKey;
@@ -191,97 +127,33 @@ type FilterDefinition = {
   options: Array<{ label: string; tone: Tone }>;
 };
 
-const SUPPORT_KEYS: Record<Extract<FilterKey, `support_${string}`>, string> = {
-  support_1m: "support_1m_distance",
-  support_3m: "support_3m_distance",
-  support_6m: "support_6m_distance",
-  support_1y: "support_1y_distance",
-  support_2y: "support_2y_distance",
-  support_5y: "support_5y_distance",
-};
-
-const SUPPORT_FILTER_KEYS = ["support_1m", "support_3m", "support_6m", "support_1y", "support_2y", "support_5y"] as const;
 const PULLBACK_SUPPORT_FILTER_KEYS = ["support_1m", "support_3m", "support_6m"] as const;
 const SUPPORT_PRESET_FILTER_KEYS = ["support_1y", "support_2y", "support_5y"] as const;
-type SupportFilterKey = typeof SUPPORT_FILTER_KEYS[number];
 type BuiltInPreset = "pullback" | "support" | "earnings";
 type BuiltInPresetCopy = {
   name: string;
   summary: string;
 };
 
-const FILTER_DEFINITIONS: FilterDefinition[] = [
-  {
-    key: "revenue",
-    label: "Latest revenue growth YoY",
-    shortLabel: "Revenue YoY",
-    section: "Growth",
-    description: "Year-over-year revenue growth in the latest reported quarter.",
-    options: ["Strong", "Solid", "Flat", "Weak", "Unclear"].map(metricSignal),
-  },
-  {
-    key: "momentum",
-    label: "Revenue growth momentum",
-    shortLabel: "Momentum",
-    section: "Growth",
-    description: "Change in revenue growth rate versus the previous quarter.",
-    options: ["Accelerating", "Stable", "Decelerating", "Unclear"].map(metricSignal),
-  },
-  {
-    key: "eps",
-    label: "GAAP EPS growth YoY",
-    shortLabel: "GAAP EPS",
-    section: "Growth",
-    description: "Reported GAAP earnings-per-share growth in the latest quarter.",
-    options: ["Strong", "Solid", "Modest", "Weak", "Unclear"].map(metricSignal),
-  },
-  {
-    key: "fcf_margin",
-    label: "Free cash flow margin",
-    shortLabel: "FCF Mgn",
-    section: "Quality",
-    description: "Trailing-12-month free cash flow divided by trailing-12-month revenue.",
-    options: ["Strong", "Solid", "Thin", "Weak", "Unclear"].map(metricSignal),
-  },
-  {
-    key: "valuation",
-    label: "Valuation",
-    shortLabel: "Valuation",
-    section: "Quality",
-    description: "Composite valuation check using forward P/E, FCF yield, price/sales, and EV/EBITDA when available.",
-    options: ["Cheap", "Fair", "Pricey", "Very pricey", "Unclear"].map(metricSignal),
-  },
-  {
-    key: "forward_pe",
-    label: "Forward P/E",
-    shortLabel: "Forward P/E",
-    section: "Quality",
-    description: "Expected earnings multiple: Cheap is positive and up to 18×; Fair is above 18× and up to 25×. Missing or non-positive values are Unclear.",
-    options: ["Cheap", "Fair", "Pricey", "Very pricey", "Unclear"].map(metricSignal),
-  },
-  {
-    key: "upcoming_earnings",
-    label: "Upcoming earnings",
-    shortLabel: "Earnings",
-    section: "Catalyst",
-    description: "Days until the next expected earnings release date or earnings window.",
-    options: ["This week", "Next 30 days", "Later", "Unclear"].map(metricSignal),
-  },
-  ...(["1m", "3m", "6m", "1y", "2y", "5y"] as const).map((range) => ({
-    key: `support_${range}` as FilterKey,
-    label: `Near ${range.toUpperCase()} support`,
-    shortLabel: `${range.toUpperCase()} support`,
-    section: "Support" as const,
-    description: `Distance from the ${range.toUpperCase()} support level. Closer to 0% means nearer support.`,
-    options: ["At support", "Near support", "Above support", "Far"].map(metricSignal),
-  })),
-];
-
+const AVAILABLE_FILTER_DEFINITIONS: FilterDefinition[] = STOCK_METRICS.flatMap((metric): FilterDefinition[] => {
+  const base = { label: metric.title, shortLabel: metric.shortLabel, description: metric.description, options: metric.options.map(metricSignal) };
+  return metric.field === "support"
+    ? SUPPORT_TIMEFRAMES.map((timeframe) => ({ ...base, key: timeframe.field, shortLabel: `${timeframe.label} support`, section: "Support" }))
+    : [{ ...base, key: metric.field, section: "Growth" }];
+});
+// Existing saved filters and presets retain their composite valuation meaning.
+// This legacy field is not offered when creating a new condition.
+const FILTER_DEFINITIONS: FilterDefinition[] = [...AVAILABLE_FILTER_DEFINITIONS, {
+  key: "valuation", label: "Valuation (saved rule)", shortLabel: "Valuation (saved rule)", section: "Quality",
+  description: "Composite valuation from an older saved filter.",
+  options: ["Cheap", "Fair", "Pricey", "Very pricey", "Unclear"].map(metricSignal),
+}];
 const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
   { key: "watchlist_order", label: "Group order" },
   { key: "symbol", label: "Symbol" },
   { key: "support_best", label: "Priority support" },
-  ...FILTER_DEFINITIONS.flatMap(({ key, shortLabel }) => key === "forward_pe" ? [] : [{ key, label: shortLabel }]),
+  ...AVAILABLE_FILTER_DEFINITIONS.flatMap(({ key, label, shortLabel }) => key === "forward_pe" || key === "industry_strength"
+    ? [] : [{ key, label: isSupportField(key) ? shortLabel : label }]),
 ];
 
 const CHART_RANGES: Array<{ key: ChartRange; days: number | null }> = [
@@ -410,19 +282,6 @@ function valuationDetailText(snapshot: OpenDataStockSnapshot) {
   ].join(" ");
 }
 
-function upcomingEarningsMetric(snapshot: OpenDataStockSnapshot) {
-  return snapshot.price_opportunity.days_to_next_earnings ?? snapshot.metrics.days_to_next_earnings;
-}
-
-function upcomingEarningsSignal(metric?: OpenDataMetric): Signal {
-  const days = finiteNumber(metric?.value);
-  return metricSignal(days == null ? "Unclear" : days <= 7 ? "This week" : days <= 30 ? "Next 30 days" : "Later");
-}
-
-function epsGaapMetric(snapshot: OpenDataStockSnapshot) {
-  return snapshot.business_health.eps_gaap_growth_yoy ?? snapshot.business_health.eps_growth_yoy;
-}
-
 function historicalRowSortValue(row: OpenDataStockSnapshot["historical_series"][string][number]) {
   const asOf = Date.parse(`${row.as_of}T00:00:00Z`);
   return Number.isFinite(asOf) ? asOf : null;
@@ -508,14 +367,9 @@ function inferredSupportLevel(currentPrice?: number | null, supportDistance?: nu
 }
 
 function signalFor(snapshot: OpenDataStockSnapshot, key: FilterKey): Signal {
-  if (key === "revenue") return revenueGrowthSignal(snapshot.business_health.revenue_growth_yoy);
-  if (key === "eps") return growthSignal(epsGaapMetric(snapshot));
-  if (key === "fcf_margin") return fcfMarginSignal(snapshot.business_health.fcf_margin?.value);
   if (key === "valuation") return valuationSignal(snapshot);
-  if (key === "forward_pe") return forwardPeSignal(snapshot.valuation.forward_pe);
-  if (key === "momentum") return revenueMomentum(snapshot);
-  if (key === "upcoming_earnings") return upcomingEarningsSignal(upcomingEarningsMetric(snapshot));
-  return supportSignal(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
+  if (isSupportField(key)) return supportSignal(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
+  return stockMetricForField(key)?.getSignal(snapshot) ?? metricSignal("Unclear");
 }
 
 function supportWindows(snapshot: OpenDataStockSnapshot, keys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS) {
@@ -949,15 +803,26 @@ function FilterSheet({
   };
 
   const addRule = () => {
-    const definition = FILTER_DEFINITIONS.find((item) => !rules.some((rule) => rule.field === item.key));
+    const definition = AVAILABLE_FILTER_DEFINITIONS.find((item) => !rules.some((rule) => rule.field === item.key));
     if (!definition) return;
     setRules([...rules, { id: nextFilterId("group"), field: definition.key, values: [definition.options[0].label] }]);
   };
 
-  const changeMetric = (id: string, field: FilterKey) => {
-    if (rules.some((rule) => rule.id !== id && rule.field === field)) return;
-    const definition = FILTER_DEFINITIONS.find((item) => item.key === field) ?? FILTER_DEFINITIONS[0];
+  const availableMetricField = (field: string, id?: string): FilterKey | undefined => {
+    const candidates = field === "support" ? SUPPORT_FILTER_KEYS : AVAILABLE_FILTER_DEFINITIONS.filter((item) => item.key === field).map((item) => item.key);
+    return candidates.find((candidate) => !rules.some((rule) => rule.id !== id && rule.field === candidate));
+  };
+
+  const changeMetric = (id: string, selected: string) => {
+    const field = availableMetricField(selected, id);
+    if (!field) return;
+    const definition = AVAILABLE_FILTER_DEFINITIONS.find((item) => item.key === field)!;
     setRules(rules.map((rule) => rule.id === id ? { ...rule, field, values: [definition.options[0].label] } : rule));
+  };
+
+  const changeSupportTimeframe = (id: string, field: string) => {
+    if (!isSupportField(field) || rules.some((rule) => rule.id !== id && rule.field === field)) return;
+    setRules(rules.map((rule) => rule.id === id ? { ...rule, field } : rule));
   };
 
   const toggleValue = (id: string, value: string) => {
@@ -1034,13 +899,27 @@ function FilterSheet({
                         aria-label={`Remove ${definition.shortLabel} condition`}><X size={16} aria-hidden="true" /></button>
                     </div>
                     <div className="filter-builder-condition-fields">
-                      <label className="filter-builder-field">
-                        <span>Metric</span>
-                        <select value={rule.field} onChange={(event) => changeMetric(rule.id, event.target.value as FilterKey)}>
-                          {FILTER_DEFINITIONS.map((item) => <option key={item.key} value={item.key}
-                            disabled={rules.some((other) => other.id !== rule.id && other.field === item.key)}>{item.shortLabel}</option>)}
-                        </select>
-                      </label>
+                      <div className="filter-builder-metric-fields">
+                        <label className="filter-builder-field">
+                          <span>Metric</span>
+                          <select value={isSupportField(rule.field) ? "support" : rule.field}
+                            onChange={(event) => changeMetric(rule.id, event.target.value)}>
+                            {rule.field === "valuation" && <option value="valuation">Valuation (saved rule)</option>}
+                            {STOCK_METRICS.map((metric) => <option key={metric.key} value={metric.field}
+                              disabled={!availableMetricField(metric.field, rule.id)}>{metric.title}</option>)}
+                          </select>
+                        </label>
+                        {isSupportField(rule.field) && <label className="filter-builder-field">
+                          <span>Timeframe</span>
+                          <select value={rule.field} onChange={(event) => changeSupportTimeframe(rule.id, event.target.value)}>
+                            {SUPPORT_TIMEFRAMES.map((timeframe) => <option key={timeframe.field} value={timeframe.field}
+                              disabled={rules.some((other) => other.id !== rule.id && other.field === timeframe.field)}>{timeframe.label}</option>)}
+                          </select>
+                        </label>}
+                        {rule.field === "valuation" && <p className="filter-builder-hint">
+                          This saved rule uses older Valuation criteria. Choose a stock metric to replace it, or remove this condition.
+                        </p>}
+                      </div>
                       <fieldset className="filter-builder-values" aria-label={`${definition.shortLabel} values`}>
                         <legend>Values <span>Choose one or more</span></legend>
                         <div className="filter-builder-value-options">
@@ -1056,7 +935,7 @@ function FilterSheet({
                   </div>;
                 })}
               </div>
-              <button type="button" className="filter-builder-add" onClick={addRule} disabled={rules.length === FILTER_DEFINITIONS.length}>
+              <button type="button" className="filter-builder-add" onClick={addRule} disabled={!AVAILABLE_FILTER_DEFINITIONS.some((item) => !rules.some((rule) => rule.field === item.key))}>
                 <Plus size={18} aria-hidden="true" />Add condition
               </button>
             </section>
@@ -1069,7 +948,7 @@ function FilterSheet({
               <button type="button" className="filter-builder-sort-summary" aria-expanded={sortExpanded}
                 aria-controls="filter-builder-sort-options" onClick={() => setSortExpanded(!sortExpanded)}>
                 <ArrowDownWideNarrow size={21} aria-hidden="true" />
-                <span><strong>{SORT_OPTIONS.find((option) => option.key === sortKey)?.label}</strong>
+                <span><strong>{sortKey === "valuation" ? "Valuation (saved sorting)" : SORT_OPTIONS.find((option) => option.key === sortKey)?.label}</strong>
                   <small>{sortDirection === "asc" ? "Ascending" : "Descending"} order</small></span>
                 <ChevronDown size={18} aria-hidden="true" />
               </button>
@@ -1077,6 +956,7 @@ function FilterSheet({
                 <label className="filter-builder-field">
                   <span>Sort by</span>
                   <select value={sortKey} onChange={(event) => onSortKeyChange(event.target.value as SortKey)}>
+                    {sortKey === "valuation" && <option value="valuation">Valuation (saved sorting)</option>}
                     {SORT_OPTIONS.filter((option) => option.key !== "watchlist_order" || watchlistView)
                       .map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
                   </select>
@@ -1503,7 +1383,7 @@ function MobileGrowthSignalButton({
 
 function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot: OpenDataStockSnapshot; detailKey: GrowthDetailKey; onOpenPeer: (ticker: string) => void }) {
   if (detailKey === "industry_strength") return <IndustryStrengthDetail snapshot={snapshot} onOpenPeer={onOpenPeer} />;
-  const copy = GROWTH_DETAIL_COPY[detailKey];
+  const copy = STOCK_METRIC_BY_KEY[detailKey];
   const revenueDetail = revenueGrowthDetail(snapshot);
   const momentum = revenueMomentum(snapshot);
   const epsGaap = epsGaapMetric(snapshot);
@@ -1557,7 +1437,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
   }
 
   if (detailKey === "forward_pe") {
-    const valuationStatus = valuationSignal(snapshot);
+    const valuationStatus = forwardPeSignal(snapshot.valuation.forward_pe);
 
     return (
       <section className="mobile-growth-detail-panel">
@@ -1672,18 +1552,7 @@ function StockDetail({ snapshot, onBack, onOpenPeer }: { snapshot: OpenDataStock
   const [error, setError] = useState<string | null>(null);
   const currentPrice = snapshot.price_opportunity.current_price?.value;
   const dailyChange = snapshot.price_opportunity.change_1d?.value;
-  const revenueSignal = revenueGrowthSignal(snapshot.business_health.revenue_growth_yoy);
-  const epsGaap = epsGaapMetric(snapshot);
-  const epsGaapSignal = growthSignal(epsGaap);
-  const fcfMarginMetric = snapshot.business_health.fcf_margin;
-  const fcfMarginStatus = fcfMarginSignal(fcfMarginMetric?.value);
-  const valuationStatus = valuationSignal(snapshot);
-  const upcomingEarnings = upcomingEarningsMetric(snapshot);
-  const upcomingEarningsStatus = upcomingEarningsSignal(upcomingEarnings);
-  const momentum = revenueMomentum(snapshot);
   const support = closestSupport(snapshot);
-  const supportStatus = supportSignal(support?.value);
-  const industryContext = industryStrengthContext(snapshot);
 
   useEffect(() => {
     let active = true;
@@ -1731,64 +1600,22 @@ function StockDetail({ snapshot, onBack, onOpenPeer }: { snapshot: OpenDataStock
 	        <PriceChart snapshot={snapshot} points={points} loading={loading} error={error} />
 
 	        <section className="mobile-signal-strip" aria-label="Current growth signals">
-          <MobileGrowthSignalButton
-            active={activeGrowthDetail === "revenue"}
-            label="Latest Revenue Growth YoY"
-            signal={revenueSignal}
-            value={formatPercent(snapshot.business_health.revenue_growth_yoy?.value, true)}
-            onClick={() => setActiveGrowthDetail("revenue")}
-          />
-          <MobileGrowthSignalButton
-            active={activeGrowthDetail === "momentum"}
-            label="Revenue Growth Momentum"
-            signal={momentum}
-            value={formatMomentumPp(momentum.change)}
-            onClick={() => setActiveGrowthDetail("momentum")}
-          />
-          <MobileGrowthSignalButton
-            active={activeGrowthDetail === "eps_gaap"}
-            label="GAAP EPS Growth YoY"
-            signal={epsGaapSignal}
-            value={formatPercent(epsGaap?.value, true)}
-            onClick={() => setActiveGrowthDetail("eps_gaap")}
-          />
-          <MobileGrowthSignalButton
-            active={activeGrowthDetail === "fcf_margin"}
-            label="Free Cash Flow Margin"
-            signal={fcfMarginStatus}
-            value={formatPercent(fcfMarginMetric?.value, true)}
-            onClick={() => setActiveGrowthDetail("fcf_margin")}
-          />
-          <MobileGrowthSignalButton
-            active={activeGrowthDetail === "forward_pe"}
-            label="Forward P/E"
-            signal={valuationStatus}
-            value={formatMetric(snapshot.valuation.forward_pe, "ratio")}
-            onClick={() => setActiveGrowthDetail("forward_pe")}
-          />
-          <MobileGrowthSignalButton
-            active={activeGrowthDetail === "upcoming_earnings"}
-            label="Upcoming Earnings"
-            signal={upcomingEarningsStatus}
-            value={formatMetric(upcomingEarnings, "days")}
-            onClick={() => setActiveGrowthDetail("upcoming_earnings")}
-          />
-          <MobileGrowthSignalButton
-            active={activeGrowthDetail === "support"}
-            className="mobile-support-signal"
-            label="Proximity to Support"
-            signal={supportStatus}
-            value={support?.window ?? "No zone"}
-            onClick={() => setActiveGrowthDetail("support")}
-          />
-          <MobileGrowthSignalButton
-            active={activeGrowthDetail === "industry_strength"}
-            className="mobile-support-signal"
-            label={INDUSTRY_STRENGTH_COPY.title}
-            signal={{ ...industryStrengthSignal(industryContext), label: `1Y · ${industryStrengthSignal(industryContext).label}` }}
-            value={formatMomentumPp(industryContext?.value ?? null)}
-            onClick={() => setActiveGrowthDetail("industry_strength")}
-          />
+          {STOCK_METRICS.map((metric) => {
+            const value = metric.getValue(snapshot);
+            const signal = metric.key === "support" ? supportSignal(support?.value) : metric.getSignal(snapshot);
+            const displayValue = metric.format === "support" ? support?.window ?? "No zone"
+              : metric.format === "pp" ? formatMomentumPp(value)
+              : metric.format === "percent" ? formatPercent(value, true)
+              : metric.format === "days" ? value == null ? "-" : `${formatNumber(value)}d`
+              : formatNumber(value);
+            return <MobileGrowthSignalButton key={metric.key}
+              active={activeGrowthDetail === metric.key}
+              className={metric.key === "support" || metric.key === "industry_strength" ? "mobile-support-signal" : undefined}
+              label={metric.title}
+              signal={metric.key === "industry_strength" ? { ...signal, label: `1Y · ${signal.label}` } : signal}
+              value={displayValue}
+              onClick={() => setActiveGrowthDetail(metric.key)} />;
+          })}
         </section>
 
         <MobileGrowthDetailPanel snapshot={snapshot} detailKey={activeGrowthDetail} onOpenPeer={onOpenPeer} />

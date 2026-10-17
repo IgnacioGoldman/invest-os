@@ -315,6 +315,13 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
+.filter-builder-metric-fields {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+}
+
 .mobile-stock-app .filter-builder-add {
   align-items: center;
   background: transparent;

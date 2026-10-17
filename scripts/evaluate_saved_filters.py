@@ -214,12 +214,34 @@ def _forward_pe_signal(value: float | None) -> str:
     return "Unclear"
 
 
+def _industry_strength_signal(snapshot: dict[str, Any]) -> str:
+    context = snapshot.get("industry_relative_strength") or {}
+    value = _number(context.get("value"))
+    end_date = context.get("end_date")
+    current_date = str(snapshot.get("price_opportunity", {}).get("current_price", {}).get("as_of", ""))[:10]
+    if value is None or not math.isfinite(value) or not end_date or current_date != end_date:
+        return "Unclear"
+    try:
+        age = (datetime.now(timezone.utc) - datetime.fromisoformat(f"{end_date}T00:00:00+00:00")).total_seconds() / 86400
+    except (ValueError, TypeError):
+        return "Unclear"
+    if age < 0 or age >= 8:
+        return "Unclear"
+    return "Ahead of market" if value >= 5 else "Behind market" if value <= -5 else "In line with market"
+
+
 def signal_for(snapshot: dict[str, Any], field: str) -> str:
     if field == "revenue":
-        return _revenue_growth_signal(_metric_value(snapshot, "business_health", "revenue_growth_yoy"))
+        metric = snapshot.get("business_health", {}).get("revenue_growth_yoy") or {}
+        value = _number(metric.get("value"))
+        return "Unavailable" if value is None and metric.get("tier") == "unavailable_open_free" else _revenue_growth_signal(value)
     if field == "eps":
-        value = _metric_value(snapshot, "business_health", "eps_gaap_growth_yoy")
-        return _growth_signal(value if value is not None else _metric_value(snapshot, "business_health", "eps_growth_yoy"))
+        health = snapshot.get("business_health", {})
+        metric = health.get("eps_gaap_growth_yoy")
+        if metric is None:
+            metric = health.get("eps_growth_yoy") or {}
+        value = _number(metric.get("value"))
+        return "Unavailable" if value is None and metric.get("tier") == "unavailable_open_free" else _growth_signal(value)
     if field == "momentum":
         return _revenue_momentum(snapshot)
     if field == "fcf_margin":
@@ -229,7 +251,12 @@ def signal_for(snapshot: dict[str, Any], field: str) -> str:
     if field == "forward_pe":
         return _forward_pe_signal(_metric_value(snapshot, "valuation", "forward_pe"))
     if field == "upcoming_earnings":
-        return _upcoming_earnings_signal(_metric_value(snapshot, "price_opportunity", "days_to_next_earnings"))
+        metric = snapshot.get("price_opportunity", {}).get("days_to_next_earnings")
+        if metric is None:
+            metric = snapshot.get("metrics", {}).get("days_to_next_earnings") or {}
+        return _upcoming_earnings_signal(_number(metric.get("value")))
+    if field == "industry_strength":
+        return _industry_strength_signal(snapshot)
     metric = SUPPORT_METRICS.get(field)
     return _support_signal(_metric_value(snapshot, "price_opportunity", metric)) if metric else "Unclear"
 

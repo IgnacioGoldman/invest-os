@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from datetime import datetime, timedelta, timezone
 
 from evaluate_saved_filters import BUILT_IN_FILTERS, evaluate, expression_matches, signal_for
 
@@ -116,6 +117,45 @@ STRONG_YOY_SUPPORT = {
 
 
 class SavedFilterEvaluatorTests(unittest.TestCase):
+    def test_industry_strength_uses_the_card_status_and_matching_price_dates(self) -> None:
+        row = snapshot("INDUSTRY", 25, 1, 1)
+        today = datetime.now(timezone.utc).date().isoformat()
+        row["price_opportunity"]["current_price"] = {"as_of": today}
+        for value, expected in ((5, "Ahead of market"), (4.99, "In line with market"), (-4.99, "In line with market"), (-5, "Behind market"), (None, "Unclear")):
+            with self.subTest(value=value):
+                row["industry_relative_strength"] = {"value": value, "end_date": today}
+                self.assertEqual(signal_for(row, "industry_strength"), expected)
+        stale = (datetime.now(timezone.utc).date() - timedelta(days=8)).isoformat()
+        row["industry_relative_strength"] = {"value": 10, "end_date": stale}
+        row["price_opportunity"]["current_price"]["as_of"] = stale
+        self.assertEqual(signal_for(row, "industry_strength"), "Unclear")
+        row["industry_relative_strength"]["end_date"] = today
+        self.assertEqual(signal_for(row, "industry_strength"), "Unclear")
+
+    def test_industry_and_support_timeframe_match_together(self) -> None:
+        row = snapshot("MATCH", 25, 30, 1, support_1y=4)
+        today = datetime.now(timezone.utc).date().isoformat()
+        row["price_opportunity"]["current_price"] = {"as_of": today}
+        row["industry_relative_strength"] = {"value": 8, "end_date": today}
+        expression = {"operator": "and", "groups": [
+            {"operator": "or", "conditions": [{"field": "industry_strength", "value": "Ahead of market"}]},
+            {"operator": "or", "conditions": [{"field": "support_1y", "value": "At support"}, {"field": "support_1y", "value": "Near support"}]},
+        ]}
+        self.assertTrue(expression_matches(row, expression))
+        expression["groups"][1]["conditions"] = [{"field": "support_1m", "value": "Near support"}]
+        self.assertFalse(expression_matches(row, expression))
+
+    def test_missing_and_fallback_metric_statuses_match_stock_cards(self) -> None:
+        row = snapshot("MISSING", 25, 1, 1)
+        row["business_health"]["revenue_growth_yoy"] = {"value": None, "tier": "unavailable_open_free"}
+        row["business_health"]["eps_gaap_growth_yoy"] = {"value": None, "tier": "unavailable_open_free"}
+        row["business_health"]["eps_growth_yoy"] = {"value": 25}
+        row["metrics"] = {"days_to_next_earnings": {"value": 5}}
+        self.assertEqual(signal_for(row, "revenue"), "Unavailable")
+        self.assertEqual(signal_for(row, "eps"), "Unavailable")
+        row["price_opportunity"].pop("days_to_next_earnings", None)
+        self.assertEqual(signal_for(row, "upcoming_earnings"), "This week")
+
     def test_multi_select_values_match_any_value_and_require_every_metric(self) -> None:
         expression = {
             "icon": "trend",

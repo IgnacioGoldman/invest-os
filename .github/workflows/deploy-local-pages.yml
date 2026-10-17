@@ -37,6 +37,10 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Validate stock card and filter metrics
+        working-directory: frontend
+        run: npm run test:metrics
+
       - name: Validate revenue growth momentum
         run: >-
           python3 scripts/validate_revenue_growth_momentum.py
