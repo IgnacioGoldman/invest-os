@@ -10,6 +10,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 from app.services.revenue_growth_momentum import calculate_revenue_growth_momentum
+from app.services.static_stock_assets import load_full_stock_rows
 
 
 def audit(rows: list[dict]) -> dict:
@@ -43,7 +44,10 @@ def main() -> None:
     parser.add_argument("--input", type=Path, default=ROOT / "frontend/public/data/open-data/stocks.json")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    report = audit(json.loads(args.input.read_text()))
+    rows = json.loads(args.input.read_text())
+    if any(row.get("detail_path") for row in rows):
+        rows = load_full_stock_rows(args.input.parent.parent)
+    report = audit(rows)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(report, indent=2) + "\n")

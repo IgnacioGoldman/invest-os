@@ -252,10 +252,57 @@ class RefreshStaticPricesTests(unittest.TestCase):
         baseline = [point(latest, 101, low=99)]
         provider = FakeProvider(full=[], recent=[])
 
-        updated = fetch_updated_history(provider, "TEST", baseline, attempts=3, retry_backoff=0)
+        diagnostics = {}
+        updated = fetch_updated_history(provider, "TEST", baseline, attempts=3, retry_backoff=0, diagnostics=diagnostics)
 
         self.assertEqual(updated, baseline)
         self.assertEqual(len(provider.recent_calls), 3)
+        self.assertEqual(diagnostics["refresh_status"], "retained_unverified")
+        self.assertEqual(diagnostics["price_as_of"], latest.isoformat())
+        self.assertTrue(diagnostics["source_notes"])
+
+    def test_fresh_unchanged_download_is_distinguished_from_source_outage(self) -> None:
+        baseline = [point(date(2026,1,20),101,low=99)]
+        diagnostics = {}
+        updated = fetch_updated_history(FakeProvider([],baseline),"TEST",baseline,diagnostics=diagnostics)
+        self.assertEqual(updated,baseline)
+        self.assertEqual(diagnostics["refresh_status"],"verified_unchanged")
+        self.assertEqual(diagnostics["fetched_candle_count"],1)
+        self.assertFalse(diagnostics["source_notes"])
+
+    def test_older_download_does_not_claim_to_verify_latest_price(self) -> None:
+        baseline = [point(date(2026,1,20),101,low=99)]
+        diagnostics = {}
+        updated = fetch_updated_history(FakeProvider([],[point(date(2026,1,19),100,low=98)]),"TEST",baseline,diagnostics=diagnostics)
+        self.assertEqual(updated[-1],baseline[-1])
+        self.assertEqual(diagnostics["refresh_status"],"retained_unverified")
+
+    def test_empty_download_without_baseline_still_fails(self) -> None:
+        with self.assertRaises(RuntimeError):
+            fetch_updated_history(FakeProvider([],[]),"TEST",[],attempts=1)
+
+    def test_price_report_counts_retained_verified_and_updated_histories(self) -> None:
+        baseline = [point(date(2026,1,20),101,low=99)]
+        cases = [(baseline,"verified_unchanged",0,0),([],"retained_unverified",0,1),
+                 ([point(date(2026,1,21),102,low=100)],"refreshed",1,0)]
+        for fetched,status,refreshed,retained in cases:
+            with self.subTest(status=status),TemporaryDirectory() as directory:
+                data_dir = Path(directory)
+                history_dir = data_dir / "open-data/price-history"
+                history_dir.mkdir(parents=True)
+                (history_dir / "TEST.json").write_text(json.dumps([p.model_dump(mode="json") for p in baseline]))
+                with (patch("refresh_static_prices.OpenDataProvider") as provider,
+                      patch("refresh_static_prices.time.sleep"),
+                      patch("refresh_static_prices.enrich_industry_strength",side_effect=lambda snapshots,*args:snapshots)):
+                    provider.return_value.fetch_price_history_since.return_value = fetched
+                    provider.return_value.fetch_next_earnings_release.return_value = None
+                    provider.return_value.fetch_forward_eps_estimate.return_value = None
+                    report = refresh_prices([OpenDataSnapshot(ticker="TEST").model_dump(mode="json")],data_dir,["TEST"],workers=1,db_data_dir=None)
+                self.assertEqual(report["failed_count"],0)
+                self.assertEqual(report["refreshed_count"],refreshed)
+                self.assertEqual(report["retained_unverified_count"],retained)
+                self.assertEqual(report["results"][0]["refresh_status"],status)
+                self.assertEqual(report["results"][0]["price_as_of"],"2026-01-21" if refreshed else "2026-01-20")
 
     def test_refresh_preserves_fundamentals_and_updates_price_metrics(self) -> None:
         metric = OpenDataMetric(
@@ -402,6 +449,8 @@ class RefreshStaticPricesTests(unittest.TestCase):
                 )
 
             self.assertEqual(report["source"], "sqlite_db_with_deployed_static_fallback")
+            self.assertEqual(report["refreshed_count"],1)
+            self.assertEqual(report["results"][0]["price_as_of"],"2026-01-02")
             with connect(db_data_dir) as conn:
                 saved_snapshot = load_stock_open_data_snapshot(conn, "TEST")
                 saved_history = load_stock_price_history(conn, "TEST")

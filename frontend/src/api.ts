@@ -80,6 +80,7 @@ export type OpenDataCompanyContext = {
 };
 
 export type OpenDataStockSnapshot = {
+  detail_path?: string;
   ticker: string;
   name?: string | null;
   cik?: number | null;
@@ -200,6 +201,28 @@ export async function fetchOpenDataStocks(): Promise<OpenDataStockSnapshot[]> {
     return requestStaticJson<OpenDataStockSnapshot[]>("/open-data/stocks.json");
   }
   return requestJson<OpenDataStockSnapshot[]>("/api/open-data/stocks");
+}
+
+const stockDetailRequests = new Map<string, Promise<OpenDataStockSnapshot>>();
+
+export function fetchOpenDataStockDetails(summary: OpenDataStockSnapshot): Promise<OpenDataStockSnapshot> {
+  if (!STATIC_DATA_MODE || !summary.detail_path) return Promise.resolve(summary);
+  const path = `${summary.detail_path}?v=${encodeURIComponent(summary.generated_at)}`;
+  const cached = stockDetailRequests.get(path);
+  if (cached) return cached;
+  const request = requestStaticJson<OpenDataStockSnapshot>(path).then((snapshot) => {
+    if (snapshot.ticker !== summary.ticker || snapshot.generated_at !== summary.generated_at) {
+      throw new Error("Stock details changed during the update. Reload to get the latest data.");
+    }
+    return snapshot;
+  }).catch((error) => {
+    stockDetailRequests.delete(path);
+    throw error;
+  });
+  // Keep revisiting a stock quick without retaining every full history on mobile.
+  if (stockDetailRequests.size >= 20) stockDetailRequests.delete(stockDetailRequests.keys().next().value!);
+  stockDetailRequests.set(path, request);
+  return request;
 }
 
 export async function fetchStockUniverse(): Promise<StockUniverseItem[]> {

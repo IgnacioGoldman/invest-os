@@ -14,6 +14,7 @@ from app.entry_engine.open_data_models import OpenDataSnapshot
 from app.entry_engine.providers.issuer_revenue import load_issuer_revenue, supplement_issuer_revenue
 from app.services.revenue_growth_momentum import calculate_revenue_growth_momentum
 from app.services.storage import connect, replace_stock_open_data_snapshot
+from app.services.static_stock_assets import load_full_stock_rows, write_stock_assets
 
 
 def repair_revenue_snapshot(snapshot: OpenDataSnapshot, facts: dict) -> OpenDataSnapshot:
@@ -40,7 +41,7 @@ def main():
     parser.add_argument("--apply", action="store_true", help="Save rebuilt snapshots to SQLite and the static export.")
     args = parser.parse_args()
     export = ROOT / "frontend/public/data/open-data/stocks.json"
-    rows = json.loads(export.read_text())
+    rows = load_full_stock_rows(export.parent.parent)
     report, output = [], []
     for row in rows:
         snapshot = OpenDataSnapshot.model_validate(row)
@@ -68,7 +69,7 @@ def main():
             for row in output:
                 replace_stock_open_data_snapshot(conn, OpenDataSnapshot.model_validate(row))
             conn.commit()
-        export.write_text(json.dumps(output, indent=2) + "\n")
+        write_stock_assets(export.parent.parent, output)
     for row in report:
         if row["before"]["label"] == "Unclear":
             print(row["ticker"], "Unclear ->", row["after"]["label"], row["after"]["change"])

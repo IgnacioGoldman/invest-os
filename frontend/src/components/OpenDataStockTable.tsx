@@ -1,6 +1,7 @@
 import { calculateRevenueGrowthMomentum, formatMomentumPp, revenueMomentumDetail, REVENUE_MOMENTUM_DESCRIPTION } from "../revenueGrowthMomentum";
 import type { OpenDataCompanyContext, OpenDataMetric, OpenDataPricePoint, OpenDataStockSnapshot, StockEntryAnalysis, StockEntryAnalysisSection } from "../api";
 import { fetchOpenDataStockPriceHistory } from "../api";
+import { useStockDetails } from "../useStockDetails";
 import { ArrowDown, ArrowUp, ArrowUpDown, BarChart3, ChevronDown, ChevronLeft, ChevronRight, Filter, GripVertical, Info, SlidersHorizontal, X } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { Fragment, memo, useEffect, useMemo, useRef, useState } from "react";
@@ -1542,9 +1543,12 @@ function SupportMetricDetails({ snapshot }: { snapshot: OpenDataStockSnapshot })
   );
 }
 
-function GrowthMetricDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataStockSnapshot; detailKey: GrowthDetailKey }) {
+function GrowthMetricDetailPanel({ snapshot: summary, detailKey }: { snapshot: OpenDataStockSnapshot; detailKey: GrowthDetailKey }) {
+  const { snapshot, loading, error, retry } = useStockDetails(summary);
   return (
     <div className="growth-detail-panel" id={`growth-detail-${detailKey}`}>
+      {loading && <p role="status">Loading financial history…</p>}
+      {error && <p role="alert">{error} <button type="button" onClick={retry}>Retry financial history</button></p>}
       {detailKey === "revenue" && <RevenueMetricDetails snapshot={snapshot} />}
       {detailKey === "momentum" && <MomentumMetricDetails snapshot={snapshot} />}
       {detailKey === "eps" && <EpsMetricDetails snapshot={snapshot} />}
@@ -1923,7 +1927,8 @@ function MiniLineChart({
   );
 }
 
-function OpenDataCharts({ snapshot }: { snapshot: OpenDataStockSnapshot }) {
+function OpenDataCharts({ snapshot: summary }: { snapshot: OpenDataStockSnapshot }) {
+  const { snapshot } = useStockDetails(summary);
   const annualRows = snapshot.historical_series.annual_fundamentals ?? [];
   const valuationRows = snapshot.historical_series.valuation_history ?? [];
   const rowsBySeries: Record<string, HistoricalRow[]> = {

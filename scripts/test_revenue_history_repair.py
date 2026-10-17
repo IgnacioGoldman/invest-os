@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 from app.entry_engine.fiscal_periods import normalize_companyfacts_periods
 from app.entry_engine.open_data_metrics import _quarterly_revenue_rows
 from app.entry_engine.open_data_models import OpenDataPeriodMetrics, OpenDataSnapshot
-from app.entry_engine.providers.issuer_revenue import load_issuer_revenue, parse_report, parse_revenue_text, refresh_issuer_revenue
+from app.entry_engine.providers.issuer_revenue import issuer_revenue_check_due, load_issuer_revenue, parse_report, parse_revenue_text, refresh_issuer_revenue
 from app.services.revenue_growth_momentum import calculate_revenue_growth_momentum
 from app.services.stock_data_quality import retain_verified_history
 from app.services.storage import connect, replace_stock_open_data_snapshot
@@ -113,13 +113,40 @@ class RevenueHistoryRepairTests(unittest.TestCase):
         seed=load_issuer_revenue("NVS")
         cache=SimpleNamespace(get=Mock(return_value=None),set=Mock())
         provider=SimpleNamespace(cache=cache,_get=Mock(side_effect=ValueError("source unavailable")))
-        result,notes=refresh_issuer_revenue(provider,"NVS",seed,as_of=date(2026,11,1))
-        self.assertEqual(result,seed)
-        self.assertTrue(notes)
-        cache.set.assert_called_once()
-        cache.get.return_value={"checked_at":"2026-11-01"}
-        refresh_issuer_revenue(provider,"NVS",seed,as_of=date(2026,11,2))
+        with TemporaryDirectory() as directory, patch("app.entry_engine.providers.issuer_revenue.PROJECT_DIR", Path(directory)):
+            path = Path(directory) / "data/stocks/issuer_facts/NVS.json"
+            path.parent.mkdir(parents=True)
+            result,notes=refresh_issuer_revenue(provider,"NVS",seed,as_of=date(2026,11,1))
+            self.assertEqual(result["facts"],seed["facts"])
+            self.assertEqual(result["verified_on"],seed["verified_on"])
+            self.assertTrue(notes)
+            cache.set.assert_called_once()
+            # A new runner has no raw cache; persisted attempt metadata still backs off.
+            persisted = load_issuer_revenue("NVS", root=Path(directory))
+            refresh_issuer_revenue(provider,"NVS",persisted,as_of=date(2026,11,2))
+            self.assertFalse(issuer_revenue_check_due("NVS",persisted,as_of=date(2026,11,7)))
+            self.assertTrue(issuer_revenue_check_due("NVS",persisted,as_of=date(2026,11,8)))
         provider._get.assert_called_once()
+
+    def test_issuer_discovery_waits_until_next_quarter_can_be_reported(self):
+        seed = load_issuer_revenue("NVS")
+        self.assertFalse(issuer_revenue_check_due("NVS", seed, as_of=date(2026,10,19)))
+        self.assertTrue(issuer_revenue_check_due("NVS", seed, as_of=date(2026,10,20)))
+
+    def test_successful_issuer_discovery_persists_new_quarter_and_check_date(self):
+        seed = load_issuer_revenue("NVS")
+        provider = SimpleNamespace(cache=SimpleNamespace(get=Mock(return_value=None),set=Mock()),
+            _get=Mock(return_value=SimpleNamespace(content=b"<p>Q3 2026 Q3 2025</p><p>USD m USD m</p><p>Net sales 15 000 14 000</p>")))
+        with TemporaryDirectory() as directory, patch("app.entry_engine.providers.issuer_revenue.PROJECT_DIR", Path(directory)):
+            (Path(directory) / "data/stocks/issuer_facts").mkdir(parents=True)
+            result, notes = refresh_issuer_revenue(provider,"NVS",seed,as_of=date(2026,11,1))
+            self.assertFalse(notes)
+            self.assertEqual(result["last_report_check"]["status"], "updated")
+            self.assertEqual(result["verified_on"], "2026-11-01")
+            rows = result["facts"]["issuer"]["Revenues"]["units"]["USD"]
+            self.assertEqual(rows[-1]["end"], "2026-09-30")
+            self.assertEqual(rows[-1]["val"], 15_000e6)
+            self.assertEqual(load_issuer_revenue("NVS",root=Path(directory)), result)
 
     def test_price_refresh_cannot_restore_older_deployed_revenue_history(self):
         deployed={"ticker":"AZN","revenue_history_version":0}

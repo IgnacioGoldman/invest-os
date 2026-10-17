@@ -10,7 +10,7 @@ Current flows:
 
 ## 1. GitHub Actions fetches the content
 
-Both workflows read the active universe from `data/stocks/stocks.json`. The exported dataset currently contains 77 symbols.
+Both workflows read the active universe from `data/stocks/stocks.json`. The exported dataset contains 200 symbols: the original 77 and 123 additions selected for sustained quarterly revenue growth. The selection and its source evidence are in [the expansion research](research/revenue-expansion-2026-10-17/shortlist.md).
 
 The SEC fallback merges same-currency, calendar-aligned Yahoo facts before calculating the snapshot. Overlapping SEC facts take priority across equivalent concept names, and cards, histories and metric aliases are calculated together. FCF inputs use the latest complete common reporting period available to the fallback. A thin refresh retains a complete prior FCF calculation together with its inputs and date, and retained revenue history supplies the matching latest growth card.
 
@@ -39,6 +39,12 @@ The SQLite database at `data/invest_os.sqlite` is the repo-persisted source of t
 
 The daily fundamentals workflow stores the latest checked relevant SEC accession in SQLite. On later runs, healthy unchanged SEC tickers are reported as preserved. `--repair-current-data` overrides this skip only for missing current fundamental inputs. The daily run makes a bounded second-source attempt and retains previously collected history without fetching it again. Local `--repair-data-gaps` runs and the explicit NIBE backfill remain responsible for deeper archive searches, older missing quarters, CAGR history, unsupported PDF layouts, fiscal-period alignment repairs, and adding deterministic parsers for additional issuers. There is no universal parser or arbitrary web crawl for every investor-relations site.
 
+Supported issuer revenue collectors for AZN, B, NVS and YPF also run when their next-report check is due, independently of the SEC accession gate. This prevents generic 6-K filenames and descriptions from suppressing those checks. Checks become eligible 20 days after the next quarter ends; attempted discovery backs off for seven days. Each issuer's normalized JSON persists `last_report_check`, including unsuccessful attempts, so the interval survives fresh GitHub runners. An already downloaded issuer quarter newer than the saved snapshot triggers collection even during that backoff. Source failures retain verified issuer facts; failure of an otherwise optional issuer-only collection retains the saved snapshot and appears in the report. Other issuers still depend on the existing SEC relevance rules and their supported sources.
+
+Both refresh reports and the GitHub validation summary distinguish **refreshed**, **verified unchanged**, and **retained without source verification**. Price status describes the downloaded candle history: unchanged means a download covered the saved latest date and matched it, while an empty or older-only response is unverified retention. Fundamentals report SEC metadata checks separately, including unavailable checks and non-SEC symbols; an unavailable response is never labeled `sec_filings_unchanged` and does not advance saved SEC state. Recollected fundamentals may still contain unavailable or retained individual metrics. Reports show source notes, actual price dates, and the latest available fundamental metric date; individual metrics can have older reporting periods. Snapshot generation timestamps describe calculation time, not the age of every observation.
+
+These statuses are informational. They do not tighten deployment validation: saved-price fallback, retries, the seven-calendar-day age limit, and the US/Stockholm adjacent-session allowance remain in effect. Review several scheduled runs and their source notes before changing freshness thresholds.
+
 `data/stocks/data-coverage.json` is regenerated after export and committed with the data. The refresh report records repair reasons and source-attempt notes; the coverage audit distinguishes missing inputs from mathematically unavailable metrics and identifies gaps in the latest six revenue quarters. Both reports are uploaded as workflow artifacts.
 
 The four-hour price workflow prefers the checked-out SQLite database for snapshots and price history, uses the deployed JSON as a fallback baseline, and commits both the refreshed database and tracked static files back to `main`.
@@ -47,7 +53,8 @@ The four-hour price workflow prefers the checked-out SQLite database for snapsho
 
 The database is then exported into static files used by the website:
 
-- `data/open-data/stocks.json`: all stock snapshots and metrics.
+- `data/open-data/stocks.json`: compact screening snapshots with current metrics, ten revenue quarters, the latest quarterly fundamentals, two annual periods, and links to full details.
+- `data/open-data/snapshots/{SYMBOL}.json`: complete stock snapshots, financial histories, source context and industry comparison charts, fetched when stock details open.
 - `data/open-data/price-history/{SYMBOL}.json`: daily price history for one symbol.
 - `data/stocks/universe.json`: searchable symbol metadata.
 - `data/meta.json`: refresh time, market date, and symbol count.
@@ -58,6 +65,6 @@ These generated files are packaged inside the GitHub Pages deployment artifact. 
 
 After validation, Vite builds the frontend in static-data mode and GitHub Pages replaces the previous deployment. If refresh or validation fails, the previous working deployment remains live.
 
-The browser loads all stock snapshots once, then searches, filters, and sorts them locally. Opening a symbol loads its separate price-history file and displays its charts.
+The browser loads the compact screening snapshots once, then searches, filters, and sorts them locally. Opening a symbol loads its full financial snapshot and separate price-history file. The detail cache retains up to twenty snapshots and is keyed by the dataset timestamp. Failed detail requests can be retried; responses for another stock or dataset revision are rejected.
 
-There is currently **no stock-list pagination**. Before expanding to the full US market, the stock list should move behind a paginated API instead of downloading every snapshot at once.
+Stock lists paginate ten companies at a time. Complete histories remain in SQLite and individual static files. Price-refresh fallback and local repair scripts resolve full details before saving, so the screening index cannot truncate persisted history. Deployment validates that the index, metadata, universe, and full detail files agree. A substantially larger universe may eventually benefit from a paginated data API.

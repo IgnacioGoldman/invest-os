@@ -27,6 +27,7 @@ from app.entry_engine.open_data_models import HistoricalPricePoint, LatestPrice,
 from app.entry_engine.valuation_refresh import reprice_valuation, saved_valuation_inputs  # noqa: E402
 from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
 from app.services.industry_strength import enrich_industry_strength, refresh_benchmark  # noqa: E402
+from app.services.static_stock_assets import write_stock_assets  # noqa: E402
 from app.services.storage import (  # noqa: E402
     DB_FILE,
     connect,
@@ -157,6 +158,23 @@ def hydrate_deployed_data(
     local_stocks = _load_json_if_present(data_dir / "open-data" / "stocks.json")
     local_universe = _load_json_if_present(data_dir / "stocks" / "universe.json")
     stocks = _merge_stock_rows(deployed_stocks, local_stocks, tickers)
+    # Restore full histories before a fallback snapshot can be persisted to SQLite.
+    def full_snapshot(row):
+        if not row.get("detail_path"):
+            return row
+        path = row["detail_path"].lstrip("/")
+        local_detail = data_dir / path
+        local_payload = _load_json_if_present(local_detail)
+        def matches(payload):
+            return isinstance(payload, dict) and payload.get("ticker") == row.get("ticker") and payload.get("generated_at") == row.get("generated_at")
+        if matches(local_payload):
+            return local_payload
+        payload = _download_json(requests.Session(), base_url, path, cache_bust)
+        if not matches(payload):
+            raise ValueError(f"{row.get('ticker')}: full snapshot does not match its screening snapshot.")
+        return payload
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
+        stocks = list(executor.map(full_snapshot, stocks))
     universe = local_universe if local_universe is not None else deployed_universe
 
     histories: dict[str, Any] = {}
@@ -214,7 +232,10 @@ def fetch_updated_history(
     overlap_days: int = 14,
     attempts: int = 3,
     retry_backoff: float = 1,
+    diagnostics: dict[str, Any] | None = None,
 ) -> list[HistoricalPricePoint]:
+    details = diagnostics if diagnostics is not None else {}
+    details.update(previous_price_as_of=baseline[-1].date if baseline else None, fetched_candle_count=0, source_notes=[])
     if not baseline:
         start_date = "1970-01-01"
     elif not _has_ohlc_history(baseline):
@@ -233,9 +254,19 @@ def fetch_updated_history(
     if not fetched:
         if baseline:
             logger.warning("%s: recent prices unavailable; retaining the deployed history.", ticker)
+            details.update(refresh_status="retained_unverified", price_as_of=baseline[-1].date,
+                           source_notes=["Recent price downloads were empty after retries; retained saved history."])
             return baseline
         raise RuntimeError(f"{ticker}: no price history was returned and no baseline is available.")
-    return merge_price_history(baseline, fetched)
+    merged = merge_price_history(baseline, fetched)
+    latest_fetched = max(point.date for point in fetched)
+    details.update(fetched_candle_count=len(fetched), latest_fetched_date=latest_fetched, price_as_of=merged[-1].date)
+    if baseline and latest_fetched < baseline[-1].date:
+        details.update(refresh_status="retained_unverified",
+                       source_notes=["Downloaded candles did not cover the saved latest price date; retained that observation."])
+    else:
+        details["refresh_status"] = "verified_unchanged" if merged == baseline else "refreshed"
+    return merged
 
 
 def refresh_snapshot_prices(
@@ -337,13 +368,14 @@ def refresh_prices(
     updated_histories: dict[str, list[HistoricalPricePoint]] = {}
     refreshed_at = datetime.now(timezone.utc)
 
-    def refresh_one(ticker: str) -> tuple[OpenDataSnapshot, list[HistoricalPricePoint]]:
+    def refresh_one(ticker: str) -> tuple[OpenDataSnapshot, list[HistoricalPricePoint], dict[str, Any]]:
         raw_snapshot = snapshot_by_ticker.get(ticker)
         if raw_snapshot is None:
             raise ValueError(f"{ticker}: deployed snapshot is missing.")
         baseline = db_histories.get(ticker) or _load_static_price_history(data_dir, ticker)
         provider = OpenDataProvider(include_filing_details=False, allow_sec_requests=False)
-        history = fetch_updated_history(provider, ticker, baseline)
+        details: dict[str, Any] = {}
+        history = fetch_updated_history(provider, ticker, baseline, diagnostics=details)
         next_earnings_release = provider.fetch_next_earnings_release(ticker, as_of=refreshed_at.date())
         currency = raw_snapshot.get("price_currency") or ("SEK" if ticker.endswith(".ST") else "USD")
         forward_eps = provider.fetch_forward_eps_estimate(ticker, currency=currency)
@@ -354,14 +386,14 @@ def refresh_prices(
             forward_eps=forward_eps,
             refreshed_at=refreshed_at,
         )
-        return snapshot, history
+        return snapshot, history, details
 
     with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
         future_map = {executor.submit(refresh_one, ticker): ticker for ticker in tickers}
         for future in as_completed(future_map):
             ticker = future_map[future]
             try:
-                snapshot, history = future.result()
+                snapshot, history, details = future.result()
                 updated_snapshots[ticker] = snapshot
                 updated_histories[ticker] = history
                 results.append(
@@ -370,6 +402,9 @@ def refresh_prices(
                         "generated_at": snapshot.generated_at.isoformat(),
                         "saved_to": f"frontend/public/data/open-data/price-history/{ticker}.json",
                         "db_saved_to": _display_path(db_data_dir / DB_FILE) if db_data_dir is not None else None,
+                        "latest_fundamental_as_of": max((metric.as_of for metric in snapshot.business_health.values()
+                                                         if metric.value is not None), default=None),
+                        **details,
                     }
                 )
             except Exception as exc:
@@ -397,7 +432,7 @@ def refresh_prices(
 
     output_snapshots = enrich_industry_strength(output_snapshots, output_histories, db_data_dir or data_dir)
     output_rows = [snapshot.model_dump(mode="json") for snapshot in output_snapshots]
-    _write_json(data_dir / "open-data" / "stocks.json", output_rows)
+    write_stock_assets(data_dir, output_rows)
     market_dates = [
         str(row.get("price_opportunity", {}).get("current_price", {}).get("as_of"))[:10]
         for row in output_rows
@@ -425,6 +460,9 @@ def refresh_prices(
         "source": "sqlite_db_with_deployed_static_fallback" if db_snapshots or db_histories else "deployed_static_snapshot",
         "database": _display_path(db_data_dir / DB_FILE) if db_data_dir is not None else None,
         "collected_count": len(results),
+        "refreshed_count": sum(row.get("refresh_status") == "refreshed" for row in results),
+        "verified_unchanged_count": sum(row.get("refresh_status") == "verified_unchanged" for row in results),
+        "retained_unverified_count": sum(row.get("refresh_status") == "retained_unverified" for row in results),
         "failed_count": len(failures),
         "skipped_low_fidelity_count": 0,
         "results": sorted(results, key=lambda row: row["ticker"]),

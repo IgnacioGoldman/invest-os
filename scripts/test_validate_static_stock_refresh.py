@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
-from validate_static_stock_refresh import SUPPORT_KEYS, validate_refresh
+from validate_static_stock_refresh import SUPPORT_KEYS, _validate_fcf_margin, _write_summary, validate_refresh
 
 
 def stock(ticker: str, market_date: str = "2026-09-22") -> dict:
@@ -21,6 +21,39 @@ def stock(ticker: str, market_date: str = "2026-09-22") -> dict:
 
 
 class StaticStockRefreshValidatorTests(unittest.TestCase):
+    def test_financial_fcf_margin_can_be_explicitly_not_meaningful(self) -> None:
+        row = {"business_health": {"fcf_margin": {"value": None, "notes": "FCF margin is not meaningful for this financial business."}},
+               "metrics": {"revenue_ttm": {"value": 100}, "free_cash_flow_ttm": {"value": 20}}}
+        errors = []
+        _validate_fcf_margin("BANK", row, errors)
+        self.assertEqual(errors, [])
+
+    def test_missing_or_incorrect_comparable_fcf_margin_still_fails(self) -> None:
+        for metric in ({"value": None, "notes": "Missing input"}, {"value": 999}):
+            with self.subTest(metric=metric):
+                row = {"business_health": {"fcf_margin": metric},
+                       "metrics": {"revenue_ttm": {"value": 100}, "free_cash_flow_ttm": {"value": 20}}}
+                errors = []
+                _validate_fcf_margin("TEST", row, errors)
+                self.assertEqual(len(errors), 1)
+
+    def test_unverified_retention_is_visible_without_changing_deployment_validation(self) -> None:
+        with TemporaryDirectory() as directory:
+            history_dir = Path(directory)
+            (history_dir / "AAA.json").write_text(json.dumps([{"date":"2026-09-22","close":100}]))
+            result = validate_refresh({"results":[{"ticker":"AAA","saved_to":"db","refresh_status":"retained_unverified",
+                "sec_check_status":"unavailable","source_notes":["SEC unavailable; retained saved data."],
+                "latest_fundamental_as_of":"2026-06-30"}]},{"tickers":["AAA"]},[stock("AAA")],history_dir)
+            self.assertTrue(result["valid"],result["errors"])
+            summary_path = history_dir / "summary.md"
+            _write_summary(summary_path,result)
+            summary = summary_path.read_text()
+            self.assertIn("Retained without source verification: **1**",summary)
+            self.assertIn("**1 unavailable**",summary)
+            self.assertIn("SEC unavailable",summary)
+            self.assertIn("| AAA | 2026-09-22 | 2026-06-30 |",summary)
+            self.assertEqual(result["market_as_of"],"2026-09-22")
+
     def setUp(self) -> None:
         # Fixture dates describe a fixed refresh, independently of today's date.
         clock = patch("validate_static_stock_refresh.datetime")

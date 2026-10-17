@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataSnapshot  # noqa: E402
 from app.services.industry_strength import enrich_industry_strength, rebuild_saved_industry_strength  # noqa: E402
+from app.services.static_stock_assets import load_full_stock_rows, write_stock_assets  # noqa: E402
 
 
 def main() -> None:
@@ -23,19 +24,17 @@ def main() -> None:
     path = args.static_dir / "open-data/stocks.json"
     if path.exists():
         # Static export may be newer than SQLite; preserve its prices and facts.
-        raw_rows = json.loads(path.read_text())
+        raw_rows = load_full_stock_rows(args.static_dir)
         rows = [OpenDataSnapshot.model_validate(row) for row in raw_rows]
         histories = {}
         for row in rows:
             history_path = args.static_dir / f"open-data/price-history/{row.ticker}.json"
             histories[row.ticker] = [HistoricalPricePoint.model_validate(p) for p in json.loads(history_path.read_text())] if history_path.exists() else []
         updated = enrich_industry_strength(rows, histories, args.data_dir)
-        temporary = path.with_suffix(".json.tmp")
         by_ticker = {row.ticker: row.industry_relative_strength for row in updated}
         for row in raw_rows:
             row["industry_relative_strength"] = by_ticker[row["ticker"]]
-        temporary.write_text(json.dumps(raw_rows, indent=2) + "\n")
-        temporary.replace(path)
+        write_stock_assets(args.static_dir, raw_rows)
     available = [s.ticker for s in updated if s.industry_relative_strength and s.industry_relative_strength["value"] is not None]
     print(json.dumps({"stocks": len(updated), "available": available, "unclear": len(updated) - len(available)}))
 

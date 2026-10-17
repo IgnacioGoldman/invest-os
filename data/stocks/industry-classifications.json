@@ -781,6 +781,1605 @@
       "market": "US",
       "currency": "USD",
       "sources": []
+    },
+    "CRDO": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1807794/000162828026060111/crdo-20260801.htm"
+      ]
+    },
+    "ALAB": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1736297/000173629726000035/alab-20260630.htm"
+      ]
+    },
+    "SITM": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1451809/000145180926000060/sitm-20260630.htm"
+      ]
+    },
+    "MTSI": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1493594/000149359426000038/mtsi-20260703.htm"
+      ]
+    },
+    "MPWR": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1280452/000162828026053275/mpwr-20260630.htm"
+      ]
+    },
+    "AMBA": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1280263/000119312526383365/amba-20260731.htm"
+      ]
+    },
+    "RBRK": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000060/rbrk-20260731.htm"
+      ]
+    },
+    "SNPS": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/883241/000088324126000025/snps-20260731.htm"
+      ]
+    },
+    "NET": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1477333/000147733326000054/cloud-20260630.htm"
+      ]
+    },
+    "ZETA": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1851003/000119312526333902/zeta-20260630.htm"
+      ]
+    },
+    "SHOP": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1594805/000159480526000047/shop-20260630.htm"
+      ]
+    },
+    "SNOW": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1640147/000164014726000037/snow-20260731.htm"
+      ]
+    },
+    "IOT": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "EDP Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1642896/000162828026060909/iot-20260801.htm"
+      ]
+    },
+    "KVYO": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1835830/000183583026000040/kvyo-20260630.htm"
+      ]
+    },
+    "BRZE": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1676238/000167623826000040/brze-20260731.htm"
+      ]
+    },
+    "FROG": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1800667/000119312526340294/frog-20260630.htm"
+      ]
+    },
+    "ZS": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "EDP Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1713683/000171368326000157/zs-20260731.htm"
+      ]
+    },
+    "MDB": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1441816/000162828026059830/mdb-20260731.htm"
+      ]
+    },
+    "AVPT": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1777921/000143774926026267/avpt20260630_10q.htm"
+      ]
+    },
+    "TOST": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "EDP Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1650164/000165016426000164/tost-20260630.htm"
+      ]
+    },
+    "GTLB": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1653482/000162828026059943/gtlb-20260731.htm"
+      ]
+    },
+    "TEAM": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1650372/000165037226000036/team-20260630.htm"
+      ]
+    },
+    "CRWD": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1535527/000153552726000031/crwd-20260731.htm"
+      ]
+    },
+    "PDFS": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1120914/000143774926026294/pdfs20260630_10q.htm"
+      ]
+    },
+    "NOW": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1373715/000137371526000076/now-20260630.htm"
+      ]
+    },
+    "S": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1583708/000158370826000055/s-20260731.htm"
+      ]
+    },
+    "CRWV": {
+      "sector": "Technology",
+      "industry": "Cloud Infrastructure",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000366/crwv-20260630.htm"
+      ]
+    },
+    "LASR": {
+      "sector": "Technology",
+      "industry": "Industrial Lasers",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1124796/000112479626000038/lasr-20260630.htm"
+      ]
+    },
+    "PL": {
+      "sector": "Technology",
+      "industry": "Geospatial Data",
+      "original_sector": "Technology",
+      "original_industry": "Radio And Television Broadcasting And Communications Equipment",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1836833/000119312526382016/pl-20260731.htm"
+      ]
+    },
+    "LITE": {
+      "sector": "Technology",
+      "industry": "Communications Equipment",
+      "original_sector": "Communication Services",
+      "original_industry": "Telecommunications Equipment",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1633978/000162828026057358/lite-20260627.htm"
+      ]
+    },
+    "AAOI": {
+      "sector": "Technology",
+      "industry": "Communications Equipment",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1158114/000143774926026278/aaoi20260630_10q.htm"
+      ]
+    },
+    "VIAV": {
+      "sector": "Technology",
+      "industry": "Communications Equipment",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/912093/000162828026056765/viav-20260627.htm"
+      ]
+    },
+    "UI": {
+      "sector": "Technology",
+      "industry": "Communications Equipment",
+      "original_sector": "Technology",
+      "original_industry": "Radio And Television Broadcasting And Communications Equipment",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1511737/000151173726000056/ubnt-20260630.htm"
+      ]
+    },
+    "APH": {
+      "sector": "Technology",
+      "industry": "Electronic Components",
+      "original_sector": "Technology",
+      "original_industry": "Electrical Products",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/820313/000110465926089194/aph-20260630x10q.htm"
+      ]
+    },
+    "CLS": {
+      "sector": "Technology",
+      "industry": "Electronics Manufacturing",
+      "original_sector": "Technology",
+      "original_industry": "Electrical Products",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1030894/000103089426000044/cls-20260630.htm"
+      ]
+    },
+    "FN": {
+      "sector": "Technology",
+      "industry": "Electronics Manufacturing",
+      "original_sector": "Utilities",
+      "original_industry": "Telecommunications Equipment",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1408710/000140871026000028/fn-20260626.htm"
+      ]
+    },
+    "FA": {
+      "sector": "Technology",
+      "industry": "IT Services",
+      "original_sector": "Technology",
+      "original_industry": "EDP Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1210677/000119312526338063/fa-20260630.htm"
+      ]
+    },
+    "TGTX": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1001316/000143774926025955/tgtx20260630_10q.htm"
+      ]
+    },
+    "TARS": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Biological Products (No Diagnostic Substances)",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1819790/000181979026000064/tars-20260630.htm"
+      ]
+    },
+    "ARQT": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1787306/000178730626000051/arqt-20260630.htm"
+      ]
+    },
+    "INSM": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1104506/000110450626000041/insm-20260630.htm"
+      ]
+    },
+    "TVTX": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1438533/000143853326000063/tvtx-20260630.htm"
+      ]
+    },
+    "AXSM": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1579428/000119312526342360/axsm-20260630.htm"
+      ]
+    },
+    "RYTM": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1649904/000162828026052533/rytm-20260630.htm"
+      ]
+    },
+    "MIRM": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1759425/000175942526000045/mirm-20260630.htm"
+      ]
+    },
+    "HALO": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Biological Products (No Diagnostic Substances)",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1159036/000115903626000104/halo-20260630.htm"
+      ]
+    },
+    "ANIP": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1023024/000102302426000069/anip-20260630.htm"
+      ]
+    },
+    "LGND": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/886163/000088616326000044/lgnd-20260630.htm"
+      ]
+    },
+    "NBIX": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Biological Products (No Diagnostic Substances)",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/914475/000091447526000037/nbix-20260630.htm"
+      ]
+    },
+    "KRYS": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Biological Products (No Diagnostic Substances)",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1711279/000171127926000057/krys-20260630.htm"
+      ]
+    },
+    "AUPH": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1600620/000160062026000062/auph-20260630.htm"
+      ]
+    },
+    "GKOS": {
+      "sector": "Healthcare",
+      "industry": "Medical Devices",
+      "original_sector": "Healthcare",
+      "original_industry": "Medical/Dental Instruments",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1192448/000119312526324201/gkos-20260630.htm"
+      ]
+    },
+    "ESTA": {
+      "sector": "Healthcare",
+      "industry": "Medical Devices",
+      "original_sector": "Healthcare",
+      "original_industry": "Industrial Specialties",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1688757/000168875726000050/esta-20260630.htm"
+      ]
+    },
+    "TMDX": {
+      "sector": "Healthcare",
+      "industry": "Medical Devices",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Electromedical & Electrotherapeutic Apparatus",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1756262/000119312526332843/tmdx-20260630.htm"
+      ]
+    },
+    "PODD": {
+      "sector": "Healthcare",
+      "industry": "Medical Devices",
+      "original_sector": "Healthcare",
+      "original_industry": "Medical/Dental Instruments",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1145197/000114519726000169/podd-20260630.htm"
+      ]
+    },
+    "PRCT": {
+      "sector": "Healthcare",
+      "industry": "Medical Devices",
+      "original_sector": "Healthcare",
+      "original_industry": "Medical/Dental Instruments",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1588978/000158897826000030/prct-20260630.htm"
+      ]
+    },
+    "IRTC": {
+      "sector": "Healthcare",
+      "industry": "Medical Devices",
+      "original_sector": "Healthcare",
+      "original_industry": "Medical/Dental Instruments",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1388658/000138865826000072/irtc-20260630.htm"
+      ]
+    },
+    "AXGN": {
+      "sector": "Healthcare",
+      "industry": "Medical Devices",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Electromedical & Electrotherapeutic Apparatus",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/805928/000080592826000094/axgn-20260630.htm"
+      ]
+    },
+    "TEM": {
+      "sector": "Healthcare",
+      "industry": "Diagnostics & Genomics",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Programming Data Processing",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1717115/000119312526326090/tem-20260630.htm"
+      ]
+    },
+    "GH": {
+      "sector": "Healthcare",
+      "industry": "Diagnostics & Genomics",
+      "original_sector": "Healthcare",
+      "original_industry": "Medical Specialities",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1576280/000157628026000037/gh-20260630.htm"
+      ]
+    },
+    "NTRA": {
+      "sector": "Healthcare",
+      "industry": "Diagnostics & Genomics",
+      "original_sector": "Healthcare",
+      "original_industry": "Medical Specialities",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1604821/000162828026054525/ntra-20260630.htm"
+      ]
+    },
+    "ADPT": {
+      "sector": "Healthcare",
+      "industry": "Diagnostics & Genomics",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Biological Products (No Diagnostic Substances)",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1478320/000119312526332940/adpt-20260630.htm"
+      ]
+    },
+    "WGS": {
+      "sector": "Healthcare",
+      "industry": "Diagnostics & Genomics",
+      "original_sector": "Healthcare",
+      "original_industry": "Medical/Nursing Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1818331/000162828026051878/wgs-20260630.htm"
+      ]
+    },
+    "ALHC": {
+      "sector": "Healthcare",
+      "industry": "Managed Healthcare",
+      "original_sector": "Healthcare",
+      "original_industry": "Medical Specialities",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1832466/000162828026051060/alhc-20260630.htm"
+      ]
+    },
+    "OSCR": {
+      "sector": "Healthcare",
+      "industry": "Managed Healthcare",
+      "original_sector": "Healthcare",
+      "original_industry": "Medical Specialities",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000069/oscr-20260630.htm"
+      ]
+    },
+    "ASTH": {
+      "sector": "Healthcare",
+      "industry": "Healthcare Services",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Professional Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1083446/000119312526342631/asth-20260630.htm"
+      ]
+    },
+    "CDE": {
+      "sector": "Materials",
+      "industry": "Precious Metals Mining",
+      "original_sector": "Materials",
+      "original_industry": "Precious Metals",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/215466/000021546626000036/cde-20260630.htm"
+      ]
+    },
+    "SSRM": {
+      "sector": "Materials",
+      "industry": "Precious Metals Mining",
+      "original_sector": "Industrials",
+      "original_industry": "Precious Metals",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/921638/000092163826000081/ssrm-20260630.htm"
+      ]
+    },
+    "RGLD": {
+      "sector": "Materials",
+      "industry": "Precious Metals Royalties",
+      "original_sector": "Industrials",
+      "original_industry": "Precious Metals",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/85535/000008553526000041/rgld-20260630.htm"
+      ]
+    },
+    "PRM": {
+      "sector": "Materials",
+      "industry": "Specialty Chemicals",
+      "original_sector": "Industrials",
+      "original_industry": "Major Chemicals",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1880319/000188031926000048/prm-20260630.htm"
+      ]
+    },
+    "RDDT": {
+      "sector": "Communication Services",
+      "industry": "Internet Platforms",
+      "original_sector": "Technology",
+      "original_industry": "EDP Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000100/rddt-20260630.htm"
+      ]
+    },
+    "LIF": {
+      "sector": "Communication Services",
+      "industry": "Internet Platforms",
+      "original_sector": "Technology",
+      "original_industry": "EDP Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1581760/000158176026000141/lifx-20260630.htm"
+      ]
+    },
+    "GRND": {
+      "sector": "Communication Services",
+      "industry": "Internet Platforms",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Programming Data Processing",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1820144/000182014426000025/grnd-20260630.htm"
+      ]
+    },
+    "RBLX": {
+      "sector": "Communication Services",
+      "industry": "Interactive Entertainment",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1315098/000162828026051082/rblx-20260630.htm"
+      ]
+    },
+    "EVC": {
+      "sector": "Communication Services",
+      "industry": "Broadcasting",
+      "original_sector": "Industrials",
+      "original_industry": "Broadcasting",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1109116/000119312526342382/evc-20260630.htm"
+      ]
+    },
+    "CVNA": {
+      "sector": "Consumer Cyclical",
+      "industry": "Auto Retail",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Retail-Auto Dealers and Gas Stations",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1690820/000169082026000055/cvna-20260630.htm"
+      ]
+    },
+    "DASH": {
+      "sector": "Consumer Cyclical",
+      "industry": "Local Delivery Platforms",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Business Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1792789/000179278926000050/dash-20260630.htm"
+      ]
+    },
+    "DUOL": {
+      "sector": "Consumer Cyclical",
+      "industry": "Digital Education",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1562088/000162828026053603/duol-20260630.htm"
+      ]
+    },
+    "BROS": {
+      "sector": "Consumer Cyclical",
+      "industry": "Restaurants",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Restaurants",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1866581/000186658126000133/bros-20260630.htm"
+      ]
+    },
+    "CAVA": {
+      "sector": "Consumer Cyclical",
+      "industry": "Restaurants",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Restaurants",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1639438/000162828026055864/cava-20260712.htm"
+      ]
+    },
+    "FIVE": {
+      "sector": "Consumer Cyclical",
+      "industry": "General Merchandise Retail",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Department/Specialty Retail Stores",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1177609/000117760926000027/five-20260801.htm"
+      ]
+    },
+    "RSI": {
+      "sector": "Consumer Cyclical",
+      "industry": "Online Gaming",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Services-Misc. Amusement & Recreation",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1793659/000179365926000048/rsi-20260630.htm"
+      ]
+    },
+    "TPB": {
+      "sector": "Consumer Defensive",
+      "industry": "Tobacco",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Tobacco",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1290677/000143774926025664/tpb20260630_10q.htm"
+      ]
+    },
+    "PLMR": {
+      "sector": "Financials",
+      "industry": "Property & Casualty Insurance",
+      "original_sector": "Financials",
+      "original_industry": "Property-Casualty Insurers",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1761312/000119312526335508/plmr-20260630.htm"
+      ]
+    },
+    "LMND": {
+      "sector": "Financials",
+      "industry": "Property & Casualty Insurance",
+      "original_sector": "Financials",
+      "original_industry": "Property-Casualty Insurers",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1691421/000169142126000055/lmnd-20260630.htm"
+      ]
+    },
+    "BRO": {
+      "sector": "Financials",
+      "industry": "Insurance Brokers",
+      "original_sector": "Financials",
+      "original_industry": "Specialty Insurers",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/79282/000119312526318251/bro-20260630.htm"
+      ]
+    },
+    "AJG": {
+      "sector": "Financials",
+      "industry": "Insurance Brokers",
+      "original_sector": "Financials",
+      "original_industry": "Specialty Insurers",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/354190/000162828026053489/ajg-20260630.htm"
+      ]
+    },
+    "DAVE": {
+      "sector": "Financials",
+      "industry": "Consumer Lending",
+      "original_sector": "Financials",
+      "original_industry": "Finance: Consumer Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1841408/000119312526335154/dave-20260630.htm"
+      ]
+    },
+    "LPLA": {
+      "sector": "Financials",
+      "industry": "Brokerage & Market Making",
+      "original_sector": "Financials",
+      "original_industry": "Investment Bankers/Brokers/Service",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1397911/000162828026051542/lpla-20260630.htm"
+      ]
+    },
+    "HOOD": {
+      "sector": "Financials",
+      "industry": "Brokerage & Market Making",
+      "original_sector": "Financials",
+      "original_industry": "Investment Bankers/Brokers/Service",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1783879/000178387926000114/hood-20260630.htm"
+      ]
+    },
+    "VIRT": {
+      "sector": "Financials",
+      "industry": "Brokerage & Market Making",
+      "original_sector": "Financials",
+      "original_industry": "Investment Bankers/Brokers/Service",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1592386/000159238626000028/virt-20260630.htm"
+      ]
+    },
+    "ARES": {
+      "sector": "Financials",
+      "industry": "Investment Managers",
+      "original_sector": "Financials",
+      "original_industry": "Investment Managers",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1176948/000162828026054538/ares-20260630.htm"
+      ]
+    },
+    "EVR": {
+      "sector": "Financials",
+      "industry": "Investment Banking",
+      "original_sector": "Financials",
+      "original_industry": "Investment Managers",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1360901/000162828026053320/evr-20260630.htm"
+      ]
+    },
+    "FOUR": {
+      "sector": "Financials",
+      "industry": "Payment Processing",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Business Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1794669/000179466926000045/four-20260630.htm"
+      ]
+    },
+    "PAY": {
+      "sector": "Financials",
+      "industry": "Payment Processing",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Business Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1841156/000119312526330940/pay-20260630.htm"
+      ]
+    },
+    "FLYW": {
+      "sector": "Financials",
+      "industry": "Payment Processing",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Business Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1580560/000158056026000016/flyw-20260630.htm"
+      ]
+    },
+    "RELY": {
+      "sector": "Financials",
+      "industry": "Payment Processing",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Business Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1782170/000162828026053424/rely-20260630.htm"
+      ]
+    },
+    "CTRE": {
+      "sector": "Real Estate",
+      "industry": "Healthcare REITs",
+      "original_sector": "Real Estate",
+      "original_industry": "Real Estate Investment Trusts",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1590717/000162828026054284/ctre-20260630.htm"
+      ]
+    },
+    "VTR": {
+      "sector": "Real Estate",
+      "industry": "Healthcare REITs",
+      "original_sector": "Real Estate",
+      "original_industry": "Real Estate Investment Trusts",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/740260/000074026026000024/vtr-20260630.htm"
+      ]
+    },
+    "EPRT": {
+      "sector": "Real Estate",
+      "industry": "Net Lease REITs",
+      "original_sector": "Real Estate",
+      "original_industry": "Real Estate Investment Trusts",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1728951/000172895126000052/eprt-20260630.htm"
+      ]
+    },
+    "NTST": {
+      "sector": "Real Estate",
+      "industry": "Net Lease REITs",
+      "original_sector": "Real Estate",
+      "original_industry": "Real Estate Investment Trusts",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1798100/000162828026049220/ntst-20260630.htm"
+      ]
+    },
+    "COMP": {
+      "sector": "Real Estate",
+      "industry": "Real Estate Brokerage",
+      "original_sector": "Financials",
+      "original_industry": "Real Estate",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1563190/000156319026000143/comp-20260630.htm"
+      ]
+    },
+    "ROAD": {
+      "sector": "Industrials",
+      "industry": "Engineering & Construction",
+      "original_sector": "Industrials",
+      "original_industry": "Military/Government/Technical",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1718227/000162828026054661/road-20260630.htm"
+      ]
+    },
+    "FIX": {
+      "sector": "Industrials",
+      "industry": "Engineering & Construction",
+      "original_sector": "Industrials",
+      "original_industry": "Engineering & Construction",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1035983/000110465926086258/fix-20260630x10q.htm"
+      ]
+    },
+    "ECG": {
+      "sector": "Industrials",
+      "industry": "Engineering & Construction",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Homebuilding",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/2015845/000201584526000050/ecg-20260630.htm"
+      ]
+    },
+    "DY": {
+      "sector": "Industrials",
+      "industry": "Engineering & Construction",
+      "original_sector": "Industrials",
+      "original_industry": "Water Sewer Pipeline Comm & Power Line Construction",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/67215/000006721526000043/dy-20260801.htm"
+      ]
+    },
+    "FTAI": {
+      "sector": "Industrials",
+      "industry": "Aerospace & Defense",
+      "original_sector": "Industrials",
+      "original_industry": "Misc Corporate Leasing Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1590364/000162828026051412/ftai-20260630.htm"
+      ]
+    },
+    "RKLB": {
+      "sector": "Industrials",
+      "industry": "Aerospace & Defense",
+      "original_sector": "Industrials",
+      "original_industry": "Military/Government/Technical",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1819994/000181999426000062/rklb-20260630.htm"
+      ]
+    },
+    "VSEC": {
+      "sector": "Industrials",
+      "industry": "Aerospace & Defense",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Military/Government/Technical",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/102752/000010275226000064/vsec-20260630.htm"
+      ]
+    },
+    "LOAR": {
+      "sector": "Industrials",
+      "industry": "Aerospace & Defense",
+      "original_sector": "Industrials",
+      "original_industry": "Military/Government/Technical",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/2000178/000119312526336945/ck0002000178-20260630.htm"
+      ]
+    },
+    "KTOS": {
+      "sector": "Industrials",
+      "industry": "Aerospace & Defense",
+      "original_sector": "Industrials",
+      "original_industry": "Military/Government/Technical",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1069258/000106925826000077/ktos-20260628.htm"
+      ]
+    },
+    "AXON": {
+      "sector": "Industrials",
+      "industry": "Public Safety Equipment",
+      "original_sector": "Industrials",
+      "original_industry": "Ordnance And Accessories",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1069183/000162828026053646/axon-20260630.htm"
+      ]
+    },
+    "NVT": {
+      "sector": "Industrials",
+      "industry": "Electrical Equipment",
+      "original_sector": "Industrials",
+      "original_industry": "Industrial Machinery/Components",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1720635/000162828026051428/nvt-20260630.htm"
+      ]
+    },
+    "AMSC": {
+      "sector": "Industrials",
+      "industry": "Electrical Equipment",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Metal Fabrications",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/880807/000143774926025922/amsc20260630_10q.htm"
+      ]
+    },
+    "AEIS": {
+      "sector": "Industrials",
+      "industry": "Electrical Equipment",
+      "original_sector": "Technology",
+      "original_industry": "Industrial Machinery/Components",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/927003/000092700326000032/aeis-20260630x10q.htm"
+      ]
+    },
+    "SEI": {
+      "sector": "Industrials",
+      "industry": "Power Equipment & Services",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Oil and Gas Field Machinery",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1697500/000162828026054349/sei-20260630.htm"
+      ]
+    },
+    "OUST": {
+      "sector": "Industrials",
+      "industry": "Industrial Sensors",
+      "original_sector": "Industrials",
+      "original_industry": "Industrial Machinery/Components",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1816581/000162828026054467/oust-20260630.htm"
+      ]
+    },
+    "SYM": {
+      "sector": "Industrials",
+      "industry": "Warehouse Automation",
+      "original_sector": "Industrials",
+      "original_industry": "Industrial Machinery/Components",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1837240/000183724026000043/sym-20260627.htm"
+      ]
+    },
+    "XMTR": {
+      "sector": "Industrials",
+      "industry": "Manufacturing Marketplaces",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Business Services",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1657573/000119312526332776/xmtr-20260630.htm"
+      ]
+    },
+    "BKV": {
+      "sector": "Energy",
+      "industry": "Oil & Gas Exploration & Production",
+      "original_sector": "Energy",
+      "original_industry": "Oil & Gas Production",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1838406/000110465926098821/bkv-20251231x10ka.htm"
+      ]
+    },
+    "OKE": {
+      "sector": "Energy",
+      "industry": "Oil & Gas Midstream",
+      "original_sector": "Utilities",
+      "original_industry": "Oil & Gas Production",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1039684/000103968426000029/oke-20260630.htm"
+      ]
+    },
+    "DTM": {
+      "sector": "Energy",
+      "industry": "Oil & Gas Midstream",
+      "original_sector": "Utilities",
+      "original_industry": "Natural Gas Distribution",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1842022/000184202226000009/dtm-20260630.htm"
+      ]
+    },
+    "RUN": {
+      "sector": "Utilities",
+      "industry": "Residential Solar Services",
+      "original_sector": "Miscellaneous",
+      "original_industry": "Industrial Machinery/Components",
+      "original_classification_source": "Nasdaq screener directory, checked 2026-10-17",
+      "market": "US",
+      "currency": "USD",
+      "reviewed_at": "2026-10-17",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1469367/000162828026053366/run-20260630.htm"
+      ]
     }
   }
 }

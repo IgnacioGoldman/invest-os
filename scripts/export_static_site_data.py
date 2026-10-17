@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataSnapshot  # noqa: E402
 from app.services.industry_strength import enrich_industry_strength  # noqa: E402
+from app.services.static_stock_assets import load_full_stock_rows, write_stock_assets  # noqa: E402
 from app.entry_engine.utils.file_storage import load_stock_universe  # noqa: E402
 from app.services.open_data_stock_store import load_cached_price_history  # noqa: E402
 from app.services.storage import DB_FILE, init_db, strip_deprecated_stock_metrics_payload  # noqa: E402
@@ -150,7 +151,7 @@ def export_static_site_data(data_dir: Path, output_dir: Path, universe_path: Pat
             data_dir,
         )]
 
-        _write_json(output_dir / "open-data" / "stocks.json", snapshots)
+        write_stock_assets(output_dir, snapshots)
         _write_json(output_dir / "stocks" / "universe.json", _build_universe_rows(universe_path, loaded, active or loaded))
         _write_json(
             output_dir / "meta.json",
@@ -170,7 +171,7 @@ def export_static_site_data(data_dir: Path, output_dir: Path, universe_path: Pat
 def export_static_snapshot(data_dir: Path, output_dir: Path, ticker: str) -> None:
     """Publish one repaired snapshot while keeping newer exported price data."""
     path = output_dir / "open-data" / "stocks.json"
-    snapshots = json.loads(path.read_text(encoding="utf-8"))
+    snapshots = load_full_stock_rows(output_dir)
     symbol = ticker.upper().strip()
     with sqlite3.connect(data_dir / DB_FILE) as conn:
         row = conn.execute("SELECT payload FROM stock_open_data_snapshots WHERE ticker = ?", (symbol,)).fetchone()
@@ -179,7 +180,7 @@ def export_static_snapshot(data_dir: Path, output_dir: Path, ticker: str) -> Non
     updated = json.loads(row[0])
     strip_deprecated_stock_metrics_payload(updated)
     snapshots = [updated if s["ticker"] == symbol else s for s in snapshots]
-    _write_json(path, snapshots)
+    write_stock_assets(output_dir, snapshots)
     meta_path = output_dir / "meta.json"
     metadata = json.loads(meta_path.read_text(encoding="utf-8"))
     metadata.update(_snapshot_metadata(snapshots))

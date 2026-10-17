@@ -35,6 +35,7 @@ from app.services.storage import (  # noqa: E402
 )
 from app.services.stock_data_quality import fundamental_gap_reasons, retain_verified_history  # noqa: E402
 from app.services.industry_strength import rebuild_saved_industry_strength  # noqa: E402
+from app.entry_engine.providers.issuer_revenue import issuer_revenue_check_due, load_issuer_revenue  # noqa: E402
 
 
 YAHOO_MOST_ACTIVE_URL = "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved"
@@ -107,6 +108,15 @@ def _latest_relevant_sec_filing(submissions: dict[str, Any] | None) -> dict[str,
 def _recent_value(recent: dict[str, Any], key: str, index: int) -> Any:
     values = recent.get(key)
     return values[index] if isinstance(values, list) and index < len(values) else None
+
+
+def _sec_submissions_verified(submissions: Any) -> bool:
+    filings = submissions.get("filings") if isinstance(submissions, dict) else None
+    recent = filings.get("recent") if isinstance(filings, dict) else None
+    if not isinstance(recent, dict):
+        return False
+    columns = [recent.get(key) for key in ("form", "filingDate", "accessionNumber")]
+    return all(isinstance(column, list) for column in columns) and len({len(column) for column in columns}) == 1
 
 
 def _latest_relevant_context_filing(snapshot: OpenDataSnapshot | None) -> dict[str, Any] | None:
@@ -315,14 +325,23 @@ def _preserved_result(
         "saved_to": "data/invest_os.sqlite",
         "analysis": None,
         "collection_status": "preserved",
+        "refresh_status": "retained_unverified" if item.get("sec_check_status") == "unavailable" or item.get("issuer_check_status") == "unavailable" else "verified_unchanged",
         "skip_reason": reason,
         "latest_sec_accession": latest_filing.get("accession_number") if latest_filing else None,
         "latest_sec_filing_date": latest_filing.get("filing_date") if latest_filing else None,
         "latest_sec_form": latest_filing.get("form") if latest_filing else None,
         "duration_seconds": round(duration_seconds, 2),
         "attempts": 0,
+        **_snapshot_dates(snapshot),
         **coverage,
     }
+
+
+def _snapshot_dates(snapshot: OpenDataSnapshot) -> dict[str, Any]:
+    current = snapshot.price_opportunity.get("current_price")
+    dates = sorted(metric.as_of for metric in snapshot.business_health.values() if metric.value is not None)
+    return {"price_as_of": current.as_of if current else None,
+            "latest_fundamental_as_of": dates[-1] if dates else None}
 
 
 def _filter_incremental_sec_work_items(
@@ -347,8 +366,10 @@ def _filter_incremental_sec_work_items(
                 existing_snapshot = load_stock_open_data_snapshot(conn, ticker)
                 try:
                     cik = provider.resolve_cik(ticker)
-                except Exception:
+                except Exception as exc:
                     if existing_snapshot is not None and existing_snapshot.cik is not None:
+                        item["sec_check_status"] = "unavailable"
+                        item["source_notes"] = [f"SEC company lookup failed; retained saved data: {exc}"]
                         preserved.append(
                             _preserved_result(
                                 index=index,
@@ -360,10 +381,15 @@ def _filter_incremental_sec_work_items(
                             )
                         )
                         continue
+                    item["sec_check_status"] = "not_applicable"
                     collect_items.append((index, item))
                     continue
 
                 submissions = provider._fetch_sec_submissions(cik)
+                verified = _sec_submissions_verified(submissions)
+                item["sec_check_status"] = "verified" if verified else "unavailable"
+                if not verified:
+                    item["source_notes"] = ["SEC submissions could not be verified; latest filing status is unknown."]
                 latest_filing = _latest_relevant_sec_filing(submissions)
                 existing_filing = _latest_relevant_context_filing(existing_snapshot)
                 state = load_stock_sec_refresh_state(conn, ticker)
@@ -373,6 +399,16 @@ def _filter_incremental_sec_work_items(
                 latest_accession = str(latest_filing.get("accession_number") or "") if latest_filing else None
 
                 repairs = fundamental_gap_reasons(existing_snapshot, include_history=repair_data_gaps) if (repair_data_gaps or repair_current_data) and existing_snapshot is not None else []
+                # Supported issuer discovery must not depend on descriptive 6-K titles.
+                seed = load_issuer_revenue(ticker)
+                if seed is not None:
+                    if issuer_revenue_check_due(ticker, seed):
+                        repairs.append("issuer_report_check_due")
+                    revenue = existing_snapshot.historical_series.get("quarterly_revenue", []) if existing_snapshot else []
+                    latest_saved = max((row.as_of for row in revenue), default="")
+                    latest_issuer = max(row["end"] for row in seed["facts"]["issuer"]["Revenues"]["units"]["USD"])
+                    if latest_issuer > latest_saved:
+                        repairs.append("issuer_report_data_changed")
                 if repair_revenue_history and existing_snapshot is not None:
                     from app.services.revenue_growth_momentum import calculate_revenue_growth_momentum
                     checked = existing_snapshot.revenue_history_checked_at
@@ -380,14 +416,15 @@ def _filter_incremental_sec_work_items(
                     if existing_snapshot.revenue_history_version < 1 or (due and calculate_revenue_growth_momentum(existing_snapshot.model_dump(mode="json"))["label"] == "Unclear"):
                         repairs.append("historical_series.revenue_history_repair")
                 if existing_snapshot is not None and not repairs and (latest_accession is None or latest_accession == known_accession):
-                    replace_stock_sec_refresh_state(conn, **_sec_state_kwargs(ticker, cik, latest_filing or existing_filing))
+                    if verified:
+                        replace_stock_sec_refresh_state(conn, **_sec_state_kwargs(ticker, cik, latest_filing or existing_filing))
                     preserved.append(
                         _preserved_result(
                             index=index,
                             item=item,
                             snapshot=existing_snapshot,
                             latest_filing=latest_filing or existing_filing,
-                            reason="sec_filings_unchanged",
+                            reason="sec_filings_unchanged" if verified else "sec_metadata_unavailable_preserved_existing_snapshot",
                             duration_seconds=time.monotonic() - started,
                         )
                     )
@@ -396,8 +433,15 @@ def _filter_incremental_sec_work_items(
                 item["_latest_sec_filing"] = latest_filing
                 if repairs:
                     item["repair_reasons"] = repairs
+                item["_issuer_check_only"] = bool(
+                    existing_snapshot is not None and repairs
+                    and all(reason.startswith("issuer_report_") for reason in repairs)
+                    and (latest_accession is None or latest_accession == known_accession)
+                )
                 collect_items.append((index, item))
             except Exception as exc:
+                item["sec_check_status"] = "unavailable"
+                item["source_notes"] = [f"SEC preflight failed; attempting normal collection: {exc}"]
                 logger.warning("%s: incremental SEC preflight failed; collecting normally: %s", ticker, exc)
                 collect_items.append((index, item))
         conn.commit()
@@ -457,6 +501,8 @@ def _collect_ticker(
         "generated_at": snapshot.generated_at.isoformat(),
         "saved_to": "data/invest_os.sqlite" if should_save else None,
         "analysis": None if include_analysis else None,
+        **_snapshot_dates(snapshot),
+        "source_notes": [note for note in snapshot.data_gaps if any(term in note.lower() for term in ("failed", "retained", "unavailable;"))],
         **coverage,
     }
 
@@ -487,16 +533,15 @@ def _collect_item_with_retries(
             max_sec_archive_lookups=max_sec_archive_lookups,
         )
         try:
+            collected = _collect_ticker(
+                provider, ticker, save, min_coverage_to_save=min_coverage,
+                include_analysis=include_analysis, reuse_saved_prices=reuse_saved_prices,
+            )
             result = {
                 **item,
-                **_collect_ticker(
-                    provider,
-                    ticker,
-                    save,
-                    min_coverage_to_save=min_coverage,
-                    include_analysis=include_analysis,
-                    reuse_saved_prices=reuse_saved_prices,
-                ),
+                **collected,
+                "source_notes": list(dict.fromkeys([*item.get("source_notes", []), *collected.get("source_notes", [])])),
+                "refresh_status": "refreshed",
             }
             result["duration_seconds"] = round(time.monotonic() - started, 2)
             result["attempts"] = attempt
@@ -511,6 +556,18 @@ def _collect_item_with_retries(
                 time.sleep(sleep_for)
 
     assert last_error is not None
+    # Independent issuer discovery is additive: its outage must not make a
+    # previously preservable, otherwise unchanged stock fail the whole refresh.
+    if save and item.get("_issuer_check_only"):
+        with connect(get_settings().data_dir) as conn:
+            previous = load_stock_open_data_snapshot(conn, ticker)
+        if previous is not None:
+            retained_item = {**item, "issuer_check_status": "unavailable",
+                             "source_notes": [*item.get("source_notes", []), f"Issuer collection failed; retained saved snapshot: {last_error}"]}
+            return _preserved_result(index=0, item=retained_item, snapshot=previous,
+                                     latest_filing=item.get("_latest_sec_filing"),
+                                     reason="issuer_check_unavailable_preserved_existing_snapshot",
+                                     duration_seconds=time.monotonic() - started)
     raise last_error
 
 
@@ -539,6 +596,7 @@ def _build_report(
     for collection in (ordered_results, ordered_skipped, ordered_failures):
         for row in collection:
             row.pop("_index", None)
+            row.pop("_issuer_check_only", None)
     preserved_count = sum(1 for row in ordered_results if row.get("collection_status") == "preserved")
     return {
         "mode": mode,
@@ -550,6 +608,9 @@ def _build_report(
         "collected_count": len(ordered_results),
         "refreshed_count": len(ordered_results) - preserved_count,
         "preserved_count": preserved_count,
+        "verified_unchanged_count": sum(row.get("refresh_status") == "verified_unchanged" for row in ordered_results),
+        "retained_unverified_count": sum(row.get("refresh_status") == "retained_unverified" for row in ordered_results),
+        "sec_unverified_count": sum(row.get("sec_check_status") == "unavailable" for row in ordered_results),
         "failed_count": len(ordered_failures),
         "skipped_low_fidelity_count": len(ordered_skipped),
         "results": ordered_results,
@@ -559,7 +620,7 @@ def _build_report(
 
 
 def _record_collected_sec_state(result: dict[str, Any], item: dict[str, Any], *, incremental_sec: bool, save: bool) -> None:
-    if not incremental_sec or not save or not result.get("saved_to"):
+    if not incremental_sec or not save or not result.get("saved_to") or item.get("sec_check_status") == "unavailable":
         return
     cik = item.get("_latest_sec_cik") or result.get("cik")
     try:

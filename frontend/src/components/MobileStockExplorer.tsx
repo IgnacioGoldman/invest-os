@@ -1,5 +1,6 @@
 import { calculateRevenueGrowthMomentum, formatMomentumPp, revenueMomentumDetail } from "../revenueGrowthMomentum";
 import { MoneyPanel } from "./MoneyPanel";
+import { useStockDetails } from "../useStockDetails";
 import { IndustryStrengthDetail } from "./IndustryStrengthDetail";
 import { prepareStockAnalysis, type StockAnalysisBrief } from "../aiAnalysis";
 import { StockAnalysisDialog, type AnalysisCopyStatus } from "./StockAnalysisDialog";
@@ -1545,7 +1546,8 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
   );
 }
 
-function StockDetail({ snapshot, onBack, onOpenPeer }: { snapshot: OpenDataStockSnapshot; onBack: () => void; onOpenPeer: (ticker: string) => void }) {
+function StockDetail({ snapshot: summary, onBack, onOpenPeer }: { snapshot: OpenDataStockSnapshot; onBack: () => void; onOpenPeer: (ticker: string) => void }) {
+  const { snapshot, loading: detailsLoading, error: detailsError, retry: retryDetails } = useStockDetails(summary);
   const [activeGrowthDetail, setActiveGrowthDetail] = useState<GrowthDetailKey>("revenue");
   const [points, setPoints] = useState<OpenDataPricePoint[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1618,6 +1620,8 @@ function StockDetail({ snapshot, onBack, onOpenPeer }: { snapshot: OpenDataStock
           })}
         </section>
 
+        {detailsLoading && <p role="status">Loading financial history…</p>}
+        {detailsError && <p role="alert">{detailsError} <button type="button" onClick={retryDetails}>Retry financial history</button></p>}
         <MobileGrowthDetailPanel snapshot={snapshot} detailKey={activeGrowthDetail} onOpenPeer={onOpenPeer} />
 
         <footer className="mobile-detail-footer">

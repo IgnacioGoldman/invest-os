@@ -4,6 +4,8 @@ A local stock exploration app focused on one workflow: public/open-data stock sc
 
 The app serves cached stock fundamentals, derived metrics, support-distance metrics, and price history from local SQLite. Signed-in users have a personal space with Explore, Watchlist, and Portfolio tabs.
 
+The universe contains 200 stocks. Static mobile builds load compact screening data first and fetch complete financial histories and price charts when a stock opens. The revenue-led 123-stock expansion and its selection evidence are documented in [the research shortlist](docs/research/revenue-expansion-2026-10-17/shortlist.md).
+
 ## Run Locally
 
 ```sh

@@ -53,6 +53,14 @@ def _metric_value(metric: Any) -> float | None:
     return _finite_number(metric.get("value") if isinstance(metric, dict) else None)
 
 
+def _observation_dates(ticker: str, snapshot: dict[str, Any], result: dict[str, Any]) -> dict[str, Any]:
+    prices = snapshot.get("price_opportunity")
+    current = prices.get("current_price") if isinstance(prices, dict) else None
+    return {"ticker": ticker,
+            "price_as_of": current.get("as_of") if isinstance(current, dict) else None,
+            "latest_fundamental_as_of": result.get("latest_fundamental_as_of")}
+
+
 def _latest_series_metric_by_as_of(snapshot: dict[str, Any], series_name: str, metric_name: str) -> tuple[date, float] | None:
     historical_series = snapshot.get("historical_series")
     if not isinstance(historical_series, dict):
@@ -95,6 +103,10 @@ def _validate_fcf_margin(ticker: str, snapshot: dict[str, Any], errors: list[str
     metrics = snapshot.get("metrics")
     if not isinstance(business_health, dict) or not isinstance(metrics, dict):
         return
+    margin = business_health.get("fcf_margin")
+    if isinstance(margin, dict) and margin.get("value") is None and "not meaningful" in str(margin.get("notes", "")).lower():
+        # Financial companies can have cash-flow inputs without a comparable FCF margin.
+        return
     free_cash_flow = _metric_value(metrics.get("free_cash_flow_ttm"))
     revenue = _metric_value(metrics.get("revenue_ttm"))
     if free_cash_flow is None or revenue in (None, 0):
@@ -105,6 +117,30 @@ def _validate_fcf_margin(ticker: str, snapshot: dict[str, Any], errors: list[str
         errors.append(f"{ticker}: fcf_margin is missing even though free_cash_flow_ttm and revenue_ttm are available.")
     elif not math.isclose(value, expected, rel_tol=1e-9, abs_tol=1e-6):
         errors.append(f"{ticker}: fcf_margin {value:.6f} does not match free_cash_flow_ttm / revenue_ttm {expected:.6f}.")
+
+
+def _validate_stock_details(ticker: str, snapshot: dict[str, Any], data_dir: Path, errors: list[str]) -> None:
+    path = snapshot.get("detail_path")
+    if not path:
+        return
+    if path != f"/open-data/snapshots/{ticker}.json":
+        errors.append(f"{ticker}: unexpected stock detail path.")
+        return
+    try:
+        detail = _load_json(data_dir / path.lstrip("/"))
+    except (OSError, ValueError):
+        errors.append(f"{ticker}: full stock detail export is missing or invalid.")
+        return
+    if not isinstance(detail, dict) or detail.get("detail_path"):
+        errors.append(f"{ticker}: full stock detail export is not a complete snapshot.")
+        return
+    for key in ("ticker", "generated_at", "business_health", "price_opportunity", "valuation", "metrics"):
+        if detail.get(key) != snapshot.get(key):
+            errors.append(f"{ticker}: full stock details and screening data disagree on {key}.")
+    full_history = detail.get("historical_series", {})
+    for key, rows in snapshot.get("historical_series", {}).items():
+        if rows != sorted(full_history.get(key, []), key=lambda row: row["as_of"])[-len(rows):] and rows:
+            errors.append(f"{ticker}: screening history does not match full {key} history.")
 
 
 def _market_session_group(snapshot: dict[str, Any]) -> str | None:
@@ -146,6 +182,7 @@ def validate_refresh(report: dict[str, Any], universe: Any, stocks: Any, history
 
     results = report.get("results") if isinstance(report.get("results"), list) else []
     result_tickers = {str(row.get("ticker", "")).upper() for row in results if isinstance(row, dict)}
+    result_by_ticker = {str(row.get("ticker", "")).upper(): row for row in results if isinstance(row, dict)}
     unsaved = sorted(
         str(row.get("ticker", "")).upper()
         for row in results
@@ -173,6 +210,7 @@ def validate_refresh(report: dict[str, Any], universe: Any, stocks: Any, history
 
     market_dates: list[str] = []
     for ticker, snapshot in sorted(stock_by_ticker.items()):
+        _validate_stock_details(ticker, snapshot, history_dir.parent.parent, errors)
         price_metrics = snapshot.get("price_opportunity")
         if not isinstance(price_metrics, dict):
             errors.append(f"{ticker}: price_opportunity is missing.")
@@ -222,6 +260,12 @@ def validate_refresh(report: dict[str, Any], universe: Any, stocks: Any, history
         "exported_count": len(stock_by_ticker),
         "market_as_of": market_as_of,
         "market_date_counts": dict(sorted(date_counts.items())),
+        "refresh_counts": dict(Counter(row.get("refresh_status", "not_reported") for row in results if isinstance(row, dict))),
+        "sec_check_counts": dict(Counter(row["sec_check_status"] for row in results if isinstance(row, dict) and row.get("sec_check_status"))),
+        "source_warnings": [{"ticker": row.get("ticker"), "notes": row["source_notes"]}
+                            for row in results if isinstance(row, dict) and row.get("source_notes")],
+        "data_dates": [_observation_dates(ticker, snapshot, result_by_ticker.get(ticker, {}))
+                       for ticker, snapshot in sorted(stock_by_ticker.items())],
         "errors": errors,
     }
 
@@ -235,6 +279,31 @@ def _write_summary(path: Path, result: dict[str, Any]) -> None:
         f"- Market data as of: **{result['market_as_of'] or 'Unavailable'}**",
         f"- Exported stocks: **{result['exported_count']} / {result['expected_count']}**",
     ]
+    counts = result.get("refresh_counts", {})
+    if any(key != "not_reported" for key in counts):
+        lines.extend([
+            f"- Refreshed: **{counts.get('refreshed', 0)}**",
+            f"- Verified unchanged: **{counts.get('verified_unchanged', 0)}**",
+            f"- Retained without source verification: **{counts.get('retained_unverified', 0)}**",
+        ])
+    if result.get("sec_check_counts"):
+        counts = result["sec_check_counts"]
+        lines.append(f"- SEC checks: **{counts.get('verified', 0)} verified**, **{counts.get('unavailable', 0)} unavailable**, **{counts.get('not_applicable', 0)} not applicable**")
+    lines.extend(["", "### Market dates", "", "| Price date | Stocks |", "| --- | ---: |",
+                  *[f"| {day} | {count} |" for day, count in result["market_date_counts"].items()]])
+    if result.get("source_warnings"):
+        lines.extend(["", "### Source checks requiring attention", "",
+                      "Validation can pass while saved observations are retained. Their data dates remain unchanged.", ""])
+        for row in result["source_warnings"]:
+            # Keep multiline provider errors in a single list item.
+            notes = " ".join(" ".join(str(note).split()) for note in row["notes"])
+            lines.append(f"- {row['ticker']}: {notes}")
+    if result.get("data_dates"):
+        lines.extend(["", "### Observation dates", "",
+                      "Financial metrics can cover different reporting periods; the date below is the latest available fundamental metric date.", "",
+                      "| Stock | Price date | Latest fundamental metric date |", "| --- | --- | --- |",
+                      *[f"| {row['ticker']} | {row['price_as_of'] or 'Unavailable'} | {row['latest_fundamental_as_of'] or 'Not reported'} |"
+                        for row in result["data_dates"]]])
     if result["errors"]:
         lines.extend(["", "### Errors", *[f"- {error}" for error in result["errors"]]])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")

@@ -41,6 +41,9 @@ jobs:
         working-directory: frontend
         run: npm run test:metrics
 
+      - name: Validate stock screening and detail exports
+        run: python3 scripts/validate_static_stock_assets.py
+
       - name: Validate revenue growth momentum
         run: >-
           python3 scripts/validate_revenue_growth_momentum.py

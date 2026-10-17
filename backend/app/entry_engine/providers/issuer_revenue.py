@@ -125,18 +125,33 @@ def load_issuer_revenue(symbol: str, *, root: Path = PROJECT_DIR) -> dict | None
     return seed
 
 
-def refresh_issuer_revenue(provider: Any, symbol: str, seed: dict, *, as_of: date | None = None) -> tuple[dict, list[str]]:
-    """Try one newer report weekly; retain the verified seed on source outages."""
+def issuer_revenue_check_due(symbol: str, seed: dict, *, as_of: date | None = None) -> bool:
+    """Use persisted attempt dates so scheduled runners share the weekly backoff."""
     today = as_of or date.today()
-    cache_name = f"issuer_revenue_check_{symbol}.json"
-    if provider.cache.get(cache_name, timedelta(days=7)) is not None:
-        return seed, []
+    if symbol not in SUPPORTED_ISSUERS:
+        return False
+    checked_at = seed.get("last_report_check", {}).get("checked_on")
+    try:
+        if checked_at and today - date.fromisoformat(checked_at) < timedelta(days=7):
+            return False
+    except (TypeError, ValueError):
+        pass
     rows = seed["facts"]["issuer"]["Revenues"]["units"]["USD"]
     latest = max(rows, key=lambda r: r["end"])
     year, quarter = latest["fy"] + (latest["fp"] == "Q4"), int(latest["fp"][1:]) % 4 + 1
     month = quarter * 3
-    if today < date(year, month, calendar.monthrange(year, month)[1]) + timedelta(days=20):
-        return seed, []
+    return today >= date(year, month, calendar.monthrange(year, month)[1]) + timedelta(days=20)
+
+
+def refresh_issuer_revenue(provider: Any, symbol: str, seed: dict, *, as_of: date | None = None) -> tuple[dict, list[str]]:
+    """Try one newer report weekly; retain verified facts on source outages."""
+    today = as_of or date.today()
+    cache_name = f"issuer_revenue_check_{symbol}.json"
+    if not issuer_revenue_check_due(symbol, seed, as_of=today) or provider.cache.get(cache_name, timedelta(days=7)) is not None:
+        return seed, seed.get("last_report_check", {}).get("notes", [])
+    rows = seed["facts"]["issuer"]["Revenues"]["units"]["USD"]
+    latest = max(rows, key=lambda r: r["end"])
+    year, quarter = latest["fy"] + (latest["fp"] == "Q4"), int(latest["fp"][1:]) % 4 + 1
     provider.cache.set(cache_name, {"checked_at": datetime.now(timezone.utc).isoformat()})
     try:
         if symbol == "B":
@@ -175,8 +190,12 @@ def refresh_issuer_revenue(provider: Any, symbol: str, seed: dict, *, as_of: dat
         by_period.update({(r["start"], r["end"]): r for r in imported})
         updated["facts"]["issuer"]["Revenues"]["units"]["USD"] = sorted(by_period.values(), key=lambda r: r["end"])
         updated["verified_on"] = today.isoformat()
-        path = PROJECT_DIR / "data/stocks/issuer_facts" / f"{symbol}.json"
-        path.write_text(json.dumps(updated, indent=2) + "\n")
-        return updated, []
+        updated["last_report_check"] = {"checked_on": today.isoformat(), "status": "updated"}
+        notes = []
     except Exception as exc:
-        return seed, [f"{symbol}: newer issuer revenue report unavailable; retained verified quarterly history: {exc}"]
+        updated = deepcopy(seed)
+        notes = [f"{symbol}: newer issuer revenue report unavailable; retained verified quarterly history: {exc}"]
+        updated["last_report_check"] = {"checked_on": today.isoformat(), "status": "retained_unverified", "notes": notes}
+    path = PROJECT_DIR / "data/stocks/issuer_facts" / f"{symbol}.json"
+    path.write_text(json.dumps(updated, indent=2) + "\n")
+    return updated, notes

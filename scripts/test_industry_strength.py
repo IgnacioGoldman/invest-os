@@ -186,7 +186,7 @@ class IndustryStrengthTests(unittest.TestCase):
             updated = {**self.histories, "P1": [*self.histories["P1"][:-1], self.histories["P1"][-1].model_copy(update={"close": 160})]}
             with (
                 patch("app.services.industry_strength.load_classifications", return_value=self.registry),
-                patch("refresh_static_prices.fetch_updated_history", side_effect=lambda provider, ticker, baseline: updated[ticker]),
+                patch("refresh_static_prices.fetch_updated_history", side_effect=lambda provider, ticker, baseline, **kwargs: updated[ticker]),
                 patch("refresh_static_prices.OpenDataProvider") as provider,
             ):
                 provider.return_value.fetch_next_earnings_release.return_value = None

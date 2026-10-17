@@ -45,6 +45,7 @@ jobs:
           python -m unittest discover -s scripts -p 'test_refresh_static_prices.py'
           python -m unittest discover -s scripts -p 'test_refresh_separation.py'
           python -m unittest discover -s scripts -p 'test_industry_strength.py'
+          python -m unittest discover -s scripts -p 'test_static_stock_assets.py'
 
       - name: Refresh deployed price data
         run: >-
