@@ -48,6 +48,7 @@ jobs:
           python -m unittest discover -s scripts -p 'test_revenue_history_repair.py'
           python -m unittest discover -s scripts -p 'test_validate_static_stock_refresh.py'
           python -m unittest discover -s scripts -p 'test_refresh_separation.py'
+          python -m unittest discover -s scripts -p 'test_industry_strength.py'
 
       - name: Refresh fundamentals using saved prices
         run: >-
@@ -85,7 +86,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/invest_os.sqlite frontend/public/data data/stocks/issuer_facts data/stocks/data-coverage.json
+          git add data/invest_os.sqlite frontend/public/data data/stocks/issuer_facts data/stocks/data-coverage.json data/stocks/benchmarks
           if git diff --cached --quiet; then
             echo "No tracked data changes to persist."
           else

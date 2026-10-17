@@ -49,6 +49,12 @@ _Is the current price close to a nearby support zone?_
 
 Compares the current price with a detected support zone from recent daily price history. Support means a clustered swing-low area with enough touches to look like a practical floor, not simply the lowest price in the range. Closer to 0% means the stock is nearer support; the window label shows which price range produced the signal. See [Support](metrics/support.md) for the calculation details.
 
+### Industry Relative Strength
+
+_How has the stock's industry performed compared with the wider market?_
+
+The stock detail card compares the equal-weight 1Y price return of tracked industry peers, excluding the selected stock, with the S&P 500 price index for supported USD listings. The difference is shown in percentage points: at least +5 pp is Ahead of market, at most −5 pp is Behind market, and values strictly between are In line with market. Missing comparable data, an unavailable market benchmark, or fewer than five eligible peers is Unclear. Every tag uses the same neutral gray dot and label; the value stays white. These observations describe price context rather than investment quality. The detail panel also compares the stock with its industry and shows absolute returns, the calculation, comparison chart, dates, and peer coverage. Both scheduled refreshes rebuild the calculation. See [Industry Relative Strength](metrics/industry-relative-performance.md) for the display, formula, tags, and data requirements.
+
 ## Valuation
 
 ### Forward P/E

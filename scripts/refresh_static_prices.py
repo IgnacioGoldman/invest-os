@@ -26,6 +26,7 @@ from app.entry_engine.open_data_metrics import (  # noqa: E402
 from app.entry_engine.open_data_models import HistoricalPricePoint, LatestPrice, OpenDataMetric, OpenDataSnapshot  # noqa: E402
 from app.entry_engine.valuation_refresh import reprice_valuation, saved_valuation_inputs  # noqa: E402
 from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
+from app.services.industry_strength import enrich_industry_strength, refresh_benchmark  # noqa: E402
 from app.services.storage import (  # noqa: E402
     DB_FILE,
     connect,
@@ -394,6 +395,8 @@ def refresh_prices(
             output_snapshots.append(fallback_snapshot)
             output_histories[ticker] = db_histories.get(ticker) or _load_static_price_history(data_dir, ticker)
 
+    output_snapshots = enrich_industry_strength(output_snapshots, output_histories, db_data_dir or data_dir)
+    output_rows = [snapshot.model_dump(mode="json") for snapshot in output_snapshots]
     _write_json(data_dir / "open-data" / "stocks.json", output_rows)
     market_dates = [
         str(row.get("price_opportunity", {}).get("current_price", {}).get("as_of"))[:10]
@@ -460,6 +463,7 @@ def main() -> int:
             cache_bust=args.cache_bust,
             workers=args.workers,
         )
+    refresh_benchmark(db_data_dir)
     report = refresh_prices(snapshots, data_dir, tickers, workers=args.workers, db_data_dir=db_data_dir)
     _write_json(args.output, report)
     print(json.dumps(report, indent=2))

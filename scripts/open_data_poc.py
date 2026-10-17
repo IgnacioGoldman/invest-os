@@ -34,6 +34,7 @@ from app.services.storage import (  # noqa: E402
     replace_stock_sec_refresh_state,
 )
 from app.services.stock_data_quality import fundamental_gap_reasons, retain_verified_history  # noqa: E402
+from app.services.industry_strength import rebuild_saved_industry_strength  # noqa: E402
 
 
 YAHOO_MOST_ACTIVE_URL = "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved"
@@ -637,6 +638,8 @@ def main() -> None:
 
     if args.ticker:
         result = _collect_ticker(provider, args.ticker, save, include_analysis=args.include_analysis, reuse_saved_prices=args.reuse_saved_prices)
+        if save:
+            rebuild_saved_industry_strength(get_settings().data_dir)
         output = json.dumps(result, indent=2, sort_keys=False)
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -792,6 +795,9 @@ def main() -> None:
                     record_result(index, item, None, exc)
                 logger.info("[%s/%s] Finished %s", completed, len(work_items), ticker)
                 checkpoint(completed)
+
+    if save:
+        rebuild_saved_industry_strength(get_settings().data_dir)
 
     report = _build_report(
         mode=mode,

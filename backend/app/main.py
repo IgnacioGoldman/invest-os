@@ -17,6 +17,7 @@ from app.services.open_data_stock_store import (
     save_stock_snapshot_to_db,
 )
 from app.services.refresh_jobs import RefreshJob, list_refresh_jobs, start_refresh_job
+from app.services.industry_strength import rebuild_saved_industry_strength
 
 
 class RefreshRequest(BaseModel):
@@ -121,7 +122,8 @@ def refresh_open_data_stock(ticker: str) -> OpenDataSnapshot:
     try:
         snapshot = OpenDataProvider(force_refresh=True, include_filing_details=False).get_open_data_snapshot(ticker)
         save_stock_snapshot_to_db(get_settings(), snapshot)
-        return snapshot
+        updated = rebuild_saved_industry_strength(get_settings().data_dir)
+        return next((row for row in updated if row.ticker == snapshot.ticker), snapshot)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:

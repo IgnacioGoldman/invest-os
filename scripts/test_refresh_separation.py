@@ -159,6 +159,7 @@ class RefreshSeparationTests(unittest.TestCase):
                 patch("sys.argv", ["refresh_static_prices.py", "--db-data-dir", str(root / "db"),
                     "--data-dir", str(root / "static"), "--universe", str(universe), "--output", str(root / "report.json")]),
                 patch("refresh_static_prices.hydrate_deployed_data", side_effect=AssertionError("Pages is unavailable")) as download,
+                patch("refresh_static_prices.refresh_benchmark", return_value=[]),
                 patch.object(OpenDataProvider, "fetch_price_history_since", return_value=NEW_HISTORY),
                 patch.object(OpenDataProvider, "fetch_next_earnings_release", return_value=None),
                 patch.object(OpenDataProvider, "fetch_forward_eps_estimate", return_value=None),

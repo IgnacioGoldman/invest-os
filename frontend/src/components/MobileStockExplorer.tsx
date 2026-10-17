@@ -1,5 +1,7 @@
 import { calculateRevenueGrowthMomentum, formatMomentumPp, revenueMomentumDetail, REVENUE_MOMENTUM_DESCRIPTION } from "../revenueGrowthMomentum";
 import { MoneyPanel } from "./MoneyPanel";
+import { IndustryStrengthDetail } from "./IndustryStrengthDetail";
+import { INDUSTRY_STRENGTH_COPY, industryStrengthContext, industryStrengthSignal } from "../industryStrength";
 import { prepareStockAnalysis, type StockAnalysisBrief } from "../aiAnalysis";
 import { StockAnalysisDialog, type AnalysisCopyStatus } from "./StockAnalysisDialog";
 import { FilterSelector, type FilterShortcut } from "./FilterSelector";
@@ -83,6 +85,7 @@ type GrowthDetailKey =
   | "fcf_margin"
   | "upcoming_earnings"
   | "support"
+  | "industry_strength"
   | "forward_pe";
 export type FilterKey =
   | "revenue"
@@ -130,6 +133,7 @@ type ChartRange = "1W" | "1M" | "3M" | "6M" | "1Y" | "2Y" | "5Y" | "ALL";
 type MetricKind = "percent" | "ratio" | "compact" | "price" | "days";
 
 const GROWTH_DETAIL_COPY: Record<GrowthDetailKey, { title: string; question: string; description: string }> = {
+  industry_strength: INDUSTRY_STRENGTH_COPY,
   revenue: {
     title: "Latest Revenue Growth YoY",
     question: "Is the business growing right now?",
@@ -1624,7 +1628,8 @@ function MobileGrowthSignalButton({
   );
 }
 
-function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataStockSnapshot; detailKey: GrowthDetailKey }) {
+function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot: OpenDataStockSnapshot; detailKey: GrowthDetailKey; onOpenPeer: (ticker: string) => void }) {
+  if (detailKey === "industry_strength") return <IndustryStrengthDetail snapshot={snapshot} onOpenPeer={onOpenPeer} />;
   const copy = GROWTH_DETAIL_COPY[detailKey];
   const revenueDetail = revenueGrowthDetail(snapshot);
   const momentum = revenueMomentum(snapshot);
@@ -1787,7 +1792,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey }: { snapshot: OpenDataSt
   );
 }
 
-function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; onBack: () => void }) {
+function StockDetail({ snapshot, onBack, onOpenPeer }: { snapshot: OpenDataStockSnapshot; onBack: () => void; onOpenPeer: (ticker: string) => void }) {
   const [activeGrowthDetail, setActiveGrowthDetail] = useState<GrowthDetailKey>("revenue");
   const [points, setPoints] = useState<OpenDataPricePoint[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1805,6 +1810,7 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
   const momentum = revenueMomentum(snapshot);
   const support = closestSupport(snapshot);
   const supportStatus = supportSignal(support?.value);
+  const industryContext = industryStrengthContext(snapshot);
 
   useEffect(() => {
     let active = true;
@@ -1902,9 +1908,17 @@ function StockDetail({ snapshot, onBack }: { snapshot: OpenDataStockSnapshot; on
             value={support?.window ?? "No zone"}
             onClick={() => setActiveGrowthDetail("support")}
           />
+          <MobileGrowthSignalButton
+            active={activeGrowthDetail === "industry_strength"}
+            className="mobile-support-signal"
+            label={INDUSTRY_STRENGTH_COPY.title}
+            signal={{ ...industryStrengthSignal(industryContext), label: `1Y · ${industryStrengthSignal(industryContext).label}` }}
+            value={formatMomentumPp(industryContext?.value ?? null)}
+            onClick={() => setActiveGrowthDetail("industry_strength")}
+          />
         </section>
 
-        <MobileGrowthDetailPanel snapshot={snapshot} detailKey={activeGrowthDetail} />
+        <MobileGrowthDetailPanel snapshot={snapshot} detailKey={activeGrowthDetail} onOpenPeer={onOpenPeer} />
 
         <footer className="mobile-detail-footer">
           <span>Updated {new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(snapshot.generated_at))}</span>
@@ -2359,7 +2373,7 @@ export function MobileStockExplorer({
   if (detailOpen && selectedSnapshot) {
     return (
       <div className="mobile-stock-app">
-        <StockDetail snapshot={selectedSnapshot} onBack={closeDetail} />
+        <StockDetail snapshot={selectedSnapshot} onBack={closeDetail} onOpenPeer={openDetail} />
       </div>
     );
   }

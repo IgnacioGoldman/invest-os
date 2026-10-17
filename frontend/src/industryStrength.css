@@ -1,0 +1,28 @@
+.industry-strength-detail { min-width: 0; }
+.industry-strength-detail > * { min-width: 0; }
+.industry-strength-detail h3 { color: var(--mobile-text); font-size: 0.95rem; margin: 0 0 10px; }
+.industry-return-row { align-items: center; display: flex; gap: 12px; justify-content: space-between; }
+.industry-return-row > span { color: var(--mobile-muted); font-size: 0.82rem; }
+.industry-return-row > strong { color: var(--mobile-text); font-size: 1rem; }
+.industry-chart-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
+.industry-chart-legend > span { align-items: center; color: var(--mobile-muted); display: flex; font-size: 0.72rem; gap: 5px; }
+.industry-chart-legend i { background: var(--industry-line); border-radius: 2px; height: 3px; width: 14px; }
+.industry-series-stock { --industry-line: var(--mobile-text); }
+.industry-series-industry { --industry-line: #7cbcff; }
+.industry-series-market { --industry-line: #c2a8ed; }
+.industry-comparison-chart .industry-chart-line { fill: none; stroke: var(--industry-line); stroke-width: 2.4; }
+.industry-chart-cursor { stroke: var(--mobile-muted); stroke-dasharray: 4 4; }
+.industry-chart-values { color: var(--mobile-muted); font-size: 0.73rem; font-variant-numeric: tabular-nums; line-height: 1.5; }
+.industry-peer-list { border-top: 1px solid var(--mobile-border); padding: 16px 0; }
+.industry-peer-list > p { color: var(--mobile-muted); font-size: 0.8rem; }
+.industry-peer-list table { border-collapse: collapse; min-width: 0; table-layout: fixed; width: 100%; }
+.industry-peer-list th, .industry-peer-list td { background: transparent; border-bottom: 1px solid var(--mobile-border); color: var(--mobile-text); font-size: 0.82rem; padding: 10px 0; text-align: left; text-transform: none; white-space: normal; }
+.industry-peer-list thead th:last-child { width: 100px; }
+.industry-peer-list th { font-weight: 600; }
+.industry-peer-list td, .industry-peer-list thead th:last-child { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.industry-peer-list button { background: transparent; border: 0; color: inherit; cursor: pointer; font: inherit; padding: 0; text-align: inherit; }
+.industry-peer-list small { color: var(--mobile-muted); display: block; font-size: 0.72rem; font-weight: 400; margin-top: 4px; overflow-wrap: anywhere; }
+.industry-selected-stock { background: var(--mobile-blue-soft); }
+.industry-method a { color: var(--mobile-blue); }
+.industry-method details { color: var(--mobile-muted); font-size: 0.8rem; line-height: 1.5; }
+.industry-method summary { cursor: pointer; }

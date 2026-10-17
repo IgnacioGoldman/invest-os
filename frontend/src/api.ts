@@ -1,3 +1,5 @@
+import type { IndustryStrength } from "./industryStrength";
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 const DATA_BASE = trimTrailingSlash(import.meta.env.VITE_STATIC_DATA_BASE_URL ?? `${import.meta.env.BASE_URL}data`);
 export const STATIC_DATA_MODE = import.meta.env.VITE_DATA_MODE === "static";
@@ -86,6 +88,7 @@ export type OpenDataStockSnapshot = {
   sector?: string | null;
   industry?: string | null;
   source: string;
+  industry_relative_strength?: IndustryStrength | null;
   generated_at: string;
   business_health: Record<string, OpenDataMetric>;
   price_opportunity: Record<string, OpenDataMetric>;

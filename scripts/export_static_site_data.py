@@ -13,7 +13,8 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from app.entry_engine.open_data_models import HistoricalPricePoint  # noqa: E402
+from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataSnapshot  # noqa: E402
+from app.services.industry_strength import enrich_industry_strength  # noqa: E402
 from app.entry_engine.utils.file_storage import load_stock_universe  # noqa: E402
 from app.services.open_data_stock_store import load_cached_price_history  # noqa: E402
 from app.services.storage import DB_FILE, init_db, strip_deprecated_stock_metrics_payload  # noqa: E402
@@ -142,6 +143,12 @@ def export_static_site_data(data_dir: Path, output_dir: Path, universe_path: Pat
         if active:
             snapshots = [snapshot for snapshot in snapshots if snapshot["ticker"] in active]
         loaded = {snapshot["ticker"] for snapshot in snapshots}
+        histories = {ticker: _load_price_history(conn, ticker) for ticker in sorted(loaded)}
+        snapshots = [snapshot.model_dump(mode="json") for snapshot in enrich_industry_strength(
+            [OpenDataSnapshot.model_validate(row) for row in snapshots],
+            {ticker: [HistoricalPricePoint.model_validate(point) for point in points] for ticker, points in histories.items()},
+            data_dir,
+        )]
 
         _write_json(output_dir / "open-data" / "stocks.json", snapshots)
         _write_json(output_dir / "stocks" / "universe.json", _build_universe_rows(universe_path, loaded, active or loaded))
@@ -155,7 +162,7 @@ def export_static_site_data(data_dir: Path, output_dir: Path, universe_path: Pat
             },
         )
         for ticker in sorted(loaded):
-            _write_json(output_dir / "open-data" / "price-history" / f"{ticker}.json", _load_price_history(conn, ticker))
+            _write_json(output_dir / "open-data" / "price-history" / f"{ticker}.json", histories[ticker])
     finally:
         conn.close()
 

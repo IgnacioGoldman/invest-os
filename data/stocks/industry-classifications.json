@@ -1,0 +1,786 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-10-17",
+  "source": "Invest OS business peer grouping v1",
+  "notes": "House peer groups for price context, not licensed GICS classifications. Original labels are retained. Original per-stock vendor provenance was not recorded in the saved universe. Business-model corrections and normalized groups are explicit; new or changed input classifications require review. Groups may contain diversified businesses and are limited to the tracked sample.",
+  "stocks": {
+    "INOD": {
+      "sector": "Technology",
+      "industry": "IT Services",
+      "original_sector": "Technology",
+      "original_industry": "Information Technology Services",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "ORCL": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Software",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "CRM": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Software",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "AZN": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Drug Manufacturers",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "AXFO.ST": {
+      "sector": "Consumer Defensive",
+      "industry": "Grocery Retail",
+      "original_sector": "Consumer Defensive",
+      "original_industry": "Grocery Stores",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "SE",
+      "currency": "SEK",
+      "sources": []
+    },
+    "NIBE-B.ST": {
+      "sector": "Industrials",
+      "industry": "Building Products",
+      "original_sector": "Industrials",
+      "original_industry": "Building Products & Equipment",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "SE",
+      "currency": "SEK",
+      "sources": []
+    },
+    "NFLX": {
+      "sector": "Communication Services",
+      "industry": "Entertainment",
+      "original_sector": "Communication Services",
+      "original_industry": "Entertainment",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "UBER": {
+      "sector": "Industrials",
+      "industry": "Passenger Transport Platforms",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Internet Content & Information",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "V": {
+      "sector": "Financials",
+      "industry": "Payment Networks",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Business Services",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "MA": {
+      "sector": "Financials",
+      "industry": "Payment Networks",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Business Services",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "CALM": {
+      "sector": "Consumer Defensive",
+      "industry": "Food Production",
+      "original_sector": "Consumer Defensive",
+      "original_industry": "Farm Products",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "DXCM": {
+      "sector": "Healthcare",
+      "industry": "Medical Devices",
+      "original_sector": "Healthcare",
+      "original_industry": "Medical Devices",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "MSTR": {
+      "sector": "Financials",
+      "industry": "Digital Asset Treasury",
+      "original_sector": "Technology",
+      "original_industry": "Software",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": [
+        "https://software.strategy.com/company"
+      ]
+    },
+    "MELI": {
+      "sector": "Consumer Cyclical",
+      "industry": "Internet Retail",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Internet Retail",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "MSFT": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Software",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "AAPL": {
+      "sector": "Technology",
+      "industry": "Consumer Electronics",
+      "original_sector": "Technology",
+      "original_industry": "Consumer Electronics",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "META": {
+      "sector": "Communication Services",
+      "industry": "Internet Platforms",
+      "original_sector": "Communication Services",
+      "original_industry": "Internet Content & Information",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "GOOG": {
+      "sector": "Communication Services",
+      "industry": "Internet Platforms",
+      "original_sector": "Communication Services",
+      "original_industry": "Internet Content & Information",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "AMZN": {
+      "sector": "Consumer Cyclical",
+      "industry": "Internet Retail",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Internet Retail",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "NVDA": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "TSLA": {
+      "sector": "Consumer Cyclical",
+      "industry": "Automobiles",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Auto Manufacturers",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "DT": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Software",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "DDOG": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Software",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "YPF": {
+      "sector": "Energy",
+      "industry": "Integrated Oil & Gas",
+      "original_sector": "Energy",
+      "original_industry": "Integrated Oil & Gas",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "PLTR": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "APP": {
+      "sector": "Communication Services",
+      "industry": "Advertising Technology",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Programming Data Processing",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": [
+        "https://www.applovin.com/en/about"
+      ]
+    },
+    "LLY": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "MU": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "TER": {
+      "sector": "Technology",
+      "industry": "Semiconductor Equipment",
+      "original_sector": "Industrials",
+      "original_industry": "Electrical Products",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "ADI": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "AVGO": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "CIEN": {
+      "sector": "Technology",
+      "industry": "Communications Equipment",
+      "original_sector": "Utilities",
+      "original_industry": "Telecommunications Equipment",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "VRT": {
+      "sector": "Industrials",
+      "industry": "Electrical Equipment",
+      "original_sector": "Technology",
+      "original_industry": "Industrial Machinery/Components",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "AMD": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "WDC": {
+      "sector": "Technology",
+      "industry": "Data Storage",
+      "original_sector": "Technology",
+      "original_industry": "Electronic Components",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "NVS": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "ABBV": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "AMGN": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Biological Products (No Diagnostic Substances)",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "ANET": {
+      "sector": "Technology",
+      "industry": "Communications Equipment",
+      "original_sector": "Communication Services",
+      "original_industry": "Computer Communications Equipment",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "AMAT": {
+      "sector": "Technology",
+      "industry": "Semiconductor Equipment",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": [
+        "https://www.appliedmaterials.com/us/en/about.html"
+      ]
+    },
+    "TXN": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "BMY": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "PWR": {
+      "sector": "Industrials",
+      "industry": "Engineering & Construction",
+      "original_sector": "Industrials",
+      "original_industry": "Engineering & Construction",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "HWM": {
+      "sector": "Industrials",
+      "industry": "Aerospace & Defense",
+      "original_sector": "Industrials",
+      "original_industry": "Metal Fabrications",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "MPC": {
+      "sector": "Energy",
+      "industry": "Oil Refining",
+      "original_sector": "Energy",
+      "original_industry": "Integrated oil Companies",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "ADBE": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "B": {
+      "sector": "Materials",
+      "industry": "Precious Metals Mining",
+      "original_sector": "Materials",
+      "original_industry": "Precious Metals",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "HL": {
+      "sector": "Materials",
+      "industry": "Precious Metals Mining",
+      "original_sector": "Industrials",
+      "original_industry": "Mining & Quarrying of Nonmetallic Minerals (No Fuels)",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "LRCX": {
+      "sector": "Technology",
+      "industry": "Semiconductor Equipment",
+      "original_sector": "Technology",
+      "original_industry": "Industrial Machinery/Components",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "VLO": {
+      "sector": "Energy",
+      "industry": "Oil Refining",
+      "original_sector": "Energy",
+      "original_industry": "Integrated oil Companies",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "STX": {
+      "sector": "Technology",
+      "industry": "Data Storage",
+      "original_sector": "Technology",
+      "original_industry": "Electronic Components",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "SPGI": {
+      "sector": "Financials",
+      "industry": "Financial Data & Ratings",
+      "original_sector": "Financials",
+      "original_industry": "Finance: Consumer Services",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": [
+        "https://www.spglobal.com/en/capabilities"
+      ]
+    },
+    "ISRG": {
+      "sector": "Healthcare",
+      "industry": "Medical Devices",
+      "original_sector": "Healthcare",
+      "original_industry": "Industrial Specialties",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "MNST": {
+      "sector": "Consumer Defensive",
+      "industry": "Beverages",
+      "original_sector": "Consumer Defensive",
+      "original_industry": "Beverages (Production/Distribution)",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "VRTX": {
+      "sector": "Healthcare",
+      "industry": "Biopharmaceuticals",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Pharmaceutical Preparations",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "CAT": {
+      "sector": "Industrials",
+      "industry": "Heavy Machinery",
+      "original_sector": "Industrials",
+      "original_industry": "Construction/Ag Equipment/Trucks",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "DVN": {
+      "sector": "Energy",
+      "industry": "Oil & Gas Exploration & Production",
+      "original_sector": "Energy",
+      "original_industry": "Oil & Gas Production",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "AFRM": {
+      "sector": "Financials",
+      "industry": "Consumer Lending",
+      "original_sector": "Financials",
+      "original_industry": "Finance: Consumer Services",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "CSCO": {
+      "sector": "Technology",
+      "industry": "Communications Equipment",
+      "original_sector": "Communication Services",
+      "original_industry": "Computer Communications Equipment",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "KO": {
+      "sector": "Consumer Defensive",
+      "industry": "Beverages",
+      "original_sector": "Consumer Defensive",
+      "original_industry": "Beverages (Production/Distribution)",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "ABNB": {
+      "sector": "Consumer Cyclical",
+      "industry": "Travel Platforms",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Diversified Commercial Services",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "SYK": {
+      "sector": "Healthcare",
+      "industry": "Medical Devices",
+      "original_sector": "Healthcare",
+      "original_industry": "Medical/Dental Instruments",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "HON": {
+      "sector": "Industrials",
+      "industry": "Aerospace & Defense",
+      "original_sector": "Industrials",
+      "original_industry": "Aerospace",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "BSX": {
+      "sector": "Healthcare",
+      "industry": "Medical Devices",
+      "original_sector": "Healthcare",
+      "original_industry": "Medical/Dental Instruments",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "KLAC": {
+      "sector": "Technology",
+      "industry": "Semiconductor Equipment",
+      "original_sector": "Technology",
+      "original_industry": "Electronic Components",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "OXY": {
+      "sector": "Energy",
+      "industry": "Oil & Gas Exploration & Production",
+      "original_sector": "Energy",
+      "original_industry": "Oil & Gas Production",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "BX": {
+      "sector": "Financials",
+      "industry": "Investment Managers",
+      "original_sector": "Financials",
+      "original_industry": "Investment Managers",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "MRVL": {
+      "sector": "Technology",
+      "industry": "Semiconductors",
+      "original_sector": "Technology",
+      "original_industry": "Semiconductors",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "COP": {
+      "sector": "Energy",
+      "industry": "Oil & Gas Exploration & Production",
+      "original_sector": "Energy",
+      "original_industry": "Integrated oil Companies",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "TGT": {
+      "sector": "Consumer Cyclical",
+      "industry": "General Merchandise Retail",
+      "original_sector": "Consumer Cyclical",
+      "original_industry": "Department/Specialty Retail Stores",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "MDT": {
+      "sector": "Healthcare",
+      "industry": "Medical Devices",
+      "original_sector": "Healthcare",
+      "original_industry": "Biotechnology: Electromedical & Electrotherapeutic Apparatus",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "PANW": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer peripheral equipment",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "PEP": {
+      "sector": "Consumer Defensive",
+      "industry": "Beverages",
+      "original_sector": "Consumer Defensive",
+      "original_industry": "Beverages (Production/Distribution)",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "UNP": {
+      "sector": "Industrials",
+      "industry": "Railroads",
+      "original_sector": "Industrials",
+      "original_industry": "Railroads",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "LMT": {
+      "sector": "Industrials",
+      "industry": "Aerospace & Defense",
+      "original_sector": "Industrials",
+      "original_industry": "Military/Government/Technical",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "INTU": {
+      "sector": "Technology",
+      "industry": "Software",
+      "original_sector": "Technology",
+      "original_industry": "Computer Software: Prepackaged Software",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    },
+    "PH": {
+      "sector": "Industrials",
+      "industry": "Industrial Machinery",
+      "original_sector": "Industrials",
+      "original_industry": "Metal Fabrications",
+      "original_classification_source": "data/stocks/stocks.json (original vendor not recorded)",
+      "market": "US",
+      "currency": "USD",
+      "sources": []
+    }
+  }
+}

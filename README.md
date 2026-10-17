@@ -42,6 +42,8 @@ The price workflow refreshes daily candles and recalculates price-dependent metr
 - `data/invest_os.sqlite`: local SQLite cache for stock snapshots, metric series, derived signals, and price history.
 - `data/stocks/stocks.json`: stock universe used by refresh.
 - `data/stocks/derived_signals/latest.json`: deterministic derived stock signals.
+- `data/stocks/industry-classifications.json`: explicit business peer groups with original labels and review metadata.
+- `data/stocks/benchmarks/sp500.json`: saved S&P 500 price history used by Industry Relative Strength, recalculated during price and fundamentals refreshes. The neutral stock-detail card shows the tracked industry's 1Y return versus the market; its detail view includes stock versus industry, a comparison chart, peer returns, coverage, and dates. See [metric documentation](docs/metrics/industry-relative-performance.md).
 
 ## Useful Scripts
 

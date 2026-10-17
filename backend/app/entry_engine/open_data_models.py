@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from datetime import datetime, timezone
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -95,6 +95,7 @@ class OpenDataSnapshot(BaseModel):
     sector: str | None = None
     industry: str | None = None
     price_currency: str | None = None
+    industry_relative_strength: dict[str, Any] | None = None
     # Denominators already converted to the listing currency, plus listing
     # shares and expected EPS. Repricing these inputs never requires SEC data.
     valuation_inputs: dict[str, OpenDataMetric] = Field(default_factory=dict)

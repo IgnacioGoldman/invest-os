@@ -11,6 +11,7 @@ from app.entry_engine.providers.open_data_provider import OpenDataProvider
 from app.services.open_data_stock_store import load_active_tickers, load_db_or_backfill_stock_snapshots, save_stock_snapshot_to_db
 from app.services.storage import connect, replace_stock_derived_signals_file
 from app.services.stock_derived_signals import StockDerivedSignalsFile, build_stock_derived_signals_file
+from app.services.industry_strength import rebuild_saved_industry_strength
 
 
 ExplorationProgressCallback = Callable[[str, str, int, int], None]
@@ -109,4 +110,5 @@ def refresh_exploration_data(
         replace_stock_derived_signals_file(conn, stock_signals)
         conn.commit()
 
+    rebuild_saved_industry_strength(settings.data_dir)
     return warnings
