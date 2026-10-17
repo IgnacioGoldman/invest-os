@@ -1,4 +1,4 @@
-import { Check, Pencil, Plus, SlidersHorizontal, Trash2, X } from "lucide-react";
+import { CalendarDays, ChartNoAxesCombined, Check, Layers3, Pencil, Plus, SlidersHorizontal, Trash2, TrendingUp, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import "../filterSelector.css";
 
@@ -7,7 +7,26 @@ export type FilterShortcut = {
   name: string;
   isDefault: boolean;
   badgeCount?: number;
+  identity?: "support" | "pullback" | "earnings";
+  description?: string;
 };
+
+function FilterIdentity({ filter, allStocks = false }: { filter?: FilterShortcut; allStocks?: boolean }) {
+  const identity = allStocks ? "all" : filter?.identity ?? "custom";
+  const Icon = identity === "all" ? Layers3 : identity === "support" ? TrendingUp
+    : identity === "pullback" ? ChartNoAxesCombined : identity === "earnings" ? CalendarDays : SlidersHorizontal;
+  // Keep a custom filter's accent stable across renames and list reordering.
+  const accent = identity === "custom"
+    ? `custom-${Array.from(filter?.key ?? "").reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0, 0) % 3}`
+    : identity;
+  return <>
+    <span className={`filter-picker-avatar filter-accent-${accent}`} aria-hidden="true"><Icon size={23} strokeWidth={1.8} /></span>
+    <span className="filter-picker-copy">
+      <span className="filter-picker-name">{allStocks ? "All stocks" : filter?.name}</span>
+      <span className="filter-picker-description">{allStocks ? "Explore every company" : filter?.description ?? "Your saved screening conditions"}</span>
+    </span>
+  </>;
+}
 
 type Props = {
   userId: string | null;
@@ -44,6 +63,7 @@ export function FilterSelector({ userId, filters, activeKey, activeName, onSelec
   const dialogRef = useRef<HTMLDialogElement>(null);
   const selectorRef = useRef<HTMLButtonElement>(null);
   const mutationRef = useRef(false);
+  const swipeRef = useRef<{ x: number; y: number } | null>(null);
   const rows = isEditing ? filters : filters.filter((filter) => !hiddenKeys.includes(filter.key));
   const hasUnsavedFilter = Boolean(activeName && !activeKey);
 
@@ -53,6 +73,7 @@ export function FilterSelector({ userId, filters, activeKey, activeName, onSelec
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     dialog?.showModal();
+    dialog?.querySelector<HTMLElement>("#filter-picker-title")?.focus({ preventScroll: true });
     return () => {
       dialog?.close();
       document.body.style.overflow = previousOverflow;
@@ -136,35 +157,50 @@ export function FilterSelector({ userId, filters, activeKey, activeName, onSelec
           onCancel={(event) => { event.preventDefault(); close(); }}
           onClick={(event) => { if (event.currentTarget === event.target) close(); }}>
           <div className="filter-picker-content">
+            <div className="filter-picker-drag-area"
+              onTouchStart={(event) => {
+                const touch = event.touches[0];
+                swipeRef.current = event.touches.length === 1 ? { x: touch.clientX, y: touch.clientY } : null;
+              }}
+              onTouchEnd={(event) => {
+                const start = swipeRef.current;
+                swipeRef.current = null;
+                const touch = event.changedTouches[0];
+                if (start && touch.clientY - start.y > 60 && Math.abs(touch.clientX - start.x) < 60) close();
+              }}
+              onTouchCancel={() => { swipeRef.current = null; }}>
             <div className="mobile-sheet-handle" aria-hidden="true" />
             <header className="filter-picker-header">
-              <h2 id="filter-picker-title">Filter stocks</h2>
-              <button type="button" className="filter-picker-mode" disabled={pendingAction !== null} onClick={() => {
+              <h2 id="filter-picker-title" tabIndex={-1}>Filter stocks</h2>
+              <button type="button" className="filter-picker-mode" aria-pressed={isEditing} disabled={pendingAction !== null} onClick={() => {
                 setIsEditing(!isEditing);
                 setRenamingKey(null);
                 setError(null);
-              }}>{isEditing ? "Done" : "Edit"}</button>
+              }}>{isEditing ? <Check size={18} aria-hidden="true" /> : <Pencil size={18} aria-hidden="true" />}{isEditing ? "Done" : "Edit"}</button>
+              <button type="button" className="filter-picker-icon filter-picker-close" aria-label="Close filters"
+                disabled={pendingAction !== null} onClick={close}><X size={22} aria-hidden="true" /></button>
             </header>
+            </div>
             <div className="filter-picker-scroll">
               <ul className="filter-picker-list" aria-label="Stock filters">
                 <li className="filter-picker-row">
                   {isEditing ? (
                     <div className={`filter-picker-choice ${activeName ? "" : "active"}`}>
-                      <span className="filter-picker-name">All stocks</span>
-                      <span className="filter-picker-kind">Built-in</span>
-                      <span className="filter-picker-selection">{!activeName && <Check size={22} aria-hidden="true" />}</span>
+                      <FilterIdentity allStocks />
+                      <span className="filter-picker-meta"><span className="filter-picker-kind">Built-in</span>
+                        <span className="filter-picker-kind">Always shown</span></span>
                     </div>
                   ) : (
                     <button type="button" className={`filter-picker-choice ${activeName ? "" : "active"}`} aria-pressed={!activeName}
                       onClick={() => { onClear(); close(); }}>
-                      <span className="filter-picker-name">All stocks</span>
-                      <span className="filter-picker-kind">Built-in</span>
-                      <span className="filter-picker-selection">{!activeName && <Check size={22} aria-hidden="true" />}</span>
+                      <FilterIdentity allStocks />
+                      <span className="filter-picker-meta"><span className="filter-picker-kind">Built-in</span>
+                        {!activeName && <Check size={20} aria-hidden="true" />}</span>
                     </button>
                   )}
                 </li>
                 {rows.map((filter) => (
-                  <li className={`filter-picker-row ${isEditing ? "editing" : ""}`} key={filter.key}>
+                  <li className={`filter-picker-row ${isEditing ? "editing" : ""} ${isEditing && hiddenKeys.includes(filter.key) ? "is-hidden" : ""}`} key={filter.key}>
                     {isEditing ? (
                       <>
                         {renamingKey === filter.key ? (
@@ -179,7 +215,7 @@ export function FilterSelector({ userId, filters, activeKey, activeName, onSelec
                         ) : (
                           <>
                             <div className="filter-picker-details">
-                              <span className="filter-picker-name">{filter.name}</span>
+                              <FilterIdentity filter={filter} />
                               <span className="filter-picker-kind">{filter.isDefault ? "Built-in" : "Custom"}</span>
                             </div>
                             <div className="filter-picker-controls">
@@ -205,40 +241,38 @@ export function FilterSelector({ userId, filters, activeKey, activeName, onSelec
                     ) : (
                       <button type="button" className={`filter-picker-choice ${activeKey === filter.key ? "active" : ""}`}
                         aria-pressed={activeKey === filter.key} onClick={() => { onSelect(filter.key); close(); }}>
-                        <span className="filter-picker-name">{filter.name}</span>
-                        <span className="filter-picker-kind">{filter.isDefault ? "Built-in" : "Custom"}</span>
-                        <span className="filter-picker-selection">{activeKey === filter.key && <Check size={22} aria-hidden="true" />}</span>
+                        <FilterIdentity filter={filter} />
+                        <span className="filter-picker-meta"><span className="filter-picker-kind">{filter.isDefault ? "Built-in" : "Custom"}</span>
+                          {activeKey === filter.key && <Check size={20} aria-hidden="true" />}</span>
                       </button>
                     )}
                   </li>
                 ))}
                 {hasUnsavedFilter && (
-                  <li className="filter-picker-row">
+                  <li className={`filter-picker-row ${isEditing ? "editing" : ""}`}>
                     {isEditing ? (
                       <>
-                        <div className="filter-picker-details"><span className="filter-picker-name">{activeName}</span><span className="filter-picker-kind">Custom</span></div>
+                        <div className="filter-picker-details"><FilterIdentity filter={{ key: "unsaved", name: activeName ?? "Custom filter", isDefault: false, description: "Your current screening conditions" }} /><span className="filter-picker-kind">Custom</span></div>
                         <button type="button" className="filter-picker-icon" title="Edit conditions" aria-label="Edit current filter conditions"
                           disabled={pendingAction !== null} onClick={() => { close(); onEditCurrent(); }}><SlidersHorizontal size={19} /></button>
                       </>
                     ) : (
                       <button type="button" className="filter-picker-choice active" aria-pressed="true" onClick={close}>
-                        <span className="filter-picker-name">{activeName}</span><span className="filter-picker-kind">Custom</span>
-                        <span className="filter-picker-selection"><Check size={22} aria-hidden="true" /></span>
+                        <FilterIdentity filter={{ key: "unsaved", name: activeName ?? "Custom filter", isDefault: false, description: "Your current screening conditions" }} />
+                        <span className="filter-picker-meta"><span className="filter-picker-kind">Custom</span><Check size={20} aria-hidden="true" /></span>
                       </button>
                     )}
-                  </li>
-                )}
-                {isEditing && (
-                  <li className="filter-picker-row">
-                    <button type="button" className="filter-picker-new" onClick={() => openBuilder()} disabled={pendingAction !== null}>
-                      <Plus size={21} aria-hidden="true" />New filter
-                    </button>
                   </li>
                 )}
               </ul>
               {error && <p className="mobile-personal-error" role="alert">{error}</p>}
               {pendingAction && <p className="filter-picker-hint" role="status">{pendingAction === "delete" ? "Deleting filter…" : "Saving name…"}</p>}
             </div>
+            <footer className="filter-picker-footer">
+              <button type="button" className="filter-picker-new" onClick={() => openBuilder()} disabled={pendingAction !== null}>
+                <Plus size={21} aria-hidden="true" />New filter
+              </button>
+            </footer>
           </div>
         </dialog>
       )}

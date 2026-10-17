@@ -2180,9 +2180,9 @@ export function MobileStockExplorer({
   };
 
   const defaultShortcuts: Array<FilterShortcut & { preset: BuiltInPreset }> = [
-    { key: SUPPORT_FILTER_KEY, name: BUILT_IN_PRESET_COPY.support.name, isDefault: true, preset: "support" },
-    { key: PULLBACK_FILTER_KEY, name: BUILT_IN_PRESET_COPY.pullback.name, isDefault: true, preset: "pullback" },
-    { key: EARNINGS_THIS_WEEK_FILTER_KEY, name: BUILT_IN_PRESET_COPY.earnings.name, isDefault: true, preset: "earnings" },
+    { key: SUPPORT_FILTER_KEY, name: BUILT_IN_PRESET_COPY.support.name, isDefault: true, preset: "support", identity: "support", description: "Growing companies near support" },
+    { key: PULLBACK_FILTER_KEY, name: BUILT_IN_PRESET_COPY.pullback.name, isDefault: true, preset: "pullback", identity: "pullback", description: "Growth, pullbacks & valuation" },
+    { key: EARNINGS_THIS_WEEK_FILTER_KEY, name: BUILT_IN_PRESET_COPY.earnings.name, isDefault: true, preset: "earnings", identity: "earnings", description: "Growing companies reporting soon" },
   ];
   const filterShortcuts: FilterShortcut[] = [
     ...defaultShortcuts,
