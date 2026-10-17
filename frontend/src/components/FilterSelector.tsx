@@ -1,5 +1,6 @@
 import { CalendarDays, ChartNoAxesCombined, Check, Layers3, Pencil, Plus, SlidersHorizontal, Trash2, TrendingUp, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { filterIcon, type FilterIconName } from "../filterIcons";
 import "../filterSelector.css";
 
 export type FilterShortcut = {
@@ -8,13 +9,14 @@ export type FilterShortcut = {
   isDefault: boolean;
   badgeCount?: number;
   identity?: "support" | "pullback" | "earnings";
+  icon?: FilterIconName;
   description?: string;
 };
 
 function FilterIdentity({ filter, allStocks = false }: { filter?: FilterShortcut; allStocks?: boolean }) {
   const identity = allStocks ? "all" : filter?.identity ?? "custom";
   const Icon = identity === "all" ? Layers3 : identity === "support" ? TrendingUp
-    : identity === "pullback" ? ChartNoAxesCombined : identity === "earnings" ? CalendarDays : SlidersHorizontal;
+    : identity === "pullback" ? ChartNoAxesCombined : identity === "earnings" ? CalendarDays : filterIcon(filter?.icon ?? "sliders").Icon;
   // Keep a custom filter's accent stable across renames and list reordering.
   const accent = identity === "custom"
     ? `custom-${Array.from(filter?.key ?? "").reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0, 0) % 3}`

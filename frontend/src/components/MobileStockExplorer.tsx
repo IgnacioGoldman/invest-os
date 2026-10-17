@@ -16,6 +16,9 @@ import {
   Bookmark,
   BookmarkCheck,
   BookmarkPlus,
+  ArrowDownWideNarrow,
+  ChevronDown,
+  MoreHorizontal,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -23,13 +26,12 @@ import {
   Sparkles,
   LogIn,
   Plus,
-  RotateCcw,
-  Save,
   Search,
-  SlidersHorizontal,
   Trash2,
   X,
 } from "lucide-react";
+import { FILTER_ICONS, filterIcon, type FilterIconName } from "../filterIcons";
+import "../filterBuilder.css";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -126,6 +128,7 @@ export type FilterGroup = {
   conditions: FilterCondition[];
 };
 export type FilterExpression = {
+  icon?: FilterIconName;
   operator: LogicOperator;
   groups: FilterGroup[];
 };
@@ -625,11 +628,8 @@ function rowMetric(
   return { value: formatPercent(value, true), signal: supportSignal(value), secondary: key.replace("support_", "").toUpperCase() };
 }
 
-let filterId = 0;
-
 function nextFilterId(prefix: "group" | "condition") {
-  filterId += 1;
-  return `${prefix}-${filterId}`;
+  return `${prefix}-${crypto.randomUUID()}`;
 }
 
 function createCondition(field: FilterKey = "revenue", value?: string): FilterCondition {
@@ -644,7 +644,7 @@ function createCondition(field: FilterKey = "revenue", value?: string): FilterCo
 function createFilterGroup(field: FilterKey = "revenue"): FilterGroup {
   return {
     id: nextFilterId("group"),
-    operator: "or",
+    operator: "and",
     conditions: [createCondition(field)],
   };
 }
@@ -818,53 +818,73 @@ function FilterSheet({
   expression,
   sortKey,
   sortDirection,
-  actions,
   personalization,
   watchlistView = false,
   activeSavedFilterId,
   onClose,
   onApply,
   onExpressionChange,
-  onApplyPullbackPreset,
-  onApplySupportPreset,
-  onApplyEarningsPreset,
   onSortKeyChange,
   onSortDirectionChange,
-  onClear,
   onSavedFilter,
+  onDeletedFilter,
 }: {
   open: boolean;
   expression: FilterExpression;
   sortKey: SortKey;
   sortDirection: SortDirection;
-  actions?: ReactNode;
   personalization?: Props["personalization"];
   watchlistView?: boolean;
   activeSavedFilterId: string | null;
   onClose: () => void;
   onApply: () => void;
   onExpressionChange: (expression: FilterExpression) => void;
-  onApplyPullbackPreset: () => void;
-  onApplySupportPreset: () => void;
-  onApplyEarningsPreset: () => void;
   onSortKeyChange: (key: SortKey) => void;
   onSortDirectionChange: (direction: SortDirection) => void;
-  onClear: () => void;
   onSavedFilter: (filter: SavedFilter) => void;
+  onDeletedFilter: (id: string) => void;
 }) {
-  const [saveName, setSaveName] = useState(() => personalization?.savedFilters.find((filter) => filter.id === activeSavedFilterId)?.name ?? "My stock filter");
+  const activeSavedFilter = personalization?.savedFilters.find((item) => item.id === activeSavedFilterId) ?? null;
+  const [saveName, setSaveName] = useState(activeSavedFilter?.name ?? "");
+  const [icon, setIcon] = useState<FilterIconName>(activeSavedFilter?.icon ?? (activeSavedFilter ? "sliders" : "trend"));
+  const [advanced, setAdvanced] = useState(expression.groups.length > 1);
+  const [sortExpanded, setSortExpanded] = useState(false);
   const [saveBusy, setSaveBusy] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const busyRef = useRef(false);
+  const initialState = useRef(JSON.stringify({ name: saveName.trim(), icon, expression, sortKey, sortDirection }));
+  const count = activeFilterCount(expression);
+  const dirty = initialState.current !== JSON.stringify({ name: saveName.trim(), icon, expression, sortKey, sortDirection });
+  const SelectedIcon = filterIcon(icon).Icon;
+
   useEffect(() => {
     if (!open) return undefined;
     const dialog = dialogRef.current;
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const viewport = window.visualViewport;
+    const updateViewport = () => {
+      dialog?.style.setProperty("--builder-viewport-height", `${viewport?.height ?? window.innerHeight}px`);
+      dialog?.style.setProperty("--builder-viewport-top", `${viewport?.offsetTop ?? 0}px`);
+      if (dialog?.contains(document.activeElement)) {
+        const activeInput = document.activeElement;
+        if (activeInput instanceof HTMLInputElement || activeInput instanceof HTMLSelectElement) {
+          activeInput.scrollIntoView({ block: "nearest" });
+        }
+      }
+    };
+    updateViewport();
     dialog?.showModal();
+    dialog?.querySelector<HTMLElement>("#filter-builder-title")?.focus({ preventScroll: true });
+    viewport?.addEventListener("resize", updateViewport);
+    viewport?.addEventListener("scroll", updateViewport);
+    window.addEventListener("resize", updateViewport);
     return () => {
+      viewport?.removeEventListener("resize", updateViewport);
+      viewport?.removeEventListener("scroll", updateViewport);
+      window.removeEventListener("resize", updateViewport);
       dialog?.close();
       document.body.style.overflow = previousOverflow;
       if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
@@ -872,46 +892,54 @@ function FilterSheet({
   }, [open]);
 
   if (!open) return null;
-  const count = activeFilterCount(expression);
-  const builtInPreset = builtInPresetFor(expression);
-  const builtInName = builtInPresetName(builtInPreset);
-  const activeSavedFilter = personalization?.savedFilters.find((item) => item.id === activeSavedFilterId) ?? null;
 
   const close = () => {
-    if (!busyRef.current) onClose();
+    if (busyRef.current) return;
+    if (!dirty || window.confirm("Discard your unsaved filter changes?")) onClose();
   };
 
   const submitSavedFilter = async () => {
-    if (!personalization?.signedIn || !saveName.trim() || count === 0 || busyRef.current) return;
+    if (!saveName.trim() || count === 0 || busyRef.current) return;
+    if (!personalization) {
+      onApply();
+      return;
+    }
     busyRef.current = true;
     setSaveBusy(true);
     setSaveError(null);
     try {
+      if (!personalization.signedIn) {
+        await personalization.onRequestSignIn();
+        return;
+      }
       const saved = await personalization.onSaveFilter({
         id: activeSavedFilter?.id,
         name: saveName.trim(),
+        icon,
         expression,
         sortKey,
         sortDirection,
       });
       onSavedFilter(saved);
     } catch (exc) {
-      setSaveError(exc instanceof Error ? exc.message : "Could not save this filter.");
+      setSaveError(exc instanceof Error ? exc.message : "Could not save this filter. Please try again.");
     } finally {
       busyRef.current = false;
       setSaveBusy(false);
     }
   };
 
-  const requestSignIn = async () => {
-    if (!personalization || busyRef.current) return;
+  const deleteFilter = async () => {
+    if (!personalization || !activeSavedFilter || busyRef.current) return;
+    if (!window.confirm(`Delete “${activeSavedFilter.name}”? This cannot be undone.`)) return;
     busyRef.current = true;
     setSaveBusy(true);
     setSaveError(null);
     try {
-      await personalization.onRequestSignIn();
+      await personalization.onDeleteFilter(activeSavedFilter.id);
+      onDeletedFilter(activeSavedFilter.id);
     } catch (exc) {
-      setSaveError(exc instanceof Error ? exc.message : "Could not start Google sign-in.");
+      setSaveError(exc instanceof Error ? exc.message : "Could not delete this filter. Please try again.");
     } finally {
       busyRef.current = false;
       setSaveBusy(false);
@@ -965,270 +993,174 @@ function FilterSheet({
     }));
   };
 
+  const matchControl = (operator: LogicOperator, onChange: (operator: LogicOperator) => void, label: string) => (
+    <div className="filter-builder-match" role="group" aria-label={label}>
+      {(["and", "or"] as const).map((value) => (
+        <button type="button" key={value} aria-pressed={operator === value} onClick={() => onChange(value)}>
+          Match {value === "and" ? "all" : "any"}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
-    <dialog ref={dialogRef} className="mobile-builder-dialog" aria-label={activeSavedFilter ? "Edit filter" : "New filter"}
+    <dialog ref={dialogRef} className="mobile-builder-dialog" aria-labelledby="filter-builder-title"
       onCancel={(event) => { event.preventDefault(); close(); }}
       onClick={(event) => { if (event.currentTarget === event.target) close(); }}>
-      <section className="mobile-filter-sheet">
-        <div className="mobile-sheet-handle" aria-hidden="true" />
-        <header className="mobile-sheet-header">
+      <form className="filter-builder" onSubmit={(event) => { event.preventDefault(); void submitSavedFilter(); }}>
+        <header className="filter-builder-header">
           <div>
-            <h2>{activeSavedFilter ? "Edit filter" : "New filter"}</h2>
-            <p>Combine metrics to narrow the list.</p>
+            <h2 id="filter-builder-title" tabIndex={-1}>{activeSavedFilter ? "Edit filter" : "New filter"}</h2>
+            <p>Create your own stock screen</p>
           </div>
-          <button type="button" className="mobile-icon-button" onClick={close} disabled={saveBusy} aria-label="Cancel filter editing">
-            <X size={20} />
-          </button>
+          <div className="filter-builder-header-actions">
+            {activeSavedFilter && <details className="filter-builder-menu">
+              <summary aria-label="Filter options"><MoreHorizontal size={20} aria-hidden="true" /></summary>
+              <button type="button" onClick={() => void deleteFilter()} disabled={saveBusy}>
+                <Trash2 size={16} aria-hidden="true" />Delete filter
+              </button>
+            </details>}
+            <button type="button" className="filter-builder-icon-button" onClick={close} disabled={saveBusy} aria-label="Close filter editor">
+              <X size={20} aria-hidden="true" />
+            </button>
+          </div>
         </header>
 
-        <div className="mobile-sheet-scroll">
-          {personalization && (
-            <section className="mobile-filter-section mobile-saved-filter-section">
-              <div className="mobile-filter-title-row">
-                <h3>{activeSavedFilter ? "My filter" : "Save filter"}</h3>
+        <div className="filter-builder-scroll">
+          <fieldset className="filter-builder-fields" disabled={saveBusy}>
+            <section className="filter-builder-section" aria-labelledby="filter-builder-identity">
+              <div className="filter-builder-heading">
+                <h3 id="filter-builder-identity"><span aria-hidden="true">1</span>Name &amp; icon</h3>
               </div>
-
-              {!personalization.signedIn ? (
-                <>
-                  <button type="button" className="mobile-signin-filter" disabled={saveBusy} onClick={() => void requestSignIn()}>
-                    <LogIn size={18} />
-                    <span><strong>Sign in to save filters</strong><small>Sync views and see daily new-match badges.</small></span>
-                    <ChevronRight size={17} />
-                  </button>
-                  {saveError && <p className="mobile-personal-error" role="alert">{saveError}</p>}
-                </>
-              ) : (
-                <div className="mobile-save-filter-form">
-                  <label>
-                    <span>Filter name</span>
-                    <input
-                      type="text"
-                      value={saveName}
-                      onChange={(event) => setSaveName(event.target.value)}
-                      maxLength={80}
-                      disabled={saveBusy}
-                      autoFocus
-                    />
-                  </label>
-                  {saveError && <p className="mobile-personal-error" role="alert">{saveError}</p>}
-                  <div className="mobile-save-filter-actions">
-                    <button type="button" onClick={close} disabled={saveBusy}>Cancel</button>
-                    <button type="button" className="primary" onClick={() => void submitSavedFilter()} disabled={saveBusy || !saveName.trim() || count === 0}>
-                      <Save size={16} />{activeSavedFilter ? "Update" : "Save"}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </section>
-          )}
-
-          <section className="mobile-sort-section">
-            <div className="mobile-sheet-section-heading">
-              <h3>Sort by</h3>
-              <div className="mobile-sort-direction" aria-label="Sort direction">
-                <button
-                  type="button"
-                  className={sortDirection === "asc" ? "active" : ""}
-                  onClick={() => onSortDirectionChange("asc")}
-                  aria-label="Sort ascending"
-                  title="Sort ascending"
-                >
-                  <ArrowUp size={16} />
-                </button>
-                <button
-                  type="button"
-                  className={sortDirection === "desc" ? "active" : ""}
-                  onClick={() => onSortDirectionChange("desc")}
-                  aria-label="Sort descending"
-                  title="Sort descending"
-                >
-                  <ArrowDown size={16} />
-                </button>
+              <div className="filter-builder-name-row">
+                <span className="filter-builder-avatar" aria-hidden="true"><SelectedIcon size={26} strokeWidth={1.8} /></span>
+                <label className="filter-builder-field">
+                  <span>Filter name</span>
+                  <input type="text" value={saveName} onChange={(event) => setSaveName(event.target.value)}
+                    placeholder="e.g. Growth near support" maxLength={80} required autoComplete="off" />
+                </label>
               </div>
-            </div>
-            <div className="mobile-chip-scroll">
-              {SORT_OPTIONS.filter((option) => option.key !== "watchlist_order" || watchlistView).map((option) => (
-                <button
-                  type="button"
-                  key={option.key}
-                  className={`mobile-choice-chip ${sortKey === option.key ? "active" : ""}`}
-                  onClick={() => onSortKeyChange(option.key)}
-                >
-                  {sortKey === option.key && <Check size={14} />}
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="mobile-filter-section mobile-logic-section">
-            <div className="mobile-filter-title-row">
-              <h3>Conditions</h3>
-              {count > 0 && <span>{count} condition{count === 1 ? "" : "s"}</span>}
-            </div>
-
-            <div className="mobile-filter-name">
-              <span>{activeSavedFilter ? "Saved filter" : builtInPreset ? "Built-in filter" : "Filter"}</span>
-              <strong>{activeSavedFilter?.name ?? builtInName ?? (count > 0 ? "Custom filter" : "No filter selected")}</strong>
-              {builtInPreset && <p>{builtInPresetSummary(builtInPreset)}</p>}
-            </div>
-
-            {expression.groups.length > 0 ? (
-              <>
-                {expression.groups.length > 1 && (
-                  <div className="mobile-logic-scope">
-                    <div>
-                      <strong>Between groups</strong>
-                      <span>{expression.operator === "and" ? "Every group must match" : "At least one group must match"}</span>
-                    </div>
-                    <div className="mobile-logic-toggle" aria-label="Logic between condition groups">
-                      <button
-                        type="button"
-                        className={expression.operator === "and" ? "active" : ""}
-                        onClick={() => onExpressionChange({ ...expression, operator: "and" })}
-                      >
-                        AND
-                      </button>
-                      <button
-                        type="button"
-                        className={expression.operator === "or" ? "active" : ""}
-                        onClick={() => onExpressionChange({ ...expression, operator: "or" })}
-                      >
-                        OR
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                <div className="mobile-condition-builder">
-                  {expression.groups.map((group, groupIndex) => (
-                    <div className="mobile-condition-block" key={group.id}>
-                      {groupIndex > 0 && <div className="mobile-logic-connector"><span>{expression.operator.toUpperCase()}</span></div>}
-                      <article className="mobile-condition-group">
-                        <header>
-                          <div>
-                            <span>Group {groupIndex + 1}</span>
-                            <strong>{group.operator === "or" ? "Match any condition" : "Match every condition"}</strong>
-                          </div>
-                          <button
-                            type="button"
-                            className="mobile-delete-group"
-                            onClick={() => removeGroup(group.id)}
-                            aria-label={`Delete group ${groupIndex + 1}`}
-                            title="Delete group"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </header>
-
-                        <div className="mobile-group-logic">
-                          <span>Inside this group</span>
-                          <div className="mobile-logic-toggle" aria-label={`Logic inside group ${groupIndex + 1}`}>
-                            <button
-                              type="button"
-                              className={group.operator === "or" ? "active" : ""}
-                              onClick={() => updateGroup(group.id, (current) => ({ ...current, operator: "or" }))}
-                            >
-                              OR
-                            </button>
-                            <button
-                              type="button"
-                              className={group.operator === "and" ? "active" : ""}
-                              onClick={() => updateGroup(group.id, (current) => ({ ...current, operator: "and" }))}
-                            >
-                              AND
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="mobile-condition-list">
-                          {group.conditions.map((condition, conditionIndex) => {
-                            const definition = FILTER_DEFINITIONS.find((item) => item.key === condition.field) ?? FILTER_DEFINITIONS[0];
-                            return (
-                              <div className="mobile-condition-wrap" key={condition.id}>
-                                {conditionIndex > 0 && <div className="mobile-condition-connector"><span>{group.operator.toUpperCase()}</span></div>}
-                                <div className="mobile-condition-row">
-                                  <label>
-                                    <span>Metric</span>
-                                    <select
-                                      value={condition.field}
-                                      onChange={(event) => updateCondition(group.id, condition.id, event.target.value as FilterKey)}
-                                    >
-                                      {FILTER_DEFINITIONS.map((item) => <option key={item.key} value={item.key}>{item.shortLabel}</option>)}
-                                    </select>
-                                  </label>
-                                  <label>
-                                    <span>Condition</span>
-                                    <select
-                                      className={`mobile-condition-value metric-status-color metric-tone-${metricSignal(condition.value).tone}`}
-                                      value={condition.value}
-                                      onChange={(event) => updateCondition(group.id, condition.id, condition.field, event.target.value)}
-                                    >
-                                      {definition.options.map((option) => <option key={option.label} value={option.label} className={`metric-status-color metric-tone-${option.tone}`}>{option.label}</option>)}
-                                    </select>
-                                  </label>
-                                  <button
-                                    type="button"
-                                    className="mobile-delete-condition"
-                                    onClick={() => removeCondition(group.id, condition.id)}
-                                    aria-label={`Remove ${definition.shortLabel} condition`}
-                                    title="Remove condition"
-                                  >
-                                    <X size={16} />
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        <button type="button" className="mobile-add-condition" onClick={() => addCondition(group)}>
-                          <Plus size={16} />
-                          Add condition to group
-                        </button>
-                      </article>
-                    </div>
+              <div className="filter-builder-icons-row">
+                <span>Choose an icon</span>
+                <div className="filter-builder-icons" role="group" aria-label="Filter icon">
+                  {FILTER_ICONS.map(({ name, label, Icon }) => (
+                    <button key={name} type="button" aria-label={`${label} icon`} title={label} aria-pressed={icon === name}
+                      onClick={() => setIcon(name)}><Icon size={21} strokeWidth={1.8} aria-hidden="true" /></button>
                   ))}
                 </div>
-
-                <button type="button" className="mobile-add-group" onClick={addGroup}>
-                  <Plus size={17} />
-                  Add another group
-                </button>
-              </>
-            ) : (
-              <div className="mobile-filter-empty">
-                <Plus size={22} />
-                <strong>Build a filter with clear logic</strong>
-                <p>Use groups for parentheses, then choose whether groups and conditions use AND or OR.</p>
-                <div>
-                  <button type="button" onClick={addGroup}><Plus size={16} />New filter</button>
-                  <button type="button" onClick={onApplyEarningsPreset}>Use Earnings preset</button>
-                  <button type="button" onClick={onApplySupportPreset}>Use Support preset</button>
-                  <button type="button" onClick={onApplyPullbackPreset}>Use Pullback preset</button>
-                </div>
               </div>
-            )}
-          </section>
-
-          {actions && (
-            <section className="mobile-filter-section mobile-list-management">
-              <h3>Watchlist</h3>
-              {actions}
             </section>
-          )}
+
+            <section className="filter-builder-section" aria-labelledby="filter-builder-conditions">
+              <div className="filter-builder-heading">
+                <h3 id="filter-builder-conditions"><span aria-hidden="true">2</span>Conditions</h3>
+                <span>{count} {count === 1 ? "rule" : "rules"}</span>
+              </div>
+              <p className="filter-builder-description">Show companies that match these criteria.</p>
+              {advanced && expression.groups.length > 1 && <div className="filter-builder-group-match">
+                <span>Across groups</span>
+                {matchControl(expression.operator, (operator) => onExpressionChange({ ...expression, operator }), "Match between groups")}
+              </div>}
+
+              <div className="filter-builder-groups">
+                {expression.groups.map((group, groupIndex) => (
+                  <div className={`filter-builder-group${advanced ? " is-advanced" : ""}`} key={group.id}>
+                    {advanced && <div className="filter-builder-group-heading">
+                      <h4>Group {groupIndex + 1}</h4>
+                      <button type="button" className="filter-builder-icon-button" onClick={() => removeGroup(group.id)}
+                        aria-label={`Remove group ${groupIndex + 1}`}><Trash2 size={16} aria-hidden="true" /></button>
+                    </div>}
+                    {group.conditions.length > 1 && matchControl(group.operator,
+                      (operator) => updateGroup(group.id, (current) => ({ ...current, operator })),
+                      `Match conditions${advanced ? ` in group ${groupIndex + 1}` : ""}`)}
+                    <div className="filter-builder-conditions">
+                      {group.conditions.map((condition, conditionIndex) => {
+                        const definition = FILTER_DEFINITIONS.find((item) => item.key === condition.field) ?? FILTER_DEFINITIONS[0];
+                        return <div className="filter-builder-condition" key={condition.id}>
+                          <div className="filter-builder-condition-heading">
+                            <span>Condition {conditionIndex + 1}</span>
+                            <button type="button" className="filter-builder-icon-button" onClick={() => removeCondition(group.id, condition.id)}
+                              aria-label={`Remove ${definition.shortLabel} condition`}><X size={16} aria-hidden="true" /></button>
+                          </div>
+                          <div className="filter-builder-condition-fields">
+                            <label className="filter-builder-field">
+                              <span>Metric</span>
+                              <select value={condition.field} onChange={(event) => updateCondition(group.id, condition.id, event.target.value as FilterKey)}>
+                                {FILTER_DEFINITIONS.map((item) => <option key={item.key} value={item.key}>{item.shortLabel}</option>)}
+                              </select>
+                            </label>
+                            <label className="filter-builder-field">
+                              <span>Value</span>
+                              <select value={condition.value} onChange={(event) => updateCondition(group.id, condition.id, condition.field, event.target.value)}>
+                                {definition.options.map((option) => <option key={option.label} value={option.label}>{option.label}</option>)}
+                              </select>
+                            </label>
+                          </div>
+                        </div>;
+                      })}
+                    </div>
+                    <button type="button" className="filter-builder-add" onClick={() => addCondition(group)}>
+                      <Plus size={18} aria-hidden="true" />Add condition
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {expression.groups.length === 0 && <button type="button" className="filter-builder-add" onClick={addGroup}>
+                <Plus size={18} aria-hidden="true" />Add condition
+              </button>}
+              <div className="filter-builder-advanced-row">
+                <button type="button" className="filter-builder-text-button" aria-pressed={advanced}
+                  disabled={expression.groups.length > 1} onClick={() => setAdvanced(!advanced)}>
+                  <ListTree size={15} aria-hidden="true" />{advanced && expression.groups.length <= 1 ? "Use simple conditions" : "Advanced logic"}
+                </button>
+                {advanced && <button type="button" className="filter-builder-text-button" onClick={addGroup}>
+                  <Plus size={16} aria-hidden="true" />Add group
+                </button>}
+              </div>
+              {advanced && expression.groups.length > 1 && <p className="filter-builder-hint">Remove extra groups to return to simple conditions.</p>}
+            </section>
+
+            <section className="filter-builder-section" aria-labelledby="filter-builder-sorting">
+              <div className="filter-builder-heading">
+                <h3 id="filter-builder-sorting"><span aria-hidden="true">3</span>Sorting</h3>
+                <span>Optional</span>
+              </div>
+              <button type="button" className="filter-builder-sort-summary" aria-expanded={sortExpanded}
+                aria-controls="filter-builder-sort-options" onClick={() => setSortExpanded(!sortExpanded)}>
+                <ArrowDownWideNarrow size={21} aria-hidden="true" />
+                <span><strong>{SORT_OPTIONS.find((option) => option.key === sortKey)?.label}</strong>
+                  <small>{sortDirection === "asc" ? "Ascending" : "Descending"} order</small></span>
+                <ChevronDown size={18} aria-hidden="true" />
+              </button>
+              {sortExpanded && <div id="filter-builder-sort-options" className="filter-builder-sort-options">
+                <label className="filter-builder-field">
+                  <span>Sort by</span>
+                  <select value={sortKey} onChange={(event) => onSortKeyChange(event.target.value as SortKey)}>
+                    {SORT_OPTIONS.filter((option) => option.key !== "watchlist_order" || watchlistView)
+                      .map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
+                  </select>
+                </label>
+                <label className="filter-builder-field">
+                  <span>Order</span>
+                  <select value={sortDirection} onChange={(event) => onSortDirectionChange(event.target.value as SortDirection)}>
+                    <option value="asc">Ascending</option><option value="desc">Descending</option>
+                  </select>
+                </label>
+              </div>}
+            </section>
+          </fieldset>
         </div>
 
-        <footer className="mobile-sheet-footer">
-          <button type="button" className="mobile-clear-button" onClick={onClear} disabled={count === 0}>
-            <RotateCcw size={16} />
-            Clear
-          </button>
-          <button type="button" className="mobile-done-button" onClick={onApply} disabled={saveBusy}>
-            Show stocks
+        <footer className="filter-builder-footer">
+          {saveError && <p className="filter-builder-error" role="alert">{saveError}</p>}
+          {personalization && !personalization.signedIn && <p className="filter-builder-hint">Sign in to save and sync your filters.</p>}
+          {count === 0 && <p className="filter-builder-hint">Add a condition to save your filter.</p>}
+          <button type="submit" className="filter-builder-save" disabled={saveBusy || !saveName.trim() || count === 0}>
+            {personalization && !personalization.signedIn ? <LogIn size={19} aria-hidden="true" /> : <Check size={20} aria-hidden="true" />}
+            {saveBusy ? "Please wait…" : !personalization ? "Apply filter" : personalization.signedIn ? "Save filter" : "Sign in to save filter"}
           </button>
         </footer>
-      </section>
+      </form>
     </dialog>
   );
 }
@@ -2175,10 +2107,6 @@ export function MobileStockExplorer({
     setSheetOpen(false);
   };
 
-  const applyDraftPreset = (preset: BuiltInPreset) => {
-    setFilterDraft((draft) => ({ ...draft, expression: createBuiltInPresetExpression(preset) }));
-  };
-
   const defaultShortcuts: Array<FilterShortcut & { preset: BuiltInPreset }> = [
     { key: SUPPORT_FILTER_KEY, name: BUILT_IN_PRESET_COPY.support.name, isDefault: true, preset: "support", identity: "support", description: "Growing companies near support" },
     { key: PULLBACK_FILTER_KEY, name: BUILT_IN_PRESET_COPY.pullback.name, isDefault: true, preset: "pullback", identity: "pullback", description: "Growth, pullbacks & valuation" },
@@ -2186,7 +2114,7 @@ export function MobileStockExplorer({
   ];
   const filterShortcuts: FilterShortcut[] = [
     ...defaultShortcuts,
-    ...(personalization?.savedFilters ?? []).map((filter) => ({ key: savedFilterKey(filter.id), name: filter.name, isDefault: false })),
+    ...(personalization?.savedFilters ?? []).map((filter) => ({ key: savedFilterKey(filter.id), name: filter.name, icon: filter.icon, isDefault: false })),
   ].map((filter) => ({ ...filter, badgeCount: personalization?.filterBadgeCounts[filter.key] }));
   const activeShortcutKey = activeSavedFilter ? savedFilterKey(activeSavedFilter.id)
     : defaultShortcuts.find((filter) => filter.preset === builtInPreset)?.key ?? null;
@@ -2589,20 +2517,19 @@ export function MobileStockExplorer({
         expression={filterDraft.expression}
         sortKey={filterDraft.sortKey}
         sortDirection={filterDraft.sortDirection}
-        actions={actions}
         personalization={personalization}
         watchlistView={isWatchlistView}
         activeSavedFilterId={filterDraft.savedFilterId}
         onClose={() => setSheetOpen(false)}
         onApply={applyFilterDraft}
         onExpressionChange={(expression) => setFilterDraft((draft) => ({ ...draft, expression }))}
-        onApplyPullbackPreset={() => applyDraftPreset("pullback")}
-        onApplySupportPreset={() => applyDraftPreset("support")}
-        onApplyEarningsPreset={() => applyDraftPreset("earnings")}
         onSortKeyChange={(sortKey) => setFilterDraft((draft) => ({ ...draft, sortKey }))}
         onSortDirectionChange={(sortDirection) => setFilterDraft((draft) => ({ ...draft, sortDirection }))}
         onSavedFilter={(filter) => { selectSavedFilter(filter); setSheetOpen(false); }}
-        onClear={() => setFilterDraft((draft) => ({ ...draft, expression: createEmptyFilterExpression() }))}
+        onDeletedFilter={(id) => {
+          if (activeSavedFilterId === id) clearFilter();
+          setSheetOpen(false);
+        }}
       />}
       {personalization?.signedIn && watchlistOpen && (
         <WatchlistSheet key={`${personalization.userId}:${watchlistTargetGroup ?? "ungrouped"}`}

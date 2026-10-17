@@ -1,6 +1,7 @@
 import type { FilterExpression, SortDirection, SortKey } from "./components/MobileStockExplorer";
 import { requireSupabase } from "./supabase";
 import type { WatchlistItem } from "./watchlist";
+import type { FilterIconName } from "./filterIcons";
 
 export const PULLBACK_FILTER_KEY = "builtin:pullback";
 export const SUPPORT_FILTER_KEY = "builtin:support";
@@ -14,6 +15,7 @@ export type SavedFilter = {
   id: string;
   user_id: string;
   name: string;
+  icon?: FilterIconName;
   expression: FilterExpression;
   sort_key: SortKey;
   sort_direction: SortDirection;
@@ -31,6 +33,7 @@ export type SaveFilterInput = {
   id?: string;
   userId: string;
   name: string;
+  icon?: FilterIconName;
   expression: FilterExpression;
   sortKey: SortKey;
   sortDirection: SortDirection;
@@ -38,6 +41,10 @@ export type SaveFilterInput = {
 
 function throwIfError(error: { message: string } | null) {
   if (error) throw new Error(error.message);
+}
+
+function withFilterIcon(filter: SavedFilter): SavedFilter {
+  return { ...filter, icon: filter.expression.icon ?? filter.icon ?? "sliders" };
 }
 
 export async function ensureUserProfile(userId: string) {
@@ -54,14 +61,16 @@ export async function fetchSavedFilters(userId: string) {
     .eq("user_id", userId)
     .order("created_at", { ascending: true }).order("id", { ascending: true });
   throwIfError(error);
-  return (data ?? []) as SavedFilter[];
+  return ((data ?? []) as SavedFilter[]).map(withFilterIcon);
 }
 
 export async function saveFilter(input: SaveFilterInput) {
   const payload = {
     user_id: input.userId,
     name: input.name.trim(),
-    expression: input.expression,
+    // Keep presentation metadata in the existing JSON document so older
+    // databases can save the complete filter without a schema migration.
+    expression: { ...input.expression, ...(input.icon ? { icon: input.icon } : {}) },
     sort_key: input.sortKey,
     sort_direction: input.sortDirection,
   };
@@ -70,7 +79,7 @@ export async function saveFilter(input: SaveFilterInput) {
     : requireSupabase().from("saved_filters").insert(payload);
   const { data, error } = await query.select("*").single();
   throwIfError(error);
-  return data as SavedFilter;
+  return withFilterIcon(data as SavedFilter);
 }
 
 export async function deleteSavedFilter(filterId: string) {
