@@ -1,5 +1,5 @@
 {
-  "audited_on": "2026-10-17",
+  "audited_on": "2026-10-19",
   "symbol_count": 200,
   "symbols": [
     {
@@ -1006,6 +1006,7 @@
         "business_health.eps_cagr_3y": "eps_cagr_3y: A positive 3-year SEC EPS history was unavailable."
       },
       "not_meaningful": {
+        "business_health.fcf_margin": "fcf_margin: Free cash flow margin is not meaningful for many financial businesses because operating cash flow is distorted by balance-sheet lending, deposits, and financing activity.",
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       }
     },
