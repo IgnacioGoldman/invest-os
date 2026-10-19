@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, GripVertical, MoreHorizontal, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
-import { WATCHLIST_COLORS, reorderGroupIds, type WatchlistGroup, type WatchlistGroupInput, type WatchlistItem } from "../watchlist";
+import { WATCHLIST_COLORS, type WatchlistGroup, type WatchlistGroupInput, type WatchlistItem } from "../watchlist";
 import type { OpenDataStockSnapshot } from "../api";
 
 export type WatchlistGroupActions = {
@@ -8,7 +8,6 @@ export type WatchlistGroupActions = {
   onCreateWatchlistGroup: (input: WatchlistGroupInput) => Promise<void>;
   onUpdateWatchlistGroup: (id: string, input: Partial<WatchlistGroupInput & { collapsed: boolean }>) => Promise<void>;
   onDeleteWatchlistGroup: (id: string) => Promise<void>;
-  onReorderWatchlistGroups: (ids: string[]) => Promise<void>;
 };
 
 // Native dialogs supply focus trapping, Escape dismissal and focus restoration.
@@ -41,8 +40,8 @@ export function WatchlistDialog({ title, onClose, children, className = "" }: { 
   );
 }
 
-type Drag = { kind: "group" | "symbol"; id: string; label: string; x: number; y: number; active: boolean };
-type Target = { groupId: string | null; ticker?: string; beforeTicker?: string; after?: boolean; beforeGroupId?: string | null };
+type Drag = { id: string; label: string; x: number; y: number; active: boolean };
+type Target = { groupId: string | null; ticker?: string; beforeTicker?: string; after?: boolean };
 
 export function WatchlistGroups({
   groups, items, matchingSnapshots, pagedSnapshots, renderRow, onRevealGroup,
@@ -61,7 +60,6 @@ export function WatchlistGroups({
 }) {
   const [editor, setEditor] = useState<WatchlistGroup | "new" | null>(null);
   const [name, setName] = useState("");
-  const [color, setColor] = useState<string>(WATCHLIST_COLORS[0].value);
   const [movingTicker, setMovingTicker] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
@@ -74,7 +72,6 @@ export function WatchlistGroups({
   const [target, setTarget] = useState<Target | null>(null);
   const targetRef = useRef<Target | null>(null);
   const orderedGroups = [...groups].sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
-  const groupIds = orderedGroups.map((group) => group.id);
   const itemByTicker = useMemo(() => new Map(items.map((item) => [item.ticker, item])), [items]);
   const groupFor = (ticker: string) => itemByTicker.get(ticker)?.group_id ?? null;
   const currentItem = items.find((item) => item.ticker === movingTicker);
@@ -101,7 +98,6 @@ export function WatchlistGroups({
   const openEditor = (group?: WatchlistGroup) => {
     setError(null);
     setName(group?.name ?? "");
-    setColor(group?.color ?? WATCHLIST_COLORS[groups.length % WATCHLIST_COLORS.length].value);
     setEditor(group ?? "new");
   };
 
@@ -119,19 +115,13 @@ export function WatchlistGroups({
       const groupId = section.dataset.watchlistGroup || null;
       const row = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-watchlist-ticker]");
       next = { groupId, ticker: row?.dataset.watchlistTicker };
-      if (row && dragRef.current?.kind === "symbol") {
+      if (row) {
         const bounds = row.getBoundingClientRect();
         const ticker = row.dataset.watchlistTicker;
         next.after = y > bounds.top + bounds.height / 2;
         const siblings = [...items].filter((item) => item.group_id === groupId).sort((a, b) => a.position - b.position);
         const index = siblings.findIndex((item) => item.ticker === ticker);
         next.beforeTicker = next.after ? siblings[index + 1]?.ticker : ticker;
-      }
-      if (dragRef.current?.kind === "group") {
-        const header = section.querySelector(".watchlist-group-header")?.getBoundingClientRect();
-        const index = groupIds.indexOf(groupId ?? "");
-        next.beforeGroupId = groupId && header && y > header.top + header.height / 2
-          ? groupIds[index + 1] ?? null : groupId;
       }
     }
     targetRef.current = next;
@@ -154,13 +144,13 @@ export function WatchlistGroups({
     return () => { cancelAnimationFrame(frame); document.removeEventListener("keydown", escape); };
   }, [drag?.active]);
 
-  const startDrag = (event: PointerEvent<HTMLButtonElement>, kind: Drag["kind"], id: string, label: string) => {
+  const startDrag = (event: PointerEvent<HTMLButtonElement>, id: string, label: string) => {
     if (busy || event.button !== 0) return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     origin.current = { x: event.clientX, y: event.clientY };
     suppressClick.current = false;
-    dragRef.current = { kind, id, label, x: event.clientX, y: event.clientY, active: false };
+    dragRef.current = { id, label, x: event.clientX, y: event.clientY, active: false };
   };
   const moveDrag = (event: PointerEvent<HTMLButtonElement>) => {
     const current = dragRef.current;
@@ -177,25 +167,22 @@ export function WatchlistGroups({
     suppressClick.current = Boolean(current?.active);
     resetDrag();
     if (!current?.active || !destination) return;
-    if (current.kind === "group") {
-      const ids = reorderGroupIds(groupIds, current.id, destination.beforeGroupId ?? null);
-      if (ids.join() !== groupIds.join()) void run(() => actions.onReorderWatchlistGroups(ids), `${current.label} reordered.`);
-    } else if (current.id !== destination.ticker) {
+    if (current.id !== destination.ticker) {
       void run(async () => {
         await actions.onMoveWatchlistItem(current.id, destination.groupId, destination.beforeTicker);
         onManualOrder();
       }, `${current.label} moved.`);
     }
   };
-  const grip = (kind: Drag["kind"], id: string, label: string) => (
+  const grip = (id: string, label: string) => (
     <button type="button" className="watchlist-icon watchlist-grip" disabled={busy}
       aria-label={`Reorder ${label}`} title="Drag to reorder, or use the menu"
-      onPointerDown={(event) => startDrag(event, kind, id, label)} onPointerMove={moveDrag}
+      onPointerDown={(event) => startDrag(event, id, label)} onPointerMove={moveDrag}
       onPointerUp={finishDrag} onPointerCancel={resetDrag} onLostPointerCapture={resetDrag}
       onClick={() => {
         if (suppressClick.current) { suppressClick.current = false; return; }
-        if (kind === "group") openEditor(groups.find((group) => group.id === id));
-        else { setError(null); setMovingTicker(id); }
+        setError(null);
+        setMovingTicker(id);
       }}>
       <GripVertical size={16} />
     </button>
@@ -210,14 +197,6 @@ export function WatchlistGroups({
   };
 
   const editorGroup = editor && editor !== "new" ? groups.find((group) => group.id === editor.id) ?? editor : null;
-  const editorIndex = editorGroup ? groupIds.indexOf(editorGroup.id) : -1;
-  const reorderEditor = (offset: number) => {
-    if (!editorGroup) return;
-    const ids = [...groupIds];
-    const index = editorIndex + offset;
-    [ids[editorIndex], ids[index]] = [ids[index], ids[editorIndex]];
-    void run(() => actions.onReorderWatchlistGroups(ids), `${editorGroup.name} reordered.`);
-  };
   const sections: Array<WatchlistGroup | null> = [...orderedGroups, null];
 
   return (
@@ -237,10 +216,9 @@ export function WatchlistGroups({
         if (!group && groups.length > 0 && total === 0 && !organizing) return null;
         return (
           <section key={id ?? "ungrouped"} data-watchlist-group={id ?? ""}
-            className={`watchlist-group${group ? "" : " watchlist-ungrouped"}${dropping ? " watchlist-drop-target" : ""}${drag?.kind === "group" && drag.id === id ? " watchlist-dragging" : ""}`}
+            className={`watchlist-group${group ? "" : " watchlist-ungrouped"}${dropping ? " watchlist-drop-target" : ""}`}
             style={{ "--watchlist-group-color": group?.color ?? "#8b8e97" } as CSSProperties} aria-label={label}>
             {(group || groups.length > 0) && <header className="watchlist-group-header">
-              {group && organizing && grip("group", group.id, label)}
               {group ? (
                 <button type="button" className="watchlist-group-toggle" aria-expanded={!group.collapsed}
                   aria-controls={`watchlist-group-${id}`} disabled={busy}
@@ -257,8 +235,8 @@ export function WatchlistGroups({
             <div id={`watchlist-group-${id}`} className="watchlist-group-rows" hidden={group?.collapsed}>
               {rows.map((snapshot) => (
                 <div key={snapshot.ticker} data-watchlist-ticker={snapshot.ticker}
-                  className={`watchlist-group-row${dropping && target?.ticker === snapshot.ticker && drag?.kind === "symbol" ? target.after ? " watchlist-insert-after" : " watchlist-insert-before" : ""}${drag?.id === snapshot.ticker ? " watchlist-dragging" : ""}`}>
-                  {organizing && grip("symbol", snapshot.ticker, snapshot.ticker)}
+                  className={`watchlist-group-row${dropping && target?.ticker === snapshot.ticker ? target.after ? " watchlist-insert-after" : " watchlist-insert-before" : ""}${drag?.id === snapshot.ticker ? " watchlist-dragging" : ""}`}>
+                  {organizing && grip(snapshot.ticker, snapshot.ticker)}
                   {renderRow(snapshot)}
                   <button type="button" className="watchlist-icon watchlist-row-menu" disabled={busy}
                     onClick={() => { setError(null); setMovingTicker(snapshot.ticker); }} aria-label={`Move or remove ${snapshot.ticker}`} title={`Move or remove ${snapshot.ticker}`}><MoreHorizontal size={18} /></button>
@@ -282,11 +260,12 @@ export function WatchlistGroups({
           <form onSubmit={(event) => {
             event.preventDefault();
             if (!name.trim()) { setError("Enter a group name."); return; }
-            void run(() => editorGroup ? actions.onUpdateWatchlistGroup(editorGroup.id, { name, color }) : actions.onCreateWatchlistGroup({ name, color }), `Group ${name.trim()} saved.`, true);
+            void run(() => editorGroup
+              ? actions.onUpdateWatchlistGroup(editorGroup.id, { name })
+              : actions.onCreateWatchlistGroup({ name, color: WATCHLIST_COLORS[groups.length % WATCHLIST_COLORS.length].value }),
+            `Group ${name.trim()} saved.`, true);
           }}>
             <label className="watchlist-name">Group name<input autoFocus value={name} onChange={(event) => setName(event.target.value)} maxLength={80} placeholder="e.g. Tech leaders" required disabled={busy} /></label>
-            <fieldset className="watchlist-colors"><legend>Color</legend>{WATCHLIST_COLORS.map((choice) => <button key={choice.value} type="button" disabled={busy} aria-label={choice.name} aria-pressed={color === choice.value} style={{ backgroundColor: choice.value }} onClick={() => setColor(choice.value)}>{color === choice.value && <Check size={17} />}</button>)}</fieldset>
-            {editorGroup && <div className="watchlist-reorder-actions"><button type="button" disabled={busy || editorIndex <= 0} onClick={() => reorderEditor(-1)}><ArrowUp size={16} />Move up</button><button type="button" disabled={busy || editorIndex >= groups.length - 1} onClick={() => reorderEditor(1)}><ArrowDown size={16} />Move down</button></div>}
             {error && <p className="watchlist-error" role="alert">{error}</p>}
             <button className="watchlist-primary" type="submit" disabled={busy || !name.trim()}>{busy ? "Saving…" : editorGroup ? "Save changes" : "Create group"}</button>
             {editorGroup && <div className="watchlist-delete-group"><button type="button" disabled={busy} onClick={() => void run(() => actions.onDeleteWatchlistGroup(editorGroup.id), `${editorGroup.name} deleted. Stocks remain in your watchlist.`, true)}><Trash2 size={16} />Delete group</button><p>Stocks will stay in your watchlist.</p></div>}

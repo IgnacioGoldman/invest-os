@@ -372,39 +372,6 @@
   border: 1px solid var(--mobile-border-strong);
 }
 
-.watchlist-colors {
-  border: 0;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  gap: 12px;
-}
-
-.watchlist-colors legend {
-  font-size: .82rem;
-  color: var(--mobile-muted);
-  padding: 0;
-  margin-bottom: 10px;
-}
-
-.mobile-stock-app .watchlist-colors button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  min-height: 44px;
-  border-radius: 50%;
-  padding: 0;
-  border: 3px solid transparent;
-  color: #111;
-}
-
-.mobile-stock-app .watchlist-colors button[aria-pressed="true"] {
-  outline: 2px solid var(--mobile-text);
-  outline-offset: 3px;
-}
-
 .watchlist-reorder-actions {
   display: flex;
   gap: 10px;
@@ -587,11 +554,6 @@
   .watchlist-group-header {
     padding-left: 4px;
     padding-right: 4px;
-  }
-
-  .watchlist-group-header > .watchlist-grip {
-    flex-basis: 28px;
-    width: 28px;
   }
 
   .watchlist-group-rows {

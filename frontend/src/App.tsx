@@ -32,7 +32,7 @@ import {
 import { isSupabaseConfigured, signInWithGoogle, signOut, supabase } from "./supabase";
 import {
   createWatchlistGroup, deleteWatchlistGroup, fetchWatchlistGroups, moveWatchlistItem,
-  reorderWatchlistGroups, reorderWatchlistItems, updateWatchlistGroup,
+  reorderWatchlistItems, updateWatchlistGroup,
   type WatchlistGroup, type WatchlistGroupInput, type WatchlistItem,
 } from "./watchlist";
 import "./styles.css";
@@ -340,14 +340,6 @@ export default function App() {
     });
   });
 
-  const reorderGroups = (ids: string[]) => mutateWatchlist(async (_userId, apply) => {
-    await reorderWatchlistGroups(ids);
-    apply(() => setWatchlistGroups((current) => ids.flatMap((id, position) => {
-      const group = current.find((entry) => entry.id === id);
-      return group ? [{ ...group, position }] : [];
-    })));
-  });
-
   const selectStockForSharing = (ticker: string) => {
     setSelectedTicker(ticker);
     const snapshot = stocks.find((item) => item.ticker === ticker);
@@ -495,7 +487,6 @@ export default function App() {
             onCreateWatchlistGroup: createGroup,
             onUpdateWatchlistGroup: updateGroup,
             onDeleteWatchlistGroup: deleteGroup,
-            onReorderWatchlistGroups: reorderGroups,
           } : undefined}
           editMode={STATIC_DATA_MODE ? false : editMode}
           removingTicker={mutatingTicker}
