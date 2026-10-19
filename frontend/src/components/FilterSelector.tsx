@@ -1,4 +1,4 @@
-import { ArrowLeft, CalendarDays, ChartNoAxesCombined, Check, Eye, Layers3, LockKeyhole, Pencil, Plus, SlidersHorizontal, Trash2, TrendingUp, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, ChartNoAxesCombined, Check, Layers3, LockKeyhole, Pencil, Plus, SlidersHorizontal, Trash2, TrendingUp, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { filterIcon, type FilterIconName } from "../filterIcons";
 import "../filterSelector.css";
@@ -287,7 +287,7 @@ export function FilterSelector({ userId, filters, activeKey, activeName, onSelec
                               {filter.isDefault && filter.configuration && <button type="button" className="filter-picker-icon"
                                 title="View configuration" aria-label={`View configuration for ${filter.name}`}
                                 data-inspect-filter={filter.key} onClick={() => inspectFilter(filter.key)}>
-                                <Eye size={19} aria-hidden="true" /></button>}
+                                <SlidersHorizontal size={19} aria-hidden="true" /></button>}
                               <button type="button" className="filter-picker-visibility" role="switch" aria-checked={!hiddenKeys.includes(filter.key)}
                                 aria-label={`Show ${filter.name} in filter selector`} title={hiddenKeys.includes(filter.key) ? "Show filter" : "Hide filter"}
                                 disabled={pendingAction !== null} onClick={() => toggleVisibility(filter.key)}>
@@ -315,10 +315,6 @@ export function FilterSelector({ userId, filters, activeKey, activeName, onSelec
                           {activeKey === filter.key && <Check size={20} aria-hidden="true" />}</span>
                       </button>
                     )}
-                    {!isEditing && filter.isDefault && filter.configuration && <button type="button" className="filter-picker-icon filter-picker-inspect"
-                      title="View configuration" aria-label={`View configuration for ${filter.name}`}
-                      data-inspect-filter={filter.key} onClick={() => inspectFilter(filter.key)}>
-                      <Eye size={19} aria-hidden="true" /><span>View configuration</span></button>}
                   </li>
                 ))}
                 {hasUnsavedFilter && (

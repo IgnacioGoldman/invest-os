@@ -281,30 +281,6 @@
   flex-shrink: 0;
 }
 
-.filter-picker-row > .filter-picker-choice {
-  flex: 1;
-  min-width: 0;
-  width: auto;
-}
-
-.filter-picker-row:has(> .filter-picker-inspect) {
-  flex-wrap: wrap;
-  gap: 0;
-}
-
-.filter-picker-row:has(> .filter-picker-inspect) > .filter-picker-choice {
-  flex-basis: 100%;
-}
-
-.mobile-stock-app .filter-picker-icon.filter-picker-inspect {
-  color: var(--mobile-blue);
-  font-size: 0.78rem;
-  gap: 6px;
-  margin: 0 12px 8px 68px;
-  padding: 0 8px;
-  width: auto;
-}
-
 .filter-configuration {
   padding: 8px;
 }
