@@ -197,12 +197,6 @@
   gap: 8px;
 }
 
-.mobile-stock-app .watchlist-row-menu {
-  flex-basis: 32px;
-  width: 32px;
-  margin-left: 4px;
-}
-
 .watchlist-group-row > .watchlist-grip {
   flex-basis: 30px;
   width: 30px;

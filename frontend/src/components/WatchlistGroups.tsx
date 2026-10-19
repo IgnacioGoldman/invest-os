@@ -176,7 +176,7 @@ export function WatchlistGroups({
   };
   const grip = (id: string, label: string) => (
     <button type="button" className="watchlist-icon watchlist-grip" disabled={busy}
-      aria-label={`Reorder ${label}`} title="Drag to reorder, or use the menu"
+      aria-label={`Reorder ${label}`} title="Drag to reorder, or click to move or remove"
       onPointerDown={(event) => startDrag(event, id, label)} onPointerMove={moveDrag}
       onPointerUp={finishDrag} onPointerCancel={resetDrag} onLostPointerCapture={resetDrag}
       onClick={() => {
@@ -238,15 +238,13 @@ export function WatchlistGroups({
                   className={`watchlist-group-row${dropping && target?.ticker === snapshot.ticker ? target.after ? " watchlist-insert-after" : " watchlist-insert-before" : ""}${drag?.id === snapshot.ticker ? " watchlist-dragging" : ""}`}>
                   {organizing && grip(snapshot.ticker, snapshot.ticker)}
                   {renderRow(snapshot)}
-                  <button type="button" className="watchlist-icon watchlist-row-menu" disabled={busy}
-                    onClick={() => { setError(null); setMovingTicker(snapshot.ticker); }} aria-label={`Move or remove ${snapshot.ticker}`} title={`Move or remove ${snapshot.ticker}`}><MoreHorizontal size={18} /></button>
                 </div>
               ))}
               {rows.length === 0 && (
                 <div className="watchlist-group-empty">
                   {matching.length > 0 ? <button type="button" onClick={() => onRevealGroup(id)}>Show {matching.length} symbol{matching.length === 1 ? "" : "s"}</button>
                     : total > 0 ? <span>No symbols match your filters.</span>
-                      : <span>Move stocks here using their menu.</span>}
+                      : <span>Use Organize to move stocks here.</span>}
                 </div>
               )}
             </div>
