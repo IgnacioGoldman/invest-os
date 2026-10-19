@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { FILTER_ICONS, filterIcon, type FilterIconName } from "../filterIcons";
 import "../filterBuilder.css";
-import { expressionFromMetricRules, metricRulesFromExpression } from "../metricFilterRules";
+import { expressionFromMetricRules, groupSupportTimeframes, metricRuleFields, metricRulesFromExpression } from "../metricFilterRules";
 import { BUILT_IN_PRESET_COPY, PULLBACK_SUPPORT_FILTER_KEYS, SUPPORT_PRESET_FILTER_KEYS,
   builtInPresetFor, createBuiltInPresetExpression, type BuiltInPreset } from "../builtInFilters";
 import { STOCK_METRICS, STOCK_METRIC_BY_KEY, SUPPORT_KEYS, SUPPORT_FILTER_KEYS, SUPPORT_TIMEFRAMES, epsGaapMetric,
@@ -582,7 +582,7 @@ function FilterSheet({
   const [saveName, setSaveName] = useState(activeSavedFilter?.name ?? "");
   const [icon, setIcon] = useState<FilterIconName>(activeSavedFilter?.icon ?? (activeSavedFilter ? "sliders" : "trend"));
   const [initialRules] = useState(() => metricRulesFromExpression(expression));
-  const [rules, setRules] = useState(initialRules.rules);
+  const [rules, setRules] = useState(() => groupSupportTimeframes(initialRules.rules));
   const [sortExpanded, setSortExpanded] = useState(false);
   const [saveBusy, setSaveBusy] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -591,6 +591,7 @@ function FilterSheet({
   const initialState = useRef(JSON.stringify({ name: saveName.trim(), icon, rules, sortKey, sortDirection }));
   const count = rules.length;
   const hasEmptyValues = rules.some((rule) => rule.values.length === 0);
+  const hasEmptyTimeframes = rules.some((rule) => metricRuleFields(rule).length === 0);
   const dirty = initialState.current !== JSON.stringify({ name: saveName.trim(), icon, rules, sortKey, sortDirection });
   const SelectedIcon = filterIcon(icon).Icon;
 
@@ -635,7 +636,7 @@ function FilterSheet({
   };
 
   const submitSavedFilter = async () => {
-    if (!saveName.trim() || count === 0 || hasEmptyValues || busyRef.current) return;
+    if (!saveName.trim() || count === 0 || hasEmptyValues || hasEmptyTimeframes || busyRef.current) return;
     const nextExpression = expressionFromMetricRules(rules, expression);
     if (!personalization) {
       onApply(nextExpression);
@@ -684,26 +685,35 @@ function FilterSheet({
   };
 
   const addRule = () => {
-    const definition = AVAILABLE_FILTER_DEFINITIONS.find((item) => !rules.some((rule) => rule.field === item.key));
+    const definition = AVAILABLE_FILTER_DEFINITIONS.find((item) => !rules.some((rule) => metricRuleFields(rule).includes(item.key)));
     if (!definition) return;
     setRules([...rules, { id: nextFilterId("group"), field: definition.key, values: [definition.options[0].label] }]);
   };
 
   const availableMetricField = (field: string, id?: string): FilterKey | undefined => {
     const candidates = field === "support" ? SUPPORT_FILTER_KEYS : AVAILABLE_FILTER_DEFINITIONS.filter((item) => item.key === field).map((item) => item.key);
-    return candidates.find((candidate) => !rules.some((rule) => rule.id !== id && rule.field === candidate));
+    return candidates.find((candidate) => !rules.some((rule) => rule.id !== id && metricRuleFields(rule).includes(candidate)));
   };
 
   const changeMetric = (id: string, selected: string) => {
     const field = availableMetricField(selected, id);
     if (!field) return;
     const definition = AVAILABLE_FILTER_DEFINITIONS.find((item) => item.key === field)!;
-    setRules(rules.map((rule) => rule.id === id ? { ...rule, field, values: [definition.options[0].label] } : rule));
+    setRules(rules.map((rule) => rule.id === id
+      ? { ...rule, field, timeframes: isSupportField(field) ? [field] : undefined, values: [definition.options[0].label] }
+      : rule));
   };
 
-  const changeSupportTimeframe = (id: string, field: string) => {
-    if (!isSupportField(field) || rules.some((rule) => rule.id !== id && rule.field === field)) return;
-    setRules(rules.map((rule) => rule.id === id ? { ...rule, field } : rule));
+  const toggleSupportTimeframe = (id: string, field: SupportFilterKey) => {
+    setRules((current) => {
+      if (current.some((rule) => rule.id !== id && metricRuleFields(rule).includes(field))) return current;
+      return current.map((rule) => {
+        if (rule.id !== id) return rule;
+        const fields = metricRuleFields(rule);
+        const timeframes = SUPPORT_FILTER_KEYS.filter((item) => item === field ? !fields.includes(item) : fields.includes(item));
+        return { ...rule, field: timeframes[0] ?? rule.field, timeframes };
+      });
+    });
   };
 
   const toggleValue = (id: string, value: string) => {
@@ -790,13 +800,20 @@ function FilterSheet({
                               disabled={!availableMetricField(metric.field, rule.id)}>{metric.title}</option>)}
                           </select>
                         </label>
-                        {isSupportField(rule.field) && <label className="filter-builder-field">
-                          <span>Timeframe</span>
-                          <select value={rule.field} onChange={(event) => changeSupportTimeframe(rule.id, event.target.value)}>
-                            {SUPPORT_TIMEFRAMES.map((timeframe) => <option key={timeframe.field} value={timeframe.field}
-                              disabled={rules.some((other) => other.id !== rule.id && other.field === timeframe.field)}>{timeframe.label}</option>)}
-                          </select>
-                        </label>}
+                        {isSupportField(rule.field) && <fieldset className="filter-builder-values" aria-label={`Condition ${index + 1} timeframes`}>
+                          <legend>Timeframes <span>Choose one or more</span></legend>
+                          <div className="filter-builder-value-options">
+                            {SUPPORT_TIMEFRAMES.map((timeframe) => <label className="filter-builder-value" key={timeframe.field}>
+                              <input type="checkbox" checked={metricRuleFields(rule).includes(timeframe.field)}
+                                disabled={rules.some((other) => other.id !== rule.id && metricRuleFields(other).includes(timeframe.field))}
+                                onChange={() => toggleSupportTimeframe(rule.id, timeframe.field)} />
+                              <Check size={14} aria-hidden="true" /><span>{timeframe.label}</span>
+                            </label>)}
+                          </div>
+                          {metricRuleFields(rule).length === 0
+                            ? <p className="filter-builder-value-error" role="status">Choose at least one timeframe.</p>
+                            : <p className="filter-builder-timeframe-hint">Match values in every selected timeframe.</p>}
+                        </fieldset>}
                         {rule.field === "valuation" && <p className="filter-builder-hint">
                           This saved rule uses older Valuation criteria. Choose a stock metric to replace it, or remove this condition.
                         </p>}
@@ -816,7 +833,7 @@ function FilterSheet({
                   </div>;
                 })}
               </div>
-              <button type="button" className="filter-builder-add" onClick={addRule} disabled={!AVAILABLE_FILTER_DEFINITIONS.some((item) => !rules.some((rule) => rule.field === item.key))}>
+              <button type="button" className="filter-builder-add" onClick={addRule} disabled={!AVAILABLE_FILTER_DEFINITIONS.some((item) => !rules.some((rule) => metricRuleFields(rule).includes(item.key)))}>
                 <Plus size={18} aria-hidden="true" />Add condition
               </button>
             </section>
@@ -857,7 +874,7 @@ function FilterSheet({
           {saveError && <p className="filter-builder-error" role="alert">{saveError}</p>}
           {personalization && !personalization.signedIn && <p className="filter-builder-hint">Sign in to save and sync your filters.</p>}
           {count === 0 && <p className="filter-builder-hint">Add a condition to save your filter.</p>}
-          <button type="submit" className="filter-builder-save" disabled={saveBusy || !saveName.trim() || count === 0 || hasEmptyValues}>
+          <button type="submit" className="filter-builder-save" disabled={saveBusy || !saveName.trim() || count === 0 || hasEmptyValues || hasEmptyTimeframes}>
             {personalization && !personalization.signedIn ? <LogIn size={19} aria-hidden="true" /> : <Check size={20} aria-hidden="true" />}
             {saveBusy ? "Please wait…" : !personalization ? "Apply filter" : personalization.signedIn ? "Save filter" : "Sign in to save filter"}
           </button>

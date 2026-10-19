@@ -12,7 +12,7 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
 const { STOCK_METRICS, SUPPORT_TIMEFRAMES, stockMetricForField } = require('../src/stockMetrics.ts');
 const { supportSignal } = require('../src/metricStatus.ts');
 const { createBuiltInPresetExpression, builtInPresetFor } = require('../src/builtInFilters.ts');
-const { metricRulesFromExpression, expressionFromMetricRules } = require('../src/metricFilterRules.ts');
+const { metricRulesFromExpression, expressionFromMetricRules, groupSupportTimeframes } = require('../src/metricFilterRules.ts');
 const stocks = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/data/open-data/stocks.json'), 'utf8'));
 
 test('every card exposes selectable statuses using its actual calculation', () => {
@@ -98,7 +98,7 @@ test('built-in filters use current card metrics and survive the simple builder u
       assert.ok(metric, `${preset}: ${rule.field} must be a current stock-card metric`);
       for (const value of rule.values) assert.ok(metric.options.includes(value), `${rule.field}: ${value}`);
     }
-    const saved = expressionFromMetricRules(rules, expression);
+    const saved = expressionFromMetricRules(groupSupportTimeframes(rules), expression);
     // IDs, icons, and display order must not affect preset recognition after editing.
     saved.icon = 'trend';
     saved.groups.reverse();
@@ -111,6 +111,54 @@ test('built-in filters use current card metrics and survive the simple builder u
     saved.groups[0].conditions.pop();
     assert.equal(builtInPresetFor(saved), null, 'changing a selected value creates a custom filter');
   }
+});
+
+test('editing saved support conditions groups matching values and preserves distinct requirements', () => {
+  const rules = [
+    { id: 'short', field: 'support_1m', values: ['At support', 'Near support'] },
+    { id: 'growth', field: 'revenue', values: ['Strong'] },
+    { id: 'long', field: 'support_5y', values: ['Near support', 'At support'] },
+    { id: 'medium', field: 'support_6m', values: ['At support'] },
+  ];
+  const grouped = groupSupportTimeframes(rules);
+  assert.equal(grouped.length, 3);
+  assert.deepEqual(grouped[0].timeframes, ['support_1m', 'support_5y']);
+  assert.deepEqual(grouped[2].timeframes, ['support_6m']);
+  assert.equal(rules[0].timeframes, undefined, 'opening the editor must not mutate the original rules');
+  const saved = expressionFromMetricRules(grouped, { operator: 'and', groups: [] });
+  const reopened = groupSupportTimeframes(metricRulesFromExpression(saved).rules);
+  assert.deepEqual(reopened.map(({ field, values, timeframes }) => ({ field, values, timeframes })),
+    grouped.map(({ field, values, timeframes }) => ({ field, values, timeframes })));
+  const ids = saved.groups.flatMap(group => [group.id, ...group.conditions.map(condition => condition.id)]);
+  assert.equal(new Set(ids).size, ids.length);
+});
+
+test('multiple selected timeframes require each timeframe and accept any selected value', () => {
+  const expression = expressionFromMetricRules([
+    { id: 'support', field: 'support_1m', timeframes: ['support_1m', 'support_5y'], values: ['At support', 'Near support'] },
+    { id: 'growth', field: 'revenue', values: ['Strong', 'Solid'] },
+  ], { operator: 'and', groups: [] });
+  const samples = [
+    [1, 1, 25, true], [1, 4, 12, true], [4, 1, 25, true], [4, 4, 25, true],
+    [20, 1, 25, false], [1, 20, 25, false], [1, 1, -5, false], [null, 1, 25, false],
+  ].map(([short, long, revenue, matches]) => {
+    const stock = structuredClone(stocks[0]);
+    stock.price_opportunity.support_1m_distance = { value: short };
+    stock.price_opportunity.support_5y_distance = { value: long };
+    stock.business_health.revenue_growth_yoy = { value: revenue };
+    return { stock, matches };
+  });
+  const result = spawnSync('python3', ['-c', [
+    'import json, sys',
+    'from evaluate_saved_filters import expression_matches',
+    'payload = json.load(sys.stdin)',
+    'print(json.dumps([expression_matches(sample["stock"], payload["expression"]) for sample in payload["samples"]]))',
+  ].join('\n')], {
+    cwd: path.join(__dirname, '../../scripts'),
+    input: JSON.stringify({ expression, samples }), encoding: 'utf8',
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(JSON.parse(result.stdout), samples.map(sample => sample.matches));
 });
 
 test('legacy support alternatives are not recognized as the updated built-in filter', () => {

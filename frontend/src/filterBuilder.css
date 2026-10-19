@@ -424,6 +424,18 @@
   opacity: 0.45;
 }
 
+.filter-builder-value:has(input:disabled) {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.filter-builder-timeframe-hint {
+  color: var(--mobile-muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  margin: 10px 0 0;
+}
+
 .filter-builder-value-error {
   color: var(--mobile-red);
   font-size: 0.8rem;

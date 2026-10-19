@@ -1,10 +1,38 @@
 import type { FilterCondition, FilterExpression, FilterKey } from "./components/MobileStockExplorer";
+import { isSupportField, SUPPORT_FILTER_KEYS, type SupportFilterKey } from "./stockMetrics";
 
 export type MetricFilterRule = {
   id: string;
   field: FilterKey;
   values: string[];
+  timeframes?: SupportFilterKey[];
 };
+
+export function metricRuleFields(rule: MetricFilterRule): FilterKey[] {
+  return isSupportField(rule.field) ? rule.timeframes ?? [rule.field] : [rule.field];
+}
+
+// Present support rules with the same allowed values as one multi-select condition.
+// Keep different value sets separate so editing existing filters preserves their meaning.
+export function groupSupportTimeframes(rules: MetricFilterRule[]): MetricFilterRule[] {
+  const grouped: MetricFilterRule[] = [];
+  for (const rule of rules) {
+    if (!isSupportField(rule.field)) {
+      grouped.push(rule);
+      continue;
+    }
+    const matching = grouped.find((other) => isSupportField(other.field)
+      && other.values.length === rule.values.length
+      && other.values.every((value) => rule.values.includes(value)));
+    if (matching) {
+      const fields = [...metricRuleFields(matching), ...metricRuleFields(rule)];
+      matching.timeframes = SUPPORT_FILTER_KEYS.filter((field) => fields.includes(field));
+    } else {
+      grouped.push({ ...rule, timeframes: [...(rule.timeframes ?? [rule.field])] });
+    }
+  }
+  return grouped;
+}
 
 export function metricRulesFromExpression(expression: FilterExpression) {
   const valuesByField = new Map<FilterKey, Set<string>>();
@@ -49,10 +77,13 @@ export function expressionFromMetricRules(rules: MetricFilterRule[], original: F
   return {
     ...original,
     operator: "and",
-    groups: rules.map((rule) => ({
-      id: rule.id,
-      operator: "or",
-      conditions: rule.values.map((value, index) => ({ id: `${rule.id}-${index}`, field: rule.field, value })),
+    groups: rules.flatMap((rule) => metricRuleFields(rule).map((field) => {
+      const id = rule.timeframes ? `${rule.id}-${field}` : rule.id;
+      return {
+        id,
+        operator: "or" as const,
+        conditions: rule.values.map((value, index) => ({ id: `${id}-${index}`, field, value })),
+      };
     })),
   };
 }
