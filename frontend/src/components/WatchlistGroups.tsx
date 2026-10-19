@@ -1,5 +1,5 @@
 import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, GripVertical, MoreHorizontal, Plus, Trash2, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { WATCHLIST_COLORS, type WatchlistGroup, type WatchlistGroupInput, type WatchlistItem } from "../watchlist";
 import type { OpenDataStockSnapshot } from "../api";
 
@@ -217,20 +217,19 @@ export function WatchlistGroups({
         return (
           <section key={id ?? "ungrouped"} data-watchlist-group={id ?? ""}
             className={`watchlist-group${group ? "" : " watchlist-ungrouped"}${dropping ? " watchlist-drop-target" : ""}`}
-            style={{ "--watchlist-group-color": group?.color ?? "#8b8e97" } as CSSProperties} aria-label={label}>
+            aria-label={label}>
             {(group || groups.length > 0) && <header className="watchlist-group-header">
               {group ? (
                 <button type="button" className="watchlist-group-toggle" aria-expanded={!group.collapsed}
                   aria-controls={`watchlist-group-${id}`} disabled={busy}
                   onClick={() => void run(() => actions.onUpdateWatchlistGroup(group.id, { collapsed: !group.collapsed }), `${label} ${group.collapsed ? "expanded" : "collapsed"}.`)}>
-                  {group.collapsed ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
-                  <span className="watchlist-group-dot" aria-hidden="true" /><strong>{label}</strong>
-                  {total > 0 && <span className="watchlist-group-count">{total}</span>}
+                  {group.collapsed ? <ChevronRight size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
+                  <strong>{label}</strong>
                 </button>
-              ) : <div className="watchlist-ungrouped-label"><strong>{label}</strong>{total > 0 && <span className="watchlist-group-count">{total}</span>}</div>}
-              <div className="watchlist-group-actions">
-                {group && <button type="button" className="watchlist-icon" disabled={busy} onClick={() => openEditor(group)} aria-label={`Edit ${label}`} title={`Edit ${label}`}><MoreHorizontal size={20} /></button>}
-              </div>
+              ) : <div className="watchlist-ungrouped-label"><strong>{label}</strong></div>}
+              {organizing && group && <div className="watchlist-group-actions">
+                <button type="button" className="watchlist-icon" disabled={busy} onClick={() => openEditor(group)} aria-label={`Edit ${label}`} title={`Edit ${label}`}><MoreHorizontal size={20} /></button>
+              </div>}
             </header>}
             <div id={`watchlist-group-${id}`} className="watchlist-group-rows" hidden={group?.collapsed}>
               {rows.map((snapshot) => (

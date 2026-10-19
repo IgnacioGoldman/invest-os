@@ -1934,6 +1934,7 @@ export function MobileStockExplorer({
         ) : (
         <div id={isWatchlistView ? "space-watchlist" : "space-explore"} role={signedIn ? "tabpanel" : undefined} aria-labelledby={signedIn ? `space-${spaceTab}-tab` : undefined}>
         {showListControls && <>
+        <div className={isWatchlistView ? "watchlist-search-tools" : undefined} ref={isWatchlistView ? listTopRef : undefined}>
         <label className="mobile-stock-search">
           <Search size={20} />
           <input
@@ -1948,8 +1949,8 @@ export function MobileStockExplorer({
           )}
         </label>
 
-        <div className={isWatchlistView ? "watchlist-list-tools" : undefined}>
         <FilterSelector key={personalization?.userId ?? "guest"}
+          compact={isWatchlistView}
           userId={personalization?.userId ?? null}
           filters={filterShortcuts}
           activeKey={activeShortcutKey}
@@ -1990,10 +1991,11 @@ export function MobileStockExplorer({
             if (activeSavedFilterId === filter.id) clearFilter();
           }}
         />
+        </div>
 
-        <div className="mobile-list-summary" ref={listTopRef}>
-          <span>{isWatchlistView ? `${watchlistTickers.length} stock${watchlistTickers.length === 1 ? "" : "s"}` : listSummaryLabel}</span>
-          {!isWatchlistView && <div className="mobile-list-actions">
+        {!isWatchlistView && <div className="mobile-list-summary" ref={listTopRef}>
+          <span>{listSummaryLabel}</span>
+          <div className="mobile-list-actions">
             {analysisMode ? (
               <button type="button" onClick={cancelAnalysis}>Cancel</button>
             ) : visibleSnapshots.length > 0 ? (
@@ -2001,9 +2003,8 @@ export function MobileStockExplorer({
                 <Sparkles size={17} aria-hidden="true" />Analyze<ChevronRight size={15} aria-hidden="true" />
               </button>
             ) : null}
-          </div>}
-        </div>
-        </div>
+          </div>
+        </div>}
         {isWatchlistView && <div className="watchlist-actions" role="group" aria-label="Watchlist actions">
           <button type="button" className="watchlist-action" onClick={openExplore}>
             <Plus size={18} aria-hidden="true" />Add stocks

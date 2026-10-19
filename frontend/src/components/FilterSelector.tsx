@@ -35,6 +35,7 @@ function FilterIdentity({ filter, allStocks = false }: { filter?: FilterShortcut
 }
 
 type Props = {
+  compact?: boolean;
   userId: string | null;
   filters: FilterShortcut[];
   activeKey: string | null;
@@ -57,7 +58,7 @@ function readHiddenFilters(storageKey: string): string[] {
   }
 }
 
-export function FilterSelector({ userId, filters, activeKey, activeName, onSelect, onClear, onCreate, onEditCurrent, onEdit, onRename, onDelete }: Props) {
+export function FilterSelector({ compact = false, userId, filters, activeKey, activeName, onSelect, onClear, onCreate, onEditCurrent, onEdit, onRename, onDelete }: Props) {
   const storageKey = `invest-os:filter-visibility:${userId ?? "guest"}`;
   const [hiddenKeys, setHiddenKeys] = useState(() => readHiddenFilters(storageKey));
   const [isOpen, setIsOpen] = useState(false);
@@ -165,8 +166,9 @@ export function FilterSelector({ userId, filters, activeKey, activeName, onSelec
 
   return (
     <>
-      <div className="filter-selector-row" role="group" aria-label="Stock filters">
+      <div className={`filter-selector-row${compact ? " filter-selector-compact" : ""}`} role="group" aria-label="Stock filters">
         <button ref={selectorRef} type="button" className="filter-selector" aria-haspopup="dialog" aria-expanded={isOpen}
+          title={activeName ? `Filters: ${activeName}` : "Filters"}
           aria-label={`Filters, ${activeName ? `1 active filter: ${activeName}` : "no active filters"}`} onClick={() => {
             setError(null);
             setIsEditing(false);
@@ -174,11 +176,12 @@ export function FilterSelector({ userId, filters, activeKey, activeName, onSelec
             setRenamingKey(null);
             setIsOpen(true);
           }}>
-          <SlidersHorizontal size={18} aria-hidden="true" />
-          <span>Filters</span>
-          {activeName && <span className="filter-selector-count" aria-hidden="true">1</span>}
+          <SlidersHorizontal size={compact ? 21 : 18} aria-hidden="true" />
+          {!compact && <span>Filters</span>}
+          {activeName && (compact ? <span className="filter-selector-indicator" aria-hidden="true" />
+            : <span className="filter-selector-count" aria-hidden="true">1</span>)}
         </button>
-        {activeName && <button type="button" className="filter-selector-chip" aria-label={`Remove ${activeName} filter`}
+        {!compact && activeName && <button type="button" className="filter-selector-chip" aria-label={`Remove ${activeName} filter`}
           onClick={() => { onClear(); selectorRef.current?.focus({ preventScroll: true }); }}>
           <span>{activeName}</span><X size={16} aria-hidden="true" />
         </button>}

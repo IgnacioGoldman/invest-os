@@ -43,6 +43,41 @@
   padding: 0 4px;
 }
 
+.filter-selector-compact {
+  flex: 0 0 44px;
+  margin: 0;
+}
+
+.mobile-stock-app .filter-selector-compact .filter-selector {
+  background: transparent;
+  border-radius: 10px;
+  height: 44px;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+  width: 44px;
+}
+
+.mobile-stock-app .filter-selector-compact .filter-selector:hover {
+  background: var(--mobile-surface-soft);
+}
+
+.filter-selector-indicator {
+  background: var(--mobile-blue);
+  border: 2px solid var(--mobile-bg);
+  border-radius: 50%;
+  height: 9px;
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  width: 9px;
+}
+
+.mobile-stock-app .filter-selector:focus-visible {
+  outline: 2px solid var(--mobile-blue);
+  outline-offset: 2px;
+}
+
 .mobile-stock-app .filter-selector-chip {
   align-items: center;
   background: var(--mobile-blue-soft);
