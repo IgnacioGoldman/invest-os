@@ -12,11 +12,7 @@ export type FilterShortcut = {
   icon?: FilterIconName;
   description?: string;
   configuration?: {
-    operator: "and" | "or";
-    groups: Array<{
-      operator: "and" | "or";
-      conditions: Array<{ metric: string; values: string[] }>;
-    }>;
+    rules: Array<{ metric: string; values: string[] }>;
     sortLabel: string;
   };
 };
@@ -224,19 +220,15 @@ export function FilterSelector({ userId, filters, activeKey, activeName, onSelec
                 <p className="filter-configuration-readonly"><LockKeyhole size={15} aria-hidden="true" />Built-in filter · Read only</p>
                 <section aria-labelledby="filter-configuration-conditions">
                   <h3 id="filter-configuration-conditions">Conditions</h3>
-                  <p className="filter-configuration-hint">{configuration.operator === "and"
-                    ? "Match all of the following groups." : "Match any of the following groups."}</p>
+                  <p className="filter-configuration-hint">Match every metric below, using any selected value.</p>
                   <ol className="filter-configuration-groups">
-                    {configuration.groups.map((group, index) => <li key={index}>
-                      {index > 0 && <span className="filter-configuration-operator">{configuration.operator.toUpperCase()}</span>}
+                    {configuration.rules.map((rule, index) => <li key={rule.metric}>
+                      {index > 0 && <span className="filter-configuration-operator">AND</span>}
                       <div className="filter-configuration-group">
-                        <p>{group.operator === "or" ? "Match any of these" : "Match all of these"}</p>
+                        <p>Condition {index + 1}</p>
                         <dl>
-                          {group.conditions.map((condition, conditionIndex) => <div key={condition.metric}>
-                            {conditionIndex > 0 && <span className="filter-configuration-operator">{group.operator.toUpperCase()}</span>}
-                            <dt>{condition.metric}</dt>
-                            <dd>{condition.values.join(group.operator === "or" ? " or " : " and ")}</dd>
-                          </div>)}
+                          <dt>{rule.metric}</dt>
+                          <dd>{rule.values.join(" or ")}</dd>
                         </dl>
                       </div>
                     </li>)}

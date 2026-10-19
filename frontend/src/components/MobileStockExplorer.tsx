@@ -33,6 +33,8 @@ import {
 import { FILTER_ICONS, filterIcon, type FilterIconName } from "../filterIcons";
 import "../filterBuilder.css";
 import { expressionFromMetricRules, metricRulesFromExpression } from "../metricFilterRules";
+import { BUILT_IN_PRESET_COPY, PULLBACK_SUPPORT_FILTER_KEYS, SUPPORT_PRESET_FILTER_KEYS,
+  builtInPresetFor, createBuiltInPresetExpression, type BuiltInPreset } from "../builtInFilters";
 import { STOCK_METRICS, STOCK_METRIC_BY_KEY, SUPPORT_KEYS, SUPPORT_FILTER_KEYS, SUPPORT_TIMEFRAMES, epsGaapMetric,
   upcomingEarningsMetric, upcomingEarningsSignal, isSupportField, stockMetricForField,
   type StockMetricKey, type StockMetricField, type SupportFilterKey } from "../stockMetrics";
@@ -128,21 +130,13 @@ type FilterDefinition = {
   options: Array<{ label: string; tone: Tone }>;
 };
 
-const PULLBACK_SUPPORT_FILTER_KEYS = ["support_1m", "support_3m", "support_6m"] as const;
-const SUPPORT_PRESET_FILTER_KEYS = ["support_1y", "support_2y", "support_5y"] as const;
-type BuiltInPreset = "pullback" | "support" | "earnings";
-type BuiltInPresetCopy = {
-  name: string;
-  summary: string;
-};
-
 const AVAILABLE_FILTER_DEFINITIONS: FilterDefinition[] = STOCK_METRICS.flatMap((metric): FilterDefinition[] => {
   const base = { label: metric.title, shortLabel: metric.shortLabel, description: metric.description, options: metric.options.map(metricSignal) };
   return metric.field === "support"
     ? SUPPORT_TIMEFRAMES.map((timeframe) => ({ ...base, key: timeframe.field, shortLabel: `${timeframe.label} support`, section: "Support" }))
     : [{ ...base, key: metric.field, section: "Growth" }];
 });
-// Existing saved filters and presets retain their composite valuation meaning.
+// Existing saved filters retain their composite valuation meaning.
 // This legacy field is not offered when creating a new condition.
 const FILTER_DEFINITIONS: FilterDefinition[] = [...AVAILABLE_FILTER_DEFINITIONS, {
   key: "valuation", label: "Valuation (saved rule)", shortLabel: "Valuation (saved rule)", section: "Quality",
@@ -505,74 +499,6 @@ function createFilterGroup(field: FilterKey = "revenue"): FilterGroup {
   };
 }
 
-function createSupportConditions(fields: readonly Extract<FilterKey, `support_${string}`>[]) {
-  return fields.flatMap((field) => [
-    createCondition(field, "At support"),
-    createCondition(field, "Near support"),
-  ]);
-}
-
-function createValuationConditions(field: "valuation" | "forward_pe" = "valuation") {
-  return [
-    createCondition(field, "Cheap"),
-    createCondition(field, "Fair"),
-  ];
-}
-
-function createStrongOrSolidYoyGroup(): FilterGroup {
-  return {
-    id: nextFilterId("group"),
-    operator: "or",
-    conditions: [createCondition("revenue", "Strong"), createCondition("revenue", "Solid")],
-  };
-}
-
-function createStrongYoyExpression(preset: BuiltInPreset): FilterExpression {
-  const supportFields = preset === "pullback" ? PULLBACK_SUPPORT_FILTER_KEYS : SUPPORT_PRESET_FILTER_KEYS;
-  return {
-    operator: "and",
-    groups: [
-      {
-        id: nextFilterId("group"),
-        operator: "or",
-        conditions: createSupportConditions(supportFields),
-      },
-      createStrongOrSolidYoyGroup(),
-      {
-        id: nextFilterId("group"),
-        operator: "or",
-        conditions: createValuationConditions(),
-      },
-      ...(preset === "pullback" ? [{
-        id: nextFilterId("group"),
-        operator: "or" as const,
-        conditions: createValuationConditions("forward_pe"),
-      }] : []),
-    ],
-  };
-}
-
-function createUpcomingEarningsExpression(): FilterExpression {
-  return {
-    operator: "and",
-    groups: [
-      {
-        id: nextFilterId("group"),
-        operator: "or",
-        conditions: [
-          createCondition("upcoming_earnings", "This week"),
-          createCondition("upcoming_earnings", "Next 30 days"),
-        ],
-      },
-      createStrongOrSolidYoyGroup(),
-    ],
-  };
-}
-
-function createBuiltInPresetExpression(preset: BuiltInPreset): FilterExpression {
-  return preset === "earnings" ? createUpcomingEarningsExpression() : createStrongYoyExpression(preset);
-}
-
 function createEmptyFilterExpression(): FilterExpression {
   return {
     operator: "and",
@@ -594,67 +520,6 @@ function filterExpressionMatches(snapshot: OpenDataStockSnapshot, expression: Fi
   return expression.operator === "and" ? groupMatches.every(Boolean) : groupMatches.some(Boolean);
 }
 
-function builtInPresetFor(expression: FilterExpression): BuiltInPreset | null {
-  if (expression.operator !== "and") return null;
-  const signatures = expression.groups.map((group) => ({
-    operator: group.operator,
-    conditions: group.conditions.map((condition) => `${condition.field}:${condition.value}`).sort(),
-  }));
-  const growthSignature = ["revenue:Solid", "revenue:Strong"];
-  const hasGrowthGroup = signatures.some(
-    (group) => group.operator === "or" && group.conditions.join("|") === growthSignature.join("|"),
-  );
-  if (!hasGrowthGroup) return null;
-  if (
-    expression.groups.length === 2
-    && signatures.some(
-      (group) =>
-        group.operator === "or"
-        && group.conditions.join("|")
-          === "upcoming_earnings:Next 30 days|upcoming_earnings:This week",
-    )
-  ) {
-    return "earnings";
-  }
-  const valuationSignature = ["valuation:Cheap", "valuation:Fair"];
-  const hasValuationGroup = signatures.some(
-    (group) => group.operator === "or" && group.conditions.join("|") === valuationSignature.join("|"),
-  );
-  if (!hasValuationGroup) return null;
-  const supportSignature = (fields: readonly Extract<FilterKey, `support_${string}`>[]) => fields
-    .flatMap((key) => [`${key}:At support`, `${key}:Near support`])
-    .sort()
-    .join("|");
-  if (
-    expression.groups.length === 4
-    && signatures.some((group) => group.operator === "or" && group.conditions.join("|") === "forward_pe:Cheap|forward_pe:Fair")
-    && signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature(PULLBACK_SUPPORT_FILTER_KEYS))
-  ) {
-    return "pullback";
-  }
-  if (expression.groups.length === 3 && signatures.some((group) => group.operator === "or" && group.conditions.join("|") === supportSignature(SUPPORT_PRESET_FILTER_KEYS))) {
-    return "support";
-  }
-  return null;
-}
-
-const BUILT_IN_PRESET_COPY: Record<BuiltInPreset, BuiltInPresetCopy> = {
-  support: {
-    name: "Strong growth + support",
-    summary:
-      "Companies with strong latest revenue growth, cheap or fair valuation, and current price at or near support zones identified across the past 1Y, 2Y, and 5Y.",
-  },
-  pullback: {
-    name: "Strong YoY + pullback + fair price",
-    summary:
-      "Companies with Strong or Solid latest revenue growth YoY, cheap or fair valuation, and Cheap or Fair forward P/E (positive and up to 25×), with price at or near support zones identified across the past 1M, 3M, and 6M.",
-  },
-  earnings: {
-    name: "Growth + upcoming earnings",
-    summary: "Companies reporting earnings this week or in the next 30 days with Strong or Solid latest revenue growth YoY.",
-  },
-};
-
 function builtInPresetName(preset: BuiltInPreset | null) {
   return preset ? BUILT_IN_PRESET_COPY[preset].name : null;
 }
@@ -668,15 +533,11 @@ function builtInPresetSortKey(preset: BuiltInPreset): SortKey {
 }
 
 function builtInPresetConfiguration(preset: BuiltInPreset): NonNullable<FilterShortcut["configuration"]> {
-  const expression = createBuiltInPresetExpression(preset);
+  const { rules } = metricRulesFromExpression(createBuiltInPresetExpression(preset));
   return {
-    operator: expression.operator,
-    groups: expression.groups.map((group) => ({
-      operator: group.operator,
-      conditions: Array.from(new Set(group.conditions.map((condition) => condition.field))).map((field) => ({
-        metric: field === "valuation" ? "Valuation" : FILTER_DEFINITIONS.find((definition) => definition.key === field)!.shortLabel,
-        values: group.conditions.filter((condition) => condition.field === field).map((condition) => condition.value),
-      })),
+    rules: rules.map(({ field, values }) => ({
+      metric: AVAILABLE_FILTER_DEFINITIONS.find((definition) => definition.key === field)!.shortLabel,
+      values,
     })),
     sortLabel: `${SORT_OPTIONS.find((option) => option.key === builtInPresetSortKey(preset))!.label} · Ascending`,
   };

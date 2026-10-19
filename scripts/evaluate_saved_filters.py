@@ -29,35 +29,20 @@ SUPPORT_METRICS = {
 }
 
 
-def _support_conditions(fields: list[str]) -> list[dict[str, str]]:
-    return [
-        {"field": field, "value": value}
-        for field in fields
-        for value in ("At support", "Near support")
-    ]
+def _metric_group(field: str, values: tuple[str, ...]) -> dict[str, Any]:
+    return {
+        "operator": "or",
+        "conditions": [{"field": field, "value": value} for value in values],
+    }
 
 
-def _valuation_conditions(field: str = "valuation") -> list[dict[str, str]]:
-    return [
-        {"field": field, "value": "Cheap"},
-        {"field": field, "value": "Fair"},
-    ]
-
-
-def _strong_yoy_expression(support_fields: list[str], *, fair_forward_pe: bool = False) -> dict[str, Any]:
+def _strong_yoy_expression(support_fields: list[str]) -> dict[str, Any]:
     return {
         "operator": "and",
         "groups": [
-            {"operator": "or", "conditions": _support_conditions(support_fields)},
-            {
-                "operator": "or",
-                "conditions": [
-                    {"field": "revenue", "value": "Strong"},
-                    {"field": "revenue", "value": "Solid"},
-                ],
-            },
-            {"operator": "or", "conditions": _valuation_conditions()},
-            *([{"operator": "or", "conditions": _valuation_conditions("forward_pe")}] if fair_forward_pe else []),
+            *[_metric_group(field, ("At support", "Near support")) for field in support_fields],
+            _metric_group("revenue", ("Strong", "Solid")),
+            _metric_group("forward_pe", ("Cheap", "Fair")),
         ],
     }
 
@@ -85,7 +70,7 @@ def _upcoming_earnings_expression() -> dict[str, Any]:
 
 
 BUILT_IN_FILTERS = {
-    "builtin:pullback": _strong_yoy_expression(["support_1m", "support_3m", "support_6m"], fair_forward_pe=True),
+    "builtin:pullback": _strong_yoy_expression(["support_1m", "support_3m", "support_6m"]),
     "builtin:support": _strong_yoy_expression(["support_1y", "support_2y", "support_5y"]),
     "builtin:earnings_this_week": _upcoming_earnings_expression(),
 }

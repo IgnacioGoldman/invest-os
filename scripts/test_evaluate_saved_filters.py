@@ -239,28 +239,25 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
                     outside_band["business_health"]["fcf_margin"] = {"value": 20}
                     self.assertFalse(expression_matches(outside_band, expression))
 
-    def test_pullback_preset_uses_one_three_and_six_month_support(self) -> None:
-        row = snapshot("PULLBACK", 12, 12, 30, support_6m=1)
-        self.assertTrue(expression_matches(row, BUILT_IN_FILTERS["builtin:pullback"]))
-
-        three_month = snapshot("THREE", 12, 12, 30, support_3m=5)
-        self.assertTrue(expression_matches(three_month, BUILT_IN_FILTERS["builtin:pullback"]))
-
-        long_term_only = snapshot("LONG", 12, 12, 30, support_1y=1)
-        self.assertFalse(expression_matches(long_term_only, BUILT_IN_FILTERS["builtin:pullback"]))
-
-        pricey = snapshot("PRICEY", 30, 1, 30, price_to_sales=15)
-        self.assertFalse(expression_matches(pricey, BUILT_IN_FILTERS["builtin:pullback"]))
-
-    def test_support_preset_uses_one_year_through_five_year_support(self) -> None:
-        row = snapshot("SUPPORT", 25, 20, 30, support_1y=5)
-        self.assertTrue(expression_matches(row, BUILT_IN_FILTERS["builtin:support"]))
-
-        one_month_only = snapshot("SHORT", 25, 1, 30)
-        self.assertFalse(expression_matches(one_month_only, BUILT_IN_FILTERS["builtin:support"]))
-
-        six_month_only = snapshot("MID", 25, 12, 30, support_6m=1)
-        self.assertFalse(expression_matches(six_month_only, BUILT_IN_FILTERS["builtin:support"]))
+    def test_support_presets_require_every_timeframe_and_accept_either_status(self) -> None:
+        for key, fields in [
+            ("builtin:pullback", ("support_1m", "support_3m", "support_6m")),
+            ("builtin:support", ("support_1y", "support_2y", "support_5y")),
+        ]:
+            for value in (1, 5):
+                with self.subTest(key=key, support=value):
+                    row = snapshot("MATCH", 12, 30, 30)
+                    for field in fields:
+                        row["price_opportunity"][f"{field}_distance"]["value"] = value
+                    self.assertTrue(expression_matches(row, BUILT_IN_FILTERS[key]))
+                    for field in fields:
+                        for outside in (7, None):
+                            with self.subTest(field=field, outside=outside):
+                                row["price_opportunity"][f"{field}_distance"]["value"] = outside
+                                self.assertFalse(expression_matches(row, BUILT_IN_FILTERS[key]))
+                        row["price_opportunity"][f"{field}_distance"]["value"] = value
+                    row["business_health"]["revenue_growth_yoy"]["value"] = 2
+                    self.assertFalse(expression_matches(row, BUILT_IN_FILTERS[key]))
 
     def test_forward_pe_signal_uses_earnings_multiple_only(self) -> None:
         for value, label in [
@@ -274,29 +271,32 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
                 row = snapshot("FORWARD_PE", 30, 1, 30, forward_pe=value, price_to_sales=15)
                 self.assertEqual(signal_for(row, "forward_pe"), label)
 
-    def test_pullback_preset_requires_cheap_or_fair_forward_pe(self) -> None:
-        for value in (0.01, 18, 18.01, 25):
-            with self.subTest(value=value):
-                row = snapshot("FAIR_PRICE", 12, 1, 30, forward_pe=value)
-                self.assertTrue(expression_matches(row, BUILT_IN_FILTERS["builtin:pullback"]))
-
-        for value in (None, 0, -1, 25.01, 30, float("nan"), float("-inf")):
-            with self.subTest(value=value):
-                row = snapshot("COMPOSITE_FAIR", 12, 1, 1, forward_pe=value)
-                self.assertIn(signal_for(row, "valuation"), ("Cheap", "Fair"))
-                self.assertFalse(expression_matches(row, BUILT_IN_FILTERS["builtin:pullback"]))
-                self.assertTrue(expression_matches(row, BUILT_IN_FILTERS["builtin:support"]))
-
-        missing = snapshot("MISSING", 12, 1, 30)
-        del missing["valuation"]["forward_pe"]
-        self.assertFalse(expression_matches(missing, BUILT_IN_FILTERS["builtin:pullback"]))
+    def test_support_presets_use_forward_pe_instead_of_composite_valuation(self) -> None:
+        for key in ("builtin:pullback", "builtin:support"):
+            for value in (0.01, 18, 18.01, 25):
+                with self.subTest(key=key, forward_pe=value):
+                    row = snapshot("FAIR_PRICE", 12, 1, 1, support_3m=1, support_6m=1,
+                                   support_1y=1, support_2y=1, forward_pe=value, price_to_sales=25)
+                    self.assertEqual(signal_for(row, "valuation"), "Very pricey")
+                    self.assertTrue(expression_matches(row, BUILT_IN_FILTERS[key]))
+            for value in (None, 0, -1, 25.01, 30, float("nan"), float("-inf")):
+                with self.subTest(key=key, forward_pe=value):
+                    row = snapshot("COMPOSITE_FAIR", 12, 1, 1, support_3m=1, support_6m=1,
+                                   support_1y=1, support_2y=1, forward_pe=value)
+                    self.assertIn(signal_for(row, "valuation"), ("Cheap", "Fair"))
+                    self.assertFalse(expression_matches(row, BUILT_IN_FILTERS[key]))
+            del row["valuation"]["forward_pe"]
+            self.assertFalse(expression_matches(row, BUILT_IN_FILTERS[key]))
 
     def test_forward_pe_becoming_fair_creates_pullback_badge(self) -> None:
         client = FakeSupabase()
-        self.assertEqual(evaluate([snapshot("TEST", 12, 1, 30, forward_pe=30)], client), (3, 0))
-        self.assertEqual(evaluate([snapshot("TEST", 12, 1, 30, forward_pe=25)], client), (3, 1))
+        row = snapshot("TEST", 12, 1, 30, support_3m=5, support_6m=1, forward_pe=30)
+        self.assertEqual(evaluate([row], client), (3, 0))
+        row["valuation"]["forward_pe"]["value"] = 25
+        self.assertEqual(evaluate([row], client), (3, 1))
         self.assertEqual(client.events[0]["filter_key"], "builtin:pullback")
-        self.assertEqual(evaluate([snapshot("TEST", 12, 1, 30, forward_pe=18)], client), (3, 0))
+        row["valuation"]["forward_pe"]["value"] = 18
+        self.assertEqual(evaluate([row], client), (3, 0))
 
     def test_upcoming_earnings_preset_requires_next_30_days_and_strong_or_solid_yoy(self) -> None:
         strong = snapshot("STRONG", 25, 12, 30, days_to_next_earnings=7)
@@ -316,7 +316,7 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
         evaluated, events = evaluate([snapshot("TEST", 12, 12, 30)], client)
         self.assertEqual((evaluated, events), (3, 0))
 
-        evaluated, events = evaluate([snapshot("TEST", 12, 1, 30)], client)
+        evaluated, events = evaluate([snapshot("TEST", 12, 1, 30, support_3m=5, support_6m=1)], client)
         self.assertEqual((evaluated, events), (3, 1))
         self.assertEqual(client.events[0]["filter_key"], "builtin:pullback")
         self.assertEqual(client.events[0]["ticker"], "TEST")
