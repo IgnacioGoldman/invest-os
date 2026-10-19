@@ -14,6 +14,7 @@ import {
   type StockUniverseItem,
 } from "./api";
 import { MobileStockExplorer } from "./components/MobileStockExplorer";
+import { stockFromRouteSegment, stockRoutePath } from "./stockRoutes";
 import { PersonalizationControls } from "./components/PersonalizationControls";
 import {
   addWatchlistItem,
@@ -42,38 +43,12 @@ const isActiveRefreshJob = (job: RefreshJob) => job.status === "queued" || job.s
 const isExplorationBetaRefreshJob = (job: RefreshJob) => job.source === "exploration_beta";
 const APP_BASE_PATH = import.meta.env.BASE_URL;
 
-function normalizeRouteValue(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
-}
-
-function readableStockSlug(snapshot: Pick<OpenDataStockSnapshot, "ticker" | "name">) {
-  const rawName = snapshot.name?.trim();
-  const firstNamePart = rawName?.split(/[,.]/)[0]?.trim().split(/\s+/)[0];
-  const candidate = firstNamePart || snapshot.ticker;
-  const slug = candidate.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-  return slug || snapshot.ticker;
-}
-
 function routeSegmentFromLocation() {
   const pathname = window.location.pathname;
   const base = APP_BASE_PATH.endsWith("/") ? APP_BASE_PATH : `${APP_BASE_PATH}/`;
   if (!pathname.startsWith(base)) return null;
   const segment = pathname.slice(base.length).split("/")[0];
   return segment ? decodeURIComponent(segment) : null;
-}
-
-function stockFromRouteSegment(stocks: OpenDataStockSnapshot[], segment: string | null) {
-  if (!segment) return null;
-  const normalizedSegment = normalizeRouteValue(segment);
-  return stocks.find((snapshot) => (
-    normalizeRouteValue(readableStockSlug(snapshot)) === normalizedSegment
-    || normalizeRouteValue(snapshot.ticker) === normalizedSegment
-  )) ?? null;
-}
-
-function stockRoutePath(snapshot: OpenDataStockSnapshot) {
-  const base = APP_BASE_PATH.endsWith("/") ? APP_BASE_PATH : `${APP_BASE_PATH}/`;
-  return `${base}${encodeURIComponent(readableStockSlug(snapshot))}`;
 }
 
 function currentMatchDate() {
@@ -377,7 +352,7 @@ export default function App() {
     setSelectedTicker(ticker);
     const snapshot = stocks.find((item) => item.ticker === ticker);
     if (!snapshot) return;
-    window.history.pushState({}, "", stockRoutePath(snapshot));
+    window.history.pushState({}, "", stockRoutePath(snapshot, APP_BASE_PATH));
     setRouteSegment(routeSegmentFromLocation());
   };
 

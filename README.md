@@ -24,6 +24,8 @@ Supabase is optional. Without its environment values, the public stock explorer 
 
 My space opens on **Explore**, using the same stock list, search, filters, and stock details as the public view. Tap a stock's bookmark-plus icon to save it directly to **My Watchlist**, then use the confirmation's **View** action or switch to **Watchlist** to organize it. Explore and Watchlist keep separate search and filter settings.
 
+Stock detail links use the exact ticker, such as `/DTM`, to keep company names from colliding. Existing company-name links still open when they identify one stock unambiguously; exact tickers take priority. Run `(cd frontend && npm run test:routing)` to check stock link resolution.
+
 Choose **Analyze**, select stocks, then **Generate AI brief** to create and copy a comparison brief. The ready view includes a short preview, an optional full prompt, and **Open ChatGPT**; paste the prompt into ChatGPT or another AI to start the analysis. The brief includes numerical metrics, fiscal periods, source identifiers and data dates. Selection works across search, filters and pages. If automatic copying is blocked, use the copy button or select the full prompt to copy it manually.
 
 Stock cards and custom filter metrics share `frontend/src/stockMetrics.ts`: each entry supplies its name, selectable statuses, and status calculation to both views. Add new card metrics there so they automatically appear in the filter builder. Proximity to Support offers a separate timeframe selector. Run `(cd frontend && npm run test:metrics)` to check selectable card statuses and agreement with the Python watchlist badge evaluator; deployment runs this check too.
