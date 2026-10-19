@@ -535,23 +535,6 @@
   border-color: var(--mobile-muted);
 }
 
-.watchlist-search-tools {
-  align-items: center;
-  display: flex;
-  gap: 8px;
-}
-
-.watchlist-search-tools .mobile-stock-search {
-  background: transparent;
-  flex: 1;
-  min-width: 0;
-  padding-left: 0;
-}
-
-.watchlist-search-tools .mobile-stock-search > svg {
-  flex-shrink: 0;
-}
-
 .watchlist-actions {
   align-items: center;
   display: flex;

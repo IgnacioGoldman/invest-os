@@ -1951,7 +1951,7 @@ export function MobileStockExplorer({
         ) : (
         <div id={isWatchlistView ? "space-watchlist" : "space-explore"} role={signedIn ? "tabpanel" : undefined} aria-labelledby={signedIn ? `space-${spaceTab}-tab` : undefined}>
         {showListControls && <>
-        <div className={isWatchlistView ? "watchlist-search-tools" : undefined} ref={isWatchlistView ? listTopRef : undefined}>
+        <div className="mobile-stock-search-tools" ref={listTopRef}>
         <label className="mobile-stock-search">
           <Search size={20} />
           <input
@@ -1967,7 +1967,7 @@ export function MobileStockExplorer({
         </label>
 
         <FilterSelector key={personalization?.userId ?? "guest"}
-          compact={isWatchlistView}
+          compact
           userId={personalization?.userId ?? null}
           filters={filterShortcuts}
           activeKey={activeShortcutKey}
@@ -2010,7 +2010,7 @@ export function MobileStockExplorer({
         />
         </div>
 
-        {!isWatchlistView && <div className="mobile-list-summary" ref={listTopRef}>
+        {!isWatchlistView && <div className="mobile-list-summary">
           <span>{listSummaryLabel}</span>
           <div className="mobile-list-actions">
             {analysisMode ? (

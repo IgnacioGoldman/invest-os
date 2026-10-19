@@ -9309,6 +9309,23 @@ body:has(.mobile-sheet-backdrop) {
   top: -2px;
 }
 
+.mobile-stock-search-tools {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.mobile-stock-search-tools .mobile-stock-search {
+  background: transparent;
+  flex: 1;
+  min-width: 0;
+  padding-left: 0;
+}
+
+.mobile-stock-search-tools .mobile-stock-search > svg {
+  flex-shrink: 0;
+}
+
 .mobile-stock-search {
   align-items: center;
   background: var(--mobile-surface-raised);
