@@ -663,6 +663,25 @@ function builtInPresetSummary(preset: BuiltInPreset | null) {
   return preset ? BUILT_IN_PRESET_COPY[preset].summary : null;
 }
 
+function builtInPresetSortKey(preset: BuiltInPreset): SortKey {
+  return preset === "earnings" ? "upcoming_earnings" : preset === "pullback" ? "support_1m" : "support_best";
+}
+
+function builtInPresetConfiguration(preset: BuiltInPreset): NonNullable<FilterShortcut["configuration"]> {
+  const expression = createBuiltInPresetExpression(preset);
+  return {
+    operator: expression.operator,
+    groups: expression.groups.map((group) => ({
+      operator: group.operator,
+      conditions: Array.from(new Set(group.conditions.map((condition) => condition.field))).map((field) => ({
+        metric: field === "valuation" ? "Valuation" : FILTER_DEFINITIONS.find((definition) => definition.key === field)!.shortLabel,
+        values: group.conditions.filter((condition) => condition.field === field).map((condition) => condition.value),
+      })),
+    })),
+    sortLabel: `${SORT_OPTIONS.find((option) => option.key === builtInPresetSortKey(preset))!.label} · Ascending`,
+  };
+}
+
 function StockStatus({ signal, context, compact = false }: { signal: Signal; context?: string | null; compact?: boolean }) {
   return (
     <MetricStatus signal={signal} context={context} className={`mobile-status${compact ? " mobile-row-status" : ""}`} />
@@ -1834,7 +1853,7 @@ export function MobileStockExplorer({
 
   const applyBuiltInPreset = (preset: BuiltInPreset) => {
     setFilterExpression(createBuiltInPresetExpression(preset));
-    setSortKey(preset === "earnings" ? "upcoming_earnings" : preset === "pullback" ? "support_1m" : "support_best");
+    setSortKey(builtInPresetSortKey(preset));
     setSortDirection("asc");
     setActiveSavedFilterId(null);
   };
@@ -1879,11 +1898,18 @@ export function MobileStockExplorer({
     setSheetOpen(false);
   };
 
-  const defaultShortcuts: Array<FilterShortcut & { preset: BuiltInPreset }> = [
-    { key: SUPPORT_FILTER_KEY, name: BUILT_IN_PRESET_COPY.support.name, isDefault: true, preset: "support", identity: "support", description: "Growing companies near support" },
-    { key: PULLBACK_FILTER_KEY, name: BUILT_IN_PRESET_COPY.pullback.name, isDefault: true, preset: "pullback", identity: "pullback", description: "Growth, pullbacks & valuation" },
-    { key: EARNINGS_THIS_WEEK_FILTER_KEY, name: BUILT_IN_PRESET_COPY.earnings.name, isDefault: true, preset: "earnings", identity: "earnings", description: "Growing companies reporting soon" },
-  ];
+  const defaultShortcuts = useMemo(() => {
+    const presets: Array<{ key: string; preset: BuiltInPreset }> = [
+      { key: SUPPORT_FILTER_KEY, preset: "support" },
+      { key: PULLBACK_FILTER_KEY, preset: "pullback" },
+      { key: EARNINGS_THIS_WEEK_FILTER_KEY, preset: "earnings" },
+    ];
+    return presets.map(({ key, preset }): FilterShortcut & { preset: BuiltInPreset } => ({
+      key, preset, name: BUILT_IN_PRESET_COPY[preset].name, isDefault: true, identity: preset,
+      description: BUILT_IN_PRESET_COPY[preset].summary,
+      configuration: builtInPresetConfiguration(preset),
+    }));
+  }, []);
   const filterShortcuts: FilterShortcut[] = [
     ...defaultShortcuts,
     ...(personalization?.savedFilters ?? []).map((filter) => ({ key: savedFilterKey(filter.id), name: filter.name, icon: filter.icon, isDefault: false })),
