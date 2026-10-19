@@ -5,7 +5,7 @@ import { IndustryStrengthDetail } from "./IndustryStrengthDetail";
 import { prepareStockAnalysis, type StockAnalysisBrief } from "../aiAnalysis";
 import { StockAnalysisDialog, type AnalysisCopyStatus } from "./StockAnalysisDialog";
 import { FilterSelector, type FilterShortcut } from "./FilterSelector";
-import { WatchlistDialog, WatchlistGroups, type WatchlistGroupActions } from "./WatchlistGroups";
+import { WatchlistGroups, type WatchlistGroupActions } from "./WatchlistGroups";
 import type { WatchlistGroup, WatchlistItem } from "../watchlist";
 import { MetricStatus } from "./MetricStatus";
 import { fcfMarginSignal, forwardPeSignal, growthSignal, metricSignal, revenueGrowthSignal, supportSignal, type MetricSignal as Signal, type MetricTone as Tone } from "../metricStatus";
@@ -1006,73 +1006,6 @@ function FilterSheet({
   );
 }
 
-function WatchlistSheet({
-  snapshots, items, groups, groupId, onClose, onAdd,
-}: {
-  snapshots: OpenDataStockSnapshot[];
-  items: WatchlistItem[];
-  groups: WatchlistGroup[];
-  groupId: string | null;
-  onClose: () => void;
-  onAdd: (ticker: string, groupId: string | null) => Promise<void>;
-}) {
-  const [query, setQuery] = useState("");
-  const [targetGroup, setTargetGroup] = useState<string | null>(groupId);
-  const [busyTicker, setBusyTicker] = useState<string | null>(null);
-  const busyRef = useRef(false);
-  const [error, setError] = useState<string | null>(null);
-  const needle = query.trim().toLowerCase();
-  const rows = snapshots.filter((snapshot) => !needle || [snapshot.ticker, snapshot.name, snapshot.sector, snapshot.industry]
-    .filter(Boolean).some((value) => String(value).toLowerCase().includes(needle)));
-  const groupName = groups.find((group) => group.id === targetGroup)?.name ?? (groups.length > 0 ? "Ungrouped" : "Watchlist");
-  const add = async (ticker: string) => {
-    if (busyRef.current) return;
-    busyRef.current = true;
-    setBusyTicker(ticker);
-    setError(null);
-    try { await onAdd(ticker, targetGroup); }
-    catch (exc) { setError(exc instanceof Error ? exc.message : `Could not add ${ticker}.`); }
-    finally { busyRef.current = false; setBusyTicker(null); }
-  };
-  return (
-    <WatchlistDialog title="Add stocks" className="watchlist-picker-dialog" onClose={() => { if (!busyRef.current) onClose(); }}>
-      {groups.length > 0 && <label className="watchlist-picker-target">Add to
-        <select value={targetGroup ?? ""} disabled={busyTicker !== null} onChange={(event) => setTargetGroup(event.target.value || null)} aria-label="Destination group">
-          {groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}
-          <option value="">Ungrouped</option>
-        </select>
-      </label>}
-      <label className="mobile-watchlist-search">
-        <Search size={18} />
-        <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find a symbol or company"
-          aria-label="Find stocks for watchlist" autoFocus autoComplete="off" autoCorrect="off" autoCapitalize="none" enterKeyHint="search" inputMode="search" spellCheck={false} />
-        {query && <button type="button" onClick={() => setQuery("")} aria-label="Clear watchlist search"><X size={16} /></button>}
-      </label>
-      {error && <p className="watchlist-error" role="alert">{error}</p>}
-      <div className="mobile-watchlist-picker">
-        {rows.map((snapshot) => {
-          const item = items.find((entry) => entry.ticker === snapshot.ticker);
-          const isAdded = Boolean(item && item.group_id === targetGroup);
-          const otherGroup = item ? groups.find((group) => group.id === item.group_id)?.name ?? "Ungrouped" : null;
-          return (
-            <div className="mobile-watchlist-option" key={snapshot.ticker}>
-              <span><strong>{snapshot.ticker}</strong><small>{snapshot.name ?? snapshot.industry ?? ""}</small>
-                {otherGroup && !isAdded && <small>In {otherGroup}</small>}
-              </span>
-              <button type="button" className={isAdded ? "remove" : "add"} disabled={busyTicker !== null || isAdded}
-                onClick={() => void add(snapshot.ticker)} aria-label={isAdded ? `${snapshot.ticker} is in ${groupName}` : `${item ? "Move" : "Add"} ${snapshot.ticker} to ${groupName}`}>
-                {busyTicker === snapshot.ticker ? "Saving…" : isAdded ? <><Check size={16} />Added</> : item ? "Move" : <><Plus size={16} />Add</>}
-              </button>
-            </div>
-          );
-        })}
-        {rows.length === 0 && <p className="mobile-watchlist-no-results">No stocks match your search.</p>}
-      </div>
-      <footer className="mobile-watchlist-footer"><button type="button" disabled={busyTicker !== null} onClick={onClose}>Done</button></footer>
-    </WatchlistDialog>
-  );
-}
-
 function dateValue(value: string) {
   const parsed = Date.parse(`${value}T00:00:00Z`);
   return Number.isFinite(parsed) ? parsed : null;
@@ -1677,8 +1610,6 @@ export function MobileStockExplorer({
     sortDirection: SortDirection;
     savedFilterId: string | null;
   }>({ expression: createEmptyFilterExpression(), sortKey: "support_best", sortDirection: "asc", savedFilterId: null });
-  const [watchlistOpen, setWatchlistOpen] = useState(false);
-  const [watchlistTargetGroup, setWatchlistTargetGroup] = useState<string | null>(null);
   const [watchlistOrganizing, setWatchlistOrganizing] = useState(false);
   const [spaceTab, setSpaceTab] = useState<SpaceTab>("explore");
   const listViews = useRef<Partial<Record<StockListTab, StockListView>>>({});
@@ -1791,7 +1722,6 @@ export function MobileStockExplorer({
     setFilterExpression(createEmptyFilterExpression());
     setActiveSavedFilterId(null);
     setSheetOpen(false);
-    setWatchlistOpen(false);
     setWatchlistOrganizing(false);
     setSavingTicker(null);
     setWatchlistSaveError(null);
@@ -1953,6 +1883,11 @@ export function MobileStockExplorer({
     setPage(view?.page ?? 1);
   };
 
+  const openExplore = () => {
+    selectSpaceTab("explore");
+    document.getElementById("space-explore-tab")?.focus();
+  };
+
   const toggleWatchlistFromExplore = async (ticker: string) => {
     if (!personalization || savingWatchlist.current) return;
     const isSaved = watchlist.has(ticker);
@@ -2084,10 +2019,6 @@ export function MobileStockExplorer({
       </article>
     );
   };
-  const openWatchlistPicker = (groupId: string | null = null) => {
-    setWatchlistTargetGroup(groupId);
-    setWatchlistOpen(true);
-  };
   const pagination = totalPages > 1 && (
     <nav className="mobile-pagination" aria-label="Stocks pagination">
       <button type="button" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} aria-label="Previous page" title="Previous page"><ChevronLeft size={19} /></button>
@@ -2213,7 +2144,7 @@ export function MobileStockExplorer({
         </div>
         </div>
         {isWatchlistView && <div className="watchlist-actions" role="group" aria-label="Watchlist actions">
-          <button type="button" className="watchlist-action" onClick={() => openWatchlistPicker()}>
+          <button type="button" className="watchlist-action" onClick={openExplore}>
             <Plus size={18} aria-hidden="true" />Add stocks
           </button>
           <button type="button" className="watchlist-action" onClick={analysisMode ? cancelAnalysis : startAnalysis}
@@ -2250,7 +2181,7 @@ export function MobileStockExplorer({
               <div className="watchlist-empty-icon" aria-hidden="true"><Bookmark size={30} strokeWidth={1.8} /></div>
               <h2 id="watchlist-empty-title">Your watchlist is empty</h2>
               <p>Add companies to track their performance and discover investment opportunities.</p>
-              <button type="button" className="watchlist-add-stocks watchlist-empty-add" onClick={() => openWatchlistPicker()}>
+              <button type="button" className="watchlist-add-stocks watchlist-empty-add" onClick={openExplore}>
                 <Plus size={20} aria-hidden="true" />Add stocks
               </button>
               <small>Groups can be created after adding stocks</small>
@@ -2328,14 +2259,6 @@ export function MobileStockExplorer({
           setSheetOpen(false);
         }}
       />}
-      {personalization?.signedIn && watchlistOpen && (
-        <WatchlistSheet key={`${personalization.userId}:${watchlistTargetGroup ?? "ungrouped"}`}
-          snapshots={snapshots} items={watchlistItems} groups={watchlistGroups}
-          groupId={watchlistTargetGroup}
-          onClose={() => setWatchlistOpen(false)}
-          onAdd={personalization.onAddToWatchlist}
-        />
-      )}
     </div>
   );
 }

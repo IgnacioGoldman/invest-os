@@ -360,7 +360,7 @@
   color: var(--mobile-muted);
 }
 
-.watchlist-name input, .watchlist-picker-target select {
+.watchlist-name input {
   min-height: 46px;
   padding: 10px 12px;
   width: 100%;
@@ -484,45 +484,6 @@
   outline-offset: 2px;
 }
 
-.watchlist-picker-dialog {
-  width: min(560px, calc(100vw - 32px));
-}
-
-.watchlist-picker-dialog .watchlist-dialog-content {
-  display: flex;
-  flex-direction: column;
-  max-height: 85dvh;
-}
-
-.watchlist-picker-target {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-  font-size: .82rem;
-  color: var(--mobile-muted);
-  margin-bottom: 14px;
-}
-
-.watchlist-picker-dialog .mobile-watchlist-search {
-  margin: 0 0 14px;
-  flex-shrink: 0;
-}
-
-.watchlist-picker-dialog .mobile-watchlist-picker {
-  flex: 1;
-  min-height: 180px;
-}
-
-.watchlist-picker-dialog .mobile-watchlist-option {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.watchlist-picker-dialog .mobile-watchlist-footer {
-  padding: 14px 0 0;
-}
-
 @media (max-width: 720px) {
   .watchlist-dialog {
     margin: auto 0 0;
@@ -537,10 +498,6 @@
 
   .watchlist-dialog-content {
     padding: 20px 16px max(20px, env(safe-area-inset-bottom));
-  }
-
-  .watchlist-picker-dialog .watchlist-dialog-content {
-    max-height: 92dvh;
   }
 
   .watchlist-group-toggle {
