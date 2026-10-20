@@ -111,5 +111,12 @@
         }
       }
     }
+  },
+  "last_report_check": {
+    "checked_on": "2026-10-20",
+    "status": "retained_unverified",
+    "notes": [
+      "AZN: newer issuer revenue report unavailable; retained verified quarterly history: 403 Client Error: Forbidden for url: https://www.astrazeneca.com/investor-relations/results-and-presentations.html"
+    ]
   }
 }
