@@ -10756,7 +10756,7 @@
     "close": 31.809999465942383,
     "high": 35.75,
     "low": 31.479999542236328,
-    "volume": 9702300.0,
+    "volume": 9719300.0,
     "source": "yfinance_history"
   },
   {
@@ -10764,7 +10764,7 @@
     "close": 32.5,
     "high": 33.0,
     "low": 31.56999969482422,
-    "volume": 6417179.0,
+    "volume": 6418200.0,
     "source": "yfinance_history"
   }
 ]
