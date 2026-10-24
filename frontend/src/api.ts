@@ -65,6 +65,22 @@ export type ResearchMetric = OpenDataMetric & {
   comparison_periods?: string[];
   price_as_of?: string;
   components?: Record<string, ResearchMetric>;
+  assessment_version?: number;
+  max_count?: number;
+  observed_count?: number;
+  coverage?: { assessed: number; applicable: number; total: number; complete: boolean };
+  flags?: RedFlagGroup[];
+  checks?: RedFlagGroup[];
+};
+export type RedFlagCheck = {
+  id: string; title: string; state: "flagged" | "clear" | "unassessed";
+  formula: string; reason: string;
+  evidence: Array<{ period: string; as_of: string; metric: string; value: number; currency: string; source: string }>;
+  values?: unknown;
+};
+export type RedFlagGroup = {
+  id: string; title: string; state: "flagged" | "clear" | "unassessed" | "not_applicable";
+  reason?: string | null; triggered_rules: string[]; checks: RedFlagCheck[];
 };
 export type ScreeningMetrics = {
   version: number;

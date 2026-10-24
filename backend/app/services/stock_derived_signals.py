@@ -10,13 +10,16 @@ from pydantic import BaseModel, Field
 from app.entry_engine.open_data_models import OpenDataSnapshot
 
 
-DerivedMetricKind = Literal["percent", "pp", "ratio", "compact"]
+DerivedMetricKind = Literal["percent", "pp", "ratio", "compact", "count"]
 
 
 class DerivedSignal(BaseModel):
-    value: float | None = None
+    value: float | int | None = None
     kind: DerivedMetricKind
     notes: str
+    coverage: dict | None = None
+    flags: list[dict] = Field(default_factory=list)
+    observed_count: int | None = None
 
 
 class InterestingFact(BaseModel):
@@ -54,6 +57,9 @@ def build_stock_derived_signals(snapshot: OpenDataSnapshot, snapshots: list[Open
         key: DerivedSignal(value=metrics[key]['value'], kind='pp' if key in {'momentum', 'operating_margin_trend'} else 'percent', notes=metrics[key]['formula'])
         for key in ('revenue', 'momentum', 'operating_margin', 'operating_margin_trend')
     }
+    flags = metrics['red_flag_count']
+    derived['red_flag_count'] = DerivedSignal(value=flags['value'], kind='count', notes=flags['notes'],
+        coverage=flags['coverage'], flags=flags['flags'], observed_count=flags['observed_count'])
     return StockDerivedSignals(
         ticker=snapshot.ticker, name=snapshot.name, sector=snapshot.sector, industry=snapshot.industry,
         source_snapshot_generated_at=snapshot.generated_at, derived_metrics=derived,

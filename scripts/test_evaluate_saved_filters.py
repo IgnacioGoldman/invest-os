@@ -125,6 +125,26 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
         self.assertEqual(client.events[0]["filter_key"],"saved:research")
         self.assertEqual(evaluate([snapshot(short=1)],client),(1,0))
 
+    def test_numeric_red_flag_badges_do_not_count_incomplete_assessments_as_zero(self):
+        from test_screening_metrics import fact
+        client = FakeSupabase()
+        expression = {'operator': 'and', 'groups': [{'operator': 'and', 'conditions': [
+            {'field': 'red_flag_count', 'comparison': 'lte', 'value': '1'}]}]}
+        client.saved_filters = [{'id': 'risk', 'user_id': 'user-1', 'expression': expression}]
+        row = snapshot()
+        self.assertIsNone(row['screening']['metrics']['red_flag_count']['value'])
+        self.assertEqual(evaluate([row], client), (1, 0))
+        for r in row['historical_series']['quarterly_fundamentals']:
+            r['metrics']['equity'] = fact(100, 'StockholdersEquity', r['as_of'])
+        row['screening'] = build_screening_metrics(row, TODAY)
+        self.assertEqual(row['screening']['metrics']['red_flag_count']['value'], 0)
+        self.assertEqual(evaluate([row], client), (1, 1))
+        self.assertEqual(client.events[0]['filter_key'], 'saved:risk')
+        del row['historical_series']['quarterly_fundamentals'][-1]['metrics']['equity']
+        row['screening'] = build_screening_metrics(row, TODAY)
+        self.assertEqual(evaluate([row], client), (1, 0))
+        self.assertFalse(client.states[0]['active'])
+
     def test_badges_are_scoped_to_filter_owner(self):
         client=FakeSupabase();client.profiles.append({"user_id":"user-2"});client.watchlist.append({"user_id":"user-2","ticker":"TEST"})
         client.saved_filters=[{"id":"research","user_id":"user-1","expression":RESEARCH_FILTER}]

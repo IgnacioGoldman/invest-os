@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev": "vite",
-    "test:metrics": "node --test scripts/test-stock-metrics.cjs",
+    "test:metrics": "node --test scripts/test-stock-metrics.cjs scripts/test-personalization.cjs",
     "test:routing": "node --test scripts/test-stock-routes.cjs",
     "build": "tsc && vite build && cp dist/index.html dist/404.html",
     "preview": "vite preview"

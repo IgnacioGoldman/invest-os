@@ -40,7 +40,8 @@ function throwIfError(error: { message: string } | null) {
 }
 
 function withFilterIcon(filter: SavedFilter): SavedFilter {
-  return { ...filter, icon: filter.expression.icon ?? filter.icon ?? "sliders" };
+  return { ...filter, icon: filter.expression.icon ?? filter.icon ?? "sliders",
+    sort_key: filter.expression.sortKey ?? filter.sort_key };
 }
 
 export async function ensureUserProfile(userId: string) {
@@ -66,8 +67,10 @@ export async function saveFilter(input: SaveFilterInput) {
     name: input.name.trim(),
     // Keep presentation metadata in the existing JSON document so older
     // databases can save the complete filter without a schema migration.
-    expression: { ...input.expression, ...(input.icon ? { icon: input.icon } : {}) },
-    sort_key: input.sortKey,
+    expression: { ...input.expression, sortKey: input.sortKey, ...(input.icon ? { icon: input.icon } : {}) },
+    // Older database constraints allow only legacy sort keys. Keep newer sorts
+    // in the existing expression document, like the filter icon.
+    sort_key: ["red_flag_count", "operating_margin", "operating_margin_trend", "watchlist_order"].includes(input.sortKey) ? "symbol" : input.sortKey,
     sort_direction: input.sortDirection,
   };
   const query = input.id

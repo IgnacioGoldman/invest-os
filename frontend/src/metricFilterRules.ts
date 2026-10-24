@@ -1,6 +1,6 @@
 import type { FilterCondition, FilterExpression, FilterKey } from "./components/MobileStockExplorer";
 import type { OpenDataStockSnapshot } from "./api";
-import { hasDisabledFilter, isSupportField, normalizedFilterValue, stockMetricForField, supportMetric, SUPPORT_FILTER_KEYS, type SupportFilterKey } from "./stockMetrics";
+import { hasDisabledFilter, isSupportField, normalizedFilterValue, stockMetricForField, supportMetric, SUPPORT_FILTER_KEYS, type NumericComparison, type SupportFilterKey } from "./stockMetrics";
 
 export function filterExpressionMatches(snapshot: OpenDataStockSnapshot, expression: FilterExpression) {
   if (hasDisabledFilter(expression)) return false;
@@ -8,6 +8,13 @@ export function filterExpressionMatches(snapshot: OpenDataStockSnapshot, express
   const groupMatches = expression.groups.map((group) => {
     if (group.conditions.length === 0) return true;
     const matches = group.conditions.map((condition) => {
+      if (condition.comparison) {
+        const value = stockMetricForField(condition.field)?.getValue(snapshot);
+        if (value == null || !Number.isFinite(value)) return false;
+        const target = Number(condition.value);
+        return condition.comparison === "lt" ? value < target : condition.comparison === "lte" ? value <= target
+          : condition.comparison === "gt" ? value > target : condition.comparison === "gte" ? value >= target : value === target;
+      }
       const label = isSupportField(condition.field)
         ? supportMetric(snapshot, condition.field)?.signal.label ?? "Unknown"
         : stockMetricForField(condition.field)?.getSignal(snapshot).label ?? "Unclear";
@@ -24,6 +31,7 @@ export type MetricFilterRule = {
   values: string[];
   timeframes?: SupportFilterKey[];
   timeframeMatch?: "any" | "all";
+  comparison?: NumericComparison;
 };
 
 export function metricRuleFields(rule: MetricFilterRule): FilterKey[] {
@@ -53,7 +61,25 @@ export function groupSupportTimeframes(rules: MetricFilterRule[]): MetricFilterR
   return grouped;
 }
 
-export function metricRulesFromExpression(expression: FilterExpression) {
+export function metricRulesFromExpression(expression: FilterExpression): { rules: MetricFilterRule[]; logicChanged: boolean } {
+  const numericGroups = expression.groups.filter(group => group.conditions.some(condition => condition.comparison != null));
+  if (numericGroups.length === 0) return labelRulesFromExpression(expression);
+  const numericRules: MetricFilterRule[] = numericGroups.flatMap(group => group.conditions.map(condition => ({
+    id: group.id, field: condition.field, values: [condition.value], comparison: condition.comparison,
+  })));
+  const numericFields = numericRules.map(rule => rule.field);
+  const remaining = expression.groups.filter(group => !numericGroups.includes(group));
+  const labels = labelRulesFromExpression({ ...expression, groups: remaining });
+  const mixed = expression.operator !== "and" && expression.groups.length > 1
+    || numericGroups.some(group => group.conditions.length !== 1)
+    || new Set(numericFields).size !== numericFields.length
+    || remaining.some(group => group.conditions.some(condition => numericFields.includes(condition.field)));
+  const fieldOrder = expression.groups.flatMap(group => group.conditions.map(condition => condition.field));
+  return { rules: [...labels.rules, ...numericRules].sort((a, b) => fieldOrder.indexOf(a.field) - fieldOrder.indexOf(b.field)),
+    logicChanged: mixed || labels.logicChanged };
+}
+
+function labelRulesFromExpression(expression: FilterExpression) {
   const valuesByField = new Map<FilterKey, Set<string>>();
   for (const condition of expression.groups.flatMap((group) => group.conditions)) {
     const values = valuesByField.get(condition.field) ?? new Set<string>();
@@ -116,7 +142,9 @@ export function expressionFromMetricRules(rules: MetricFilterRule[], original: F
   return {
     ...original,
     operator: "and",
-    groups: rules.flatMap((rule) => {
+    groups: rules.flatMap((rule): FilterExpression["groups"] => {
+      if (rule.comparison) return [{ id: rule.id, operator: "and" as const,
+        conditions: [{ id: `${rule.id}-numeric`, field: rule.field, value: rule.values[0] ?? "", comparison: rule.comparison }] }];
       const fields = metricRuleFields(rule);
       if (isSupportField(rule.field) && rule.timeframeMatch === "any") return [{
         id: rule.id,

@@ -35,7 +35,8 @@ import "../filterBuilder.css";
 import { expressionFromMetricRules, filterExpressionMatches, groupSupportTimeframes, metricRuleFields, metricRulesFromExpression } from "../metricFilterRules";
 import { STOCK_METRICS, STOCK_METRIC_BY_KEY, SUPPORT_KEYS, SUPPORT_FILTER_KEYS, SUPPORT_TIMEFRAMES,
   upcomingEarningsMetric, upcomingEarningsSignal, isSupportField, stockMetricForField, researchMetric, metricEvidence, hasDisabledFilter, businessMetric, visibleStockMetrics, supportMetric, DISABLED_FILTER_FIELDS,
-  type StockMetricKey, type StockMetricField, type SupportFilterKey } from "../stockMetrics";
+  redFlagMetric, redFlagDisplay, NUMERIC_FIELDS, validNumericCondition,
+  type NumericComparison, type StockMetricKey, type StockMetricField, type SupportFilterKey } from "../stockMetrics";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -101,6 +102,7 @@ export type FilterCondition = {
   id: string;
   field: FilterKey;
   value: string;
+  comparison?: NumericComparison;
 };
 export type FilterGroup = {
   id: string;
@@ -109,6 +111,7 @@ export type FilterGroup = {
 };
 export type FilterExpression = {
   icon?: FilterIconName;
+  sortKey?: SortKey;
   operator: LogicOperator;
   groups: FilterGroup[];
 };
@@ -315,6 +318,11 @@ function rowMetric(
   }
   const definition = stockMetricForField(key);
   if (definition && !definition.context) {
+    if (definition.key === "red_flag_count") {
+      const metric = redFlagMetric(snapshot);
+      return metric ? { value: redFlagDisplay(snapshot), signal: definition.getSignal(snapshot),
+        secondary: `${metric.coverage!.assessed}/${metric.coverage!.applicable} checks assessed` } : null;
+    }
     const value = definition.getValue(snapshot);
     if (value == null) return null;
     return { value: definition.format === "pp" ? formatMomentumPp(value) : formatPercent(value, true),
@@ -425,6 +433,8 @@ function FilterSheet({
   const count = rules.length;
   const hasEmptyValues = rules.some((rule) => rule.values.length === 0);
   const hasEmptyTimeframes = rules.some((rule) => metricRuleFields(rule).length === 0);
+  const hasInvalidNumeric = rules.some(rule => rule.comparison != null
+    && !validNumericCondition({ field: rule.field, value: rule.values[0], comparison: rule.comparison }));
   const dirty = initialState.current !== JSON.stringify({ name: saveName.trim(), icon, rules, sortKey, sortDirection });
   const SelectedIcon = filterIcon(icon).Icon;
 
@@ -469,7 +479,7 @@ function FilterSheet({
   };
 
   const submitSavedFilter = async () => {
-    if (!saveName.trim() || count === 0 || hasEmptyValues || hasEmptyTimeframes || busyRef.current) return;
+    if (!saveName.trim() || count === 0 || hasEmptyValues || hasEmptyTimeframes || hasInvalidNumeric || busyRef.current) return;
     const nextExpression = expressionFromMetricRules(rules, expression);
     if (!personalization) {
       onApply(nextExpression);
@@ -520,7 +530,10 @@ function FilterSheet({
   const addRule = () => {
     const definition = AVAILABLE_FILTER_DEFINITIONS.find((item) => !rules.some((rule) => metricRuleFields(rule).includes(item.key)));
     if (!definition) return;
-    setRules([...rules, { id: nextFilterId("group"), field: definition.key, values: [definition.options[0].label], timeframeMatch: isSupportField(definition.key) ? "any" : undefined }]);
+    setRules([...rules, { id: nextFilterId("group"), field: definition.key,
+      values: [definition.key === "red_flag_count" ? "1" : definition.options[0].label],
+      comparison: definition.key === "red_flag_count" ? "lte" : undefined,
+      timeframeMatch: isSupportField(definition.key) ? "any" : undefined }]);
   };
 
   const availableMetricField = (field: string, id?: string): FilterKey | undefined => {
@@ -533,7 +546,9 @@ function FilterSheet({
     if (!field) return;
     const definition = AVAILABLE_FILTER_DEFINITIONS.find((item) => item.key === field)!;
     setRules(rules.map((rule) => rule.id === id
-      ? { ...rule, field, timeframes: isSupportField(field) ? [field] : undefined, timeframeMatch: isSupportField(field) ? "any" : undefined, values: [definition.options[0].label] }
+      ? { ...rule, field, timeframes: isSupportField(field) ? [field] : undefined, timeframeMatch: isSupportField(field) ? "any" : undefined,
+        comparison: field === "red_flag_count" ? "lte" : undefined,
+        values: [field === "red_flag_count" ? "1" : definition.options[0].label] }
       : rule));
   };
 
@@ -608,7 +623,7 @@ function FilterSheet({
                 <h3 id="filter-builder-conditions"><span aria-hidden="true">2</span>Conditions</h3>
                 <span>{count} {count === 1 ? "rule" : "rules"}</span>
               </div>
-              <p className="filter-builder-description">Match every metric below, using any selected value.</p>
+              <p className="filter-builder-description">Match every condition below. Label conditions accept any selected value.</p>
               {initialRules.logicChanged && <p className="filter-builder-hint" role="note">
                 This filter used different matching rules. Saving will require every metric below to match.
               </p>}
@@ -633,6 +648,17 @@ function FilterSheet({
                               disabled={!availableMetricField(metric.field, rule.id)}>{metric.title}</option>)}
                           </select>
                         </label>
+                        {NUMERIC_FIELDS.includes(rule.field) && rule.field !== "red_flag_count" && <label className="filter-builder-field">
+                          <span>Condition type</span>
+                          <select aria-label={`Condition ${index + 1} type`} value={rule.comparison ? "numeric" : "labels"}
+                            onChange={(event) => {
+                              const numeric = event.target.value === "numeric";
+                              setRules(current => current.map(item => item.id === rule.id ? { ...item,
+                                comparison: numeric ? "gt" : undefined, values: [numeric ? "0" : definition.options[0].label] } : item));
+                            }}>
+                            <option value="labels">Descriptive labels</option><option value="numeric">Numeric comparison</option>
+                          </select>
+                        </label>}
                         {isSupportField(rule.field) && <fieldset className="filter-builder-values" aria-label={`Condition ${index + 1} timeframes`}>
                           <legend>Timeframes <span>Choose one or more</span></legend>
                           <div className="filter-builder-value-options">
@@ -662,7 +688,27 @@ function FilterSheet({
                           This metric is disabled for screening. Replace or remove this condition before using the filter.
                         </p>}
                       </div>
-                      <fieldset className="filter-builder-values" aria-label={`${definition.shortLabel} values`}>
+                      {rule.comparison ? <fieldset className="filter-builder-values" aria-label={`${definition.shortLabel} numeric condition`}>
+                        <legend>Numeric condition</legend>
+                        <label className="filter-builder-field"><span>Comparison</span>
+                          <select aria-label={`Condition ${index + 1} comparison`} value={rule.comparison}
+                            onChange={event => { const comparison = event.target.value as NumericComparison;
+                              setRules(current => current.map(item => item.id === rule.id ? { ...item, comparison } : item)); }}>
+                            <option value="lt">Less than (&lt;)</option><option value="lte">At most (≤)</option>
+                            <option value="eq">Equal to (=)</option><option value="gte">At least (≥)</option><option value="gt">Greater than (&gt;)</option>
+                          </select>
+                        </label>
+                        <label className="filter-builder-field">
+                          <span>{rule.field === "red_flag_count" ? "Count" : stockMetricForField(rule.field)?.format === "pp" ? "Percentage points" : "Percent"}</span>
+                          <input type="number" aria-label={`Condition ${index + 1} threshold`} value={rule.values[0] ?? ""}
+                            step={rule.field === "red_flag_count" ? "1" : "any"} min={rule.field === "red_flag_count" ? 0 : undefined}
+                            onChange={event => { const value = event.target.value;
+                              setRules(current => current.map(item => item.id === rule.id ? { ...item, values: [value] } : item)); }} />
+                        </label>
+                        {rule.field === "red_flag_count" && <p className="filter-builder-timeframe-hint">Requires a complete assessment. Incomplete assessments do not match.</p>}
+                        {!validNumericCondition({ field: rule.field, value: rule.values[0], comparison: rule.comparison })
+                          && <p role="status" className="filter-builder-value-error">Enter {rule.field === "red_flag_count" ? "a non-negative whole number" : "a finite number"}.</p>}
+                      </fieldset> : <fieldset className="filter-builder-values" aria-label={`${definition.shortLabel} values`}>
                         <legend>Values <span>Choose one or more</span></legend>
                         <div className="filter-builder-value-options">
                           {definition.options.map((option) => <label className="filter-builder-value" key={option.label}>
@@ -672,7 +718,7 @@ function FilterSheet({
                           </label>)}
                         </div>
                         {rule.values.length === 0 && <p className="filter-builder-value-error" role="status">Choose at least one value.</p>}
-                      </fieldset>
+                      </fieldset>}
                     </div>
                   </div>;
                 })}
@@ -717,7 +763,7 @@ function FilterSheet({
           {saveError && <p className="filter-builder-error" role="alert">{saveError}</p>}
           {personalization && !personalization.signedIn && <p className="filter-builder-hint">Sign in to save and sync your filters.</p>}
           {count === 0 && <p className="filter-builder-hint">Add a condition to save your filter.</p>}
-          <button type="submit" className="filter-builder-save" disabled={saveBusy || !saveName.trim() || count === 0 || hasEmptyValues || hasEmptyTimeframes}>
+          <button type="submit" className="filter-builder-save" disabled={saveBusy || !saveName.trim() || count === 0 || hasEmptyValues || hasEmptyTimeframes || hasInvalidNumeric}>
             {personalization && !personalization.signedIn ? <LogIn size={19} aria-hidden="true" /> : <Check size={20} aria-hidden="true" />}
             {saveBusy ? "Please wait…" : !personalization ? "Apply filter" : personalization.signedIn ? "Save filter" : "Sign in to save filter"}
           </button>
@@ -1132,10 +1178,10 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
     );
   }
 
-  const metric = businessMetric(snapshot, detailKey);
+  const metric = detailKey === "red_flag_count" ? redFlagMetric(snapshot) : businessMetric(snapshot, detailKey);
   if (!metric) return null;
   const value = metric.value!;
-  const currentValue = copy.format === "pp" ? formatMomentumPp(value)
+  const currentValue = detailKey === "red_flag_count" ? redFlagDisplay(snapshot) : copy.format === "pp" ? formatMomentumPp(value)
     : formatPercent(value, true);
   return <section className="mobile-growth-detail-panel">
     <div className="mobile-growth-copy">
@@ -1145,6 +1191,22 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
     <div className="mobile-growth-formula">
       <span>{metric?.period || "Current value"}</span><strong>{currentValue}</strong>
       <StockStatus signal={copy.getSignal(snapshot)} />
+      {detailKey === "red_flag_count" && <>
+        <small>{metric.coverage!.assessed} of {metric.coverage!.applicable} applicable concern groups assessed ({metric.coverage!.total} in this rule set).</small>
+        {metric.coverage!.complete && metric.value === 0 && <small>No flags detected by these rules; this is not a clean bill of financial health.</small>}
+        {(metric.checks ?? []).map(group => <section className="mobile-red-flag-group" key={group.id}>
+          <h3>{group.title} · {group.state === "flagged" ? "Detected" : group.state === "clear" ? "No flag detected" : group.state === "not_applicable" ? "Outside rule scope" : "Not assessed"}</h3>
+          {group.reason && <p>{group.reason}</p>}
+          {group.checks.map(check => <details key={check.id}>
+            <summary>{check.title} · {check.state === "flagged" ? "Detected" : check.state === "clear" ? "No flag detected" : "Not assessed"}</summary>
+            <p>{check.formula}</p><p>{check.reason}</p>
+            <ul>{check.evidence.map((evidence, index) => <li key={index}>
+              {evidence.period} ({evidence.as_of}): {evidence.metric.replace(/_/g, " ")} {formatNumber(evidence.value)} {evidence.currency}.
+              <small>Source: {evidence.source}</small>
+            </li>)}</ul>
+          </details>)}
+        </section>)}
+      </>}
       {detailKey === "operating_margin" && metric?.yoy_change_pp != null && <small>{formatMomentumPp(metric.yoy_change_pp)} versus the same quarter last year</small>}
       <small>{metric?.formula}</small>
       {(metric?.warnings ?? []).map(warning => <small key={warning}>{warning}</small>)}
@@ -1231,7 +1293,7 @@ function StockDetail({ snapshot: summary, onBack, onOpenPeer }: { snapshot: Open
           <div className="mobile-signal-strip mobile-business-metrics">
             {businessMetrics.map(metric => <MobileGrowthSignalButton key={metric.key}
               active={selectedDetail === metric.key} label={metric.title}
-              value={metric.format === "pp" ? formatMomentumPp(metric.getValue(snapshot)) : formatPercent(metric.getValue(snapshot), true)}
+              value={metric.key === "red_flag_count" ? redFlagDisplay(snapshot) : metric.format === "pp" ? formatMomentumPp(metric.getValue(snapshot)) : formatPercent(metric.getValue(snapshot), true)}
               signal={metric.getSignal(snapshot)} onClick={() => setActiveGrowthDetail(current => current === metric.key ? null : metric.key)} />)}
           </div>
         </section>}

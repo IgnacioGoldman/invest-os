@@ -1,11 +1,13 @@
 # First-filter business performance
 
-Invest OS identifies companies with interesting reported business performance. It does not evaluate investment attractiveness. One compact, two-column Business Performance section contains only:
+Invest OS identifies companies with interesting reported business performance. One compact, two-column Business Performance section contains these four descriptive facts:
 
 - [Revenue Growth YoY](latest-revenue-growth-yoy.md): Growing / Flat / Declining, percentage.
 - [Revenue Growth Momentum](revenue-growth-momentum.md): Accelerating / Steady / Decelerating, percentage points.
 - [Operating Margin](operating-margin.md): Profitable / Loss-making, percentage.
 - [Operating Margin Trend](operating-margin-trend.md): Improving / Stable / Declining, percentage points versus the same fiscal quarter last year.
+
+It also exposes [Red Flag Count](red-flag-count.md), an optional derived count of three distinct concern groups with explicit assessment coverage and transparent evidence. Numeric custom filters can compare these five metrics. A low concern count is not an investment-quality or valuation score.
 
 Public inputs must have finite values, source identifiers, matching currency and fiscal periods. Recompute ratios and compare actual year-ago dates. Reuse the existing 140-day quarterly-report freshness policy. Green identifies growing revenue, accelerating revenue growth or improving operating margins; market-context cards remain neutral. Missing, stale, anomalous or non-comparable metrics are omitted entirely, including their detail panels. Cards never contain placeholder labels. No empty grid positions are reserved. Missing facts are never zero or ranked as zero. No composite quality or valuation score is generated.
 

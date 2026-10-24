@@ -18,10 +18,21 @@ export const DISABLED_FILTER_FIELDS = ["eps", "industry_strength", "valuation", 
 export function normalizedFilterValue(field: string, value: string) {
   return field === "momentum" && value === "Stable" ? "Steady" : value;
 }
-export function hasDisabledFilter(expression: { groups: { conditions: { field: string; value?: string }[] }[] }) {
+export const NUMERIC_FIELDS = ["revenue", "momentum", "operating_margin", "operating_margin_trend", "red_flag_count"];
+export const NUMERIC_COMPARISONS = ["lt", "lte", "eq", "gte", "gt"] as const;
+export type NumericComparison = typeof NUMERIC_COMPARISONS[number];
+export function validNumericCondition(condition: { field: string; value?: string; comparison?: string }) {
+  if (!NUMERIC_FIELDS.includes(condition.field) || !NUMERIC_COMPARISONS.some(c => c === condition.comparison)
+      || typeof condition.value !== "string" || !/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(condition.value.trim())
+      || !Number.isFinite(Number(condition.value))) return false;
+  return condition.field !== "red_flag_count" || (Number.isInteger(Number(condition.value)) && Number(condition.value) >= 0);
+}
+export function hasDisabledFilter(expression: { groups: { conditions: { field: string; value?: string; comparison?: string }[] }[] }) {
   return expression.groups.some(group => group.conditions.some(c => {
     const metric = stockMetricForField(c.field);
-    return DISABLED_FILTER_FIELDS.includes(c.field) || !metric || (c.value != null && !(metric.options as readonly string[]).includes(normalizedFilterValue(c.field, c.value)));
+    return DISABLED_FILTER_FIELDS.includes(c.field) || !metric
+      || (c.comparison != null ? !validNumericCondition(c) : c.field === "red_flag_count"
+        || (c.value != null && !(metric.options as readonly string[]).includes(normalizedFilterValue(c.field, c.value))));
   }));
 }
 export function upcomingEarningsMetric(snapshot: OpenDataStockSnapshot): OpenDataMetric | undefined {
@@ -78,7 +89,26 @@ export function businessMetric(snapshot: OpenDataStockSnapshot, key: string): Re
   return metric;
 }
 export function visibleStockMetrics(snapshot: OpenDataStockSnapshot, context: boolean) {
-  return STOCK_METRICS.filter(metric => metric.context === context && metric.getValue(snapshot) != null);
+  return STOCK_METRICS.filter(metric => metric.context === context
+    && (metric.key === "red_flag_count" ? redFlagMetric(snapshot) != null : metric.getValue(snapshot) != null));
+}
+export function redFlagMetric(snapshot: OpenDataStockSnapshot): ResearchMetric | undefined {
+  const metric = researchMetric(snapshot, "red_flag_count");
+  const today = new Date(Date.now()).toISOString().slice(0, 10);
+  if (metric?.assessment_version !== 1 || !metric.coverage || !metric.valid_until
+      || !["Complete assessment", "Partial assessment", "Not assessed"].includes(metric.status)
+      || validDay(metric.valid_until) == null || metric.valid_until < today) return undefined;
+  return metric;
+}
+export function redFlagValue(snapshot: OpenDataStockSnapshot): number | null {
+  const metric = redFlagMetric(snapshot);
+  return metric?.validated && metric.status === "Complete assessment" && metric.coverage?.complete && Number.isInteger(metric.value)
+    && metric.value != null && metric.value >= 0 && metric.value <= (metric.max_count ?? 0) ? metric.value : null;
+}
+export function redFlagDisplay(snapshot: OpenDataStockSnapshot): string {
+  const metric = redFlagMetric(snapshot);
+  const value = redFlagValue(snapshot);
+  return value != null ? String(value) : metric?.observed_count ? `≥${metric.observed_count}` : "Not fully assessed";
 }
 export function metricEvidence(metric?: ResearchMetric, includeWarnings = true): string {
   if (!metric) return "Unknown: comparable financial inputs are unavailable.";
@@ -86,7 +116,7 @@ export function metricEvidence(metric?: ResearchMetric, includeWarnings = true):
 }
 type Definition = {
   key: string; field: string; title: string; shortLabel: string; question: string; description: string;
-  format: "percent" | "ratio" | "days" | "pp" | "support" | "compact";
+  format: "percent" | "ratio" | "days" | "pp" | "support" | "compact" | "count";
   context: boolean; options: string[];
   getSignal: (s: OpenDataStockSnapshot) => MetricSignal;
   getValue: (s: OpenDataStockSnapshot) => number | null;
@@ -108,6 +138,11 @@ export const STOCK_METRICS = [
   { key: "operating_margin_trend", field: "operating_margin_trend", title: "Operating Margin Trend", shortLabel: "Margin trend", format: "pp", context: false,
     question: "How did operating profitability change year over year?", description: "Latest-quarter operating margin minus the same fiscal quarter last year, in percentage points. A positive change is Improving, zero is Stable, and a negative change is Declining.",
     options: ["Improving", "Stable", "Declining"], ...financialMetric("operating_margin_trend") },
+  { key: "red_flag_count", field: "red_flag_count", title: "Red Flag Count", shortLabel: "Red flags", format: "count", context: false,
+    question: "Which potential financial concerns are detectable from the reported history?",
+    description: "One point per distinct concern group: cash generation, operating profitability and negative book equity. Potential concerns need context. Numeric filters require a complete assessment.",
+    options: ["Complete assessment", "Partial assessment", "Not assessed"],
+    getSignal: s => metricSignal(redFlagMetric(s)?.status ?? "Not assessed"), getValue: redFlagValue },
   { key: "upcoming_earnings", field: "upcoming_earnings", title: "Upcoming Earnings", shortLabel: "Earnings", format: "days", context: true,
     question: "When is the next expected report?", description: "Source-provided earnings date or window. An expected date is an estimate unless confirmed by the issuer.",
     options: ["This week", "Next 30 days", "Later"], getSignal: (s) => upcomingEarningsSignal(upcomingEarningsMetric(s)), getValue: s => { const m = upcomingEarningsMetric(s); return upcomingEarningsSignal(m).label === "Unknown" ? null : m?.value ?? null; } },

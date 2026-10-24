@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,7 +16,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
-from app.services.screening_metrics import build_screening_metrics, DROPPED_FIELDS, BUSINESS_STATUSES, support_context  # noqa: E402
+from app.services.screening_metrics import build_screening_metrics, day, DROPPED_FIELDS, BUSINESS_STATUSES, support_context  # noqa: E402
 
 DEFAULT_STOCKS_PATH = ROOT / "frontend" / "public" / "data" / "open-data" / "stocks.json"
 MATCH_TIMEZONE = ZoneInfo("Europe/Stockholm")
@@ -52,6 +53,10 @@ def signal_for(snapshot: dict[str, Any], field: str) -> str:
     if not screening or field == "upcoming_earnings":
         screening = build_screening_metrics(snapshot, today=datetime.now(timezone.utc).date())
     metric = screening.get("metrics", {}).get(field, {})
+    if field == 'red_flag_count' and (metric.get('assessment_version') != 1
+            or metric.get('status') not in {'Complete assessment', 'Partial assessment', 'Not assessed'}
+            or not day(metric.get('valid_until')) or metric['valid_until'] < datetime.now(timezone.utc).date().isoformat()):
+        return 'Not assessed'
     if field in BUSINESS_STATUSES:
         valid_until = str(metric.get('valid_until') or '')
         if not metric.get('validated') or valid_until < datetime.now(timezone.utc).date().isoformat():
@@ -64,6 +69,48 @@ FILTER_VALUES = {
     "upcoming_earnings": {"This week", "Next 30 days", "Later"},
     **{field: {"Inside Support Zone", "Near Support", "Above Support"} for field in SUPPORT_METRICS},
 }
+NUMERIC_FIELDS = {*BUSINESS_STATUSES, 'red_flag_count'}
+NUMERIC_COMPARISONS = {'lt', 'lte', 'eq', 'gte', 'gt'}
+
+
+def numeric_target(condition: dict) -> float | None:
+    value = condition.get('value')
+    if isinstance(value, bool) or value is None or (isinstance(value, str) and not value.strip()):
+        return None
+    if not isinstance(value, str) or not re.fullmatch(r'[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?', value.strip(), re.I):
+        return None
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(value) or (condition.get('field') == 'red_flag_count' and (value < 0 or not value.is_integer())):
+        return None
+    return value
+
+
+def valid_condition(condition: dict) -> bool:
+    field = condition.get('field')
+    if condition.get('comparison') is not None:
+        return field in NUMERIC_FIELDS and isinstance(condition['comparison'], str) and condition['comparison'] in NUMERIC_COMPARISONS and numeric_target(condition) is not None
+    return field in FILTER_VALUES and _filter_value(condition) in FILTER_VALUES[field]
+
+
+def condition_matches(snapshot: dict, condition: dict) -> bool:
+    if condition.get('comparison') is None:
+        return signal_for(snapshot, str(condition.get('field', ''))) == _filter_value(condition)
+    screening = snapshot.get('screening') or build_screening_metrics(snapshot, today=datetime.now(timezone.utc).date())
+    m = screening.get('metrics', {}).get(condition['field'], {})
+    value, target = _number(m.get('value')), numeric_target(condition)
+    deadline = str(m.get('valid_until') or '')
+    if (value is None or target is None or not m.get('validated') or not day(deadline) or deadline < datetime.now(timezone.utc).date().isoformat()
+            or (condition['field'] == 'red_flag_count' and (not m.get('coverage', {}).get('complete')
+                or m.get('status') != 'Complete assessment' or m.get('assessment_version') != 1
+                or not value.is_integer() or not 0 <= value <= m.get('max_count', 0)))
+            or (condition['field'] in BUSINESS_STATUSES and m.get('status') not in BUSINESS_STATUSES[condition['field']])):
+        return False
+    comparison = condition['comparison']
+    return {'lt': value < target, 'lte': value <= target, 'eq': value == target,
+            'gte': value >= target, 'gt': value > target}[comparison]
 
 
 def expression_matches(snapshot: dict[str, Any], expression: dict[str, Any]) -> bool:
@@ -72,7 +119,7 @@ def expression_matches(snapshot: dict[str, Any], expression: dict[str, Any]) -> 
         return True
     # Retired rules fail the entire saved expression, even inside an OR group.
     # Silently removing a rule could broaden an existing saved screen.
-    if any(isinstance(c, dict) and (c.get("field") not in FILTER_VALUES or _filter_value(c) not in FILTER_VALUES.get(c.get("field"), set())) for g in groups if isinstance(g, dict) for c in g.get("conditions", [])):
+    if any(isinstance(c, dict) and not valid_condition(c) for g in groups if isinstance(g, dict) for c in g.get("conditions", [])):
         return False
     group_results: list[bool] = []
     for group in groups:
@@ -81,7 +128,7 @@ def expression_matches(snapshot: dict[str, Any], expression: dict[str, Any]) -> 
             group_results.append(True)
             continue
         results = [
-            signal_for(snapshot, str(condition.get("field", ""))) == _filter_value(condition)
+            condition_matches(snapshot, condition)
             for condition in conditions
             if isinstance(condition, dict)
         ]

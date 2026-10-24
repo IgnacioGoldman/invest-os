@@ -1,4 +1,4 @@
-"""Four deterministic business facts, plus preserved inputs for AI research.
+"""Four deterministic business facts, a concern count and preserved AI inputs.
 
 Sources establish provenance, not independent verification. First-filter cards
 use signed revenue/margin changes, the existing 3 pp momentum threshold and the
@@ -211,6 +211,7 @@ def build_business_performance(snapshot: dict, today: date) -> dict:
 
 
 def build_screening_metrics(snapshot: dict, today: date | None = None) -> dict:
+    from app.services.red_flags import build_red_flag_count
     today = today or date.today()
     raw = snapshot.get('metrics', {})
     health = snapshot.get('business_health', {})
@@ -334,7 +335,8 @@ def build_screening_metrics(snapshot: dict, today: date | None = None) -> dict:
         event_days = None
     output['upcoming_earnings'] = result(earnings, value=event_days, period=match[0][1:] if match else 'Unknown date',
         formula='source event/window start date − current date', status='Unknown' if event_days is None else 'This week' if event_days <= 7 else 'Next 30 days' if event_days <= 30 else 'Later')
-    return {'version': 2, 'as_of': today.isoformat(), 'metrics': output, 'financial_details': advanced, 'warnings': warnings,
+    output['red_flag_count'] = build_red_flag_count(snapshot, today)
+    return {'version': 3, 'as_of': today.isoformat(), 'metrics': output, 'financial_details': advanced, 'warnings': warnings,
             'verification': 'Source identifiers preserve provenance; financial inputs have not been independently verified.'}
 
 

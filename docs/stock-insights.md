@@ -1,8 +1,10 @@
 # Stock business-performance screening
 
-Invest OS shows four deterministic first-filter facts: Revenue Growth YoY, Revenue Growth Momentum, Operating Margin and Operating Margin Trend. See the [metric index](metrics/README.md) for calculations, thresholds, confidence checks and retired metrics.
+Invest OS shows four deterministic business-performance facts: Revenue Growth YoY, Revenue Growth Momentum, Operating Margin and Operating Margin Trend. [Red Flag Count](metrics/red-flag-count.md) adds one optional derived metric with transparent concern groups and assessment coverage. See the [metric index](metrics/README.md) for calculations, thresholds, confidence checks and retired metrics.
 
 Business Performance is a compact two-column section. A missing, stale or non-comparable metric has no card or detail panel. The separate Market Context section shows only valid future earnings dates and detected support zones; chart timeframes remain unchanged.
+
+Red Flag Count displays partial assessments explicitly rather than presenting incomplete data as zero concerns. Numeric comparisons on this count require complete coverage. Custom filters support `<`, `≤`, `=`, `≥` and `>` for the count and the four business facts, while existing label conditions remain supported.
 
 The built-in **test 1** filter requires Growing Revenue Growth YoY, Profitable Operating Margin, and Inside Support Zone or Near Support on **any** of the 1m, 3m or 6m timeframes. Missing or invalid support on another timeframe does not veto a valid match. It is available to guests and signed-in users, sorts alphabetically, and can be customized as a separate saved filter. New support conditions default to **Any selected timeframe**; the editor also offers **Every selected timeframe** and preserves existing saved filters that require all selected timeframes. Support conditions describe market context rather than investment quality.
 

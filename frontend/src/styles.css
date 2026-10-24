@@ -11445,3 +11445,13 @@ body:has(.mobile-sheet-backdrop) {
 .mobile-context-metrics > button:last-child:nth-child(odd) {
   grid-column: 1 / -1;
 }
+.mobile-red-flag-group {
+  border-top: 1px solid var(--mobile-border);
+  margin-top: 12px;
+  padding-top: 12px;
+  overflow-wrap: anywhere;
+}
+.mobile-red-flag-group h3 { font-size: 14px; margin: 0 0 8px; }
+.mobile-red-flag-group p, .mobile-red-flag-group li { font-size: 12px; line-height: 1.5; }
+.mobile-red-flag-group details { margin-top: 8px; }
+.mobile-red-flag-group summary { cursor: pointer; font-size: 12px; }

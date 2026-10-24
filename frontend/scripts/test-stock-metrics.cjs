@@ -44,9 +44,9 @@ test('all support timeframes resolve to the shared context definition', () => {
   for (const timeframe of SUPPORT_TIMEFRAMES) assert.equal(stockMetricForField(timeframe.field), stockMetricForField('support'));
 });
 
-test('only four business-performance cards remain', () => {
+test('four business-performance facts and the derived Red Flag Count are registered', () => {
   assert.deepEqual(STOCK_METRICS.filter(metric => !metric.context).map(metric => metric.key),
-    ['revenue', 'momentum', 'operating_margin', 'operating_margin_trend']);
+    ['revenue', 'momentum', 'operating_margin', 'operating_margin_trend', 'red_flag_count']);
   for (const field of ['eps', 'industry_strength', 'valuation', 'fcf_margin', 'forward_pe', 'balance_sheet', 'gross_margin', 'price_to_sales', 'fcf_yield']) assert.equal(stockMetricForField(field), undefined);
 });
 
@@ -56,9 +56,9 @@ test('GOOG displays the requested signed facts and comparable operating-margin t
   try {
     const stock = googFixture;
     const cards = visibleStockMetrics(stock, false);
-    assert.equal(cards.length, 4);
+    assert.equal(cards.length, 5);
     const values = cards.map(m => [Number(m.getValue(stock).toFixed(2)), m.getSignal(stock).label]);
-    assert.deepEqual(values, [[24.23, 'Growing'], [8, 'Accelerating'], [34.03, 'Profitable'], [1.6, 'Improving']]);
+    assert.deepEqual(values, [[24.23, 'Growing'], [8, 'Accelerating'], [34.03, 'Profitable'], [1.6, 'Improving'], [0, 'Complete assessment']]);
   } finally { Date.now = now; }
 });
 
@@ -115,7 +115,7 @@ test('AI research preserves dropped raw figures, source metadata and anomaly war
   const { prepareStockAnalysis } = require('../src/aiAnalysis.ts');
   const stock = googFixture;
   const prompt = prepareStockAnalysis([stock], 'All stocks').prompt;
-  for (const text of ['raw_financial_metrics', 'eps_gaap_growth_yoy', 'peg', 'net_margin', 'screening_metrics', 'net income exceeds operating income', 'not independent verification']) assert.ok(prompt.includes(text), text);
+  for (const text of ['raw_financial_metrics', 'eps_gaap_growth_yoy', 'peg', 'net_margin', 'screening_metrics', 'red_flag_count', 'observed_count', 'coverage', 'net income exceeds operating income', 'not independent verification']) assert.ok(prompt.includes(text), text);
 });
 
 test('Markdown AI instructions render single and comparison briefs with literal filter names', () => {
@@ -130,7 +130,7 @@ test('Markdown AI instructions render single and comparison briefs with literal 
     assert.ok(brief.prompt.includes(`Stock screen: ${filterName}\n`));
     assert.match(brief.prompt, /Prepared: \d{4}-\d{2}-\d{2}T/);
     assert.ok(brief.prompt.includes('## Invest OS data\n\n### GOOG'));
-    assert.ok(brief.prompt.includes('| Rank | Stock | Business score | Valuation score | Brief rationale |'));
+    assert.match(brief.prompt, /\| Rank \| Stock \| Business (?:score|quality score \+ tag) \| Valuation score(?: \+ tag)? \| Brief rationale \|/);
     assert.ok(brief.prompt.includes('two integer scores from 0 to 100'));
     assert.ok(brief.prompt.includes('equal-weight average'));
     assert.ok(brief.prompt.includes('Do not review, critique or suggest improvements to Invest OS'));
@@ -266,4 +266,89 @@ test('GOOG matches test 1 through its valid 6M zone even without 1M or 3M suppor
   } finally {
     Date.now = originalNow;
   }
+});
+
+test('Red Flag Count distinguishes complete zero, partial lower bounds and expired data', () => {
+  const { redFlagDisplay, redFlagValue } = require('../src/stockMetrics.ts');
+  const now = Date.now;
+  Date.now = () => Date.parse('2026-10-24T12:00:00Z');
+  try {
+    const stock = structuredClone(googFixture);
+    assert.equal(redFlagValue(stock), 0);
+    assert.equal(redFlagDisplay(stock), '0');
+    const metric = stock.screening.metrics.red_flag_count;
+    metric.coverage.complete = false;
+    metric.coverage.assessed = 2;
+    metric.validated = false;
+    metric.value = null;
+    metric.status = 'Partial assessment';
+    assert.equal(redFlagValue(stock), null);
+    assert.equal(redFlagDisplay(stock), 'Not fully assessed');
+    assert.ok(visibleStockMetrics(stock, false).some(m => m.key === 'red_flag_count'));
+    metric.observed_count = 1;
+    assert.equal(redFlagDisplay(stock), '≥1');
+    metric.valid_until = '2000-01-01';
+    assert.equal(redFlagValue(stock), null);
+    assert.equal(visibleStockMetrics(stock, false).some(m => m.key === 'red_flag_count'), false);
+  } finally { Date.now = now; }
+});
+
+test('numeric custom filters persist comparisons and agree with Python on coverage and boundaries', () => {
+  const now = Date.now;
+  Date.now = () => Date.parse('2026-10-24T12:00:00Z');
+  try {
+    const base = structuredClone(googFixture);
+    Object.assign(base.price_opportunity, JSON.parse(fs.readFileSync(path.join(__dirname, '../../scripts/fixtures/goog-support-2026-10-23.json'), 'utf8')).price_opportunity);
+    const expression = expressionFromMetricRules([
+      { id: 'growth', field: 'revenue', comparison: 'gt', values: ['15'] },
+      { id: 'margin', field: 'operating_margin', comparison: 'gt', values: ['15'] },
+      { id: 'support', field: 'support_6m', timeframeMatch: 'any', values: ['Inside Support Zone', 'Near Support'] },
+      { id: 'flags', field: 'red_flag_count', comparison: 'lte', values: ['1'] },
+    ], { operator: 'and', groups: [] });
+    const parsed = metricRulesFromExpression(expression);
+    assert.equal(parsed.logicChanged, false);
+    assert.deepEqual(parsed.rules.map(rule => rule.comparison), ['gt', 'gt', undefined, 'lte']);
+    const reopened = expressionFromMetricRules(groupSupportTimeframes(parsed.rules), expression);
+    const samples = [];
+    for (const count of [0, 1, 2, 3]) {
+      const stock = structuredClone(base);
+      Object.assign(stock.screening.metrics.red_flag_count, { value: count, observed_count: count });
+      samples.push({ stock, matches: count <= 1 });
+    }
+    for (const mutate of [
+      stock => { delete stock.screening.metrics.red_flag_count; },
+      stock => { stock.screening.metrics.red_flag_count.valid_until = '2000-01-01'; },
+      stock => { stock.screening.metrics.red_flag_count.coverage.complete = false; },
+      stock => { stock.screening.metrics.red_flag_count.value = null; },
+      stock => { stock.screening.metrics.red_flag_count.status = 'Unknown'; },
+      stock => { stock.screening.metrics.revenue.value = 15; },
+      stock => { stock.screening.metrics.operating_margin.value = 15; },
+    ]) {
+      const stock = structuredClone(base); mutate(stock); samples.push({ stock, matches: false });
+    }
+    for (const sample of samples) {
+      assert.equal(filterExpressionMatches(sample.stock, expression), sample.matches);
+      assert.equal(filterExpressionMatches(sample.stock, reopened), sample.matches);
+    }
+    const boundaryExpressions = ['lt', 'lte', 'eq', 'gte', 'gt'].map(comparison => expressionFromMetricRules([
+      { id: 'flags', field: 'red_flag_count', comparison, values: ['0'] },
+    ], { operator: 'and', groups: [] }));
+    assert.deepEqual(boundaryExpressions.map(e => filterExpressionMatches(base, e)), [false, true, true, true, false]);
+    const invalidExpressions = ['', 'NaN', 'Infinity', '-1', '1.5', '0x1'].map(value => ({ operator: 'or', groups: [{ operator: 'or', conditions: [
+      { id: 'bad', field: 'red_flag_count', comparison: 'lte', value },
+      { id: 'good', field: 'revenue', value: 'Growing' },
+    ] }] }));
+    for (const invalid of invalidExpressions) assert.equal(filterExpressionMatches(base, invalid), false);
+    const expressions = [expression, reopened, ...boundaryExpressions, ...invalidExpressions];
+    const paritySamples = [...samples, ...stocks.map(stock => ({ stock }))];
+    const result = spawnSync('python3', ['-c', [
+      'import json, sys', 'from datetime import datetime, timezone',
+      'from unittest.mock import patch', 'from evaluate_saved_filters import expression_matches',
+      'class FrozenDatetime(datetime):', ' @classmethod', ' def now(cls, tz=None): return cls(2026,10,24,12,tzinfo=timezone.utc)',
+      'payload=json.load(sys.stdin)', "with patch('evaluate_saved_filters.datetime', FrozenDatetime):",
+      ' print(json.dumps([[expression_matches(s["stock"], e) for s in payload["samples"]] for e in payload["expressions"]]))',
+    ].join('\n')], { cwd: path.join(__dirname, '../../scripts'), input: JSON.stringify({ expressions, samples: paritySamples }), encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr);
+    assert.deepEqual(JSON.parse(result.stdout), expressions.map(e => paritySamples.map(s => filterExpressionMatches(s.stock, e))));
+  } finally { Date.now = now; }
 });
