@@ -4,7 +4,8 @@
     "test:metrics": "node --test scripts/test-stock-metrics.cjs scripts/test-personalization.cjs",
     "test:routing": "node --test scripts/test-stock-routes.cjs",
     "build": "tsc && vite build && cp dist/index.html dist/404.html",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:simulation": "node --test scripts/test-portfolio-simulation.cjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.99.0",

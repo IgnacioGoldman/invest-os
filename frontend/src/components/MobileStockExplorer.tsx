@@ -1,4 +1,5 @@
 import { formatMomentumPp } from "../revenueGrowthMomentum";
+import { PortfolioSimulation } from "./PortfolioSimulation";
 import { MoneyPanel } from "./MoneyPanel";
 import { useStockDetails } from "../useStockDetails";
 import { prepareStockAnalysis, type StockAnalysisBrief } from "../aiAnalysis";
@@ -1371,6 +1372,7 @@ export function MobileStockExplorer({
   const shortcutKey = (filter: ScreeningFilter) => filter.isDefault ? filter.id : savedFilterKey(filter.id);
   const relevantSupportKeys = SUPPORT_FILTER_KEYS;
   const signedIn = personalization?.signedIn ?? false;
+  const spaceTabs = signedIn ? SPACE_TABS : (["explore", "portfolio"] as const);
   const isWatchlistView = signedIn && spaceTab === "watchlist";
   const watchlistTickers = personalization?.watchlistTickers ?? [];
   const watchlist = useMemo(() => new Set(watchlistTickers), [watchlistTickers]);
@@ -1759,9 +1761,9 @@ export function MobileStockExplorer({
           </div>
         </header>
 
-        {signedIn && (
+        {(
           <div className="my-space-tabs" role="tablist" aria-label="My space">
-            {SPACE_TABS.map((tab, index) => (
+            {spaceTabs.map((tab, index) => (
               <button type="button" key={tab} role="tab" id={`space-${tab}-tab`} aria-controls={`space-${tab}`}
                 aria-selected={spaceTab === tab} tabIndex={spaceTab === tab ? 0 : -1}
                 onClick={() => selectSpaceTab(tab)}
@@ -1769,7 +1771,7 @@ export function MobileStockExplorer({
                   if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
                     event.preventDefault();
                     const next = event.key === "Home" ? "explore" : event.key === "End" ? "portfolio"
-                      : SPACE_TABS[(index + (event.key === "ArrowRight" ? 1 : -1) + SPACE_TABS.length) % SPACE_TABS.length];
+                      : spaceTabs[(index + (event.key === "ArrowRight" ? 1 : -1) + spaceTabs.length) % spaceTabs.length];
                     selectSpaceTab(next);
                     document.getElementById(`space-${next}-tab`)?.focus();
                   }
@@ -1779,8 +1781,8 @@ export function MobileStockExplorer({
             ))}
           </div>
         )}
-        {signedIn && spaceTab === "portfolio" && personalization?.userId ? (
-          <MoneyPanel key={personalization.userId} userId={personalization.userId} />
+        {spaceTab === "portfolio" ? (
+          signedIn && personalization?.userId ? <MoneyPanel key={personalization.userId} userId={personalization.userId} /> : <section id="space-portfolio" role="tabpanel" aria-labelledby="space-portfolio-tab"><PortfolioSimulation /></section>
         ) : (
         <div id={isWatchlistView ? "space-watchlist" : "space-explore"} role={signedIn ? "tabpanel" : undefined} aria-labelledby={signedIn ? `space-${spaceTab}-tab` : undefined}>
         {showListControls && <>

@@ -211,14 +211,11 @@ def build_business_performance(snapshot: dict, today: date) -> dict:
         momentum['detail'] = movement
     # The chart and all consumers use these recomputed, source-linked observations.
     growth['observations'] = observations
-    momentum['observations'] = observations
     consistency = metric(latest_revenue, 'max absolute second difference ≤ max(3 pp, 25% of median absolute growth); or sustained level shift (≥3 quarters each side)')
     if momentum['validated']:
         pattern = revenue_consistency([point['value'] for point in used])
         consistency.update(momentum, value=None, status=pattern['label'], formula=consistency['formula'],
-                           diagnostics=pattern, observations=observations)
-    else:
-        consistency['observations'] = observations
+                           diagnostics=pattern)
 
     def operating_for(row: dict) -> tuple[float | None, list[dict]]:
         income = row.get('metrics', {}).get('operating_income', {})

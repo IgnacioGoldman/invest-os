@@ -166,6 +166,15 @@ def export_static_site_data(data_dir: Path, output_dir: Path, universe_path: Pat
             _write_json(output_dir / "open-data" / "price-history" / f"{ticker}.json", histories[ticker])
     finally:
         conn.close()
+    export_simulation_data(data_dir, output_dir)
+
+
+def export_simulation_data(data_dir: Path, output_dir: Path) -> None:
+    """A full stock export must preserve the independently durable simulation."""
+    from app.services.simulation.engine import load_state, public_dashboard, atomic_json
+    path = data_dir / 'simulation/state.json'
+    if path.exists():
+        atomic_json(output_dir / 'simulation/index.json', public_dashboard(load_state(path)))
 
 
 def export_static_snapshot(data_dir: Path, output_dir: Path, ticker: str) -> None:

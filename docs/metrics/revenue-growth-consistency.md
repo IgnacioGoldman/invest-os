@@ -11,3 +11,5 @@ Also classify **Steady** for a sustained level shift: some split has at least th
 These explicit initial screening heuristics describe the observed pattern; they do not establish sustainability, investment quality or causation. The 3 pp noise floor follows momentum's existing materiality band; the relative allowance avoids treating small fluctuations at high growth levels as inherently choppy. Boundaries use unrounded values with 1e-10 pp numerical tolerance. Raw values and diagnostics remain inspectable and available to AI research. Consistency is not sortable because its categories have no numerical order.
 
 Examples: 12,14,16,18,20,22 → Steady; 30,26,22,18,14,10 → Steady; 2,2,3,2,2,3 → Steady; 1,1,1,1,1,100 → Choppy; 15,-5,30,2,40,-10 → Choppy.
+
+Supporting source-linked observations are stored once under the revenue metric and shared by the three growth signals, rather than copying the same history into every metric payload.

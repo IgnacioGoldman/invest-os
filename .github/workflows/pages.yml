@@ -129,6 +129,10 @@ jobs:
           --output /tmp/revenue-growth-momentum-report.json
           --summary "$GITHUB_STEP_SUMMARY"
 
+      - name: Validate portfolio simulation display data
+        working-directory: frontend
+        run: npm run test:simulation
+
       - name: Build frontend
         working-directory: frontend
         env:

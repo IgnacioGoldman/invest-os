@@ -1,0 +1,141 @@
+name: Update paper portfolio simulation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '35 23 * * 1-5'
+      timezone: Europe/Stockholm
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Shares the existing data/publication lock: no overlapping ledger mutations.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SIMULATION_RUN_OWNER: ${{ github.run_id }}-${{ github.run_attempt }}
+      OPENAI_API_KEY_CONFIGURED: ${{ secrets.OPENAI_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          lfs: true
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: |
+            backend/requirements.txt
+            backend/requirements-simulation.txt
+      - name: Install simulation dependencies
+        run: python -m pip install --disable-pip-version-check -r backend/requirements-simulation.txt
+      - name: Validate deterministic accounting and decision rules
+        run: |
+          python -m unittest discover -s scripts -p 'test_portfolio_simulation.py'
+          python -m unittest discover -s scripts -p 'test_priced_for_perfection.py'
+          python -m unittest discover -s scripts -p 'test_revenue_growth_consistency.py'
+          python -m unittest discover -s scripts -p 'test_evaluate_saved_filters.py'
+      - name: Detect eligible sessions and retrieve required execution data
+        id: market
+        run: python scripts/run_portfolio_simulation.py --phase market --market-output /tmp/portfolio-market.json
+      - name: Refresh quotes and valuation inputs using existing financial data
+        if: steps.market.outputs.has_session == 'true'
+        run: >-
+          python scripts/refresh_static_prices.py
+          --cache-bust "${GITHUB_RUN_ID}"
+          --workers 4
+          --output /tmp/simulation-price-refresh.json
+      - name: Complete eligible orders, account portfolios, and prepare review
+        id: prepare
+        continue-on-error: true
+        run: python scripts/run_portfolio_simulation.py --phase prepare --market-file /tmp/portfolio-market.json
+      - name: Persist accounting and prepared review
+        run: bash scripts/persist_simulation.sh
+      - name: Reserve this session's single paid attempt
+        if: steps.prepare.outcome == 'success'
+        run: python scripts/run_portfolio_simulation.py --phase claim
+      - name: Persist paid-attempt checkpoint before contacting OpenAI
+        if: steps.prepare.outcome == 'success'
+        run: bash scripts/persist_simulation.sh
+      - name: Request structured investment assessment
+        if: steps.prepare.outcome == 'success'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python scripts/run_portfolio_simulation.py --phase analyze
+      - name: Apply fixed portfolio rules and reconcile ledger
+        if: steps.prepare.outcome == 'success'
+        run: |
+          python scripts/run_portfolio_simulation.py --phase finalize
+          python scripts/run_portfolio_simulation.py --phase verify
+      - name: Publish simulation projection and persist outcomes
+        run: |
+          python scripts/run_portfolio_simulation.py --phase publish
+          bash scripts/persist_simulation.sh
+      - name: Add run summary
+        if: always()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          path=Path('frontend/public/data/simulation/index.json')
+          if path.exists():
+              s=json.loads(path.read_text())
+              print('Paper portfolio status:',s['metadata']['status'])
+              print('\nStart date:',s['metadata']['start_date'])
+              print('\nLast successful accounting:',s['metadata']['latest_successful_update'])
+              print('\nLast successful AI review:',s['metadata']['last_successful_analysis'])
+              print('\nRecorded transactions:',len(s['transactions']))
+          PY
+      - name: Upload public run diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-simulation-${{ github.run_id }}
+          path: |
+            /tmp/simulation-price-refresh.json
+            frontend/public/data/simulation/index.json
+          if-no-files-found: warn
+          retention-days: 14
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Validate frontend and static data
+        run: |
+          npm --prefix frontend run test:metrics
+          npm --prefix frontend run test:simulation
+          python scripts/validate_static_stock_assets.py
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          VITE_DATA_MODE: static
+          VITE_BASE_PATH: /invest-os/
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: npm run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: frontend/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy simulation and application atomically
+        id: deployment
+        uses: actions/deploy-pages@v4

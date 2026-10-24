@@ -60,7 +60,7 @@ def build_stock_derived_signals(snapshot: OpenDataSnapshot, snapshots: list[Open
         for key in ('revenue', 'momentum', 'operating_margin', 'operating_margin_trend')
     }
     consistency = metrics['revenue_consistency']
-    derived['revenue_consistency'] = DerivedSignal(kind='label', label=consistency['status'] if consistency['validated'] else None, notes=consistency['formula'], observations=consistency.get('observations', []))
+    derived['revenue_consistency'] = DerivedSignal(kind='label', label=consistency['status'] if consistency['validated'] else None, notes=consistency['formula'], observations=metrics['revenue'].get('observations', []))
     flags = metrics['red_flag_count']
     derived['red_flag_count'] = DerivedSignal(value=flags['value'], kind='count', notes=flags['notes'],
         coverage=flags['coverage'], flags=flags['flags'], observed_count=flags['observed_count'])

@@ -5,7 +5,7 @@ import math
 import os
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError
@@ -45,23 +45,24 @@ def _filter_value(condition: dict[str, Any]) -> Any:
     return value
 
 
-def signal_for(snapshot: dict[str, Any], field: str) -> str:
+def signal_for(snapshot: dict[str, Any], field: str, today: date | None = None) -> str:
+    today = today or datetime.now(timezone.utc).date()
     if field in DROPPED_FIELDS:
         return "Needs Review"
     if field in SUPPORT_METRICS:
-        context = support_context(snapshot, SUPPORT_METRICS[field], today=datetime.now(timezone.utc).date())
+        context = support_context(snapshot, SUPPORT_METRICS[field], today=today)
         return context['status'] if context else 'Unknown'
     screening = snapshot.get("screening")
     if not screening or field == "upcoming_earnings":
-        screening = build_screening_metrics(snapshot, today=datetime.now(timezone.utc).date())
+        screening = build_screening_metrics(snapshot, today=today)
     metric = screening.get("metrics", {}).get(field, {})
     if field == 'red_flag_count' and (metric.get('assessment_version') != 2
             or metric.get('status') not in {'Complete assessment', 'Partial assessment', 'Not assessed'}
-            or not day(metric.get('valid_until')) or metric['valid_until'] < datetime.now(timezone.utc).date().isoformat()):
+            or not day(metric.get('valid_until')) or metric['valid_until'] < today.isoformat()):
         return 'Not assessed'
     if field in BUSINESS_STATUSES:
         valid_until = str(metric.get('valid_until') or '')
-        if not metric.get('validated') or valid_until < datetime.now(timezone.utc).date().isoformat():
+        if not metric.get('validated') or valid_until < today.isoformat():
             return 'Unknown'
     return metric.get("strength", metric.get("status", "Unknown")) if field == "revenue" else metric.get("status", "Unknown")
 
@@ -98,22 +99,23 @@ def valid_condition(condition: dict) -> bool:
     return field in FILTER_VALUES and _filter_value(condition) in FILTER_VALUES[field]
 
 
-def condition_matches(snapshot: dict, condition: dict) -> bool:
+def condition_matches(snapshot: dict, condition: dict, today: date | None = None) -> bool:
+    today = today or datetime.now(timezone.utc).date()
     if condition.get('comparison') is None:
         if condition.get('field') == 'revenue' and condition.get('value') in {'Growing', 'Declining', 'Flat'}:
-            screening = snapshot.get('screening') or build_screening_metrics(snapshot, today=datetime.now(timezone.utc).date())
+            screening = snapshot.get('screening') or build_screening_metrics(snapshot, today=today)
             m = screening.get('metrics', {}).get('revenue', {})
             value = _number(m.get('value'))
-            if signal_for(snapshot, 'revenue') == 'Unknown' or value is None:
+            if signal_for(snapshot, 'revenue', today) == 'Unknown' or value is None:
                 return False
             return value > 0 if condition['value'] == 'Growing' else value < 0 if condition['value'] == 'Declining' else value == 0
-        label = signal_for(snapshot, str(condition.get('field', '')))
+        label = signal_for(snapshot, str(condition.get('field', '')), today)
         return label == ('Flat' if condition.get('field') == 'revenue' and condition.get('value') == 'Flat growth' else _filter_value(condition))
-    screening = snapshot.get('screening') or build_screening_metrics(snapshot, today=datetime.now(timezone.utc).date())
+    screening = snapshot.get('screening') or build_screening_metrics(snapshot, today=today)
     m = screening.get('metrics', {}).get(condition['field'], {})
     value, target = _number(m.get('value')), numeric_target(condition)
     deadline = str(m.get('valid_until') or '')
-    if (value is None or target is None or not m.get('validated') or not day(deadline) or deadline < datetime.now(timezone.utc).date().isoformat()
+    if (value is None or target is None or not m.get('validated') or not day(deadline) or deadline < today.isoformat()
             or (condition['field'] == 'red_flag_count' and (not m.get('coverage', {}).get('complete')
                 or m.get('status') != 'Complete assessment' or m.get('assessment_version') != 2
                 or not value.is_integer() or not 0 <= value <= m.get('max_count', 0)))
@@ -124,7 +126,8 @@ def condition_matches(snapshot: dict, condition: dict) -> bool:
             'gte': value >= target, 'gt': value > target}[comparison]
 
 
-def expression_matches(snapshot: dict[str, Any], expression: dict[str, Any]) -> bool:
+def expression_matches(snapshot: dict[str, Any], expression: dict[str, Any], today: date | None = None) -> bool:
+    today = today or datetime.now(timezone.utc).date()
     groups = expression.get("groups")
     if not isinstance(groups, list) or not groups:
         return True
@@ -139,7 +142,7 @@ def expression_matches(snapshot: dict[str, Any], expression: dict[str, Any]) -> 
             group_results.append(True)
             continue
         results = [
-            condition_matches(snapshot, condition)
+            condition_matches(snapshot, condition, today)
             for condition in conditions
             if isinstance(condition, dict)
         ]

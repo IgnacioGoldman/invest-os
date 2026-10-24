@@ -321,3 +321,7 @@ export async function fetchRefreshJobs(): Promise<RefreshJob[]> {
   }
   return requestJson<RefreshJob[]>("/api/refresh/jobs");
 }
+
+export async function fetchPortfolioSimulation() {
+  return requestStaticJson<import("./portfolioSimulation").PortfolioSimulationData>("/simulation/index.json");
+}
