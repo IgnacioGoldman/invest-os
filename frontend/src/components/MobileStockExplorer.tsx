@@ -32,9 +32,9 @@ import {
 } from "lucide-react";
 import { FILTER_ICONS, filterIcon, type FilterIconName } from "../filterIcons";
 import "../filterBuilder.css";
-import { expressionFromMetricRules, groupSupportTimeframes, metricRuleFields, metricRulesFromExpression } from "../metricFilterRules";
+import { expressionFromMetricRules, filterExpressionMatches, groupSupportTimeframes, metricRuleFields, metricRulesFromExpression } from "../metricFilterRules";
 import { STOCK_METRICS, STOCK_METRIC_BY_KEY, SUPPORT_KEYS, SUPPORT_FILTER_KEYS, SUPPORT_TIMEFRAMES,
-  upcomingEarningsMetric, upcomingEarningsSignal, isSupportField, stockMetricForField, researchMetric, metricEvidence, hasDisabledFilter, normalizedFilterValue, businessMetric, visibleStockMetrics, supportMetric, DISABLED_FILTER_FIELDS,
+  upcomingEarningsMetric, upcomingEarningsSignal, isSupportField, stockMetricForField, researchMetric, metricEvidence, hasDisabledFilter, businessMetric, visibleStockMetrics, supportMetric, DISABLED_FILTER_FIELDS,
   type StockMetricKey, type StockMetricField, type SupportFilterKey } from "../stockMetrics";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -252,12 +252,6 @@ function inferredSupportLevel(currentPrice?: number | null, supportDistance?: nu
   return divisor > 0 ? currentPrice / divisor : null;
 }
 
-function signalFor(snapshot: OpenDataStockSnapshot, key: FilterKey): Signal {
-  if (DISABLED_FILTER_FIELDS.includes(key)) return metricSignal("Retired rule");
-  if (isSupportField(key)) return supportMetric(snapshot, key)?.signal ?? metricSignal("Unknown");
-  return stockMetricForField(key)?.getSignal(snapshot) ?? metricSignal("Unclear");
-}
-
 function supportWindows(snapshot: OpenDataStockSnapshot, keys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS) {
   return keys.flatMap(key => {
     const context = supportMetric(snapshot, key);
@@ -380,17 +374,6 @@ function createEmptyFilterExpression(): FilterExpression {
 
 function activeFilterCount(expression: FilterExpression) {
   return expression.groups.reduce((total, group) => total + group.conditions.length, 0);
-}
-
-function filterExpressionMatches(snapshot: OpenDataStockSnapshot, expression: FilterExpression) {
-  if (hasDisabledFilter(expression)) return false;
-  if (expression.groups.length === 0) return true;
-  const groupMatches = expression.groups.map((group) => {
-    if (group.conditions.length === 0) return true;
-    const matches = group.conditions.map((condition) => signalFor(snapshot, condition.field).label === normalizedFilterValue(condition.field, condition.value));
-    return group.operator === "and" ? matches.every(Boolean) : matches.some(Boolean);
-  });
-  return expression.operator === "and" ? groupMatches.every(Boolean) : groupMatches.some(Boolean);
 }
 
 function StockStatus({ signal, context, compact = false }: { signal: Signal; context?: string | null; compact?: boolean }) {
@@ -537,7 +520,7 @@ function FilterSheet({
   const addRule = () => {
     const definition = AVAILABLE_FILTER_DEFINITIONS.find((item) => !rules.some((rule) => metricRuleFields(rule).includes(item.key)));
     if (!definition) return;
-    setRules([...rules, { id: nextFilterId("group"), field: definition.key, values: [definition.options[0].label] }]);
+    setRules([...rules, { id: nextFilterId("group"), field: definition.key, values: [definition.options[0].label], timeframeMatch: isSupportField(definition.key) ? "any" : undefined }]);
   };
 
   const availableMetricField = (field: string, id?: string): FilterKey | undefined => {
@@ -550,7 +533,7 @@ function FilterSheet({
     if (!field) return;
     const definition = AVAILABLE_FILTER_DEFINITIONS.find((item) => item.key === field)!;
     setRules(rules.map((rule) => rule.id === id
-      ? { ...rule, field, timeframes: isSupportField(field) ? [field] : undefined, values: [definition.options[0].label] }
+      ? { ...rule, field, timeframes: isSupportField(field) ? [field] : undefined, timeframeMatch: isSupportField(field) ? "any" : undefined, values: [definition.options[0].label] }
       : rule));
   };
 
@@ -662,7 +645,18 @@ function FilterSheet({
                           </div>
                           {metricRuleFields(rule).length === 0
                             ? <p className="filter-builder-value-error" role="status">Choose at least one timeframe.</p>
-                            : <p className="filter-builder-timeframe-hint">Match values in every selected timeframe.</p>}
+                            : <p className="filter-builder-timeframe-hint">Match values in {rule.timeframeMatch === "any" ? "any" : "every"} selected timeframe.</p>}
+                          <label className="filter-builder-field">
+                            <span>Match support on</span>
+                            <select aria-label={`Condition ${index + 1} timeframe matching`} value={rule.timeframeMatch ?? "all"}
+                              onChange={(event) => {
+                                const timeframeMatch = event.target.value === "any" ? "any" : "all";
+                                setRules((current) => current.map((item) => item.id === rule.id ? { ...item, timeframeMatch } : item));
+                              }}>
+                              <option value="any">Any selected timeframe</option>
+                              <option value="all">Every selected timeframe</option>
+                            </select>
+                          </label>
                         </fieldset>}
                         {DISABLED_FILTER_FIELDS.includes(rule.field) && <p className="filter-builder-hint">
                           This metric is disabled for screening. Replace or remove this condition before using the filter.

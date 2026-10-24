@@ -1,0 +1,34 @@
+{
+  "ticker": "GOOG",
+  "generated_at": "2026-10-23T23:16:44.963798Z",
+  "price_opportunity": {
+    "current_price": {
+      "value": 317.2799987792969,
+      "source": "yfinance_history",
+      "tier": "exact_public_fact",
+      "as_of": "2026-10-23",
+      "notes": "Latest open/free daily close price."
+    },
+    "support_1m_distance": {
+      "value": null,
+      "source": "open_data_provider",
+      "tier": "unavailable_open_free",
+      "as_of": "2026-10-23",
+      "notes": "support_1m_distance: No usable 1M support zone was detected below the latest close from open/free daily price history."
+    },
+    "support_3m_distance": {
+      "value": null,
+      "source": "open_data_provider",
+      "tier": "unavailable_open_free",
+      "as_of": "2026-10-23",
+      "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+    },
+    "support_6m_distance": {
+      "value": -2.5980051998659692,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Primary 6M support floor below, overlapping, or reclaimed by the latest close. Support zone: $308.59-$342.89; midpoint $325.74; distance -2.60%; touches 5; first touch 2026-06-26; last touch 2026-09-24; cluster tolerance 4.0%."
+    }
+  }
+}

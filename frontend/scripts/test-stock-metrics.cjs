@@ -16,7 +16,7 @@ require.extensions['.ts'] = (module, filename) => {
   }).outputText, filename);
 };
 const { STOCK_METRICS, SUPPORT_TIMEFRAMES, stockMetricForField, visibleStockMetrics, supportMetric } = require('../src/stockMetrics.ts');
-const { metricRulesFromExpression, expressionFromMetricRules, groupSupportTimeframes } = require('../src/metricFilterRules.ts');
+const { metricRulesFromExpression, expressionFromMetricRules, filterExpressionMatches, groupSupportTimeframes } = require('../src/metricFilterRules.ts');
 const stocks = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/data/open-data/stocks.json'), 'utf8'));
 // Freeze the requested accounting regression independently of daily refreshes.
 const googFixture = JSON.parse(fs.readFileSync(path.join(__dirname, '../../scripts/fixtures/goog-q2-2026.json'), 'utf8'));
@@ -187,24 +187,26 @@ test('editing saved support conditions groups matching values and preserves dist
   assert.equal(new Set(ids).size, ids.length);
 });
 
-test('test 1 default requires growing revenue, profitable operations and all three support timeframes', () => {
+test('test 1 requires growth and profit with support on any selected timeframe', () => {
   const { DEFAULT_FILTERS } = require('../src/defaultFilters.ts');
   const preset = DEFAULT_FILTERS.find(filter => filter.name === 'test 1');
   assert.ok(preset.isDefault);
   const expression = preset.expression;
-  const rules = groupSupportTimeframes(metricRulesFromExpression(expression).rules);
+  const parsed = metricRulesFromExpression(expression);
+  assert.equal(parsed.logicChanged, false);
+  const rules = groupSupportTimeframes(parsed.rules);
   assert.equal(rules.length, 3);
+  assert.equal(rules[2].timeframeMatch, 'any');
   assert.deepEqual(rules[2].timeframes, ['support_1m', 'support_3m', 'support_6m']);
-  const positiveCases = Array.from({ length: 8 }, (_, mask) => [
-    mask & 1 ? 1 : 4, mask & 2 ? 1 : 4, mask & 4 ? 1 : 4, 25, 12, true,
-  ]);
-  const negativeCases = [
-    [20, 1, 1, 25, 12, false], [1, 20, 1, 25, 12, false], [1, 1, 20, 25, 12, false],
-    [null, 1, 1, 25, 12, false], [1, null, 1, 25, 12, false], [1, 1, null, 25, 12, false],
-    [1, 1, 1, -5, 12, false], [1, 1, 1, 0, 12, false], [1, 1, 1, null, 12, false],
-    [1, 1, 1, 25, -5, false], [1, 1, 1, 25, null, false],
-  ];
-  const samples = [...positiveCases, ...negativeCases].map(([short, medium, long, revenue, margin, matches]) => {
+  const cases = [null, 1, 4, 20].flatMap(short => [null, 1, 4, 20].flatMap(medium =>
+    [null, 1, 4, 20].map(long => [short, medium, long, 25, 12])));
+  cases.push([1, 1, 1, -5, 12], [1, 1, 1, 0, 12], [1, 1, 1, null, 12],
+    [1, 1, 1, 25, -5], [1, 1, 1, 25, null]);
+  const samples = cases.map(([short, medium, long, revenue, margin]) => {
+    const businessMatches = revenue != null && revenue > 0 && margin != null && margin >= 0;
+    const supports = [short, medium, long].map(value => value === 1 || value === 4);
+    const matches = businessMatches && supports.some(Boolean);
+    const matchesAll = businessMatches && supports.every(Boolean);
     const stock = structuredClone(stocks[0]);
     const today = new Date().toISOString().slice(0,10);
     stock.price_opportunity.current_price = { value: 100, as_of: today };
@@ -218,17 +220,50 @@ test('test 1 default requires growing revenue, profitable operations and all thr
     stock.business_health.revenue_growth_yoy = { value: revenue };
     stock.screening.metrics.revenue = { value: revenue, validated: true, valid_until: "2999-01-01", status: revenue > 0 ? "Growing" : revenue === 0 ? "Flat" : "Declining" };
     stock.screening.metrics.operating_margin = { value: margin, validated: margin != null, valid_until: "2999-01-01", status: margin == null ? "Unknown" : margin >= 0 ? "Profitable" : "Loss-making" };
-    return { stock, matches };
+    return { stock, matches, matchesAll };
   });
+  const roundTrip = expressionFromMetricRules(rules, expression);
+  const allExpression = expressionFromMetricRules(rules.map(rule => ({ ...rule, timeframeMatch: 'all' })), expression);
+  const allRoundTrip = expressionFromMetricRules(groupSupportTimeframes(metricRulesFromExpression(allExpression).rules), allExpression);
+  for (const sample of samples) {
+    assert.equal(filterExpressionMatches(sample.stock, expression), sample.matches);
+    assert.equal(filterExpressionMatches(sample.stock, roundTrip), sample.matches);
+    assert.equal(filterExpressionMatches(sample.stock, allExpression), sample.matchesAll);
+    assert.equal(filterExpressionMatches(sample.stock, allRoundTrip), sample.matchesAll);
+  }
   const result = spawnSync('python3', ['-c', [
     'import json, sys',
     'from evaluate_saved_filters import expression_matches',
     'payload = json.load(sys.stdin)',
-    'print(json.dumps([expression_matches(sample["stock"], payload["expression"]) for sample in payload["samples"]]))',
+    'print(json.dumps([[expression_matches(sample["stock"], expression) for sample in payload["samples"]] for expression in payload["expressions"]]))',
   ].join('\n')], {
     cwd: path.join(__dirname, '../../scripts'),
-    input: JSON.stringify({ expression, samples }), encoding: 'utf8',
+    input: JSON.stringify({ expressions: [expression, roundTrip, allExpression, allRoundTrip], samples }), encoding: 'utf8',
   });
   assert.equal(result.status, 0, result.stderr);
-  assert.deepEqual(JSON.parse(result.stdout), samples.map(sample => sample.matches));
+  assert.deepEqual(JSON.parse(result.stdout), [samples.map(sample => sample.matches), samples.map(sample => sample.matches), samples.map(sample => sample.matchesAll), samples.map(sample => sample.matchesAll)]);
+});
+
+test('GOOG matches test 1 through its valid 6M zone even without 1M or 3M support', () => {
+  const { DEFAULT_FILTERS } = require('../src/defaultFilters.ts');
+  const priceFixture = JSON.parse(fs.readFileSync(path.join(__dirname, '../../scripts/fixtures/goog-support-2026-10-23.json'), 'utf8'));
+  const stock = structuredClone(googFixture);
+  Object.assign(stock.price_opportunity, priceFixture.price_opportunity);
+  const originalNow = Date.now;
+  Date.now = () => Date.parse('2026-10-24T12:00:00Z');
+  try {
+    assert.equal(supportMetric(stock, 'support_1m'), null);
+    assert.equal(supportMetric(stock, 'support_3m'), null);
+    assert.equal(supportMetric(stock, 'support_6m').signal.label, 'Inside Support Zone');
+    const expression = DEFAULT_FILTERS.find(filter => filter.name === 'test 1').expression;
+    assert.equal(filterExpressionMatches(stock, expression), true);
+    const parsed = metricRulesFromExpression(expression);
+    assert.equal(parsed.logicChanged, false);
+    const reopened = expressionFromMetricRules(groupSupportTimeframes(parsed.rules), expression);
+    assert.equal(filterExpressionMatches(stock, reopened), true);
+    stock.screening.metrics.operating_margin = { ...stock.screening.metrics.operating_margin, status: 'Loss-making', value: -1 };
+    assert.equal(filterExpressionMatches(stock, expression), false, 'support must not bypass the profitability requirement');
+  } finally {
+    Date.now = originalNow;
+  }
 });

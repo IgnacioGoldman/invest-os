@@ -4,7 +4,7 @@ Invest OS shows four deterministic first-filter facts: Revenue Growth YoY, Reven
 
 Business Performance is a compact two-column section. A missing, stale or non-comparable metric has no card or detail panel. The separate Market Context section shows only valid future earnings dates and detected support zones; chart timeframes remain unchanged.
 
-The built-in **test 1** filter selects Growing Revenue Growth YoY and Profitable Operating Margin, and requires Inside Support Zone or Near Support on **each** of the 1m, 3m and 6m timeframes. Missing or invalid inputs do not match. It is available to guests and signed-in users, sorts alphabetically, and can be customized as a separate saved filter. Support conditions describe market context rather than investment quality.
+The built-in **test 1** filter requires Growing Revenue Growth YoY, Profitable Operating Margin, and Inside Support Zone or Near Support on **any** of the 1m, 3m or 6m timeframes. Missing or invalid support on another timeframe does not veto a valid match. It is available to guests and signed-in users, sorts alphabetically, and can be customized as a separate saved filter. New support conditions default to **Any selected timeframe**; the editor also offers **Every selected timeframe** and preserves existing saved filters that require all selected timeframes. Support conditions describe market context rather than investment quality.
 
 Valuation, cash-flow, balance-sheet, earnings and return-on-capital interpretations are reserved for Analyze with AI. Their underlying figures, calculations, dates, periods, source identifiers and anomaly warnings remain exported. No subjective investment ratings or automatic quality scores appear in first-filter screening.
 

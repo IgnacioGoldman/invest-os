@@ -1,11 +1,29 @@
 import type { FilterCondition, FilterExpression, FilterKey } from "./components/MobileStockExplorer";
-import { isSupportField, SUPPORT_FILTER_KEYS, type SupportFilterKey } from "./stockMetrics";
+import type { OpenDataStockSnapshot } from "./api";
+import { hasDisabledFilter, isSupportField, normalizedFilterValue, stockMetricForField, supportMetric, SUPPORT_FILTER_KEYS, type SupportFilterKey } from "./stockMetrics";
+
+export function filterExpressionMatches(snapshot: OpenDataStockSnapshot, expression: FilterExpression) {
+  if (hasDisabledFilter(expression)) return false;
+  if (expression.groups.length === 0) return true;
+  const groupMatches = expression.groups.map((group) => {
+    if (group.conditions.length === 0) return true;
+    const matches = group.conditions.map((condition) => {
+      const label = isSupportField(condition.field)
+        ? supportMetric(snapshot, condition.field)?.signal.label ?? "Unknown"
+        : stockMetricForField(condition.field)?.getSignal(snapshot).label ?? "Unclear";
+      return label === normalizedFilterValue(condition.field, condition.value);
+    });
+    return group.operator === "and" ? matches.every(Boolean) : matches.some(Boolean);
+  });
+  return expression.operator === "and" ? groupMatches.every(Boolean) : groupMatches.some(Boolean);
+}
 
 export type MetricFilterRule = {
   id: string;
   field: FilterKey;
   values: string[];
   timeframes?: SupportFilterKey[];
+  timeframeMatch?: "any" | "all";
 };
 
 export function metricRuleFields(rule: MetricFilterRule): FilterKey[] {
@@ -21,7 +39,8 @@ export function groupSupportTimeframes(rules: MetricFilterRule[]): MetricFilterR
       grouped.push(rule);
       continue;
     }
-    const matching = grouped.find((other) => isSupportField(other.field)
+    const matching = rule.timeframeMatch !== "any" && grouped.find((other) => isSupportField(other.field)
+      && other.timeframeMatch !== "any"
       && other.values.length === rule.values.length
       && other.values.every((value) => rule.values.includes(value)));
     if (matching) {
@@ -58,32 +77,60 @@ export function metricRulesFromExpression(expression: FilterExpression) {
     return { rules, logicChanged: rules.length > 0 };
   }
   const constraints = new Map<FilterKey, Set<string>>();
+  const alternatives = new Map<FilterKey, MetricFilterRule>();
   for (const clause of clauses) {
     if (clause.length === 0) continue;
     const field = clause[0].field;
-    if (clause.some((condition) => condition.field !== field)) return { rules, logicChanged: true };
+    if (clause.some((condition) => condition.field !== field)) {
+      const fields = [...new Set(clause.map((condition) => condition.field))];
+      const timeframes = SUPPORT_FILTER_KEYS.filter((key) => fields.includes(key));
+      const values = [...new Set(clause.filter((condition) => condition.field === field).map((condition) => condition.value))];
+      // An OR across support timeframes is one rule only when each timeframe
+      // accepts the same values and is not independently constrained elsewhere.
+      if (timeframes.length !== fields.length || fields.some((key) => {
+        const allowed = new Set(clause.filter((condition) => condition.field === key).map((condition) => condition.value));
+        return allowed.size !== values.length || values.some((value) => !allowed.has(value))
+          || clauses.some((other) => other !== clause && other.some((condition) => condition.field === key));
+      })) return { rules, logicChanged: true };
+      const rule: MetricFilterRule = { id: `metric-${field}`, field, values, timeframes, timeframeMatch: "any" };
+      fields.forEach((key) => alternatives.set(key, rule));
+      continue;
+    }
     const allowed = new Set(clause.map((condition) => condition.value));
     const previous = constraints.get(field);
     constraints.set(field, previous ? new Set([...previous].filter((value) => allowed.has(value))) : allowed);
   }
-  const logicChanged = rules.some((rule) => {
+  const parsedRules = rules.flatMap((rule) => {
+    const alternative = alternatives.get(rule.field);
+    return alternative ? alternative.field === rule.field ? [alternative] : [] : [rule];
+  });
+  const logicChanged = parsedRules.some((rule) => {
+    if (rule.timeframeMatch === "any") return false;
     const allowed = constraints.get(rule.field);
     return !allowed || allowed.size !== rule.values.length || rule.values.some((value) => !allowed.has(value));
   });
-  return { rules, logicChanged };
+  return { rules: parsedRules, logicChanged };
 }
 
 export function expressionFromMetricRules(rules: MetricFilterRule[], original: FilterExpression): FilterExpression {
   return {
     ...original,
     operator: "and",
-    groups: rules.flatMap((rule) => metricRuleFields(rule).map((field) => {
-      const id = rule.timeframes ? `${rule.id}-${field}` : rule.id;
-      return {
-        id,
+    groups: rules.flatMap((rule) => {
+      const fields = metricRuleFields(rule);
+      if (isSupportField(rule.field) && rule.timeframeMatch === "any") return [{
+        id: rule.id,
         operator: "or" as const,
-        conditions: rule.values.map((value, index) => ({ id: `${id}-${index}`, field, value })),
-      };
-    })),
+        conditions: fields.flatMap((field) => rule.values.map((value, index) => ({ id: `${rule.id}-${field}-${index}`, field, value }))),
+      }];
+      return fields.map((field) => {
+        const id = rule.timeframes ? `${rule.id}-${field}` : rule.id;
+        return {
+          id,
+          operator: "or" as const,
+          conditions: rule.values.map((value, index) => ({ id: `${id}-${index}`, field, value })),
+        };
+      });
+    }),
   };
 }
