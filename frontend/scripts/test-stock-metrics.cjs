@@ -12,6 +12,16 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
 const { STOCK_METRICS, SUPPORT_TIMEFRAMES, stockMetricForField, visibleStockMetrics, supportMetric } = require('../src/stockMetrics.ts');
 const { metricRulesFromExpression, expressionFromMetricRules, groupSupportTimeframes } = require('../src/metricFilterRules.ts');
 const stocks = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/data/open-data/stocks.json'), 'utf8'));
+// Freeze the requested accounting regression independently of daily refreshes.
+const googFixture = JSON.parse(fs.readFileSync(path.join(__dirname, '../../scripts/fixtures/goog-q2-2026.json'), 'utf8'));
+const projectedFixture = spawnSync('python3', ['-c', [
+  'import json, sys', 'from datetime import date',
+  'from evaluate_saved_filters import build_screening_metrics',
+  'print(json.dumps(build_screening_metrics(json.load(sys.stdin), date(2026, 10, 24))))',
+].join('\n')], { cwd: path.join(__dirname, '../../scripts'), input: JSON.stringify(googFixture), encoding: 'utf8' });
+assert.equal(projectedFixture.status, 0, projectedFixture.stderr);
+googFixture.screening = JSON.parse(projectedFixture.stdout);
+
 
 test('every visible card exposes only factual selectable labels', () => {
   const forbidden = /^(Unknown|Needs Review|Computed Metric|Unavailable|Insufficient Data|Strong|Solid|Fair|Cheap|Attractive)$/;
@@ -38,7 +48,7 @@ test('GOOG displays the requested signed facts and comparable operating-margin t
   const now = Date.now;
   Date.now = () => Date.parse('2026-10-24T12:00:00Z');
   try {
-    const stock = stocks.find(s => s.ticker === 'GOOG');
+    const stock = googFixture;
     const cards = visibleStockMetrics(stock, false);
     assert.equal(cards.length, 4);
     const values = cards.map(m => [Number(m.getValue(stock).toFixed(2)), m.getSignal(stock).label]);
@@ -97,7 +107,7 @@ test('retired and obsolete quality rules disable the whole saved expression', ()
 
 test('AI research preserves dropped raw figures, source metadata and anomaly warnings', () => {
   const { prepareStockAnalysis } = require('../src/aiAnalysis.ts');
-  const stock = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/data/open-data/snapshots/GOOG.json'), 'utf8'));
+  const stock = googFixture;
   const prompt = prepareStockAnalysis([stock], 'All stocks').prompt;
   for (const text of ['raw_financial_metrics', 'eps_gaap_growth_yoy', 'peg', 'net_margin', 'screening_metrics', 'net income exceeds operating income', 'not independent verification']) assert.ok(prompt.includes(text), text);
 });
