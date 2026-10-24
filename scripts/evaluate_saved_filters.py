@@ -29,53 +29,6 @@ SUPPORT_METRICS = {
 }
 
 
-def _metric_group(field: str, values: tuple[str, ...]) -> dict[str, Any]:
-    return {
-        "operator": "or",
-        "conditions": [{"field": field, "value": value} for value in values],
-    }
-
-
-def _strong_yoy_expression(support_fields: list[str]) -> dict[str, Any]:
-    return {
-        "operator": "and",
-        "groups": [
-            *[_metric_group(field, ("At support", "Near support")) for field in support_fields],
-            _metric_group("revenue", ("Strong", "Solid")),
-            _metric_group("forward_pe", ("Cheap", "Fair")),
-        ],
-    }
-
-
-def _upcoming_earnings_expression() -> dict[str, Any]:
-    return {
-        "operator": "and",
-        "groups": [
-            {
-                "operator": "or",
-                "conditions": [
-                    {"field": "upcoming_earnings", "value": "This week"},
-                    {"field": "upcoming_earnings", "value": "Next 30 days"},
-                ],
-            },
-            {
-                "operator": "or",
-                "conditions": [
-                    {"field": "revenue", "value": "Strong"},
-                    {"field": "revenue", "value": "Solid"},
-                ],
-            },
-        ],
-    }
-
-
-BUILT_IN_FILTERS = {
-    "builtin:pullback": _strong_yoy_expression(["support_1m", "support_3m", "support_6m"]),
-    "builtin:support": _strong_yoy_expression(["support_1y", "support_2y", "support_5y"]),
-    "builtin:earnings_this_week": _upcoming_earnings_expression(),
-}
-
-
 def _number(value: Any) -> float | None:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
@@ -349,7 +302,7 @@ def evaluate(stocks: list[dict[str, Any]], client: SupabaseRest) -> tuple[int, i
             for ticker in sorted(watchlists.get(user_id, set()))
             if ticker in stocks_by_ticker
         ]
-        filters = list(BUILT_IN_FILTERS.items()) + custom_filters.get(user_id, [])
+        filters = custom_filters.get(user_id, [])
 
         for filter_key, expression in filters:
             tracking_key = (user_id, filter_key)

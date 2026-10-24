@@ -33,8 +33,6 @@ import {
 import { FILTER_ICONS, filterIcon, type FilterIconName } from "../filterIcons";
 import "../filterBuilder.css";
 import { expressionFromMetricRules, groupSupportTimeframes, metricRuleFields, metricRulesFromExpression } from "../metricFilterRules";
-import { BUILT_IN_PRESET_COPY, PULLBACK_SUPPORT_FILTER_KEYS, SUPPORT_PRESET_FILTER_KEYS,
-  builtInPresetFor, createBuiltInPresetExpression, type BuiltInPreset } from "../builtInFilters";
 import { STOCK_METRICS, STOCK_METRIC_BY_KEY, SUPPORT_KEYS, SUPPORT_FILTER_KEYS, SUPPORT_TIMEFRAMES, epsGaapMetric,
   upcomingEarningsMetric, upcomingEarningsSignal, isSupportField, stockMetricForField,
   type StockMetricKey, type StockMetricField, type SupportFilterKey } from "../stockMetrics";
@@ -47,9 +45,6 @@ import {
   type OpenDataStockSnapshot,
 } from "../api";
 import {
-  EARNINGS_THIS_WEEK_FILTER_KEY,
-  PULLBACK_FILTER_KEY,
-  SUPPORT_FILTER_KEY,
   savedFilterKey,
   type SavedFilter,
   type SaveFilterInput,
@@ -518,29 +513,6 @@ function filterExpressionMatches(snapshot: OpenDataStockSnapshot, expression: Fi
     return group.operator === "and" ? matches.every(Boolean) : matches.some(Boolean);
   });
   return expression.operator === "and" ? groupMatches.every(Boolean) : groupMatches.some(Boolean);
-}
-
-function builtInPresetName(preset: BuiltInPreset | null) {
-  return preset ? BUILT_IN_PRESET_COPY[preset].name : null;
-}
-
-function builtInPresetSummary(preset: BuiltInPreset | null) {
-  return preset ? BUILT_IN_PRESET_COPY[preset].summary : null;
-}
-
-function builtInPresetSortKey(preset: BuiltInPreset): SortKey {
-  return preset === "earnings" ? "upcoming_earnings" : preset === "pullback" ? "support_1m" : "support_best";
-}
-
-function builtInPresetConfiguration(preset: BuiltInPreset): NonNullable<FilterShortcut["configuration"]> {
-  const { rules } = metricRulesFromExpression(createBuiltInPresetExpression(preset));
-  return {
-    rules: rules.map(({ field, values }) => ({
-      metric: AVAILABLE_FILTER_DEFINITIONS.find((definition) => definition.key === field)!.shortLabel,
-      values,
-    })),
-    sortLabel: `${SORT_OPTIONS.find((option) => option.key === builtInPresetSortKey(preset))!.label} · Ascending`,
-  };
 }
 
 function StockStatus({ signal, context, compact = false }: { signal: Signal; context?: string | null; compact?: boolean }) {
@@ -1510,13 +1482,8 @@ export function MobileStockExplorer({
   const listTopRef = useRef<HTMLDivElement | null>(null);
   const analysisPrepareRef = useRef<HTMLButtonElement | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
-  const builtInPreset = builtInPresetFor(filterExpression);
   const activeSavedFilter = personalization?.savedFilters.find((item) => item.id === activeSavedFilterId) ?? null;
-  const relevantSupportKeys = builtInPreset === "support"
-    ? SUPPORT_PRESET_FILTER_KEYS
-    : builtInPreset === "pullback"
-      ? PULLBACK_SUPPORT_FILTER_KEYS
-      : SUPPORT_FILTER_KEYS;
+  const relevantSupportKeys = SUPPORT_FILTER_KEYS;
   const signedIn = personalization?.signedIn ?? false;
   const isWatchlistView = signedIn && spaceTab === "watchlist";
   const watchlistTickers = personalization?.watchlistTickers ?? [];
@@ -1659,13 +1626,6 @@ export function MobileStockExplorer({
     setActiveSavedFilterId(null);
   };
 
-  const applyBuiltInPreset = (preset: BuiltInPreset) => {
-    setFilterExpression(createBuiltInPresetExpression(preset));
-    setSortKey(builtInPresetSortKey(preset));
-    setSortDirection("asc");
-    setActiveSavedFilterId(null);
-  };
-
   const savedExpression = (filter: SavedFilter): FilterExpression => ({
     ...filter.expression,
     groups: filter.expression.groups.map((group) => ({
@@ -1706,25 +1666,12 @@ export function MobileStockExplorer({
     setSheetOpen(false);
   };
 
-  const defaultShortcuts = useMemo(() => {
-    const presets: Array<{ key: string; preset: BuiltInPreset }> = [
-      { key: SUPPORT_FILTER_KEY, preset: "support" },
-      { key: PULLBACK_FILTER_KEY, preset: "pullback" },
-      { key: EARNINGS_THIS_WEEK_FILTER_KEY, preset: "earnings" },
-    ];
-    return presets.map(({ key, preset }): FilterShortcut & { preset: BuiltInPreset } => ({
-      key, preset, name: BUILT_IN_PRESET_COPY[preset].name, isDefault: true, identity: preset,
-      description: BUILT_IN_PRESET_COPY[preset].summary,
-      configuration: builtInPresetConfiguration(preset),
-    }));
-  }, []);
-  const filterShortcuts: FilterShortcut[] = [
-    ...defaultShortcuts,
-    ...(personalization?.savedFilters ?? []).map((filter) => ({ key: savedFilterKey(filter.id), name: filter.name, icon: filter.icon, isDefault: false })),
-  ].map((filter) => ({ ...filter, badgeCount: personalization?.filterBadgeCounts[filter.key] }));
-  const activeShortcutKey = activeSavedFilter ? savedFilterKey(activeSavedFilter.id)
-    : defaultShortcuts.find((filter) => filter.preset === builtInPreset)?.key ?? null;
-  const activeFilterName = filterCount > 0 ? activeSavedFilter?.name ?? builtInPresetName(builtInPreset) ?? "Custom filter" : null;
+  const filterShortcuts: FilterShortcut[] = (personalization?.savedFilters ?? []).map((filter) => ({
+    key: savedFilterKey(filter.id), name: filter.name, icon: filter.icon,
+    badgeCount: personalization?.filterBadgeCounts[savedFilterKey(filter.id)],
+  }));
+  const activeShortcutKey = activeSavedFilter ? savedFilterKey(activeSavedFilter.id) : null;
+  const activeFilterName = filterCount > 0 ? activeSavedFilter?.name ?? "Custom filter" : null;
 
   const startAnalysis = () => {
     setAnalysisSelection([]);
@@ -1974,12 +1921,8 @@ export function MobileStockExplorer({
           activeName={activeFilterName}
           onClear={clearFilter}
           onSelect={(key) => {
-            const preset = defaultShortcuts.find((filter) => filter.key === key)?.preset;
-            if (preset) applyBuiltInPreset(preset);
-            else {
-              const filter = personalization?.savedFilters.find((item) => savedFilterKey(item.id) === key);
-              if (filter) selectSavedFilter(filter);
-            }
+            const filter = personalization?.savedFilters.find((item) => savedFilterKey(item.id) === key);
+            if (filter) selectSavedFilter(filter);
           }}
           onCreate={() => openFilterBuilder()}
           onEditCurrent={() => {

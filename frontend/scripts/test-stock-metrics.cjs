@@ -11,7 +11,6 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
 }).outputText, filename);
 const { STOCK_METRICS, SUPPORT_TIMEFRAMES, stockMetricForField } = require('../src/stockMetrics.ts');
 const { supportSignal } = require('../src/metricStatus.ts');
-const { createBuiltInPresetExpression, builtInPresetFor } = require('../src/builtInFilters.ts');
 const { metricRulesFromExpression, expressionFromMetricRules, groupSupportTimeframes } = require('../src/metricFilterRules.ts');
 const stocks = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/data/open-data/stocks.json'), 'utf8'));
 
@@ -88,31 +87,6 @@ test('watchlist badge calculations agree with every stock-card filter', () => {
   assert.deepEqual(JSON.parse(result.stdout), expected);
 });
 
-test('built-in filters use current card metrics and survive the simple builder unchanged', () => {
-  for (const preset of ['support', 'pullback', 'earnings']) {
-    const expression = createBuiltInPresetExpression(preset);
-    const { rules, logicChanged } = metricRulesFromExpression(expression);
-    assert.equal(logicChanged, false, `${preset} must use the builder's matching rules`);
-    for (const rule of rules) {
-      const metric = stockMetricForField(rule.field);
-      assert.ok(metric, `${preset}: ${rule.field} must be a current stock-card metric`);
-      for (const value of rule.values) assert.ok(metric.options.includes(value), `${rule.field}: ${value}`);
-    }
-    const saved = expressionFromMetricRules(groupSupportTimeframes(rules), expression);
-    // IDs, icons, and display order must not affect preset recognition after editing.
-    saved.icon = 'trend';
-    saved.groups.reverse();
-    for (const group of saved.groups) {
-      group.id = 'new-group-id';
-      group.conditions.reverse();
-      for (const condition of group.conditions) condition.id = 'new-condition-id';
-    }
-    assert.equal(builtInPresetFor(saved), preset);
-    saved.groups[0].conditions.pop();
-    assert.equal(builtInPresetFor(saved), null, 'changing a selected value creates a custom filter');
-  }
-});
-
 test('editing saved support conditions groups matching values and preserves distinct requirements', () => {
   const rules = [
     { id: 'short', field: 'support_1m', values: ['At support', 'Near support'] },
@@ -159,32 +133,4 @@ test('multiple selected timeframes require each timeframe and accept any selecte
   });
   assert.equal(result.status, 0, result.stderr);
   assert.deepEqual(JSON.parse(result.stdout), samples.map(sample => sample.matches));
-});
-
-test('legacy support alternatives are not recognized as the updated built-in filter', () => {
-  const expression = createBuiltInPresetExpression('pullback');
-  const supportGroups = expression.groups.filter(group => group.conditions[0].field.startsWith('support_'));
-  expression.groups = [
-    { id: 'legacy-support', operator: 'or', conditions: supportGroups.flatMap(group => group.conditions) },
-    ...expression.groups.filter(group => !supportGroups.includes(group)),
-  ];
-  assert.equal(builtInPresetFor(expression), null);
-});
-
-test('built-in screen expressions agree with the watchlist badge evaluator', () => {
-  const presets = { 'builtin:support': 'support', 'builtin:pullback': 'pullback', 'builtin:earnings_this_week': 'earnings' };
-  const expressions = Object.fromEntries(Object.entries(presets).map(([key, preset]) => {
-    const expression = createBuiltInPresetExpression(preset);
-    return [key, { operator: expression.operator, groups: expression.groups.map(group => ({
-      operator: group.operator,
-      conditions: group.conditions.map(({ field, value }) => ({ field, value })),
-    })) }];
-  }));
-  const result = spawnSync('python3', ['-c', [
-    'import json',
-    'from evaluate_saved_filters import BUILT_IN_FILTERS',
-    'print(json.dumps(BUILT_IN_FILTERS))',
-  ].join('\n')], { cwd: path.join(__dirname, '../../scripts'), encoding: 'utf8' });
-  assert.equal(result.status, 0, result.stderr);
-  assert.deepEqual(JSON.parse(result.stdout), expressions);
 });
