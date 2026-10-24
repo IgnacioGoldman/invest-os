@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 from app.entry_engine.fiscal_periods import normalize_companyfacts_periods
 from app.entry_engine.open_data_metrics import _quarterly_revenue_rows
 from app.entry_engine.open_data_models import OpenDataPeriodMetrics, OpenDataSnapshot
-from app.entry_engine.providers.issuer_revenue import issuer_revenue_check_due, load_issuer_revenue, parse_report, parse_revenue_text, refresh_issuer_revenue
+from app.entry_engine.providers.issuer_revenue import issuer_revenue_check_due, load_issuer_revenue, parse_report, parse_revenue_text, refresh_issuer_revenue, revenue_fact
 from app.services.revenue_growth_momentum import calculate_revenue_growth_momentum
 from app.services.stock_data_quality import retain_verified_history
 from app.services.storage import connect, replace_stock_open_data_snapshot
@@ -29,6 +29,17 @@ def fact(value, start, end, fy, fp, form="10-Q", filed="2026-08-01"):
 
 def facts(rows):
     return {"facts":{"us-gaap":{"Revenues":{"units":{"USD":rows}}}}}
+
+
+def nvs_revenue_seed():
+    # Scheduled refreshes update the production seed's quarters and check date.
+    # Scheduling and persistence tests need a fixed starting point.
+    return {
+        "verified_on": "2026-10-13",
+        "facts": {"issuer": {"Revenues": {"units": {"USD": [
+            revenue_fact(2026, 2, 14408, "2026-07-21", "https://issuer.example/q2-2026.pdf"),
+        ]}}}},
+    }
 
 
 class RevenueHistoryRepairTests(unittest.TestCase):
@@ -110,7 +121,7 @@ class RevenueHistoryRepairTests(unittest.TestCase):
         self.assertEqual([r["val"] for r in rows],[6574e6,4946e6,4641e6])
 
     def test_source_outage_keeps_verified_seed_and_records_weekly_check(self):
-        seed=load_issuer_revenue("NVS")
+        seed=nvs_revenue_seed()
         cache=SimpleNamespace(get=Mock(return_value=None),set=Mock())
         provider=SimpleNamespace(cache=cache,_get=Mock(side_effect=ValueError("source unavailable")))
         with TemporaryDirectory() as directory, patch("app.entry_engine.providers.issuer_revenue.PROJECT_DIR", Path(directory)):
@@ -129,12 +140,19 @@ class RevenueHistoryRepairTests(unittest.TestCase):
         provider._get.assert_called_once()
 
     def test_issuer_discovery_waits_until_next_quarter_can_be_reported(self):
-        seed = load_issuer_revenue("NVS")
+        seed = nvs_revenue_seed()
         self.assertFalse(issuer_revenue_check_due("NVS", seed, as_of=date(2026,10,19)))
         self.assertTrue(issuer_revenue_check_due("NVS", seed, as_of=date(2026,10,20)))
 
+    def test_issuer_discovery_waits_seven_days_after_persisted_check(self):
+        seed = nvs_revenue_seed()
+        seed["last_report_check"] = {"checked_on": "2026-10-20", "status": "retained_unverified"}
+        for day, expected in ((20, False), (21, False), (26, False), (27, True)):
+            with self.subTest(day=day):
+                self.assertEqual(issuer_revenue_check_due("NVS", seed, as_of=date(2026,10,day)), expected)
+
     def test_successful_issuer_discovery_persists_new_quarter_and_check_date(self):
-        seed = load_issuer_revenue("NVS")
+        seed = nvs_revenue_seed()
         provider = SimpleNamespace(cache=SimpleNamespace(get=Mock(return_value=None),set=Mock()),
             _get=Mock(return_value=SimpleNamespace(content=b"<p>Q3 2026 Q3 2025</p><p>USD m USD m</p><p>Net sales 15 000 14 000</p>")))
         with TemporaryDirectory() as directory, patch("app.entry_engine.providers.issuer_revenue.PROJECT_DIR", Path(directory)):
