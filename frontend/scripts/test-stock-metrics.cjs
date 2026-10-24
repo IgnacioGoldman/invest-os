@@ -6,9 +6,15 @@ const ts = require('typescript');
 const { spawnSync } = require('node:child_process');
 
 // Use the app's existing TypeScript dependency; the production build checks types.
-require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
-  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
-}).outputText, filename);
+require.extensions['.ts'] = (module, filename) => {
+  const originalRequire = module.require.bind(module);
+  module.require = (id) => id.endsWith('.md?raw')
+    ? { default: fs.readFileSync(path.resolve(path.dirname(filename), id.slice(0, -4)), 'utf8') }
+    : originalRequire(id);
+  module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
+  }).outputText, filename);
+};
 const { STOCK_METRICS, SUPPORT_TIMEFRAMES, stockMetricForField, visibleStockMetrics, supportMetric } = require('../src/stockMetrics.ts');
 const { metricRulesFromExpression, expressionFromMetricRules, groupSupportTimeframes } = require('../src/metricFilterRules.ts');
 const stocks = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/data/open-data/stocks.json'), 'utf8'));
@@ -110,6 +116,24 @@ test('AI research preserves dropped raw figures, source metadata and anomaly war
   const stock = googFixture;
   const prompt = prepareStockAnalysis([stock], 'All stocks').prompt;
   for (const text of ['raw_financial_metrics', 'eps_gaap_growth_yoy', 'peg', 'net_margin', 'screening_metrics', 'net income exceeds operating income', 'not independent verification']) assert.ok(prompt.includes(text), text);
+});
+
+test('Markdown AI instructions render single and comparison briefs with literal filter names', () => {
+  const { prepareStockAnalysis } = require('../src/aiAnalysis.ts');
+  const filterName = 'Growth $& {{subject}}';
+  for (const snapshots of [[googFixture], [googFixture, { ...googFixture, ticker: 'TEST' }]]) {
+    const brief = prepareStockAnalysis(snapshots, filterName);
+    const subject = snapshots.length === 1
+      ? 'Evaluate GOOG as a potential investment.'
+      : 'Compare GOOG, TEST as potential investments.';
+    assert.ok(brief.prompt.startsWith(`${subject}\n\n`));
+    assert.ok(brief.prompt.includes(`Stock screen: ${filterName}\n`));
+    assert.match(brief.prompt, /Prepared: \d{4}-\d{2}-\d{2}T/);
+    assert.ok(brief.prompt.includes('## Invest OS data\n\n### GOOG'));
+    assert.equal(brief.prompt.includes('{{preparedAt}}'), false);
+    assert.equal(brief.prompt.includes('{{filterName}}'), false);
+    assert.equal(brief.prompt.split('```json').length - 1, snapshots.length);
+  }
 });
 
 test('watchlist badge calculations agree with every stock-card filter', () => {
