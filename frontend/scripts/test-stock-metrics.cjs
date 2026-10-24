@@ -130,6 +130,11 @@ test('Markdown AI instructions render single and comparison briefs with literal 
     assert.ok(brief.prompt.includes(`Stock screen: ${filterName}\n`));
     assert.match(brief.prompt, /Prepared: \d{4}-\d{2}-\d{2}T/);
     assert.ok(brief.prompt.includes('## Invest OS data\n\n### GOOG'));
+    assert.ok(brief.prompt.includes('| Rank | Stock | Business score | Valuation score | Brief rationale |'));
+    assert.ok(brief.prompt.includes('two integer scores from 0 to 100'));
+    assert.ok(brief.prompt.includes('equal-weight average'));
+    assert.ok(brief.prompt.includes('Do not review, critique or suggest improvements to Invest OS'));
+    assert.ok(brief.preview.includes('rank all selected stocks'));
     assert.equal(brief.prompt.includes('{{preparedAt}}'), false);
     assert.equal(brief.prompt.includes('{{filterName}}'), false);
     assert.equal(brief.prompt.split('```json').length - 1, snapshots.length);

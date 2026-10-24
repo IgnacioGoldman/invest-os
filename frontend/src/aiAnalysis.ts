@@ -17,7 +17,7 @@ function latestRows(snapshot: OpenDataStockSnapshot, series: string, count: numb
 export function prepareStockAnalysis(snapshots: OpenDataStockSnapshot[], filterName: string): StockAnalysisBrief {
   const tickers = snapshots.map((snapshot) => snapshot.ticker);
   const subject = tickers.length > 1 ? `Compare ${tickers.join(", ")} as potential investments.` : `Evaluate ${tickers[0]} as a potential investment.`;
-  const preview = `${subject} Use the financial data from Invest OS: revenue growth, valuation, profitability and support levels. Compare business quality, opportunities and risks. Explain which deserves further research and why.`;
+  const preview = `${subject} Score business quality and valuation attractiveness from 0 to 100, then rank all selected stocks by their equally weighted scores. Use the supplied data as a starting point, supplement it with research when available, and explain the investment case and key risks.`;
   const variables: Record<string, string> = { subject, preparedAt: new Date().toISOString(), filterName };
   const instructions = stockAnalysisTemplate.trimEnd().replace(
     /\{\{(subject|preparedAt|filterName)\}\}/g,
