@@ -413,7 +413,7 @@ def _filter_incremental_sec_work_items(
                     from app.services.revenue_growth_momentum import calculate_revenue_growth_momentum
                     checked = existing_snapshot.revenue_history_checked_at
                     due = checked is None or datetime.now(timezone.utc) - checked >= timedelta(days=7)
-                    if existing_snapshot.revenue_history_version < 1 or (due and calculate_revenue_growth_momentum(existing_snapshot.model_dump(mode="json"))["label"] == "Unclear"):
+                    if existing_snapshot.revenue_history_version < 1 or (due and calculate_revenue_growth_momentum(existing_snapshot.model_dump(mode="json"))["label"] == "Unknown"):
                         repairs.append("historical_series.revenue_history_repair")
                 if existing_snapshot is not None and not repairs and (latest_accession is None or latest_accession == known_accession):
                     if verified:

@@ -46,6 +46,7 @@ jobs:
           python -m unittest discover -s scripts -p 'test_refresh_separation.py'
           python -m unittest discover -s scripts -p 'test_industry_strength.py'
           python -m unittest discover -s scripts -p 'test_static_stock_assets.py'
+          python -m unittest discover -s scripts -p 'test_screening_metrics.py'
 
       - name: Refresh deployed price data
         run: >-
@@ -95,6 +96,10 @@ jobs:
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
+
+      - name: Validate financial cards and saved filters
+        working-directory: frontend
+        run: npm run test:metrics
 
       - name: Validate revenue growth momentum
         run: >-

@@ -20,12 +20,12 @@ That means the latest close is about 4% above the detected support area.
 
 Support is a price-setup metric, so its tags describe distance from a detected support zone:
 
-- **At support:** The latest close is within 2.5% of the support-zone midpoint.
-- **Near support:** The latest close is more than 2.5% and up to 6% above the support-zone midpoint.
-- **Above support:** The latest close is more than 6% and up to 25% above the support-zone midpoint.
-- **Far:** The latest close is more than 25% above support, or no usable support zone was detected for the window.
+- **Inside Support Zone:** The latest close is within ±2.5% of the support-zone midpoint.
+- **Near Support:** The latest close is more than 2.5% and up to 6% above the support-zone midpoint.
+- **Above Support:** Any usable distance above 6%, including more than 25%.
+- **Unknown:** Missing, invalid or a distance below −2.5%; no zero substitution.
 
-Tags follow the app's shared color scale: strong green for **At support**, green for **Near support**, yellow for **Above support**, and red for **Far** when a usable zone exists. If no usable zone was detected, **Far** is gray and its tooltip explains the missing data. Each status uses the same dot and label, such as `1M · Near support`, while the percentage stays white.
+All support labels use neutral styling. The existing 2.5% and 6% cutoffs are retained. This technical context sits beside the price chart, outside the six financial cards. Price history and all period selectors are preserved.
 
 ## How It Is Calculated
 

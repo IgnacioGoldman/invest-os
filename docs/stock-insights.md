@@ -1,65 +1,7 @@
-# Stock Insights
+# Stock research screening
 
-This page explains how the Exploration stock table forms the Business, Price, Valuation, and Conviction signals.
+Invest OS surfaces stocks worth researching. It does not generate investment-quality ratings, composite conviction scores or buy/sell conclusions. The [metric index](metrics/README.md) documents the current six financial cards, optional details, neutral price/earnings context and retired metrics.
 
-The goal is not to predict the future or produce a buy/sell command. The goal is to turn a large pile of public facts into a cleaner first-pass view: is this a good business, is the current price interesting, is valuation stretched, and how complete is the evidence?
+Financial values come from a shared deterministic screening projection that checks source periods, currency, denominator effects, estimate freshness and anomalies. Cards, filters, badge evaluation and AI exports use that projection. Missing or unreliable inputs are Unknown/Needs Review, never zero. A source identifier preserves provenance; it does not independently verify a value.
 
-## Main Inputs
-
-Stock insights use public open-data snapshots, mainly:
-
-- Business facts: latest-quarter revenue growth, GAAP EPS growth, margins, free cash flow, returns on equity/capital, cash, debt, and share count.
-- Price facts: current price, 1 day to 5 year price changes, distance from all-time high, distance from 52 week high/low, volatility, and support-zone distance.
-- Valuation facts: trailing PE, forward PE estimate when available, PEG proxy, price/sales, EV/EBITDA proxy, FCF yield, and valuation history.
-- Context facts: recent SEC filings, known data gaps, peer ranks, valuation percentiles, net cash/debt, FCF conversion, and price versus fundamentals.
-
-Every metric carries a source and quality tier. Some values are exact public facts, some are computed from public facts, and some are proxy estimates. Proxy estimates can be useful, but the UI should treat them with more humility.
-
-## Business
-
-### Latest Revenue Growth YoY
-
-_Is the business growing right now?_
-
-Compares the company's revenue in its latest reported quarter with the same quarter one year earlier. It shows how quickly the company's sales are growing or declining. For example, +15% means the company generated 15% more revenue than in the same quarter last year.
-
-### Revenue Growth Momentum 
-
-_Is the company’s growth getting stronger or weaker?_
-
-Compares median revenue growth YoY over the latest three quarters with the median over the preceding three. A difference of at least +3 percentage points is Accelerating, at most −3 pp is Decelerating, and smaller changes are Stable. The latest-quarter movement is shown separately so a rebound after one weak quarter is not mistaken for sustained acceleration. Requires six consecutive comparable quarterly growth observations. See [Revenue Growth Momentum](metrics/revenue-growth-momentum.md) for the formula, tags, and data-update behavior.
-
-### GAAP EPS Growth YoY
-
-_Is the company reporting more profit per share than a year ago?_
-
-Compares GAAP diluted earnings per share with the same quarter last year. It reflects the company’s official reported earnings after operating costs, interest, taxes, changes in share count, and other accounting gains or losses. Because unusual items can affect GAAP earnings, a very strong or weak result does not always mean the underlying business changed by the same amount. Cross-check it with free cash flow, margins, and revenue growth.
-
-### Free Cash Flow Margin
-
-_Is the company turning its revenue into actual cash?_
-
-Measures free cash flow as a percentage of revenue. It shows how much cash the business keeps after paying operating costs and capital expenditures. This is especially useful because revenue and EPS can look strong while cash generation is weak.
-
-## Price
-
-### Proximity to support
-
-_Is the current price close to a nearby support zone?_
-
-Compares the current price with a detected support zone from recent daily price history. Support means a clustered swing-low area with enough touches to look like a practical floor, not simply the lowest price in the range. Closer to 0% means the stock is nearer support; the window label shows which price range produced the signal. See [Support](metrics/support.md) for the calculation details.
-
-### Industry Relative Strength
-
-_How has the stock's industry performed compared with the wider market?_
-
-The stock detail card compares the equal-weight 1Y price return of tracked industry peers, excluding the selected stock, with the S&P 500 price index for supported USD listings. The difference is shown in percentage points: at least +5 pp is Ahead of market, at most −5 pp is Behind market, and values strictly between are In line with market. Missing comparable data, an unavailable market benchmark, or fewer than five eligible peers is Unclear. Every tag uses the same neutral gray dot and label; the value stays white. These observations describe price context rather than investment quality. The detail panel also compares the stock with its industry and shows absolute returns, the calculation, comparison chart, dates, and peer coverage. Both scheduled refreshes rebuild the calculation. See [Industry Relative Strength](metrics/industry-relative-performance.md) for the display, formula, tags, and data requirements.
-
-## Valuation
-
-### Forward P/E
-
-_How expensive is the stock relative to expected earnings?_
-
-Compares the current share price with analysts’ expected earnings per share over the next 12 months. It helps answer whether investors are already paying a high price for the company’s expected growth.
-A high Forward P/E is not automatically bad if earnings are expected to grow quickly. A low Forward P/E is not automatically attractive if earnings are stagnating or falling.
+Raw reported facts, historical ratios and filing context remain in AI briefs, including exceptional-earnings and recent negative-FCF warnings. The brief requests evidence and research priorities. Retired saved filters require explicit edits before matching stocks; they are never silently broadened.

@@ -48,6 +48,28 @@ export type OpenDataMetric = {
   tier: OpenDataMetricTier;
   as_of: string;
   notes: string;
+  period?: string | null;
+  formula?: string | null;
+  currency?: string | null;
+  estimate_as_of?: string | null;
+  forecast_horizon?: string | null;
+};
+
+export type ResearchMetric = OpenDataMetric & {
+  kind: "Reported Fact" | "Computed Metric" | "Estimate";
+  status: string;
+  warnings: string[];
+  yoy_change_pp?: number | null;
+  price_as_of?: string;
+  components?: Record<string, ResearchMetric>;
+};
+export type ScreeningMetrics = {
+  version: number;
+  as_of: string;
+  metrics: Record<string, ResearchMetric>;
+  financial_details: Record<string, ResearchMetric>;
+  warnings: string[];
+  verification: string;
 };
 
 export type OpenDataFilingExhibit = {
@@ -81,6 +103,8 @@ export type OpenDataCompanyContext = {
 
 export type OpenDataStockSnapshot = {
   detail_path?: string;
+  screening?: ScreeningMetrics | null;
+  valuation_inputs?: Record<string, OpenDataMetric>;
   ticker: string;
   name?: string | null;
   cik?: number | null;

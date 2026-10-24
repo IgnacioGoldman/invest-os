@@ -42,7 +42,8 @@ class StaticStockAssetsTests(unittest.TestCase):
         with TemporaryDirectory() as directory:
             root = Path(directory)
             write_stock_assets(root, [full])
-            self.assertEqual(load_full_stock_rows(root), [full])
+            self.assertIn("screening", load_full_stock_rows(root)[0])
+            self.assertEqual([{k:v for k,v in row.items() if k != "screening"} for row in load_full_stock_rows(root)], [full])
             summary = json.loads((root / "open-data/stocks.json").read_text())[0]
             self.assertIn("detail_path", summary)
             self.assertEqual(len(load_full_stock_rows(root)[0]["historical_series"]["annual_fundamentals"]), 26)
@@ -68,6 +69,16 @@ class StaticStockAssetsTests(unittest.TestCase):
             _validate_stock_details("TEST", summary, root, errors)
             self.assertTrue(any("missing or invalid" in e for e in errors))
 
+    def test_validation_rejects_different_research_metrics_in_summary_and_detail(self):
+        with TemporaryDirectory() as directory:
+            root=Path(directory)
+            write_stock_assets(root,[full_snapshot()])
+            summary=json.loads((root/"open-data/stocks.json").read_text())[0]
+            summary["screening"]["metrics"]["revenue"]["value"]=999
+            errors=[]
+            _validate_stock_details("TEST",summary,root,errors)
+            self.assertTrue(any("screening projection" in e for e in errors))
+
     def test_deployed_fallback_downloads_full_snapshot(self):
         full = full_snapshot()
         routes = {"open-data/stocks.json": [stock_summary(full)], "stocks/universe.json": [{"symbol": "TEST"}],
@@ -87,7 +98,8 @@ class StaticStockAssetsTests(unittest.TestCase):
             root = Path(directory)
             write_stock_assets(root, [local])
             rows = hydrate_deployed_data("https://example.com/data", root, ["TEST"], cache_bust="test", workers=2)
-            self.assertEqual(rows, [local])
+            self.assertIn("screening", rows[0])
+            self.assertEqual([{k:v for k,v in row.items() if k != "screening"} for row in rows], [local])
 
     def test_mismatched_deployed_detail_fails_instead_of_persisting_wrong_data(self):
         full = full_snapshot()

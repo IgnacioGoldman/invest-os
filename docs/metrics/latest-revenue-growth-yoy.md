@@ -1,38 +1,9 @@
-### Latest Revenue Growth YoY
+# Revenue Growth YoY
 
-Latest Revenue Growth YoY is best calculated from the **latest reported quarter** rather than from trailing 12 month revenue.
+Computed Metric: `(latest fiscal-quarter revenue / same fiscal quarter prior-year revenue − 1) × 100`.
 
-Annual or TTM revenue can hide recent changes because it blends older quarters with the newest one. The latest-quarter YoY view compares the newest quarter with the same quarter one year earlier, which gives a cleaner first-pass read on whether the business is expanding right now.
+Use the latest reported quarter, even if missing. Require a unique fiscal quarter, positive finite revenue in both periods, matching currency and report dates 350–380 days apart (the existing fiscal comparison tolerance). Do not substitute an older usable observation. Preserve both source identifiers, fiscal periods, period end and formula. A source identifier establishes provenance, not independent verification. A disagreement with stored growth becomes Needs Review.
 
-Formula:
+Existing product boundaries are retained with factual names: High Growth ≥20%; Moderate Growth ≥8% and <20%; Flat ≥0% and <8%; Declining <0%. Flat includes modest positive growth and does not imply exactly zero change. These are descriptive screening bands, not investment-quality judgments. Unknown/Needs Review never becomes zero. Values and non-directional bands use neutral styling; Declining can indicate an adverse direction.
 
-```text
-Latest Revenue Growth YoY = (Latest Quarter Revenue - Same Quarter Last Year Revenue) / Same Quarter Last Year Revenue
-```
-
-Or, expressed as a percentage:
-
-```text
-Latest Revenue Growth YoY % = ((Latest Quarter Revenue - Same Quarter Last Year Revenue) / Same Quarter Last Year Revenue) * 100
-```
-
-For example, +15% revenue growth means the company generated 15% more revenue in the latest quarter than in the comparable quarter one year ago.
-
-Why this comes first: revenue growth is the simplest way to ask whether customer demand is expanding before looking at margins, earnings, cash flow, valuation, or price setup.
-
-### Tags
-
-Latest Revenue Growth YoY is a business-growth metric, so its tags should describe current business expansion, not valuation or price setup.
-
-Suggested tags:
-
-- **Strong:** Latest-quarter revenue growth YoY is 20% or higher. The business is growing quickly.
-- **Solid:** Latest-quarter revenue growth YoY is 8% to 20%. The business is growing at a healthy rate.
-- **Flat:** Latest-quarter revenue growth YoY is 0% to 8%. Revenue is still growing, but the pace is modest.
-- **Weak:** Latest-quarter revenue growth YoY is below 0%. Revenue is lower than in the comparable quarter one year ago.
-- **Unclear:** Latest or comparable prior-year revenue data is missing, revenue is not meaningful, or the company type makes quarterly revenue growth hard to compare.
-- **Unavailable:** Comparable quarterly revenue YoY is not available from the current open-data source.
-
-Tags use the same visual scale as support and other company metrics: strong green for **Strong**, green for **Solid**, yellow for **Flat**, red for **Weak**, and gray for **Unclear** or **Unavailable**. Each status has the same dot and label, while the percentage stays white.
-
-These thresholds should be treated as a first-pass signal. A mature utility, bank, retailer, or industrial business may look healthy with lower revenue growth than a software or platform company, so the tag should be read together with margins, EPS growth, free cash flow, sector, and valuation.
+Acquisitions, disposals, currency and changes in revenue definition can impair comparability. Review source notes and reporting dates; no automatic acquisition or FX adjustment is invented.

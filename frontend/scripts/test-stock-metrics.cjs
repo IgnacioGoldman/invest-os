@@ -38,27 +38,52 @@ test('all support timeframes resolve to the stock card definition', () => {
   for (const timeframe of SUPPORT_TIMEFRAMES) assert.equal(stockMetricForField(timeframe.field), support);
 });
 
-test('Forward P/E uses the earnings multiple even when other valuation measures are expensive', () => {
-  const stock = structuredClone(stocks[0]);
-  stock.valuation.forward_pe = { value: 15 };
-  stock.valuation.price_to_sales = { value: 25 };
-  assert.equal(stockMetricForField('forward_pe').getSignal(stock).label, 'Cheap');
+test('only six financial cards are primary; retired metrics are absent', () => {
+  assert.deepEqual(STOCK_METRICS.filter(metric => !metric.context).map(metric => metric.key),
+    ['revenue', 'momentum', 'operating_margin', 'fcf_margin', 'forward_pe', 'balance_sheet']);
+  for (const field of ['eps', 'industry_strength', 'valuation']) assert.equal(stockMetricForField(field), undefined);
 });
 
-test('industry statuses match the card and reject stale or mismatched dates', () => {
-  const metric = stockMetricForField('industry_strength');
+test('unsupported Forward P/E is Unknown regardless of a raw low multiple', () => {
+  const stock = structuredClone(stocks[0]);
+  stock.valuation.forward_pe = { value: 15 };
+  delete stock.screening;
+  assert.equal(stockMetricForField('forward_pe').getSignal(stock).label, 'Unknown');
+  assert.equal(stockMetricForField('forward_pe').getValue(stock), null);
+});
+
+test('dated estimates expire without a refresh and never produce valuation ratings', () => {
   const stock = structuredClone(stocks[0]);
   const today = new Date().toISOString().slice(0, 10);
-  stock.price_opportunity.current_price.as_of = today;
-  for (const [value, expected] of [[5, 'Ahead of market'], [4.99, 'In line with market'], [-4.99, 'In line with market'], [-5, 'Behind market'], [null, 'Unclear']]) {
-    stock.industry_relative_strength = { value, end_date: today };
-    assert.equal(metric.getSignal(stock).label, expected);
+  stock.screening = { metrics: { forward_pe: { value: 20, status: 'Estimate', forecast_horizon: 'FY2027 annual', estimate_as_of: today, price_as_of: today, warnings: [] } } };
+  const metric = stockMetricForField('forward_pe');
+  assert.equal(metric.getValue(stock), 20);
+  assert.equal(metric.getSignal(stock).label, 'Estimate');
+  stock.screening.metrics.forward_pe.estimate_as_of = '2000-01-01';
+  assert.equal(metric.getValue(stock), null);
+  assert.equal(metric.getSignal(stock).label, 'Unknown');
+});
+
+test('earnings and support use neutral styling, including missing support', () => {
+  const { metricSignal } = require('../src/metricStatus.ts');
+  for (const label of ['Inside Support Zone', 'Near Support', 'Above Support', 'This week', 'Next 30 days', 'Estimate', 'Computed Metric']) assert.equal(metricSignal(label).tone, 'neutral');
+  assert.equal(supportSignal(null).label, 'Unknown');
+  assert.equal(supportSignal(0).label, 'Inside Support Zone');
+  assert.equal(metricSignal('Accelerating').tone, 'positive');
+});
+
+test('retired and obsolete quality rules disable the whole saved expression', () => {
+  const { hasDisabledFilter } = require('../src/stockMetrics.ts');
+  for (const [field, value] of [['eps', 'Strong'], ['valuation', 'Cheap'], ['industry_strength', 'Ahead of market'], ['fcf_margin', 'Strong']]) {
+    assert.equal(hasDisabledFilter({ operator: 'or', groups: [{ conditions: [{ field, value }, { field: 'revenue', value: 'High Growth' }] }] }), true);
   }
-  stock.industry_relative_strength = { value: 10, end_date: '2000-01-01' };
-  stock.price_opportunity.current_price.as_of = '2000-01-01';
-  assert.equal(metric.getSignal(stock).label, 'Unclear');
-  stock.industry_relative_strength = { value: 10, end_date: today };
-  assert.equal(metric.getSignal(stock).label, 'Unclear');
+});
+
+test('AI research preserves dropped raw figures, source metadata and anomaly warnings', () => {
+  const { prepareStockAnalysis } = require('../src/aiAnalysis.ts');
+  const stock = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/data/open-data/snapshots/GOOG.json'), 'utf8'));
+  const prompt = prepareStockAnalysis([stock], 'All stocks').prompt;
+  for (const text of ['raw_financial_metrics', 'eps_gaap_growth_yoy', 'peg', 'net_margin', 'screening_metrics', 'net income exceeds operating income', 'not independent verification']) assert.ok(prompt.includes(text), text);
 });
 
 test('watchlist badge calculations agree with every stock-card filter', () => {
@@ -89,10 +114,10 @@ test('watchlist badge calculations agree with every stock-card filter', () => {
 
 test('editing saved support conditions groups matching values and preserves distinct requirements', () => {
   const rules = [
-    { id: 'short', field: 'support_1m', values: ['At support', 'Near support'] },
-    { id: 'growth', field: 'revenue', values: ['Strong'] },
-    { id: 'long', field: 'support_5y', values: ['Near support', 'At support'] },
-    { id: 'medium', field: 'support_6m', values: ['At support'] },
+    { id: 'short', field: 'support_1m', values: ['Inside Support Zone', 'Near Support'] },
+    { id: 'growth', field: 'revenue', values: ['High Growth'] },
+    { id: 'long', field: 'support_5y', values: ['Near Support', 'Inside Support Zone'] },
+    { id: 'medium', field: 'support_6m', values: ['Inside Support Zone'] },
   ];
   const grouped = groupSupportTimeframes(rules);
   assert.equal(grouped.length, 3);
@@ -109,8 +134,8 @@ test('editing saved support conditions groups matching values and preserves dist
 
 test('multiple selected timeframes require each timeframe and accept any selected value', () => {
   const expression = expressionFromMetricRules([
-    { id: 'support', field: 'support_1m', timeframes: ['support_1m', 'support_5y'], values: ['At support', 'Near support'] },
-    { id: 'growth', field: 'revenue', values: ['Strong', 'Solid'] },
+    { id: 'support', field: 'support_1m', timeframes: ['support_1m', 'support_5y'], values: ['Inside Support Zone', 'Near Support'] },
+    { id: 'growth', field: 'revenue', values: ['High Growth', 'Moderate Growth'] },
   ], { operator: 'and', groups: [] });
   const samples = [
     [1, 1, 25, true], [1, 4, 12, true], [4, 1, 25, true], [4, 4, 25, true],
@@ -120,6 +145,7 @@ test('multiple selected timeframes require each timeframe and accept any selecte
     stock.price_opportunity.support_1m_distance = { value: short };
     stock.price_opportunity.support_5y_distance = { value: long };
     stock.business_health.revenue_growth_yoy = { value: revenue };
+    stock.screening.metrics.revenue = { value: revenue, status: revenue >= 20 ? "High Growth" : revenue >= 8 ? "Moderate Growth" : revenue >= 0 ? "Flat" : "Declining" };
     return { stock, matches };
   });
   const result = spawnSync('python3', ['-c', [

@@ -17,7 +17,7 @@ Revenue Growth Momentum (pp) = Recent Median - Prior Median
 
 The result is a change in **percentage points (pp)**, not a percentage change in revenue or a percentage change in the growth rate. Each quarter contributes equally; the median is not revenue-weighted and does not measure aggregate six-month revenue growth.
 
-For example, SYK's earlier three quarters grew 11.88%, 11.07%, and 10.25%, while its latest three grew 11.42%, 2.63%, and 9.42%. Their medians are 11.07% and 9.42%, respectively. Momentum is therefore **−1.65 pp: Stable**, even though the latest quarter rebounded **+6.79 pp** from 2.63% to 9.42%.
+For example, SYK's earlier three quarters grew 11.88%, 11.07%, and 10.25%, while its latest three grew 11.42%, 2.63%, and 9.42%. Their medians are 11.07% and 9.42%, respectively. Momentum is therefore **−1.65 pp: Steady**, even though the latest quarter rebounded **+6.79 pp** from 2.63% to 9.42%.
 
 Why this matters: the main signal asks whether the company's typical growth pace has changed. The latest-quarter movement provides context about a rebound or sudden deterioration without replacing that broader trend.
 
@@ -27,10 +27,10 @@ Revenue Growth Momentum describes changes in growth pace, not the absolute stren
 
 - **Accelerating:** Recent median growth is at least 3 pp above the prior median.
 - **Decelerating:** Recent median growth is at least 3 pp below the prior median.
-- **Stable:** The median difference is strictly between −3 pp and +3 pp.
-- **Unclear:** Six consecutive quarters with finite, comparable revenue YoY growth are unavailable. Missing growth, missing quarters, duplicate quarters, or invalid fiscal periods prevent calculation. Older valid quarters never replace a missing quarter in the latest window.
+- **Steady:** The median difference is strictly between −3 pp and +3 pp.
+- **Unknown:** Six consecutive quarters with finite, comparable revenue YoY growth are unavailable. Missing growth, missing quarters, duplicate quarters, or invalid fiscal periods prevent calculation. Older valid quarters never replace a missing quarter in the latest window.
 
-These thresholds are a first-pass signal. Stable means the typical growth pace is within 3 pp of its earlier level; it does not mean every quarter was stable. A company can accelerate while revenue is still shrinking, or decelerate while revenue is still growing strongly.
+These thresholds are a first-pass signal. Steady means the typical growth pace is within 3 pp of its earlier level; it does not mean every quarter was stable. A company can accelerate while revenue is still shrinking, or decelerate while revenue is still growing strongly.
 
 ### Latest-quarter movement
 
@@ -75,3 +75,7 @@ python scripts/backfill_revenue_history.py --facts-dir .cache/open_data --apply
 The rebuild checks for momentum coverage regressions, updates the latest revenue growth card and its alias together, and preserves existing prices. It does not refresh other financial metrics; a normal fundamentals collection computes those from the normalized facts.
 
 The median deliberately responds more slowly than a two-quarter comparison. One new strong quarter is early evidence, not enough on its own to establish sustained acceleration. One weak quarter still matters economically even when it has little influence on the median, so read this signal alongside the six quarterly observations, latest movement, and revenue growth YoY.
+
+## Research screening confidence
+
+Displayed as a Computed Metric with six fiscal periods, source identifiers and the formula. The latest comparable quarter must also pass the revenue input checks. No investment score is derived. The ±3 pp thresholds are the existing documented product rules, not newly fitted thresholds. Green means accelerating revenue only.

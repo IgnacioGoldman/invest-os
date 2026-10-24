@@ -1144,7 +1144,10 @@ class OpenDataProvider:
             return None
         return OpenDataMetric(
             value=value, source="yfinance:forwardEps", tier="proxy_estimate",
-            as_of=date.today().isoformat(),
+            as_of=date.today().isoformat(), currency=currency.upper(),
+            estimate_as_of=date.today().isoformat(),
+            # forwardEps alone does not identify a fiscal-year or NTM horizon.
+            # Keep it unknown until the provider supplies explicit forecast metadata.
             notes=f"Yahoo expected EPS per listed share in {currency.upper()}; estimate methodology is not independently verified.",
         )
 

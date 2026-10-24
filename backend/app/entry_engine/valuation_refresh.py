@@ -207,14 +207,15 @@ def reprice_valuation(
         as_of=as_of, notes="Current price divided by saved expected EPS from Yahoo or its implied forward P/E input; not an SEC fact.",
         fallback_as_of=as_of, tier="proxy_estimate",
     )
-    if public_eps is None or public_eps.value is None:
-        valuation["forward_pe"] = proxy
-    elif public_eps.value > 0:
-        valuation["forward_pe"] = public
-    else:
-        valuation["forward_pe"] = _unavailable(
-            "forward_pe", "Expected EPS is loss-making or zero; forward P/E is not meaningful.", as_of,
-        )
+    # Public multiples and historical-growth proxies remain raw research data.
+    # Only an explicitly dated EPS forecast can supply the displayed estimate.
+    from app.services.screening_metrics import build_screening_metrics
+    checked = build_screening_metrics({**snapshot.model_dump(mode="json"),
+        "price_currency": price.currency,
+        "price_opportunity": {**{k: v.model_dump(mode="json") for k, v in snapshot.price_opportunity.items()},
+            "current_price": {"value": price.price, "source": price.source, "as_of": price.as_of}},
+        "valuation_inputs": {k: v.model_dump(mode="json") for k, v in inputs.items()}})
+    valuation["forward_pe"] = OpenDataMetric.model_validate(checked["metrics"]["forward_pe"])
     # Preserve deliberate exclusions instead of reviving them on a price update.
     for key, previous in snapshot.valuation.items():
         if previous.value is None and "not meaningful" in previous.notes.lower() and key in {"fcf_yield", "ev_to_ebitda"}:
@@ -226,5 +227,5 @@ def reprice_valuation(
             metrics[alias] = valuation[key]
     return snapshot.model_copy(update={
         "valuation": valuation, "metrics": metrics,
-        "valuation_inputs": inputs, "price_currency": price.currency,
+        "valuation_inputs": inputs, "price_currency": price.currency, "screening": checked,
     })

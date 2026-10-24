@@ -1,7 +1,6 @@
-import type { OpenDataMetric, OpenDataStockSnapshot } from "./api";
-import { INDUSTRY_STRENGTH_COPY, industryStrengthContext, industryStrengthSignal } from "./industryStrength";
-import { fcfMarginSignal, forwardPeSignal, growthSignal, metricSignal, revenueGrowthSignal, supportSignal, type MetricSignal } from "./metricStatus";
-import { calculateRevenueGrowthMomentum, REVENUE_MOMENTUM_DESCRIPTION } from "./revenueGrowthMomentum";
+import type { OpenDataMetric, OpenDataStockSnapshot, ResearchMetric } from "./api";
+import { metricSignal, supportSignal, type MetricSignal } from "./metricStatus";
+import { REVENUE_MOMENTUM_DESCRIPTION } from "./revenueGrowthMomentum";
 
 export const SUPPORT_TIMEFRAMES = [
   { field: "support_1m", label: "1M", metric: "support_1m_distance" },
@@ -14,138 +13,87 @@ export const SUPPORT_TIMEFRAMES = [
 export type SupportFilterKey = typeof SUPPORT_TIMEFRAMES[number]["field"];
 export const SUPPORT_FILTER_KEYS = SUPPORT_TIMEFRAMES.map(({ field }) => field);
 export const SUPPORT_KEYS = Object.fromEntries(SUPPORT_TIMEFRAMES.map(({ field, metric }) => [field, metric])) as Record<SupportFilterKey, string>;
-export function isSupportField(field: string): field is SupportFilterKey {
-  return SUPPORT_TIMEFRAMES.some((timeframe) => timeframe.field === field);
+export function isSupportField(field: string): field is SupportFilterKey { return SUPPORT_TIMEFRAMES.some(t => t.field === field); }
+export const DISABLED_FILTER_FIELDS = ["eps", "industry_strength", "valuation"];
+export function normalizedFilterValue(field: string, value: string) {
+  return field === "revenue" ? ({ Strong: "High Growth", Solid: "Moderate Growth", Weak: "Declining", Unclear: "Unknown", Unavailable: "Unknown" } as Record<string, string>)[value] ?? value
+    : field === "momentum" && value === "Stable" ? "Steady" : value;
 }
-
-export function epsGaapMetric(snapshot: OpenDataStockSnapshot) {
-  return snapshot.business_health.eps_gaap_growth_yoy ?? snapshot.business_health.eps_growth_yoy;
+export function hasDisabledFilter(expression: { groups: { conditions: { field: string; value?: string }[] }[] }) {
+  return expression.groups.some(group => group.conditions.some(c => {
+    const metric = stockMetricForField(c.field);
+    return DISABLED_FILTER_FIELDS.includes(c.field) || !metric || (c.value != null && !(metric.options as readonly string[]).includes(normalizedFilterValue(c.field, c.value)));
+  }));
 }
-export function upcomingEarningsMetric(snapshot: OpenDataStockSnapshot) {
-  return snapshot.price_opportunity.days_to_next_earnings ?? snapshot.metrics.days_to_next_earnings;
+export function upcomingEarningsMetric(snapshot: OpenDataStockSnapshot): OpenDataMetric | undefined {
+  const raw = snapshot.price_opportunity.days_to_next_earnings ?? snapshot.metrics.days_to_next_earnings;
+  if (!raw) return undefined;
+  const match = /:(\d{4}-\d{2}-\d{2})(?:\/(\d{4}-\d{2}-\d{2}))?$/.exec(raw.source ?? "");
+  const value = match && freshDay(raw.as_of) ? Math.round((Date.parse(`${match[1]}T00:00:00Z`) - Date.parse(`${new Date().toISOString().slice(0, 10)}T00:00:00Z`)) / 86400000) : null;
+  return { ...raw, value: value != null && value >= 0 ? value : null };
 }
 export function upcomingEarningsSignal(metric?: OpenDataMetric): MetricSignal {
   const days = metric?.value;
-  return metricSignal(days == null || !Number.isFinite(days) ? "Unclear" : days <= 7 ? "This week" : days <= 30 ? "Next 30 days" : "Later");
+  return metricSignal(days == null || !Number.isFinite(days) || days < 0 ? "Unknown" : days <= 7 ? "This week" : days <= 30 ? "Next 30 days" : "Later");
 }
-const finite = (value?: number | null) => typeof value === "number" && Number.isFinite(value) ? value : null;
-
-const METRIC_COPY = {
-  industry_strength: INDUSTRY_STRENGTH_COPY,
-  revenue: {
-    title: "Latest Revenue Growth YoY",
-    question: "Is the business growing right now?",
-    description:
-      "Compares the company's revenue in its latest reported quarter with the same quarter one year earlier. It shows how quickly the company's sales are growing or declining. For example, +15% means the company generated 15% more revenue than in the same quarter last year.",
-  },
-  momentum: {
-    title: "Revenue Growth Momentum",
-    question: "Is the company's growth getting stronger or weaker?",
-    description:
-      REVENUE_MOMENTUM_DESCRIPTION,
-  },
-  eps_gaap: {
-    title: "GAAP EPS Growth YoY",
-    question: "Are reported earnings improving?",
-    description:
-      "GAAP EPS growth shows reported accounting earnings per share versus the same quarter last year. It can be affected by unusual gains, charges, or accounting items, so use it alongside cash-flow and margin metrics.",
-  },
-  fcf_margin: {
-    title: "Free Cash Flow Margin",
-    question: "Is the company turning revenue into actual cash?",
-    description:
-      "Compares trailing-12-month free cash flow with trailing-12-month revenue. TTM is used because a single quarter can be noisy when collections, inventory, working capital, or capex timing shift cash flow around.",
-  },
-  forward_pe: {
-    title: "Forward P/E",
-    question: "What are you paying for expected earnings?",
-    description:
-      "Compares the current share price with expected earnings per share over the next 12 months. It is a compact first-pass valuation check, not a full valuation model.",
-  },
-  upcoming_earnings: {
-    title: "Upcoming Earnings",
-    question: "Is there an earnings catalyst coming soon?",
-    description:
-      "Counts the days until the next expected earnings release date or earnings window. Earnings releases can be catalysts for sharp price moves, so a lower value means the next scheduled information event is closer.",
-  },
-  support: {
-    title: "Proximity to Support",
-    question: "Is the current price close to a nearby support zone?",
-    description:
-      "Compares the current price with a detected support zone from recent daily price history. Support means a clustered swing-low area with enough touches to look like a practical floor, not just the lowest price in the range.",
-  },
+function freshDay(value?: string | null) {
+  const age = (Date.now() - Date.parse(`${value?.slice(0, 10)}T00:00:00Z`)) / 86400000;
+  return age >= 0 && age < 8;
+}
+export function researchMetric(snapshot: OpenDataStockSnapshot, key: string): ResearchMetric | undefined {
+  const metric = snapshot.screening?.metrics[key];
+  if (key === "forward_pe" && metric && (!freshDay(metric.estimate_as_of) || !freshDay(metric.price_as_of))) {
+    return { ...metric, value: null, status: "Unknown", warnings: [...metric.warnings, "The estimate or market price is stale."] };
+  }
+  return metric;
+}
+export function financialDetail(snapshot: OpenDataStockSnapshot, key: string): ResearchMetric | undefined {
+  const metric = snapshot.screening?.financial_details[key];
+  return metric && key !== "gross_margin" && !freshDay(snapshot.price_opportunity.current_price?.as_of)
+    ? { ...metric, value: null, status: "Unknown", warnings: [...metric.warnings, "The market price is stale."] } : metric;
+}
+export function metricEvidence(metric?: ResearchMetric, includeWarnings = true): string {
+  if (!metric) return "Unknown: comparable financial inputs are unavailable.";
+  return [metric.kind, metric.period, metric.currency, `As of ${metric.as_of || "Unknown"}`, metric.estimate_as_of ? `Estimate dated ${metric.estimate_as_of}` : "", metric.formula, metric.notes, `Source: ${metric.source}`, ...(includeWarnings ? metric.warnings : [])].filter(Boolean).join(" · ");
+}
+type Definition = {
+  key: string; field: string; title: string; shortLabel: string; question: string; description: string;
+  format: "percent" | "ratio" | "days" | "pp" | "support" | "compact";
+  context: boolean; options: string[];
+  getSignal: (s: OpenDataStockSnapshot) => MetricSignal;
+  getValue: (s: OpenDataStockSnapshot) => number | null;
 };
-
-
-type MetricDefinition = {
-  key: string;
-  field: string;
-  title: string;
-  shortLabel: string;
-  question: string;
-  description: string;
-  format: "percent" | "ratio" | "days" | "pp" | "support";
-  options: string[];
-  getSignal: (snapshot: OpenDataStockSnapshot) => MetricSignal;
-  getValue: (snapshot: OpenDataStockSnapshot) => number | null;
-};
-
-// This list renders stock cards and supplies the filter menu. Adding a card here
-// requires its selectable statuses and calculation, so the two cannot drift.
+const financialMetric = (key: string) => ({
+  getSignal: (s: OpenDataStockSnapshot) => metricSignal(researchMetric(s, key)?.status ?? "Unknown"),
+  getValue: (s: OpenDataStockSnapshot) => researchMetric(s, key)?.value ?? null,
+});
 export const STOCK_METRICS = [
-  {
-    key: "revenue", field: "revenue", ...METRIC_COPY.revenue, shortLabel: "Revenue YoY", format: "percent",
-    options: ["Strong", "Solid", "Flat", "Weak", "Unclear", "Unavailable"],
-    getSignal: (snapshot) => revenueGrowthSignal(snapshot.business_health.revenue_growth_yoy),
-    getValue: (snapshot) => finite(snapshot.business_health.revenue_growth_yoy?.value),
-  },
-  {
-    key: "momentum", field: "momentum", ...METRIC_COPY.momentum, shortLabel: "Momentum", format: "pp",
-    options: ["Accelerating", "Stable", "Decelerating", "Unclear"],
-    getSignal: (snapshot) => metricSignal(calculateRevenueGrowthMomentum(snapshot).label),
-    getValue: (snapshot) => calculateRevenueGrowthMomentum(snapshot).change,
-  },
-  {
-    key: "eps_gaap", field: "eps", ...METRIC_COPY.eps_gaap, shortLabel: "GAAP EPS", format: "percent",
-    options: ["Strong", "Solid", "Modest", "Weak", "Unclear", "Unavailable"],
-    getSignal: (snapshot) => growthSignal(epsGaapMetric(snapshot)),
-    getValue: (snapshot) => finite(epsGaapMetric(snapshot)?.value),
-  },
-  {
-    key: "fcf_margin", field: "fcf_margin", ...METRIC_COPY.fcf_margin, shortLabel: "FCF Mgn", format: "percent",
-    options: ["Strong", "Solid", "Thin", "Weak", "Unclear"],
-    getSignal: (snapshot) => fcfMarginSignal(snapshot.business_health.fcf_margin?.value),
-    getValue: (snapshot) => finite(snapshot.business_health.fcf_margin?.value),
-  },
-  {
-    key: "forward_pe", field: "forward_pe", ...METRIC_COPY.forward_pe, shortLabel: "Forward P/E", format: "ratio",
-    options: ["Cheap", "Fair", "Pricey", "Very pricey", "Unclear"],
-    getSignal: (snapshot) => forwardPeSignal(snapshot.valuation.forward_pe),
-    getValue: (snapshot) => finite(snapshot.valuation.forward_pe?.value),
-  },
-  {
-    key: "upcoming_earnings", field: "upcoming_earnings", ...METRIC_COPY.upcoming_earnings, shortLabel: "Earnings", format: "days",
-    options: ["This week", "Next 30 days", "Later", "Unclear"],
-    getSignal: (snapshot) => upcomingEarningsSignal(upcomingEarningsMetric(snapshot)),
-    getValue: (snapshot) => finite(upcomingEarningsMetric(snapshot)?.value),
-  },
-  {
-    key: "support", field: "support", ...METRIC_COPY.support, shortLabel: "Support", format: "support",
-    options: ["At support", "Near support", "Above support", "Far"],
-    getSignal: (snapshot) => supportSignal(snapshot.price_opportunity.support_1m_distance?.value),
-    getValue: (snapshot) => finite(snapshot.price_opportunity.support_1m_distance?.value),
-  },
-  {
-    key: "industry_strength", field: "industry_strength", ...METRIC_COPY.industry_strength, shortLabel: "Industry strength", format: "pp",
-    options: ["Ahead of market", "In line with market", "Behind market", "Unclear"],
-    getSignal: (snapshot) => industryStrengthSignal(industryStrengthContext(snapshot)),
-    getValue: (snapshot) => industryStrengthContext(snapshot)?.value ?? null,
-  },
-] as const satisfies readonly MetricDefinition[];
-
+  { key: "revenue", field: "revenue", title: "Revenue Growth YoY", shortLabel: "Revenue YoY", format: "percent", context: false,
+    question: "How did quarterly sales change?", description: "Latest fiscal quarter versus the equivalent prior-year quarter. Labels describe revenue growth, not investment quality.",
+    options: ["High Growth", "Moderate Growth", "Flat", "Declining", "Unknown", "Needs Review"], ...financialMetric("revenue") },
+  { key: "momentum", field: "momentum", title: "Revenue Growth Momentum", shortLabel: "Momentum", format: "pp", context: false,
+    question: "Is revenue growth accelerating or decelerating?", description: REVENUE_MOMENTUM_DESCRIPTION,
+    options: ["Accelerating", "Steady", "Decelerating", "Unknown", "Needs Review"], ...financialMetric("momentum") },
+  { key: "operating_margin", field: "operating_margin", title: "Operating Margin", shortLabel: "Operating margin", format: "percent", context: false,
+    question: "What portion of quarterly sales becomes operating profit?", description: "Latest-quarter core operating income divided by revenue, with the change versus the same quarter last year when comparable.",
+    options: ["Computed Metric", "Unknown", "Needs Review"], ...financialMetric("operating_margin") },
+  { key: "fcf_margin", field: "fcf_margin", title: "Free Cash Flow Margin", shortLabel: "FCF margin", format: "percent", context: false,
+    question: "How much revenue became free cash flow over twelve months?", description: "TTM operating cash flow minus capex, divided by TTM revenue. Recent-quarter cash flow and deterioration warnings are separate context.",
+    options: ["Computed Metric", "Unknown", "Needs Review"], ...financialMetric("fcf_margin") },
+  { key: "forward_pe", field: "forward_pe", title: "Forward P/E", shortLabel: "Forward P/E", format: "ratio", context: false,
+    question: "What multiple of estimated earnings does the price represent?", description: "Estimate only: requires positive, sourced annual forward EPS with an identifiable forecast horizon, estimate date and compatible currency. Historical EPS extrapolations are excluded.",
+    options: ["Estimate", "Unknown", "Needs Review"], ...financialMetric("forward_pe") },
+  { key: "balance_sheet", field: "balance_sheet", title: "Balance Sheet", shortLabel: "Net cash/debt", format: "compact", context: false,
+    question: "What are the reported cash, investments and debt?", description: "Net cash/debt uses only compatible unrestricted cash equivalents and complete debt. Investments are disclosed separately and excluded from net cash.",
+    options: ["Computed Metric", "Unknown", "Needs Review"], ...financialMetric("balance_sheet") },
+  { key: "upcoming_earnings", field: "upcoming_earnings", title: "Upcoming Earnings", shortLabel: "Earnings", format: "days", context: true,
+    question: "When is the next expected report?", description: "Source-provided earnings date or window. An expected date is an estimate unless confirmed by the issuer.",
+    options: ["This week", "Next 30 days", "Later", "Unknown"], getSignal: (s) => upcomingEarningsSignal(upcomingEarningsMetric(s)), getValue: s => { const m = upcomingEarningsMetric(s); return upcomingEarningsSignal(m).label === "Unknown" ? null : m?.value ?? null; } },
+  { key: "support", field: "support", title: "Proximity to Support", shortLabel: "Support", format: "support", context: true,
+    question: "Where is the latest price relative to a detected support zone?", description: "Technical context from clustered swing lows in saved price history. It does not predict future returns.",
+    options: ["Inside Support Zone", "Near Support", "Above Support", "Unknown"], getSignal: s => supportSignal(s.price_opportunity.support_1m_distance?.value), getValue: s => s.price_opportunity.support_1m_distance?.value ?? null },
+] as const satisfies readonly Definition[];
 export type StockMetricKey = typeof STOCK_METRICS[number]["key"];
 export type StockMetricField = Exclude<typeof STOCK_METRICS[number]["field"], "support"> | SupportFilterKey;
-export const STOCK_METRIC_BY_KEY = Object.fromEntries(STOCK_METRICS.map((metric) => [metric.key, metric])) as Record<StockMetricKey, typeof STOCK_METRICS[number]>;
-export function stockMetricForField(field: string) {
-  return STOCK_METRICS.find((metric) => metric.field === (isSupportField(field) ? "support" : field));
-}
+export const STOCK_METRIC_BY_KEY = Object.fromEntries(STOCK_METRICS.map(m => [m.key, m])) as Record<StockMetricKey, typeof STOCK_METRICS[number]>;
+export function stockMetricForField(field: string) { return STOCK_METRICS.find(m => m.field === (isSupportField(field) ? "support" : field)); }

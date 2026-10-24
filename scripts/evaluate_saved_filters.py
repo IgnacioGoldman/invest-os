@@ -15,7 +15,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
-from app.services.revenue_growth_momentum import calculate_revenue_growth_momentum  # noqa: E402
+from app.services.screening_metrics import build_screening_metrics, DROPPED_FIELDS  # noqa: E402
 
 DEFAULT_STOCKS_PATH = ROOT / "frontend" / "public" / "data" / "open-data" / "stocks.json"
 MATCH_TIMEZONE = ZoneInfo("Europe/Stockholm")
@@ -30,179 +30,53 @@ SUPPORT_METRICS = {
 
 
 def _number(value: Any) -> float | None:
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
         return None
     return float(value)
 
 
-def _metric_value(snapshot: dict[str, Any], section: str, metric: str) -> float | None:
-    return _number(snapshot.get(section, {}).get(metric, {}).get("value"))
-
-
-def _growth_signal(value: float | None) -> str:
-    if value is None:
-        return "Unclear"
-    if value >= 20:
-        return "Strong"
-    if value >= 8:
-        return "Solid"
-    if value >= 0:
-        return "Modest"
-    return "Weak"
-
-
-def _revenue_growth_signal(value: float | None) -> str:
-    signal = _growth_signal(value)
-    return "Flat" if signal == "Modest" else signal
-
-
-def _fcf_margin_signal(value: float | None) -> str:
-    if value is None:
-        return "Unclear"
-    if value >= 20:
-        return "Strong"
-    if value >= 10:
-        return "Solid"
-    if value >= 0:
-        return "Thin"
-    return "Weak"
-
-
 def _filter_value(condition: dict[str, Any]) -> Any:
     value = condition.get("value")
-    if value == "Mixed":
-        # Older saved expressions keep their original meaning after the rename.
-        return {"eps": "Modest", "fcf_margin": "Thin"}.get(condition.get("field"), value)
+    if condition.get("field") == "revenue":
+        return {"Strong": "High Growth", "Solid": "Moderate Growth", "Weak": "Declining", "Unclear": "Unknown", "Unavailable": "Unknown"}.get(value, value)
+    if condition.get("field") == "momentum" and value == "Stable":
+        return "Steady"
     return value
 
 
-def _support_signal(value: float | None) -> str:
-    if value is None or value > 25:
-        return "Far"
-    if value <= 2.5:
-        return "At support"
-    if value <= 6:
-        return "Near support"
-    return "Above support"
-
-
-def _upcoming_earnings_signal(value: float | None) -> str:
-    if value is None:
-        return "Unclear"
-    if value <= 7:
-        return "This week"
-    if value <= 30:
-        return "Next 30 days"
-    return "Later"
-
-
-def _valuation_signal(snapshot: dict[str, Any]) -> str:
-    forward_pe = _metric_value(snapshot, "valuation", "forward_pe")
-    fcf_yield = _metric_value(snapshot, "valuation", "fcf_yield")
-    price_sales = _metric_value(snapshot, "valuation", "price_to_sales")
-    ev_to_ebitda = _metric_value(snapshot, "valuation", "ev_to_ebitda")
-
-    if all(value is None for value in (forward_pe, fcf_yield, price_sales, ev_to_ebitda)):
-        return "Unclear"
-    if (
-        (forward_pe is not None and forward_pe >= 50)
-        or (fcf_yield is not None and fcf_yield < 1)
-        or (price_sales is not None and price_sales >= 20)
-        or (ev_to_ebitda is not None and ev_to_ebitda >= 40)
-    ):
-        return "Very pricey"
-    if (
-        (forward_pe is not None and forward_pe >= 35)
-        or (fcf_yield is not None and fcf_yield < 2)
-        or (price_sales is not None and price_sales >= 12)
-        or (ev_to_ebitda is not None and ev_to_ebitda >= 25)
-    ):
-        return "Pricey"
-    if (
-        forward_pe is not None
-        and forward_pe <= 18
-        and (fcf_yield is None or fcf_yield >= 4)
-        and (price_sales is None or price_sales <= 8)
-    ):
-        return "Cheap"
-    if (
-        (forward_pe is not None and forward_pe <= 25)
-        or (fcf_yield is not None and fcf_yield >= 3)
-        or (price_sales is not None and price_sales <= 8)
-    ):
-        return "Fair"
-    return "Unclear"
-
-
-def _revenue_momentum(snapshot: dict[str, Any]) -> str:
-    return calculate_revenue_growth_momentum(snapshot)["label"]
-
-
-def _forward_pe_signal(value: float | None) -> str:
-    if value is None or not math.isfinite(value) or value <= 0:
-        return "Unclear"
-    if value <= 18:
-        return "Cheap"
-    if value <= 25:
-        return "Fair"
-    if value >= 50:
-        return "Very pricey"
-    if value >= 35:
-        return "Pricey"
-    return "Unclear"
-
-
-def _industry_strength_signal(snapshot: dict[str, Any]) -> str:
-    context = snapshot.get("industry_relative_strength") or {}
-    value = _number(context.get("value"))
-    end_date = context.get("end_date")
-    current_date = str(snapshot.get("price_opportunity", {}).get("current_price", {}).get("as_of", ""))[:10]
-    if value is None or not math.isfinite(value) or not end_date or current_date != end_date:
-        return "Unclear"
-    try:
-        age = (datetime.now(timezone.utc) - datetime.fromisoformat(f"{end_date}T00:00:00+00:00")).total_seconds() / 86400
-    except (ValueError, TypeError):
-        return "Unclear"
-    if age < 0 or age >= 8:
-        return "Unclear"
-    return "Ahead of market" if value >= 5 else "Behind market" if value <= -5 else "In line with market"
-
-
 def signal_for(snapshot: dict[str, Any], field: str) -> str:
-    if field == "revenue":
-        metric = snapshot.get("business_health", {}).get("revenue_growth_yoy") or {}
-        value = _number(metric.get("value"))
-        return "Unavailable" if value is None and metric.get("tier") == "unavailable_open_free" else _revenue_growth_signal(value)
-    if field == "eps":
-        health = snapshot.get("business_health", {})
-        metric = health.get("eps_gaap_growth_yoy")
-        if metric is None:
-            metric = health.get("eps_growth_yoy") or {}
-        value = _number(metric.get("value"))
-        return "Unavailable" if value is None and metric.get("tier") == "unavailable_open_free" else _growth_signal(value)
-    if field == "momentum":
-        return _revenue_momentum(snapshot)
-    if field == "fcf_margin":
-        return _fcf_margin_signal(_metric_value(snapshot, "business_health", "fcf_margin"))
-    if field == "valuation":
-        return _valuation_signal(snapshot)
-    if field == "forward_pe":
-        return _forward_pe_signal(_metric_value(snapshot, "valuation", "forward_pe"))
-    if field == "upcoming_earnings":
-        metric = snapshot.get("price_opportunity", {}).get("days_to_next_earnings")
-        if metric is None:
-            metric = snapshot.get("metrics", {}).get("days_to_next_earnings") or {}
-        return _upcoming_earnings_signal(_number(metric.get("value")))
-    if field == "industry_strength":
-        return _industry_strength_signal(snapshot)
-    metric = SUPPORT_METRICS.get(field)
-    return _support_signal(_metric_value(snapshot, "price_opportunity", metric)) if metric else "Unclear"
+    if field in DROPPED_FIELDS:
+        return "Needs Review"
+    if field in SUPPORT_METRICS:
+        value = _number(snapshot.get("price_opportunity", {}).get(SUPPORT_METRICS[field], {}).get("value"))
+        return "Unknown" if value is None or value < -2.5 else "Inside Support Zone" if value <= 2.5 else "Near Support" if value <= 6 else "Above Support"
+    screening = snapshot.get("screening")
+    # Recheck date-sensitive estimates, including legacy cached snapshots.
+    if not screening or field in {"forward_pe", "upcoming_earnings"}:
+        screening = build_screening_metrics(snapshot)
+    return screening.get("metrics", {}).get(field, {}).get("status", "Unknown")
+
+
+FILTER_VALUES = {
+    "revenue": {"High Growth", "Moderate Growth", "Flat", "Declining", "Unknown", "Needs Review"},
+    "momentum": {"Accelerating", "Steady", "Decelerating", "Unknown", "Needs Review"},
+    "operating_margin": {"Computed Metric", "Unknown", "Needs Review"},
+    "fcf_margin": {"Computed Metric", "Unknown", "Needs Review"},
+    "forward_pe": {"Estimate", "Unknown", "Needs Review"},
+    "balance_sheet": {"Computed Metric", "Unknown", "Needs Review"},
+    "upcoming_earnings": {"This week", "Next 30 days", "Later", "Unknown"},
+    **{field: {"Inside Support Zone", "Near Support", "Above Support", "Unknown"} for field in SUPPORT_METRICS},
+}
 
 
 def expression_matches(snapshot: dict[str, Any], expression: dict[str, Any]) -> bool:
     groups = expression.get("groups")
     if not isinstance(groups, list) or not groups:
         return True
+    # Retired rules fail the entire saved expression, even inside an OR group.
+    # Silently removing a rule could broaden an existing saved screen.
+    if any(isinstance(c, dict) and (c.get("field") not in FILTER_VALUES or _filter_value(c) not in FILTER_VALUES.get(c.get("field"), set())) for g in groups if isinstance(g, dict) for c in g.get("conditions", [])):
+        return False
     group_results: list[bool] = []
     for group in groups:
         conditions = group.get("conditions") if isinstance(group, dict) else None

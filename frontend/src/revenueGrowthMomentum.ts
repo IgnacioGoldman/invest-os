@@ -6,7 +6,7 @@ type RevenueRow = {
 type RevenueSnapshot = { historical_series: Record<string, RevenueRow[]> };
 export type RevenueGrowthPoint = { period: string; value: number };
 export type RevenueGrowthMomentum = {
-  label: "Accelerating" | "Decelerating" | "Stable" | "Unclear";
+  label: "Accelerating" | "Decelerating" | "Steady" | "Unknown";
   change: number | null;
   recentMedian: number | null;
   priorMedian: number | null;
@@ -30,7 +30,7 @@ function median(points: RevenueGrowthPoint[]) {
 
 export function calculateRevenueGrowthMomentum(snapshot: RevenueSnapshot): RevenueGrowthMomentum {
   const unclear = (reason: string): RevenueGrowthMomentum => ({
-    label: "Unclear", change: null, recentMedian: null, priorMedian: null,
+    label: "Unknown", change: null, recentMedian: null, priorMedian: null,
     latestChange: null, latestMovement: null, points: [], reason,
   });
   const rows = [...(snapshot.historical_series.quarterly_revenue ?? [])];
@@ -62,7 +62,7 @@ export function calculateRevenueGrowthMomentum(snapshot: RevenueSnapshot): Reven
     ? previous <= priorMedian - 3 && Math.abs(latest - priorMedian) < 3 ? "Rebounding" : "Improving"
     : latestChange <= -3 ? "Weakening" : "Steady";
   return {
-    label: change >= 3 ? "Accelerating" : change <= -3 ? "Decelerating" : "Stable",
+    label: change >= 3 ? "Accelerating" : change <= -3 ? "Decelerating" : "Steady",
     change, recentMedian, priorMedian, latestChange, latestMovement, points, reason: null,
   };
 }

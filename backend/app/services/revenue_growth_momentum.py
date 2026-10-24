@@ -15,7 +15,7 @@ def _quarter_index(period: str) -> int | None:
 def calculate_revenue_growth_momentum(snapshot: dict[str, Any]) -> dict[str, Any]:
     def unclear(reason: str) -> dict[str, Any]:
         return {
-            "label": "Unclear", "change": None, "recentMedian": None, "priorMedian": None,
+            "label": "Unknown", "change": None, "recentMedian": None, "priorMedian": None,
             "latestChange": None, "latestMovement": None, "points": [], "reason": reason,
         }
 
@@ -43,7 +43,7 @@ def calculate_revenue_growth_momentum(snapshot: dict[str, Any]) -> dict[str, Any
     else:
         latest_movement = "Weakening" if latest_change <= -3 else "Steady"
     return {
-        "label": "Accelerating" if change >= 3 else "Decelerating" if change <= -3 else "Stable",
+        "label": "Accelerating" if change >= 3 else "Decelerating" if change <= -3 else "Steady",
         "change": change, "recentMedian": recent_median, "priorMedian": prior_median,
         "latestChange": latest_change, "latestMovement": latest_movement, "points": points, "reason": None,
     }

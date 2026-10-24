@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataSnapshot
+from app.services.screening_metrics import build_screening_metrics, enrich_screening
 from app.services.stock_derived_signals import StockDerivedSignals, StockDerivedSignalsFile
 
 
@@ -32,6 +33,7 @@ def strip_deprecated_stock_metrics_payload(payload: dict[str, Any]) -> dict[str,
         if isinstance(metrics, dict):
             for key in DEPRECATED_STOCK_METRIC_KEYS:
                 metrics.pop(key, None)
+    payload["screening"] = build_screening_metrics(payload)
     return payload
 
 
@@ -195,7 +197,7 @@ def replace_stock_metric_series(conn: sqlite3.Connection, snapshot: OpenDataSnap
 
 
 def replace_stock_open_data_snapshot(conn: sqlite3.Connection, snapshot: OpenDataSnapshot) -> None:
-    snapshot = _strip_deprecated_stock_metrics(snapshot)
+    snapshot = enrich_screening(_strip_deprecated_stock_metrics(snapshot))
     conn.execute(
         """
         INSERT INTO stock_open_data_snapshots (ticker, generated_at, payload)

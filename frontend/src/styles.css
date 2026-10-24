@@ -11401,3 +11401,25 @@ body:has(.mobile-sheet-backdrop) {
     padding: 0 10px;
   }
 }
+
+/* Financial provenance stays available without widening compact detail cards. */
+.mobile-growth-formula,
+.mobile-metric-evidence,
+.mobile-research-warning,
+.mobile-growth-detail-panel > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.mobile-metric-evidence,
+.mobile-research-warning {
+  color: var(--mobile-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+.mobile-metric-evidence summary,
+.mobile-research-warning summary {
+  cursor: pointer;
+}
+.mobile-research-warning {
+  margin-bottom: 12px;
+}

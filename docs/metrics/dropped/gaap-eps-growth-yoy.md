@@ -1,3 +1,22 @@
+# GAAP EPS Growth YoY — retired from screening
+
+Definition: Percentage change in latest-quarter GAAP diluted EPS versus the same fiscal quarter last year, only with positive comparable EPS.
+
+Dropped because: Exceptional investment gains, tax benefits, buybacks and a small earnings base can overwhelm operating performance.
+
+Typical misleading situations: Exceptional investment gains, tax benefits, buybacks and a small earnings base can overwhelm operating performance.
+
+The supplied GOOG Q2 2026 example has GAAP EPS growth about +294%, net margin 93.65%, and PEG 0.18 amid exceptional investment gains. These figures are a regression example from the saved dataset, not independently verified financial statements or a valuation conclusion.
+
+Reconsider only with: Comparable reconciled diluted EPS, identification of unusual items, and a defensible adjusted earnings policy.
+
+Excluded from default cards, saved-filter matching, rankings, composite scores and automatic positive/negative ratings. Raw source facts and historical calculations remain available to AI research. Saved filters using retired fields are disabled until edited, including OR expressions; they are never silently broadened.
+
+See the [metric index](../README.md) for the current policy.
+
+<details>
+<summary>Historical methodology (inactive)</summary>
+
 ### GAAP EPS Growth YoY
 
 GAAP EPS Growth YoY is best calculated from **GAAP diluted earnings per share in the latest reported quarter** compared with the same quarter one year earlier.
@@ -36,3 +55,5 @@ Suggested tags:
 - **Unavailable:** Comparable quarterly GAAP diluted EPS is missing from the current open-data source, or either quarter has zero or negative EPS.
 
 These thresholds should be treated as a first-pass signal. Unusual gains, tax benefits, impairment charges, acquisitions, share buybacks, dilution, and a small prior-year earnings base can move EPS growth without a similar change in customer demand. Read the tag together with revenue growth, margins, free cash flow, share count, and sector.
+
+</details>

@@ -52,7 +52,7 @@ def main() -> None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(report, indent=2) + "\n")
     for row in report["symbols"]:
-        if row["revenue_momentum"]["label"] == "Unclear" or row["missing_inputs"]:
+        if row["revenue_momentum"]["label"] == "Unknown" or row["missing_inputs"]:
             print(f"{row['ticker']}: revenue YoY={row['revenue_growth_observations']}; missing={', '.join(row['missing_inputs']) or 'none'}")
     print(f"Audited {report['symbol_count']} symbols")
 

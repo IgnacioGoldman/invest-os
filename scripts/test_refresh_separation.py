@@ -67,10 +67,11 @@ class RefreshSeparationTests(unittest.TestCase):
         self.assertEqual(updated.historical_series, old.historical_series)
         for key in ("net_income_ttm", "revenue_ttm", "free_cash_flow_ttm", "shares_diluted"):
             self.assertEqual(updated.metrics[key], old.metrics[key])
-        expected = {"pe": 20, "price_to_sales": 2, "fcf_yield": 4, "ev_to_ebitda": 11, "peg": 0.8, "forward_pe": 16}
+        expected = {"pe": 20, "price_to_sales": 2, "fcf_yield": 4, "ev_to_ebitda": 11, "peg": 0.8}
         for key, value in expected.items():
             self.assertAlmostEqual(updated.valuation[key].value, value, msg=key)
             self.assertEqual(updated.valuation[key].as_of, "2026-10-13")
+        self.assertIsNone(updated.valuation["forward_pe"].value, "Historical-growth EPS cannot become a forward forecast")
         self.assertEqual(updated.metrics["market_cap"].value, 2000)
         self.assertEqual(updated.valuation["pe"], updated.metrics["pe_ttm"])
         self.assertEqual(updated.valuation["peg"], updated.metrics["peg_proxy"])
@@ -103,7 +104,7 @@ class RefreshSeparationTests(unittest.TestCase):
 
     def test_yahoo_forward_eps_updates_forward_pe_and_loss_invalidates_it(self):
         old = snapshot()
-        for eps, expected in ((8, 25), (0, None), (-2, None)):
+        for eps, expected in ((8, None), (0, None), (-2, None)):
             updated = refresh_snapshot_prices(old, NEW_HISTORY, forward_eps=metric(eps, "yfinance:forwardEps"))
             self.assertEqual(updated.valuation["forward_pe"].value, expected)
             self.assertEqual(updated.valuation_inputs["forward_eps_public"].value, eps)
@@ -143,7 +144,7 @@ class RefreshSeparationTests(unittest.TestCase):
             with connect(root / "db") as conn:
                 saved = load_stock_open_data_snapshot(conn, "TEST")
             self.assertEqual(saved.valuation["pe"].value, 20)
-            self.assertEqual(saved.valuation["forward_pe"].value, 25)
+            self.assertIsNone(saved.valuation["forward_pe"].value, "A bare Yahoo EPS input has no identified forecast horizon")
             self.assertTrue((root / "static/open-data/stocks.json").exists())
 
     def test_cli_uses_complete_sqlite_baseline_even_if_pages_is_unreachable(self):

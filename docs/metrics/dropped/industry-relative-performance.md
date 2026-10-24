@@ -1,3 +1,20 @@
+# Industry Relative Strength — retired from screening
+
+Definition: Equal-weight tracked peer one-year price return minus market benchmark return, in percentage points.
+
+Dropped because: Sparse peers, a selected universe, inconsistent industry classification and calendar/currency gaps distort comparisons.
+
+Typical misleading situations: Sparse peers, a selected universe, inconsistent industry classification and calendar/currency gaps distort comparisons.
+
+Reconsider only with: Reviewed stable classifications, representative peer coverage and a documented robust benchmark/currency methodology.
+
+Excluded from default cards, saved-filter matching, rankings, composite scores and automatic positive/negative ratings. Raw source facts and historical calculations remain available to AI research. Saved filters using retired fields are disabled until edited, including OR expressions; they are never silently broadened.
+
+See the [metric index](../README.md) for the current policy.
+
+<details>
+<summary>Historical methodology (inactive)</summary>
+
 ### Industry Relative Strength
 
 Stock detail metric showing industry price context, with neutral styling and a supporting stock-versus-industry comparison.
@@ -105,3 +122,5 @@ Read this metric alongside revenue growth, earnings, free cash flow, support, an
 The supporting stock-versus-industry gap helps frame research questions: why has the company led or lagged peers, and do reported fundamentals support that difference? It does not automatically make a lagging stock a bargain or a leading stock overpriced.
 
 This metric does not measure whether a stock or industry is cheap or expensive. Industry valuation needs suitable fundamental ratios and comparable valuation history. The analysis brief includes the industry-versus-market gap, stock-versus-industry gap, all three absolute returns, period, peer coverage, benchmark identity, dates, and limitations. Chart points are omitted from the brief to keep it compact. The metric does not automatically change the existing valuation or business-quality scores.
+
+</details>

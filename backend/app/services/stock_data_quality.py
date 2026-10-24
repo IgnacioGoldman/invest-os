@@ -24,6 +24,9 @@ def fundamental_gap_reasons(snapshot: OpenDataSnapshot, *, include_history: bool
     reasons = []
     for group_name in ("business_health", "valuation"):
         for key, metric in getattr(snapshot, group_name).items():
+            # A missing forecast horizon cannot be repaired with statement facts.
+            if group_name == "valuation" and key == "forward_pe":
+                continue
             if not include_history and key in {"revenue_cagr_3y", "eps_cagr_3y", "peg"}:
                 continue
             if key == "eps_growth_yoy" or metric.value is not None:
@@ -32,7 +35,7 @@ def fundamental_gap_reasons(snapshot: OpenDataSnapshot, *, include_history: bool
             if any(term in note for term in ("not meaningful", "loss-making", "positive 3-year eps", "positive eps", "crossed from")):
                 continue
             reasons.append(f"{group_name}.{key}")
-    if include_history and calculate_revenue_growth_momentum(snapshot.model_dump(mode="json"))["label"] == "Unclear":
+    if include_history and calculate_revenue_growth_momentum(snapshot.model_dump(mode="json"))["label"] == "Unknown":
         reasons.append("historical_series.latest_six_revenue_growth_quarters")
     return reasons
 

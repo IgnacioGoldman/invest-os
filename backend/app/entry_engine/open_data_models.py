@@ -25,6 +25,11 @@ class OpenDataMetric(BaseModel):
     tier: MetricTier
     as_of: str
     notes: str
+    period: str | None = None
+    formula: str | None = None
+    currency: str | None = None
+    forecast_horizon: str | None = None
+    estimate_as_of: str | None = None
 
     @field_validator("value", mode="before")
     @classmethod
@@ -87,6 +92,7 @@ class OpenDataCompanyContext(BaseModel):
 
 
 class OpenDataSnapshot(BaseModel):
+    screening: dict[str, Any] | None = None
     ticker: str
     name: str | None = None
     cik: int | None = None

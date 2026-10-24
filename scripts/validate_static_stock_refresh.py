@@ -137,6 +137,8 @@ def _validate_stock_details(ticker: str, snapshot: dict[str, Any], data_dir: Pat
     for key in ("ticker", "generated_at", "business_health", "price_opportunity", "valuation", "metrics"):
         if detail.get(key) != snapshot.get(key):
             errors.append(f"{ticker}: full stock details and screening data disagree on {key}.")
+    if "screening" in snapshot and detail.get("screening") != snapshot["screening"]:
+        errors.append(f"{ticker}: full stock details and screening data disagree on screening projection.")
     full_history = detail.get("historical_series", {})
     for key, rows in snapshot.get("historical_series", {}).items():
         if rows != sorted(full_history.get(key, []), key=lambda row: row["as_of"])[-len(rows):] and rows:

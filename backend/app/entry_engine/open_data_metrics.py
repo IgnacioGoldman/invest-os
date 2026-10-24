@@ -67,8 +67,6 @@ DILUTED_SHARES_CONCEPTS = (
 DILUTED_EPS_CONCEPTS = ("EarningsPerShareDiluted", "DilutedEarningsLossPerShare")
 CASH_CONCEPTS = (
     "CashAndCashEquivalentsAtCarryingValue",
-    "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
-    "CashCashEquivalentsAndShortTermInvestments",
     "CashAndCashEquivalents",
 )
 EQUITY_CONCEPTS = (
@@ -93,8 +91,8 @@ DEPRECIATION_AMORTIZATION_CONCEPTS = (
 )
 
 DEBT_COMPONENT_GROUPS = (
-    ("LongTermDebtCurrent", "LongTermDebtNoncurrent"),
     ("ShortTermBorrowings", "LongTermDebtCurrent", "LongTermDebtNoncurrent"),
+    ("LongTermDebtCurrent", "LongTermDebtNoncurrent"),
     ("ShortTermBorrowings", "LongTermDebt"),
     ("DebtCurrent", "LongTermDebtNoncurrent"),
     ("DebtCurrent", "LongTermDebt"),
@@ -379,6 +377,20 @@ def compute_open_data_snapshot(
         "Latest SEC cash or cash-and-equivalent balance fact.",
     )
     debt = _debt_metric(companyfacts, as_of)
+    short_term_investments = _latest_fact_metric(companyfacts, ("ShortTermInvestments", "MarketableSecuritiesCurrent"), USD_UNITS, "short_term_investments", as_of, "Reported short-term investments; composition and liquidity require review. Excluded from net cash.")
+    long_term_investments = _latest_fact_metric(companyfacts, ("LongTermInvestments", "MarketableSecuritiesNoncurrent"), USD_UNITS, "long_term_investments", as_of, "Reported long-term investments, potentially including illiquid strategic holdings. Excluded from net cash.")
+    cash_with_investments = _latest_fact_metric(
+        companyfacts, ("CashCashEquivalentsAndShortTermInvestments",), USD_UNITS,
+        "cash_with_investments", as_of, "Reported cash plus short-term investments aggregate; not unrestricted cash and excluded from net cash.",
+    )
+    cash_including_restricted = _latest_fact_metric(
+        companyfacts, ("CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",), USD_UNITS,
+        "cash_including_restricted", as_of, "Reported cash aggregate including restricted cash; excluded from net cash.",
+    )
+    investment_gains = _ttm_metric(
+        companyfacts, ("DebtAndEquitySecuritiesGainLoss",), USD_UNITS,
+        "investment_gains_ttm", as_of,
+    )
     equity = _latest_fact_metric(
         companyfacts,
         EQUITY_CONCEPTS,
@@ -557,7 +569,7 @@ def compute_open_data_snapshot(
     forward_pe = (
         forward_pe_estimate
         if forward_pe_estimate is not None and forward_pe_estimate.value is not None
-        else forward_pe_proxy
+        else _unavailable("forward_pe", "A sourced forward EPS estimate with forecast horizon and estimate date is required; historical-growth proxies are excluded.", as_of)
     )
     peg = (
         _unavailable("peg", "Positive 3-year EPS CAGR was unavailable; PEG is not meaningful.", as_of)
@@ -683,6 +695,8 @@ def compute_open_data_snapshot(
         "roe": roe_quarterly,
         "roic": roic_quarterly,
         "cash": cash,
+        "short_term_investments": short_term_investments,
+        "long_term_investments": long_term_investments,
         "debt": debt,
         "debt_to_equity": debt_to_equity,
     }
@@ -723,6 +737,9 @@ def compute_open_data_snapshot(
     _mark_non_comparable_metrics(sector, industry, business_health, valuation, as_of)
     metrics = {
         "revenue_ttm": revenue,
+        "cash_with_investments_reported": cash_with_investments,
+        "cash_including_restricted_reported": cash_including_restricted,
+        "investment_gains_ttm": investment_gains,
         "net_income_ttm": net_income,
         "operating_cash_flow_ttm": operating_cash_flow,
         "capex_ttm": capex,
@@ -778,7 +795,7 @@ def compute_open_data_snapshot(
             fallback_as_of=as_of, tier="proxy_estimate",
         )
 
-    return OpenDataSnapshot(
+    snapshot = OpenDataSnapshot(
         revenue_history_version=1,
         revenue_history_checked_at=datetime.now(timezone.utc),
         ticker=ticker.upper(),
@@ -798,6 +815,11 @@ def compute_open_data_snapshot(
         data_gaps=data_gaps,
         metrics=metrics,
     )
+
+    from app.services.screening_metrics import enrich_screening
+    snapshot = enrich_screening(snapshot)
+    checked_forward = OpenDataMetric.model_validate(snapshot.screening["metrics"]["forward_pe"])
+    return snapshot.model_copy(update={"valuation": {**snapshot.valuation, "forward_pe": checked_forward}, "metrics": {**snapshot.metrics, "forward_pe": checked_forward}})
 
 
 def _ttm_metric(

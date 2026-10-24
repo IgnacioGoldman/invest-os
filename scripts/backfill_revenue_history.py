@@ -58,7 +58,7 @@ def main():
                                                   "revenue_history_checked_at": datetime.now(timezone.utc)})
         payload = snapshot.model_dump(mode="json")
         after = calculate_revenue_growth_momentum(payload)
-        if before["label"] != "Unclear" and after["label"] == "Unclear":
+        if before["label"] != "Unknown" and after["label"] == "Unknown":
             raise ValueError(f"{snapshot.ticker}: rebuild would regress momentum: {after['reason']}")
         report.append({"ticker":snapshot.ticker, "before":before, "after":after,
                        "latest_growth":snapshot.business_health["revenue_growth_yoy"].value})
@@ -71,9 +71,9 @@ def main():
             conn.commit()
         write_stock_assets(export.parent.parent, output)
     for row in report:
-        if row["before"]["label"] == "Unclear":
-            print(row["ticker"], "Unclear ->", row["after"]["label"], row["after"]["change"])
-    print(f"Calculable momentum: {sum(r['after']['label'] != 'Unclear' for r in report)}/{len(report)}")
+        if row["before"]["label"] == "Unknown":
+            print(row["ticker"], "Unknown ->", row["after"]["label"], row["after"]["change"])
+    print(f"Calculable momentum: {sum(r['after']['label'] != 'Unknown' for r in report)}/{len(report)}")
 
 
 if __name__ == "__main__":

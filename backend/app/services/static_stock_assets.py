@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from app.services.screening_metrics import build_screening_metrics
+
 
 def stock_summary(snapshot: dict[str, Any]) -> dict[str, Any]:
     summary = dict(snapshot)
@@ -30,6 +32,7 @@ def write_stock_assets(data_dir: Path, snapshots: list[dict[str, Any]]) -> None:
     directory = data_dir / "open-data"
     details = directory / "snapshots"
     details.mkdir(parents=True, exist_ok=True)
+    snapshots = [{**snapshot, "screening": build_screening_metrics(snapshot)} for snapshot in snapshots]
     for snapshot in snapshots:
         if snapshot.get("detail_path"):
             raise ValueError("Full snapshots are required when publishing stock assets.")

@@ -61,7 +61,7 @@ const rows = JSON.parse(readFileSync(process.argv[2], "utf8"));
 for (const value of [NaN, Infinity, -Infinity]) {
   const snapshot = structuredClone(rows[0]);
   snapshot.historical_series.quarterly_revenue[5].metrics.revenue_growth_yoy.value = value;
-  if (calculateRevenueGrowthMomentum(snapshot).label !== "Unclear") throw new Error("Nonfinite growth was calculated");
+  if (calculateRevenueGrowthMomentum(snapshot).label !== "Unknown") throw new Error("Nonfinite growth was calculated");
 }
 process.stdout.write(JSON.stringify(rows.map(calculateRevenueGrowthMomentum)));
 ''')
@@ -72,7 +72,7 @@ process.stdout.write(JSON.stringify(rows.map(calculateRevenueGrowthMomentum)));
     assert len(actual) == len(expected), "Frontend returned incomplete results"
 
     results = [{"ticker": row["ticker"], **result} for row, result in zip(stocks, expected[len(cases):])]
-    unavailable = [{"ticker": row["ticker"], "reason": row["reason"]} for row in results if row["label"] == "Unclear"]
+    unavailable = [{"ticker": row["ticker"], "reason": row["reason"]} for row in results if row["label"] == "Unknown"]
     counts = dict(sorted(Counter(row["label"] for row in results).items()))
     report = {"symbol_count": len(stocks), "calculated_count": len(stocks) - len(unavailable),
               "scenario_count": len(cases), "frontend_filter_parity": "passed", "labels": counts,

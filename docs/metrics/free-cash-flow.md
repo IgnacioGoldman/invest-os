@@ -1,35 +1,9 @@
-### Free Cash Flow
+# Free Cash Flow Margin
 
-Free Cash Flow Margin is best calculated as **TTM (trailing 12 months)** rather than from a single quarter.
+Computed Metric: `(TTM operating cash flow − abs(TTM capex)) / TTM revenue × 100`.
 
-A single quarter can be noisy because working capital, customer collections, inventory, and capital expenditure timing can move cash flow around. TTM smooths those timing effects and gives a better first-pass view of whether the business consistently turns revenue into cash.
+All three inputs must document twelve-month coverage, share the same period end and currency, and be finite; revenue must be positive. Capex is a positive outflow, including normalization of vendors reporting it with a negative sign. Zero capex is usable only when explicitly reported. Display `TTM ended YYYY-MM-DD`, sources, formula and period end. Never substitute quarterly FCF or silently combine annual and quarterly figures. Missing/incompatible inputs are Unknown. Financial businesses use Unknown because lending, deposits and financing impair comparability.
 
-Formula:
+The numeric margin has no Strong/Solid/Thin/Weak quality rating. A positive TTM margin can conceal recent negative FCF. Show Needs Review with the recent quarter and amount when FCF is negative, when capex exceeds operating cash flow, or when the comparable quarterly FCF margin declined. Show the exact YoY change in pp; assess materiality in research. No arbitrary deterioration or extraordinary-capex cutoff is invented. These checks flag circumstances for investigation, not proven exceptional expenditure. Quarterly warnings are explicitly separate from the TTM measurement.
 
-```text
-Free Cash Flow Margin = Free Cash Flow TTM / Revenue TTM
-```
-
-Or, expressed as a percentage:
-
-```text
-Free Cash Flow Margin % = (Free Cash Flow TTM / Revenue TTM) * 100
-```
-
-For example, a 25% FCF margin means the company generates $25 of free cash flow for every $100 of revenue.
-
-Why I’d put this next: you already have growth and earnings growth. The missing piece is quality of those earnings. FCF margin answers that very efficiently.
-
-### Tags
-
-Free Cash Flow Margin is a business-quality metric, so its tags should describe cash generation, not price setup. For example, **At support** belongs to price/support, not FCF margin.
-
-Suggested tags:
-
-- **Strong:** FCF margin is 20% or higher. The business is converting a large share of revenue into cash.
-- **Solid:** FCF margin is at least 10% but below 20%. Cash generation looks healthy.
-- **Thin:** FCF margin is at least 0% but below 10%. Free cash flow is at break-even or represents a small share of revenue.
-- **Weak:** FCF margin is below 0%. The business is not producing positive free cash flow over the trailing 12 months.
-- **Unclear:** Revenue or free cash flow data is missing, revenue is not meaningful, or the company type makes FCF margin hard to compare.
-
-These thresholds should be treated as a first-pass signal. Capital-light software businesses can sustain much higher FCF margins than retailers, manufacturers, utilities, banks, or insurers, so the tag should be read together with sector, growth, debt, and valuation.
+Working capital, stock compensation and capex timing remain limitations. Source identifiers are provenance, not independent verification.
