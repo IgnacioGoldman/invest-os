@@ -45,7 +45,7 @@ def ordinary(revenue_growth=12):
         'historical_series': {'quarterly_revenue':rows, 'quarterly_fundamentals':quarter_rows},
         'business_health': {'cash': fact(50, 'CashAndCashEquivalentsAtCarryingValue'), 'debt': fact(20,'Borrowings'),
                             'long_term_investments': fact(1000, 'LongTermInvestments')},
-        'metrics': {'revenue_ttm':fact(400, 'Revenues',notes='TTM'), 'operating_cash_flow_ttm':fact(120,'NetCashProvidedByUsedInOperatingActivities',notes='TTM'),
+        'metrics': {'market_cap': {'value':500,'source':'yfinance:marketCap','as_of':TODAY.isoformat(),'tier':'exact_public_fact','currency':'USD','notes':'Reported market capitalization.'}, 'revenue_ttm':fact(400, 'Revenues',notes='TTM'), 'operating_cash_flow_ttm':fact(120,'NetCashProvidedByUsedInOperatingActivities',notes='TTM'),
                     'capex_ttm': fact(40,'PaymentsToAcquirePropertyPlantAndEquipment',notes='TTM')},
         'valuation': {}, 'valuation_inputs': {}, 'price_opportunity': {'current_price': {'value':100, 'source':'quote:test', 'as_of':TODAY.isoformat(),'tier':'exact_public_fact','notes':'Saved market quote.'}}}
 

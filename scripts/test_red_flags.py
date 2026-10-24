@@ -23,10 +23,10 @@ class RedFlagTests(unittest.TestCase):
         m = build_red_flag_count(clean(), TODAY)
         self.assertEqual(m['value'], 0)
         self.assertIs(type(m['value']), int)
-        self.assertEqual(m['coverage'], dict(assessed=3, applicable=3, total=3, complete=True))
+        self.assertEqual(m['coverage'], dict(assessed=4, applicable=4, total=4, complete=True))
         self.assertEqual(m['flags'], [])
         self.assertEqual(m['as_of'], '2026-06-30')
-        self.assertEqual(m['valid_until'], '2026-11-17')
+        self.assertEqual(m['valid_until'], '2026-10-31')
 
     def test_three_distinct_groups_and_overlapping_cash_warnings_count_once(self):
         s = clean()
@@ -73,9 +73,11 @@ class RedFlagTests(unittest.TestCase):
             r['metrics']['operating_cash_flow']['value'] = 10
             del r['metrics']['capex']
         m = build_red_flag_count(s, TODAY)
-        self.assertEqual(m['value'], 1)
-        self.assertTrue(m['coverage']['complete'])
+        self.assertIsNone(m['value'])
+        self.assertEqual(m['observed_count'], 1)
+        self.assertFalse(m['coverage']['complete'])
         self.assertEqual(check(m, 'cash_generation')['triggered_rules'], ['cash_conversion'])
+        self.assertEqual(check(m, 'priced_for_perfection')['state'], 'unassessed')
 
     def test_persistence_and_zero_boundaries(self):
         s = clean()

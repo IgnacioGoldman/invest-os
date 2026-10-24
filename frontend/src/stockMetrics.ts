@@ -95,7 +95,7 @@ export function visibleStockMetrics(snapshot: OpenDataStockSnapshot, context: bo
 export function redFlagMetric(snapshot: OpenDataStockSnapshot): ResearchMetric | undefined {
   const metric = researchMetric(snapshot, "red_flag_count");
   const today = new Date(Date.now()).toISOString().slice(0, 10);
-  if (metric?.assessment_version !== 1 || !metric.coverage || !metric.valid_until
+  if (metric?.assessment_version !== 2 || !metric.coverage || !metric.valid_until
       || !["Complete assessment", "Partial assessment", "Not assessed"].includes(metric.status)
       || validDay(metric.valid_until) == null || metric.valid_until < today) return undefined;
   return metric;
@@ -143,7 +143,7 @@ export const STOCK_METRICS = [
     options: ["Improving", "Stable", "Declining"], ...financialMetric("operating_margin_trend") },
   { key: "red_flag_count", field: "red_flag_count", title: "Red Flag Count", shortLabel: "Red flags", format: "count", context: false,
     question: "Which potential financial concerns are detectable from the reported history?",
-    description: "One point per distinct concern group: cash generation, operating profitability and negative book equity. Potential concerns need context. Numeric filters require a complete assessment.",
+    description: "One point per distinct concern group: cash generation, operating profitability, negative book equity and Priced for Perfection valuation. Potential concerns need context. Numeric filters require a complete assessment.",
     options: ["Complete assessment", "Partial assessment", "Not assessed"],
     getSignal: s => metricSignal(redFlagMetric(s)?.status ?? "Not assessed"), getValue: redFlagValue },
   { key: "upcoming_earnings", field: "upcoming_earnings", title: "Upcoming Earnings", shortLabel: "Earnings", format: "days", context: true,

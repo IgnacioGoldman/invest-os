@@ -1,0 +1,1484 @@
+{
+  "ticker": "ALAB",
+  "sector": "Technology",
+  "industry": "Semiconductors",
+  "price_currency": "USD",
+  "price_opportunity": {
+    "current_price": {
+      "value": 257.1600036621094,
+      "source": "yfinance_history",
+      "tier": "exact_public_fact",
+      "as_of": "2026-10-23",
+      "notes": "Latest open/free daily close price."
+    },
+    "change_1d": {
+      "value": -0.2559939660847944,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Price performance computed from open/free daily close history."
+    },
+    "change_1w": {
+      "value": -10.02729092704802,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Price performance computed from open/free daily close history."
+    },
+    "change_1m": {
+      "value": -28.65782340391649,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Price performance computed from open/free daily close history."
+    },
+    "change_3m": {
+      "value": -11.804645207233916,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Price performance computed from open/free daily close history."
+    },
+    "change_6m": {
+      "value": 20.82315734203418,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Price performance computed from open/free daily close history."
+    },
+    "change_1y": {
+      "value": 57.14984393869219,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Price performance computed from open/free daily close history."
+    },
+    "change_2y": {
+      "value": 279.2920237271909,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Price performance computed from open/free daily close history."
+    },
+    "change_5y": {
+      "value": null,
+      "source": "open_data_provider",
+      "tier": "unavailable_open_free",
+      "as_of": "2026-10-23",
+      "notes": "change_5y: Historical basis price was unavailable."
+    },
+    "distance_from_ath": {
+      "value": -46.759966562205676,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Distance from latest close to all-time high close, expressed as a percentage."
+    },
+    "distance_from_52w_high": {
+      "value": -46.759966562205676,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Distance from latest close to 52-week high close, expressed as a percentage."
+    },
+    "distance_from_52w_low": {
+      "value": 156.4675498868602,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Distance from latest close to 52-week low close, expressed as a percentage."
+    },
+    "support_1m_distance": {
+      "value": null,
+      "source": "open_data_provider",
+      "tier": "unavailable_open_free",
+      "as_of": "2026-10-23",
+      "notes": "support_1m_distance: No usable 1M support zone was detected below the latest close from open/free daily price history."
+    },
+    "support_3m_distance": {
+      "value": null,
+      "source": "open_data_provider",
+      "tier": "unavailable_open_free",
+      "as_of": "2026-10-23",
+      "notes": "support_3m_distance: No usable 3M support zone was detected below the latest close from open/free daily price history."
+    },
+    "support_6m_distance": {
+      "value": 3.6151490020656456,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Primary 6M support floor below, overlapping, or reclaimed by the latest close. Support zone: $239.72-$256.66; midpoint $248.19; distance +3.62%; touches 2; first touch 2026-07-29; last touch 2026-09-15; cluster tolerance 4.0%."
+    },
+    "support_1y_distance": {
+      "value": 85.80109455353077,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Primary 1Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $133.91-$142.90; midpoint $138.41; distance +85.80%; touches 3; first touch 2025-11-14; last touch 2026-02-05; cluster tolerance 4.0%."
+    },
+    "support_2y_distance": {
+      "value": 199.08429430441518,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Primary 2Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $82.02-$89.95; midpoint $85.98; distance +199.08%; touches 5; first touch 2024-11-15; last touch 2025-07-14; cluster tolerance 4.0%."
+    },
+    "support_5y_distance": {
+      "value": 603.798856868355,
+      "source": "yfinance_history",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Primary 5Y support floor below, overlapping, or reclaimed by the latest close. Support zone: $35.49-$37.59; midpoint $36.54; distance +603.80%; touches 2; first touch 2024-08-07; last touch 2024-09-10; cluster tolerance 4.0%."
+    },
+    "days_to_next_earnings": {
+      "value": 11.0,
+      "source": "yfinance:calendar:Earnings Date:2026-11-03",
+      "tier": "proxy_estimate",
+      "as_of": "2026-10-23",
+      "notes": "Days until the next expected earnings release window (2026-11-03) from Yahoo Finance/yfinance. This is an open/free market-calendar estimate and can change before the company confirms the date."
+    }
+  },
+  "metrics": {
+    "market_cap": {
+      "value": 47147715071.41113,
+      "source": "yfinance_history; yfinance_history; sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-Q:2026-06-30",
+      "tier": "computed_from_public_facts",
+      "as_of": "2026-10-23",
+      "notes": "Current price multiplied by saved listing share count, including its ADR adjustment."
+    }
+  },
+  "historical_series": {
+    "quarterly_revenue": [
+      {
+        "period": "FY2024 Q3",
+        "as_of": "2024-09-30",
+        "metrics": {
+          "revenue": {
+            "value": 113086000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2024-09-30",
+            "notes": "Single-quarter SEC fact."
+          },
+          "revenue_growth_yoy": {
+            "value": 206.23375216637783,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2023-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly revenue YoY growth for Q3 versus the same fiscal quarter last year."
+          }
+        }
+      },
+      {
+        "period": "FY2024 Q4",
+        "as_of": "2024-12-31",
+        "metrics": {
+          "revenue": {
+            "value": 141096000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "revenue_growth_yoy": {
+            "value": 179.32058439244565,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2023-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2023-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly revenue YoY growth for Q4 versus the same fiscal quarter last year."
+          }
+        }
+      },
+      {
+        "period": "FY2025 Q1",
+        "as_of": "2025-03-31",
+        "metrics": {
+          "revenue": {
+            "value": 159442000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-03-31",
+            "notes": "Single-quarter SEC fact."
+          },
+          "revenue_growth_yoy": {
+            "value": 144.3255999264458,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly revenue YoY growth for Q1 versus the same fiscal quarter last year."
+          }
+        }
+      },
+      {
+        "period": "FY2025 Q2",
+        "as_of": "2025-06-30",
+        "metrics": {
+          "revenue": {
+            "value": 191925000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-06-30",
+            "notes": "Single-quarter SEC fact."
+          },
+          "revenue_growth_yoy": {
+            "value": 149.73975276512687,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly revenue YoY growth for Q2 versus the same fiscal quarter last year."
+          }
+        }
+      },
+      {
+        "period": "FY2025 Q3",
+        "as_of": "2025-09-30",
+        "metrics": {
+          "revenue": {
+            "value": 230575000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-09-30",
+            "notes": "Single-quarter SEC fact."
+          },
+          "revenue_growth_yoy": {
+            "value": 103.8934969845958,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly revenue YoY growth for Q3 versus the same fiscal quarter last year."
+          }
+        }
+      },
+      {
+        "period": "FY2025 Q4",
+        "as_of": "2025-12-31",
+        "metrics": {
+          "revenue": {
+            "value": 270583000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "revenue_growth_yoy": {
+            "value": 91.77226852639338,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly revenue YoY growth for Q4 versus the same fiscal quarter last year."
+          }
+        }
+      },
+      {
+        "period": "FY2026 Q1",
+        "as_of": "2026-03-31",
+        "metrics": {
+          "revenue": {
+            "value": 308361000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2026-03-31",
+            "notes": "Single-quarter SEC fact."
+          },
+          "revenue_growth_yoy": {
+            "value": 93.40010787621831,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly revenue YoY growth for Q1 versus the same fiscal quarter last year."
+          }
+        }
+      },
+      {
+        "period": "FY2026 Q2",
+        "as_of": "2026-06-30",
+        "metrics": {
+          "revenue": {
+            "value": 392400000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2026-06-30",
+            "notes": "Single-quarter SEC fact."
+          },
+          "revenue_growth_yoy": {
+            "value": 104.45486518171161,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly revenue YoY growth for Q2 versus the same fiscal quarter last year."
+          }
+        }
+      }
+    ],
+    "quarterly_fundamentals": [
+      {
+        "period": "FY2024 Q3",
+        "as_of": "2024-09-30",
+        "metrics": {
+          "revenue": {
+            "value": 113086000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly revenue SEC fact. Single-quarter SEC fact."
+          },
+          "cost_of_revenue": {
+            "value": 25209000.0,
+            "source": "sec_companyfacts:us-gaap/CostOfGoodsAndServicesSold:USD:10-Q:2024-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly cost_of_revenue SEC fact. Single-quarter SEC fact."
+          },
+          "net_income": {
+            "value": -7593000.0,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2024-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly net_income SEC fact. Single-quarter SEC fact."
+          },
+          "operating_income": {
+            "value": -8896000.0,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2024-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly operating_income SEC fact. Single-quarter SEC fact."
+          },
+          "operating_cash_flow": {
+            "value": 63508000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2024-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly operating_cash_flow SEC fact. Q3 value derived as Q3 year-to-date value minus Q2 year-to-date value."
+          },
+          "capex": {
+            "value": 16697000.0,
+            "source": "sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2024-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly capex SEC fact. Q3 value derived as Q3 year-to-date value minus Q2 year-to-date value."
+          },
+          "eps_diluted": {
+            "value": -0.05,
+            "source": "sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-Q:2024-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly eps_diluted SEC fact. Single-quarter SEC fact."
+          },
+          "shares_diluted": {
+            "value": 156831000.0,
+            "source": "sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-Q:2024-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly shares_diluted SEC fact. Single-quarter SEC fact."
+          },
+          "cash": {
+            "value": 126117000.0,
+            "source": "sec_companyfacts:us-gaap/CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents:USD:10-Q:2024-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly cash SEC fact. Quarter-end SEC fact."
+          },
+          "debt": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "debt: Quarterly debt fact was unavailable."
+          },
+          "equity": {
+            "value": 889612000.0,
+            "source": "sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2024-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly equity SEC fact. Quarter-end SEC fact."
+          },
+          "gross_profit": {
+            "value": 87877000.0,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2024-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly gross_profit SEC fact. Single-quarter SEC fact."
+          },
+          "free_cash_flow": {
+            "value": 46811000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2024-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2024-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly free cash flow computed as operating cash flow minus capex."
+          },
+          "gross_margin": {
+            "value": 77.70811594715526,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly gross margin."
+          },
+          "operating_margin": {
+            "value": -7.866579417434519,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly operating margin."
+          },
+          "net_margin": {
+            "value": -6.714358983428541,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly net margin."
+          },
+          "fcf_margin": {
+            "value": 41.39416019666449,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2024-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2024-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-09-30",
+            "notes": "Quarterly free cash flow margin."
+          },
+          "roe": {
+            "value": -3.4140726518976807,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-09-30",
+            "notes": "Annualized quarterly net income divided by quarter-end equity."
+          },
+          "debt_to_equity": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "debt_to_equity: Inputs required for this historical computation were unavailable."
+          },
+          "roic": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "roic: Inputs required for this historical computation were unavailable."
+          }
+        }
+      },
+      {
+        "period": "FY2024 Q4",
+        "as_of": "2024-12-31",
+        "metrics": {
+          "revenue": {
+            "value": 141096000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly revenue SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "cost_of_revenue": {
+            "value": 36648000.0,
+            "source": "sec_companyfacts:us-gaap/CostOfGoodsAndServicesSold:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/CostOfGoodsAndServicesSold:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly cost_of_revenue SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "net_income": {
+            "value": 24713000.0,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly net_income SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "operating_income": {
+            "value": 144000.0,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly operating_income SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "operating_cash_flow": {
+            "value": 39703000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly operating_cash_flow SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "capex": {
+            "value": 15448000.0,
+            "source": "sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly capex SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "eps_diluted": {
+            "value": 0.25,
+            "source": "sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-K:2024-12-31; sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly eps_diluted SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "shares_diluted": {
+            "value": 9613000.0,
+            "source": "sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-K:2024-12-31; sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly shares_diluted SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "cash": {
+            "value": 80044000.0,
+            "source": "sec_companyfacts:us-gaap/CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents:USD:10-Q:2024-12-31",
+            "tier": "exact_public_fact",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly cash SEC fact. Quarter-end SEC fact."
+          },
+          "debt": {
+            "value": 1286000.0,
+            "source": "yfinance_statement:yfinance/DebtCurrent:USD:YF-ANNUAL:2024-12-31",
+            "tier": "exact_public_fact",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly debt SEC fact. This may include capital/finance lease obligations depending on the SEC tag."
+          },
+          "equity": {
+            "value": 964799000.0,
+            "source": "sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2024-12-31",
+            "tier": "exact_public_fact",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly equity SEC fact. Quarter-end SEC fact."
+          },
+          "gross_profit": {
+            "value": 104448000.0,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly gross_profit SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "free_cash_flow": {
+            "value": 24255000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly free cash flow computed as operating cash flow minus capex."
+          },
+          "gross_margin": {
+            "value": 74.02619493111074,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly gross margin."
+          },
+          "operating_margin": {
+            "value": 0.10205817315870046,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly operating margin."
+          },
+          "net_margin": {
+            "value": 17.515025231048366,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly net margin."
+          },
+          "fcf_margin": {
+            "value": 17.19042354141861,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarterly free cash flow margin."
+          },
+          "roe": {
+            "value": 10.245864682695567,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2024-09-30; sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2024-12-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Annualized quarterly net income divided by quarter-end equity."
+          },
+          "debt_to_equity": {
+            "value": 0.0013329201211858637,
+            "source": "yfinance_statement:yfinance/DebtCurrent:USD:YF-ANNUAL:2024-12-31; sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2024-12-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2024-12-31",
+            "notes": "Quarter-end debt divided by quarter-end equity."
+          },
+          "roic": {
+            "value": 0.06500827839795224,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-K:2024-12-31; sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2024-09-30; yfinance_statement:yfinance/DebtCurrent:USD:YF-ANNUAL:2024-12-31; sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2024-12-31; sec_companyfacts:us-gaap/CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents:USD:10-Q:2024-12-31",
+            "tier": "proxy_estimate",
+            "as_of": "2024-12-31",
+            "notes": "Proxy annualized quarterly ROIC: operating income divided by quarter-end invested capital. No tax adjustment is applied."
+          }
+        }
+      },
+      {
+        "period": "FY2025 Q1",
+        "as_of": "2025-03-31",
+        "metrics": {
+          "revenue": {
+            "value": 159442000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly revenue SEC fact. Single-quarter SEC fact."
+          },
+          "cost_of_revenue": {
+            "value": 40031000.0,
+            "source": "sec_companyfacts:us-gaap/CostOfGoodsAndServicesSold:USD:10-Q:2025-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly cost_of_revenue SEC fact. Single-quarter SEC fact."
+          },
+          "net_income": {
+            "value": 31819000.0,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2025-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly net_income SEC fact. Single-quarter SEC fact."
+          },
+          "operating_income": {
+            "value": 11285000.0,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2025-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly operating_income SEC fact. Single-quarter SEC fact."
+          },
+          "operating_cash_flow": {
+            "value": 10504000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly operating_cash_flow SEC fact. Single-quarter SEC fact."
+          },
+          "capex": {
+            "value": 4539000.0,
+            "source": "sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly capex SEC fact. Single-quarter SEC fact."
+          },
+          "eps_diluted": {
+            "value": 0.18,
+            "source": "sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-Q:2025-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly eps_diluted SEC fact. Single-quarter SEC fact."
+          },
+          "shares_diluted": {
+            "value": 178116000.0,
+            "source": "sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-Q:2025-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly shares_diluted SEC fact. Single-quarter SEC fact."
+          },
+          "cash": {
+            "value": 86994000.0,
+            "source": "sec_companyfacts:us-gaap/CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents:USD:10-Q:2025-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly cash SEC fact. Quarter-end SEC fact."
+          },
+          "debt": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "debt: Quarterly debt fact was unavailable."
+          },
+          "equity": {
+            "value": 1041562000.0,
+            "source": "sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2025-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly equity SEC fact. Quarter-end SEC fact."
+          },
+          "gross_profit": {
+            "value": 119411000.0,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2025-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly gross_profit SEC fact. Single-quarter SEC fact."
+          },
+          "free_cash_flow": {
+            "value": 5965000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly free cash flow computed as operating cash flow minus capex."
+          },
+          "gross_margin": {
+            "value": 74.89306456266227,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly gross margin."
+          },
+          "operating_margin": {
+            "value": 7.077808858393649,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly operating margin."
+          },
+          "net_margin": {
+            "value": 19.956473200286,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly net margin."
+          },
+          "fcf_margin": {
+            "value": 3.7411723385306255,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-03-31",
+            "notes": "Quarterly free cash flow margin."
+          },
+          "roe": {
+            "value": 12.219723837851229,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2025-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-03-31",
+            "notes": "Annualized quarterly net income divided by quarter-end equity."
+          },
+          "debt_to_equity": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "debt_to_equity: Inputs required for this historical computation were unavailable."
+          },
+          "roic": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "roic: Inputs required for this historical computation were unavailable."
+          }
+        }
+      },
+      {
+        "period": "FY2025 Q2",
+        "as_of": "2025-06-30",
+        "metrics": {
+          "revenue": {
+            "value": 191925000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly revenue SEC fact. Single-quarter SEC fact."
+          },
+          "cost_of_revenue": {
+            "value": 46362000.0,
+            "source": "sec_companyfacts:us-gaap/CostOfGoodsAndServicesSold:USD:10-Q:2025-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly cost_of_revenue SEC fact. Single-quarter SEC fact."
+          },
+          "net_income": {
+            "value": 51219000.0,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2025-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly net_income SEC fact. Single-quarter SEC fact."
+          },
+          "operating_income": {
+            "value": 39774000.0,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2025-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly operating_income SEC fact. Single-quarter SEC fact."
+          },
+          "operating_cash_flow": {
+            "value": 135366000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly operating_cash_flow SEC fact. Q2 value derived as Q2 year-to-date value minus Q1 year-to-date value."
+          },
+          "capex": {
+            "value": 2023000.0,
+            "source": "sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly capex SEC fact. Q2 value derived as Q2 year-to-date value minus Q1 year-to-date value."
+          },
+          "eps_diluted": {
+            "value": 0.29,
+            "source": "sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-Q:2025-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly eps_diluted SEC fact. Single-quarter SEC fact."
+          },
+          "shares_diluted": {
+            "value": 178100000.0,
+            "source": "sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-Q:2025-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly shares_diluted SEC fact. Single-quarter SEC fact."
+          },
+          "cash": {
+            "value": 163404000.0,
+            "source": "sec_companyfacts:us-gaap/CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents:USD:10-Q:2025-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly cash SEC fact. Quarter-end SEC fact."
+          },
+          "debt": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "debt: Quarterly debt fact was unavailable."
+          },
+          "equity": {
+            "value": 1135714000.0,
+            "source": "sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2025-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly equity SEC fact. Quarter-end SEC fact."
+          },
+          "gross_profit": {
+            "value": 145563000.0,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2025-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly gross_profit SEC fact. Single-quarter SEC fact."
+          },
+          "free_cash_flow": {
+            "value": 133343000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly free cash flow computed as operating cash flow minus capex."
+          },
+          "gross_margin": {
+            "value": 75.84368894099256,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly gross margin."
+          },
+          "operating_margin": {
+            "value": 20.723720203204376,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly operating margin."
+          },
+          "net_margin": {
+            "value": 26.686987104337632,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly net margin."
+          },
+          "fcf_margin": {
+            "value": 69.4766184707568,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-06-30",
+            "notes": "Quarterly free cash flow margin."
+          },
+          "roe": {
+            "value": 18.039400764629125,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2025-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-06-30",
+            "notes": "Annualized quarterly net income divided by quarter-end equity."
+          },
+          "debt_to_equity": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "debt_to_equity: Inputs required for this historical computation were unavailable."
+          },
+          "roic": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "roic: Inputs required for this historical computation were unavailable."
+          }
+        }
+      },
+      {
+        "period": "FY2025 Q3",
+        "as_of": "2025-09-30",
+        "metrics": {
+          "revenue": {
+            "value": 230575000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly revenue SEC fact. Single-quarter SEC fact."
+          },
+          "cost_of_revenue": {
+            "value": 54763000.0,
+            "source": "sec_companyfacts:us-gaap/CostOfGoodsAndServicesSold:USD:10-Q:2025-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly cost_of_revenue SEC fact. Single-quarter SEC fact."
+          },
+          "net_income": {
+            "value": 91114000.0,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2025-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly net_income SEC fact. Single-quarter SEC fact."
+          },
+          "operating_income": {
+            "value": 55406000.0,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2025-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly operating_income SEC fact. Single-quarter SEC fact."
+          },
+          "operating_cash_flow": {
+            "value": 78171000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly operating_cash_flow SEC fact. Q3 value derived as Q3 year-to-date value minus Q2 year-to-date value."
+          },
+          "capex": {
+            "value": 12293000.0,
+            "source": "sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly capex SEC fact. Q3 value derived as Q3 year-to-date value minus Q2 year-to-date value."
+          },
+          "eps_diluted": {
+            "value": 0.5,
+            "source": "sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-Q:2025-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly eps_diluted SEC fact. Single-quarter SEC fact."
+          },
+          "shares_diluted": {
+            "value": 180631000.0,
+            "source": "sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-Q:2025-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly shares_diluted SEC fact. Single-quarter SEC fact."
+          },
+          "cash": {
+            "value": 141482000.0,
+            "source": "sec_companyfacts:us-gaap/CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents:USD:10-Q:2025-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly cash SEC fact. Quarter-end SEC fact."
+          },
+          "debt": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "debt: Quarterly debt fact was unavailable."
+          },
+          "equity": {
+            "value": 1271731000.0,
+            "source": "sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2025-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly equity SEC fact. Quarter-end SEC fact."
+          },
+          "gross_profit": {
+            "value": 175812000.0,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2025-09-30",
+            "tier": "exact_public_fact",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly gross_profit SEC fact. Single-quarter SEC fact."
+          },
+          "free_cash_flow": {
+            "value": 65878000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly free cash flow computed as operating cash flow minus capex."
+          },
+          "gross_margin": {
+            "value": 76.24937655860349,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly gross margin."
+          },
+          "operating_margin": {
+            "value": 24.02949148866963,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly operating margin."
+          },
+          "net_margin": {
+            "value": 39.51599262712783,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly net margin."
+          },
+          "fcf_margin": {
+            "value": 28.57118074379269,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-09-30",
+            "notes": "Quarterly free cash flow margin."
+          },
+          "roe": {
+            "value": 28.65826184940054,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-09-30",
+            "notes": "Annualized quarterly net income divided by quarter-end equity."
+          },
+          "debt_to_equity": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "debt_to_equity: Inputs required for this historical computation were unavailable."
+          },
+          "roic": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "roic: Inputs required for this historical computation were unavailable."
+          }
+        }
+      },
+      {
+        "period": "FY2025 Q4",
+        "as_of": "2025-12-31",
+        "metrics": {
+          "revenue": {
+            "value": 270583000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly revenue SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "cost_of_revenue": {
+            "value": 66108000.0,
+            "source": "sec_companyfacts:us-gaap/CostOfGoodsAndServicesSold:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/CostOfGoodsAndServicesSold:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly cost_of_revenue SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "net_income": {
+            "value": 44982000.0,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly net_income SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "operating_income": {
+            "value": 66958000.0,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly operating_income SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "operating_cash_flow": {
+            "value": 95265000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly operating_cash_flow SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "capex": {
+            "value": 18689000.0,
+            "source": "sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly capex SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "eps_diluted": {
+            "value": 0.25,
+            "source": "sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-K:2025-12-31; sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly eps_diluted SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "shares_diluted": {
+            "value": 590000.0,
+            "source": "sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-K:2025-12-31; sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly shares_diluted SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "cash": {
+            "value": 167684000.0,
+            "source": "sec_companyfacts:us-gaap/CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents:USD:10-Q:2025-12-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly cash SEC fact. Quarter-end SEC fact."
+          },
+          "debt": {
+            "value": 4146000.0,
+            "source": "yfinance_statement:yfinance/DebtCurrent:USD:YF-QUARTER:2025-12-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly debt SEC fact. This may include capital/finance lease obligations depending on the SEC tag."
+          },
+          "equity": {
+            "value": 1363634000.0,
+            "source": "sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2025-12-31",
+            "tier": "exact_public_fact",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly equity SEC fact. Quarter-end SEC fact."
+          },
+          "gross_profit": {
+            "value": 204475000.0,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly gross_profit SEC fact. Q4 value derived as annual value minus Q3 year-to-date value."
+          },
+          "free_cash_flow": {
+            "value": 76576000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly free cash flow computed as operating cash flow minus capex."
+          },
+          "gross_margin": {
+            "value": 75.56830990860476,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly gross margin."
+          },
+          "operating_margin": {
+            "value": 24.74582660403647,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly operating margin."
+          },
+          "net_margin": {
+            "value": 16.624104248973513,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly net margin."
+          },
+          "fcf_margin": {
+            "value": 28.30037363766386,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarterly free cash flow margin."
+          },
+          "roe": {
+            "value": 13.194742870887644,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2025-09-30; sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2025-12-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Annualized quarterly net income divided by quarter-end equity."
+          },
+          "debt_to_equity": {
+            "value": 0.0030404052700358014,
+            "source": "yfinance_statement:yfinance/DebtCurrent:USD:YF-QUARTER:2025-12-31; sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2025-12-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2025-12-31",
+            "notes": "Quarter-end debt divided by quarter-end equity."
+          },
+          "roic": {
+            "value": 22.317547929498975,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-K:2025-12-31; sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2025-09-30; yfinance_statement:yfinance/DebtCurrent:USD:YF-QUARTER:2025-12-31; sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2025-12-31; sec_companyfacts:us-gaap/CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents:USD:10-Q:2025-12-31",
+            "tier": "proxy_estimate",
+            "as_of": "2025-12-31",
+            "notes": "Proxy annualized quarterly ROIC: operating income divided by quarter-end invested capital. No tax adjustment is applied."
+          }
+        }
+      },
+      {
+        "period": "FY2026 Q1",
+        "as_of": "2026-03-31",
+        "metrics": {
+          "revenue": {
+            "value": 308361000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly revenue SEC fact. Single-quarter SEC fact."
+          },
+          "cost_of_revenue": {
+            "value": 73220000.0,
+            "source": "sec_companyfacts:us-gaap/CostOfGoodsAndServicesSold:USD:10-Q:2026-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly cost_of_revenue SEC fact. Single-quarter SEC fact."
+          },
+          "net_income": {
+            "value": 80310000.0,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2026-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly net_income SEC fact. Single-quarter SEC fact."
+          },
+          "operating_income": {
+            "value": 61833000.0,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2026-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly operating_income SEC fact. Single-quarter SEC fact."
+          },
+          "operating_cash_flow": {
+            "value": 74598000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly operating_cash_flow SEC fact. Single-quarter SEC fact."
+          },
+          "capex": {
+            "value": 7586000.0,
+            "source": "sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly capex SEC fact. Single-quarter SEC fact."
+          },
+          "eps_diluted": {
+            "value": 0.44,
+            "source": "sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-Q:2026-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly eps_diluted SEC fact. Single-quarter SEC fact."
+          },
+          "shares_diluted": {
+            "value": 181157000.0,
+            "source": "sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-Q:2026-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly shares_diluted SEC fact. Single-quarter SEC fact."
+          },
+          "cash": {
+            "value": 148357000.0,
+            "source": "sec_companyfacts:us-gaap/CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents:USD:10-Q:2026-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly cash SEC fact. Quarter-end SEC fact."
+          },
+          "debt": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "debt: Quarterly debt fact was unavailable."
+          },
+          "equity": {
+            "value": 1493948000.0,
+            "source": "sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2026-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly equity SEC fact. Quarter-end SEC fact."
+          },
+          "gross_profit": {
+            "value": 235141000.0,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2026-03-31",
+            "tier": "exact_public_fact",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly gross_profit SEC fact. Single-quarter SEC fact."
+          },
+          "free_cash_flow": {
+            "value": 67012000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly free cash flow computed as operating cash flow minus capex."
+          },
+          "gross_margin": {
+            "value": 76.25510359610975,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly gross margin."
+          },
+          "operating_margin": {
+            "value": 20.052146672244543,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly operating margin."
+          },
+          "net_margin": {
+            "value": 26.044149551986145,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly net margin."
+          },
+          "fcf_margin": {
+            "value": 21.73167164459838,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-03-31",
+            "notes": "Quarterly free cash flow margin."
+          },
+          "roe": {
+            "value": 21.502756454709267,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2026-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-03-31",
+            "notes": "Annualized quarterly net income divided by quarter-end equity."
+          },
+          "debt_to_equity": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "debt_to_equity: Inputs required for this historical computation were unavailable."
+          },
+          "roic": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "roic: Inputs required for this historical computation were unavailable."
+          }
+        }
+      },
+      {
+        "period": "FY2026 Q2",
+        "as_of": "2026-06-30",
+        "metrics": {
+          "revenue": {
+            "value": 392400000.0,
+            "source": "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly revenue SEC fact. Single-quarter SEC fact."
+          },
+          "cost_of_revenue": {
+            "value": 104833000.0,
+            "source": "sec_companyfacts:us-gaap/CostOfGoodsAndServicesSold:USD:10-Q:2026-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly cost_of_revenue SEC fact. Single-quarter SEC fact."
+          },
+          "net_income": {
+            "value": 153088000.0,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2026-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly net_income SEC fact. Single-quarter SEC fact."
+          },
+          "operating_income": {
+            "value": 89248000.0,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2026-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly operating_income SEC fact. Single-quarter SEC fact."
+          },
+          "operating_cash_flow": {
+            "value": 87678000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly operating_cash_flow SEC fact. Q2 value derived as Q2 year-to-date value minus Q1 year-to-date value."
+          },
+          "capex": {
+            "value": 20468000.0,
+            "source": "sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly capex SEC fact. Q2 value derived as Q2 year-to-date value minus Q1 year-to-date value."
+          },
+          "eps_diluted": {
+            "value": 0.83,
+            "source": "sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-Q:2026-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly eps_diluted SEC fact. Single-quarter SEC fact."
+          },
+          "shares_diluted": {
+            "value": 183340000.0,
+            "source": "sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-Q:2026-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly shares_diluted SEC fact. Single-quarter SEC fact."
+          },
+          "cash": {
+            "value": 111523000.0,
+            "source": "sec_companyfacts:us-gaap/CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents:USD:10-Q:2026-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly cash SEC fact. Quarter-end SEC fact."
+          },
+          "debt": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "debt: Quarterly debt fact was unavailable."
+          },
+          "equity": {
+            "value": 1725704000.0,
+            "source": "sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2026-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly equity SEC fact. Quarter-end SEC fact."
+          },
+          "gross_profit": {
+            "value": 287567000.0,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2026-06-30",
+            "tier": "exact_public_fact",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly gross_profit SEC fact. Single-quarter SEC fact."
+          },
+          "free_cash_flow": {
+            "value": 67210000.0,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-03-31",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly free cash flow computed as operating cash flow minus capex."
+          },
+          "gross_margin": {
+            "value": 73.28414882772681,
+            "source": "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly gross margin."
+          },
+          "operating_margin": {
+            "value": 22.74413863404689,
+            "source": "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly operating margin."
+          },
+          "net_margin": {
+            "value": 39.013251783893985,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly net margin."
+          },
+          "fcf_margin": {
+            "value": 17.127930682976555,
+            "source": "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/PaymentsToAcquirePropertyPlantAndEquipment:USD:10-Q:2026-03-31; sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-06-30",
+            "notes": "Quarterly free cash flow margin."
+          },
+          "roe": {
+            "value": 35.48418500507619,
+            "source": "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2026-06-30; sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2026-06-30",
+            "tier": "computed_from_public_facts",
+            "as_of": "2026-06-30",
+            "notes": "Annualized quarterly net income divided by quarter-end equity."
+          },
+          "debt_to_equity": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "debt_to_equity: Inputs required for this historical computation were unavailable."
+          },
+          "roic": {
+            "value": null,
+            "source": "open_data_provider",
+            "tier": "unavailable_open_free",
+            "as_of": "2026-10-17",
+            "notes": "roic: Inputs required for this historical computation were unavailable."
+          }
+        }
+      }
+    ]
+  }
+}

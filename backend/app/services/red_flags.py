@@ -8,11 +8,11 @@ from app.services.screening_metrics import (
     BUSINESS_MAX_AGE_DAYS, currencies, day, financial, number, quarter_index, result,
 )
 
-RED_FLAG_VERSION = 1
-MAX_RED_FLAGS = 3
+RED_FLAG_VERSION = 2
+MAX_RED_FLAGS = 4
 
 
-def build_red_flag_count(snapshot: dict, today: date) -> dict:
+def build_red_flag_count(snapshot: dict, today: date, valuation: dict | None = None) -> dict:
     history = snapshot.get('historical_series', {})
     rows = sorted(history.get('quarterly_fundamentals', []), key=lambda r: r.get('as_of', ''))
     latest = rows[-1] if rows else {}
@@ -146,21 +146,37 @@ def build_red_flag_count(snapshot: dict, today: date) -> dict:
         return {'id': key, 'title': title, 'state': state, 'reason': reason,
                 'triggered_rules': [b['id'] for b in flagged], 'checks': branches}
 
+    from app.services.valuation_metrics import reported_valuation_metrics, PRICE_TO_SALES_LIMIT, FCF_YIELD_LIMIT, MARKET_MAX_AGE_DAYS
+    valuation = valuation if valuation is not None else reported_valuation_metrics(snapshot, today)
+    values = valuation['values'] if fresh and eligible else None
+    expensive = {'id':'priced_for_perfection','title':'Priced for Perfection',
+        'state': 'flagged' if values and values['price_to_sales'] > PRICE_TO_SALES_LIMIT and values['fcf_yield_fraction'] < FCF_YIELD_LIMIT else 'clear' if values else 'unassessed',
+        'formula': 'Market cap / TTM revenue > 10 AND TTM (operating cash flow − abs(capex)) / same market cap < 0.02',
+        'reason': 'Stock valuation is unusually high relative to current revenue and free cash flow generation. Initial screening heuristics, not universal valuation standards.' if values else 'Four aligned revenue/cash-flow quarters and a fresh, compatible market capitalization are required.',
+        'evidence':valuation['evidence'] if values else [], 'values':values}
+    if values and valuation['price_to_sales']['warnings']:
+        expensive['reason'] += ' ' + ' '.join(valuation['price_to_sales']['warnings'])
+    if values:
+        inputs.extend(valuation['evidence'])
     checks = [group('cash_generation', 'Cash-generation concerns', [conversion, fcf]),
               group('operating_performance', 'Operating profitability pressure', [decline, losses]),
-              group('balance_sheet', 'Negative book equity', [equity])]
+              group('balance_sheet', 'Negative book equity', [equity]),
+              {**group('priced_for_perfection', 'Priced for Perfection', [expensive]), 'category':'Valuation'}]
     flags = [c for c in checks if c['state'] == 'flagged']
     assessed = sum(c['state'] in {'clear', 'flagged'} for c in checks)
     applicable = sum(c['state'] != 'not_applicable' for c in checks)
     complete = eligible and fresh and assessed == applicable == MAX_RED_FLAGS
     count = len(flags)
     status = 'Complete assessment' if complete else 'Partial assessment' if assessed else 'Not assessed'
+    financial_deadline = (end + timedelta(days=BUSINESS_MAX_AGE_DAYS)).isoformat() if end else None
+    market_day = day(valuation.get('price_as_of'))
+    deadline = min(financial_deadline, (market_day + timedelta(days=MARKET_MAX_AGE_DAYS)).isoformat()) if complete and market_day and financial_deadline else financial_deadline
     source = '; '.join(dict.fromkeys(i['source'] for i in inputs)) or 'unavailable'
     return result({'source': source, 'as_of': latest.get('as_of', ''), 'tier': 'computed_from_public_facts'},
         value=count if complete else None, period=latest.get('period', ''),
         formula='One point per distinct flagged concern group; overlapping rules within a group count once.',
         status=status, validated=complete,
-        valid_until=(end + timedelta(days=BUSINESS_MAX_AGE_DAYS)).isoformat() if end else None,
+        valid_until=deadline, price_as_of=valuation.get('price_as_of'),
         assessment_version=RED_FLAG_VERSION, max_count=MAX_RED_FLAGS, observed_count=count,
         coverage={'assessed': assessed, 'applicable': applicable, 'total': MAX_RED_FLAGS, 'complete': complete},
         flags=flags, checks=checks,

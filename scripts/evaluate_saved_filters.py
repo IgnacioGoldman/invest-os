@@ -55,7 +55,7 @@ def signal_for(snapshot: dict[str, Any], field: str) -> str:
     if not screening or field == "upcoming_earnings":
         screening = build_screening_metrics(snapshot, today=datetime.now(timezone.utc).date())
     metric = screening.get("metrics", {}).get(field, {})
-    if field == 'red_flag_count' and (metric.get('assessment_version') != 1
+    if field == 'red_flag_count' and (metric.get('assessment_version') != 2
             or metric.get('status') not in {'Complete assessment', 'Partial assessment', 'Not assessed'}
             or not day(metric.get('valid_until')) or metric['valid_until'] < datetime.now(timezone.utc).date().isoformat()):
         return 'Not assessed'
@@ -115,7 +115,7 @@ def condition_matches(snapshot: dict, condition: dict) -> bool:
     deadline = str(m.get('valid_until') or '')
     if (value is None or target is None or not m.get('validated') or not day(deadline) or deadline < datetime.now(timezone.utc).date().isoformat()
             or (condition['field'] == 'red_flag_count' and (not m.get('coverage', {}).get('complete')
-                or m.get('status') != 'Complete assessment' or m.get('assessment_version') != 1
+                or m.get('status') != 'Complete assessment' or m.get('assessment_version') != 2
                 or not value.is_integer() or not 0 <= value <= m.get('max_count', 0)))
             or (condition['field'] in BUSINESS_STATUSES and m.get('status') not in BUSINESS_STATUSES[condition['field']])):
         return False

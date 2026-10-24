@@ -1204,6 +1204,9 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
           {group.checks.map(check => <details key={check.id}>
             <summary>{check.title} · {check.state === "flagged" ? "Detected" : check.state === "clear" ? "No flag detected" : "Not assessed"}</summary>
             <p>{check.formula}</p><p>{check.reason}</p>
+            {check.id === "priced_for_perfection" && check.values != null && <p>
+              Price-to-Sales: {formatNumber((check.values as { price_to_sales: number }).price_to_sales)}× · Free Cash Flow Yield: {formatPercent((check.values as { fcf_yield_fraction: number }).fcf_yield_fraction * 100)}
+            </p>}
             <ul>{check.evidence.map((evidence, index) => <li key={index}>
               {evidence.period} ({evidence.as_of}): {evidence.metric.replace(/_/g, " ")} {formatNumber(evidence.value)} {evidence.currency}.
               <small>Source: {evidence.source}</small>

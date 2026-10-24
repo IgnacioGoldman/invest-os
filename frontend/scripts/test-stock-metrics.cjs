@@ -421,3 +421,28 @@ test('consistency is categorical, exportable and combines with numeric growth an
   assert.equal(filterExpressionMatches(stock, expression), false);
   assert.ok(!visibleStockMetrics(stock, false).some(m => m.key === 'revenue_consistency'));
 });
+
+
+test('Priced for Perfection contributes once to the existing count, filters and compact evidence', () => {
+  const { compactAnalysisStock } = require('../src/aiBriefData.ts');
+  const { redFlagValue } = require('../src/stockMetrics.ts');
+  for (const ticker of ['SHOP', 'ALAB']) {
+    const stock = structuredClone(stocks.find(s => s.ticker === ticker));
+    const risk = stock.screening.metrics.red_flag_count;
+    const group = risk.flags.find(g => g.id === 'priced_for_perfection');
+    assert.ok(group);
+    assert.deepEqual(group.triggered_rules, ['priced_for_perfection']);
+    assert.equal(risk.max_count, 4);
+    assert.equal(redFlagValue(stock), risk.value);
+    assert.ok(risk.observed_count >= 1);
+    assert.equal(filterExpressionMatches(stock, { operator: 'and', groups: [{ conditions: [
+      { field: 'red_flag_count', comparison: 'eq', value: '0' },
+    ] }] }), false);
+    const brief = compactAnalysisStock(stock);
+    const v = brief.red_flags.detected.find(g => g.group === 'Priced for Perfection').rules[0].values;
+    const original = group.checks[0].values;
+    assert.equal(v.market_cap, Number((original.market_cap / 1e6).toPrecision(7)));
+    assert.equal(v.revenue_ttm, Number((original.revenue_ttm / 1e6).toPrecision(7)));
+    assert.equal(v.price_to_sales, Number(original.price_to_sales.toPrecision(7)));
+  }
+});

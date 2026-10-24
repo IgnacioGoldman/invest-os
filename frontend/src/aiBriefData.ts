@@ -85,7 +85,7 @@ export function compactAnalysisStock(snapshot: OpenDataStockSnapshot) {
   const annual = history("annual_fundamentals", 2, historicalKeys);
   const risk = researchMetric(snapshot, "red_flag_count");
   function scaledEvidence(value: unknown, key = ""): unknown {
-    if (typeof value === "number") return round(value, monetary.has(key) ? "money" : "percent");
+    if (typeof value === "number") return round(value, (monetary.has(key) || monetary.has(key.replace(/_ttm$/, "")) || key === "market_cap") ? "money" : "percent");
     if (Array.isArray(value)) return value.map(item => scaledEvidence(item));
     if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, v]) => [key, scaledEvidence(v, key)]));
     return value;

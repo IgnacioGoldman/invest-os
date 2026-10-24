@@ -350,23 +350,12 @@ def build_screening_metrics(snapshot: dict, today: date | None = None) -> dict:
     if financial(snapshot):
         gross.update(value=None, status='Unknown')
     advanced['gross_margin'] = gross
-    market_cap = raw.get('market_cap', {})
-    inputs = snapshot.get('valuation_inputs', {})
-    for key, denominator_key, raw_key in (('price_to_sales', 'revenue', 'revenue_ttm'), ('fcf_yield', 'free_cash_flow', 'free_cash_flow_ttm')):
-        m = snapshot.get('valuation', {}).get(key, {})
-        statement = inputs.get(denominator_key, raw.get(raw_key, {}))
-        value = None
-        currency = snapshot.get('price_currency')
-        valid = (valid_price and currency and currencies(statement) == {currency} and number(statement.get('value')) is not None
-                 and number(market_cap.get('value')) is not None and market_cap['value'] > 0
-                 and market_cap.get('as_of') == price.get('as_of') and statement.get('as_of') == revenue.get('as_of'))
-        if valid and key == 'price_to_sales' and statement['value'] > 0:
-            value = market_cap['value'] / statement['value']
-        elif valid and key == 'fcf_yield' and not financial(snapshot):
-            value = statement['value'] / market_cap['value'] * 100
-        advanced[key] = result(m, value=value, period=f"TTM ended {revenue.get('as_of', 'Unknown')}; price {price.get('as_of', 'Unknown')}",
-            formula='market cap / TTM revenue' if key == 'price_to_sales' else 'TTM FCF / market cap × 100', status='Computed Metric' if value is not None else 'Unknown',
-            warnings=[] if value is not None else ['Missing, stale or incompatible market-cap/statement inputs.'])
+    from app.services.valuation_metrics import reported_valuation_metrics
+    valuation = reported_valuation_metrics(snapshot, today)
+    for key in ('price_to_sales','fcf_yield'):
+        advanced[key] = valuation[key]
+        if financial(snapshot):
+            advanced[key].update(value=None, status='Unknown')
     for m in output.values():
         if m['value'] is not None and (number(m['value']) is None):
             m.update(value=None, status='Needs Review')
@@ -381,7 +370,7 @@ def build_screening_metrics(snapshot: dict, today: date | None = None) -> dict:
         event_days = None
     output['upcoming_earnings'] = result(earnings, value=event_days, period=match[0][1:] if match else 'Unknown date',
         formula='source event/window start date − current date', status='Unknown' if event_days is None else 'This week' if event_days <= 7 else 'Next 30 days' if event_days <= 30 else 'Later')
-    output['red_flag_count'] = build_red_flag_count(snapshot, today)
+    output['red_flag_count'] = build_red_flag_count(snapshot, today, valuation)
     return {'version': 4, 'as_of': today.isoformat(), 'metrics': output, 'financial_details': advanced, 'warnings': warnings,
             'verification': 'Source identifiers preserve provenance; financial inputs have not been independently verified.'}
 
