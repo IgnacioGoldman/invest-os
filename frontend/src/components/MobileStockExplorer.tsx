@@ -4,6 +4,7 @@ import { useStockDetails } from "../useStockDetails";
 import { prepareStockAnalysis, type StockAnalysisBrief } from "../aiAnalysis";
 import { StockAnalysisDialog, type AnalysisCopyStatus } from "./StockAnalysisDialog";
 import { FilterSelector, type FilterShortcut } from "./FilterSelector";
+import { DEFAULT_FILTERS, type ScreeningFilter } from "../defaultFilters";
 import { WatchlistGroups, type WatchlistGroupActions } from "./WatchlistGroups";
 import type { WatchlistGroup, WatchlistItem } from "../watchlist";
 import { MetricStatus } from "./MetricStatus";
@@ -1300,7 +1301,9 @@ export function MobileStockExplorer({
   const listTopRef = useRef<HTMLDivElement | null>(null);
   const analysisPrepareRef = useRef<HTMLButtonElement | null>(null);
   const selectedSnapshot = snapshots.find((snapshot) => snapshot.ticker === selectedTicker) ?? null;
-  const activeSavedFilter = personalization?.savedFilters.find((item) => item.id === activeSavedFilterId) ?? null;
+  const screeningFilters: ScreeningFilter[] = [...DEFAULT_FILTERS, ...(personalization?.savedFilters ?? [])];
+  const activeFilter = screeningFilters.find((item) => item.id === activeSavedFilterId) ?? null;
+  const shortcutKey = (filter: ScreeningFilter) => filter.isDefault ? filter.id : savedFilterKey(filter.id);
   const relevantSupportKeys = SUPPORT_FILTER_KEYS;
   const signedIn = personalization?.signedIn ?? false;
   const isWatchlistView = signedIn && spaceTab === "watchlist";
@@ -1444,7 +1447,7 @@ export function MobileStockExplorer({
     setActiveSavedFilterId(null);
   };
 
-  const savedExpression = (filter: SavedFilter): FilterExpression => ({
+  const savedExpression = (filter: ScreeningFilter): FilterExpression => ({
     ...filter.expression,
     groups: filter.expression.groups.map((group) => ({
       ...group,
@@ -1457,19 +1460,19 @@ export function MobileStockExplorer({
     })),
   });
 
-  const selectSavedFilter = (filter: SavedFilter) => {
+  const selectSavedFilter = (filter: ScreeningFilter) => {
     setFilterExpression(savedExpression(filter));
     setSortKey(supportedSortKey(filter.sort_key, isWatchlistView));
     setSortDirection(filter.sort_direction);
     setActiveSavedFilterId(filter.id);
   };
 
-  const openFilterBuilder = (filter?: SavedFilter) => {
+  const openFilterBuilder = (filter?: ScreeningFilter) => {
     setFilterDraft({
       expression: filter ? savedExpression(filter) : { operator: "and", groups: [createFilterGroup()] },
       sortKey: supportedSortKey(filter?.sort_key ?? sortKey, isWatchlistView),
       sortDirection: filter?.sort_direction ?? sortDirection,
-      savedFilterId: filter?.id ?? null,
+      savedFilterId: filter?.isDefault ? null : filter?.id ?? null,
     });
     setSheetOpen(true);
   };
@@ -1483,12 +1486,13 @@ export function MobileStockExplorer({
     setSheetOpen(false);
   };
 
-  const filterShortcuts: FilterShortcut[] = (personalization?.savedFilters ?? []).map((filter) => ({
-    key: savedFilterKey(filter.id), name: filter.name, icon: filter.icon,
-    badgeCount: personalization?.filterBadgeCounts[savedFilterKey(filter.id)],
+  const filterShortcuts: FilterShortcut[] = screeningFilters.map((filter) => ({
+    key: shortcutKey(filter), name: filter.name, icon: filter.icon,
+    description: filter.description, readOnly: filter.isDefault,
+    badgeCount: personalization?.filterBadgeCounts[shortcutKey(filter)],
   }));
-  const activeShortcutKey = activeSavedFilter ? savedFilterKey(activeSavedFilter.id) : null;
-  const activeFilterName = filterCount > 0 ? activeSavedFilter?.name ?? "Custom filter" : null;
+  const activeShortcutKey = activeFilter ? shortcutKey(activeFilter) : null;
+  const activeFilterName = filterCount > 0 ? activeFilter?.name ?? "Custom filter" : null;
 
   const startAnalysis = () => {
     setAnalysisSelection([]);
@@ -1738,7 +1742,7 @@ export function MobileStockExplorer({
           activeName={activeFilterName}
           onClear={clearFilter}
           onSelect={(key) => {
-            const filter = personalization?.savedFilters.find((item) => savedFilterKey(item.id) === key);
+            const filter = screeningFilters.find((item) => shortcutKey(item) === key);
             if (filter) selectSavedFilter(filter);
           }}
           onCreate={() => openFilterBuilder()}
@@ -1747,7 +1751,7 @@ export function MobileStockExplorer({
             setSheetOpen(true);
           }}
           onEdit={(key) => {
-            const filter = personalization?.savedFilters.find((item) => savedFilterKey(item.id) === key);
+            const filter = screeningFilters.find((item) => shortcutKey(item) === key);
             if (filter) openFilterBuilder(filter);
           }}
           onRename={async (key, name) => {

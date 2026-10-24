@@ -187,15 +187,24 @@ test('editing saved support conditions groups matching values and preserves dist
   assert.equal(new Set(ids).size, ids.length);
 });
 
-test('multiple selected timeframes require each timeframe and accept any selected value', () => {
-  const expression = expressionFromMetricRules([
-    { id: 'support', field: 'support_1m', timeframes: ['support_1m', 'support_5y'], values: ['Inside Support Zone', 'Near Support'] },
-    { id: 'growth', field: 'revenue', values: ['Growing'] },
-  ], { operator: 'and', groups: [] });
-  const samples = [
-    [1, 1, 25, true], [1, 4, 12, true], [4, 1, 25, true], [4, 4, 25, true],
-    [20, 1, 25, false], [1, 20, 25, false], [1, 1, -5, false], [null, 1, 25, false],
-  ].map(([short, long, revenue, matches]) => {
+test('test 1 default requires growing revenue, profitable operations and all three support timeframes', () => {
+  const { DEFAULT_FILTERS } = require('../src/defaultFilters.ts');
+  const preset = DEFAULT_FILTERS.find(filter => filter.name === 'test 1');
+  assert.ok(preset.isDefault);
+  const expression = preset.expression;
+  const rules = groupSupportTimeframes(metricRulesFromExpression(expression).rules);
+  assert.equal(rules.length, 3);
+  assert.deepEqual(rules[2].timeframes, ['support_1m', 'support_3m', 'support_6m']);
+  const positiveCases = Array.from({ length: 8 }, (_, mask) => [
+    mask & 1 ? 1 : 4, mask & 2 ? 1 : 4, mask & 4 ? 1 : 4, 25, 12, true,
+  ]);
+  const negativeCases = [
+    [20, 1, 1, 25, 12, false], [1, 20, 1, 25, 12, false], [1, 1, 20, 25, 12, false],
+    [null, 1, 1, 25, 12, false], [1, null, 1, 25, 12, false], [1, 1, null, 25, 12, false],
+    [1, 1, 1, -5, 12, false], [1, 1, 1, 0, 12, false], [1, 1, 1, null, 12, false],
+    [1, 1, 1, 25, -5, false], [1, 1, 1, 25, null, false],
+  ];
+  const samples = [...positiveCases, ...negativeCases].map(([short, medium, long, revenue, margin, matches]) => {
     const stock = structuredClone(stocks[0]);
     const today = new Date().toISOString().slice(0,10);
     stock.price_opportunity.current_price = { value: 100, as_of: today };
@@ -204,9 +213,11 @@ test('multiple selected timeframes require each timeframe and accept any selecte
       return { value, as_of: today, source: 'yfinance_history', tier: 'computed_from_public_facts', notes: `Support zone: $${(midpoint*.975).toFixed(8)}-$${(midpoint*1.025).toFixed(8)}; midpoint $${midpoint}` };
     };
     stock.price_opportunity.support_1m_distance = support(short);
-    stock.price_opportunity.support_5y_distance = support(long);
+    stock.price_opportunity.support_3m_distance = support(medium);
+    stock.price_opportunity.support_6m_distance = support(long);
     stock.business_health.revenue_growth_yoy = { value: revenue };
     stock.screening.metrics.revenue = { value: revenue, validated: true, valid_until: "2999-01-01", status: revenue > 0 ? "Growing" : revenue === 0 ? "Flat" : "Declining" };
+    stock.screening.metrics.operating_margin = { value: margin, validated: margin != null, valid_until: "2999-01-01", status: margin == null ? "Unknown" : margin >= 0 ? "Profitable" : "Loss-making" };
     return { stock, matches };
   });
   const result = spawnSync('python3', ['-c', [

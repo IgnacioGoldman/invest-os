@@ -9,6 +9,7 @@ export type FilterShortcut = {
   badgeCount?: number;
   icon?: FilterIconName;
   description?: string;
+  readOnly?: boolean;
 };
 
 function FilterIdentity({ filter, allStocks = false }: { filter?: FilterShortcut; allStocks?: boolean }) {
@@ -217,7 +218,7 @@ export function FilterSelector({ compact = false, userId, filters, activeKey, ac
                           <>
                             <div className="filter-picker-details">
                               <FilterIdentity filter={filter} />
-                              <span className="filter-picker-kind">Custom</span>
+                              <span className="filter-picker-kind">{filter.readOnly ? "Default" : "Custom"}</span>
                             </div>
                             <div className="filter-picker-controls">
                               <button type="button" className="filter-picker-visibility" role="switch" aria-checked={!hiddenKeys.includes(filter.key)}
@@ -225,12 +226,12 @@ export function FilterSelector({ compact = false, userId, filters, activeKey, ac
                                 disabled={pendingAction !== null} onClick={() => toggleVisibility(filter.key)}>
                                 <span className={hiddenKeys.includes(filter.key) ? "" : "visible"}><span /></span>
                               </button>
-                              <button type="button" className="filter-picker-icon" title="Rename filter" aria-label={`Rename ${filter.name}`}
-                                disabled={pendingAction !== null} onClick={() => { setRenamingKey(filter.key); setRenameName(filter.name); setError(null); }}><Pencil size={19} /></button>
-                              <button type="button" className="filter-picker-icon" title="Edit conditions" aria-label={`Edit conditions for ${filter.name}`}
+                              {!filter.readOnly && <button type="button" className="filter-picker-icon" title="Rename filter" aria-label={`Rename ${filter.name}`}
+                                disabled={pendingAction !== null} onClick={() => { setRenamingKey(filter.key); setRenameName(filter.name); setError(null); }}><Pencil size={19} /></button>}
+                              <button type="button" className="filter-picker-icon" title={filter.readOnly ? "Customize filter" : "Edit conditions"} aria-label={`${filter.readOnly ? "Customize" : "Edit conditions for"} ${filter.name}`}
                                 disabled={pendingAction !== null} onClick={() => openBuilder(filter.key)}><SlidersHorizontal size={19} /></button>
-                              <button type="button" className="filter-picker-icon filter-picker-delete" title="Delete filter" aria-label={`Delete ${filter.name}`}
-                                disabled={pendingAction !== null} onClick={() => void deleteFilter(filter.key)}><Trash2 size={19} /></button>
+                              {!filter.readOnly && <button type="button" className="filter-picker-icon filter-picker-delete" title="Delete filter" aria-label={`Delete ${filter.name}`}
+                                disabled={pendingAction !== null} onClick={() => void deleteFilter(filter.key)}><Trash2 size={19} /></button>}
                             </div>
                           </>
                         )}
@@ -239,7 +240,7 @@ export function FilterSelector({ compact = false, userId, filters, activeKey, ac
                       <button type="button" className={`filter-picker-choice ${activeKey === filter.key ? "active" : ""}`}
                         aria-pressed={activeKey === filter.key} onClick={() => { onSelect(filter.key); close(); }}>
                         <FilterIdentity filter={filter} />
-                        <span className="filter-picker-meta"><span className="filter-picker-kind">Custom</span>
+                        <span className="filter-picker-meta"><span className="filter-picker-kind">{filter.readOnly ? "Default" : "Custom"}</span>
                           {activeKey === filter.key && <Check size={20} aria-hidden="true" />}</span>
                       </button>
                     )}
