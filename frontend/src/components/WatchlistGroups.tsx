@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, GripVertical, MoreHorizontal, Plus, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, BookmarkCheck, Check, ChevronDown, ChevronRight, GripVertical, MoreHorizontal, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { WATCHLIST_COLORS, type WatchlistGroup, type WatchlistGroupInput, type WatchlistItem } from "../watchlist";
 import type { OpenDataStockSnapshot } from "../api";
@@ -237,6 +237,13 @@ export function WatchlistGroups({
                   className={`watchlist-group-row${dropping && target?.ticker === snapshot.ticker ? target.after ? " watchlist-insert-after" : " watchlist-insert-before" : ""}${drag?.id === snapshot.ticker ? " watchlist-dragging" : ""}`}>
                   {organizing && grip(snapshot.ticker, snapshot.ticker)}
                   {renderRow(snapshot)}
+                  {organizing && (
+                    <button type="button" className="mobile-watchlist-bookmark saved" disabled={busy}
+                      aria-label={`Remove ${snapshot.ticker} from Watchlist`} title="Remove from Watchlist"
+                      onClick={() => void run(() => onRemove(snapshot.ticker), `${snapshot.ticker} removed from watchlist.`)}>
+                      <BookmarkCheck size={21} aria-hidden="true" />
+                    </button>
+                  )}
                 </div>
               ))}
               {rows.length === 0 && (
