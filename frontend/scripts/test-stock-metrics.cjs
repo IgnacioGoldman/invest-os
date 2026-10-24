@@ -111,11 +111,57 @@ test('retired and obsolete quality rules disable the whole saved expression', ()
   }
 });
 
-test('AI research preserves dropped raw figures, source metadata and anomaly warnings', () => {
+test('compact AI research preserves financial substance, sources, coverage and anomaly warnings', () => {
   const { prepareStockAnalysis } = require('../src/aiAnalysis.ts');
   const stock = googFixture;
   const prompt = prepareStockAnalysis([stock], 'All stocks').prompt;
-  for (const text of ['raw_financial_metrics', 'eps_gaap_growth_yoy', 'peg', 'net_margin', 'screening_metrics', 'red_flag_count', 'observed_count', 'coverage', 'net income exceeds operating income', 'not independent verification']) assert.ok(prompt.includes(text), text);
+  for (const text of ['net_income_ttm', 'eps_gaap_growth_yoy', 'peg', 'net_margin', 'red_flags', 'observed_count', 'coverage', 'net income exceeds operating income', 'not independent verification']) assert.ok(prompt.includes(text), text);
+  const data = JSON.parse(prompt.split('```json\n')[1].split('```')[0]);
+  assert.equal(data.metrics.net_income_ttm.v, Number((stock.metrics.net_income_ttm.value / 1e6).toPrecision(7)));
+  assert.equal(data.red_flags.count, stock.screening.metrics.red_flag_count.value);
+  assert.deepEqual(data.red_flags.coverage, stock.screening.metrics.red_flag_count.coverage);
+  assert.ok(data.sources.some(s => s.startsWith('sec_companyfacts:')));
+  assert.equal(new Set(data.sources).size, data.sources.length);
+  assert.equal(data.quarters.length, Math.min(8, stock.historical_series.quarterly_fundamentals.length));
+  assert.equal(data.revenue_quarters.length, Math.min(10, stock.historical_series.quarterly_revenue.length));
+  assert.equal('raw_financial_metrics' in data, false);
+  assert.equal('screening_metrics' in data, false);
+});
+
+test('compact AI data preserves currencies, per-share units, zeroes, proxies and source references', () => {
+  const { compactAnalysisStock } = require('../src/aiBriefData.ts');
+  const stock = structuredClone(googFixture);
+  stock.price_currency = 'USD';
+  stock.metrics.revenue_ttm.currency = 'SGD';
+  stock.metrics.cash.value = null;
+  stock.metrics.capex_ttm.value = 0;
+  stock.metrics.roic = { value: -0.000001, tier: 'proxy_estimate', as_of: '2026-06-30', source: 'test:proxy', notes: 'Proxy using incomplete invested capital.' };
+  stock.valuation_inputs = { revenue: { ...stock.metrics.revenue_ttm, value: 123000000, currency: undefined, notes: 'Converted from SGD into USD.' } };
+  const row = stock.historical_series.quarterly_fundamentals.at(-1);
+  row.metrics.eps_diluted = { value: 0.27, tier: 'exact_public_fact', source: 'sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-Q:2026-06-30', as_of: row.as_of, notes: '' };
+  const before = structuredClone(stock);
+  const data = compactAnalysisStock(stock);
+  assert.deepEqual(stock, before, 'copying must not alter stored research data');
+  assert.equal(data.currency, 'SGD');
+  assert.equal(data.market.currency, 'USD');
+  assert.equal(data.market.price.ccy, 'USD');
+  assert.equal(data.valuation_basis.revenue.ccy, 'USD');
+  assert.equal(data.valuation_basis.revenue.v, 123);
+  assert.equal(data.metrics.capex_ttm.v, 0);
+  assert.equal(data.metrics.cash, undefined);
+  assert.ok(data.missing_metrics.includes('cash'));
+  assert.equal(data.metrics.roic.v, -0.000001);
+  assert.equal(data.metrics.roic.t, 'p');
+  assert.match(data.metrics.roic.caution, /incomplete/);
+  assert.equal(data.quarters.at(-1).values.eps_diluted.v, 0.27);
+  function checkReferences(value) {
+    if (Array.isArray(value)) return value.forEach(checkReferences);
+    if (!value || typeof value !== 'object') return;
+    if (value.s) for (const id of value.s) assert.ok(Number.isInteger(id) && id > 0 && id <= data.sources.length);
+    Object.values(value).forEach(checkReferences);
+  }
+  checkReferences(data);
+  assert.ok(JSON.stringify(data).length < JSON.stringify(stock, null, 2).length / 2, 'deduplicate metadata rather than dropping the histories');
 });
 
 test('Markdown AI instructions render single and comparison briefs with literal filter names', () => {
@@ -129,7 +175,8 @@ test('Markdown AI instructions render single and comparison briefs with literal 
     assert.ok(brief.prompt.startsWith(`${subject}\n\n`));
     assert.ok(brief.prompt.includes(`Stock screen: ${filterName}\n`));
     assert.match(brief.prompt, /Prepared: \d{4}-\d{2}-\d{2}T/);
-    assert.ok(brief.prompt.includes('## Invest OS data\n\n### GOOG'));
+    assert.ok(brief.prompt.includes('## Invest OS data\n\nCompact data key:'));
+    assert.ok(brief.prompt.includes('### GOOG'));
     assert.match(brief.prompt, /\| Rank \| Stock \| Business (?:score|quality score \+ tag) \| Valuation score(?: \+ tag)? \| Brief rationale \|/);
     assert.ok(brief.prompt.includes('two integer scores from 0 to 100'));
     assert.ok(brief.prompt.includes('equal-weight average'));

@@ -1,5 +1,5 @@
 import type { OpenDataStockSnapshot } from "./api";
-import { researchMetric } from "./stockMetrics";
+import { compactAnalysisStock } from "./aiBriefData";
 import stockAnalysisTemplate from "./prompts/stock-analysis.md?raw";
 
 export type StockAnalysisBrief = {
@@ -7,12 +7,6 @@ export type StockAnalysisBrief = {
   preview: string;
   prompt: string;
 };
-
-function latestRows(snapshot: OpenDataStockSnapshot, series: string, count: number) {
-  return [...(snapshot.historical_series[series] ?? [])]
-    .sort((a, b) => a.as_of.localeCompare(b.as_of) || a.period.localeCompare(b.period, undefined, { numeric: true }))
-    .slice(-count);
-}
 
 export function prepareStockAnalysis(snapshots: OpenDataStockSnapshot[], filterName: string): StockAnalysisBrief {
   const tickers = snapshots.map((snapshot) => snapshot.ticker);
@@ -23,36 +17,14 @@ export function prepareStockAnalysis(snapshots: OpenDataStockSnapshot[], filterN
     /\{\{(subject|preparedAt|filterName)\}\}/g,
     (_placeholder, key: string) => variables[key],
   );
-  const lines = [instructions, ""];
+  const lines = [instructions, "",
+    "Compact data key: v=value (rounded to 7 significant digits); t=r reported, c computed, p proxy/estimate; s=1-based references to that stock's sources list; d=as-of date, otherwise financial_as_of (or the history row's as_of); ccy overrides the stock's financial currency. All monetary amounts and share counts are in millions, except market.price and EPS (per share). Percentages, percentage points and valuation ratios are unscaled. Missing/omitted values are unknown, never zero. Quarterly and annual histories remain separate. Red-flag values use the same units; an incomplete count is null and observed_count is only a lower bound. Filing links are metadata, not proof their contents were reviewed.", ""];
   for (const snapshot of snapshots) {
-    const context = snapshot.company_context;
-
     lines.push(
       `### ${snapshot.ticker} — ${snapshot.name ?? snapshot.ticker}`,
       "",
       "```json",
-      JSON.stringify({
-        ticker: snapshot.ticker,
-        company: snapshot.name,
-        exchange: snapshot.exchange,
-        country: snapshot.country,
-        sector: snapshot.sector,
-        industry: snapshot.industry,
-        dataset_source: snapshot.source,
-        dataset_generated_at: snapshot.generated_at,
-        business_health: snapshot.business_health,
-        valuation: snapshot.valuation,
-        price_and_support: snapshot.price_opportunity,
-        revenue_growth_momentum: researchMetric(snapshot, "momentum"),
-        screening_metrics: { ...snapshot.screening, metrics: { ...snapshot.screening?.metrics, forward_pe: researchMetric(snapshot, "forward_pe") } },
-        raw_financial_metrics: snapshot.metrics,
-        raw_valuation_inputs: snapshot.valuation_inputs,
-        recent_quarterly_revenue: latestRows(snapshot, "quarterly_revenue", 10),
-        latest_quarterly_fundamentals: latestRows(snapshot, "quarterly_fundamentals", 8),
-        recent_annual_fundamentals: latestRows(snapshot, "annual_fundamentals", 2),
-        data_gaps: snapshot.data_gaps,
-        company_context: context ? { ...context, recent_filings: context.recent_filings.slice(0, 3) } : null,
-      }, null, 2),
+      JSON.stringify(compactAnalysisStock(snapshot)),
       "```",
       "",
     );

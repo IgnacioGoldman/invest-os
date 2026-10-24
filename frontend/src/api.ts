@@ -121,6 +121,7 @@ export type OpenDataCompanyContext = {
 };
 
 export type OpenDataStockSnapshot = {
+  price_currency?: string | null;
   detail_path?: string;
   screening?: ScreeningMetrics | null;
   valuation_inputs?: Record<string, OpenDataMetric>;

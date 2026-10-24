@@ -36,7 +36,7 @@ export function StockAnalysisDialog({ brief, copyStatus, onCopy, onClose }: {
           <h2 id="stock-analysis-title">Your analysis prompt is ready</h2>
           <button type="button" className="stock-analysis-close" aria-label="Close analysis prompt" onClick={onClose}><X size={21} /></button>
         </header>
-        <p>We've prepared a detailed prompt for your {count} selected stock{count === 1 ? "" : "s"}.</p>
+        <p>We've prepared your analysis prompt for {count} selected stock{count === 1 ? "" : "s"} · {new Intl.NumberFormat().format(Array.from(brief.prompt).length)} characters.</p>
         <div className="stock-analysis-tickers" aria-label="Selected stocks">{brief.tickers.map((ticker) => <span key={ticker}>{ticker}</span>)}</div>
         <div className="stock-analysis-buttons">
           <button type="button" className="stock-analysis-copy" onClick={onCopy} disabled={copyStatus === "copying"}>
