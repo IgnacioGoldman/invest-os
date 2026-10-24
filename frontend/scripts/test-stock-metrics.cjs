@@ -30,7 +30,7 @@ googFixture.screening = JSON.parse(projectedFixture.stdout);
 
 
 test('every visible card exposes only factual selectable labels', () => {
-  const forbidden = /^(Unknown|Needs Review|Computed Metric|Unavailable|Insufficient Data|Strong|Solid|Fair|Cheap|Attractive)$/;
+  const forbidden = /^(Unknown|Needs Review|Computed Metric|Unavailable|Insufficient Data|Fair|Cheap|Attractive)$/;
   for (const metric of STOCK_METRICS) {
     assert.ok(metric.options.length > 0);
     for (const label of metric.options) assert.equal(forbidden.test(label), false, label);
@@ -44,9 +44,9 @@ test('all support timeframes resolve to the shared context definition', () => {
   for (const timeframe of SUPPORT_TIMEFRAMES) assert.equal(stockMetricForField(timeframe.field), stockMetricForField('support'));
 });
 
-test('four business-performance facts and the derived Red Flag Count are registered', () => {
+test('growth pattern, business-performance facts and the derived Red Flag Count are registered', () => {
   assert.deepEqual(STOCK_METRICS.filter(metric => !metric.context).map(metric => metric.key),
-    ['revenue', 'momentum', 'operating_margin', 'operating_margin_trend', 'red_flag_count']);
+    ['revenue', 'momentum', 'revenue_consistency', 'operating_margin', 'operating_margin_trend', 'red_flag_count']);
   for (const field of ['eps', 'industry_strength', 'valuation', 'fcf_margin', 'forward_pe', 'balance_sheet', 'gross_margin', 'price_to_sales', 'fcf_yield']) assert.equal(stockMetricForField(field), undefined);
 });
 
@@ -56,9 +56,9 @@ test('GOOG displays the requested signed facts and comparable operating-margin t
   try {
     const stock = googFixture;
     const cards = visibleStockMetrics(stock, false);
-    assert.equal(cards.length, 5);
-    const values = cards.map(m => [Number(m.getValue(stock).toFixed(2)), m.getSignal(stock).label]);
-    assert.deepEqual(values, [[24.23, 'Growing'], [8, 'Accelerating'], [34.03, 'Profitable'], [1.6, 'Improving'], [0, 'Complete assessment']]);
+    assert.equal(cards.length, 6);
+    const values = cards.filter(m => m.format !== "label").map(m => [Number(m.getValue(stock).toFixed(2)), m.getSignal(stock).label]);
+    assert.deepEqual(values, [[24.23, 'Strong'], [8, 'Accelerating'], [34.03, 'Profitable'], [1.6, 'Improving'], [0, 'Complete assessment']]);
   } finally { Date.now = now; }
 });
 
@@ -123,7 +123,7 @@ test('compact AI research preserves financial substance, sources, coverage and a
   assert.ok(data.sources.some(s => s.startsWith('sec_companyfacts:')));
   assert.equal(new Set(data.sources).size, data.sources.length);
   assert.equal(data.quarters.length, Math.min(8, stock.historical_series.quarterly_fundamentals.length));
-  assert.equal(data.revenue_quarters.length, Math.min(10, stock.historical_series.quarterly_revenue.length));
+  assert.equal(data.revenue_quarters.length, Math.min(12, stock.historical_series.quarterly_revenue.length));
   assert.equal('raw_financial_metrics' in data, false);
   assert.equal('screening_metrics' in data, false);
 });
@@ -399,4 +399,25 @@ test('numeric custom filters persist comparisons and agree with Python on covera
     assert.equal(result.status, 0, result.stderr);
     assert.deepEqual(JSON.parse(result.stdout), expressions.map(e => paritySamples.map(s => filterExpressionMatches(s.stock, e))));
   } finally { Date.now = now; }
+});
+
+
+test('consistency is categorical, exportable and combines with numeric growth and momentum filters', () => {
+  const stock = structuredClone(googFixture);
+  const m = stock.screening.metrics;
+  m.revenue_consistency = { ...m.momentum, value: null, status: 'Steady', validated: true, valid_until: '2999-01-01' };
+  m.revenue = { ...m.revenue, value: 22, strength: 'Strong', valid_until: '2999-01-01' };
+  m.momentum.valid_until = '2999-01-01';
+  const expression = { operator: 'and', groups: [
+    { operator: 'and', conditions: [{ field: 'revenue', comparison: 'gt', value: '15' }] },
+    { operator: 'and', conditions: [{ field: 'momentum', value: 'Accelerating' }] },
+    { operator: 'and', conditions: [{ field: 'revenue_consistency', value: 'Steady' }] },
+  ] };
+  assert.equal(filterExpressionMatches(stock, expression), true);
+  assert.equal(stockMetricForField('revenue_consistency').getValue(stock), null);
+  assert.ok(visibleStockMetrics(stock, false).some(m => m.key === 'revenue_consistency'));
+  assert.equal(filterExpressionMatches(stock, { operator: 'and', groups: [{ conditions: [{ field: 'revenue', value: 'Growing' }] }] }), true);
+  m.revenue_consistency.validated = false;
+  assert.equal(filterExpressionMatches(stock, expression), false);
+  assert.ok(!visibleStockMetrics(stock, false).some(m => m.key === 'revenue_consistency'));
 });

@@ -13,7 +13,7 @@ def stock_summary(snapshot: dict[str, Any]) -> dict[str, Any]:
     history = snapshot.get("historical_series", {})
     summary["historical_series"] = {
         key: sorted(history.get(key, []), key=lambda row: row["as_of"])[-count:]
-        for key, count in (("quarterly_revenue", 10), ("quarterly_fundamentals", 1), ("annual_fundamentals", 2))
+        for key, count in (("quarterly_revenue", 12), ("quarterly_fundamentals", 1), ("annual_fundamentals", 2))
     }
     if snapshot.get("industry_relative_strength"):
         summary["industry_relative_strength"] = {

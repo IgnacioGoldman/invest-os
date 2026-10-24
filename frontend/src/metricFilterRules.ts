@@ -1,6 +1,6 @@
 import type { FilterCondition, FilterExpression, FilterKey } from "./components/MobileStockExplorer";
 import type { OpenDataStockSnapshot } from "./api";
-import { hasDisabledFilter, isSupportField, normalizedFilterValue, stockMetricForField, supportMetric, SUPPORT_FILTER_KEYS, type NumericComparison, type SupportFilterKey } from "./stockMetrics";
+import { financialLabelMatches, hasDisabledFilter, isSupportField, normalizedFilterValue, stockMetricForField, supportMetric, SUPPORT_FILTER_KEYS, type NumericComparison, type SupportFilterKey } from "./stockMetrics";
 
 export function filterExpressionMatches(snapshot: OpenDataStockSnapshot, expression: FilterExpression) {
   if (hasDisabledFilter(expression)) return false;
@@ -15,6 +15,7 @@ export function filterExpressionMatches(snapshot: OpenDataStockSnapshot, express
         return condition.comparison === "lt" ? value < target : condition.comparison === "lte" ? value <= target
           : condition.comparison === "gt" ? value > target : condition.comparison === "gte" ? value >= target : value === target;
       }
+      if (!isSupportField(condition.field)) return financialLabelMatches(snapshot, condition.field, condition.value);
       const label = isSupportField(condition.field)
         ? supportMetric(snapshot, condition.field)?.signal.label ?? "Unknown"
         : stockMetricForField(condition.field)?.getSignal(snapshot).label ?? "Unclear";

@@ -80,7 +80,7 @@ export function compactAnalysisStock(snapshot: OpenDataStockSnapshot) {
         return value ? [[key, value]] : [];
       })) }));
   }
-  const revenueHistory = history("quarterly_revenue", 10, ["revenue", "revenue_growth_yoy"]);
+  const revenueHistory = history("quarterly_revenue", 12, ["revenue", "revenue_growth_yoy"]);
   const quarterly = history("quarterly_fundamentals", 8, historicalKeys);
   const annual = history("annual_fundamentals", 2, historicalKeys);
   const risk = researchMetric(snapshot, "red_flag_count");
@@ -123,6 +123,11 @@ export function compactAnalysisStock(snapshot: OpenDataStockSnapshot) {
   return { ticker: snapshot.ticker, company: snapshot.name, sector: snapshot.sector, industry: snapshot.industry,
     snapshot_as_of: snapshot.generated_at, financial_as_of: financialDate, currency: financialCurrency,
     metrics: facts, missing_metrics: missing, market, red_flags: redFlags,
+    revenue_signals: Object.fromEntries(["revenue", "momentum", "revenue_consistency"].map(key => {
+      const m = snapshot.screening?.metrics[key];
+      return [key, { label: m?.validated ? m.strength ?? m.status : null, formula: m?.formula, periods: m?.comparison_periods,
+        ...(m?.diagnostics ? { diagnostics: m.diagnostics } : {}) }];
+    })),
     revenue_quarters: revenueHistory, quarters: quarterly, annual,
     ...(valuationBasis && Object.keys(valuationBasis).length ? { valuation_basis: valuationBasis } : {}),
     warnings: [...warnings], data_gaps: snapshot.data_gaps,

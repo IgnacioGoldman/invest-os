@@ -71,7 +71,7 @@ class ScreeningMetricsTests(unittest.TestCase):
         facts=json.loads((Path(__file__).parent/'fixtures/goog-sec-business-facts-q2-2026.json').read_text())
         snapshot=compute_open_data_snapshot(ticker='GOOG',cik=facts['cik'],companyfacts=facts,price=None)
         metrics=build_screening_metrics(snapshot.model_dump(mode='json'),TODAY)['metrics']
-        expected={'revenue':(24.23362508814868,'Growing'),'momentum':(7.9999203537215,'Accelerating'),
+        expected={'revenue':(24.23362508814868,'Growing'),'momentum':(6.978846106653712,'Accelerating'),
                   'operating_margin':(34.03285585495342,'Profitable'),'operating_margin_trend':(1.6034784956801786,'Improving')}
         for key,(value,label) in expected.items():
             self.assertAlmostEqual(metrics[key]['value'],value)

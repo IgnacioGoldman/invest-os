@@ -11,6 +11,7 @@ import math
 import re
 from datetime import date, timedelta
 from typing import Any
+from statistics import median
 
 from app.services.revenue_growth_momentum import calculate_revenue_growth_momentum
 
@@ -95,9 +96,30 @@ BUSINESS_MAX_AGE_DAYS = 140
 BUSINESS_STATUSES = {
     'revenue': {'Growing', 'Flat', 'Declining'},
     'momentum': {'Accelerating', 'Steady', 'Decelerating'},
+    'revenue_consistency': {'Steady', 'Choppy'},
     'operating_margin': {'Profitable', 'Loss-making'},
     'operating_margin_trend': {'Improving', 'Stable', 'Declining'},
 }
+
+
+def revenue_strength(value: float | None) -> str:
+    """Restore the pre-existing 20/8/0 growth bands without changing signed aliases."""
+    if value is None:
+        return 'Unknown'
+    return 'Strong' if value >= 20 - 1e-10 else 'Solid' if value >= 8 - 1e-10 else 'Flat' if value >= 0 else 'Weak'
+
+
+def revenue_consistency(values: list[float]) -> dict:
+    """Pattern regularity, independent of growth direction and strength."""
+    tolerance = max(3.0, .25 * median(abs(v) for v in values))
+    curvature = max(abs(values[i] - 2 * values[i-1] + values[i-2]) for i in range(2, len(values)))
+    # A sustained new level is not an isolated spike. Require three observations
+    # on each side, all within the same documented tolerance of their median.
+    sustained_shift = any(all(max(abs(v - median(part)) for v in part) <= tolerance for part in (values[:i], values[i:]))
+                          for i in range(3, len(values)-2))
+    return {'label': 'Steady' if curvature <= tolerance + 1e-10 or sustained_shift else 'Choppy',
+            'max_second_difference_pp': curvature, 'tolerance_pp': tolerance, 'sustained_level_shift': sustained_shift,
+            'observation_count': len(values)}
 
 
 def build_business_performance(snapshot: dict, today: date) -> dict:
@@ -161,18 +183,42 @@ def build_business_performance(snapshot: dict, today: date) -> dict:
     if value is not None:
         publish(growth, value, 'Growing' if value > 0 else 'Declining' if value < 0 else 'Flat', inputs, latest_revenue)
 
+    growth['strength'] = revenue_strength(growth['value'])
+
     momentum = metric(latest_revenue, 'median(latest 3 quarterly YoY growth rates) − median(preceding 3), pp')
-    window = rows[-6:]
-    validated_rows, momentum_inputs = [], []
-    for row in window:
+    validated_rows, all_inputs, observations = [], {}, []
+    for row in rows:
         value, inputs = growth_for(row)
         validated_rows.append({**row, 'metrics': {'revenue_growth_yoy': {'value': value}}})
-        momentum_inputs.extend(inputs)
+        all_inputs[row.get('period', '')] = inputs
+        if value is not None:
+            observations.append({'period': row['period'], 'as_of': row['as_of'], 'value': value,
+                                 'currency': next(iter(currencies(inputs[0]))),
+                                 'source': '; '.join(dict.fromkeys(i['source'] for i in inputs))})
     movement = calculate_revenue_growth_momentum({'historical_series': {'quarterly_revenue': validated_rows}})
-    if growth['validated'] and movement['change'] is not None:
-        publish(momentum, movement['change'], movement['label'], momentum_inputs, latest_revenue)
+    used = movement['points']
+    window = [row for row in validated_rows if row['period'] in {p['period'] for p in used}]
+    comparable_window = bool(window) and all(
+        60 <= (day(b['as_of']) - day(a['as_of'])).days <= 120 for a, b in zip(window, window[1:]))
+    window_inputs = [i for row in window for i in all_inputs[row['period']]]
+    same_currency = bool(window_inputs) and len(set.union(*(currencies(i) for i in window_inputs))) == 1
+    if growth['validated'] and movement['change'] is not None and comparable_window and same_currency:
+        publish(momentum, movement['change'], movement['label'], window_inputs, latest_revenue)
+        half = len(used) // 2
+        momentum['formula'] = f'median(latest {half} quarterly YoY growth rates) − median(preceding {half}), pp; ±3 pp thresholds'
         momentum['period'] = '; '.join(row['period'] for row in window)
         momentum['comparison_periods'] = [row['period'] for row in window]
+        momentum['detail'] = movement
+    # The chart and all consumers use these recomputed, source-linked observations.
+    growth['observations'] = observations
+    momentum['observations'] = observations
+    consistency = metric(latest_revenue, 'max absolute second difference ≤ max(3 pp, 25% of median absolute growth); or sustained level shift (≥3 quarters each side)')
+    if momentum['validated']:
+        pattern = revenue_consistency([point['value'] for point in used])
+        consistency.update(momentum, value=None, status=pattern['label'], formula=consistency['formula'],
+                           diagnostics=pattern, observations=observations)
+    else:
+        consistency['observations'] = observations
 
     def operating_for(row: dict) -> tuple[float | None, list[dict]]:
         income = row.get('metrics', {}).get('operating_income', {})
@@ -198,7 +244,7 @@ def build_business_performance(snapshot: dict, today: date) -> dict:
         publish(trend, delta, 'Improving' if delta > 0 else 'Declining' if delta < 0 else 'Stable', inputs + prior_inputs, latest_operating)
         trend['comparison_periods'] = [prior['period'], latest_operating['period']]
     operating['yoy_change_pp'] = trend['value']
-    business = {'revenue': growth, 'momentum': momentum, 'operating_margin': operating, 'operating_margin_trend': trend}
+    business = {'revenue': growth, 'momentum': momentum, 'revenue_consistency': consistency, 'operating_margin': operating, 'operating_margin_trend': trend}
     revenue_input = latest_revenue.get('metrics', {}).get('revenue', {})
     operating_revenue = latest_operating.get('metrics', {}).get('revenue', {})
     if (latest_revenue.get('as_of') == latest_operating.get('as_of')
@@ -336,7 +382,7 @@ def build_screening_metrics(snapshot: dict, today: date | None = None) -> dict:
     output['upcoming_earnings'] = result(earnings, value=event_days, period=match[0][1:] if match else 'Unknown date',
         formula='source event/window start date − current date', status='Unknown' if event_days is None else 'This week' if event_days <= 7 else 'Next 30 days' if event_days <= 30 else 'Later')
     output['red_flag_count'] = build_red_flag_count(snapshot, today)
-    return {'version': 3, 'as_of': today.isoformat(), 'metrics': output, 'financial_details': advanced, 'warnings': warnings,
+    return {'version': 4, 'as_of': today.isoformat(), 'metrics': output, 'financial_details': advanced, 'warnings': warnings,
             'verification': 'Source identifiers preserve provenance; financial inputs have not been independently verified.'}
 
 

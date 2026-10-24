@@ -16,7 +16,7 @@ export const SUPPORT_KEYS = Object.fromEntries(SUPPORT_TIMEFRAMES.map(({ field, 
 export function isSupportField(field: string): field is SupportFilterKey { return SUPPORT_TIMEFRAMES.some(t => t.field === field); }
 export const DISABLED_FILTER_FIELDS = ["eps", "industry_strength", "valuation", "fcf_margin", "forward_pe", "balance_sheet"];
 export function normalizedFilterValue(field: string, value: string) {
-  return field === "momentum" && value === "Stable" ? "Steady" : value;
+  return field === "revenue" ? ({ "High Growth": "Strong", "Moderate Growth": "Solid", "Weak": "Weak" } as Record<string, string>)[value] ?? value : field === "momentum" && value === "Stable" ? "Steady" : value;
 }
 export const NUMERIC_FIELDS = ["revenue", "momentum", "operating_margin", "operating_margin_trend", "red_flag_count"];
 export const NUMERIC_COMPARISONS = ["lt", "lte", "eq", "gte", "gt"] as const;
@@ -84,13 +84,13 @@ export function businessMetric(snapshot: OpenDataStockSnapshot, key: string): Re
   const deadline = metric?.valid_until;
   const today = new Date(Date.now()).toISOString().slice(0, 10);
   if (!metric?.validated || !definition || definition.context || validDay(deadline) == null || !deadline || deadline < today
-      || typeof metric.value !== "number" || !Number.isFinite(metric.value)
+      || (definition.format !== "label" && (typeof metric.value !== "number" || !Number.isFinite(metric.value)))
       || !(definition.options as readonly string[]).includes(metric.status)) return undefined;
   return metric;
 }
 export function visibleStockMetrics(snapshot: OpenDataStockSnapshot, context: boolean) {
   return STOCK_METRICS.filter(metric => metric.context === context
-    && (metric.key === "red_flag_count" ? redFlagMetric(snapshot) != null : metric.getValue(snapshot) != null));
+    && (metric.key === "red_flag_count" ? redFlagMetric(snapshot) != null : (metric.format === "label" ? businessMetric(snapshot, metric.key) != null : metric.getValue(snapshot) != null)));
 }
 export function redFlagMetric(snapshot: OpenDataStockSnapshot): ResearchMetric | undefined {
   const metric = researchMetric(snapshot, "red_flag_count");
@@ -116,22 +116,25 @@ export function metricEvidence(metric?: ResearchMetric, includeWarnings = true):
 }
 type Definition = {
   key: string; field: string; title: string; shortLabel: string; question: string; description: string;
-  format: "percent" | "ratio" | "days" | "pp" | "support" | "compact" | "count";
+  format: "percent" | "ratio" | "days" | "pp" | "support" | "compact" | "count" | "label";
   context: boolean; options: string[];
   getSignal: (s: OpenDataStockSnapshot) => MetricSignal;
   getValue: (s: OpenDataStockSnapshot) => number | null;
 };
 const financialMetric = (key: string) => ({
-  getSignal: (s: OpenDataStockSnapshot) => metricSignal(businessMetric(s, key)?.status ?? "Unknown"),
+  getSignal: (s: OpenDataStockSnapshot) => metricSignal((key === "revenue" ? businessMetric(s, key)?.strength : undefined) ?? businessMetric(s, key)?.status ?? "Unknown"),
   getValue: (s: OpenDataStockSnapshot) => businessMetric(s, key)?.value ?? null,
 });
 export const STOCK_METRICS = [
   { key: "revenue", field: "revenue", title: "Revenue Growth YoY", shortLabel: "Revenue YoY", format: "percent", context: false,
-    question: "How did quarterly sales change?", description: "Latest fiscal quarter versus the equivalent prior-year quarter. Labels describe revenue growth, not investment quality.",
-    options: ["Growing", "Flat", "Declining"], ...financialMetric("revenue") },
+    question: "How did quarterly sales change?", description: "Latest fiscal quarter versus the equivalent prior-year quarter. Strength bands: Strong ≥20%, Solid ≥8%, Flat 0–<8%, Weak <0%. Growing and Declining remain available for saved signed-direction filters.",
+    options: ["Strong", "Solid", "Flat growth", "Weak", "Growing", "Flat", "Declining"], ...financialMetric("revenue") },
   { key: "momentum", field: "momentum", title: "Revenue Growth Momentum", shortLabel: "Momentum", format: "pp", context: false,
     question: "Is revenue growth accelerating or decelerating?", description: REVENUE_MOMENTUM_DESCRIPTION,
     options: ["Accelerating", "Steady", "Decelerating"], ...financialMetric("momentum") },
+  { key: "revenue_consistency", field: "revenue_consistency", title: "Revenue Growth Consistency", shortLabel: "Consistency", format: "label", context: false,
+    question: "Has quarterly revenue growth followed a regular pattern?", description: "Six to eight comparable quarterly YoY observations. Smooth trends and sustained new levels are Steady; abrupt spikes and reversals are Choppy. This describes regularity, not growth strength.",
+    options: ["Steady", "Choppy"], ...financialMetric("revenue_consistency") },
   { key: "operating_margin", field: "operating_margin", title: "Operating Margin", shortLabel: "Operating margin", format: "percent", context: false,
     question: "What portion of quarterly sales becomes operating profit?", description: "Latest-quarter core operating income divided by revenue, with the change versus the same quarter last year when comparable.",
     options: ["Profitable", "Loss-making"], ...financialMetric("operating_margin") },
@@ -154,3 +157,14 @@ export type StockMetricKey = typeof STOCK_METRICS[number]["key"];
 export type StockMetricField = Exclude<typeof STOCK_METRICS[number]["field"], "support"> | SupportFilterKey;
 export const STOCK_METRIC_BY_KEY = Object.fromEntries(STOCK_METRICS.map(m => [m.key, m])) as Record<StockMetricKey, typeof STOCK_METRICS[number]>;
 export function stockMetricForField(field: string) { return STOCK_METRICS.find(m => m.field === (isSupportField(field) ? "support" : field)); }
+
+export function financialLabelMatches(snapshot: OpenDataStockSnapshot, field: string, value: string): boolean {
+  const m = businessMetric(snapshot, field);
+  if (field === "revenue" && m) {
+    if (value === "Growing") return m.value! > 0;
+    if (value === "Declining") return m.value! < 0;
+    if (value === "Flat growth") return m.strength === "Flat";
+    if (value === "Flat") return m.status === "Flat";
+  }
+  return stockMetricForField(field)?.getSignal(snapshot).label === normalizedFilterValue(field, value);
+}

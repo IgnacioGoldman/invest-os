@@ -143,7 +143,7 @@ const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
   { key: "watchlist_order", label: "Group order" },
   { key: "symbol", label: "Symbol" },
   { key: "support_best", label: "Support distance" },
-  ...AVAILABLE_FILTER_DEFINITIONS.map(({ key, label, shortLabel }) => ({ key: key as SortKey, label: isSupportField(key) ? shortLabel : label })),
+  ...AVAILABLE_FILTER_DEFINITIONS.filter(({ key }) => stockMetricForField(key)?.format !== "label").map(({ key, label, shortLabel }) => ({ key: key as SortKey, label: isSupportField(key) ? shortLabel : label })),
 ];
 
 function supportedSortKey(key: SortKey, watchlistView: boolean): SortKey {
@@ -238,9 +238,7 @@ function metricValue(row: OpenDataStockSnapshot["historical_series"][string][num
 }
 
 function revenueGrowthPoints(snapshot: OpenDataStockSnapshot) {
-  return historicalRows(snapshot, "quarterly_revenue")
-    .map((row) => ({ period: row.period, value: metricValue(row, "revenue_growth_yoy") }))
-    .filter((point): point is { period: string; value: number } => point.value != null);
+  return snapshot.screening?.metrics.revenue?.observations ?? [];
 }
 
 function quarterlyMetricPoints(snapshot: OpenDataStockSnapshot, metric: string) {
@@ -323,6 +321,8 @@ function rowMetric(
       return metric ? { value: redFlagDisplay(snapshot), signal: definition.getSignal(snapshot),
         secondary: `${metric.coverage!.assessed}/${metric.coverage!.applicable} checks assessed` } : null;
     }
+    if (definition.format === "label") return businessMetric(snapshot, definition.key)
+      ? { value: definition.getSignal(snapshot).label, signal: definition.getSignal(snapshot), secondary: null } : null;
     const value = definition.getValue(snapshot);
     if (value == null) return null;
     return { value: definition.format === "pp" ? formatMomentumPp(value) : formatPercent(value, true),
@@ -968,7 +968,8 @@ function GrowthChart({
   selectedPeriods?: string[];
 }) {
   const [activePoint, setActivePoint] = useState<{ period: string; value: number; x: number; y: number } | null>(null);
-  const visible = points.slice(-8);
+  const [range, setRange] = useState<"8Q" | "ALL">("8Q");
+  const visible = range === "ALL" ? points : points.slice(-8);
   if (visible.length === 0) {
     return (
       <article className="mobile-growth-chart">
@@ -1011,6 +1012,9 @@ function GrowthChart({
       <div className="mobile-growth-heading">
         <h3>{title}</h3>
         <strong className={visible[visible.length - 1].value < 0 ? "negative" : "positive"}>{formatPercent(visible[visible.length - 1].value, true)}</strong>
+      </div>
+      <div className="mobile-range-control" aria-label="Revenue history range">
+        {(["8Q", "ALL"] as const).map(item => <button type="button" key={item} className={range === item ? "active" : ""} onClick={() => { setRange(item); setActivePoint(null); }}>{item === "8Q" ? "8 quarters" : "All history"}</button>)}
       </div>
       <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${title} quarterly chart`}>
         <line className="mobile-bar-zero" x1={pad.left} x2={width - pad.right} y1={zeroY} y2={zeroY} />
@@ -1181,7 +1185,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
   const metric = detailKey === "red_flag_count" ? redFlagMetric(snapshot) : businessMetric(snapshot, detailKey);
   if (!metric) return null;
   const value = metric.value!;
-  const currentValue = detailKey === "red_flag_count" ? redFlagDisplay(snapshot) : copy.format === "pp" ? formatMomentumPp(value)
+  const currentValue = detailKey === "red_flag_count" ? redFlagDisplay(snapshot) : copy.format === "label" ? metric.status : copy.format === "pp" ? formatMomentumPp(value)
     : formatPercent(value, true);
   return <section className="mobile-growth-detail-panel">
     <div className="mobile-growth-copy">
@@ -1208,12 +1212,16 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
         </section>)}
       </>}
       {detailKey === "operating_margin" && metric?.yoy_change_pp != null && <small>{formatMomentumPp(metric.yoy_change_pp)} versus the same quarter last year</small>}
+      {detailKey === "revenue_consistency" && metric.diagnostics && <small>
+        {metric.diagnostics.observation_count} quarters · largest change in quarterly growth pace {formatMomentumPp(metric.diagnostics.max_second_difference_pp)} · tolerance {formatMomentumPp(metric.diagnostics.tolerance_pp)}
+      </small>}
       <small>{metric?.formula}</small>
       {(metric?.warnings ?? []).map(warning => <small key={warning}>{warning}</small>)}
       <details className="mobile-metric-evidence"><summary>Sources and calculation</summary><small>{metricEvidence(metric, false)}</small></details>
 
     </div>
-
+    {(["revenue", "momentum", "revenue_consistency"] as string[]).includes(detailKey) && <GrowthChart
+      title="Revenue Growth YoY" points={revenueGrowthPoints(snapshot)} selectedPeriods={metric.comparison_periods} />}
   </section>;
 }
 
@@ -1291,7 +1299,7 @@ function StockDetail({ snapshot: summary, onBack, onOpenPeer }: { snapshot: Open
           <div className="mobile-signal-strip mobile-business-metrics">
             {businessMetrics.map(metric => <MobileGrowthSignalButton key={metric.key}
               active={selectedDetail === metric.key} label={metric.title}
-              value={metric.key === "red_flag_count" ? redFlagDisplay(snapshot) : metric.format === "pp" ? formatMomentumPp(metric.getValue(snapshot)) : formatPercent(metric.getValue(snapshot), true)}
+              value={metric.key === "red_flag_count" ? redFlagDisplay(snapshot) : metric.format === "label" ? metric.getSignal(snapshot).label : metric.format === "pp" ? formatMomentumPp(metric.getValue(snapshot)) : formatPercent(metric.getValue(snapshot), true)}
               signal={metric.getSignal(snapshot)} onClick={() => setActiveGrowthDetail(current => current === metric.key ? null : metric.key)} />)}
           </div>
         </section>}

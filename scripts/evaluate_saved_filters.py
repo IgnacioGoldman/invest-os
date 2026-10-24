@@ -38,6 +38,8 @@ def _number(value: Any) -> float | None:
 
 def _filter_value(condition: dict[str, Any]) -> Any:
     value = condition.get("value")
+    if condition.get("field") == "revenue":
+        value = {"High Growth": "Strong", "Moderate Growth": "Solid"}.get(value, value)
     if condition.get("field") == "momentum" and value == "Stable":
         return "Steady"
     return value
@@ -61,15 +63,16 @@ def signal_for(snapshot: dict[str, Any], field: str) -> str:
         valid_until = str(metric.get('valid_until') or '')
         if not metric.get('validated') or valid_until < datetime.now(timezone.utc).date().isoformat():
             return 'Unknown'
-    return screening.get("metrics", {}).get(field, {}).get("status", "Unknown")
+    return metric.get("strength", metric.get("status", "Unknown")) if field == "revenue" else metric.get("status", "Unknown")
 
 
 FILTER_VALUES = {
     **BUSINESS_STATUSES,
+    "revenue": {"Strong", "Solid", "Weak", "Growing", "Flat growth", "Flat", "Declining"},
     "upcoming_earnings": {"This week", "Next 30 days", "Later"},
     **{field: {"Inside Support Zone", "Near Support", "Above Support"} for field in SUPPORT_METRICS},
 }
-NUMERIC_FIELDS = {*BUSINESS_STATUSES, 'red_flag_count'}
+NUMERIC_FIELDS = {*BUSINESS_STATUSES, 'red_flag_count'} - {'revenue_consistency'}
 NUMERIC_COMPARISONS = {'lt', 'lte', 'eq', 'gte', 'gt'}
 
 
@@ -97,7 +100,15 @@ def valid_condition(condition: dict) -> bool:
 
 def condition_matches(snapshot: dict, condition: dict) -> bool:
     if condition.get('comparison') is None:
-        return signal_for(snapshot, str(condition.get('field', ''))) == _filter_value(condition)
+        if condition.get('field') == 'revenue' and condition.get('value') in {'Growing', 'Declining', 'Flat'}:
+            screening = snapshot.get('screening') or build_screening_metrics(snapshot, today=datetime.now(timezone.utc).date())
+            m = screening.get('metrics', {}).get('revenue', {})
+            value = _number(m.get('value'))
+            if signal_for(snapshot, 'revenue') == 'Unknown' or value is None:
+                return False
+            return value > 0 if condition['value'] == 'Growing' else value < 0 if condition['value'] == 'Declining' else value == 0
+        label = signal_for(snapshot, str(condition.get('field', '')))
+        return label == ('Flat' if condition.get('field') == 'revenue' and condition.get('value') == 'Flat growth' else _filter_value(condition))
     screening = snapshot.get('screening') or build_screening_metrics(snapshot, today=datetime.now(timezone.utc).date())
     m = screening.get('metrics', {}).get(condition['field'], {})
     value, target = _number(m.get('value')), numeric_target(condition)

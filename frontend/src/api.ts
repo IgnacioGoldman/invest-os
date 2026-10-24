@@ -63,6 +63,9 @@ export type ResearchMetric = OpenDataMetric & {
   validated?: boolean;
   valid_until?: string | null;
   comparison_periods?: string[];
+  strength?: string;
+  observations?: Array<{ period: string; as_of: string; value: number; currency: string; source: string }>;
+  diagnostics?: { label: string; max_second_difference_pp: number; tolerance_pp: number; sustained_level_shift: boolean; observation_count: number };
   price_as_of?: string;
   components?: Record<string, ResearchMetric>;
   assessment_version?: number;

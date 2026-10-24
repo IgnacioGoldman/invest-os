@@ -1,9 +1,10 @@
 # First-filter business performance
 
-Invest OS identifies companies with interesting reported business performance. One compact, two-column Business Performance section contains these four descriptive facts:
+Invest OS identifies companies with interesting reported business performance. One compact, two-column Business Performance section contains these descriptive facts:
 
-- [Revenue Growth YoY](latest-revenue-growth-yoy.md): Growing / Flat / Declining, percentage.
+- [Revenue Growth YoY](latest-revenue-growth-yoy.md): Strong / Solid / Flat / Weak strength bands, percentage; signed-direction saved filters preserved.
 - [Revenue Growth Momentum](revenue-growth-momentum.md): Accelerating / Steady / Decelerating, percentage points.
+- [Revenue Growth Consistency](revenue-growth-consistency.md): Steady / Choppy, six to eight quarterly observations.
 - [Operating Margin](operating-margin.md): Profitable / Loss-making, percentage.
 - [Operating Margin Trend](operating-margin-trend.md): Improving / Stable / Declining, percentage points versus the same fiscal quarter last year.
 

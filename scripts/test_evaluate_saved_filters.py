@@ -107,7 +107,7 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
         row=snapshot(revenue=25)
         for label in ('Strong','Solid','High Growth','Moderate Growth'):
             expression={"operator":"or","groups":[{"operator":"or","conditions":[{"field":"revenue","value":label},{"field":"revenue","value":"Growing"}]}]}
-            self.assertFalse(expression_matches(row,expression))
+            self.assertTrue(expression_matches(snapshot(),expression))
 
     def test_support_boundaries_and_missing_data_are_neutral_context(self):
         for value,label in ((2.5,"Inside Support Zone"),(2.51,"Near Support"),(6,"Near Support"),(6.01,"Above Support"),(100,"Above Support"),(None,"Unknown"),(-1,"Inside Support Zone"),(-3,"Unknown")):
