@@ -11423,3 +11423,25 @@ body:has(.mobile-sheet-backdrop) {
 .mobile-research-warning {
   margin-bottom: 12px;
 }
+
+/* The first filter uses four business facts; missing cards leave no slots. */
+.mobile-business-metrics,
+.mobile-context-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.mobile-section-title {
+  color: var(--mobile-muted);
+  font-size: 0.8rem;
+  font-weight: 680;
+  margin: 14px 0 0;
+}
+.mobile-business-metrics > button,
+.mobile-context-metrics > button {
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 84px;
+}
+
+.mobile-business-metrics > button:last-child:nth-child(odd),
+.mobile-context-metrics > button:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}

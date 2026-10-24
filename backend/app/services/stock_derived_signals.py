@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from app.entry_engine.open_data_models import OpenDataSnapshot
 
 
-DerivedMetricKind = Literal["percent", "ratio", "compact"]
+DerivedMetricKind = Literal["percent", "pp", "ratio", "compact"]
 
 
 class DerivedSignal(BaseModel):
@@ -51,17 +51,13 @@ def build_stock_derived_signals(snapshot: OpenDataSnapshot, snapshots: list[Open
     screening = build_screening_metrics(snapshot.model_dump(mode="json"))
     metrics = screening["metrics"]
     derived = {
-        "rev_accel": DerivedSignal(value=metrics["momentum"]["value"], kind="percent", notes="Revenue growth momentum: median(latest three quarterly YoY rates) minus median(preceding three), in percentage points."),
-        "op_margin_yoy_delta": DerivedSignal(value=metrics["operating_margin"].get("yoy_change_pp"), kind="percent", notes="Latest-quarter operating margin minus the same fiscal quarter last year, in percentage points."),
-        "net_cash": DerivedSignal(value=metrics["balance_sheet"]["value"], kind="compact", notes="Compatible unrestricted cash equivalents minus complete debt; investments excluded. Unknown when scope is incomplete."),
+        key: DerivedSignal(value=metrics[key]['value'], kind='pp' if key in {'momentum', 'operating_margin_trend'} else 'percent', notes=metrics[key]['formula'])
+        for key in ('revenue', 'momentum', 'operating_margin', 'operating_margin_trend')
     }
-    warnings = list(screening["warnings"])
-    for metric in metrics.values():
-        warnings.extend(metric["warnings"])
     return StockDerivedSignals(
         ticker=snapshot.ticker, name=snapshot.name, sector=snapshot.sector, industry=snapshot.industry,
         source_snapshot_generated_at=snapshot.generated_at, derived_metrics=derived,
-        interesting_facts=[InterestingFact(type="needs_review", text=warning) for warning in dict.fromkeys(warnings)],
+        interesting_facts=[],
         data_gaps=snapshot.data_gaps,
     )
 

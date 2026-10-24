@@ -51,28 +51,44 @@ class FakeSupabase:
 
 from test_screening_metrics import ordinary
 from app.services.screening_metrics import build_screening_metrics
+from test_screening_metrics import TODAY
+from unittest.mock import patch
 
 
 def snapshot(ticker="TEST", revenue=12, short=1, long=30):
     row=ordinary(revenue); row["ticker"]=ticker
-    row["price_opportunity"].update(support_1m_distance={"value":short},support_5y_distance={"value":long})
-    row["screening"]=build_screening_metrics(row)
+    def support(value):
+        midpoint=100/(1+value/100) if value is not None else 100
+        return {"value":value,"source":"yfinance_history","tier":"computed_from_public_facts","as_of":TODAY.isoformat(),
+                "notes":f"Support zone: ${midpoint*.975:.8f}-${midpoint*1.025:.8f}; midpoint ${midpoint}"}
+    row["price_opportunity"].update(support_1m_distance=support(short),support_5y_distance=support(long))
+    row["screening"]=build_screening_metrics(row,TODAY)
     return row
 
 
 RESEARCH_FILTER={"operator":"and","groups":[
-    {"operator":"or","conditions":[{"field":"revenue","value":"High Growth"},{"field":"revenue","value":"Moderate Growth"}]},
+    {"operator":"or","conditions":[{"field":"revenue","value":"Growing"},{"field":"revenue","value":"Growing"}]},
     {"operator":"or","conditions":[{"field":"support_1m","value":"Inside Support Zone"},{"field":"support_5y","value":"Near Support"}]},
 ]}
 
 
+class FrozenDatetime(datetime):
+    @classmethod
+    def now(cls,tz=None):
+        return cls(2026,10,24,12,tzinfo=timezone.utc)
+
+
 class SavedFilterEvaluatorTests(unittest.TestCase):
+    def setUp(self):
+        clock=patch('evaluate_saved_filters.datetime',FrozenDatetime)
+        clock.start();self.addCleanup(clock.stop)
+
     def test_retired_rules_fail_closed_even_inside_or(self):
-        for field in ("eps","valuation","industry_strength"):
+        for field in ("eps","valuation","industry_strength","fcf_margin","forward_pe","balance_sheet"):
             row=snapshot()
             self.assertEqual(signal_for(row,field),"Needs Review")
             expression={"operator":"or","groups":[{"operator":"or","conditions":[
-                {"field":field,"value":"Cheap"},{"field":"revenue","value":"Moderate Growth"}]}]}
+                {"field":field,"value":"Cheap"},{"field":"revenue","value":"Growing"}]}]}
             self.assertFalse(expression_matches(row,expression))
 
     def test_grouped_expression_requires_each_metric_and_accepts_any_status(self):
@@ -83,14 +99,15 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
 
     def test_missing_metrics_remain_unknown_and_do_not_create_positive_signals(self):
         row={"ticker":"MISSING"}
-        for field in ("revenue","momentum","fcf_margin","forward_pe","upcoming_earnings","support_1m"):
+        for field in ("revenue","momentum","operating_margin","operating_margin_trend","upcoming_earnings","support_1m"):
             self.assertEqual(signal_for(row,field),"Unknown")
         self.assertFalse(expression_matches(row,RESEARCH_FILTER))
 
-    def test_revenue_legacy_labels_preserve_band_meaning(self):
+    def test_old_revenue_band_rules_require_explicit_editing(self):
         row=snapshot(revenue=25)
-        expression={"operator":"and","groups":[{"operator":"and","conditions":[{"field":"revenue","value":"Strong"}]}]}
-        self.assertTrue(expression_matches(row,expression))
+        for label in ('Strong','Solid','High Growth','Moderate Growth'):
+            expression={"operator":"or","groups":[{"operator":"or","conditions":[{"field":"revenue","value":label},{"field":"revenue","value":"Growing"}]}]}
+            self.assertFalse(expression_matches(row,expression))
 
     def test_support_boundaries_and_missing_data_are_neutral_context(self):
         for value,label in ((2.5,"Inside Support Zone"),(2.51,"Near Support"),(6,"Near Support"),(6.01,"Above Support"),(100,"Above Support"),(None,"Unknown"),(-1,"Inside Support Zone"),(-3,"Unknown")):
@@ -99,7 +116,7 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
     def test_bare_forward_multiple_never_generates_a_valuation_rating(self):
         for value in (5,18,25,50,None,-1,float("nan")):
             row=snapshot();row["valuation"]["forward_pe"]={"value":value}
-            self.assertEqual(signal_for(row,"forward_pe"),"Unknown")
+            self.assertEqual(signal_for(row,"forward_pe"),"Needs Review")
 
     def test_first_run_is_quiet_then_new_match_creates_daily_badge(self):
         client=FakeSupabase();client.saved_filters=[{"id":"research","user_id":"user-1","expression":RESEARCH_FILTER}]

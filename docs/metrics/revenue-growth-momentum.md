@@ -28,7 +28,7 @@ Revenue Growth Momentum describes changes in growth pace, not the absolute stren
 - **Accelerating:** Recent median growth is at least 3 pp above the prior median.
 - **Decelerating:** Recent median growth is at least 3 pp below the prior median.
 - **Steady:** The median difference is strictly between −3 pp and +3 pp.
-- **Unknown:** Six consecutive quarters with finite, comparable revenue YoY growth are unavailable. Missing growth, missing quarters, duplicate quarters, or invalid fiscal periods prevent calculation. Older valid quarters never replace a missing quarter in the latest window.
+- **Hidden card:** Six consecutive quarters with finite, comparable revenue YoY growth are unavailable. Missing growth, missing quarters, duplicate quarters, or invalid fiscal periods prevent calculation. Older valid quarters never replace a missing quarter in the latest window.
 
 These thresholds are a first-pass signal. Steady means the typical growth pace is within 3 pp of its earlier level; it does not mean every quarter was stable. A company can accelerate while revenue is still shrinking, or decelerate while revenue is still growing strongly.
 
@@ -45,11 +45,11 @@ Latest-quarter Change (pp) = Growth YoY Q[t] - Growth YoY Q[t-1]
 - **Weakening:** The latest change is at most −3 pp.
 - **Steady:** The latest change is strictly between −3 pp and +3 pp.
 
-This supporting label does not affect momentum filters, sorting, or the primary tag. Both changes use unrounded values for classification and display rounded to two decimal places. The detail view highlights all six quarters used in the calculation.
+This supporting label does not affect momentum filters, sorting, or the primary tag. Both changes use unrounded values for classification and display rounded to two decimal places. Expandable evidence identifies all six quarters used in the calculation.
 
 ### Data updates and validation
 
-Desktop and mobile calculate momentum from each loaded snapshot's `historical_series.quarterly_revenue`, using the shared `frontend/src/revenueGrowthMomentum.ts` implementation. No separately cached momentum value needs to be refreshed. New quarterly data automatically changes the six-quarter window on the next load.
+The shared backend screening projection recomputes momentum from validated `historical_series.quarterly_revenue` inputs. The TypeScript implementation preserves the same six-quarter formula and is checked for parity. New quarterly data changes the window on the next projection rebuild; the browser rechecks its freshness deadline before rendering.
 
 GitHub Actions evaluates saved-filter badges using the matching Python implementation in `backend/app/services/revenue_growth_momentum.py`. Deployment and data-refresh workflows run `scripts/validate_revenue_growth_momentum.py` to compare both implementations across regression scenarios and every exported symbol before publishing. The validator records unavailable symbols and their reasons without inventing missing observations or rejecting otherwise usable stock data.
 
@@ -78,4 +78,6 @@ The median deliberately responds more slowly than a two-quarter comparison. One 
 
 ## Research screening confidence
 
-Displayed as a Computed Metric with six fiscal periods, source identifiers and the formula. The latest comparable quarter must also pass the revenue input checks. No investment score is derived. The ±3 pp thresholds are the existing documented product rules, not newly fitted thresholds. Green means accelerating revenue only.
+The card displays its signed percentage-point value and Accelerating / Steady / Decelerating label. Calculation classification remains metadata for AI, not a visible Computed Metric badge. Preserve six fiscal periods, source identifiers and the formula. The latest comparable quarter must also pass the revenue input checks. No investment score is derived. The ±3 pp thresholds are the existing documented product rules, not newly fitted thresholds. Green means accelerating revenue only.
+
+The first-filter projection recomputes every YoY observation from comparable public revenue amounts, requiring approximately ten consecutive quarterly amounts. The latest report must pass the same 140-day freshness rule as Revenue Growth YoY. Missing, stale, duplicate, currency-incompatible or anomalous inputs hide the card entirely; no placeholder or numeric zero is inserted.

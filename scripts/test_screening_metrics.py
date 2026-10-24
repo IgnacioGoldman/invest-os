@@ -66,6 +66,78 @@ class ScreeningMetricsTests(unittest.TestCase):
         self.assertEqual(result.metrics['cash_including_restricted_reported'].value,100)
         self.assertIsNone(result.screening['metrics']['balance_sheet']['value'])
 
+    def test_four_business_metrics_reproduce_original_sec_quarter_facts(self):
+        from app.entry_engine.open_data_metrics import compute_open_data_snapshot
+        facts=json.loads((Path(__file__).parent/'fixtures/goog-sec-business-facts-q2-2026.json').read_text())
+        snapshot=compute_open_data_snapshot(ticker='GOOG',cik=facts['cik'],companyfacts=facts,price=None)
+        metrics=build_screening_metrics(snapshot.model_dump(mode='json'),TODAY)['metrics']
+        expected={'revenue':(24.23362508814868,'Growing'),'momentum':(7.9999203537215,'Accelerating'),
+                  'operating_margin':(34.03285585495342,'Profitable'),'operating_margin_trend':(1.6034784956801786,'Improving')}
+        for key,(value,label) in expected.items():
+            self.assertAlmostEqual(metrics[key]['value'],value)
+            self.assertEqual(metrics[key]['status'],label)
+            self.assertTrue(metrics[key]['validated'])
+            self.assertEqual(metrics[key]['as_of'],'2026-06-30')
+            self.assertIn('sec_companyfacts:us-gaap/',metrics[key]['source'])
+        self.assertIn('2025-06-30',metrics['operating_margin_trend']['source'])
+        self.assertIn('2026-06-30',metrics['operating_margin_trend']['source'])
+
+    def test_missing_prior_operating_quarter_hides_trend_but_keeps_current_margin(self):
+        row=ordinary()
+        row['historical_series']['quarterly_fundamentals']=[r for r in row['historical_series']['quarterly_fundamentals'] if r['period']!='FY2025 Q2']
+        m=build_screening_metrics(row,TODAY)['metrics']
+        self.assertTrue(m['operating_margin']['validated'])
+        self.assertFalse(m['operating_margin_trend']['validated'])
+        self.assertIsNone(m['operating_margin_trend']['value'])
+
+    def test_business_freshness_does_not_depend_on_a_fresh_market_quote(self):
+        row=ordinary()
+        at_deadline=build_screening_metrics(row,date(2026,11,17))['metrics']
+        expired=build_screening_metrics(row,date(2026,11,18))['metrics']
+        for key in ('revenue','momentum','operating_margin','operating_margin_trend'):
+            self.assertTrue(at_deadline[key]['validated'])
+            self.assertIsNone(expired[key]['value'])
+        future=build_screening_metrics(row,date(2026,6,29))['metrics']
+        self.assertIsNone(future['revenue']['value'])
+
+    def test_operating_trend_uses_same_fiscal_quarter_and_rejects_proxies(self):
+        for mutate in [lambda r:r['metrics']['operating_income'].update(tier='proxy_estimate'),
+                       lambda r:r['metrics']['operating_income'].update(source='unsourced'),
+                       lambda r:r['metrics']['operating_income'].update(as_of='2025-06-29'),
+                       lambda r:r['metrics']['revenue'].update(source='sec_companyfacts:us-gaap/Revenues:EUR:10-Q:2025-06-30')]:
+            row=ordinary();prior=next(r for r in row['historical_series']['quarterly_fundamentals'] if r['period']=='FY2025 Q2');mutate(prior)
+            m=build_screening_metrics(row,TODAY)['metrics']
+            self.assertTrue(m['operating_margin']['validated'])
+            self.assertIsNone(m['operating_margin_trend']['value'])
+
+    def test_business_labels_are_signed_facts_with_no_strength_bands(self):
+        for growth,label in [(24.23,'Growing'),(8,'Growing'),(.01,'Growing'),(0,'Flat'),(-5,'Declining')]:
+            row=ordinary(growth);m=build_screening_metrics(row,TODAY)['metrics']
+            self.assertEqual(m['revenue']['status'],label)
+        row=ordinary();row['historical_series']['quarterly_fundamentals'][-1]['metrics']['operating_income']['value']=-10
+        m=build_screening_metrics(row,TODAY)['metrics']
+        self.assertEqual(m['operating_margin']['status'],'Loss-making')
+        self.assertEqual(m['operating_margin_trend']['status'],'Declining')
+
+    def test_conflicting_same_quarter_revenue_and_duplicate_periods_are_hidden(self):
+        row=ordinary()
+        row['historical_series']['quarterly_fundamentals']=deepcopy(row['historical_series']['quarterly_fundamentals'])
+        row['historical_series']['quarterly_fundamentals'][-1]['metrics']['revenue']['value']*=2
+        metrics=build_screening_metrics(row,TODAY)['metrics']
+        for key in ('revenue','momentum','operating_margin','operating_margin_trend'):
+            self.assertIsNone(metrics[key]['value'])
+        row=ordinary()
+        row['historical_series']['quarterly_fundamentals'].append(deepcopy(row['historical_series']['quarterly_fundamentals'][-1]))
+        metrics=build_screening_metrics(row,TODAY)['metrics']
+        self.assertIsNone(metrics['operating_margin']['value'])
+        self.assertIsNone(metrics['operating_margin_trend']['value'])
+
+    def test_earnings_context_rejects_invalid_past_and_reversed_dates(self):
+        row=ordinary()
+        for event in ('2026-02-30','2026-10-24','2026-10-23','2026-11-03/2026-11-01'):
+            row['price_opportunity']['days_to_next_earnings']={**fact(8,'Calendar',TODAY.isoformat()),'source':f'yfinance:calendar:Earnings Date:{event}'}
+            self.assertIsNone(build_screening_metrics(row,TODAY)['metrics']['upcoming_earnings']['value'])
+
     def test_goog_q2_exceptional_earnings_do_not_generate_investment_ratings(self):
         s=json.loads((Path(__file__).parent/'fixtures/goog-q2-2026.json').read_text())
         before=deepcopy(s)
@@ -83,13 +155,15 @@ class ScreeningMetricsTests(unittest.TestCase):
         self.assertNotIn('eps',m); self.assertNotIn('peg',m)
         self.assertEqual(s,before,'Computing screening must preserve raw research facts')
         derived=build_stock_derived_signals(OpenDataSnapshot.model_validate(s),[])
+        self.assertEqual(derived.derived_metrics['momentum'].kind,'pp')
+        self.assertEqual(derived.derived_metrics['operating_margin_trend'].kind,'pp')
         self.assertNotIn('unusual_score',derived.derived_metrics)
         self.assertNotIn('sector_pe_cheap_rank',derived.derived_metrics)
 
     def test_ordinary_company_preserves_reproducible_values_without_false_gain_alarm(self):
         result=build_screening_metrics(ordinary(),TODAY);m=result['metrics']
         self.assertAlmostEqual(m['revenue']['value'],12)
-        self.assertEqual(m['revenue']['status'],'Moderate Growth')
+        self.assertEqual(m['revenue']['status'],'Growing')
         self.assertEqual(m['momentum']['status'],'Steady')
         self.assertAlmostEqual(m['operating_margin']['value'],20)
         self.assertAlmostEqual(m['operating_margin']['yoy_change_pp'],0)

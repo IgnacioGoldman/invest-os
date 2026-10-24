@@ -1,4 +1,4 @@
-import { calculateRevenueGrowthMomentum, formatMomentumPp } from "../revenueGrowthMomentum";
+import { formatMomentumPp } from "../revenueGrowthMomentum";
 import { MoneyPanel } from "./MoneyPanel";
 import { useStockDetails } from "../useStockDetails";
 import { prepareStockAnalysis, type StockAnalysisBrief } from "../aiAnalysis";
@@ -7,7 +7,7 @@ import { FilterSelector, type FilterShortcut } from "./FilterSelector";
 import { WatchlistGroups, type WatchlistGroupActions } from "./WatchlistGroups";
 import type { WatchlistGroup, WatchlistItem } from "../watchlist";
 import { MetricStatus } from "./MetricStatus";
-import { metricSignal, supportSignal, type MetricSignal as Signal, type MetricTone as Tone } from "../metricStatus";
+import { metricSignal, type MetricSignal as Signal, type MetricTone as Tone } from "../metricStatus";
 import {
   ArrowDown,
   ArrowLeft,
@@ -33,7 +33,7 @@ import { FILTER_ICONS, filterIcon, type FilterIconName } from "../filterIcons";
 import "../filterBuilder.css";
 import { expressionFromMetricRules, groupSupportTimeframes, metricRuleFields, metricRulesFromExpression } from "../metricFilterRules";
 import { STOCK_METRICS, STOCK_METRIC_BY_KEY, SUPPORT_KEYS, SUPPORT_FILTER_KEYS, SUPPORT_TIMEFRAMES,
-  upcomingEarningsMetric, upcomingEarningsSignal, isSupportField, stockMetricForField, researchMetric, metricEvidence, hasDisabledFilter, normalizedFilterValue, financialDetail,
+  upcomingEarningsMetric, upcomingEarningsSignal, isSupportField, stockMetricForField, researchMetric, metricEvidence, hasDisabledFilter, normalizedFilterValue, businessMetric, visibleStockMetrics, supportMetric, DISABLED_FILTER_FIELDS,
   type StockMetricKey, type StockMetricField, type SupportFilterKey } from "../stockMetrics";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -81,7 +81,7 @@ type Props = {
 };
 
 type GrowthDetailKey = StockMetricKey;
-export type FilterKey = StockMetricField | "valuation" | "eps" | "industry_strength";
+export type FilterKey = StockMetricField | "valuation" | "eps" | "industry_strength" | "fcf_margin" | "forward_pe" | "balance_sheet";
 export type SortKey = "watchlist_order" | "symbol" | "support_best" | Exclude<FilterKey, "forward_pe" | "industry_strength">;
 export type SortDirection = "asc" | "desc";
 const SPACE_TABS = ["explore", "watchlist", "portfolio"] as const;
@@ -132,15 +132,14 @@ const AVAILABLE_FILTER_DEFINITIONS: FilterDefinition[] = STOCK_METRICS.flatMap((
 });
 // Retired saved rules stay visible for editing, but cannot match stocks.
 const FILTER_DEFINITIONS: FilterDefinition[] = [...AVAILABLE_FILTER_DEFINITIONS,
-  ...(["valuation", "eps", "industry_strength"] as const).map(key => ({ key, label: `${key} (disabled)`, shortLabel: `${key} (disabled)`, section: "Quality" as const,
-    description: "This metric has been retired from screening. Remove this rule before using the filter.", options: [metricSignal("Needs Review")] })),
+  ...(["valuation", "eps", "industry_strength", "fcf_margin", "forward_pe", "balance_sheet"] as const).map(key => ({ key, label: `${key} (disabled)`, shortLabel: `${key} (disabled)`, section: "Quality" as const,
+    description: "This metric has been retired from screening. Remove this rule before using the filter.", options: [] })),
 ];
 const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
   { key: "watchlist_order", label: "Group order" },
   { key: "symbol", label: "Symbol" },
-  { key: "support_best", label: "Priority support" },
-  ...AVAILABLE_FILTER_DEFINITIONS.flatMap(({ key, label, shortLabel }) => key === "forward_pe" || key === "industry_strength"
-    ? [] : [{ key, label: isSupportField(key) ? shortLabel : label }]),
+  { key: "support_best", label: "Support distance" },
+  ...AVAILABLE_FILTER_DEFINITIONS.map(({ key, label, shortLabel }) => ({ key: key as SortKey, label: isSupportField(key) ? shortLabel : label })),
 ];
 
 function supportedSortKey(key: SortKey, watchlistView: boolean): SortKey {
@@ -246,11 +245,6 @@ function quarterlyMetricPoints(snapshot: OpenDataStockSnapshot, metric: string) 
     .filter((point): point is { period: string; value: number } => point.value != null);
 }
 
-function revenueMomentum(snapshot: OpenDataStockSnapshot) {
-  const momentum = calculateRevenueGrowthMomentum(snapshot);
-  return { ...momentum, tone: metricSignal(momentum.label).tone };
-}
-
 function inferredSupportLevel(currentPrice?: number | null, supportDistance?: number | null) {
   if (currentPrice == null || supportDistance == null) return null;
   const divisor = 1 + supportDistance / 100;
@@ -258,23 +252,17 @@ function inferredSupportLevel(currentPrice?: number | null, supportDistance?: nu
 }
 
 function signalFor(snapshot: OpenDataStockSnapshot, key: FilterKey): Signal {
-  if (["valuation", "eps", "industry_strength"].includes(key)) return metricSignal("Needs Review");
-  if (isSupportField(key)) return supportSignal(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value);
+  if (DISABLED_FILTER_FIELDS.includes(key)) return metricSignal("Retired rule");
+  if (isSupportField(key)) return supportMetric(snapshot, key)?.signal ?? metricSignal("Unknown");
   return stockMetricForField(key)?.getSignal(snapshot) ?? metricSignal("Unclear");
 }
 
 function supportWindows(snapshot: OpenDataStockSnapshot, keys: readonly SupportFilterKey[] = SUPPORT_FILTER_KEYS) {
-  return keys
-    .map((key) => ({
-      key,
-      label: FILTER_DEFINITIONS.find((definition) => definition.key === key)?.shortLabel ?? key,
-      window: key.replace("support_", "").toUpperCase(),
-      value: finiteNumber(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value),
-      metric: snapshot.price_opportunity[SUPPORT_KEYS[key]],
-    }))
-    .filter((item): item is { key: SupportFilterKey; label: string; window: string; value: number; metric: OpenDataMetric } =>
-      item.value != null,
-    );
+  return keys.flatMap(key => {
+    const context = supportMetric(snapshot, key);
+    return context ? [{ key, label: FILTER_DEFINITIONS.find(d => d.key === key)?.shortLabel ?? key,
+      window: key.replace("support_", "").toUpperCase(), value: context.metric.value!, metric: context.metric, signal: context.signal }] : [];
+  });
 }
 
 function supportTimeframeRank(key: SupportFilterKey) {
@@ -312,7 +300,7 @@ function sortValue(
   if (definition && !isSupportField(key)) return definition.getValue(snapshot);
   if (key === "eps" || key === "valuation") return null;
   if (key === "upcoming_earnings") return finiteNumber(upcomingEarningsMetric(snapshot)?.value);
-  return isSupportField(key) ? finiteNumber(snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value) : null;
+  return isSupportField(key) ? supportMetric(snapshot, key)?.metric.value ?? null : null;
 }
 
 function rowMetric(
@@ -322,7 +310,8 @@ function rowMetric(
 ) {
   if (key === "symbol") {
     const dailyChange = snapshot.price_opportunity.change_1d?.value;
-    const dailySignal = metricSignal(dailyChange == null ? "Unavailable" : dailyChange > 0 ? "Up today" : dailyChange < 0 ? "Down today" : "Flat today");
+    if (dailyChange == null || !Number.isFinite(dailyChange) || finiteNumber(snapshot.price_opportunity.current_price?.value) == null) return null;
+    const dailySignal = metricSignal(dailyChange > 0 ? "Up today" : dailyChange < 0 ? "Down today" : "Flat today");
     return {
       value: formatPrice(snapshot.price_opportunity.current_price?.value),
       signal: dailySignal,
@@ -332,12 +321,14 @@ function rowMetric(
   const definition = stockMetricForField(key);
   if (definition && !definition.context) {
     const value = definition.getValue(snapshot);
-    return { value: definition.format === "pp" ? formatMomentumPp(value) : definition.format === "compact" ? formatCompact(value) : definition.format === "ratio" ? formatNumber(value) : formatPercent(value, true),
+    if (value == null) return null;
+    return { value: definition.format === "pp" ? formatMomentumPp(value) : formatPercent(value, true),
       signal: definition.getSignal(snapshot), secondary: researchMetric(snapshot, definition.key)?.period ?? null };
   }
-  if (key === "eps" || key === "valuation") return { value: "Unknown", signal: metricSignal("Needs Review"), secondary: "Disabled metric" };
+  if (DISABLED_FILTER_FIELDS.includes(key)) return null;
   if (key === "upcoming_earnings") {
     const metric = upcomingEarningsMetric(snapshot);
+    if (metric?.value == null) return null;
     return {
       value: formatMetric(metric, "days"),
       signal: upcomingEarningsSignal(metric),
@@ -346,14 +337,16 @@ function rowMetric(
   }
   if (key === "support_best" || key === "watchlist_order") {
     const support = closestSupport(snapshot, supportKeys);
+    if (!support) return null;
     return {
       value: formatPercent(support?.value, true),
-      signal: supportSignal(support?.value),
+      signal: support.signal,
       secondary: support?.window ?? null,
     };
   }
-  const value = isSupportField(key) ? snapshot.price_opportunity[SUPPORT_KEYS[key]]?.value : null;
-  return { value: formatPercent(value, true), signal: supportSignal(value), secondary: key.replace("support_", "").toUpperCase() };
+  const context = isSupportField(key) ? supportMetric(snapshot, key) : null;
+  if (!context) return null;
+  return { value: formatPercent(context.metric.value, true), signal: context.signal, secondary: key.replace("support_", "").toUpperCase() };
 }
 
 function nextFilterId(prefix: "group" | "condition") {
@@ -651,7 +644,7 @@ function FilterSheet({
                           <span>Metric</span>
                           <select value={isSupportField(rule.field) ? "support" : rule.field}
                             onChange={(event) => changeMetric(rule.id, event.target.value)}>
-                            {["eps", "valuation", "industry_strength"].includes(rule.field) && <option value={rule.field}>{rule.field} (disabled)</option>}
+                            {DISABLED_FILTER_FIELDS.includes(rule.field) && <option value={rule.field}>{rule.field} (disabled)</option>}
                             {STOCK_METRICS.map((metric) => <option key={metric.key} value={metric.field}
                               disabled={!availableMetricField(metric.field, rule.id)}>{metric.title}</option>)}
                           </select>
@@ -670,7 +663,7 @@ function FilterSheet({
                             ? <p className="filter-builder-value-error" role="status">Choose at least one timeframe.</p>
                             : <p className="filter-builder-timeframe-hint">Match values in every selected timeframe.</p>}
                         </fieldset>}
-                        {["eps", "valuation", "industry_strength"].includes(rule.field) && <p className="filter-builder-hint">
+                        {DISABLED_FILTER_FIELDS.includes(rule.field) && <p className="filter-builder-hint">
                           This metric is disabled for screening. Replace or remove this condition before using the filter.
                         </p>}
                       </div>
@@ -1069,13 +1062,13 @@ function MobileGrowthSignalButton({
 
 function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot: OpenDataStockSnapshot; detailKey: GrowthDetailKey; onOpenPeer: (ticker: string) => void }) {
   const copy = STOCK_METRIC_BY_KEY[detailKey];
-  const momentum = revenueMomentum(snapshot);
   const upcomingEarnings = upcomingEarningsMetric(snapshot);
   const support = closestSupport(snapshot);
   const supports = supportWindows(snapshot);
   const currentPrice = finiteNumber(snapshot.price_opportunity.current_price?.value);
   const supportLevel = support ? inferredSupportLevel(currentPrice, support.value) : null;
   if (detailKey === "support") {
+    if (!support) return null;
     const detailText = support
       ? [
           `Nearest window: ${support.window}.`,
@@ -1097,7 +1090,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
         <div className="mobile-growth-formula">
           <span>Current value</span>
           <strong>{formatPercent(support?.value, true)}</strong>
-          <StockStatus signal={supportSignal(support?.value)} context={support?.window} />
+          <StockStatus signal={support.signal} context={support?.window} />
           <small>{detailText}</small>
           {supports.length > 0 && (
             <div className="mobile-support-window-list" aria-label="All support proximities">
@@ -1105,7 +1098,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
                 const level = inferredSupportLevel(currentPrice, item.value);
                 return (
                   <div className="mobile-support-window-row" key={item.key}>
-                    <StockStatus signal={supportSignal(item.value)} context={item.window} />
+                    <StockStatus signal={item.signal} context={item.window} />
                     <strong>{formatPercent(item.value, true)}</strong>
                     <small>{level == null ? "No level" : formatPrice(level)}</small>
                   </div>
@@ -1119,6 +1112,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
   }
 
   if (detailKey === "upcoming_earnings") {
+    if (upcomingEarnings?.value == null) return null;
     const signal = upcomingEarningsSignal(upcomingEarnings);
     const days = finiteNumber(upcomingEarnings?.value);
     const detailText = days == null
@@ -1143,10 +1137,11 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
     );
   }
 
-  const metric = researchMetric(snapshot, detailKey);
-  const value = copy.getValue(snapshot);
-  const currentValue = value == null ? "Unknown" : copy.format === "pp" ? formatMomentumPp(value)
-    : copy.format === "compact" ? formatCompact(value) : copy.format === "ratio" ? `${formatNumber(value)}x` : formatPercent(value, true);
+  const metric = businessMetric(snapshot, detailKey);
+  if (!metric) return null;
+  const value = metric.value!;
+  const currentValue = copy.format === "pp" ? formatMomentumPp(value)
+    : formatPercent(value, true);
   return <section className="mobile-growth-detail-panel">
     <div className="mobile-growth-copy">
       <span>Metric definition</span><h2>{copy.title}</h2>
@@ -1159,27 +1154,26 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
       <small>{metric?.formula}</small>
       {(metric?.warnings ?? []).map(warning => <small key={warning}>{warning}</small>)}
       <details className="mobile-metric-evidence"><summary>Sources and calculation</summary><small>{metricEvidence(metric, false)}</small></details>
-      {detailKey === "balance_sheet" && Object.entries(metric?.components ?? {}).map(([key, component]) => <div key={key}>
-        <p>{({ cash: "Cash (see reported scope)", short_term_investments: "Short-term investments", long_term_investments: "Long-term investments", debt: "Debt (see scope below)" } as Record<string, string>)[key]}: {component.value == null ? "Unknown" : `${component.currency ?? "Currency unknown"} ${formatCompact(component.value)}`}</p>
-        <details className="mobile-metric-evidence"><summary>Reported scope and source</summary><small>{metricEvidence(component)}</small></details>
-      </div>)}
+
     </div>
-    {(detailKey === "revenue" || detailKey === "momentum" || detailKey === "operating_margin") && <GrowthChart
-      title={detailKey === "operating_margin" ? "Quarterly operating margin" : "Quarterly revenue growth YoY"}
-      points={detailKey === "operating_margin" ? quarterlyMetricPoints(snapshot, "operating_margin") : revenueGrowthPoints(snapshot)}
-      selectedPeriods={detailKey === "momentum" ? momentum.points.map(p => p.period) : undefined} />}
+
   </section>;
 }
 
 function StockDetail({ snapshot: summary, onBack, onOpenPeer }: { snapshot: OpenDataStockSnapshot; onBack: () => void; onOpenPeer: (ticker: string) => void }) {
   const { snapshot, loading: detailsLoading, error: detailsError, retry: retryDetails } = useStockDetails(summary);
-  const [activeGrowthDetail, setActiveGrowthDetail] = useState<GrowthDetailKey>("revenue");
+  const [activeGrowthDetail, setActiveGrowthDetail] = useState<GrowthDetailKey | null>(null);
   const [points, setPoints] = useState<OpenDataPricePoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const currentPrice = snapshot.price_opportunity.current_price?.value;
   const dailyChange = snapshot.price_opportunity.change_1d?.value;
   const support = closestSupport(snapshot);
+  const businessMetrics = visibleStockMetrics(snapshot, false);
+  const contextMetrics = visibleStockMetrics(snapshot, true);
+  const visibleMetrics = [...businessMetrics, ...contextMetrics];
+  const selectedDetail = visibleMetrics.find(m => m.key === activeGrowthDetail)?.key;
+
 
   useEffect(() => {
     let active = true;
@@ -1226,53 +1220,29 @@ function StockDetail({ snapshot: summary, onBack, onOpenPeer }: { snapshot: Open
 	
 	        <PriceChart snapshot={snapshot} points={points} loading={loading} error={error} />
 
-        <section className="mobile-signal-strip" aria-label="Earnings and technical context">
-          {STOCK_METRICS.filter(metric => metric.context).map(metric => <MobileGrowthSignalButton key={metric.key}
-            active={activeGrowthDetail === metric.key} label={metric.title} className="mobile-support-signal"
-            value={metric.key === "support" ? support?.window ?? "Unknown" : formatMetric(upcomingEarningsMetric(snapshot), "days")}
-            signal={metric.key === "support" ? supportSignal(support?.value) : metric.getSignal(snapshot)}
-            onClick={() => setActiveGrowthDetail(metric.key)} />)}
-        </section>
+        {contextMetrics.length > 0 && <section aria-label="Market Context">
+          <h2 className="mobile-section-title">Market Context</h2>
+          <div className="mobile-signal-strip mobile-context-metrics">
+            {contextMetrics.map(metric => <MobileGrowthSignalButton key={metric.key}
+              active={selectedDetail === metric.key} label={metric.title}
+              value={metric.key === "support" ? `${formatPercent(support!.value, true)} · ${support!.window}` : formatMetric(upcomingEarningsMetric(snapshot), "days")}
+              signal={metric.key === "support" ? support!.signal : metric.getSignal(snapshot)}
+              onClick={() => setActiveGrowthDetail(current => current === metric.key ? null : metric.key)} />)}
+          </div>
+        </section>}
 
-	        <section className="mobile-signal-strip" aria-label="Financial research metrics">
-          {STOCK_METRICS.filter(metric => !metric.context).map((metric) => {
-            const value = metric.getValue(snapshot);
-            const signal = metric.getSignal(snapshot);
-            const balances = metric.key === "balance_sheet" ? researchMetric(snapshot, "balance_sheet")?.components : undefined;
-            const displayValue = balances ? `${formatCompact(balances.cash?.value)} / ${formatCompact(balances.debt?.value)}` : value == null ? "Unknown" : metric.format === "pp" ? formatMomentumPp(value)
-              : metric.format === "percent" ? formatPercent(value, true)
-              : metric.format === "compact" ? formatCompact(value) : `${formatNumber(value)}x`;
-            return <MobileGrowthSignalButton key={metric.key}
-              active={activeGrowthDetail === metric.key}
-              label={metric.key === "fcf_margin" ? `${metric.title} · TTM` : metric.key === "balance_sheet" ? "Balance Sheet · Cash / debt" : metric.title}
-              signal={signal}
-              value={displayValue}
-              onClick={() => setActiveGrowthDetail(metric.key)} />;
-          })}
-        </section>
-
-
-        {(snapshot.screening?.warnings ?? []).map(warning => <details key={warning} className="mobile-research-warning">
-          <summary>Needs Review: reported earnings</summary><p>{warning}</p>
-        </details>)}
+        {businessMetrics.length > 0 && <section aria-label="Business Performance">
+          <h2 className="mobile-section-title">Business Performance</h2>
+          <div className="mobile-signal-strip mobile-business-metrics">
+            {businessMetrics.map(metric => <MobileGrowthSignalButton key={metric.key}
+              active={selectedDetail === metric.key} label={metric.title}
+              value={metric.format === "pp" ? formatMomentumPp(metric.getValue(snapshot)) : formatPercent(metric.getValue(snapshot), true)}
+              signal={metric.getSignal(snapshot)} onClick={() => setActiveGrowthDetail(current => current === metric.key ? null : metric.key)} />)}
+          </div>
+        </section>}
         {detailsLoading && <p role="status">Loading financial history…</p>}
         {detailsError && <p role="alert">{detailsError} <button type="button" onClick={retryDetails}>Retry financial history</button></p>}
-        <MobileGrowthDetailPanel snapshot={snapshot} detailKey={activeGrowthDetail} onOpenPeer={onOpenPeer} />
-
-        <details className="mobile-growth-detail-panel">
-          <summary>Financial Details</summary>
-          {Object.keys(snapshot.screening?.financial_details ?? {}).map(key => {
-            const metric = financialDetail(snapshot, key)!;
-            return <div key={key}>
-              <p>{({ gross_margin: "Gross Margin", price_to_sales: "Price / Sales", fcf_yield: "FCF Yield" } as Record<string, string>)[key]}: {metric.value == null ? "Unknown" : `${formatNumber(metric.value)}${key === "price_to_sales" ? "x" : "%"}`}</p>
-              <small>{metric.period}</small>
-              <small>{metric.formula}</small>
-              {metric.warnings.map(warning => <small key={warning}>{warning}</small>)}
-              <details className="mobile-metric-evidence"><summary>Sources and calculation</summary><small>{metricEvidence(metric, false)}</small></details>
-            </div>;
-          })}
-          <p>{snapshot.screening?.verification ?? "Source identifiers preserve provenance; inputs have not been independently verified."}</p>
-        </details>
+        {selectedDetail && <MobileGrowthDetailPanel snapshot={snapshot} detailKey={selectedDetail} onOpenPeer={onOpenPeer} />}
 
         <footer className="mobile-detail-footer">
           <span>Updated {new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(snapshot.generated_at))}</span>
@@ -1660,10 +1630,10 @@ export function MobileStockExplorer({
             <strong>{snapshot.ticker}</strong>
             <span>{snapshot.name ?? snapshot.industry ?? ""}</span>
           </div>
-          <div className="mobile-stock-value">
+          {metric && <div className="mobile-stock-value">
             <strong>{metric.value}</strong>
             <StockStatus signal={metric.signal} context={metric.secondary} compact />
-          </div>
+          </div>}
         </button>
         {signedIn && spaceTab === "explore" && !analysisMode && !editMode && (
           <button type="button" className={`mobile-watchlist-bookmark${watchlist.has(snapshot.ticker) || savingTicker === snapshot.ticker ? " saved" : ""}`}

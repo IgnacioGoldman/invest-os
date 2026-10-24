@@ -1,30 +1,32 @@
-# Research screening metrics
+# First-filter business performance
 
-Invest OS identifies stocks worth researching; no standalone metric establishes investment quality or a buy/sell conclusion. Raw facts remain available for AI research. Metric categories are Reported Fact, Computed Metric and Estimate. Preserve source identifiers, dates, fiscal periods, formulas and warnings; provenance is not independent verification. Unknown/Needs Review never scores as zero. Composite investment and valuation scores are disabled.
+Invest OS identifies companies with interesting reported business performance. It does not evaluate investment attractiveness. One compact, two-column Business Performance section contains only:
 
-Six default financial cards:
+- [Revenue Growth YoY](latest-revenue-growth-yoy.md): Growing / Flat / Declining, percentage.
+- [Revenue Growth Momentum](revenue-growth-momentum.md): Accelerating / Steady / Decelerating, percentage points.
+- [Operating Margin](operating-margin.md): Profitable / Loss-making, percentage.
+- [Operating Margin Trend](operating-margin-trend.md): Improving / Stable / Declining, percentage points versus the same fiscal quarter last year.
 
-- [Revenue Growth YoY](latest-revenue-growth-yoy.md)
-- [Revenue Growth Momentum](revenue-growth-momentum.md)
-- [Operating Margin](operating-margin.md)
-- [Free Cash Flow Margin](free-cash-flow.md)
-- [Forward P/E (Estimate)](forward-pe.md)
-- [Balance Sheet](balance-sheet.md)
+Public inputs must have finite values, source identifiers, matching currency and fiscal periods. Recompute ratios and compare actual year-ago dates. Reuse the existing 140-day quarterly-report freshness policy. Green identifies growing revenue, accelerating revenue growth or improving operating margins; market-context cards remain neutral. Missing, stale, anomalous or non-comparable metrics are omitted entirely, including their detail panels. Cards never contain placeholder labels. No empty grid positions are reserved. Missing facts are never zero or ranked as zero. No composite quality or valuation score is generated.
 
-[Earnings](upcoming-earnings.md) and [support](support.md) are neutral context beside the preserved price chart. [Financial Details](financial-details.md) contains Gross Margin, Price/Sales and FCF Yield.
+The preserved price chart keeps all timeframe selectors. [Earnings](upcoming-earnings.md) appears only with a fresh sourced future date; [support](support.md) appears only with a valid detected zone and compatible fresh quote. These sit in Market Context, separate from business performance. Unavailable context cards are omitted.
 
-Retired from screening and scoring (raw figures preserved):
+Removed from all first-filter cards and selectable filters:
 
+- [Free Cash Flow Margin](dropped/free-cash-flow.md)
+- [Forward P/E](dropped/forward-pe.md)
+- [Balance Sheet / Cash / Debt](dropped/balance-sheet.md)
+- [Gross Margin, Price/Sales and FCF Yield / former Financial Details](dropped/financial-details.md)
 - [GAAP EPS Growth YoY](dropped/gaap-eps-growth-yoy.md)
 - [EPS CAGR 3Y](dropped/eps-cagr-3y.md)
-- [PEG](dropped/peg.md)
+- [Net Margin](dropped/net-margin.md)
 - [ROE](dropped/roe.md)
 - [ROIC proxy](dropped/roic-proxy.md)
-- [Net Margin](dropped/net-margin.md)
-- [Trailing GAAP P/E](dropped/trailing-pe.md)
+- [PEG](dropped/peg.md)
+- [Trailing P/E](dropped/trailing-pe.md)
 - [EV/EBITDA proxy](dropped/ev-ebitda-proxy.md)
 - [Industry Relative Strength](dropped/industry-relative-performance.md)
 
-The existing GAAP EPS and Industry Relative Strength documents moved into `dropped/`, retaining their historical methodology in an inactive archive. Other retired metrics had no standalone Markdown files; their retirement documents were added here. New metrics were considered: share-count change, net-debt/FCF, FCF conversion and valuation/peer composites are not added to screening because denominator, period or coverage ambiguities would reintroduce the reliability problems. Raw share counts and cash-flow facts remain available for investigation.
+Existing retirement files are reused. The four newly retired root documents moved into `dropped/` with their previous methodology preserved. Raw reported values, all underlying research calculations, dates, fiscal periods, source identifiers and anomaly warnings remain in Analyze with AI. Source identifiers are provenance, not independent verification.
 
-`backend/app/services/screening_metrics.py` supplies API loads, static exports, saved-filter badges and derived research context. Cards and browser filters consume that same projection. Date-sensitive estimates are rechecked in the browser. Retired saved-filter rules fail closed (also within OR groups) until explicitly edited; missing values remain null and sort last.
+The shared backend projection in `backend/app/services/screening_metrics.py` supplies API loads, static exports and badge evaluation. The browser hides invalid or expired projected metrics before rendering cards. Saved filters referencing removed metrics or labels require editing and fail closed, even within OR groups; their removal never silently broadens a saved screen.

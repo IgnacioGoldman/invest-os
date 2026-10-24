@@ -18,14 +18,13 @@ That means the latest close is about 4% above the detected support area.
 
 ## Tags
 
-Support is a price-setup metric, so its tags describe distance from a detected support zone:
+The detector must provide a finite source-linked distance and a positive ordered support zone, paired with the same fresh saved quote (0–7 days old). Hide the card if the quote is below the detected zone, dates disagree, source metadata is missing or no valid zone exists. Do not infer a zone from a bare distance.
 
-- **Inside Support Zone:** The latest close is within ±2.5% of the support-zone midpoint.
-- **Near Support:** The latest close is more than 2.5% and up to 6% above the support-zone midpoint.
-- **Above Support:** Any usable distance above 6%, including more than 25%.
-- **Unknown:** Missing, invalid or a distance below −2.5%; no zero substitution.
+- **Inside Support Zone:** the quote lies between the detected zone bounds, including a negative midpoint distance.
+- **Near Support:** the quote is above the zone and the midpoint distance is at most 6% (the existing threshold).
+- **Above Support:** the quote is above the zone and the midpoint distance exceeds 6%.
 
-All support labels use neutral styling. The existing 2.5% and 6% cutoffs are retained. This technical context sits beside the price chart, outside the six financial cards. Price history and all period selectors are preserved.
+All labels use neutral styling. Context cards sit in Market Context beside the preserved price chart, separate from Business Performance. No missing-value placeholder is rendered, and support is never an investment-quality signal.
 
 ## How It Is Calculated
 

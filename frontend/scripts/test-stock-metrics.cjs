@@ -9,73 +9,89 @@ const { spawnSync } = require('node:child_process');
 require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
 }).outputText, filename);
-const { STOCK_METRICS, SUPPORT_TIMEFRAMES, stockMetricForField } = require('../src/stockMetrics.ts');
-const { supportSignal } = require('../src/metricStatus.ts');
+const { STOCK_METRICS, SUPPORT_TIMEFRAMES, stockMetricForField, visibleStockMetrics, supportMetric } = require('../src/stockMetrics.ts');
 const { metricRulesFromExpression, expressionFromMetricRules, groupSupportTimeframes } = require('../src/metricFilterRules.ts');
 const stocks = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/data/open-data/stocks.json'), 'utf8'));
 
-test('every card exposes selectable statuses using its actual calculation', () => {
-  const keys = STOCK_METRICS.map(metric => metric.key);
-  assert.equal(new Set(keys).size, keys.length);
+test('every visible card exposes only factual selectable labels', () => {
+  const forbidden = /^(Unknown|Needs Review|Computed Metric|Unavailable|Insufficient Data|Strong|Solid|Fair|Cheap|Attractive)$/;
   for (const metric of STOCK_METRICS) {
-    assert.ok(metric.options.length > 0, metric.title);
-    assert.equal(new Set(metric.options).size, metric.options.length);
-    const missing = structuredClone(stocks[0]);
-    missing.business_health.revenue_growth_yoy = { value: null, tier: 'unavailable_open_free' };
-    missing.business_health.eps_gaap_growth_yoy = { value: null, tier: 'unavailable_open_free' };
-    missing.industry_relative_strength = undefined;
-    for (const stock of [...stocks, missing]) {
-      const signal = metric.getSignal(stock);
-      assert.ok(metric.options.includes(signal.label), `${metric.title}: ${signal.label} is missing from the filter`);
+    assert.ok(metric.options.length > 0);
+    for (const label of metric.options) assert.equal(forbidden.test(label), false, label);
+    for (const stock of stocks) {
+      if (metric.getValue(stock) != null) assert.ok(metric.options.includes(metric.getSignal(stock).label));
     }
-    if (metric.field !== 'support') assert.equal(stockMetricForField(metric.field), metric);
   }
-  assert.equal(stockMetricForField('valuation'), undefined);
 });
 
-test('all support timeframes resolve to the stock card definition', () => {
-  const support = STOCK_METRICS.find(metric => metric.key === 'support');
-  for (const timeframe of SUPPORT_TIMEFRAMES) assert.equal(stockMetricForField(timeframe.field), support);
+test('all support timeframes resolve to the shared context definition', () => {
+  for (const timeframe of SUPPORT_TIMEFRAMES) assert.equal(stockMetricForField(timeframe.field), stockMetricForField('support'));
 });
 
-test('only six financial cards are primary; retired metrics are absent', () => {
+test('only four business-performance cards remain', () => {
   assert.deepEqual(STOCK_METRICS.filter(metric => !metric.context).map(metric => metric.key),
-    ['revenue', 'momentum', 'operating_margin', 'fcf_margin', 'forward_pe', 'balance_sheet']);
-  for (const field of ['eps', 'industry_strength', 'valuation']) assert.equal(stockMetricForField(field), undefined);
+    ['revenue', 'momentum', 'operating_margin', 'operating_margin_trend']);
+  for (const field of ['eps', 'industry_strength', 'valuation', 'fcf_margin', 'forward_pe', 'balance_sheet', 'gross_margin', 'price_to_sales', 'fcf_yield']) assert.equal(stockMetricForField(field), undefined);
 });
 
-test('unsupported Forward P/E is Unknown regardless of a raw low multiple', () => {
-  const stock = structuredClone(stocks[0]);
-  stock.valuation.forward_pe = { value: 15 };
+test('GOOG displays the requested signed facts and comparable operating-margin trend', () => {
+  const now = Date.now;
+  Date.now = () => Date.parse('2026-10-24T12:00:00Z');
+  try {
+    const stock = stocks.find(s => s.ticker === 'GOOG');
+    const cards = visibleStockMetrics(stock, false);
+    assert.equal(cards.length, 4);
+    const values = cards.map(m => [Number(m.getValue(stock).toFixed(2)), m.getSignal(stock).label]);
+    assert.deepEqual(values, [[24.23, 'Growing'], [8, 'Accelerating'], [34.03, 'Profitable'], [1.6, 'Improving']]);
+  } finally { Date.now = now; }
+});
+
+test('missing, invalid or expired business inputs remove cards instead of rendering placeholders', () => {
+  const stock = structuredClone(stocks.find(s => s.ticker === 'GOOG'));
   delete stock.screening;
-  assert.equal(stockMetricForField('forward_pe').getSignal(stock).label, 'Unknown');
-  assert.equal(stockMetricForField('forward_pe').getValue(stock), null);
+  assert.deepEqual(visibleStockMetrics(stock, false), []);
+  stock.screening = { metrics: Object.fromEntries(['revenue', 'momentum', 'operating_margin', 'operating_margin_trend'].map(key => [key,
+    { value: 5, status: 'Computed Metric', validated: true, valid_until: '2999-01-01' }])) };
+  assert.deepEqual(visibleStockMetrics(stock, false), []);
+  stock.screening.metrics.revenue = { value: 5, status: 'Growing', validated: true, valid_until: '2999-01-01' };
+  assert.deepEqual(visibleStockMetrics(stock, false).map(m => m.key), ['revenue']);
+  stock.screening.metrics.revenue.valid_until = '2000-01-01';
+  assert.deepEqual(visibleStockMetrics(stock, false), []);
 });
 
-test('dated estimates expire without a refresh and never produce valuation ratings', () => {
+test('missing context is hidden; bare support distances do not establish a valid zone', () => {
   const stock = structuredClone(stocks[0]);
-  const today = new Date().toISOString().slice(0, 10);
-  stock.screening = { metrics: { forward_pe: { value: 20, status: 'Estimate', forecast_horizon: 'FY2027 annual', estimate_as_of: today, price_as_of: today, warnings: [] } } };
-  const metric = stockMetricForField('forward_pe');
-  assert.equal(metric.getValue(stock), 20);
-  assert.equal(metric.getSignal(stock).label, 'Estimate');
-  stock.screening.metrics.forward_pe.estimate_as_of = '2000-01-01';
-  assert.equal(metric.getValue(stock), null);
-  assert.equal(metric.getSignal(stock).label, 'Unknown');
+  stock.price_opportunity = { current_price: { value: 100, as_of: new Date().toISOString().slice(0,10) }, support_1m_distance: { value: 1 } };
+  stock.metrics = {};
+  assert.deepEqual(visibleStockMetrics(stock, true), []);
+  assert.equal(supportMetric(stock), null);
 });
 
-test('earnings and support use neutral styling, including missing support', () => {
+test('earnings context requires a valid strictly future date and ordered window', () => {
+  const { upcomingEarningsMetric } = require('../src/stockMetrics.ts');
+  const now = Date.now;
+  Date.now = () => Date.parse('2026-10-24T12:00:00Z');
+  try {
+    const stock = structuredClone(stocks[0]);
+    for (const date of ['2026-02-30', '2026-10-24', '2026-10-23', '2026-11-03/2026-11-01']) {
+      stock.price_opportunity.days_to_next_earnings = { value: 8, source: `yfinance:calendar:Earnings Date:${date}`, as_of: '2026-10-24' };
+      assert.equal(upcomingEarningsMetric(stock).value, null);
+    }
+    stock.price_opportunity.days_to_next_earnings = { value: 4, source: 'yfinance:calendar:Earnings Date:2026-10-28', as_of: '2026-10-24' };
+    assert.equal(upcomingEarningsMetric(stock).value, 4);
+  } finally { Date.now = now; }
+});
+
+test('green identifies business direction, while all market context stays neutral', () => {
   const { metricSignal } = require('../src/metricStatus.ts');
-  for (const label of ['Inside Support Zone', 'Near Support', 'Above Support', 'This week', 'Next 30 days', 'Estimate', 'Computed Metric']) assert.equal(metricSignal(label).tone, 'neutral');
-  assert.equal(supportSignal(null).label, 'Unknown');
-  assert.equal(supportSignal(0).label, 'Inside Support Zone');
-  assert.equal(metricSignal('Accelerating').tone, 'positive');
+  for (const label of ['Growing', 'Accelerating', 'Improving']) assert.equal(metricSignal(label).tone, 'positive');
+  for (const label of ['Profitable', 'Stable', 'Steady', 'Flat', 'Inside Support Zone', 'Near Support', 'Above Support', 'This week', 'Next 30 days']) assert.equal(metricSignal(label).tone, 'neutral');
 });
 
 test('retired and obsolete quality rules disable the whole saved expression', () => {
   const { hasDisabledFilter } = require('../src/stockMetrics.ts');
-  for (const [field, value] of [['eps', 'Strong'], ['valuation', 'Cheap'], ['industry_strength', 'Ahead of market'], ['fcf_margin', 'Strong']]) {
-    assert.equal(hasDisabledFilter({ operator: 'or', groups: [{ conditions: [{ field, value }, { field: 'revenue', value: 'High Growth' }] }] }), true);
+  for (const [field, value] of [['eps', 'Strong'], ['valuation', 'Cheap'], ['industry_strength', 'Ahead of market'], ['fcf_margin', 'Strong'], ['forward_pe', 'Estimate'], ['balance_sheet', 'Computed Metric']]) {
+    assert.equal(hasDisabledFilter({ operator: 'or', groups: [{ conditions: [{ field, value }, { field: 'revenue', value: 'Growing' }] }] }), true);
   }
 });
 
@@ -95,7 +111,7 @@ test('watchlist badge calculations agree with every stock-card filter', () => {
   const fields = STOCK_METRICS.flatMap(metric => metric.field === 'support' ? SUPPORT_TIMEFRAMES.map(timeframe => timeframe.field) : [metric.field]);
   const expected = samples.map(stock => fields.map(field => {
     const timeframe = SUPPORT_TIMEFRAMES.find(item => item.field === field);
-    return timeframe ? supportSignal(stock.price_opportunity[timeframe.metric]?.value).label : stockMetricForField(field).getSignal(stock).label;
+    return timeframe ? supportMetric(stock, timeframe.field)?.signal.label ?? "Unknown" : stockMetricForField(field).getSignal(stock).label;
   }));
   const result = spawnSync('python3', ['-c', [
     'import json, sys',
@@ -115,7 +131,7 @@ test('watchlist badge calculations agree with every stock-card filter', () => {
 test('editing saved support conditions groups matching values and preserves distinct requirements', () => {
   const rules = [
     { id: 'short', field: 'support_1m', values: ['Inside Support Zone', 'Near Support'] },
-    { id: 'growth', field: 'revenue', values: ['High Growth'] },
+    { id: 'growth', field: 'revenue', values: ['Growing'] },
     { id: 'long', field: 'support_5y', values: ['Near Support', 'Inside Support Zone'] },
     { id: 'medium', field: 'support_6m', values: ['Inside Support Zone'] },
   ];
@@ -135,17 +151,23 @@ test('editing saved support conditions groups matching values and preserves dist
 test('multiple selected timeframes require each timeframe and accept any selected value', () => {
   const expression = expressionFromMetricRules([
     { id: 'support', field: 'support_1m', timeframes: ['support_1m', 'support_5y'], values: ['Inside Support Zone', 'Near Support'] },
-    { id: 'growth', field: 'revenue', values: ['High Growth', 'Moderate Growth'] },
+    { id: 'growth', field: 'revenue', values: ['Growing'] },
   ], { operator: 'and', groups: [] });
   const samples = [
     [1, 1, 25, true], [1, 4, 12, true], [4, 1, 25, true], [4, 4, 25, true],
     [20, 1, 25, false], [1, 20, 25, false], [1, 1, -5, false], [null, 1, 25, false],
   ].map(([short, long, revenue, matches]) => {
     const stock = structuredClone(stocks[0]);
-    stock.price_opportunity.support_1m_distance = { value: short };
-    stock.price_opportunity.support_5y_distance = { value: long };
+    const today = new Date().toISOString().slice(0,10);
+    stock.price_opportunity.current_price = { value: 100, as_of: today };
+    const support = value => {
+      const midpoint = value == null ? 100 : 100 / (1 + value / 100);
+      return { value, as_of: today, source: 'yfinance_history', tier: 'computed_from_public_facts', notes: `Support zone: $${(midpoint*.975).toFixed(8)}-$${(midpoint*1.025).toFixed(8)}; midpoint $${midpoint}` };
+    };
+    stock.price_opportunity.support_1m_distance = support(short);
+    stock.price_opportunity.support_5y_distance = support(long);
     stock.business_health.revenue_growth_yoy = { value: revenue };
-    stock.screening.metrics.revenue = { value: revenue, status: revenue >= 20 ? "High Growth" : revenue >= 8 ? "Moderate Growth" : revenue >= 0 ? "Flat" : "Declining" };
+    stock.screening.metrics.revenue = { value: revenue, validated: true, valid_until: "2999-01-01", status: revenue > 0 ? "Growing" : revenue === 0 ? "Flat" : "Declining" };
     return { stock, matches };
   });
   const result = spawnSync('python3', ['-c', [

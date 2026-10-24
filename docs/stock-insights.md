@@ -1,7 +1,7 @@
-# Stock research screening
+# Stock business-performance screening
 
-Invest OS surfaces stocks worth researching. It does not generate investment-quality ratings, composite conviction scores or buy/sell conclusions. The [metric index](metrics/README.md) documents the current six financial cards, optional details, neutral price/earnings context and retired metrics.
+Invest OS shows four deterministic first-filter facts: Revenue Growth YoY, Revenue Growth Momentum, Operating Margin and Operating Margin Trend. See the [metric index](metrics/README.md) for calculations, thresholds, confidence checks and retired metrics.
 
-Financial values come from a shared deterministic screening projection that checks source periods, currency, denominator effects, estimate freshness and anomalies. Cards, filters, badge evaluation and AI exports use that projection. Missing or unreliable inputs are Unknown/Needs Review, never zero. A source identifier preserves provenance; it does not independently verify a value.
+Business Performance is a compact two-column section. A missing, stale or non-comparable metric has no card or detail panel. The separate Market Context section shows only valid future earnings dates and detected support zones; chart timeframes remain unchanged.
 
-Raw reported facts, historical ratios and filing context remain in AI briefs, including exceptional-earnings and recent negative-FCF warnings. The brief requests evidence and research priorities. Retired saved filters require explicit edits before matching stocks; they are never silently broadened.
+Valuation, cash-flow, balance-sheet, earnings and return-on-capital interpretations are reserved for Analyze with AI. Their underlying figures, calculations, dates, periods, source identifiers and anomaly warnings remain exported. No subjective investment ratings or automatic quality scores appear in first-filter screening.

@@ -1,7 +1,11 @@
 # Operating Margin
 
-Computed Metric: `latest fiscal-quarter operating income / same-quarter revenue × 100`. Show fiscal quarter, period end, source identifiers and formula, with change in percentage points versus the same fiscal quarter last year when dates, currency and definitions are comparable.
+`latest-quarter operating income / revenue for the same quarter × 100`.
 
-Require finite same-period inputs and positive revenue. Use core reported operating income or a documented gross-profit-minus-operating-expenses computation. Exclude the incomplete R&D-plus-SG&A proxy. Never search backwards for an older usable quarter. Missing/incompatible data is Unknown. A margin outside ±100% or inconsistent reporting dates is Needs Review, requiring inspection rather than truncation. Financial businesses are Unknown under the existing non-comparability policy. No Strong/Fair quality rating.
+**Profitable** means nonnegative operating income (including break-even); **Loss-making** means negative operating income. The percentage is shown with its sign. No Computed Metric badge or investment-quality rating is displayed.
 
-Unusual operating charges and business-model differences still matter. A source identifier is provenance, not independent verification. Raw GAAP net margin remains in AI research, excluded from screening.
+Require finite public operating income and positive revenue, with the same quarter-end date and currency, a unique normalized fiscal period, and a report no older than 140 days (the existing revenue-screen freshness policy). Exclude historical-growth estimates, the incomplete R&D-plus-SG&A operating-income proxy, financial businesses where standard operating margins are not comparable, and margins outside ±100% that require interpretation. Never substitute a prior usable quarter for a missing latest quarter. A newer available revenue report prevents displaying an older operating quarter as current.
+
+Hide an invalid or unavailable card entirely. Preserve source identifiers, fiscal period, formula and as-of date in the expandable evidence and AI export. Unusual operating charges and business-model differences still require research; provenance does not establish independent verification.
+
+[Operating Margin Trend](operating-margin-trend.md) is a separate percentage-point comparison against the same fiscal quarter last year.

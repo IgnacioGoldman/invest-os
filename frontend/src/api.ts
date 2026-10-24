@@ -60,6 +60,9 @@ export type ResearchMetric = OpenDataMetric & {
   status: string;
   warnings: string[];
   yoy_change_pp?: number | null;
+  validated?: boolean;
+  valid_until?: string | null;
+  comparison_periods?: string[];
   price_as_of?: string;
   components?: Record<string, ResearchMetric>;
 };
@@ -210,6 +213,7 @@ function staticPath(path: string): string {
 
 async function requestStaticJson<T>(path: string): Promise<T> {
   const response = await fetch(staticPath(path), {
+    cache: "no-cache",
     headers: {
       "Content-Type": "application/json",
     },
@@ -231,7 +235,7 @@ const stockDetailRequests = new Map<string, Promise<OpenDataStockSnapshot>>();
 
 export function fetchOpenDataStockDetails(summary: OpenDataStockSnapshot): Promise<OpenDataStockSnapshot> {
   if (!STATIC_DATA_MODE || !summary.detail_path) return Promise.resolve(summary);
-  const path = `${summary.detail_path}?v=${encodeURIComponent(summary.generated_at)}`;
+  const path = `${summary.detail_path}?v=${encodeURIComponent(summary.generated_at)}&metrics=${summary.screening?.version ?? 0}`;
   const cached = stockDetailRequests.get(path);
   if (cached) return cached;
   const request = requestStaticJson<OpenDataStockSnapshot>(path).then((snapshot) => {

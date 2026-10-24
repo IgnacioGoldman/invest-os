@@ -1,8 +1,9 @@
-"""Conservative research metrics. Raw snapshots are never overwritten.
+"""Four deterministic business facts, plus preserved inputs for AI research.
 
-Source identifiers establish provenance, not independent verification. No quality
-score or valuation rating is calculated here. Policy cutoffs reuse existing
-revenue (20/8/0), momentum (3 pp), and market freshness (7 days) rules.
+Sources establish provenance, not independent verification. First-filter cards
+use signed revenue/margin changes, the existing 3 pp momentum threshold and the
+existing 140-day quarterly freshness policy. Research-only calculations remain
+available without becoming screening labels, rankings or investment scores.
 """
 from __future__ import annotations
 
@@ -13,7 +14,7 @@ from typing import Any
 
 from app.services.revenue_growth_momentum import calculate_revenue_growth_momentum
 
-DROPPED_FIELDS = frozenset({'eps', 'industry_strength', 'valuation'})
+DROPPED_FIELDS = frozenset({'eps', 'industry_strength', 'valuation', 'fcf_margin', 'forward_pe', 'balance_sheet'})
 
 
 def number(value: Any) -> float | None:
@@ -69,86 +70,163 @@ def financial(snapshot: dict) -> bool:
     return any(term in text for term in ('financial', 'bank', 'insurance', 'insurer', 'credit', 'asset management', 'capital markets', 'broker'))
 
 
+def support_context(snapshot: dict, key: str, today: date | None = None) -> dict | None:
+    today = today or date.today()
+    prices = snapshot.get('price_opportunity', {})
+    m, quote = prices.get(key, {}), prices.get('current_price', {})
+    zone = re.search(r'Support zone: \$?([\d,.]+)-\$?([\d,.]+)', m.get('notes', ''))
+    end = day(m.get('as_of'))
+    if (not zone or number(m.get('value')) is None or m.get('tier') != 'computed_from_public_facts'
+            or not m.get('source') or m.get('as_of') != quote.get('as_of') or not end or not 0 <= (today-end).days <= 7
+            or number(quote.get('value')) is None):
+        return None
+    try:
+        low, high = (float(value.replace(',', '')) for value in zone.groups())
+    except ValueError:
+        return None
+    if low <= 0 or high < low or quote['value'] < low:
+        return None
+    return {**m, 'status': 'Inside Support Zone' if quote['value'] <= high else 'Near Support' if m['value'] <= 6 else 'Above Support'}
+
+
+# Reuse the 140-day quarterly-revenue freshness rule in
+# scripts/screen_revenue_expansion.py. A new stock quote does not refresh facts.
+BUSINESS_MAX_AGE_DAYS = 140
+BUSINESS_STATUSES = {
+    'revenue': {'Growing', 'Flat', 'Declining'},
+    'momentum': {'Accelerating', 'Steady', 'Decelerating'},
+    'operating_margin': {'Profitable', 'Loss-making'},
+    'operating_margin_trend': {'Improving', 'Stable', 'Declining'},
+}
+
+
+def build_business_performance(snapshot: dict, today: date) -> dict:
+    """Validate report inputs and calculate only descriptive first-filter facts."""
+    history = snapshot.get('historical_series', {})
+    rows = sorted(history.get('quarterly_revenue', []), key=lambda r: r.get('as_of', ''))
+    quarters = sorted(history.get('quarterly_fundamentals', []), key=lambda r: r.get('as_of', ''))
+    latest_revenue = rows[-1] if rows else {}
+    latest_operating = quarters[-1] if quarters else {}
+    latest_report = max(latest_revenue.get('as_of', ''), latest_operating.get('as_of', ''))
+
+    def unique(row: dict, series: list[dict]) -> bool:
+        return quarter_index(row.get('period', '')) is not None and sum(r.get('period') == row['period'] for r in series) == 1 and sum(r.get('as_of') == row.get('as_of') for r in series) == 1
+
+    def public_input(m: dict, row: dict) -> bool:
+        # These checks validate the input's structure and reproducibility. They
+        # do not establish independent verification of the publisher's figures.
+        return (number(m.get('value')) is not None and len(currencies(m)) == 1
+                and m.get('as_of') == row.get('as_of') and day(m.get('as_of')) is not None
+                and m.get('tier') in {'exact_public_fact', 'computed_from_public_facts'}
+                and str(m.get('source', '')).startswith(('sec_companyfacts:', 'issuer_statement:', 'yfinance_statement:'))
+                and 'proxy' not in (m.get('notes') or '').lower())
+
+    def prior_for(row: dict, series: list[dict]) -> dict:
+        idx = quarter_index(row.get('period', ''))
+        matches = [r for r in series if idx is not None and quarter_index(r.get('period', '')) == idx - 4]
+        if len(matches) != 1 or not unique(row, series):
+            return {}
+        current_date, previous_date = day(row.get('as_of')), day(matches[0].get('as_of'))
+        return matches[0] if current_date and previous_date and 350 <= (current_date - previous_date).days <= 380 else {}
+
+    def metric(row: dict, formula: str) -> dict:
+        end = day(row.get('as_of'))
+        return result(period=row.get('period', ''), as_of=row.get('as_of', ''), formula=formula,
+                      validated=False, valid_until=(end + timedelta(days=BUSINESS_MAX_AGE_DAYS)).isoformat() if end else None)
+
+    def publish(m: dict, value: float | None, status: str, inputs: list[dict], row: dict) -> dict:
+        end = day(row.get('as_of'))
+        if (number(value) is not None and end and 0 <= (today - end).days <= BUSINESS_MAX_AGE_DAYS
+                and row.get('as_of') == latest_report):
+            m.update(value=value, status=status, validated=True,
+                     source='; '.join(dict.fromkeys(i['source'] for i in inputs)),
+                     currency=next(iter(currencies(inputs[0]))))
+        return m
+
+    def growth_for(row: dict) -> tuple[float | None, list[dict]]:
+        prior = prior_for(row, rows)
+        current = row.get('metrics', {}).get('revenue', {})
+        previous = prior.get('metrics', {}).get('revenue', {})
+        if not (public_input(current, row) and public_input(previous, prior)
+                and currencies(current) == currencies(previous) and current['value'] >= 0 and previous['value'] > 0):
+            return None, []
+        value = (current['value'] / previous['value'] - 1) * 100
+        stored = number(row.get('metrics', {}).get('revenue_growth_yoy', {}).get('value'))
+        if stored is not None and not math.isclose(stored, value, abs_tol=1e-6):
+            return None, []
+        return value, [current, previous]
+
+    growth = metric(latest_revenue, '(latest quarter revenue / same fiscal quarter prior-year revenue − 1) × 100')
+    value, inputs = growth_for(latest_revenue)
+    if value is not None:
+        publish(growth, value, 'Growing' if value > 0 else 'Declining' if value < 0 else 'Flat', inputs, latest_revenue)
+
+    momentum = metric(latest_revenue, 'median(latest 3 quarterly YoY growth rates) − median(preceding 3), pp')
+    window = rows[-6:]
+    validated_rows, momentum_inputs = [], []
+    for row in window:
+        value, inputs = growth_for(row)
+        validated_rows.append({**row, 'metrics': {'revenue_growth_yoy': {'value': value}}})
+        momentum_inputs.extend(inputs)
+    movement = calculate_revenue_growth_momentum({'historical_series': {'quarterly_revenue': validated_rows}})
+    if growth['validated'] and movement['change'] is not None:
+        publish(momentum, movement['change'], movement['label'], momentum_inputs, latest_revenue)
+        momentum['period'] = '; '.join(row['period'] for row in window)
+        momentum['comparison_periods'] = [row['period'] for row in window]
+
+    def operating_for(row: dict) -> tuple[float | None, list[dict]]:
+        income = row.get('metrics', {}).get('operating_income', {})
+        revenue = row.get('metrics', {}).get('revenue', {})
+        if (not unique(row, quarters) or financial(snapshot)
+                or not public_input(income, row) or not public_input(revenue, row)
+                or not compatible(income, revenue) or revenue['value'] <= 0):
+            return None, []
+        value = income['value'] / revenue['value'] * 100
+        # Unusual magnitudes require interpretation and stay in AI research.
+        return (value, [income, revenue]) if abs(value) <= 100 else (None, [])
+
+    operating = metric(latest_operating, 'latest quarter operating income / same-quarter revenue × 100')
+    value, inputs = operating_for(latest_operating)
+    if value is not None:
+        publish(operating, value, 'Profitable' if value >= 0 else 'Loss-making', inputs, latest_operating)
+    trend = metric(latest_operating, 'latest quarter operating margin − same fiscal quarter prior-year operating margin, pp')
+    prior = prior_for(latest_operating, quarters)
+    previous, prior_inputs = operating_for(prior)
+    if operating['validated'] and previous is not None and currencies(inputs[0]) == currencies(prior_inputs[0]):
+        delta = value - previous
+        delta = 0.0 if math.isclose(delta, 0, abs_tol=1e-10) else delta
+        publish(trend, delta, 'Improving' if delta > 0 else 'Declining' if delta < 0 else 'Stable', inputs + prior_inputs, latest_operating)
+        trend['comparison_periods'] = [prior['period'], latest_operating['period']]
+    operating['yoy_change_pp'] = trend['value']
+    business = {'revenue': growth, 'momentum': momentum, 'operating_margin': operating, 'operating_margin_trend': trend}
+    revenue_input = latest_revenue.get('metrics', {}).get('revenue', {})
+    operating_revenue = latest_operating.get('metrics', {}).get('revenue', {})
+    if (latest_revenue.get('as_of') == latest_operating.get('as_of')
+            and public_input(revenue_input, latest_revenue) and public_input(operating_revenue, latest_operating)
+            and currencies(revenue_input) == currencies(operating_revenue)
+            and not math.isclose(revenue_input['value'], operating_revenue['value'], rel_tol=1e-12, abs_tol=1e-6)):
+        for m in business.values():
+            m.update(value=None, validated=False, status='Unknown', notes='Conflicting revenue amounts for the same reporting quarter.')
+    return business
+
+
 def build_screening_metrics(snapshot: dict, today: date | None = None) -> dict:
     today = today or date.today()
     raw = snapshot.get('metrics', {})
     health = snapshot.get('business_health', {})
     history = snapshot.get('historical_series', {})
-    revenue_rows = sorted(history.get('quarterly_revenue', []), key=lambda r: r.get('as_of', ''))
     quarters = sorted(history.get('quarterly_fundamentals', []), key=lambda r: r.get('as_of', ''))
     latest = quarters[-1] if quarters else {}
     qm = latest.get('metrics', {})
     period = latest.get('period', '')
     warnings: list[str] = []
-    output: dict[str, Any] = {}
-
-    # Use the latest quarter, including a missing latest observation. Never
-    # search backwards for an older usable value and present it as current.
-    latest_revenue = revenue_rows[-1] if revenue_rows else {}
-    rp = latest_revenue.get('period', '')
-    index = quarter_index(rp)
-    matches = [r for r in revenue_rows if index is not None and quarter_index(r.get('period', '')) == index - 4]
-    current = latest_revenue.get('metrics', {}).get('revenue', {})
-    prior = matches[0].get('metrics', {}).get('revenue', {}) if len(matches) == 1 else {}
-    reported = latest_revenue.get('metrics', {}).get('revenue_growth_yoy', {})
-    growth = result(reported, period=rp, formula='(quarter revenue / same fiscal quarter prior-year revenue - 1) × 100', kind='Computed Metric')
-    dates = (day(current.get('as_of')), day(prior.get('as_of')))
-    if (number(current.get('value')) is not None and number(prior.get('value')) is not None
-            and current['value'] > 0 and prior['value'] > 0 and currencies(current) == currencies(prior) and len(currencies(current)) == 1
-            and all(dates) and 350 <= (dates[0] - dates[1]).days <= 380
-            and sum(r.get('period') == rp for r in revenue_rows) == 1):
-        value = (current['value'] / prior['value'] - 1) * 100
-        growth.update(value=value, source=f"{current.get('source')}; {prior.get('source')}", as_of=current.get('as_of'),
-                      status='High Growth' if value >= 20 else 'Moderate Growth' if value >= 8 else 'Flat' if value >= 0 else 'Declining')
-    else:
-        growth['warnings'] = ['Comparable latest-quarter revenue and prior-year fiscal quarter are required.']
-    output['revenue'] = growth
-
-    validated_rows = []
-    for row in revenue_rows:
-        ri = quarter_index(row.get('period', ''))
-        rm = row.get('metrics', {})
-        rv = rm.get('revenue', {})
-        candidates = [r for r in revenue_rows if ri is not None and quarter_index(r.get('period', '')) == ri - 4]
-        pv = candidates[0].get('metrics', {}).get('revenue', {}) if len(candidates) == 1 else {}
-        rd, pd = day(rv.get('as_of')), day(pv.get('as_of'))
-        valid = (number(rv.get('value')) is not None and number(pv.get('value')) is not None and rv['value'] > 0 and pv['value'] > 0
-                 and len(currencies(rv)) == 1 and currencies(rv) == currencies(pv) and rd and pd and 350 <= (rd-pd).days <= 380)
-        computed = (rv['value'] / pv['value'] - 1) * 100 if valid else None
-        stored = number(rm.get('revenue_growth_yoy', {}).get('value'))
-        if computed is not None and stored is not None and not math.isclose(computed, stored, abs_tol=1e-6):
-            computed = None
-        validated_rows.append({**row, 'metrics': {**rm, 'revenue_growth_yoy': {**rm.get('revenue_growth_yoy', {}), 'value': computed}}})
-    momentum = calculate_revenue_growth_momentum({**snapshot, 'historical_series': {**history, 'quarterly_revenue': validated_rows}})
-    stored_growth = number(reported.get('value'))
-    if growth['value'] is not None and stored_growth is not None and not math.isclose(growth['value'], stored_growth, abs_tol=1e-6):
-        growth.update(value=None, status='Needs Review', warnings=['Stored growth disagrees with the comparable revenue calculation.'])
-    if growth['value'] is None:
-        momentum.update(label='Unknown', change=None, reason='Latest comparable revenue is unavailable.')
-    output['momentum'] = result(value=momentum['change'], period='; '.join(p['period'] for p in momentum['points']),
-        formula='median(latest 3 quarterly YoY growth rates) − median(preceding 3), pp',
-        status={'Stable': 'Steady', 'Unclear': 'Unknown'}.get(momentum['label'], momentum['label']),
-        as_of=latest_revenue.get('as_of', ''), notes='Existing thresholds: accelerating ≥3 pp; decelerating ≤−3 pp; otherwise steady.', warnings=[momentum['reason']] if momentum['reason'] else [], source='; '.join(r.get('metrics', {}).get('revenue_growth_yoy', {}).get('source', '') for r in revenue_rows[-6:]))
-
+    output = build_business_performance(snapshot, today)
+    # Retain interpretation-heavy calculations and warnings for Analyze with AI.
     op = qm.get('operating_income', {})
-    # Approximate R&D + SG&A proxies must not masquerade as core profitability.
     if op.get('tier') == 'proxy_estimate' or 'proxy' in op.get('notes', '').lower():
         op = {}
-    operating = compute(op, qm.get('revenue', {}), 'quarter operating income / quarter revenue × 100', period, lambda a, b: a / b * 100)
-    idx = quarter_index(period)
-    prior_quarters = [r for r in quarters if idx is not None and quarter_index(r.get('period', '')) == idx - 4]
-    operating['yoy_change_pp'] = None
-    if len(prior_quarters) == 1 and operating['value'] is not None:
-        prior_q = prior_quarters[0]
-        pm = prior_q['metrics']
-        previous = compute(pm.get('operating_income', {}), pm.get('revenue', {}), '', prior_q['period'], lambda a, b: a / b * 100)
-        a, b = day(latest.get('as_of')), day(prior_q.get('as_of'))
-        if previous['value'] is not None and pm.get('operating_income', {}).get('tier') != 'proxy_estimate' and 'proxy' not in pm.get('operating_income', {}).get('notes', '').lower() and a and b and 350 <= (a-b).days <= 380 and currencies(op) == currencies(pm.get('operating_income', {})):
-            operating['yoy_change_pp'] = operating['value'] - previous['value']
-    if operating['value'] is not None and (abs(operating['value']) > 100 or op.get('as_of') != latest.get('as_of')):
-        operating['status'] = 'Needs Review'
-        operating['warnings'].append('Operating margin exceeds revenue in magnitude or does not match the latest fiscal period; inspect the calculation inputs.')
-    output['operating_margin'] = operating
+    index = quarter_index(period)
+    prior_quarters = [r for r in quarters if index is not None and quarter_index(r.get('period', '')) == index - 4]
 
     revenue, ocf, capex = (raw.get(k, {}) for k in ('revenue_ttm', 'operating_cash_flow_ttm', 'capex_ttm'))
     fcf = compute(ocf, capex, 'TTM operating cash flow − TTM capex (positive cash outflow)', f"TTM ended {revenue.get('as_of', 'Unknown')}", lambda a, b: a - abs(b), positive_denominator=False)
@@ -249,13 +327,14 @@ def build_screening_metrics(snapshot: dict, today: date | None = None) -> dict:
     earnings = snapshot.get('price_opportunity', {}).get('days_to_next_earnings', raw.get('days_to_next_earnings', {}))
     match = re.search(r':(\d{4}-\d{2}-\d{2})(?:/(\d{4}-\d{2}-\d{2}))?$', earnings.get('source', ''))
     event_date = day(match[1]) if match else None
-    event_days = (event_date - today).days if event_date else None
+    event_end = day(match[2]) if match and match[2] else event_date
+    event_days = (event_date - today).days if event_date and event_end and event_end >= event_date else None
     collected = day(earnings.get('as_of'))
-    if event_days is None or event_days < 0 or not collected or not 0 <= (today-collected).days <= 7:
+    if event_days is None or event_days <= 0 or not collected or not 0 <= (today-collected).days <= 7:
         event_days = None
     output['upcoming_earnings'] = result(earnings, value=event_days, period=match[0][1:] if match else 'Unknown date',
         formula='source event/window start date − current date', status='Unknown' if event_days is None else 'This week' if event_days <= 7 else 'Next 30 days' if event_days <= 30 else 'Later')
-    return {'version': 1, 'as_of': today.isoformat(), 'metrics': output, 'financial_details': advanced, 'warnings': warnings,
+    return {'version': 2, 'as_of': today.isoformat(), 'metrics': output, 'financial_details': advanced, 'warnings': warnings,
             'verification': 'Source identifiers preserve provenance; financial inputs have not been independently verified.'}
 
 

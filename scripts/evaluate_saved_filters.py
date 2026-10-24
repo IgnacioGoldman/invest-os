@@ -15,7 +15,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
-from app.services.screening_metrics import build_screening_metrics, DROPPED_FIELDS  # noqa: E402
+from app.services.screening_metrics import build_screening_metrics, DROPPED_FIELDS, BUSINESS_STATUSES, support_context  # noqa: E402
 
 DEFAULT_STOCKS_PATH = ROOT / "frontend" / "public" / "data" / "open-data" / "stocks.json"
 MATCH_TIMEZONE = ZoneInfo("Europe/Stockholm")
@@ -37,8 +37,6 @@ def _number(value: Any) -> float | None:
 
 def _filter_value(condition: dict[str, Any]) -> Any:
     value = condition.get("value")
-    if condition.get("field") == "revenue":
-        return {"Strong": "High Growth", "Solid": "Moderate Growth", "Weak": "Declining", "Unclear": "Unknown", "Unavailable": "Unknown"}.get(value, value)
     if condition.get("field") == "momentum" and value == "Stable":
         return "Steady"
     return value
@@ -48,24 +46,23 @@ def signal_for(snapshot: dict[str, Any], field: str) -> str:
     if field in DROPPED_FIELDS:
         return "Needs Review"
     if field in SUPPORT_METRICS:
-        value = _number(snapshot.get("price_opportunity", {}).get(SUPPORT_METRICS[field], {}).get("value"))
-        return "Unknown" if value is None or value < -2.5 else "Inside Support Zone" if value <= 2.5 else "Near Support" if value <= 6 else "Above Support"
+        context = support_context(snapshot, SUPPORT_METRICS[field], today=datetime.now(timezone.utc).date())
+        return context['status'] if context else 'Unknown'
     screening = snapshot.get("screening")
-    # Recheck date-sensitive estimates, including legacy cached snapshots.
-    if not screening or field in {"forward_pe", "upcoming_earnings"}:
-        screening = build_screening_metrics(snapshot)
+    if not screening or field == "upcoming_earnings":
+        screening = build_screening_metrics(snapshot, today=datetime.now(timezone.utc).date())
+    metric = screening.get("metrics", {}).get(field, {})
+    if field in BUSINESS_STATUSES:
+        valid_until = str(metric.get('valid_until') or '')
+        if not metric.get('validated') or valid_until < datetime.now(timezone.utc).date().isoformat():
+            return 'Unknown'
     return screening.get("metrics", {}).get(field, {}).get("status", "Unknown")
 
 
 FILTER_VALUES = {
-    "revenue": {"High Growth", "Moderate Growth", "Flat", "Declining", "Unknown", "Needs Review"},
-    "momentum": {"Accelerating", "Steady", "Decelerating", "Unknown", "Needs Review"},
-    "operating_margin": {"Computed Metric", "Unknown", "Needs Review"},
-    "fcf_margin": {"Computed Metric", "Unknown", "Needs Review"},
-    "forward_pe": {"Estimate", "Unknown", "Needs Review"},
-    "balance_sheet": {"Computed Metric", "Unknown", "Needs Review"},
-    "upcoming_earnings": {"This week", "Next 30 days", "Later", "Unknown"},
-    **{field: {"Inside Support Zone", "Near Support", "Above Support", "Unknown"} for field in SUPPORT_METRICS},
+    **BUSINESS_STATUSES,
+    "upcoming_earnings": {"This week", "Next 30 days", "Later"},
+    **{field: {"Inside Support Zone", "Near Support", "Above Support"} for field in SUPPORT_METRICS},
 }
 
 
