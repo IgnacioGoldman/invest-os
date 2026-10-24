@@ -1278,7 +1278,6 @@ function StockDetail({ snapshot: summary, onBack, onOpenPeer }: { snapshot: Open
 	        <PriceChart snapshot={snapshot} points={points} loading={loading} error={error} />
 
         {contextMetrics.length > 0 && <section aria-label="Market Context">
-          <h2 className="mobile-section-title">Market Context</h2>
           <div className="mobile-signal-strip mobile-context-metrics">
             {contextMetrics.map(metric => <MobileGrowthSignalButton key={metric.key}
               active={selectedDetail === metric.key} label={metric.title}
@@ -1289,7 +1288,6 @@ function StockDetail({ snapshot: summary, onBack, onOpenPeer }: { snapshot: Open
         </section>}
 
         {businessMetrics.length > 0 && <section aria-label="Business Performance">
-          <h2 className="mobile-section-title">Business Performance</h2>
           <div className="mobile-signal-strip mobile-business-metrics">
             {businessMetrics.map(metric => <MobileGrowthSignalButton key={metric.key}
               active={selectedDetail === metric.key} label={metric.title}
