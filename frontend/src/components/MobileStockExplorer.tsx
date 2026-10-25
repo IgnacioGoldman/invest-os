@@ -38,7 +38,7 @@ import "../filterBuilder.css";
 import { expressionFromMetricRules, filterExpressionMatches, groupSupportTimeframes, metricRuleFields, metricRulesFromExpression } from "../metricFilterRules";
 import { STOCK_METRICS, STOCK_METRIC_BY_KEY, SUPPORT_KEYS, SUPPORT_FILTER_KEYS, SUPPORT_TIMEFRAMES,
   upcomingEarningsMetric, upcomingEarningsSignal, isSupportField, stockMetricForField, researchMetric, hasDisabledFilter, businessMetric, visibleStockMetrics, supportMetric, DISABLED_FILTER_FIELDS,
-  redFlagMetric, redFlagDisplay, NUMERIC_FIELDS, validNumericCondition,
+  redFlagMetric, redFlagDisplay, NUMERIC_FIELDS, validNumericCondition, metricFilterOptions,
   type NumericComparison, type StockMetricKey, type StockMetricField, type SupportFilterKey } from "../stockMetrics";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -128,11 +128,11 @@ type FilterDefinition = {
   shortLabel: string;
   section: "Growth" | "Quality" | "Catalyst" | "Support";
   description: string;
-  options: Array<{ label: string; tone: Tone }>;
+  options: Array<{ label: string; value: string; tone: Tone }>;
 };
 
 const AVAILABLE_FILTER_DEFINITIONS: FilterDefinition[] = STOCK_METRICS.flatMap((metric): FilterDefinition[] => {
-  const base = { label: metric.title, shortLabel: metric.shortLabel, description: metric.description, options: metric.options.map(metricSignal) };
+  const base = { label: metric.title, shortLabel: metric.shortLabel, description: metric.description, options: metricFilterOptions(metric.field) };
   return metric.field === "support"
     ? SUPPORT_TIMEFRAMES.map((timeframe) => ({ ...base, key: timeframe.field, shortLabel: `${timeframe.label} support`, section: "Support" }))
     : [{ ...base, key: metric.field, section: "Growth" }];
@@ -364,7 +364,7 @@ function createCondition(field: FilterKey = "revenue", value?: string): FilterCo
   return {
     id: nextFilterId("condition"),
     field: definition.key,
-    value: value ?? definition.options[0].label,
+    value: value ?? definition.options[0].value,
   };
 }
 
@@ -438,6 +438,8 @@ function FilterSheet({
   const hasEmptyTimeframes = rules.some((rule) => metricRuleFields(rule).length === 0);
   const hasInvalidNumeric = rules.some(rule => rule.comparison != null
     && !validNumericCondition({ field: rule.field, value: rule.values[0], comparison: rule.comparison }));
+  const hasInvalidLabels = rules.some(rule => !rule.comparison
+    && rule.values.some(value => !metricFilterOptions(rule.field).some(option => option.value === value)));
   const dirty = initialState.current !== JSON.stringify({ name: saveName.trim(), icon, rules, sortKey, sortDirection });
   const SelectedIcon = filterIcon(icon).Icon;
 
@@ -482,7 +484,7 @@ function FilterSheet({
   };
 
   const submitSavedFilter = async () => {
-    if (!saveName.trim() || count === 0 || hasEmptyValues || hasEmptyTimeframes || hasInvalidNumeric || busyRef.current) return;
+    if (!saveName.trim() || count === 0 || hasEmptyValues || hasEmptyTimeframes || hasInvalidNumeric || hasInvalidLabels || busyRef.current) return;
     const nextExpression = expressionFromMetricRules(rules, expression);
     if (!personalization) {
       onApply(nextExpression);
@@ -534,7 +536,7 @@ function FilterSheet({
     const definition = AVAILABLE_FILTER_DEFINITIONS.find((item) => !rules.some((rule) => metricRuleFields(rule).includes(item.key)));
     if (!definition) return;
     setRules([...rules, { id: nextFilterId("group"), field: definition.key,
-      values: [definition.key === "red_flag_count" ? "1" : definition.options[0].label],
+      values: [definition.key === "red_flag_count" ? "1" : definition.options[0].value],
       comparison: definition.key === "red_flag_count" ? "lte" : undefined,
       timeframeMatch: isSupportField(definition.key) ? "any" : undefined }]);
   };
@@ -551,7 +553,7 @@ function FilterSheet({
     setRules(rules.map((rule) => rule.id === id
       ? { ...rule, field, timeframes: isSupportField(field) ? [field] : undefined, timeframeMatch: isSupportField(field) ? "any" : undefined,
         comparison: field === "red_flag_count" ? "lte" : undefined,
-        values: [field === "red_flag_count" ? "1" : definition.options[0].label] }
+        values: [field === "red_flag_count" ? "1" : definition.options[0].value] }
       : rule));
   };
 
@@ -568,9 +570,11 @@ function FilterSheet({
   };
 
   const toggleValue = (id: string, value: string) => {
-    setRules((current) => current.map((rule) => rule.id === id
-      ? { ...rule, values: rule.values.includes(value) ? rule.values.filter((item) => item !== value) : [...rule.values, value] }
-      : rule));
+    setRules((current) => current.map((rule) => {
+      if (rule.id !== id) return rule;
+      const values = rule.values.filter(item => metricFilterOptions(rule.field).some(option => option.value === item));
+      return { ...rule, values: values.includes(value) ? values.filter(item => item !== value) : [...values, value] };
+    }));
   };
 
   return (
@@ -657,7 +661,7 @@ function FilterSheet({
                             onChange={(event) => {
                               const numeric = event.target.value === "numeric";
                               setRules(current => current.map(item => item.id === rule.id ? { ...item,
-                                comparison: numeric ? "gt" : undefined, values: [numeric ? "0" : definition.options[0].label] } : item));
+                                comparison: numeric ? "gt" : undefined, values: [numeric ? "0" : definition.options[0].value] } : item));
                             }}>
                             <option value="labels">Descriptive labels</option><option value="numeric">Numeric comparison</option>
                           </select>
@@ -715,12 +719,14 @@ function FilterSheet({
                         <legend>Values <span>Choose one or more</span></legend>
                         <div className="filter-builder-value-options">
                           {definition.options.map((option) => <label className="filter-builder-value" key={option.label}>
-                            <input type="checkbox" checked={rule.values.includes(option.label)}
-                              onChange={() => toggleValue(rule.id, option.label)} />
+                            <input type="checkbox" checked={rule.values.includes(option.value)}
+                              onChange={() => toggleValue(rule.id, option.value)} />
                             <Check size={14} aria-hidden="true" /><span>{option.label}</span>
                           </label>)}
                         </div>
                         {rule.values.length === 0 && <p className="filter-builder-value-error" role="status">Choose at least one value.</p>}
+                        {rule.values.some(value => !definition.options.some(option => option.value === value))
+                          && <p className="filter-builder-value-error" role="status">This condition uses previous labels. Choose current values to update it.</p>}
                       </fieldset>}
                     </div>
                   </div>;
@@ -766,7 +772,7 @@ function FilterSheet({
           {saveError && <p className="filter-builder-error" role="alert">{saveError}</p>}
           {personalization && !personalization.signedIn && <p className="filter-builder-hint">Sign in to save and sync your filters.</p>}
           {count === 0 && <p className="filter-builder-hint">Add a condition to save your filter.</p>}
-          <button type="submit" className="filter-builder-save" disabled={saveBusy || !saveName.trim() || count === 0 || hasEmptyValues || hasEmptyTimeframes || hasInvalidNumeric}>
+          <button type="submit" className="filter-builder-save" disabled={saveBusy || !saveName.trim() || count === 0 || hasEmptyValues || hasEmptyTimeframes || hasInvalidNumeric || hasInvalidLabels}>
             {personalization && !personalization.signedIn ? <LogIn size={19} aria-hidden="true" /> : <Check size={20} aria-hidden="true" />}
             {saveBusy ? "Please wait…" : !personalization ? "Apply filter" : personalization.signedIn ? "Save filter" : "Sign in to save filter"}
           </button>

@@ -17,4 +17,4 @@ Compares the company's revenue in its latest reported quarter with the same quar
 - **Flat:** revenue growth of 0% or more but less than 8%.
 - **Weak:** negative revenue growth; sales declined compared with the same quarter last year.
 
-In filters, **Flat growth** selects the 0–<8% band. The saved direction filters remain **Growing** (>0%), **Flat** (=0%) and **Declining** (<0%). **High Growth** and **Moderate Growth** are legacy aliases for Strong and Solid.
+Filters offer the same four tags. The **Flat** tag selects the 0–<8% band and is stored as **Flat growth** to distinguish it from older saved rules. Existing direction filters keep their meaning: **Growing** (>0%), **Flat** (=0%) and **Declining** (<0%). Opening a single direction rule in the editor presents its equivalent numeric comparison. **High Growth** and **Moderate Growth** are legacy aliases for Strong and Solid.

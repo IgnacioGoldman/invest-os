@@ -63,9 +63,19 @@ export function groupSupportTimeframes(rules: MetricFilterRule[]): MetricFilterR
 }
 
 export function metricRulesFromExpression(expression: FilterExpression): { rules: MetricFilterRule[]; logicChanged: boolean } {
+  const parsed = parseMetricRules(expression);
+  return { ...parsed, rules: parsed.rules.map(rule => {
+    if (rule.field !== "revenue" || rule.comparison || rule.values.length !== 1) return rule;
+    const comparison = rule.values[0] === "Growing" ? "gt" : rule.values[0] === "Flat" ? "eq"
+      : rule.values[0] === "Declining" ? "lt" : undefined;
+    return comparison ? { ...rule, comparison, values: ["0"] } : rule;
+  }) };
+}
+
+function parseMetricRules(expression: FilterExpression): { rules: MetricFilterRule[]; logicChanged: boolean } {
   expression = { ...expression, groups: expression.groups.map(group => ({ ...group,
-    conditions: group.conditions.map(condition => isSupportField(condition.field)
-      ? { ...condition, value: normalizedFilterValue(condition.field, condition.value) } : condition),
+    conditions: group.conditions.map(condition => condition.comparison ? condition
+      : { ...condition, value: normalizedFilterValue(condition.field, condition.value) }),
   })) };
   const numericGroups = expression.groups.filter(group => group.conditions.some(condition => condition.comparison != null));
   if (numericGroups.length === 0) return labelRulesFromExpression(expression);

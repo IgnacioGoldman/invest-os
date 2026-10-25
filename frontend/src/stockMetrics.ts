@@ -14,6 +14,7 @@ export const SUPPORT_FILTER_KEYS = SUPPORT_TIMEFRAMES.map(({ field }) => field);
 export const SUPPORT_KEYS = Object.fromEntries(SUPPORT_TIMEFRAMES.map(({ field, metric }) => [field, metric])) as Record<SupportFilterKey, string>;
 export function isSupportField(field: string): field is SupportFilterKey { return SUPPORT_TIMEFRAMES.some(t => t.field === field); }
 export const DISABLED_FILTER_FIELDS = ["eps", "industry_strength", "valuation", "fcf_margin", "forward_pe", "balance_sheet"];
+const LEGACY_REVENUE_DIRECTIONS = ["Growing", "Flat", "Declining"];
 export function normalizedFilterValue(field: string, value: string) {
   if (isSupportField(field) && value === "Inside Support Zone") return "At Support";
   return field === "revenue" ? ({ "High Growth": "Strong", "Moderate Growth": "Solid", "Weak": "Weak" } as Record<string, string>)[value] ?? value : field === "momentum" && value === "Stable" ? "Steady" : value;
@@ -30,9 +31,11 @@ export function validNumericCondition(condition: { field: string; value?: string
 export function hasDisabledFilter(expression: { groups: { conditions: { field: string; value?: string; comparison?: string }[] }[] }) {
   return expression.groups.some(group => group.conditions.some(c => {
     const metric = stockMetricForField(c.field);
+    const value = c.value == null ? undefined : normalizedFilterValue(c.field, c.value);
     return DISABLED_FILTER_FIELDS.includes(c.field) || !metric
       || (c.comparison != null ? !validNumericCondition(c) : c.field === "red_flag_count"
-        || (c.value != null && !(metric.options as readonly string[]).includes(normalizedFilterValue(c.field, c.value))));
+        || (c.value != null && !metricFilterOptions(c.field).some(option => option.value === value)
+          && !(c.field === "revenue" && LEGACY_REVENUE_DIRECTIONS.includes(c.value))));
   }));
 }
 export function upcomingEarningsMetric(snapshot: OpenDataStockSnapshot): OpenDataMetric | undefined {
@@ -85,7 +88,8 @@ export function businessMetric(snapshot: OpenDataStockSnapshot, key: string): Re
   const today = new Date(Date.now()).toISOString().slice(0, 10);
   if (!metric?.validated || !definition || definition.context || validDay(deadline) == null || !deadline || deadline < today
       || (definition.format !== "label" && (typeof metric.value !== "number" || !Number.isFinite(metric.value)))
-      || !(definition.options as readonly string[]).includes(metric.status)) return undefined;
+      || !((definition.options as readonly string[]).includes(metric.status)
+        || (key === "revenue" && LEGACY_REVENUE_DIRECTIONS.includes(metric.status)))) return undefined;
   return metric;
 }
 export function visibleStockMetrics(snapshot: OpenDataStockSnapshot, context: boolean) {
@@ -128,7 +132,7 @@ const financialMetric = (key: string) => ({
 export const STOCK_METRICS = [
   { key: "revenue", field: "revenue", title: "Revenue Growth YoY", shortLabel: "Revenue YoY", format: "percent", context: false,
     question: "Is the business growing right now?", description: "Compares the company's revenue in its latest reported quarter with the same quarter one year earlier. It shows how quickly the company's sales are growing or declining. For example, +15% means the company generated 15% more revenue than in the same quarter last year.",
-    options: ["Strong", "Solid", "Flat growth", "Weak", "Growing", "Flat", "Declining"], ...financialMetric("revenue") },
+    options: ["Strong", "Solid", "Flat", "Weak"], ...financialMetric("revenue") },
   { key: "momentum", field: "momentum", title: "Revenue Growth Momentum", shortLabel: "Momentum", format: "pp", context: false,
     question: "Is the company's growth getting stronger or weaker?", description: "Compares the company's typical recent revenue growth with its earlier growth. It shows whether sales growth is speeding up, holding a similar pace or slowing down. For example, moving from typical growth of 10% to 16% means growth accelerated by 6 percentage points. Growth can slow down while sales are still increasing.",
     options: ["Accelerating", "Steady", "Decelerating"], ...financialMetric("momentum") },
@@ -156,6 +160,14 @@ export type StockMetricKey = typeof STOCK_METRICS[number]["key"];
 export type StockMetricField = Exclude<typeof STOCK_METRICS[number]["field"], "support"> | SupportFilterKey;
 export const STOCK_METRIC_BY_KEY = Object.fromEntries(STOCK_METRICS.map(m => [m.key, m])) as Record<StockMetricKey, typeof STOCK_METRICS[number]>;
 export function stockMetricForField(field: string) { return STOCK_METRICS.find(m => m.field === (isSupportField(field) ? "support" : field)); }
+
+export function metricFilterOptions(field: string) {
+  return (stockMetricForField(field)?.options ?? []).map(label => ({ ...metricSignal(label),
+    // Saved "Flat" direction rules mean exactly zero. Keep the growth band
+    // distinct in storage while showing the same tag as the revenue card.
+    value: field === "revenue" && label === "Flat" ? "Flat growth" : label,
+  }));
+}
 
 export function financialLabelMatches(snapshot: OpenDataStockSnapshot, field: string, value: string): boolean {
   const m = businessMetric(snapshot, field);

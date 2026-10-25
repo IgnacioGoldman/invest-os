@@ -89,6 +89,65 @@ test('every visible card exposes only factual selectable labels', () => {
   }
 });
 
+test('revenue filter choices use current card tags and preserve the Flat growth band', () => {
+  const { metricFilterOptions } = require('../src/stockMetrics.ts');
+  const options = metricFilterOptions('revenue');
+  assert.deepEqual(options.map(option => option.label), ['Strong', 'Solid', 'Flat', 'Weak']);
+  assert.deepEqual(options.map(option => option.value), ['Strong', 'Solid', 'Flat growth', 'Weak']);
+  const expressions = options.map(option => expressionFromMetricRules([
+    { id: 'revenue', field: 'revenue', values: [option.value] },
+  ], { operator: 'and', groups: [] }));
+  const samples = [-5, 0, .01, 7.99, 8, 19.99, 20, 35].map(value => {
+    const stock = structuredClone(googFixture);
+    const strength = value >= 20 ? 'Strong' : value >= 8 ? 'Solid' : value >= 0 ? 'Flat' : 'Weak';
+    Object.assign(stock.screening.metrics.revenue, { value, strength, validated: true,
+      status: value > 0 ? 'Growing' : value < 0 ? 'Declining' : 'Flat', valid_until: '2999-01-01' });
+    expressions.forEach((expression, index) => {
+      const parsed = metricRulesFromExpression(expression);
+      assert.equal(parsed.logicChanged, false);
+      assert.deepEqual(parsed.rules[0].values, [options[index].value]);
+      const reopened = expressionFromMetricRules(parsed.rules, expression);
+      assert.equal(filterExpressionMatches(stock, expression), strength === options[index].label);
+      assert.equal(filterExpressionMatches(stock, reopened), strength === options[index].label);
+    });
+    return stock;
+  });
+  const result = spawnSync('python3', ['-c', [
+    'import json, sys', 'from evaluate_saved_filters import expression_matches',
+    'payload=json.load(sys.stdin)',
+    'print(json.dumps([[expression_matches(s, e) for s in payload["stocks"]] for e in payload["expressions"]]))',
+  ].join('\n')], { cwd: path.join(__dirname, '../../scripts'), input: JSON.stringify({ expressions, stocks: samples }), encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(JSON.parse(result.stdout), expressions.map(e => samples.map(s => filterExpressionMatches(s, e))));
+});
+
+test('editing legacy direction rules uses equivalent numeric comparisons without changing matches', () => {
+  for (const [label, comparison] of [['Growing', 'gt'], ['Flat', 'eq'], ['Declining', 'lt']]) {
+    const original = expressionFromMetricRules([
+      { id: 'legacy-revenue', field: 'revenue', values: [label] },
+    ], { operator: 'and', groups: [] });
+    const parsed = metricRulesFromExpression(original);
+    assert.equal(parsed.logicChanged, false);
+    assert.equal(parsed.rules[0].comparison, comparison);
+    assert.deepEqual(parsed.rules[0].values, ['0']);
+    assert.equal(original.groups[0].conditions[0].value, label, 'Opening must not mutate saved data');
+    const reopened = expressionFromMetricRules(parsed.rules, original);
+    for (const value of [-5, 0, .01, 5, 15, 25, null]) {
+      const stock = structuredClone(googFixture);
+      Object.assign(stock.screening.metrics.revenue, { value, validated: value != null,
+        status: value > 0 ? 'Growing' : value < 0 ? 'Declining' : 'Flat', valid_until: '2999-01-01' });
+      assert.equal(filterExpressionMatches(stock, reopened), filterExpressionMatches(stock, original), `${label}: ${value}`);
+    }
+  }
+  for (const [field, oldLabel, currentLabel] of [['revenue', 'High Growth', 'Strong'],
+    ['revenue', 'Moderate Growth', 'Solid'], ['momentum', 'Stable', 'Steady']]) {
+    const original = expressionFromMetricRules([{ id: 'legacy', field, values: [oldLabel] }], { operator: 'and', groups: [] });
+    const parsed = metricRulesFromExpression(original);
+    assert.equal(parsed.logicChanged, false);
+    assert.deepEqual(parsed.rules[0].values, [currentLabel]);
+  }
+});
+
 test('all support timeframes resolve to the shared context definition', () => {
   for (const timeframe of SUPPORT_TIMEFRAMES) assert.equal(stockMetricForField(timeframe.field), stockMetricForField('support'));
 });
@@ -270,7 +329,7 @@ test('watchlist badge calculations agree with every stock-card filter', () => {
 test('editing saved support conditions groups matching values and preserves distinct requirements', () => {
   const rules = [
     { id: 'short', field: 'support_1m', values: ['At Support', 'Near Support'] },
-    { id: 'growth', field: 'revenue', values: ['Growing'] },
+    { id: 'growth', field: 'revenue', values: ['Strong'] },
     { id: 'long', field: 'support_5y', values: ['Near Support', 'At Support'] },
     { id: 'medium', field: 'support_6m', values: ['At Support'] },
   ];

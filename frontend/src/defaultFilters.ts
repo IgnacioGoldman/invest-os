@@ -15,7 +15,7 @@ export const DEFAULT_FILTERS: ScreeningFilter[] = [{
   sort_key: "symbol",
   sort_direction: "asc",
   expression: expressionFromMetricRules([
-    { id: "test-1-revenue", field: "revenue", values: ["Growing"] },
+    { id: "test-1-revenue", field: "revenue", comparison: "gt", values: ["0"] },
     { id: "test-1-margin", field: "operating_margin", values: ["Profitable"] },
     { id: "test-1-support", field: "support_1m", timeframes: ["support_1m", "support_3m", "support_6m"], timeframeMatch: "any", values: ["At Support", "Near Support"] },
   ], { operator: "and", groups: [] }),
