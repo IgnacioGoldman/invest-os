@@ -346,7 +346,7 @@ test('editing saved support conditions groups matching values and preserves dist
   assert.equal(new Set(ids).size, ids.length);
 });
 
-test('test 1 requires growth and profit with support on any selected timeframe', () => {
+test('test 1 requires Strong or Solid growth, profit, support on any selected timeframe and zero assessed red flags', () => {
   const { DEFAULT_FILTERS } = require('../src/defaultFilters.ts');
   const preset = DEFAULT_FILTERS.find(filter => filter.name === 'test 1');
   assert.ok(preset.isDefault);
@@ -354,19 +354,25 @@ test('test 1 requires growth and profit with support on any selected timeframe',
   const parsed = metricRulesFromExpression(expression);
   assert.equal(parsed.logicChanged, false);
   const rules = groupSupportTimeframes(parsed.rules);
-  assert.equal(rules.length, 3);
+  assert.equal(rules.length, 4);
+  assert.deepEqual(rules[0].values, ['Strong', 'Solid']);
+  assert.equal(rules[0].comparison, undefined);
   assert.equal(rules[2].timeframeMatch, 'any');
   assert.deepEqual(rules[2].timeframes, ['support_1m', 'support_3m', 'support_6m']);
+  assert.equal(rules[3].field, 'red_flag_count');
+  assert.equal(rules[3].comparison, 'eq');
+  assert.deepEqual(rules[3].values, ['0']);
   const cases = [null, 1, 4, 20].flatMap(short => [null, 1, 4, 20].flatMap(medium =>
     [null, 1, 4, 20].map(long => [short, medium, long, 25, 12])));
   cases.push([1, 1, 1, -5, 12], [1, 1, 1, 0, 12], [1, 1, 1, null, 12],
-    [1, 1, 1, 25, -5], [1, 1, 1, 25, null]);
-  const samples = cases.map(([short, medium, long, revenue, margin]) => {
-    const businessMatches = revenue != null && revenue > 0 && margin != null && margin >= 0;
+    [1, 1, 1, 7.99, 12], [1, 1, 1, 8, 12], [1, 1, 1, 19.99, 12], [1, 1, 1, 20, 12],
+    [1, 1, 1, 25, -5], [1, 1, 1, 25, null], [1, 1, 1, 25, 12, 1], [1, 1, 1, 25, 12, 2]);
+  const samples = cases.map(([short, medium, long, revenue, margin, redFlags = 0]) => {
+    const businessMatches = revenue != null && revenue >= 8 && margin != null && margin >= 0 && redFlags === 0;
     const supports = [short, medium, long].map(value => value === 1 || value === 4);
     const matches = businessMatches && supports.some(Boolean);
     const matchesAll = businessMatches && supports.every(Boolean);
-    const stock = structuredClone(stocks[0]);
+    const stock = structuredClone(googFixture);
     const today = new Date().toISOString().slice(0,10);
     stock.price_opportunity.current_price = { value: 100, as_of: today };
     const support = value => {
@@ -377,10 +383,24 @@ test('test 1 requires growth and profit with support on any selected timeframe',
     stock.price_opportunity.support_3m_distance = support(medium);
     stock.price_opportunity.support_6m_distance = support(long);
     stock.business_health.revenue_growth_yoy = { value: revenue };
-    stock.screening.metrics.revenue = { value: revenue, validated: true, valid_until: "2999-01-01", status: revenue > 0 ? "Growing" : revenue === 0 ? "Flat" : "Declining" };
+    stock.screening.metrics.revenue = { value: revenue, validated: revenue != null, valid_until: "2999-01-01", status: revenue > 0 ? "Growing" : revenue === 0 ? "Flat" : "Declining",
+      strength: revenue == null ? 'Unknown' : revenue >= 20 ? 'Strong' : revenue >= 8 ? 'Solid' : revenue >= 0 ? 'Flat' : 'Weak' };
     stock.screening.metrics.operating_margin = { value: margin, validated: margin != null, valid_until: "2999-01-01", status: margin == null ? "Unknown" : margin >= 0 ? "Profitable" : "Loss-making" };
+    Object.assign(stock.screening.metrics.red_flag_count, { value: redFlags, observed_count: redFlags, valid_until: '2999-01-01' });
     return { stock, matches, matchesAll };
   });
+  for (const mutate of [
+    stock => { delete stock.screening.metrics.red_flag_count; },
+    stock => { stock.screening.metrics.red_flag_count.value = null; },
+    stock => { stock.screening.metrics.red_flag_count.validated = false; },
+    stock => { stock.screening.metrics.red_flag_count.valid_until = '2000-01-01'; },
+    stock => { stock.screening.metrics.red_flag_count.coverage.complete = false; },
+    stock => { stock.screening.metrics.red_flag_count.status = 'Partial assessment'; },
+  ]) {
+    const stock = structuredClone(samples.find(sample => sample.matchesAll).stock);
+    mutate(stock);
+    samples.push({ stock, matches: false, matchesAll: false });
+  }
   const roundTrip = expressionFromMetricRules(rules, expression);
   const allExpression = expressionFromMetricRules(rules.map(rule => ({ ...rule, timeframeMatch: 'all' })), expression);
   const allRoundTrip = expressionFromMetricRules(groupSupportTimeframes(metricRulesFromExpression(allExpression).rules), allExpression);
