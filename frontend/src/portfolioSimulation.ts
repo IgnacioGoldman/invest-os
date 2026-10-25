@@ -22,7 +22,8 @@ export type SimulationTransaction = {
 export type SimulationDecision = {
   id: string; session: string; analysis_date: string; symbol: string | null; action: string; explanation: string;
   execution_status: string; financial_as_of: string | null; model: string; analysis_version: string;
-  assessment: { thesis_status: string; principal_risks: string[]; evidence: { reference_id: string; explanation: string }[] } | null;
+  assessment: { thesis_status: string; investment_assessment?: string; business_assessment?: string; valuation_assessment?: string;
+    explanation?: string; principal_risks: string[]; evidence: { reference_id: string; explanation: string }[] } | null;
 };
 export type PortfolioSimulationData = {
   schema_version: number;
@@ -35,8 +36,29 @@ export type PortfolioSimulationData = {
   orders: { id: string; symbol: string; type: string; status: string; market_cutoff: string; portfolio_id: string; rationale: string }[];
   ai_usage: { id: string; session: string; status: string; usage: { input_tokens?: number; output_tokens?: number } | null; estimated_cost_usd: number | null }[];
   ai_costs: { estimated_usd: number; complete: boolean; deducted_from_returns: false; net_economic_return: null };
-  reviews: { session: string; status: string | null; screened_count: number; eligible_count: number; message: string | null }[];
+  reviews: { session: string; status: string | null; candidates?: string[]; screened_count: number; eligible_count: number; message: string | null }[];
 };
+export function simulationTradeHistory(data: Pick<PortfolioSimulationData, "transactions">) {
+  const days = new Map<string, SimulationTransaction[]>();
+  const trades = data.transactions.filter(t => t.portfolio_id === "strategy" && (t.type === "BUY" || t.type === "SELL"))
+    .sort((a, b) => b.execution_timestamp.localeCompare(a.execution_timestamp) || a.id.localeCompare(b.id));
+  for (const trade of trades) {
+    const rows = days.get(trade.execution_date) ?? [];
+    rows.push(trade); days.set(trade.execution_date, rows);
+  }
+  return [...days.entries()].sort(([a], [b]) => b.localeCompare(a)).map(([date, trades]) => ({ date, trades }));
+}
+export function simulationAnalysisHistory(data: Pick<PortfolioSimulationData, "reviews" | "decisions">) {
+  type Day = { date: string; review?: PortfolioSimulationData["reviews"][number]; decisions: SimulationDecision[] };
+  const days = new Map<string, Day>();
+  for (const review of data.reviews) days.set(review.session, { date: review.session, review, decisions: [] });
+  for (const decision of data.decisions) {
+    const date = decision.session || decision.analysis_date.slice(0, 10);
+    const day = days.get(date) ?? { date, decisions: [] };
+    day.decisions.push(decision); days.set(date, day);
+  }
+  return [...days.values()].sort((a, b) => b.date.localeCompare(a.date));
+}
 export function comparisonPoints(data: Pick<PortfolioSimulationData, "snapshots">) {
   const days = new Map<string, Partial<Record<"strategy" | "vwce", SimulationSnapshot>>>();
   for (const snapshot of data.snapshots) {
