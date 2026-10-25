@@ -346,9 +346,14 @@ test('editing saved support conditions groups matching values and preserves dist
   assert.equal(new Set(ids).size, ids.length);
 });
 
-test('test 1 requires Strong or Solid growth, profit, support on any selected timeframe and zero assessed red flags', () => {
+for (const [name, timeframes] of [
+  ['pullback', ['support_1m', 'support_3m', 'support_6m']],
+  ['support', ['support_1y', 'support_2y', 'support_5y']],
+]) {
+test(`${name} requires Strong or Solid growth, profit, its own support timeframes and zero assessed red flags`, () => {
   const { DEFAULT_FILTERS } = require('../src/defaultFilters.ts');
-  const preset = DEFAULT_FILTERS.find(filter => filter.name === 'test 1');
+  assert.deepEqual(DEFAULT_FILTERS.map(filter => filter.name), ['pullback', 'support']);
+  const preset = DEFAULT_FILTERS.find(filter => filter.name === name);
   assert.ok(preset.isDefault);
   const expression = preset.expression;
   const parsed = metricRulesFromExpression(expression);
@@ -358,7 +363,7 @@ test('test 1 requires Strong or Solid growth, profit, support on any selected ti
   assert.deepEqual(rules[0].values, ['Strong', 'Solid']);
   assert.equal(rules[0].comparison, undefined);
   assert.equal(rules[2].timeframeMatch, 'any');
-  assert.deepEqual(rules[2].timeframes, ['support_1m', 'support_3m', 'support_6m']);
+  assert.deepEqual(rules[2].timeframes, timeframes);
   assert.equal(rules[3].field, 'red_flag_count');
   assert.equal(rules[3].comparison, 'eq');
   assert.deepEqual(rules[3].values, ['0']);
@@ -379,9 +384,12 @@ test('test 1 requires Strong or Solid growth, profit, support on any selected ti
       const midpoint = value == null ? 100 : 100 / (1 + value / 100);
       return { value, as_of: today, source: 'yfinance_history', tier: 'computed_from_public_facts', notes: `Support zone: $${(midpoint*.975).toFixed(8)}-$${(midpoint*1.025).toFixed(8)}; midpoint $${midpoint}` };
     };
-    stock.price_opportunity.support_1m_distance = support(short);
-    stock.price_opportunity.support_3m_distance = support(medium);
-    stock.price_opportunity.support_6m_distance = support(long);
+    // Unselected timeframes qualify, so they cannot rescue a failed selected
+    // timeframe condition or accidentally turn "any" into "all".
+    for (const timeframe of SUPPORT_TIMEFRAMES) stock.price_opportunity[timeframe.metric] = support(1);
+    [short, medium, long].forEach((value, index) => {
+      stock.price_opportunity[SUPPORT_TIMEFRAMES.find(timeframe => timeframe.field === timeframes[index]).metric] = support(value);
+    });
     stock.business_health.revenue_growth_yoy = { value: revenue };
     stock.screening.metrics.revenue = { value: revenue, validated: revenue != null, valid_until: "2999-01-01", status: revenue > 0 ? "Growing" : revenue === 0 ? "Flat" : "Declining",
       strength: revenue == null ? 'Unknown' : revenue >= 20 ? 'Strong' : revenue >= 8 ? 'Solid' : revenue >= 0 ? 'Flat' : 'Weak' };
@@ -422,8 +430,9 @@ test('test 1 requires Strong or Solid growth, profit, support on any selected ti
   assert.equal(result.status, 0, result.stderr);
   assert.deepEqual(JSON.parse(result.stdout), [samples.map(sample => sample.matches), samples.map(sample => sample.matches), samples.map(sample => sample.matchesAll), samples.map(sample => sample.matchesAll)]);
 });
+}
 
-test('GOOG matches test 1 through its valid 6M zone even without 1M or 3M support', () => {
+test('GOOG matches pullback through its valid 6M zone even without 1M or 3M support', () => {
   const { DEFAULT_FILTERS } = require('../src/defaultFilters.ts');
   const priceFixture = JSON.parse(fs.readFileSync(path.join(__dirname, '../../scripts/fixtures/goog-support-2026-10-23.json'), 'utf8'));
   const stock = structuredClone(googFixture);
@@ -442,7 +451,7 @@ test('GOOG matches test 1 through its valid 6M zone even without 1M or 3M suppor
     assert.equal(restored.logicChanged, false);
     assert.deepEqual(restored.rules[0].values, ['At Support']);
     assert.equal(legacy.groups[0].conditions[0].value, 'Inside Support Zone');
-    const expression = DEFAULT_FILTERS.find(filter => filter.name === 'test 1').expression;
+    const expression = DEFAULT_FILTERS.find(filter => filter.name === 'pullback').expression;
     assert.equal(filterExpressionMatches(stock, expression), true);
     const parsed = metricRulesFromExpression(expression);
     assert.equal(parsed.logicChanged, false);
