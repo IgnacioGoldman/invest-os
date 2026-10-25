@@ -12,12 +12,37 @@
 .stock-analysis-trigger > svg { color: var(--mobile-blue); }
 .stock-analysis-trigger > svg:last-child { color: var(--mobile-muted); }
 
-.stock-analysis-selection-hint {
-  color: var(--mobile-muted);
-  font-size: .8rem;
-  line-height: 1.5;
+.stock-analysis-selection-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  justify-content: space-between;
   margin: 12px 0 4px;
 }
+.stock-analysis-selection-hint {
+  color: var(--mobile-muted);
+  flex: 1 1 240px;
+  font-size: .8rem;
+  line-height: 1.5;
+  margin: 0;
+}
+.mobile-stock-app .stock-analysis-all {
+  align-items: center;
+  background: var(--mobile-blue-soft);
+  border: 1px solid var(--mobile-border-strong);
+  border-radius: 999px;
+  color: var(--mobile-blue);
+  display: inline-flex;
+  font-size: .82rem;
+  font-weight: 600;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+.mobile-stock-app .stock-analysis-all:disabled,
+.mobile-stock-app .mobile-stock-row-main:disabled { cursor: not-allowed; opacity: .45; }
 
 .stock-analysis-selection-bar {
   align-items: center;

@@ -2,6 +2,8 @@ import type { OpenDataStockSnapshot } from "./api";
 import { compactAnalysisStock } from "./aiBriefData";
 import stockAnalysisTemplate from "./prompts/stock-analysis.md?raw";
 
+export const MAX_ANALYSIS_STOCKS = 50;
+
 export type StockAnalysisBrief = {
   tickers: string[];
   preview: string;
@@ -9,6 +11,7 @@ export type StockAnalysisBrief = {
 };
 
 export function prepareStockAnalysis(snapshots: OpenDataStockSnapshot[], filterName: string): StockAnalysisBrief {
+  snapshots = snapshots.slice(0, MAX_ANALYSIS_STOCKS);
   const tickers = snapshots.map((snapshot) => snapshot.ticker);
   const subject = tickers.length > 1 ? `Compare ${tickers.join(", ")} as potential investments.` : `Evaluate ${tickers[0]} as a potential investment.`;
   const preview = `${subject} Assess each stock independently using descriptive tags only: Strong, Solid, Average, Weak or Poor for business quality; Cheap, Fair or Expensive for valuation; Unknown when evidence is insufficient. Then compare and rank all selected stocks, giving equal importance to business quality and valuation, and create one table with Rank, Stock, Business quality, Valuation and Rationale. Use the supplied data as a starting point, supplement it with research when available, and explain the investment case and key risks.`;

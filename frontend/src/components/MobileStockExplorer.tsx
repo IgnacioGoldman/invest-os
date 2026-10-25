@@ -4,7 +4,7 @@ import { MoneyPanel } from "./MoneyPanel";
 import { useStockDetails } from "../useStockDetails";
 import { CONTEXTUAL_METRICS, contextualMetric, contextualValue, contextualHistory, formatContextualValue,
   type ContextualMetricDefinition } from "../contextualMetrics";
-import { prepareStockAnalysis, type StockAnalysisBrief } from "../aiAnalysis";
+import { MAX_ANALYSIS_STOCKS, prepareStockAnalysis, type StockAnalysisBrief } from "../aiAnalysis";
 import { StockAnalysisDialog, type AnalysisCopyStatus } from "./StockAnalysisDialog";
 import { FilterSelector, type FilterShortcut } from "./FilterSelector";
 import { DEFAULT_FILTERS, type ScreeningFilter } from "../defaultFilters";
@@ -1703,7 +1703,7 @@ export function MobileStockExplorer({
     setAnalysisSelection((tickers) => (
       tickers.includes(ticker)
         ? tickers.filter((item) => item !== ticker)
-        : [...tickers, ticker]
+        : tickers.length < MAX_ANALYSIS_STOCKS ? [...tickers, ticker] : tickers
     ));
   };
 
@@ -1724,17 +1724,26 @@ export function MobileStockExplorer({
     setAnalysisBrief(null);
   };
 
-  const prepareSelectedStocks = () => {
-    const selectedSnapshots = analysisSelection.flatMap((ticker) => {
-      const snapshot = snapshots.find((item) => item.ticker === ticker);
-      return snapshot ? [snapshot] : [];
-    });
+  const prepareAnalysis = (selectedSnapshots: OpenDataStockSnapshot[]) => {
     if (selectedSnapshots.length === 0) return;
     analysisPrepareRef.current?.focus({ preventScroll: true });
     const brief = prepareStockAnalysis(selectedSnapshots, activeFilterName ?? "All stocks");
     setAnalysisBrief(brief);
     // Start the clipboard write in the tap handler so mobile browsers retain user activation.
     void copyAnalysisPrompt(brief.prompt);
+  };
+
+  const prepareSelectedStocks = () => {
+    prepareAnalysis(analysisSelection.flatMap((ticker) => {
+      const snapshot = snapshots.find((item) => item.ticker === ticker);
+      return snapshot ? [snapshot] : [];
+    }));
+  };
+
+  const analyzeAllStocks = () => {
+    const selectedSnapshots = visibleSnapshots.slice(0, MAX_ANALYSIS_STOCKS);
+    setAnalysisSelection(selectedSnapshots.map((snapshot) => snapshot.ticker));
+    prepareAnalysis(selectedSnapshots);
   };
 
   const openDetail = (ticker: string) => {
@@ -1758,6 +1767,7 @@ export function MobileStockExplorer({
           className={`mobile-stock-row-main ${analysisMode ? "analysis-selecting" : ""}`}
           onClick={() => analysisMode ? toggleAnalysisSelection(snapshot.ticker) : openDetail(snapshot.ticker)}
           aria-pressed={analysisMode ? analysisSelected : undefined}
+          disabled={analysisMode && !analysisSelected && analysisSelection.length >= MAX_ANALYSIS_STOCKS}
         >
           {analysisMode && (
             <span className={`mobile-analysis-check ${analysisSelected ? "selected" : ""}`} aria-hidden="true">
@@ -1938,7 +1948,17 @@ export function MobileStockExplorer({
           </button>
         </div>}
         {analysisMode && (
-          <p className="stock-analysis-selection-hint">Select companies to compare, then generate an AI brief.</p>
+          <div className="stock-analysis-selection-actions">
+            <p className="stock-analysis-selection-hint">
+              Select up to {MAX_ANALYSIS_STOCKS} companies, then generate an AI brief.
+              {visibleSnapshots.length > MAX_ANALYSIS_STOCKS
+                ? ` Analyze all uses the first ${MAX_ANALYSIS_STOCKS} matches in the current sort order.`
+                : " Analyze all includes every company matching your search and filters."}
+            </p>
+            <button type="button" className="stock-analysis-all" onClick={analyzeAllStocks} disabled={visibleSnapshots.length === 0}>
+              <Sparkles size={17} aria-hidden="true" />Analyze all ({Math.min(visibleSnapshots.length, MAX_ANALYSIS_STOCKS)})
+            </button>
+          </div>
         )}
         </>}
         {watchlistSaveError && <p className="mobile-personal-error" role="alert">{watchlistSaveError}</p>}
@@ -2002,7 +2022,7 @@ export function MobileStockExplorer({
         )}
         {analysisMode && showListControls && (
           <div className="stock-analysis-selection-bar">
-            <div><strong role="status">{analysisSelection.length} stock{analysisSelection.length === 1 ? "" : "s"} selected</strong></div>
+            <div><strong role="status">{analysisSelection.length} / {MAX_ANALYSIS_STOCKS} stocks selected</strong></div>
             <button ref={analysisPrepareRef} type="button" className="stock-analysis-prepare" onClick={prepareSelectedStocks} disabled={analysisSelection.length === 0}><Sparkles size={17} aria-hidden="true" />Generate AI brief</button>
           </div>
         )}
