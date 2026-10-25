@@ -1,11 +1,21 @@
 # Revenue Growth Momentum
 
-Prefer eight comparable consecutive quarterly YoY observations: median(latest four) minus median(previous four), in percentage points. With six or seven usable latest observations, use the latest six: three versus three. Medians for four observations average the middle two. The minimum remains six YoY observations (ten quarterly revenue amounts); eight need twelve amounts.
+## What it means?
 
-**Accelerating** ≥+3 pp; **Decelerating** ≤−3 pp; **Steady** strictly between. The existing Stable saved-filter alias means Steady. One extreme quarter cannot by itself move the median of a three/four-quarter group. This is typical growth pace, not a numerical investment score or proof of sustainability. A company can accelerate while shrinking or decelerate while growing strongly.
+_Is the company's growth getting stronger or weaker?_
 
-The backend screening projection recomputes all YoY values from public quarterly revenues, requiring unique fiscal periods, matching currencies, year-ago dates 350–380 days apart and consecutive reporting dates 60–120 days apart. The latest report must be at most 140 days old. Invalid/missing latest data hides the metric; no zero or historical substitution is allowed. Comparison periods, unrounded values, source identifiers, latest-quarter movement and all validated historical observations are preserved. All consumers use this projection. The mirrored standalone Python/TypeScript compatibility helpers are parity-tested across fixtures and the complete stock universe.
+Compares the company's typical recent revenue growth with its earlier growth. It shows whether sales growth is speeding up, holding a similar pace or slowing down. For example, moving from typical growth of 10% to 16% means growth accelerated by 6 percentage points. Growth can slow down while sales are still increasing.
 
-Click momentum, revenue or consistency to open the existing shared Revenue Growth YoY chart. Select the latest eight quarters or all available observations; inspect a quarter by touch or keyboard. Negative growth plots below zero. No redundant chart is added.
+## How is calculated?
 
-The existing collection/cache and issuer revenue repairs are reused; no extra network request is needed. Daily fundamentals refresh rebuilds classifications. `scripts/validate_revenue_growth_momentum.py` verifies compatibility-helper parity, while backend and frontend tests check displayed/filter projection parity.
+`median(latest four quarterly revenue YoY growth rates) − median(preceding four quarterly revenue YoY growth rates)`, in percentage points.
+
+With only six or seven comparable observations, use the latest six and compare three quarters with the preceding three. At least six consecutive quarterly YoY growth rates are required. The median is the middle value after sorting; for four values, average the middle two. This reduces the influence of an unusual quarter.
+
+## Tags
+
+- **Accelerating:** the recent median growth rate is at least 3 percentage points higher.
+- **Steady:** the change is greater than −3 and less than +3 percentage points.
+- **Decelerating:** the recent median growth rate is at least 3 percentage points lower.
+
+The saved-filter alias **Stable** means Steady. Tags use the unrounded calculation.

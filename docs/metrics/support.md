@@ -1,57 +1,25 @@
 # Support
 
-Support is the app's estimate of a price area where buyers have recently stepped in. It is a research signal, not a guarantee that the price will hold.
+## What it means?
 
-## What It Means
+_How close is the stock's price to an area where buyers have recently stepped in?_
 
-A support zone is not simply the lowest price on the chart. The app looks for swing lows that happen around the same price area and treats that cluster as a possible floor.
+Compares the latest closing price with a detected support zone. It shows whether the stock is trading inside or above a price area where earlier declines found buyers. For example, a price of $364 and a support midpoint of $349 gives a distance of about +4.3%. A support zone is an estimate; the price can fall through it.
 
-The support value is shown as distance from the latest close to the support zone midpoint.
+## How is calculated?
 
-Example:
+`(latest closing price / support zone midpoint − 1) × 100`.
 
-- Current price: `$364`
-- Support midpoint: `$349`
-- Support distance: about `+4%`
+For each selected window (1M, 3M, 6M, 1Y, 2Y or 5Y), find swing lows in daily price history and group nearby lows into price clusters. Use daily lows when available, otherwise closing prices. Cluster width adjusts for volatility and is capped at 4%.
 
-That means the latest close is about 4% above the detected support area.
+The 1M window can use one touch. Longer windows need at least two touches separated by at least 15 days. Zones entirely above the latest close, stale zones and areas resembling reclaimed resistance are excluded. The lowest price on the chart therefore does not necessarily qualify as support.
+
+The zone and quote must share a source-linked date within the last seven days. If no valid zone exists or the quote is below it, hide the metric for that window.
 
 ## Tags
 
-The detector must provide a finite source-linked distance and a positive ordered support zone, paired with the same fresh saved quote (0–7 days old). Hide the card if the quote is below the detected zone, dates disagree, source metadata is missing or no valid zone exists. Do not infer a zone from a bare distance.
+- **At Support:** the latest price is inside the detected zone, including its boundaries. Distance from the midpoint can be negative.
+- **Near Support:** the latest price is above the zone and no more than 6% above its midpoint.
+- **Above Support:** the latest price is above the zone and more than 6% above its midpoint.
 
-- **At Support:** the quote lies between the detected zone bounds, including a negative midpoint distance.
-- **Near Support:** the quote is above the zone and the midpoint distance is at most 6% (the existing threshold).
-- **Above Support:** the quote is above the zone and the midpoint distance exceeds 6%.
-
-Support labels use the original proximity colors: **At Support** is bright green, **Near Support** is light green, and **Above Support** is yellow. Context cards sit in Market Context beside the preserved price chart, separate from Business Performance. No missing-value placeholder is rendered, and support is never an investment-quality signal.
-
-## How It Is Calculated
-
-For each window, such as 1M, 3M, 6M, 1Y, 2Y, or 5Y, the app:
-
-1. Looks at daily price history.
-2. Finds swing lows using the daily low price when available, otherwise the close.
-3. Groups nearby swing lows into price clusters.
-4. Uses a wider cluster for more volatile stocks, capped at 4%.
-5. Requires enough separated touches for the window.
-6. Filters out zones entirely above the latest close, stale zones, and areas that look more like reclaimed resistance than support.
-7. Reports the distance from the latest close to the selected zone midpoint.
-
-Short windows can be more tactical. The 1M window can use one touch. Longer windows, including 3M, 6M, 1Y, 2Y, and 5Y, need at least two touches separated by at least 15 days.
-
-## Why The Lowest Price May Not Be Support
-
-Sometimes a stock drops sharply, bounces, and still does not mark that low as support. One bounce is only one event. For a longer window, the app wants to see the same area tested again.
-
-For TSLA, the 1Y chart can show support near `$348` even though the price dropped to roughly `$298` and then rebounded. The `$298` area was a single swing-low event in that 1Y history. The `$348` area had two qualifying touches in the same cluster, so the app treated `$348` as the 1Y support zone.
-
-## How To Use It
-
-Use support as a setup clue:
-
-- Near support can mean the current price is close to a recent floor.
-- Far above support can mean the current price has already moved a long way from the detected floor.
-- No support means the app did not find a usable zone for that window.
-
-Support should be read together with trend, business quality, valuation, news, and your own risk rules.
+At Support uses bright green, Near Support light green and Above Support yellow to show proximity.

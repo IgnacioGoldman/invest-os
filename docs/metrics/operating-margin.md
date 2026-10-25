@@ -1,11 +1,20 @@
 # Operating Margin
 
+## What it means?
+
+_What portion of the company's sales becomes operating profit?_
+
+Shows how much of the company's quarterly revenue remains after operating expenses, before interest and taxes. It helps explain how profitably the company runs its business. For example, a 20% operating margin means the company generated 20 in operating profit for every 100 in sales.
+
+## How is calculated?
+
 `latest-quarter operating income / revenue for the same quarter × 100`.
 
-**Profitable** means nonnegative operating income (including break-even); **Loss-making** means negative operating income. The percentage is shown with its sign. No Computed Metric badge or investment-quality rating is displayed.
+Both amounts must come from the same fiscal quarter and use the same currency, with positive revenue. The app uses reported operating income rather than estimating it from selected expenses. Non-comparable financial businesses and margins outside ±100% are excluded.
 
-Require finite public operating income and positive revenue, with the same quarter-end date and currency, a unique normalized fiscal period, and a report no older than 140 days (the existing revenue-screen freshness policy). Exclude historical-growth estimates, the incomplete R&D-plus-SG&A operating-income proxy, financial businesses where standard operating margins are not comparable, and margins outside ±100% that require interpretation. Never substitute a prior usable quarter for a missing latest quarter. A newer available revenue report prevents displaying an older operating quarter as current.
+## Tags
 
-Hide an invalid or unavailable card entirely. Preserve source identifiers, fiscal period, formula and as-of date in the expandable evidence and AI export. Unusual operating charges and business-model differences still require research; provenance does not establish independent verification.
+- **Profitable:** operating margin is 0% or higher, including break-even.
+- **Loss-making:** operating margin is below 0%; operating expenses exceeded revenue.
 
-[Operating Margin Trend](operating-margin-trend.md) is a separate percentage-point comparison against the same fiscal quarter last year.
+[Operating Margin Trend](operating-margin-trend.md) separately shows how the margin changed compared with the same quarter last year.

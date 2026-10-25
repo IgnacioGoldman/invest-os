@@ -35,7 +35,7 @@ import { FILTER_ICONS, filterIcon, type FilterIconName } from "../filterIcons";
 import "../filterBuilder.css";
 import { expressionFromMetricRules, filterExpressionMatches, groupSupportTimeframes, metricRuleFields, metricRulesFromExpression } from "../metricFilterRules";
 import { STOCK_METRICS, STOCK_METRIC_BY_KEY, SUPPORT_KEYS, SUPPORT_FILTER_KEYS, SUPPORT_TIMEFRAMES,
-  upcomingEarningsMetric, upcomingEarningsSignal, isSupportField, stockMetricForField, researchMetric, metricEvidence, hasDisabledFilter, businessMetric, visibleStockMetrics, supportMetric, DISABLED_FILTER_FIELDS,
+  upcomingEarningsMetric, upcomingEarningsSignal, isSupportField, stockMetricForField, researchMetric, hasDisabledFilter, businessMetric, visibleStockMetrics, supportMetric, DISABLED_FILTER_FIELDS,
   redFlagMetric, redFlagDisplay, NUMERIC_FIELDS, validNumericCondition,
   type NumericComparison, type StockMetricKey, type StockMetricField, type SupportFilterKey } from "../stockMetrics";
 import type { ReactNode } from "react";
@@ -969,8 +969,7 @@ function GrowthChart({
   selectedPeriods?: string[];
 }) {
   const [activePoint, setActivePoint] = useState<{ period: string; value: number; x: number; y: number } | null>(null);
-  const [range, setRange] = useState<"8Q" | "ALL">("8Q");
-  const visible = range === "ALL" ? points : points.slice(-8);
+  const visible = points.slice(-8);
   if (visible.length === 0) {
     return (
       <article className="mobile-growth-chart">
@@ -1013,9 +1012,6 @@ function GrowthChart({
       <div className="mobile-growth-heading">
         <h3>{title}</h3>
         <strong className={visible[visible.length - 1].value < 0 ? "negative" : "positive"}>{formatPercent(visible[visible.length - 1].value, true)}</strong>
-      </div>
-      <div className="mobile-range-control" aria-label="Revenue history range">
-        {(["8Q", "ALL"] as const).map(item => <button type="button" key={item} className={range === item ? "active" : ""} onClick={() => { setRange(item); setActivePoint(null); }}>{item === "8Q" ? "8 quarters" : "All history"}</button>)}
       </div>
       <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${title} quarterly chart`}>
         <line className="mobile-bar-zero" x1={pad.left} x2={width - pad.right} y1={zeroY} y2={zeroY} />
@@ -1128,7 +1124,6 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
     return (
       <section className="mobile-growth-detail-panel mobile-support-detail-panel">
         <div className="mobile-growth-copy">
-          <span>Metric definition</span>
           <h2>{copy.title}</h2>
           <p className="metric-question">{copy.question}</p>
           <p>{copy.description}</p>
@@ -1168,7 +1163,6 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
     return (
       <section className="mobile-growth-detail-panel">
         <div className="mobile-growth-copy">
-          <span>Metric definition</span>
           <h2>{copy.title}</h2>
           <p className="metric-question">{copy.question}</p>
           <p>{copy.description}</p>
@@ -1190,7 +1184,7 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
     : formatPercent(value, true);
   return <section className="mobile-growth-detail-panel">
     <div className="mobile-growth-copy">
-      <span>Metric definition</span><h2>{copy.title}</h2>
+      <h2>{copy.title}</h2>
       <p className="metric-question">{copy.question}</p><p>{copy.description}</p>
     </div>
     <div className="mobile-growth-formula">
@@ -1221,8 +1215,6 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
       </small>}
       <small>{metric?.formula}</small>
       {(metric?.warnings ?? []).map(warning => <small key={warning}>{warning}</small>)}
-      <details className="mobile-metric-evidence"><summary>Sources and calculation</summary><small>{metricEvidence(metric, false)}</small></details>
-
     </div>
     {(["revenue", "momentum", "revenue_consistency"] as string[]).includes(detailKey) && <GrowthChart
       title="Revenue Growth YoY" points={revenueGrowthPoints(snapshot)} selectedPeriods={metric.comparison_periods} />}

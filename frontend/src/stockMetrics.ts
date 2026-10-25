@@ -1,6 +1,5 @@
 import type { OpenDataMetric, OpenDataStockSnapshot, ResearchMetric } from "./api";
 import { metricSignal, type MetricSignal } from "./metricStatus";
-import { REVENUE_MOMENTUM_DESCRIPTION } from "./revenueGrowthMomentum";
 
 export const SUPPORT_TIMEFRAMES = [
   { field: "support_1m", label: "1M", metric: "support_1m_distance" },
@@ -128,30 +127,29 @@ const financialMetric = (key: string) => ({
 });
 export const STOCK_METRICS = [
   { key: "revenue", field: "revenue", title: "Revenue Growth YoY", shortLabel: "Revenue YoY", format: "percent", context: false,
-    question: "How did quarterly sales change?", description: "Latest fiscal quarter versus the equivalent prior-year quarter. Strength bands: Strong ≥20%, Solid ≥8%, Flat 0–<8%, Weak <0%. Growing and Declining remain available for saved signed-direction filters.",
+    question: "Is the business growing right now?", description: "Compares the company's revenue in its latest reported quarter with the same quarter one year earlier. It shows how quickly the company's sales are growing or declining. For example, +15% means the company generated 15% more revenue than in the same quarter last year.",
     options: ["Strong", "Solid", "Flat growth", "Weak", "Growing", "Flat", "Declining"], ...financialMetric("revenue") },
   { key: "momentum", field: "momentum", title: "Revenue Growth Momentum", shortLabel: "Momentum", format: "pp", context: false,
-    question: "Is revenue growth accelerating or decelerating?", description: REVENUE_MOMENTUM_DESCRIPTION,
+    question: "Is the company's growth getting stronger or weaker?", description: "Compares the company's typical recent revenue growth with its earlier growth. It shows whether sales growth is speeding up, holding a similar pace or slowing down. For example, moving from typical growth of 10% to 16% means growth accelerated by 6 percentage points. Growth can slow down while sales are still increasing.",
     options: ["Accelerating", "Steady", "Decelerating"], ...financialMetric("momentum") },
   { key: "revenue_consistency", field: "revenue_consistency", title: "Revenue Growth Consistency", shortLabel: "Consistency", format: "label", context: false,
-    question: "Has quarterly revenue growth followed a regular pattern?", description: "Six to eight comparable quarterly YoY observations. Smooth trends and sustained new levels are Steady; abrupt spikes and reversals are Choppy. This describes regularity, not growth strength.",
+    question: "Has quarterly revenue growth followed a regular pattern?", description: "Looks at how smoothly the company's revenue growth has changed over recent quarters. It helps distinguish a regular trend from sudden spikes and reversals. For example, growth of 12%, 14%, 16%, 18%, 20% and 22% follows a steady pattern, while 15%, −5%, 30%, 2%, 40% and −10% is choppy. A steady pattern can include slowing growth or declining sales.",
     options: ["Steady", "Choppy"], ...financialMetric("revenue_consistency") },
   { key: "operating_margin", field: "operating_margin", title: "Operating Margin", shortLabel: "Operating margin", format: "percent", context: false,
-    question: "What portion of quarterly sales becomes operating profit?", description: "Latest-quarter core operating income divided by revenue, with the change versus the same quarter last year when comparable.",
+    question: "What portion of the company's sales becomes operating profit?", description: "Shows how much of the company's quarterly revenue remains after operating expenses, before interest and taxes. It helps explain how profitably the company runs its business. For example, a 20% operating margin means the company generated 20 in operating profit for every 100 in sales.",
     options: ["Profitable", "Loss-making"], ...financialMetric("operating_margin") },
   { key: "operating_margin_trend", field: "operating_margin_trend", title: "Operating Margin Trend", shortLabel: "Margin trend", format: "pp", context: false,
-    question: "How did operating profitability change year over year?", description: "Latest-quarter operating margin minus the same fiscal quarter last year, in percentage points. A positive change is Improving, zero is Stable, and a negative change is Declining.",
+    question: "Is the company keeping more or less operating profit from its sales?", description: "Compares the company's latest quarterly operating margin with the same quarter one year earlier. It shows whether operating profitability is improving, staying the same or declining. For example, a margin rising from 15% to 20% is an improvement of 5 percentage points. A company can improve its margin while still making an operating loss.",
     options: ["Improving", "Stable", "Declining"], ...financialMetric("operating_margin_trend") },
   { key: "red_flag_count", field: "red_flag_count", title: "Red Flag Count", shortLabel: "Red flags", format: "count", context: false,
-    question: "Which potential financial concerns are detectable from the reported history?",
-    description: "One point per distinct concern group: cash generation, operating profitability, negative book equity and Priced for Perfection valuation. Potential concerns need context. Numeric filters require a complete assessment.",
+    question: "Which potential financial concerns appear in the company's reported data?", description: "Counts the concern groups detected across cash generation, operating profitability, the balance sheet and valuation. It helps identify areas that deserve a closer look. For example, a count of 2 means two of the four groups triggered a warning. Zero means none of these rules detected a concern in a complete assessment; it does not mean the investment has no risks.",
     options: ["Complete assessment", "Partial assessment", "Not assessed"],
     getSignal: s => metricSignal(redFlagMetric(s)?.status ?? "Not assessed"), getValue: redFlagValue },
   { key: "support", field: "support", title: "Proximity to Support", shortLabel: "Support", format: "support", context: true,
-    question: "Where is the latest price relative to a detected support zone?", description: "Technical context from clustered swing lows in saved price history. It does not predict future returns.",
+    question: "How close is the stock's price to an area where buyers have recently stepped in?", description: "Compares the latest closing price with a detected support zone. It shows whether the stock is trading inside or above a price area where earlier declines found buyers. For example, a price of $364 and a support midpoint of $349 gives a distance of about +4.3%. A support zone is an estimate; the price can fall through it.",
     options: ["At Support", "Near Support", "Above Support"], getSignal: s => SUPPORT_TIMEFRAMES.map(t => supportMetric(s, t.field)).find(Boolean)?.signal ?? metricSignal("Unknown"), getValue: s => SUPPORT_TIMEFRAMES.map(t => supportMetric(s, t.field)).find(Boolean)?.metric.value ?? null },
   { key: "upcoming_earnings", field: "upcoming_earnings", title: "Upcoming Earnings", shortLabel: "Earnings", format: "days", context: true,
-    question: "When is the next expected report?", description: "Source-provided earnings date or window. An expected date is an estimate unless confirmed by the issuer.",
+    question: "When is the company expected to report its next earnings?", description: "Shows how soon the company's next earnings release is expected. It helps identify an approaching report that may bring new information about the business. For example, 5 days means the expected release is five calendar days away. Calendar dates are estimates unless confirmed by the company.",
     options: ["This week", "Next 30 days", "Later"], getSignal: (s) => upcomingEarningsSignal(upcomingEarningsMetric(s)), getValue: s => { const m = upcomingEarningsMetric(s); return upcomingEarningsSignal(m).label === "Unknown" ? null : m?.value ?? null; } },
 ] as const satisfies readonly Definition[];
 export type StockMetricKey = typeof STOCK_METRICS[number]["key"];

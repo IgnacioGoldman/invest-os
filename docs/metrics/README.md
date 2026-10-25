@@ -2,7 +2,7 @@
 
 Invest OS identifies companies with interesting reported business performance. One compact, two-column Business Performance section contains these descriptive facts:
 
-- [Revenue Growth YoY](latest-revenue-growth-yoy.md): Strong / Solid / Flat / Weak strength bands, percentage; signed-direction saved filters preserved.
+- [Revenue Growth YoY](revenue-growth-yoy.md): Strong / Solid / Flat / Weak strength bands, percentage; signed-direction saved filters preserved.
 - [Revenue Growth Momentum](revenue-growth-momentum.md): Accelerating / Steady / Decelerating, percentage points.
 - [Revenue Growth Consistency](revenue-growth-consistency.md): Steady / Choppy, six to eight quarterly observations.
 - [Operating Margin](operating-margin.md): Profitable / Loss-making, percentage.
