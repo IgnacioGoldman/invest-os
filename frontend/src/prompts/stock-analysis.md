@@ -103,6 +103,8 @@ numerical scores. Allowed values are:
 - Business quality: Strong, Solid, Average, Weak, Poor or Unknown.
 - Valuation: Cheap, Fair, Expensive or Unknown.
 
+Provide a colored visual answer.
+
 Use Unknown when there is insufficient evidence to
 reliably assess that dimension; explain the material
 uncertainty in the rationale. Missing information is
