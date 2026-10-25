@@ -11158,16 +11158,6 @@ body:has(.mobile-sheet-backdrop) {
   font-weight: 760;
 }
 
-.mobile-detail-footer {
-  color: var(--mobile-muted);
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 0.72rem;
-  gap: 8px 20px;
-  justify-content: space-between;
-  padding-top: 8px;
-}
-
 .mobile-list-management .stock-action-cluster {
   display: flex;
   flex-wrap: wrap;

@@ -1311,10 +1311,6 @@ function StockDetail({ snapshot: summary, onBack, onOpenPeer }: { snapshot: Open
         {detailsError && <p role="alert">{detailsError} <button type="button" onClick={retryDetails}>Retry financial history</button></p>}
         {selectedDetail && <MobileGrowthDetailPanel snapshot={snapshot} detailKey={selectedDetail} onOpenPeer={onOpenPeer} />}
 
-        <footer className="mobile-detail-footer">
-          <span>Updated {new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(snapshot.generated_at))}</span>
-          <span>{snapshot.source}</span>
-        </footer>
       </main>
     </div>
   );
