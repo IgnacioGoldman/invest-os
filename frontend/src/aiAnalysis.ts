@@ -2,7 +2,8 @@ import type { OpenDataStockSnapshot } from "./api";
 import { compactAnalysisStock } from "./aiBriefData";
 import stockAnalysisTemplate from "./prompts/stock-analysis.md?raw";
 
-export const MAX_ANALYSIS_STOCKS = 50;
+// Keep pasted research briefs small enough to leave room for the AI's comparison.
+export const MAX_ANALYSIS_STOCKS = 3;
 
 export type StockAnalysisBrief = {
   tickers: string[];
