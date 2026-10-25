@@ -2,6 +2,8 @@ import { formatMomentumPp } from "../revenueGrowthMomentum";
 import { PortfolioSimulation } from "./PortfolioSimulation";
 import { MoneyPanel } from "./MoneyPanel";
 import { useStockDetails } from "../useStockDetails";
+import { CONTEXTUAL_METRICS, contextualMetric, contextualValue, contextualHistory, formatContextualValue,
+  type ContextualMetricDefinition } from "../contextualMetrics";
 import { prepareStockAnalysis, type StockAnalysisBrief } from "../aiAnalysis";
 import { StockAnalysisDialog, type AnalysisCopyStatus } from "./StockAnalysisDialog";
 import { FilterSelector, type FilterShortcut } from "./FilterSelector";
@@ -963,10 +965,14 @@ function GrowthChart({
   title,
   points,
   selectedPeriods,
+  formatValue = (value: number) => formatPercent(value, true),
+  neutral = false,
 }: {
   title: string;
   points: Array<{ period: string; value: number }>;
   selectedPeriods?: string[];
+  formatValue?: (value: number) => string;
+  neutral?: boolean;
 }) {
   const [activePoint, setActivePoint] = useState<{ period: string; value: number; x: number; y: number } | null>(null);
   const visible = points.slice(-8);
@@ -974,7 +980,7 @@ function GrowthChart({
     return (
       <article className="mobile-growth-chart">
         <h3>{title}</h3>
-        <p>No comparable quarterly history.</p>
+        <p>{neutral ? "No comparable history is available for this metric." : "No comparable quarterly history."}</p>
       </article>
     );
   }
@@ -1008,12 +1014,12 @@ function GrowthChart({
   };
 
   return (
-    <article className="mobile-growth-chart">
+    <article className={`mobile-growth-chart${neutral ? " mobile-contextual-chart" : ""}`}>
       <div className="mobile-growth-heading">
         <h3>{title}</h3>
-        <strong className={visible[visible.length - 1].value < 0 ? "negative" : "positive"}>{formatPercent(visible[visible.length - 1].value, true)}</strong>
+        <strong className={neutral ? undefined : visible[visible.length - 1].value < 0 ? "negative" : "positive"}>{formatValue(visible[visible.length - 1].value)}</strong>
       </div>
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${title} quarterly chart`}>
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${title} ${neutral ? "historical" : "quarterly"} chart`}>
         <line className="mobile-bar-zero" x1={pad.left} x2={width - pad.right} y1={zeroY} y2={zeroY} />
         {visible.map((point, index) => {
           const x = pad.left + slot * index + (slot - barWidth) / 2;
@@ -1035,7 +1041,7 @@ function GrowthChart({
                 width={slot}
                 height={height - pad.top - pad.bottom}
                 tabIndex={0}
-                aria-label={`${point.period}: ${formatPercent(point.value, true)}`}
+                aria-label={`${point.period}: ${formatValue(point.value)}`}
                 onFocus={() => setActivePoint(pointForIndex(index))}
                 onBlur={() => setActivePoint(null)}
                 onPointerDown={(event) => {
@@ -1067,7 +1073,7 @@ function GrowthChart({
             <rect width={tooltipWidth} height={tooltipHeight} rx="8" />
             <text x="10" y="16" className="tooltip-period">{activePoint.period}</text>
             <text x="10" y="32" className={activePoint.value < 0 ? "negative" : "positive"}>
-              {formatPercent(activePoint.value, true)}
+              {formatValue(activePoint.value)}
             </text>
           </g>
         )}
@@ -1086,16 +1092,16 @@ function MobileGrowthSignalButton({
 }: {
   active: boolean;
   label: string;
-  signal: Signal;
+  signal?: Signal;
   value: string;
   onClick: () => void;
   className?: string;
 }) {
   return (
-    <button type="button" className={`mobile-growth-signal ${active ? "active" : ""} ${className}`.trim()} onClick={onClick}>
+    <button type="button" className={`mobile-growth-signal ${active ? "active" : ""} ${className}`.trim()} onClick={onClick} aria-expanded={active}>
       <span>{label}</span>
       <span className="mobile-growth-signal-summary">
-        <StockStatus signal={signal} />
+        {signal && <StockStatus signal={signal} />}
         <strong>{value}</strong>
       </span>
     </button>
@@ -1221,9 +1227,51 @@ function MobileGrowthDetailPanel({ snapshot, detailKey, onOpenPeer }: { snapshot
   </section>;
 }
 
+function ContextualMetricDetail({ snapshot, definition }: { snapshot: OpenDataStockSnapshot; definition: ContextualMetricDefinition }) {
+  const metric = contextualMetric(snapshot, definition);
+  const components = metric && "components" in metric ? metric.components : undefined;
+  const currency = metric?.currency;
+  const formatValue = (value: number) => formatContextualValue(value, definition, currency);
+  return <section className="mobile-growth-detail-panel" aria-label={`${definition.title} details`}>
+    <div className="mobile-growth-copy">
+      <h2>{definition.title}</h2>
+      <p className="metric-question">{definition.question}</p>
+      <p>{definition.description}</p>
+    </div>
+    <div className="mobile-growth-formula">
+      <span>{metric?.period || "Current value"}</span>
+      <strong>{formatContextualValue(contextualValue(metric), definition, currency)}</strong>
+      {contextualValue(metric) == null && <small>A usable value is unavailable from the current inputs.</small>}
+      <small>Calculation: {metric?.formula || definition.formula}</small>
+      <small>{definition.interpretation}</small>
+      {metric?.forecast_horizon && <small>Forecast horizon: {metric.forecast_horizon}</small>}
+      {metric?.estimate_as_of && <small>Estimate dated {metric.estimate_as_of}</small>}
+      {metric && "price_as_of" in metric && metric.price_as_of && <small>Price dated {metric.price_as_of}</small>}
+      {metric?.as_of && <small>As of {metric.as_of}{currency ? ` · ${currency}` : ""}</small>}
+      {metric?.notes && <small>{metric.notes}</small>}
+      {metric && "warnings" in metric && metric.warnings.map(warning => <small key={warning}>{warning}</small>)}
+      {snapshot.screening?.warnings.map(warning => <small key={warning}>{warning}</small>)}
+      {components && Object.entries(components).map(([key, component]) => <div className="mobile-contextual-component" key={key}>
+        <span>{key.replace(/_/g, " ")}</span>
+        <strong>{formatContextualValue(contextualValue(component), { format: "compact" }, component.currency)}</strong>
+        <small>{component.period} · {component.notes}</small>
+        <small>Source: {component.source}</small>
+      </div>)}
+      {metric?.source && <small>Source: {metric.source}</small>}
+    </div>
+    {definition.key === "balance_sheet" ? ["cash", "debt"].map(key => <GrowthChart key={`${snapshot.ticker}:${key}`}
+      title={key === "cash" ? "Reported Cash and Cash Equivalents" : "Reported Debt (saved borrowing scope)"}
+      points={contextualHistory(snapshot, { ...definition, historySeries: "quarterly_fundamentals", historyKey: key })}
+      formatValue={formatValue} neutral />) : <GrowthChart key={`${snapshot.ticker}:${definition.key}`} title={definition.historyTitle ?? definition.title}
+      points={contextualHistory(snapshot, definition)} formatValue={formatValue} neutral />}
+  </section>;
+}
+
 function StockDetail({ snapshot: summary, onBack, onOpenPeer }: { snapshot: OpenDataStockSnapshot; onBack: () => void; onOpenPeer: (ticker: string) => void }) {
   const { snapshot, loading: detailsLoading, error: detailsError, retry: retryDetails } = useStockDetails(summary);
   const [activeGrowthDetail, setActiveGrowthDetail] = useState<GrowthDetailKey | null>(null);
+  const [contextualOpen, setContextualOpen] = useState(false);
+  const [activeContextualKey, setActiveContextualKey] = useState<string | null>(null);
   const [points, setPoints] = useState<OpenDataPricePoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1234,7 +1282,13 @@ function StockDetail({ snapshot: summary, onBack, onOpenPeer }: { snapshot: Open
   const contextMetrics = visibleStockMetrics(snapshot, true);
   const visibleMetrics = [...businessMetrics, ...contextMetrics];
   const selectedDetail = visibleMetrics.find(m => m.key === activeGrowthDetail)?.key;
+  const selectedContextual = contextualOpen ? CONTEXTUAL_METRICS.find(metric => metric.key === activeContextualKey) : undefined;
 
+  useEffect(() => {
+    setContextualOpen(false);
+    setActiveContextualKey(null);
+    setActiveGrowthDetail(null);
+  }, [snapshot.ticker]);
 
   useEffect(() => {
     let active = true;
@@ -1287,7 +1341,7 @@ function StockDetail({ snapshot: summary, onBack, onOpenPeer }: { snapshot: Open
               {businessMetrics.map(metric => <MobileGrowthSignalButton key={metric.key}
                 active={selectedDetail === metric.key} label={metric.title}
                 value={metric.key === "red_flag_count" ? redFlagDisplay(snapshot) : metric.format === "label" ? metric.getSignal(snapshot).label : metric.format === "pp" ? formatMomentumPp(metric.getValue(snapshot)) : formatPercent(metric.getValue(snapshot), true)}
-                signal={metric.getSignal(snapshot)} onClick={() => setActiveGrowthDetail(current => current === metric.key ? null : metric.key)} />)}
+                signal={metric.getSignal(snapshot)} onClick={() => { setActiveContextualKey(null); setActiveGrowthDetail(current => current === metric.key ? null : metric.key); }} />)}
             </div>
           </section>}
 
@@ -1297,14 +1351,32 @@ function StockDetail({ snapshot: summary, onBack, onOpenPeer }: { snapshot: Open
                 active={selectedDetail === metric.key} label={metric.title}
                 value={metric.key === "support" ? `${formatPercent(support!.value, true)} · ${support!.window}` : formatMetric(upcomingEarningsMetric(snapshot), "days")}
                 signal={metric.key === "support" ? support!.signal : metric.getSignal(snapshot)}
-                onClick={() => setActiveGrowthDetail(current => current === metric.key ? null : metric.key)} />)}
+                onClick={() => { setActiveContextualKey(null); setActiveGrowthDetail(current => current === metric.key ? null : metric.key); }} />)}
             </div>
           </section>}
         </div>
         {detailsLoading && <p role="status">Loading financial history…</p>}
         {detailsError && <p role="alert">{detailsError} <button type="button" onClick={retryDetails}>Retry financial history</button></p>}
         {selectedDetail && <MobileGrowthDetailPanel snapshot={snapshot} detailKey={selectedDetail} onOpenPeer={onOpenPeer} />}
-
+        <section className="mobile-contextual-section" aria-label="Contextual metrics">
+          <button type="button" className="mobile-contextual-toggle" aria-expanded={contextualOpen}
+            aria-controls="contextual-metric-cards" onClick={() => { setContextualOpen(open => !open); setActiveContextualKey(null); }}>
+            <span>Contextual metrics <small>{contextualOpen ? "Hide additional financial indicators" : "Explore additional financial indicators"}</small></span>
+            <ChevronDown size={20} aria-hidden="true" />
+          </button>
+          {contextualOpen && <div id="contextual-metric-cards">
+            <p className="mobile-contextual-intro">These indicators need business and valuation context. They have no classification tags.</p>
+            <div className="mobile-signal-strip mobile-context-metrics">
+              {CONTEXTUAL_METRICS.map(definition => {
+                const metric = contextualMetric(snapshot, definition);
+                return <MobileGrowthSignalButton key={definition.key} active={selectedContextual?.key === definition.key}
+                  label={definition.title} value={formatContextualValue(contextualValue(metric), definition, metric?.currency)}
+                  onClick={() => { setActiveGrowthDetail(null); setActiveContextualKey(key => key === definition.key ? null : definition.key); }} />;
+              })}
+            </div>
+            {selectedContextual && <ContextualMetricDetail snapshot={snapshot} definition={selectedContextual} />}
+          </div>}
+        </section>
       </main>
     </div>
   );

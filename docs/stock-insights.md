@@ -1,6 +1,6 @@
 # Stock business-performance screening
 
-Invest OS shows four deterministic business-performance facts: Revenue Growth YoY, Revenue Growth Momentum, Operating Margin and Operating Margin Trend. [Red Flag Count](metrics/red-flag-count.md) adds one optional derived metric with transparent concern groups and assessment coverage. See the [metric index](metrics/README.md) for calculations, thresholds, confidence checks and retired metrics.
+Invest OS shows four deterministic business-performance facts: Revenue Growth YoY, Revenue Growth Momentum, Operating Margin and Operating Margin Trend. [Red Flag Count](metrics/signals/red-flag-count.md) adds one optional derived metric with transparent concern groups and assessment coverage. See the [metric index](metrics/README.md) for calculations, thresholds, confidence checks and retired metrics.
 
 Business Performance is a compact two-column section. A missing, stale or non-comparable metric has no card or detail panel. The separate Market Context section shows only valid future earnings dates and detected support zones; chart timeframes remain unchanged.
 

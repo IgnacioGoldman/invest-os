@@ -16,6 +16,7 @@ require.extensions['.ts'] = (module, filename) => {
   }).outputText, filename);
 };
 const { STOCK_METRICS, SUPPORT_TIMEFRAMES, stockMetricForField, visibleStockMetrics, supportMetric } = require('../src/stockMetrics.ts');
+const { CONTEXTUAL_METRICS, contextualMetric, contextualHistory, contextualValue, formatContextualValue } = require('../src/contextualMetrics.ts');
 const { metricRulesFromExpression, expressionFromMetricRules, filterExpressionMatches, groupSupportTimeframes } = require('../src/metricFilterRules.ts');
 const stocks = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/data/open-data/stocks.json'), 'utf8'));
 // Freeze the requested accounting regression independently of daily refreshes.
@@ -27,6 +28,54 @@ const projectedFixture = spawnSync('python3', ['-c', [
 ].join('\n')], { cwd: path.join(__dirname, '../../scripts'), input: JSON.stringify(googFixture), encoding: 'utf8' });
 assert.equal(projectedFixture.status, 0, projectedFixture.stderr);
 googFixture.screening = JSON.parse(projectedFixture.stdout);
+
+test('contextual values have no classifications and cannot restore saved-filter rules', () => {
+  for (const definition of CONTEXTUAL_METRICS) {
+    assert.equal('getSignal' in definition, false);
+    assert.equal('options' in definition, false);
+    assert.equal(stockMetricForField(definition.key), undefined);
+    assert.equal(filterExpressionMatches(googFixture, { operator: 'or', groups: [{ operator: 'or', conditions: [
+      { field: definition.key, value: 'Cheap' }, { field: 'revenue', value: 'Growing' },
+    ] }] }), false);
+  }
+  const forward = CONTEXTUAL_METRICS.find(m => m.key === 'forward_pe');
+  assert.equal(formatContextualValue(40, forward), '40×');
+  assert.equal(formatContextualValue(10, forward), '10×');
+  assert.equal(formatContextualValue(null, forward), '—');
+  assert.equal(contextualValue({ value: Infinity }), null);
+  assert.equal(formatContextualValue(0, { format: 'percent' }), '0%');
+});
+
+test('contextual cards respect rejected projections instead of exposing unsafe raw fallbacks', () => {
+  const stock = structuredClone(googFixture);
+  const definition = CONTEXTUAL_METRICS.find(m => m.key === 'forward_pe');
+  stock.metrics.forward_pe = { value: 10 };
+  stock.screening.metrics.forward_pe = { value: 40, estimate_as_of: '2000-01-01', price_as_of: '2000-01-01', warnings: [] };
+  assert.equal(contextualValue(contextualMetric(stock, definition)), null);
+  delete stock.screening.metrics.forward_pe;
+  assert.equal(contextualMetric(stock, definition), undefined);
+  const gross = CONTEXTUAL_METRICS.find(m => m.key === 'gross_margin');
+  assert.equal(contextualMetric(stock, gross), stock.screening.financial_details.gross_margin);
+});
+
+test('contextual charts preserve units and annual versus quarterly measurement bases', () => {
+  const stock = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/data/open-data/snapshots/GOOG.json'), 'utf8'));
+  for (const key of ['price_to_sales', 'fcf_yield', 'pe', 'ev_to_ebitda']) {
+    const definition = CONTEXTUAL_METRICS.find(m => m.key === key);
+    const points = contextualHistory(stock, definition);
+    assert.ok(points.length > 0);
+    assert.equal(points.at(-1).value, stock.historical_series.valuation_history.at(-1).metrics[definition.historyKey].value);
+    assert.match(definition.historyTitle, /Annual/);
+  }
+  const fcf = CONTEXTUAL_METRICS.find(m => m.key === 'fcf_margin');
+  assert.equal(contextualHistory(stock, fcf).at(-1).value, stock.historical_series.quarterly_fundamentals.at(-1).metrics.fcf_margin.value);
+  assert.match(fcf.historyTitle, /separate from TTM/);
+  const eps = CONTEXTUAL_METRICS.find(m => m.key === 'eps_gaap_growth_yoy');
+  assert.ok(Math.abs(contextualHistory(stock, eps).at(-1).value - stock.metrics.eps_gaap_growth_yoy.value) < 1e-6);
+  for (const definition of CONTEXTUAL_METRICS.filter(m => ['forward_pe', 'peg'].includes(m.key))) {
+    assert.deepEqual(contextualHistory(stock, definition), [], 'Never fabricate unavailable ratio history');
+  }
+});
 
 
 test('every visible card exposes only factual selectable labels', () => {

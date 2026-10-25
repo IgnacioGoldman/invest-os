@@ -11440,6 +11440,44 @@ body:has(.mobile-sheet-backdrop) {
 .mobile-context-metrics > button:last-child:nth-child(odd) {
   grid-column: 1 / -1;
 }
+.mobile-contextual-section {
+  border-top: 1px solid var(--mobile-border);
+  padding: 12px 0 24px;
+}
+.mobile-contextual-toggle {
+  align-items: center;
+  background: var(--mobile-surface);
+  border: 0;
+  border-radius: var(--mobile-control-radius);
+  color: var(--mobile-text);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  justify-content: space-between;
+  padding: 14px 12px;
+  text-align: left;
+  width: 100%;
+}
+.mobile-contextual-toggle small {
+  color: var(--mobile-muted);
+  display: block;
+  font-size: 0.75rem;
+  margin-top: 4px;
+}
+.mobile-contextual-toggle[aria-expanded="true"] > svg { transform: rotate(180deg); }
+.mobile-contextual-intro {
+  color: var(--mobile-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin: 12px 0;
+}
+.mobile-contextual-section .mobile-growth-detail-panel { padding-top: 14px; }
+.mobile-contextual-component { display: grid; gap: 6px; margin-top: 8px; }
+.mobile-contextual-component > span { text-transform: capitalize; }
+.mobile-contextual-chart rect.positive,
+.mobile-contextual-chart rect.negative { fill: var(--mobile-muted); }
+.mobile-contextual-chart .mobile-growth-tooltip .positive,
+.mobile-contextual-chart .mobile-growth-tooltip .negative { fill: var(--mobile-text); }
 .mobile-red-flag-group {
   border-top: 1px solid var(--mobile-border);
   margin-top: 12px;

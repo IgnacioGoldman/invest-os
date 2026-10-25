@@ -1,35 +1,41 @@
-# First-filter business performance
+# Metrics
 
-Invest OS identifies companies with interesting reported business performance. One compact, two-column Business Performance section contains these descriptive facts:
+Metric documentation is organized into two groups:
 
-- [Revenue Growth YoY](revenue-growth-yoy.md): Strong / Solid / Flat / Weak strength bands, percentage; signed-direction saved filters preserved.
-- [Revenue Growth Momentum](revenue-growth-momentum.md): Accelerating / Steady / Decelerating, percentage points.
-- [Revenue Growth Consistency](revenue-growth-consistency.md): Steady / Choppy, six to eight quarterly observations.
-- [Operating Margin](operating-margin.md): Profitable / Loss-making, percentage.
-- [Operating Margin Trend](operating-margin-trend.md): Improving / Stable / Declining, percentage points versus the same fiscal quarter last year.
+- **Signals** have deterministic classification rules and tags. Their existing content and classification behavior are preserved.
+- **Contextual metrics** are financial indicators that require business, industry, accounting or valuation context. They have no deterministic classification tags. For example, Forward P/E of 40 does not automatically mean Expensive, and 10 does not automatically mean Cheap.
 
-It also exposes [Red Flag Count](red-flag-count.md), an optional derived count of four distinct concern groups with explicit assessment coverage and transparent evidence. Numeric custom filters can compare the five numeric metrics. A low concern count is not an investment-quality or valuation score.
+## Signals
 
-Public inputs must have finite values, source identifiers, matching currency and fiscal periods. Recompute ratios and compare actual year-ago dates. Reuse the existing 140-day quarterly-report freshness policy. Green identifies growing revenue, accelerating revenue growth or improving operating margins; market-context cards remain neutral. Missing, stale, anomalous or non-comparable metrics are omitted entirely, including their detail panels. Cards never contain placeholder labels. No empty grid positions are reserved. Missing facts are never zero or ranked as zero. No composite quality or valuation score is generated.
+- [Operating Margin Trend](signals/operating-margin-trend.md)
+- [Operating Margin](signals/operating-margin.md)
+- [Red Flag Count](signals/red-flag-count.md)
+- [Revenue Growth Consistency](signals/revenue-growth-consistency.md)
+- [Revenue Growth Momentum](signals/revenue-growth-momentum.md)
+- [Revenue Growth YoY](signals/revenue-growth-yoy.md)
+- [Support](signals/support.md)
+- [Upcoming Earnings](signals/upcoming-earnings.md)
 
-The preserved price chart keeps all timeframe selectors. [Earnings](upcoming-earnings.md) appears only with a fresh sourced future date; [support](support.md) appears only with a valid detected zone and compatible fresh quote. These sit in Market Context, separate from business performance. Unavailable context cards are omitted.
+Business-performance signals remain visible by default in stock details. Earnings and support retain their existing Market Context placement and deterministic tags. Missing, stale, anomalous or non-comparable signal metrics remain omitted. Numeric custom filters and Red Flag Count retain their existing behavior and coverage requirements. A low concern count is not an investment-quality or valuation score.
 
-Removed from all first-filter cards and selectable filters:
+## Contextual
 
-- [Free Cash Flow Margin](dropped/free-cash-flow.md)
-- [Forward P/E](dropped/forward-pe.md)
-- [Balance Sheet / Cash / Debt](dropped/balance-sheet.md)
-- [Gross Margin, Price/Sales and FCF Yield / former Financial Details](dropped/financial-details.md)
-- [GAAP EPS Growth YoY](dropped/gaap-eps-growth-yoy.md)
-- [EPS CAGR 3Y](dropped/eps-cagr-3y.md)
-- [Net Margin](dropped/net-margin.md)
-- [ROE](dropped/roe.md)
-- [ROIC proxy](dropped/roic-proxy.md)
-- [PEG](dropped/peg.md)
-- [Trailing P/E](dropped/trailing-pe.md)
-- [EV/EBITDA proxy](dropped/ev-ebitda-proxy.md)
-- [Industry Relative Strength](dropped/industry-relative-performance.md)
+- [Balance Sheet / Net Cash](contextual/balance-sheet.md)
+- [EPS CAGR 3Y](contextual/eps-cagr-3y.md)
+- [EV / EBITDA Proxy](contextual/ev-ebitda-proxy.md)
+- [Financial Details](contextual/financial-details.md)
+- [Forward P/E](contextual/forward-pe.md)
+- [Free Cash Flow Margin](contextual/free-cash-flow.md)
+- [GAAP EPS Growth YoY](contextual/gaap-eps-growth-yoy.md)
+- [Industry Relative Strength](contextual/industry-relative-performance.md)
+- [Net Margin](contextual/net-margin.md)
+- [PEG (historical growth proxy)](contextual/peg.md)
+- [ROE (annualized quarterly)](contextual/roe.md)
+- [ROIC Proxy](contextual/roic-proxy.md)
+- [Trailing GAAP P/E](contextual/trailing-pe.md)
 
-Existing retirement files are reused. The four newly retired root documents moved into `dropped/` with their previous methodology preserved. Raw reported values, all underlying research calculations, dates, fiscal periods, source identifiers and anomaly warnings remain in Analyze with AI. Source identifiers are provenance, not independent verification.
+Stock details offer a collapsed **Contextual metrics** control. Expanding it reveals additional cards using the same layout as signals. Selecting a card opens its question, description, calculation, dates, sources, limitations and a neutral chart at the bottom. Missing values show an em dash with an explanation. Missing comparable history is stated explicitly; historical observations are never fabricated. Annual, quarterly and TTM bases are labeled separately.
 
-The shared backend projection in `backend/app/services/screening_metrics.py` supplies API loads, static exports and badge evaluation. The browser hides invalid or expired projected metrics before rendering cards. Saved filters referencing removed metrics or labels require editing and fail closed, even within OR groups; their removal never silently broadens a saved screen.
+Contextual definitions are separate from the signal/filter registry. They do not restore retired saved-filter rules, presets, rankings or automatic scores. Saved filters referencing removed metrics or labels still require editing and fail closed, including OR groups. Raw reported values, underlying research calculations, dates, fiscal periods, source identifiers and anomaly notes remain available to Analyze with AI. Source identifiers are provenance, not independent verification.
+
+The shared backend projection in `backend/app/services/screening_metrics.py` supplies validated signal metrics and contextual research calculations to API loads and static exports. The frontend uses those projections where available, retaining their input requirements, including the seven-day forecast/quote policy for Forward P/E. Additional saved contextual figures come from the existing raw research data. Their reporting dates and limitations are shown without classification tags.
