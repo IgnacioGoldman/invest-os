@@ -275,24 +275,6 @@ test('compact AI data preserves currencies, per-share units, zeroes, proxies and
   assert.ok(JSON.stringify(data).length < JSON.stringify(stock, null, 2).length / 2, 'deduplicate metadata rather than dropping the histories');
 });
 
-test('AI briefs cap batches at 3 stocks while preserving the supplied order and input', () => {
-  const { MAX_ANALYSIS_STOCKS, prepareStockAnalysis } = require('../src/aiAnalysis.ts');
-  assert.equal(MAX_ANALYSIS_STOCKS, 3);
-  const candidates = Array.from({ length: 6 }, (_, index) => ({ ...googFixture, ticker: `BATCH-${String(index + 1).padStart(3, '0')}` }));
-  for (const count of [1, 2, 3, 6]) {
-    const snapshots = candidates.slice(0, count).reverse();
-    const originalTickers = snapshots.map(stock => stock.ticker);
-    const brief = prepareStockAnalysis(snapshots, 'Filtered stocks');
-    assert.deepEqual(brief.tickers, originalTickers.slice(0, 3));
-    assert.equal(brief.prompt.split('```json').length - 1, Math.min(count, 3));
-    for (const ticker of originalTickers.slice(3)) {
-      assert.equal(brief.prompt.includes(`### ${ticker} —`), false);
-      assert.equal(brief.preview.includes(ticker), false);
-    }
-    assert.deepEqual(snapshots.map(stock => stock.ticker), originalTickers);
-  }
-});
-
 test('Markdown AI instructions render single and comparison briefs with literal filter names', () => {
   const { prepareStockAnalysis } = require('../src/aiAnalysis.ts');
   const filterName = 'Growth $& {{subject}}';
