@@ -16,6 +16,7 @@ export const SUPPORT_KEYS = Object.fromEntries(SUPPORT_TIMEFRAMES.map(({ field, 
 export function isSupportField(field: string): field is SupportFilterKey { return SUPPORT_TIMEFRAMES.some(t => t.field === field); }
 export const DISABLED_FILTER_FIELDS = ["eps", "industry_strength", "valuation", "fcf_margin", "forward_pe", "balance_sheet"];
 export function normalizedFilterValue(field: string, value: string) {
+  if (isSupportField(field) && value === "Inside Support Zone") return "At Support";
   return field === "revenue" ? ({ "High Growth": "Strong", "Moderate Growth": "Solid", "Weak": "Weak" } as Record<string, string>)[value] ?? value : field === "momentum" && value === "Stable" ? "Steady" : value;
 }
 export const NUMERIC_FIELDS = ["revenue", "momentum", "operating_margin", "operating_margin_trend", "red_flag_count"];
@@ -76,7 +77,7 @@ export function supportMetric(snapshot: OpenDataStockSnapshot, field: SupportFil
   if (typeof metric?.value !== "number" || !Number.isFinite(metric.value) || metric.tier !== "computed_from_public_facts"
       || !metric.source || metric.as_of !== quote?.as_of || !freshDay(metric.as_of)
       || !(low > 0 && high >= low) || typeof quote?.value !== "number" || !Number.isFinite(quote.value) || quote.value < low) return null;
-  return { metric, signal: metricSignal(quote.value <= high ? "Inside Support Zone" : metric.value <= 6 ? "Near Support" : "Above Support") };
+  return { metric, signal: metricSignal(quote.value <= high ? "At Support" : metric.value <= 6 ? "Near Support" : "Above Support") };
 }
 export function businessMetric(snapshot: OpenDataStockSnapshot, key: string): ResearchMetric | undefined {
   const metric = researchMetric(snapshot, key);
@@ -151,7 +152,7 @@ export const STOCK_METRICS = [
     options: ["This week", "Next 30 days", "Later"], getSignal: (s) => upcomingEarningsSignal(upcomingEarningsMetric(s)), getValue: s => { const m = upcomingEarningsMetric(s); return upcomingEarningsSignal(m).label === "Unknown" ? null : m?.value ?? null; } },
   { key: "support", field: "support", title: "Proximity to Support", shortLabel: "Support", format: "support", context: true,
     question: "Where is the latest price relative to a detected support zone?", description: "Technical context from clustered swing lows in saved price history. It does not predict future returns.",
-    options: ["Inside Support Zone", "Near Support", "Above Support"], getSignal: s => SUPPORT_TIMEFRAMES.map(t => supportMetric(s, t.field)).find(Boolean)?.signal ?? metricSignal("Unknown"), getValue: s => SUPPORT_TIMEFRAMES.map(t => supportMetric(s, t.field)).find(Boolean)?.metric.value ?? null },
+    options: ["At Support", "Near Support", "Above Support"], getSignal: s => SUPPORT_TIMEFRAMES.map(t => supportMetric(s, t.field)).find(Boolean)?.signal ?? metricSignal("Unknown"), getValue: s => SUPPORT_TIMEFRAMES.map(t => supportMetric(s, t.field)).find(Boolean)?.metric.value ?? null },
 ] as const satisfies readonly Definition[];
 export type StockMetricKey = typeof STOCK_METRICS[number]["key"];
 export type StockMetricField = Exclude<typeof STOCK_METRICS[number]["field"], "support"> | SupportFilterKey;

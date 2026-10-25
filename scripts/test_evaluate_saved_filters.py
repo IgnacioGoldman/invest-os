@@ -68,7 +68,7 @@ def snapshot(ticker="TEST", revenue=12, short=1, long=30):
 
 RESEARCH_FILTER={"operator":"and","groups":[
     {"operator":"or","conditions":[{"field":"revenue","value":"Growing"},{"field":"revenue","value":"Growing"}]},
-    {"operator":"or","conditions":[{"field":"support_1m","value":"Inside Support Zone"},{"field":"support_5y","value":"Near Support"}]},
+    {"operator":"or","conditions":[{"field":"support_1m","value":"At Support"},{"field":"support_5y","value":"Near Support"}]},
 ]}
 
 
@@ -110,7 +110,11 @@ class SavedFilterEvaluatorTests(unittest.TestCase):
             self.assertTrue(expression_matches(snapshot(),expression))
 
     def test_support_boundaries_and_missing_data_are_neutral_context(self):
-        for value,label in ((2.5,"Inside Support Zone"),(2.51,"Near Support"),(6,"Near Support"),(6.01,"Above Support"),(100,"Above Support"),(None,"Unknown"),(-1,"Inside Support Zone"),(-3,"Unknown")):
+        for label in ('At Support', 'Inside Support Zone'):
+            expression = {'operator': 'and', 'groups': [{'operator': 'or', 'conditions': [
+                {'field': 'support_1m', 'value': label}]}]}
+            self.assertTrue(expression_matches(snapshot(short=1), expression))
+        for value,label in ((2.5,"At Support"),(2.51,"Near Support"),(6,"Near Support"),(6.01,"Above Support"),(100,"Above Support"),(None,"Unknown"),(-1,"At Support"),(-3,"Unknown")):
             self.assertEqual(signal_for(snapshot(short=value),"support_1m"),label)
 
     def test_bare_forward_multiple_never_generates_a_valuation_rating(self):

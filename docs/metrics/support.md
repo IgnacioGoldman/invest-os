@@ -20,7 +20,7 @@ That means the latest close is about 4% above the detected support area.
 
 The detector must provide a finite source-linked distance and a positive ordered support zone, paired with the same fresh saved quote (0–7 days old). Hide the card if the quote is below the detected zone, dates disagree, source metadata is missing or no valid zone exists. Do not infer a zone from a bare distance.
 
-- **Inside Support Zone:** the quote lies between the detected zone bounds, including a negative midpoint distance.
+- **At Support:** the quote lies between the detected zone bounds, including a negative midpoint distance.
 - **Near Support:** the quote is above the zone and the midpoint distance is at most 6% (the existing threshold).
 - **Above Support:** the quote is above the zone and the midpoint distance exceeds 6%.
 

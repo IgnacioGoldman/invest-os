@@ -101,7 +101,7 @@ test('earnings context requires a valid strictly future date and ordered window'
 test('green identifies business direction, while all market context stays neutral', () => {
   const { metricSignal } = require('../src/metricStatus.ts');
   for (const label of ['Growing', 'Accelerating', 'Improving']) assert.equal(metricSignal(label).tone, 'positive');
-  for (const label of ['Profitable', 'Stable', 'Steady', 'Flat', 'Inside Support Zone', 'Near Support', 'Above Support', 'This week', 'Next 30 days']) assert.equal(metricSignal(label).tone, 'neutral');
+  for (const label of ['Profitable', 'Stable', 'Steady', 'Flat', 'At Support', 'Near Support', 'Above Support', 'This week', 'Next 30 days']) assert.equal(metricSignal(label).tone, 'neutral');
 });
 
 test('retired and obsolete quality rules disable the whole saved expression', () => {
@@ -217,10 +217,10 @@ test('watchlist badge calculations agree with every stock-card filter', () => {
 
 test('editing saved support conditions groups matching values and preserves distinct requirements', () => {
   const rules = [
-    { id: 'short', field: 'support_1m', values: ['Inside Support Zone', 'Near Support'] },
+    { id: 'short', field: 'support_1m', values: ['At Support', 'Near Support'] },
     { id: 'growth', field: 'revenue', values: ['Growing'] },
-    { id: 'long', field: 'support_5y', values: ['Near Support', 'Inside Support Zone'] },
-    { id: 'medium', field: 'support_6m', values: ['Inside Support Zone'] },
+    { id: 'long', field: 'support_5y', values: ['Near Support', 'At Support'] },
+    { id: 'medium', field: 'support_6m', values: ['At Support'] },
   ];
   const grouped = groupSupportTimeframes(rules);
   assert.equal(grouped.length, 3);
@@ -302,7 +302,15 @@ test('GOOG matches test 1 through its valid 6M zone even without 1M or 3M suppor
   try {
     assert.equal(supportMetric(stock, 'support_1m'), null);
     assert.equal(supportMetric(stock, 'support_3m'), null);
-    assert.equal(supportMetric(stock, 'support_6m').signal.label, 'Inside Support Zone');
+    assert.equal(supportMetric(stock, 'support_6m').signal.label, 'At Support');
+    const legacy = { operator: 'and', groups: [{ id: 'support', operator: 'or', conditions: [
+      { id: 'support-6m', field: 'support_6m', value: 'Inside Support Zone' },
+    ] }] };
+    assert.equal(filterExpressionMatches(stock, legacy), true);
+    const restored = metricRulesFromExpression(legacy);
+    assert.equal(restored.logicChanged, false);
+    assert.deepEqual(restored.rules[0].values, ['At Support']);
+    assert.equal(legacy.groups[0].conditions[0].value, 'Inside Support Zone');
     const expression = DEFAULT_FILTERS.find(filter => filter.name === 'test 1').expression;
     assert.equal(filterExpressionMatches(stock, expression), true);
     const parsed = metricRulesFromExpression(expression);
@@ -350,7 +358,7 @@ test('numeric custom filters persist comparisons and agree with Python on covera
     const expression = expressionFromMetricRules([
       { id: 'growth', field: 'revenue', comparison: 'gt', values: ['15'] },
       { id: 'margin', field: 'operating_margin', comparison: 'gt', values: ['15'] },
-      { id: 'support', field: 'support_6m', timeframeMatch: 'any', values: ['Inside Support Zone', 'Near Support'] },
+      { id: 'support', field: 'support_6m', timeframeMatch: 'any', values: ['At Support', 'Near Support'] },
       { id: 'flags', field: 'red_flag_count', comparison: 'lte', values: ['1'] },
     ], { operator: 'and', groups: [] });
     const parsed = metricRulesFromExpression(expression);

@@ -87,7 +87,7 @@ def support_context(snapshot: dict, key: str, today: date | None = None) -> dict
         return None
     if low <= 0 or high < low or quote['value'] < low:
         return None
-    return {**m, 'status': 'Inside Support Zone' if quote['value'] <= high else 'Near Support' if m['value'] <= 6 else 'Above Support'}
+    return {**m, 'status': 'At Support' if quote['value'] <= high else 'Near Support' if m['value'] <= 6 else 'Above Support'}
 
 
 # Reuse the 140-day quarterly-revenue freshness rule in

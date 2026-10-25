@@ -63,6 +63,10 @@ export function groupSupportTimeframes(rules: MetricFilterRule[]): MetricFilterR
 }
 
 export function metricRulesFromExpression(expression: FilterExpression): { rules: MetricFilterRule[]; logicChanged: boolean } {
+  expression = { ...expression, groups: expression.groups.map(group => ({ ...group,
+    conditions: group.conditions.map(condition => isSupportField(condition.field)
+      ? { ...condition, value: normalizedFilterValue(condition.field, condition.value) } : condition),
+  })) };
   const numericGroups = expression.groups.filter(group => group.conditions.some(condition => condition.comparison != null));
   if (numericGroups.length === 0) return labelRulesFromExpression(expression);
   const numericRules: MetricFilterRule[] = numericGroups.flatMap(group => group.conditions.map(condition => ({

@@ -11,12 +11,12 @@ export const DEFAULT_FILTERS: ScreeningFilter[] = [{
   name: "test 1",
   icon: "target",
   isDefault: true,
-  description: "Growing revenue, profitable operations, inside or near support on any of 1m, 3m or 6m",
+  description: "Growing revenue, profitable operations, at or near support on any of 1m, 3m or 6m",
   sort_key: "symbol",
   sort_direction: "asc",
   expression: expressionFromMetricRules([
     { id: "test-1-revenue", field: "revenue", values: ["Growing"] },
     { id: "test-1-margin", field: "operating_margin", values: ["Profitable"] },
-    { id: "test-1-support", field: "support_1m", timeframes: ["support_1m", "support_3m", "support_6m"], timeframeMatch: "any", values: ["Inside Support Zone", "Near Support"] },
+    { id: "test-1-support", field: "support_1m", timeframes: ["support_1m", "support_3m", "support_6m"], timeframeMatch: "any", values: ["At Support", "Near Support"] },
   ], { operator: "and", groups: [] }),
 }];

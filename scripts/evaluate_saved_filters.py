@@ -38,6 +38,8 @@ def _number(value: Any) -> float | None:
 
 def _filter_value(condition: dict[str, Any]) -> Any:
     value = condition.get("value")
+    if condition.get("field") in SUPPORT_METRICS and value == "Inside Support Zone":
+        return "At Support"
     if condition.get("field") == "revenue":
         value = {"High Growth": "Strong", "Moderate Growth": "Solid"}.get(value, value)
     if condition.get("field") == "momentum" and value == "Stable":
@@ -71,7 +73,7 @@ FILTER_VALUES = {
     **BUSINESS_STATUSES,
     "revenue": {"Strong", "Solid", "Weak", "Growing", "Flat growth", "Flat", "Declining"},
     "upcoming_earnings": {"This week", "Next 30 days", "Later"},
-    **{field: {"Inside Support Zone", "Near Support", "Above Support"} for field in SUPPORT_METRICS},
+    **{field: {"At Support", "Near Support", "Above Support"} for field in SUPPORT_METRICS},
 }
 NUMERIC_FIELDS = {*BUSINESS_STATUSES, 'red_flag_count'} - {'revenue_consistency'}
 NUMERIC_COMPARISONS = {'lt', 'lte', 'eq', 'gte', 'gt'}
