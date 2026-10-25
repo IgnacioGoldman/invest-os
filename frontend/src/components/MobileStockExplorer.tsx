@@ -1372,7 +1372,6 @@ export function MobileStockExplorer({
   const shortcutKey = (filter: ScreeningFilter) => filter.isDefault ? filter.id : savedFilterKey(filter.id);
   const relevantSupportKeys = SUPPORT_FILTER_KEYS;
   const signedIn = personalization?.signedIn ?? false;
-  const spaceTabs = signedIn ? SPACE_TABS : (["explore", "auto"] as const);
   const isWatchlistView = signedIn && spaceTab === "watchlist";
   const watchlistTickers = personalization?.watchlistTickers ?? [];
   const watchlist = useMemo(() => new Set(watchlistTickers), [watchlistTickers]);
@@ -1761,17 +1760,17 @@ export function MobileStockExplorer({
           </div>
         </header>
 
-        {(
+        {signedIn && (
           <div className="my-space-tabs" role="tablist" aria-label="My space">
-            {spaceTabs.map((tab, index) => (
+            {SPACE_TABS.map((tab, index) => (
               <button type="button" key={tab} role="tab" id={`space-${tab}-tab`} aria-controls={`space-${tab}`}
                 aria-selected={spaceTab === tab} tabIndex={spaceTab === tab ? 0 : -1}
                 onClick={() => selectSpaceTab(tab)}
                 onKeyDown={(event) => {
                   if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
                     event.preventDefault();
-                    const next = event.key === "Home" ? spaceTabs[0] : event.key === "End" ? spaceTabs[spaceTabs.length - 1]
-                      : spaceTabs[(index + (event.key === "ArrowRight" ? 1 : -1) + spaceTabs.length) % spaceTabs.length];
+                    const next = event.key === "Home" ? SPACE_TABS[0] : event.key === "End" ? SPACE_TABS[SPACE_TABS.length - 1]
+                      : SPACE_TABS[(index + (event.key === "ArrowRight" ? 1 : -1) + SPACE_TABS.length) % SPACE_TABS.length];
                     selectSpaceTab(next);
                     document.getElementById(`space-${next}-tab`)?.focus();
                   }
@@ -1781,7 +1780,7 @@ export function MobileStockExplorer({
             ))}
           </div>
         )}
-        {spaceTab === "auto" ? (
+        {signedIn && spaceTab === "auto" ? (
           <section id="space-auto" role="tabpanel" aria-labelledby="space-auto-tab"><PortfolioSimulation /></section>
         ) : spaceTab === "portfolio" ? (
           signedIn && personalization?.userId ? <MoneyPanel key={personalization.userId} userId={personalization.userId} /> : null
