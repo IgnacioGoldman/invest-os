@@ -10859,11 +10859,16 @@ body:has(.mobile-sheet-backdrop) {
   color: var(--mobile-blue);
 }
 
+.mobile-detail-metrics {
+  display: grid;
+  gap: 7px;
+  padding: 14px 0 16px;
+}
+
 .mobile-signal-strip {
   display: grid;
   gap: 7px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  padding: 14px 0 16px;
 }
 
 .mobile-support-signal {

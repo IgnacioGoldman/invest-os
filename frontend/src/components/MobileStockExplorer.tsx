@@ -1289,24 +1289,26 @@ function StockDetail({ snapshot: summary, onBack, onOpenPeer }: { snapshot: Open
 	
 	        <PriceChart snapshot={snapshot} points={points} loading={loading} error={error} />
 
-        {contextMetrics.length > 0 && <section aria-label="Market Context">
-          <div className="mobile-signal-strip mobile-context-metrics">
-            {contextMetrics.map(metric => <MobileGrowthSignalButton key={metric.key}
-              active={selectedDetail === metric.key} label={metric.title}
-              value={metric.key === "support" ? `${formatPercent(support!.value, true)} · ${support!.window}` : formatMetric(upcomingEarningsMetric(snapshot), "days")}
-              signal={metric.key === "support" ? support!.signal : metric.getSignal(snapshot)}
-              onClick={() => setActiveGrowthDetail(current => current === metric.key ? null : metric.key)} />)}
-          </div>
-        </section>}
+        <div className="mobile-detail-metrics">
+          {contextMetrics.length > 0 && <section aria-label="Market Context">
+            <div className="mobile-signal-strip mobile-context-metrics">
+              {contextMetrics.map(metric => <MobileGrowthSignalButton key={metric.key}
+                active={selectedDetail === metric.key} label={metric.title}
+                value={metric.key === "support" ? `${formatPercent(support!.value, true)} · ${support!.window}` : formatMetric(upcomingEarningsMetric(snapshot), "days")}
+                signal={metric.key === "support" ? support!.signal : metric.getSignal(snapshot)}
+                onClick={() => setActiveGrowthDetail(current => current === metric.key ? null : metric.key)} />)}
+            </div>
+          </section>}
 
-        {businessMetrics.length > 0 && <section aria-label="Business Performance">
-          <div className="mobile-signal-strip mobile-business-metrics">
-            {businessMetrics.map(metric => <MobileGrowthSignalButton key={metric.key}
-              active={selectedDetail === metric.key} label={metric.title}
-              value={metric.key === "red_flag_count" ? redFlagDisplay(snapshot) : metric.format === "label" ? metric.getSignal(snapshot).label : metric.format === "pp" ? formatMomentumPp(metric.getValue(snapshot)) : formatPercent(metric.getValue(snapshot), true)}
-              signal={metric.getSignal(snapshot)} onClick={() => setActiveGrowthDetail(current => current === metric.key ? null : metric.key)} />)}
-          </div>
-        </section>}
+          {businessMetrics.length > 0 && <section aria-label="Business Performance">
+            <div className="mobile-signal-strip mobile-business-metrics">
+              {businessMetrics.map(metric => <MobileGrowthSignalButton key={metric.key}
+                active={selectedDetail === metric.key} label={metric.title}
+                value={metric.key === "red_flag_count" ? redFlagDisplay(snapshot) : metric.format === "label" ? metric.getSignal(snapshot).label : metric.format === "pp" ? formatMomentumPp(metric.getValue(snapshot)) : formatPercent(metric.getValue(snapshot), true)}
+                signal={metric.getSignal(snapshot)} onClick={() => setActiveGrowthDetail(current => current === metric.key ? null : metric.key)} />)}
+            </div>
+          </section>}
+        </div>
         {detailsLoading && <p role="status">Loading financial history…</p>}
         {detailsError && <p role="alert">{detailsError} <button type="button" onClick={retryDetails}>Retry financial history</button></p>}
         {selectedDetail && <MobileGrowthDetailPanel snapshot={snapshot} detailKey={selectedDetail} onOpenPeer={onOpenPeer} />}
