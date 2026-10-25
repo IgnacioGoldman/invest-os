@@ -147,12 +147,12 @@ export const STOCK_METRICS = [
     description: "One point per distinct concern group: cash generation, operating profitability, negative book equity and Priced for Perfection valuation. Potential concerns need context. Numeric filters require a complete assessment.",
     options: ["Complete assessment", "Partial assessment", "Not assessed"],
     getSignal: s => metricSignal(redFlagMetric(s)?.status ?? "Not assessed"), getValue: redFlagValue },
-  { key: "upcoming_earnings", field: "upcoming_earnings", title: "Upcoming Earnings", shortLabel: "Earnings", format: "days", context: true,
-    question: "When is the next expected report?", description: "Source-provided earnings date or window. An expected date is an estimate unless confirmed by the issuer.",
-    options: ["This week", "Next 30 days", "Later"], getSignal: (s) => upcomingEarningsSignal(upcomingEarningsMetric(s)), getValue: s => { const m = upcomingEarningsMetric(s); return upcomingEarningsSignal(m).label === "Unknown" ? null : m?.value ?? null; } },
   { key: "support", field: "support", title: "Proximity to Support", shortLabel: "Support", format: "support", context: true,
     question: "Where is the latest price relative to a detected support zone?", description: "Technical context from clustered swing lows in saved price history. It does not predict future returns.",
     options: ["At Support", "Near Support", "Above Support"], getSignal: s => SUPPORT_TIMEFRAMES.map(t => supportMetric(s, t.field)).find(Boolean)?.signal ?? metricSignal("Unknown"), getValue: s => SUPPORT_TIMEFRAMES.map(t => supportMetric(s, t.field)).find(Boolean)?.metric.value ?? null },
+  { key: "upcoming_earnings", field: "upcoming_earnings", title: "Upcoming Earnings", shortLabel: "Earnings", format: "days", context: true,
+    question: "When is the next expected report?", description: "Source-provided earnings date or window. An expected date is an estimate unless confirmed by the issuer.",
+    options: ["This week", "Next 30 days", "Later"], getSignal: (s) => upcomingEarningsSignal(upcomingEarningsMetric(s)), getValue: s => { const m = upcomingEarningsMetric(s); return upcomingEarningsSignal(m).label === "Unknown" ? null : m?.value ?? null; } },
 ] as const satisfies readonly Definition[];
 export type StockMetricKey = typeof STOCK_METRICS[number]["key"];
 export type StockMetricField = Exclude<typeof STOCK_METRICS[number]["field"], "support"> | SupportFilterKey;
