@@ -1,4 +1,3 @@
-import { PortfolioSimulation } from "./PortfolioSimulation";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import {
@@ -149,7 +148,6 @@ export function MoneyPanel({ userId }: { userId: string }) {
 
   return (
     <section className="money-panel" id="space-portfolio" role="tabpanel" aria-labelledby="space-portfolio-tab">
-      <PortfolioSimulation />
       {loading ? <p className="money-hint" role="status">Loading your amounts…</p> : loadError ? (
         <div className="money-load-error" role="alert">
           <p>{loadError}</p><button type="button" onClick={() => { setLoading(true); void load(); }}>Try again</button>

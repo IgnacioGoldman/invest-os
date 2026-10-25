@@ -12,7 +12,7 @@ InvestOS and accumulating VWCE begin with €10,000 on the feature's actual acti
 - `scripts/run_portfolio_simulation.py`: explicit initialize / market / prepare / claim / analyze / finalize / verify / publish phases.
 - `data/simulation/state.json`: authoritative, version-controlled metadata, sessions, screening results, source evidence, assessments, orders, transactions, historical market observations, daily snapshots and actual reported AI token usage.
 - `frontend/public/data/simulation/index.json`: one atomic public projection containing only hypothetical portfolios and public financial analysis. It contains no private money entries, API key, raw model request registry or account data.
-- `frontend/src/components/PortfolioSimulation.tsx`: comparison and drill-down inside the existing Portfolio tab. Personal money tracking remains below it. Guests can inspect the public simulation in Portfolio; watchlists remain personal.
+- `frontend/src/components/PortfolioSimulation.tsx`: comparison and drill-down in the Auto tab. Personal source balances and invested/uninvested amounts stay in the separate Portfolio tab. Guests can access Explore and Auto; Watchlist and Portfolio require sign-in.
 
 Every transaction has a stable identifier, portfolio/position/decision identifiers, original-currency price and gross value, EUR FX rate/date/source, execution time, fees, cash movement and rationale. SELL records include realized EUR P/L. Replacements link the BUY to its preceding SELL order and preserve the former position. A hash chain detects inconsistent ledger edits. Positions and account values are reproducible from transactions; closed positions are never overwritten by current holdings.
 

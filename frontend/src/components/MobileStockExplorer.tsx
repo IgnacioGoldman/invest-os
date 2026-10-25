@@ -87,9 +87,9 @@ type GrowthDetailKey = StockMetricKey;
 export type FilterKey = StockMetricField | "valuation" | "eps" | "industry_strength" | "fcf_margin" | "forward_pe" | "balance_sheet";
 export type SortKey = "watchlist_order" | "symbol" | "support_best" | Exclude<FilterKey, "forward_pe" | "industry_strength">;
 export type SortDirection = "asc" | "desc";
-const SPACE_TABS = ["explore", "watchlist", "portfolio"] as const;
+const SPACE_TABS = ["explore", "watchlist", "portfolio", "auto"] as const;
 type SpaceTab = typeof SPACE_TABS[number];
-type StockListTab = Exclude<SpaceTab, "portfolio">;
+type StockListTab = Extract<SpaceTab, "explore" | "watchlist">;
 type StockListView = {
   query: string;
   expression: FilterExpression;
@@ -1372,7 +1372,7 @@ export function MobileStockExplorer({
   const shortcutKey = (filter: ScreeningFilter) => filter.isDefault ? filter.id : savedFilterKey(filter.id);
   const relevantSupportKeys = SUPPORT_FILTER_KEYS;
   const signedIn = personalization?.signedIn ?? false;
-  const spaceTabs = signedIn ? SPACE_TABS : (["explore", "portfolio"] as const);
+  const spaceTabs = signedIn ? SPACE_TABS : (["explore", "auto"] as const);
   const isWatchlistView = signedIn && spaceTab === "watchlist";
   const watchlistTickers = personalization?.watchlistTickers ?? [];
   const watchlist = useMemo(() => new Set(watchlistTickers), [watchlistTickers]);
@@ -1575,7 +1575,7 @@ export function MobileStockExplorer({
 
   const selectSpaceTab = (tab: SpaceTab) => {
     if (tab === spaceTab) return;
-    if (spaceTab !== "portfolio") {
+    if (spaceTab === "explore" || spaceTab === "watchlist") {
       listViews.current[spaceTab] = {
         query, expression: filterExpression, sortKey, sortDirection,
         savedFilterId: activeSavedFilterId, page: currentPage,
@@ -1585,7 +1585,7 @@ export function MobileStockExplorer({
     setWatchlistOrganizing(false);
     cancelAnalysis();
     setWatchlistSaveError(null);
-    if (tab === "portfolio") return;
+    if (tab === "portfolio" || tab === "auto") return;
     const view = listViews.current[tab];
     restoringListPage.current = view?.page ?? 1;
     setQuery(view?.query ?? "");
@@ -1770,19 +1770,21 @@ export function MobileStockExplorer({
                 onKeyDown={(event) => {
                   if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
                     event.preventDefault();
-                    const next = event.key === "Home" ? "explore" : event.key === "End" ? "portfolio"
+                    const next = event.key === "Home" ? spaceTabs[0] : event.key === "End" ? spaceTabs[spaceTabs.length - 1]
                       : spaceTabs[(index + (event.key === "ArrowRight" ? 1 : -1) + spaceTabs.length) % spaceTabs.length];
                     selectSpaceTab(next);
                     document.getElementById(`space-${next}-tab`)?.focus();
                   }
                 }}>
-                {tab === "explore" ? "Explore" : tab === "watchlist" ? "Watchlist" : "Portfolio"}
+                {tab === "explore" ? "Explore" : tab === "watchlist" ? "Watchlist" : tab === "portfolio" ? "Portfolio" : "Auto"}
               </button>
             ))}
           </div>
         )}
-        {spaceTab === "portfolio" ? (
-          signedIn && personalization?.userId ? <MoneyPanel key={personalization.userId} userId={personalization.userId} /> : <section id="space-portfolio" role="tabpanel" aria-labelledby="space-portfolio-tab"><PortfolioSimulation /></section>
+        {spaceTab === "auto" ? (
+          <section id="space-auto" role="tabpanel" aria-labelledby="space-auto-tab"><PortfolioSimulation /></section>
+        ) : spaceTab === "portfolio" ? (
+          signedIn && personalization?.userId ? <MoneyPanel key={personalization.userId} userId={personalization.userId} /> : null
         ) : (
         <div id={isWatchlistView ? "space-watchlist" : "space-explore"} role={signedIn ? "tabpanel" : undefined} aria-labelledby={signedIn ? `space-${spaceTab}-tab` : undefined}>
         {showListControls && <>

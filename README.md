@@ -93,6 +93,6 @@ The `.github/workflows/price-refresh.yml` workflow reuses saved fundamentals, re
 
 ## Paper strategy versus VWCE
 
-The existing Portfolio tab includes a forward-running €10,000 EUR paper simulation, a VWCE comparison chart, current/historical holdings and a complete transaction/decision timeline. It starts at actual activation, with no fabricated past performance. Deterministic screening and risk coverage gate one daily structured AI review; fixed portfolio rules decide orders and execute them at later valid closes. The separate private money tracker is preserved.
+My space has four tabs: Explore, Watchlist, Portfolio, and Auto. Portfolio tracks private source balances and invested/uninvested amounts. Auto includes a forward-running €10,000 EUR paper simulation, a VWCE comparison chart, current/historical holdings and a complete transaction/decision timeline. It starts at actual activation, with no fabricated past performance. Deterministic screening and risk coverage gate one daily structured AI review; fixed portfolio rules decide orders and execute them at later valid closes. Guests can access Explore and Auto.
 
 See [the simulation architecture, exact rules, accounting conventions and setup](docs/portfolio-simulation.md). Set the repository Actions secret `OPENAI_API_KEY` to enable AI reviews. The scheduled workflow runs weekdays at 23:35 Europe/Stockholm and can be dispatched manually. Without sufficient validated inputs or the key, the strategy stays in cash rather than inventing investments.
