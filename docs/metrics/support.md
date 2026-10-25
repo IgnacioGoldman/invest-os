@@ -24,7 +24,7 @@ The detector must provide a finite source-linked distance and a positive ordered
 - **Near Support:** the quote is above the zone and the midpoint distance is at most 6% (the existing threshold).
 - **Above Support:** the quote is above the zone and the midpoint distance exceeds 6%.
 
-All labels use neutral styling. Context cards sit in Market Context beside the preserved price chart, separate from Business Performance. No missing-value placeholder is rendered, and support is never an investment-quality signal.
+Support labels use the original proximity colors: **At Support** is bright green, **Near Support** is light green, and **Above Support** is yellow. Context cards sit in Market Context beside the preserved price chart, separate from Business Performance. No missing-value placeholder is rendered, and support is never an investment-quality signal.
 
 ## How It Is Calculated
 

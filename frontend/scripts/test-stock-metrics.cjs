@@ -98,10 +98,13 @@ test('earnings context requires a valid strictly future date and ordered window'
   } finally { Date.now = now; }
 });
 
-test('green identifies business direction, while all market context stays neutral', () => {
+test('support restores proximity colors while business direction and earnings keep their styling', () => {
   const { metricSignal } = require('../src/metricStatus.ts');
+  assert.equal(metricSignal('At Support').tone, 'strong');
+  assert.equal(metricSignal('Near Support').tone, 'positive');
+  assert.equal(metricSignal('Above Support').tone, 'warning');
   for (const label of ['Growing', 'Accelerating', 'Improving']) assert.equal(metricSignal(label).tone, 'positive');
-  for (const label of ['Profitable', 'Stable', 'Steady', 'Flat', 'At Support', 'Near Support', 'Above Support', 'This week', 'Next 30 days']) assert.equal(metricSignal(label).tone, 'neutral');
+  for (const label of ['Profitable', 'Stable', 'Steady', 'Flat', 'Unknown', 'This week', 'Next 30 days']) assert.equal(metricSignal(label).tone, 'neutral');
 });
 
 test('retired and obsolete quality rules disable the whole saved expression', () => {
