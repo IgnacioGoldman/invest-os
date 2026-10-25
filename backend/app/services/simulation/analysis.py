@@ -1,13 +1,14 @@
-"""One strict, source-bound Responses API assessment per logical review session."""
+"""One strict, source-bound Gemini assessment per logical review session."""
 from __future__ import annotations
-from datetime import datetime
 from pathlib import Path
 from typing import Literal
+from urllib.parse import quote
 import json
-from pydantic import BaseModel, ConfigDict, Field
-from app.services.simulation.accounting import digest
+import requests
+from pydantic import BaseModel, ConfigDict
+from app.config import get_settings
 from app.services.screening_metrics import currencies
-from app.services.simulation.strategy import MODEL, ANALYSIS_VERSION
+from app.services.simulation.strategy import ANALYSIS_VERSION
 
 
 class StrictModel(BaseModel):
@@ -94,25 +95,61 @@ def validate_review(raw,request: dict) -> dict:
     return review
 
 
-def estimate_usage_cost(usage: dict) -> float | None:
-    # Current Standard rates, prompts <=272K. Estimated USD, not an invoice.
-    if not all(isinstance(usage.get(k),int) and usage[k]>=0 for k in ('input_tokens','output_tokens')) or usage['input_tokens']>272000: return None
+def estimate_usage_cost(usage: dict,model: str = 'gemini-3-flash-preview') -> float | None:
+    # Gemini 3 Flash Preview Standard text rates; unknown models have unknown cost.
+    # https://ai.google.dev/gemini-api/docs/pricing#gemini-3-flash-preview
+    if model!='gemini-3-flash-preview': return None
+    if not all(type(usage.get(k)) is int and usage[k]>=0 for k in ('input_tokens','output_tokens')): return None
     cached=(usage.get('input_tokens_details') or {}).get('cached_tokens',0)
-    if not isinstance(cached,int) or not 0<=cached<=usage['input_tokens']: return None
-    return round(((usage['input_tokens']-cached)*2+cached*.10+usage['output_tokens']*10)/1e6,8)
+    if type(cached) is not int or not 0<=cached<=usage['input_tokens']: return None
+    return round(((usage['input_tokens']-cached)*.50+cached*.05+usage['output_tokens']*3)/1e6,8)
 
 
-def call_openai(request: dict,api_key: str) -> tuple[dict,dict]:
-    from openai import OpenAI
+def call_gemini(request: dict,api_key: str) -> tuple[dict,dict]:
+    if not api_key: raise ValueError('GEMINI_API_KEY is not configured')
+    model=request.get('model') or get_settings().gemini_model
     prompt=(Path(__file__).resolve().parents[2]/'prompts/portfolio-review.md').read_text()
-    client=OpenAI(api_key=api_key,max_retries=0,timeout=300.)
-    response=client.responses.parse(model=MODEL,reasoning={'effort':'high'},store=False,
-        input=[{'role':'system','content':prompt},{'role':'user','content':json.dumps(request['payload'],separators=(',',':'),allow_nan=False)}],
-        text_format=InvestmentReview,max_output_tokens=24000)
-    usage=response.usage.model_dump() if response.usage else {}
-    metadata={'response_id':response.id,'model':response.model,'usage':usage,
-              'estimated_cost_usd':estimate_usage_cost(usage),'cost_basis':'Standard token-rate estimate as of 2026-10-24; actual invoice and EUR expense not available.'}
-    # Record actual reported usage even on refusal/incomplete semantic output.
-    if response.status!='completed' or response.output_parsed is None:
+    # requests.post uses no automatic retries. Do not follow redirects or reissue
+    # paid requests: the engine journals and commits a single attempt beforehand.
+    response=requests.post(
+        f'https://generativelanguage.googleapis.com/v1beta/models/{quote(model,safe="")}:generateContent',
+        headers={'x-goog-api-key':api_key},
+        json={
+            'systemInstruction':{'parts':[{'text':prompt}]},
+            'contents':[{'role':'user','parts':[{'text':json.dumps(request['payload'],separators=(',',':'),allow_nan=False)}]}],
+            'generationConfig':{
+                'thinkingConfig':{'thinkingLevel':'high'},
+                'responseMimeType':'application/json',
+                'responseJsonSchema':InvestmentReview.model_json_schema(),
+                'maxOutputTokens':24000,
+            },
+        },
+        timeout=(10,300),allow_redirects=False,
+    )
+    response.raise_for_status()
+    result=response.json()
+    reported=result.get('usageMetadata') or {}
+    usage={}
+    if reported:
+        thinking=reported.get('thoughtsTokenCount',0)
+        output=reported.get('candidatesTokenCount',0)
+        usage={'input_tokens':reported.get('promptTokenCount'),
+               'output_tokens':output+thinking if all(type(v) is int and v>=0 for v in (output,thinking)) else None,
+               'total_tokens':reported.get('totalTokenCount'),
+               'input_tokens_details':{'cached_tokens':reported.get('cachedContentTokenCount',0)},
+               'output_tokens_details':{'reasoning_tokens':thinking}}
+    candidates=result.get('candidates') or []
+    candidate=candidates[0] if candidates else {}
+    metadata={'provider':'gemini','response_id':result.get('responseId'),'model':result.get('modelVersion') or model,
+              'usage':usage,'provider_usage':reported,'finish_reason':candidate.get('finishReason'),
+              'estimated_cost_usd':estimate_usage_cost(usage,model),
+              'cost_basis':'Gemini 3 Flash Preview Standard text token-rate estimate as of 2026-10-25, including thinking tokens; actual invoice and EUR expense not available. Other models have unknown cost.'}
+    # Return usage even for blocked, truncated or malformed structured responses.
+    if result.get('promptFeedback',{}).get('blockReason') or candidate.get('finishReason')!='STOP':
         return {'invalid_response':True},metadata
-    return response.output_parsed.model_dump(),metadata
+    parts=candidate.get('content',{}).get('parts',[])
+    text=''.join(part.get('text','') for part in parts if not part.get('thought'))
+    try:
+        return json.loads(text),metadata
+    except (ValueError,TypeError):
+        return {'invalid_response':True},metadata

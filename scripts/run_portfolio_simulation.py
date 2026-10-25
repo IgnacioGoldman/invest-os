@@ -8,6 +8,7 @@ from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'backend'))
+from app.config import get_settings
 from app.services.static_stock_assets import load_full_stock_rows
 from app.services.simulation.engine import initialize,load_state,save_state,prepare,claim,analyze,finalize,public_dashboard,atomic_json,validate_reconstruction
 from app.services.simulation.market import fetch_market
@@ -25,7 +26,7 @@ def main():
     args=parser.parse_args()
     now=args.now or datetime.now(timezone.utc).isoformat()
     if datetime.fromisoformat(now).tzinfo is None: parser.error('--now requires a timezone')
-    key=os.environ.get('OPENAI_API_KEY','')
+    key=get_settings().gemini_api_key or ''
     if not args.state.exists() and args.phase!='initialize':
         parser.error('Simulation state is missing; explicit initialization is required. Never reset existing history automatically.')
     state=load_state(args.state) if args.state.exists() else initialize(now)
@@ -39,7 +40,7 @@ def main():
             with open(os.environ['GITHUB_OUTPUT'],'a') as stream:stream.write(f'has_session={str(has_session).lower()}\n')
     elif args.phase=='prepare':
         market=json.loads(args.market_file.read_text()) if args.market_file else fetch_market(state,now)
-        try: prepare(state,load_full_stock_rows(ROOT/'frontend/public/data'),market,now,bool(key) or os.environ.get("OPENAI_API_KEY_CONFIGURED")=="true")
+        try: prepare(state,load_full_stock_rows(ROOT/'frontend/public/data'),market,now,bool(key) or os.environ.get("GEMINI_API_KEY_CONFIGURED")=="true")
         except Exception as error:
             save_state(args.state,state)
             print(f'Simulation accounting failed ({type(error).__name__}); prior ledger preserved.',file=sys.stderr)

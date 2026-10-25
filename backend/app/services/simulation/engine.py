@@ -6,9 +6,10 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 import json
 import os
+from app.config import get_settings
 from app.services.simulation.accounting import CAPITAL, FEE_RATE, amount, book, digest, verify_ledger, record_snapshot, execute_orders, apply_corporate_actions, valuation, performance
-from app.services.simulation.strategy import STRATEGY_VERSION, ANALYSIS_VERSION, MODEL, screen_stock, select_candidates, apply_decisions
-from app.services.simulation.analysis import build_payload, validate_review, call_openai
+from app.services.simulation.strategy import STRATEGY_VERSION, ANALYSIS_VERSION, screen_stock, select_candidates, apply_decisions
+from app.services.simulation.analysis import build_payload, validate_review, call_gemini
 
 BENCHMARK={'symbol':'VWCE.DE','name':'Vanguard FTSE All-World UCITS ETF (USD) Accumulating',
            'isin':'IE00BK5BQT80','currency':'EUR','exchange':'Xetra',
@@ -119,6 +120,7 @@ def prepare(state: dict,snapshots: list[dict],market: dict,now: str,api_configur
     payload,registry=build_payload(by_symbol,record['candidates'],holdings,screens,session,now)
     selected=set(record['candidates'])|held
     record['request']={'id':f'{state["metadata"]["simulation_id"]}:{session}:{ANALYSIS_VERSION}',
+        'model':get_settings().gemini_model,
         'status':'ready' if api_configured else 'missing_api_key','prepared_at':now,'payload':payload,'registry':registry,
         'input_hash':digest(payload),'screens':{symbol:screens[symbol] for symbol in selected if symbol in screens},'owner':None}
     record['analysis_status']=record['request']['status']
@@ -132,16 +134,16 @@ def claim(state: dict,session: str,owner: str,now: str) -> bool:
     if (datetime.fromisoformat(now)-datetime.fromisoformat(request['prepared_at'])).total_seconds()>86400:
         request['status']='expired';state['sessions'][session]['analysis_status']='expired';return False
     request.update(status='attempted',owner=owner,attempted_at=now)
-    state['ai_usage'].append({'id':request['id'],'session':session,'at':now,'status':'attempted','model':MODEL,'usage':None,'estimated_cost_usd':None})
+    state['ai_usage'].append({'id':request['id'],'session':session,'at':now,'status':'attempted','model':request.get('model') or get_settings().gemini_model,'usage':None,'estimated_cost_usd':None})
     state['sessions'][session]['analysis_status']='attempted'
     return True
 
 
-def analyze(state: dict,session: str,owner: str,api_key: str,now: str,caller=call_openai) -> bool:
+def analyze(state: dict,session: str,owner: str,api_key: str,now: str,caller=call_gemini) -> bool:
     record=state['sessions'][session];request=record.get('request')
     if not api_key or not request or request['status']!='attempted' or request['owner']!=owner: return False
     try:
-        # max_retries=0: a paid attempt is journaled and committed BEFORE this call.
+        # No retries: a paid attempt is journaled and committed BEFORE this call.
         raw,usage=caller(request,api_key)
         entry=next(u for u in state['ai_usage'] if u['id']==request['id'])
         entry.update(status='received',**usage)
@@ -158,7 +160,7 @@ def analyze(state: dict,session: str,owner: str,api_key: str,now: str,caller=cal
         for entry in state['ai_usage']:
             if entry['id']==request['id']:entry['status']='failed'
         if not any(u['id']==request['id'] for u in state['ai_usage']):
-            state['ai_usage'].append({'id':request['id'],'session':session,'at':now,'status':'failed','model':MODEL,'usage':None,'estimated_cost_usd':None})
+            state['ai_usage'].append({'id':request['id'],'session':session,'at':now,'status':'failed','model':request.get('model') or get_settings().gemini_model,'usage':None,'estimated_cost_usd':None})
         state['metadata']['status']='analysis_error'
         return False
 
@@ -172,7 +174,7 @@ def finalize(state: dict,session: str,now: str) -> None:
             if usage['id']==request['id']:usage['status']='indeterminate'
         record.update(analysis_status='indeterminate',analysis_message='A prior paid request may have started. It will not be retried automatically for this session.')
         state['metadata']['status']='analysis_error'
-    if request['status']=='missing_api_key': record['analysis_message']='OPENAI_API_KEY is not configured. No AI request or new strategy orders were created.'
+    if request['status']=='missing_api_key': record['analysis_message']='GEMINI_API_KEY is not configured. No AI request or new strategy orders were created.'
     review=request.get('review') if request['status']=='success' else None
     apply_decisions(state,session,request['screens'],review,request['registry'],now)
 

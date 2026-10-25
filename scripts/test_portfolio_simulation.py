@@ -6,6 +6,8 @@ from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 from unittest.mock import patch
 import json
+import os
+import requests
 import unittest
 
 from test_screening_metrics import fact
@@ -13,7 +15,8 @@ from test_red_flags import clean
 from app.services.simulation.accounting import book, valuation, verify_ledger, execute_orders, apply_corporate_actions, record_snapshot
 from app.services.simulation.engine import initialize,prepare,claim,analyze,finalize,public_dashboard,validate_reconstruction,atomic_json,load_state,BENCHMARK
 from app.services.simulation.strategy import screen_stock,select_candidates,forward_pe_classification
-from app.services.simulation.analysis import validate_review,call_openai,estimate_usage_cost
+from app.services.simulation.analysis import validate_review,call_gemini,estimate_usage_cost,InvestmentReview
+from app.config import get_settings
 from app.services.simulation.market import benchmark_identity,historical_fx,normalize_bars
 
 START='2026-10-25T18:00:00+00:00'
@@ -56,7 +59,13 @@ def good_review(request,investment='compelling',thesis='intact'):
         'ranked_candidates':list(candidates),'comparisons':[]}
 
 def mocked_call(request,key):
-    return good_review(request),{'model':'gpt-6.1-sol','usage':{'input_tokens':100,'output_tokens':50},'estimated_cost_usd':.0007}
+    return good_review(request),{'model':'gemini-3-flash-preview','usage':{'input_tokens':100,'output_tokens':50},'estimated_cost_usd':.0002}
+
+def gemini_response(request):
+    return {'responseId':'fixture-response','modelVersion':'gemini-3-flash-preview',
+            'usageMetadata':{'promptTokenCount':1000,'cachedContentTokenCount':200,
+                             'candidatesTokenCount':100,'thoughtsTokenCount':50,'totalTokenCount':1150},
+            'candidates':[{'finishReason':'STOP','content':{'parts':[{'text':json.dumps(good_review(request))}]}}]}
 
 def run_review(state,stocks,d,market_data=None,caller=mocked_call,configured=True):
     session=prepare(state,stocks,market_data or market(d,[s['ticker'] for s in stocks]),now(d),configured)
@@ -252,25 +261,115 @@ class PortfolioSimulationTests(unittest.TestCase):
         self.assertIsNone(public['ai_costs']['net_economic_return'])
         self.assertEqual(public['portfolios']['strategy']['performance']['annualized_return_pct'],None)
 
-    def test_usage_and_sdk_request_parameters(self):
-        self.assertAlmostEqual(estimate_usage_cost({'input_tokens':1000,'output_tokens':100,'input_tokens_details':{'cached_tokens':200}}),.00262)
-        self.assertIsNone(estimate_usage_cost({'input_tokens':300000,'output_tokens':100}))
+    def test_usage_and_gemini_request_parameters(self):
+        self.assertAlmostEqual(estimate_usage_cost({'input_tokens':1000,'output_tokens':100,'input_tokens_details':{'cached_tokens':200}}),.00071)
+        self.assertIsNone(estimate_usage_cost({'input_tokens':1000,'output_tokens':100},'another-gemini-model'))
+        self.assertIsNone(estimate_usage_cost({}))
+        self.assertIsNone(estimate_usage_cost({'input_tokens':1000,'output_tokens':100,'input_tokens_details':{'cached_tokens':1001}}))
         state=initialize(START);prepare(state,[stock()],market(MON),now(MON),True);r=state['sessions'][MON]['request']
-        captured={}
-        def factory(**kwargs):
-            captured['client']=kwargs
-            def parse(**args):
-                captured['request']=args
-                from app.services.simulation.analysis import InvestmentReview
-                return SimpleNamespace(status='completed',id='fixture-response',model='gpt-6.1-sol',usage=SimpleNamespace(model_dump=lambda:{'input_tokens':1,'output_tokens':1}),output_parsed=InvestmentReview.model_validate(good_review(r)))
-            return SimpleNamespace(responses=SimpleNamespace(parse=parse))
-        with patch.dict('sys.modules',{'openai':SimpleNamespace(OpenAI=factory)}): raw,metadata=call_openai(r,'test-key')
-        self.assertEqual(captured['client']['max_retries'],0)
-        self.assertEqual(captured['request']['model'],'gpt-6.1-sol')
-        self.assertEqual(captured['request']['reasoning'],{'effort':'high'})
-        self.assertFalse(captured['request']['store'])
+        r['model']='gemini-3-flash-preview'
+        response=gemini_response(r)
+        # Ignore thought parts and support the final JSON spanning multiple parts.
+        text=response['candidates'][0]['content']['parts'][0]['text']
+        response['candidates'][0]['content']['parts']=[{'thought':True,'text':'Internal thought.'},{'text':text[:30]},{'text':text[30:]}]
+        with patch('app.services.simulation.analysis.requests.post',return_value=SimpleNamespace(raise_for_status=lambda:None,json=lambda:response)) as post:
+            raw,metadata=call_gemini(r,'test-key')
+        post.assert_called_once()
+        self.assertEqual(post.call_args.args[0],'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent')
+        args=post.call_args.kwargs
+        self.assertEqual(args['headers'],{'x-goog-api-key':'test-key'})
+        self.assertFalse(args['allow_redirects'])
+        self.assertEqual(args['timeout'],(10,300))
+        config=args['json']['generationConfig']
+        self.assertEqual(config['thinkingConfig'],{'thinkingLevel':'high'})
+        self.assertEqual(config['responseMimeType'],'application/json')
+        self.assertEqual(config['responseJsonSchema'],InvestmentReview.model_json_schema())
+        self.assertEqual(json.loads(args['json']['contents'][0]['parts'][0]['text']),r['payload'])
+        self.assertIn('equity investment analyst',args['json']['systemInstruction']['parts'][0]['text'])
         self.assertEqual(validate_review(raw,r),good_review(r))
-        self.assertEqual(metadata['usage']['input_tokens'],1)
+        self.assertEqual(metadata['usage']['input_tokens'],1000)
+        self.assertEqual(metadata['usage']['output_tokens'],150)
+        self.assertEqual(metadata['usage']['output_tokens_details']['reasoning_tokens'],50)
+        self.assertEqual(metadata['provider_usage'],response['usageMetadata'])
+        self.assertAlmostEqual(metadata['estimated_cost_usd'],.00086)
+
+    def test_gemini_invalid_responses_preserve_usage_and_never_create_orders(self):
+        for invalid in ('blocked','truncated','malformed','empty','invalid_evidence','extra_field'):
+            with self.subTest(invalid=invalid):
+                state=initialize(START);prepare(state,[stock()],market(MON),now(MON),True)
+                r=state['sessions'][MON]['request'];response=gemini_response(r)
+                if invalid=='blocked':
+                    response.update(candidates=[],promptFeedback={'blockReason':'SAFETY'})
+                elif invalid=='truncated':response['candidates'][0]['finishReason']='MAX_TOKENS'
+                elif invalid=='malformed':response['candidates'][0]['content']['parts']=[{'text':'{'}]
+                elif invalid=='empty':response['candidates'][0]['content']['parts']=[]
+                else:
+                    review=good_review(r)
+                    if invalid=='invalid_evidence':review['assessments'][0]['evidence'][0]['reference_id']='invented'
+                    else:review['unexpected']=True
+                    response['candidates'][0]['content']['parts']=[{'text':json.dumps(review)}]
+                claim(state,MON,'test-run',now(MON))
+                with patch('app.services.simulation.analysis.requests.post',return_value=SimpleNamespace(raise_for_status=lambda:None,json=lambda:response)) as post:
+                    self.assertFalse(analyze(state,MON,'test-run','test-key',now(MON)))
+                    self.assertFalse(analyze(state,MON,'test-run','test-key',now(MON)))
+                post.assert_called_once()
+                finalize(state,MON,now(MON))
+                self.assertEqual(state['ai_usage'][0]['status'],'failed')
+                self.assertEqual(state['ai_usage'][0]['usage']['output_tokens'],150)
+                self.assertEqual(len(state['orders']),1) # Benchmark only.
+
+    def test_gemini_http_failures_do_not_retry_or_leak_credentials(self):
+        for error in (requests.HTTPError('429 test-secret'),requests.Timeout('test-secret')):
+            with self.subTest(error=type(error).__name__):
+                state=initialize(START);prepare(state,[stock()],market(MON),now(MON),True)
+                claim(state,MON,'test-run',now(MON))
+                with patch('app.services.simulation.analysis.requests.post',side_effect=error) as post:
+                    self.assertFalse(analyze(state,MON,'test-run','test-secret',now(MON)))
+                    self.assertFalse(analyze(state,MON,'test-run','test-secret',now(MON)))
+                post.assert_called_once()
+                self.assertNotIn('test-secret',json.dumps(state))
+
+    def test_gemini_model_is_frozen_at_preparation_and_journaled(self):
+        state=initialize(START)
+        with patch.dict(os.environ,{'GEMINI_MODEL':'gemini-custom-model'}):
+            prepare(state,[stock()],market(MON),now(MON),True)
+        r=state['sessions'][MON]['request'];response=gemini_response(r)
+        response['modelVersion']='gemini-custom-model-version'
+        with patch.dict(os.environ,{'GEMINI_MODEL':'changed-model'}):
+            claim(state,MON,'test-run',now(MON))
+            self.assertEqual(state['ai_usage'][0]['model'],'gemini-custom-model')
+            with patch('app.services.simulation.analysis.requests.post',return_value=SimpleNamespace(raise_for_status=lambda:None,json=lambda:response)) as post:
+                self.assertTrue(analyze(state,MON,'test-run','test-key',now(MON)))
+            self.assertIn('/gemini-custom-model:generateContent',post.call_args.args[0])
+            finalize(state,MON,now(MON))
+        self.assertIsNone(state['ai_usage'][0]['estimated_cost_usd'])
+        self.assertEqual(state['investment_decisions'][-1]['model'],'gemini-custom-model-version')
+
+    def test_gemini_settings_load_dotenv_and_respect_environment_overrides(self):
+        with TemporaryDirectory() as temp:
+            Path(temp,'.env').write_text('GEMINI_API_KEY=dotenv-key\nGEMINI_MODEL=gemini-dotenv-model\n')
+            with patch('app.config.PROJECT_DIR',Path(temp)),patch.dict(os.environ,{},clear=True):
+                settings=get_settings()
+                self.assertEqual(settings.gemini_api_key,'dotenv-key')
+                self.assertEqual(settings.gemini_model,'gemini-dotenv-model')
+                with patch.dict(os.environ,{'GEMINI_API_KEY':'ci-key','GEMINI_MODEL':'models/gemini-ci-model'}):
+                    settings=get_settings()
+                    self.assertEqual(settings.gemini_api_key,'ci-key')
+                    self.assertEqual(settings.gemini_model,'gemini-ci-model')
+                with patch.dict(os.environ,{'GEMINI_API_KEY':'','GEMINI_MODEL':''}):
+                    settings=get_settings()
+                    self.assertIsNone(settings.gemini_api_key)
+                    self.assertEqual(settings.gemini_model,'gemini-3-flash-preview')
+
+    def test_missing_gemini_key_does_not_make_a_request(self):
+        state=initialize(START);prepare(state,[stock()],market(MON),now(MON),False)
+        with patch('app.services.simulation.analysis.requests.post') as post:
+            self.assertFalse(claim(state,MON,'test-run',now(MON)))
+            self.assertFalse(analyze(state,MON,'test-run','',now(MON)))
+            with self.assertRaises(ValueError):call_gemini(state['sessions'][MON]['request'],'')
+        post.assert_not_called()
+        finalize(state,MON,now(MON))
+        self.assertIn('GEMINI_API_KEY',state['sessions'][MON]['analysis_message'])
 
     def test_benchmark_identity_and_historical_fx(self):
         info={'symbol':'VWCE.DE','currency':'EUR','quoteType':'ETF','exchange':'GER','longName':BENCHMARK['name'],'isin':BENCHMARK['isin']}

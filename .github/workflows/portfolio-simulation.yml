@@ -22,7 +22,8 @@ jobs:
     timeout-minutes: 60
     env:
       SIMULATION_RUN_OWNER: ${{ github.run_id }}-${{ github.run_attempt }}
-      OPENAI_API_KEY_CONFIGURED: ${{ secrets.OPENAI_API_KEY != '' }}
+      GEMINI_API_KEY_CONFIGURED: ${{ secrets.GEMINI_API_KEY != '' }}
+      GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-3-flash-preview' }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -62,13 +63,13 @@ jobs:
       - name: Reserve this session's single paid attempt
         if: steps.prepare.outcome == 'success'
         run: python scripts/run_portfolio_simulation.py --phase claim
-      - name: Persist paid-attempt checkpoint before contacting OpenAI
+      - name: Persist paid-attempt checkpoint before contacting Gemini
         if: steps.prepare.outcome == 'success'
         run: bash scripts/persist_simulation.sh
       - name: Request structured investment assessment
         if: steps.prepare.outcome == 'success'
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python scripts/run_portfolio_simulation.py --phase analyze
       - name: Apply fixed portfolio rules and reconcile ledger
         if: steps.prepare.outcome == 'success'

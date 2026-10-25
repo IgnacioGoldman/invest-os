@@ -1,12 +1,12 @@
 """Fixed V1 entry/hold/exit rules. AI supplies assessments, never trades or amounts."""
 from __future__ import annotations
 from datetime import date, datetime, timezone, timedelta
+from app.config import get_settings
 from app.services.screening_metrics import build_screening_metrics, number
 from app.services.simulation.accounting import MAX_ALLOCATION, MAX_POSITIONS, book, valuation, digest
 
 STRATEGY_VERSION = '1.0.0'
-ANALYSIS_VERSION = '1.0.0'
-MODEL = 'gpt-6.1-sol'
+ANALYSIS_VERSION = '2.0.0'
 
 
 def forward_pe_classification(value) -> str:
@@ -70,8 +70,10 @@ def replacement_eligible(screen: dict) -> bool:
 
 
 def decision(state: dict, session: str, symbol: str | None, action: str, reason: str, now: str, assessment=None, screen=None) -> dict:
+    request=state['sessions'][session].get('request') or {}
+    usage=next((u for u in state['ai_usage'] if u['id']==request.get('id')), {})
     row={'id':f'decision:{session}:{symbol or "portfolio"}', 'session':session,'analysis_date':now,'symbol':symbol,
-         'action':action,'explanation':reason,'model':MODEL,'analysis_version':ANALYSIS_VERSION,'strategy_version':STRATEGY_VERSION,
+         'action':action,'explanation':reason,'model':usage.get('model') or request.get('model') or get_settings().gemini_model,'analysis_version':ANALYSIS_VERSION,'strategy_version':STRATEGY_VERSION,
          'assessment':assessment,'execution_status':'no_transaction','financial_as_of':screen.get('financial_as_of') if screen else None,
          'market_cutoff':session,'metrics':{k:screen[k] for k in ('revenue_strength','operating_margin','forward_pe_class','red_flags')} if screen else None,
          'red_flag_ids':[f['id'] for f in screen['metrics']['red_flag_count']['flags']] if screen else []}
