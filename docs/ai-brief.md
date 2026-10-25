@@ -1,6 +1,6 @@
 # AI brief copy format
 
-The analysis instructions remain in `frontend/src/prompts/stock-analysis.md` and are copied unchanged apart from the company, prepared date and filter-name placeholders. Investment analysis, scores, tags, output table and research requirements are not shortened by the data formatter.
+The analysis instructions remain in `frontend/src/prompts/stock-analysis.md` and are copied unchanged apart from the company, prepared date and filter-name placeholders. Investment analysis, descriptive assessment tags, output table and research requirements are not shortened by the data formatter. The final step combines comparison, ranking and table creation, giving business quality and valuation equal importance without numerical scores.
 
 `frontend/src/aiBriefData.ts` builds a compact copy of each selected snapshot:
 

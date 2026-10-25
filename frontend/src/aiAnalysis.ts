@@ -11,7 +11,7 @@ export type StockAnalysisBrief = {
 export function prepareStockAnalysis(snapshots: OpenDataStockSnapshot[], filterName: string): StockAnalysisBrief {
   const tickers = snapshots.map((snapshot) => snapshot.ticker);
   const subject = tickers.length > 1 ? `Compare ${tickers.join(", ")} as potential investments.` : `Evaluate ${tickers[0]} as a potential investment.`;
-  const preview = `${subject} Score business quality and valuation attractiveness from 0 to 100, pair each score with a colored tag (Strong, Solid, Average, Weak or Poor for business quality; Cheap, Fair or Expensive for valuation), then rank all selected stocks by their equally weighted scores. Use the supplied data as a starting point, supplement it with research when available, and explain the investment case and key risks.`;
+  const preview = `${subject} Assess each stock independently using descriptive tags only: Strong, Solid, Average, Weak or Poor for business quality; Cheap, Fair or Expensive for valuation; Unknown when evidence is insufficient. Then compare and rank all selected stocks, giving equal importance to business quality and valuation, and create one table with Rank, Stock, Business quality, Valuation and Rationale. Use the supplied data as a starting point, supplement it with research when available, and explain the investment case and key risks.`;
   const variables: Record<string, string> = { subject, preparedAt: new Date().toISOString(), filterName };
   const instructions = stockAnalysisTemplate.trimEnd().replace(
     /\{\{(subject|preparedAt|filterName)\}\}/g,

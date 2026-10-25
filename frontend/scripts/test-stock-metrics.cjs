@@ -289,9 +289,14 @@ test('Markdown AI instructions render single and comparison briefs with literal 
     assert.ok(brief.prompt.includes('## Invest OS data\n\nCompact data key:'));
     assert.ok(brief.prompt.includes('prices (including support zones) and EPS are per share'));
     assert.ok(brief.prompt.includes('### GOOG'));
-    assert.match(brief.prompt, /\| Rank \| Stock \| Business (?:score|quality score \+ tag) \| Valuation score(?: \+ tag)? \| Brief rationale \|/);
-    assert.ok(brief.prompt.includes('two integer scores from 0 to 100'));
-    assert.ok(brief.prompt.includes('equal-weight average'));
+    assert.ok(brief.prompt.includes('| Rank | Stock | Business quality | Valuation | Rationale |'));
+    assert.ok(brief.prompt.includes('## STEP 4 — COMPARE, RANK AND CREATE THE FINAL TABLE'));
+    assert.ok(brief.prompt.includes('Business quality: Strong, Solid, Average, Weak, Poor or Unknown.'));
+    assert.ok(brief.prompt.includes('Valuation: Cheap, Fair, Expensive or Unknown.'));
+    assert.ok(brief.prompt.includes('equal importance to Business Quality and Valuation'));
+    assert.equal(brief.prompt.includes('## Output details'), false);
+    assert.equal(brief.prompt.includes('score + tag'), false);
+    assert.equal(brief.preview.includes('0 to 100'), false);
     assert.ok(brief.prompt.includes('Do not review, critique or suggest improvements to Invest OS'));
     assert.ok(brief.preview.includes('rank all selected stocks'));
     assert.equal(brief.prompt.includes('{{preparedAt}}'), false);
