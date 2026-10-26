@@ -1,0 +1,6 @@
+Source: https://www.sec.gov/Archives/edgar/data/904851/000155485526001760/MainDocument.htm
+5.2 CONSOLIDATED INCOME STATEMENT
+Income Statement 2Q26 1Q26 2Q25 Q/Q Y/Y 1H26 1H25
+Unaudited Figures, in US$ million
+Revenues 6,574 4,946 4,641 32.9% 41.7% 11,520 9,249 24.6%
+Operating income 1,813 878 412 106.5% 340.0% 2,691 604 345.5%

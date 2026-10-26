@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import calendar
 from copy import deepcopy
 import json
 import logging
@@ -218,10 +219,15 @@ def _issuer_fact_row(value: float, period_end: date, *, annual: bool, scale: flo
 def _period_end_from_issuer_header(header: Any, *, annual: bool) -> date | None:
     text = str(header or "").strip()
     if annual:
-        try:
-            return date(int(text[:4]), 12, 31)
-        except ValueError:
-            return None
+        if re.fullmatch(r'(?:19|20)\d{2}', text):
+            return date(int(text), 12, 31)
+        # Cash-flow and balance sheets use Excel serial dates, whereas the
+        # income sheet uses literal years. Never truncate a serial into a year.
+        if re.fullmatch(r'\d{5}(?:\.0+)?', text):
+            end = date(1899, 12, 30) + timedelta(days=int(float(text)))
+            if end.month == 12 and end.day == 31:
+                return end
+        return None
     match = re.fullmatch(r"Q([1-4])\s+(\d{4})", text)
     if not match:
         return None
@@ -460,19 +466,82 @@ class OpenDataProvider:
         from app.entry_engine import open_data_metrics as metric_engine
         from app.entry_engine.open_data_metrics import REVENUE_CONCEPTS, USD_UNITS, _annual_points, _quarterly_metric_facts
 
+        primary = metric_engine.normalize_companyfacts_periods(primary)
         quarters = _quarterly_metric_facts(primary, REVENUE_CONCEPTS, USD_UNITS)
         annual = _annual_points(primary, REVENUE_CONCEPTS, USD_UNITS)
         if not annual:
             return None, "Secondary statement fallback skipped: primary reporting currency/year-end could not be verified."
         currency = annual[0].unit
-        # Yahoo's normalized periods currently use calendar quarters. Mixing
-        # these with non-calendar SEC fiscal labels would create fake history.
-        if annual[0].end.month != 12 or any(q.fy != q.end.year or q.fp != f"Q{(q.end.month - 1) // 3 + 1}" for q in quarters):
-            return None, "Secondary statement fallback skipped: Yahoo calendar quarters do not match verified SEC fiscal periods."
+        noncalendar = annual[0].end.month != 12 or any(q.fy != q.end.year or q.fp != f"Q{(q.end.month - 1) // 3 + 1}" for q in quarters)
+        # For non-calendar filers accept only exact statement dates whose
+        # fiscal identity and duration are established by primary revenue facts.
+        aligned = {}
+        if noncalendar:
+            for q in quarters:
+                points = [p for concept in REVENUE_CONCEPTS for p in metric_engine._fact_points(primary, concept, (currency,))
+                          if p.end == q.end and p.start and p.duration_days and 60 <= p.duration_days <= 130]
+                if points:
+                    start = max(points, key=metric_engine._point_sort_key).start
+                    aligned[(q.end.isoformat(), False)] = (q.fy, q.fp, start.isoformat())
+                else:
+                    # A Q4 derived from annual minus nine-month facts has no
+                    # direct three-month fact; the preceding quarter fixes its start.
+                    prior = [p for p in quarters if q.fy is not None and p.fy is not None
+                             and p.fy * 4 + int(p.fp[1:]) == q.fy * 4 + int(q.fp[1:]) - 1
+                             and 60 <= (q.end - p.end).days <= 130]
+                    if len(prior) == 1:
+                        aligned[(q.end.isoformat(), False)] = (q.fy, q.fp, (prior[0].end + timedelta(days=1)).isoformat())
+            for point in annual:
+                if point.start:
+                    aligned.setdefault((point.end.isoformat(), True), (point.fy, 'FY', point.start.isoformat()))
+            if not any(not key[1] for key in aligned):
+                return None, "Secondary statement fallback skipped: no exact quarterly dates with verified SEC fiscal periods."
+        # Stable month-end fiscal calendars also establish newer vendor-only
+        # quarters. Require two distinct primary annual spans; 52/53-week or
+        # changing year ends remain limited to exact primary statement dates.
+        annual_ends = sorted({(p.end, p.fy) for p in annual if p.fy is not None}, reverse=True)[:3]
+        stable_calendar = (len(annual_ends) >= 2
+            and len({(end.month, fy - end.year) for end, fy in annual_ends}) == 1
+            and all(end.day == calendar.monthrange(end.year, end.month)[1] for end, _ in annual_ends))
+        reconciled_dates = {}
+        alignment_notes = []
+
+        def align_vendor(row: dict) -> dict | None:
+            key = (row.get('end'), row.get('fp') == 'FY')
+            if key in reconciled_dates:
+                primary_end, identity = reconciled_dates[key]
+                return {**row, 'end': primary_end, 'fy': identity[0], 'fp': identity[1], 'start': identity[2]}
+            identity = aligned.get(key)
+            if identity is None and not key[1] and stable_calendar:
+                end = metric_engine._parse_date(row.get('end'))
+                fiscal_end, fiscal_year = annual_ends[0]
+                if (end and -400 <= (end - fiscal_end).days <= 365
+                        and end.day == calendar.monthrange(end.year, end.month)[1]
+                        and (end.month - fiscal_end.month) % 3 == 0):
+                    quarter = (end.month - fiscal_end.month) % 12 // 3 or 4
+                    year = end.year + (end.month > fiscal_end.month) + fiscal_year - fiscal_end.year
+                    start_year, start_month = divmod(end.year * 12 + end.month - 3, 12)
+                    identity = (year, f'Q{quarter}', date(start_year, start_month + 1, 1).isoformat())
+            return {**row, 'fy': identity[0], 'fp': identity[1], 'start': identity[2]} if identity else None
         vendor = self.fetch_yfinance_companyfacts(symbol, metadata)
+        if noncalendar:
+            vendor_revenue_rows = vendor.get('facts', {}).get('yfinance', {}).get('RevenueFromContractWithCustomerExcludingAssessedTax', {}).get('units', {}).get(currency, [])
+            for row in vendor_revenue_rows:
+                end, value = metric_engine._parse_date(row.get('end')), _finite_float(row.get('val'))
+                if not end or value is None or row.get('fp') == 'FY':
+                    continue
+                matches = [q for q in quarters if 0 < abs((q.end - end).days) <= 7
+                           and math.isclose(q.value, value, rel_tol=1e-7, abs_tol=1)
+                           and (q.end.isoformat(), False) in aligned]
+                if len(matches) == 1:
+                    primary_end = matches[0].end.isoformat()
+                    reconciled_dates[(row['end'], False)] = (primary_end, aligned[(primary_end, False)])
+                    alignment_notes.append(f'Yahoo statement date {end} aligned to SEC date {primary_end} after same-currency quarterly revenue reconciliation.')
         money = {}
         for concept, data in vendor.get("facts", {}).get("yfinance", {}).items():
             rows = data.get("units", {}).get(currency)
+            if rows and noncalendar:
+                rows = [mapped for row in rows if (mapped := align_vendor(row)) is not None]
             if rows:
                 money[concept] = {"units": {currency: rows}}
         vendor_revenue = money.get("RevenueFromContractWithCustomerExcludingAssessedTax")
@@ -516,7 +585,7 @@ class OpenDataProvider:
                     del money[concept]
         supplemented = deepcopy(primary)
         supplemented.setdefault("facts", {})["yfinance"] = money
-        return supplemented, "Checked Yahoo statement tables for missing same-currency calendar-quarter fundamentals; retained overlapping SEC facts and calculated related metrics together."
+        return supplemented, "Checked Yahoo statement tables for missing same-currency fundamentals with verified fiscal periods; retained overlapping SEC facts and calculated related metrics together." + (' ' + ' '.join(dict.fromkeys(alignment_notes)) if alignment_notes else '')
 
     def fetch_non_sec_companyfacts(self, ticker: str, metadata: dict[str, Any]) -> dict[str, Any]:
         symbol = ticker.upper().strip()
@@ -556,7 +625,7 @@ class OpenDataProvider:
         config = ISSUER_FINANCIAL_WORKBOOKS.get(symbol)
         if config is None:
             return None
-        cache_name = f"issuer_companyfacts_{symbol.replace('/', '_')}.json"
+        cache_name = f"issuer_companyfacts_v2_{symbol.replace('/', '_')}.json"
         cached = None if self.force_refresh else self.cache.get(cache_name, timedelta(hours=12))
         if cached is not None:
             return cached

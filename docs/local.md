@@ -72,6 +72,35 @@ PY
 
 ## 4. Metric History Targets
 
+### Operating-margin repairs
+
+For a deliberate full refresh that bypasses cached source responses while retaining saved market prices:
+
+```sh
+.venv/bin/python scripts/open_data_poc.py \
+  --universe-file data/stocks/stocks.json \
+  --reuse-saved-prices --force-refresh --workers 1 \
+  --skip-filing-details --min-coverage 0 \
+  --output /tmp/fundamentals-repair.json
+.venv/bin/python scripts/build_stock_derived_signals.py
+.venv/bin/python scripts/export_static_site_data.py
+.venv/bin/python scripts/audit_stock_data_coverage.py --output data/stocks/data-coverage.json
+```
+
+Use one worker for this repair path to avoid SQLite write contention. A smaller universe file can target only affected symbols. Inspect the collection report for failures, unsupported inputs and unresolved gaps; `--min-coverage 0` allows saving incomplete but supported snapshots and is not a statement that every metric is validated.
+
+The collector now retries reported operating income when only a proxy or a missing latest-quarter input is available. Non-calendar Yahoo statements use verified SEC fiscal identities: exact statement dates, stable month-end annual calendars, or a date difference of at most seven days with matching same-currency quarterly revenue. Unmatched periods and currencies remain excluded. Axfood's annual workbook headers accept literal years and Excel year-end serial dates; corrected collections discard previously retained corrupt future years. YPF's durable issuer facts also retain reported USD operating income from its consolidated income statement, and supported newer releases import that row alongside revenue.
+
+To compare refreshed margins with the preserved Analyze experiment:
+
+```sh
+.venv/bin/python scripts/audit_operating_margins.py \
+  --baseline-run experiments/analyze-universe/runs/2026-10-25 \
+  --output-dir experiments/analyze-universe/runs/2026-10-26-data-repair
+```
+
+This produces Markdown, CSV and JSON with recovered margins, remaining causes and financial-rule counts. An optional `--price-baseline PATH` checks pre-repair price fingerprints against the final export, ignoring optional null metadata added during serialization. The 26 October report includes that captured baseline. The comparison does not rerank the companies or rewrite the frozen experiment.
+
 For each active ticker, local should aim to persist enough history to make metric trends useful:
 
 - At least four periods for revenue growth YoY when quarterly or annual data supports it.

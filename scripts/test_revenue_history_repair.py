@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 from app.entry_engine.fiscal_periods import normalize_companyfacts_periods
 from app.entry_engine.open_data_metrics import _quarterly_revenue_rows
 from app.entry_engine.open_data_models import OpenDataPeriodMetrics, OpenDataSnapshot
-from app.entry_engine.providers.issuer_revenue import issuer_revenue_check_due, load_issuer_revenue, parse_report, parse_revenue_text, refresh_issuer_revenue, revenue_fact
+from app.entry_engine.providers.issuer_revenue import issuer_revenue_check_due, load_issuer_revenue, parse_report, parse_revenue_text, parse_operating_income_text, refresh_issuer_revenue, revenue_fact
 from app.services.revenue_growth_momentum import calculate_revenue_growth_momentum
 from app.services.stock_data_quality import retain_verified_history
 from app.services.storage import connect, replace_stock_open_data_snapshot
@@ -43,6 +43,19 @@ def nvs_revenue_seed():
 
 
 class RevenueHistoryRepairTests(unittest.TestCase):
+    def test_ypf_operating_income_uses_consolidated_usd_quarters_and_signed_values(self):
+        text = (ROOT / 'scripts/fixtures/ypf-q2-2026-operating-income.txt').read_text()
+        metadata = dict(year=2026,quarter=2,filed='2026-08-10',url='https://www.sec.gov/Archives/edgar/data/904851/000155485526001760/MainDocument.htm')
+        rows = parse_operating_income_text('YPF',text,**metadata)
+        self.assertEqual([r['val'] for r in rows],[1813e6,878e6,412e6])
+        self.assertEqual([r['end'] for r in rows],['2026-06-30','2026-03-31','2025-06-30'])
+        negative = parse_operating_income_text('YPF',text.replace('1,813 878 412','(1,813) - 412'),**metadata)
+        self.assertEqual([r['val'] for r in negative],[-1813e6,0,412e6])
+        for bad in [text.replace('US$ million','AR$ million'),text.replace('Operating income','Adjusted operating income'),
+                    text.replace('2Q26','3Q26'),text.replace('1,813','N/A')]:
+            with self.subTest(text=bad),self.assertRaises(ValueError):
+                parse_operating_income_text('YPF',bad,**metadata)
+
     def test_comparative_filing_year_does_not_erase_prior_quarter(self):
         data = facts([
             fact(400,"2024-01-01","2024-12-31",2025,"FY","10-K"),

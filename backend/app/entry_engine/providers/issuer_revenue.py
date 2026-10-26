@@ -95,7 +95,7 @@ class _StatementText(HTMLParser):
         self.parts.append("\n" if tag == "tr" or (tag in {"p", "div"} and not self.row_depth) else " " if tag in {"p", "div", "td", "th"} else "")
 
 
-def parse_report(symbol: str, content: bytes, **metadata) -> list[dict]:
+def report_text(content: bytes) -> str:
     if content.startswith(b"%PDF"):
         text = "\f".join(page.extract_text() or "" for page in PdfReader(BytesIO(content)).pages)
     else:
@@ -104,7 +104,31 @@ def parse_report(symbol: str, content: bytes, **metadata) -> list[dict]:
         text = "".join(parser.parts)
         # SEC tables split cells into paragraphs. Keep each table row together.
         text = re.sub(r"[ \t]+", " ", text)
-    return parse_revenue_text(symbol, text, **metadata)
+    return text
+
+
+def parse_report(symbol: str, content: bytes, **metadata) -> list[dict]:
+    return parse_revenue_text(symbol, report_text(content), **metadata)
+
+
+def parse_operating_income_text(symbol: str, text: str, **metadata) -> list[dict]:
+    """Read reported USD operating income from YPF's consolidated table only."""
+    if symbol != 'YPF':
+        raise ValueError('Operating-income report parsing is supported only for YPF')
+    text = text.replace('\u00a0', ' ')
+    revenues = parse_revenue_text(symbol, text, **metadata)
+    table = text.split('5.2 CONSOLIDATED INCOME STATEMENT', 1)[-1].split('5.3 ', 1)[0]
+    match = re.search(r'^Operating (?:income|profit)(?: / \(loss\))?\s+([^\n]+)', table, re.M)
+    tokens = match[1].split()[:3] if match else []
+    if len(tokens) != len(revenues) or any(not re.fullmatch(r'\(?-?[\d,]+(?:\.\d+)?\)?|-', token) for token in tokens):
+        raise ValueError('YPF: reported consolidated operating-income row was not recognized')
+    result = []
+    for revenue, token in zip(revenues, tokens):
+        value = 0.0 if token == '-' else float(token.strip('()').replace(',', '')) * (-1 if token.startswith('(') else 1)
+        if not math.isfinite(value):
+            raise ValueError('YPF: non-finite operating income')
+        result.append({**revenue, 'val': value * 1_000_000})
+    return result
 
 
 def supplement_issuer_revenue(primary: dict, seed: dict) -> dict:
@@ -122,6 +146,10 @@ def load_issuer_revenue(symbol: str, *, root: Path = PROJECT_DIR) -> dict | None
         expected = revenue_fact(row["fy"], int(row["fp"][1:]), row["val"] / 1_000_000, row["filed"], row["source_url"])
         if row != expected or not row["source_url"].startswith("https://"):
             raise ValueError(f"{symbol}: invalid durable issuer revenue fact")
+    for row in seed['facts']['issuer'].get('OperatingIncomeLoss', {}).get('units', {}).get('USD', []):
+        expected = {**revenue_fact(row['fy'], int(row['fp'][1:]), 1, row['filed'], row['source_url']), 'val': row['val']}
+        if row != expected or not math.isfinite(row['val']) or not row['source_url'].startswith('https://'):
+            raise ValueError(f'{symbol}: invalid durable issuer operating-income fact')
     return seed
 
 
@@ -189,9 +217,19 @@ def refresh_issuer_revenue(provider: Any, symbol: str, seed: dict, *, as_of: dat
         by_period = {(r["start"], r["end"]): r for r in rows}
         by_period.update({(r["start"], r["end"]): r for r in imported})
         updated["facts"]["issuer"]["Revenues"]["units"]["USD"] = sorted(by_period.values(), key=lambda r: r["end"])
+        notes = []
+        if symbol == 'YPF':
+            try:
+                operating = parse_operating_income_text(symbol, report_text(content), year=year, quarter=quarter,
+                                                      filed=filings['filingDate'][i], url=url)
+                stored = updated['facts']['issuer'].setdefault('OperatingIncomeLoss', {'units': {'USD': []}})['units']['USD']
+                by_period = {(r['start'], r['end']): r for r in stored}
+                by_period.update({(r['start'], r['end']): r for r in operating})
+                updated['facts']['issuer']['OperatingIncomeLoss']['units']['USD'] = sorted(by_period.values(), key=lambda r: r['end'])
+            except ValueError as exc:
+                notes.append(f'YPF: retained operating-income history; newer consolidated row unavailable: {exc}')
         updated["verified_on"] = today.isoformat()
         updated["last_report_check"] = {"checked_on": today.isoformat(), "status": "updated"}
-        notes = []
     except Exception as exc:
         updated = deepcopy(seed)
         notes = [f"{symbol}: newer issuer revenue report unavailable; retained verified quarterly history: {exc}"]

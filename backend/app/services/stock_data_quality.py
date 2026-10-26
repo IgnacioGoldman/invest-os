@@ -15,7 +15,7 @@ FCF_BUNDLE_KEYS = (
 def _complete_fcf_bundle(snapshot: OpenDataSnapshot) -> bool:
     inputs = [snapshot.metrics.get(key) for key in FCF_BUNDLE_KEYS[:4]]
     return (
-        all(metric is not None and metric.value is not None for metric in inputs)
+        all(metric is not None and metric.value is not None and metric.as_of <= snapshot.generated_at.date().isoformat() for metric in inputs)
         and len({metric.as_of for metric in inputs if metric is not None}) == 1
     )
 
@@ -37,6 +37,14 @@ def fundamental_gap_reasons(snapshot: OpenDataSnapshot, *, include_history: bool
             reasons.append(f"{group_name}.{key}")
     if include_history and calculate_revenue_growth_momentum(snapshot.model_dump(mode="json"))["label"] == "Unknown":
         reasons.append("historical_series.latest_six_revenue_growth_quarters")
+    from app.services.screening_metrics import financial
+    payload = snapshot.model_dump(mode='json')
+    if not financial(payload):
+        quarters = snapshot.historical_series.get('quarterly_fundamentals', [])
+        latest = max(quarters, key=lambda row: row.as_of) if quarters else None
+        income = latest.metrics.get('operating_income') if latest else None
+        if latest is not None and (income is None or income.value is None or income.tier == 'proxy_estimate' or 'proxy' in income.notes.lower()):
+            reasons.append('historical_series.latest_quarter_reported_operating_income')
     return reasons
 
 
@@ -44,11 +52,16 @@ def retain_verified_history(snapshot: OpenDataSnapshot, previous: OpenDataSnapsh
     """A thin or unavailable source must not erase already persisted facts."""
     if previous is None:
         return snapshot
+    today = snapshot.generated_at.date().isoformat()
     histories = dict(snapshot.historical_series)
     for name, old_rows in previous.historical_series.items():
         corrected_dates = {row.as_of for row in histories.get(name, [])}
         rows = {(r.period, r.as_of): r for r in histories.get(name, [])}
         for old in old_rows:
+            if old.as_of > today:
+                # Corrupt workbook serial dates must not survive a corrected
+                # collection as future fiscal years (for example FY4602).
+                continue
             key = (old.period, old.as_of)
             new = rows.get(key)
             if new is None:
@@ -60,7 +73,7 @@ def retain_verified_history(snapshot: OpenDataSnapshot, previous: OpenDataSnapsh
             else:
                 metrics = dict(new.metrics)
                 for metric_name, metric in old.metrics.items():
-                    if metric.value is not None and (metric_name not in metrics or metrics[metric_name].value is None):
+                    if metric.as_of <= today and metric.value is not None and (metric_name not in metrics or metrics[metric_name].value is None):
                         metrics[metric_name] = metric
                 rows[key] = new.model_copy(update={"metrics": metrics})
         histories[name] = sorted(rows.values(), key=lambda r: (r.as_of, r.period))
@@ -68,6 +81,8 @@ def retain_verified_history(snapshot: OpenDataSnapshot, previous: OpenDataSnapsh
     for group in ("business_health", "valuation"):
         metrics = dict(getattr(snapshot, group))
         for name, old in getattr(previous, group).items():
+            if old.as_of > today:
+                continue
             if group == "business_health" and name == "fcf_margin":
                 continue
             new = metrics.get(name)
@@ -78,6 +93,8 @@ def retain_verified_history(snapshot: OpenDataSnapshot, previous: OpenDataSnapsh
         groups[group] = metrics
     all_metrics = dict(snapshot.metrics)
     for name, old in previous.metrics.items():
+        if old.as_of > today:
+            continue
         if name in FCF_BUNDLE_KEYS:
             continue
         new = all_metrics.get(name)

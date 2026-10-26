@@ -237,11 +237,94 @@ class FundamentalsFallbackTests(unittest.TestCase):
         rows = primary["facts"]["us-gaap"]["RevenueFromContractWithCustomerExcludingAssessedTax"]["units"]["USD"]
         rows[0].update(start="2024-11-01", end="2025-10-31")
         rows[1].update(start="2026-02-01", end="2026-04-30")
-        with patch.object(OpenDataProvider, "fetch_yfinance_companyfacts") as fetch:
+        vendor = facts_for('yfinance', {
+            'RevenueFromContractWithCustomerExcludingAssessedTax': [statement_row(999, '2026-06-30', quarterly=True)],
+            'OperatingIncomeLoss': [statement_row(999, '2026-06-30', quarterly=True)],
+        })
+        with patch.object(OpenDataProvider, "fetch_yfinance_companyfacts", return_value=vendor):
             facts, note = OpenDataProvider()._supplement_sec_companyfacts("CRM", {}, primary)
         self.assertIsNone(facts)
-        self.assertIn("fiscal periods", note)
-        fetch.assert_not_called()
+        self.assertIn('no Yahoo revenue', note)
+
+    def test_noncalendar_fallback_uses_exact_primary_dates_and_fiscal_labels(self):
+        annual = statement_row(400, '2026-06-30')
+        annual.update(start='2025-07-01', fp='FY', fy=2026)
+        quarter = statement_row(130, '2026-06-30', quarterly=True)
+        primary = facts_for('us-gaap', {'Revenues': [annual, quarter]})
+        vendor = facts_for('yfinance', {
+            'RevenueFromContractWithCustomerExcludingAssessedTax': [quarter],
+            'OperatingIncomeLoss': [statement_row(26, '2026-06-30', quarterly=True)],
+        })
+        with patch.object(OpenDataProvider, 'fetch_yfinance_companyfacts', return_value=vendor):
+            merged, _ = OpenDataProvider()._supplement_sec_companyfacts('TEST', {}, primary)
+        snapshot = compute_open_data_snapshot(ticker='TEST', cik=123, price=None, companyfacts=merged)
+        latest = snapshot.historical_series['quarterly_fundamentals'][-1]
+        self.assertEqual(latest.period, 'FY2026 Q4')
+        self.assertEqual(latest.metrics['revenue'].value,130)
+        self.assertEqual(latest.metrics['operating_income'].value,26)
+        self.assertTrue(latest.metrics['operating_income'].source.startswith('yfinance_statement:'))
+
+    def test_stable_fiscal_calendar_accepts_newer_quarter_without_calendar_labels(self):
+        annuals = [{**statement_row(400,f'{year}-09-30'),'start':f'{year-1}-10-01','fp':'FY'} for year in (2024,2025)]
+        quarter = {**statement_row(100,'2026-03-31',quarterly=True),'start':'2026-01-01'}
+        primary = facts_for('us-gaap',{'Revenues':[*annuals,quarter]})
+        vendor = facts_for('yfinance',{
+            'RevenueFromContractWithCustomerExcludingAssessedTax':[statement_row(130,'2026-06-30',quarterly=True)],
+            'OperatingIncomeLoss':[statement_row(26,'2026-06-30',quarterly=True)]})
+        with patch.object(OpenDataProvider,'fetch_yfinance_companyfacts',return_value=vendor):
+            merged,_ = OpenDataProvider()._supplement_sec_companyfacts('V',{},primary)
+        snapshot = compute_open_data_snapshot(ticker='TEST',cik=123,price=None,companyfacts=merged)
+        latest = snapshot.historical_series['quarterly_fundamentals'][-1]
+        self.assertEqual(latest.period,'FY2026 Q3')
+        self.assertEqual(latest.as_of,'2026-06-30')
+        self.assertEqual(latest.metrics['operating_margin'].value,20)
+
+    def test_week_based_statement_alignment_requires_reconciled_revenue(self):
+        annual = {**statement_row(400,'2026-01-31'),'start':'2025-02-01','fy':2026}
+        current = {**statement_row(130,'2026-08-01',quarterly=True),'start':'2026-05-03'}
+        primary = facts_for('us-gaap',{'Revenues':[annual,current]})
+        for sales,accepted in [(130,True),(999,False)]:
+            vendor = facts_for('yfinance',{
+                'RevenueFromContractWithCustomerExcludingAssessedTax':[{**statement_row(sales,'2026-07-31',quarterly=True),'start':'2026-05-01'}],
+                'OperatingIncomeLoss':[statement_row(26,'2026-07-31',quarterly=True)]})
+            with patch.object(OpenDataProvider,'fetch_yfinance_companyfacts',return_value=vendor):
+                merged,note = OpenDataProvider()._supplement_sec_companyfacts('DY',{},primary)
+            if not accepted:
+                self.assertIsNone(merged)
+                continue
+            snapshot = compute_open_data_snapshot(ticker='TEST',cik=123,price=None,companyfacts=merged)
+            latest = snapshot.historical_series['quarterly_fundamentals'][-1]
+            self.assertEqual((latest.period,latest.as_of),('FY2027 Q2','2026-08-01'))
+            self.assertEqual(latest.metrics['operating_income'].value,26)
+            self.assertEqual(latest.metrics['revenue'].value,130)
+            self.assertIn('revenue reconciliation',note)
+
+    def test_proxy_current_income_triggers_fallback_even_when_research_margin_exists(self):
+        from app.services.stock_data_quality import fundamental_gap_reasons
+        row = OpenDataPeriodMetrics(period='FY2026 Q2',as_of='2026-06-30',metrics={
+            'operating_income': OpenDataMetric(value=20,tier='proxy_estimate',source='test',as_of='2026-06-30',notes='Proxy income')})
+        snapshot = OpenDataSnapshot(ticker='TEST',sector='Technology',historical_series={'quarterly_fundamentals':[row]})
+        self.assertIn('historical_series.latest_quarter_reported_operating_income',fundamental_gap_reasons(snapshot,include_history=False))
+        financial = snapshot.model_copy(update={'sector':'Financials'})
+        self.assertNotIn('historical_series.latest_quarter_reported_operating_income',fundamental_gap_reasons(financial,include_history=False))
+
+    def test_corrected_collection_does_not_retain_corrupt_future_years(self):
+        metric = OpenDataMetric(value=100,source='issuer',tier='exact_public_fact',as_of='4602-12-31',notes='Bad header')
+        previous = OpenDataSnapshot(ticker='AXFO.ST',historical_series={'quarterly_fundamentals':[
+            OpenDataPeriodMetrics(period='FY4602 Q4',as_of='4602-12-31',metrics={'cash':metric})]},
+            business_health={'cash':metric},metrics={'cash':metric})
+        current = OpenDataSnapshot(ticker='AXFO.ST')
+        repaired = retain_verified_history(current,previous)
+        self.assertEqual(repaired.historical_series['quarterly_fundamentals'],[])
+        self.assertNotIn('cash',repaired.business_health)
+        self.assertNotIn('cash',repaired.metrics)
+
+    def test_corrupt_future_fcf_bundle_cannot_override_current_collection(self):
+        from app.services.stock_data_quality import FCF_BUNDLE_KEYS
+        metric = OpenDataMetric(value=100,source='issuer',tier='exact_public_fact',as_of='4602-12-31',notes='Bad header')
+        old = OpenDataSnapshot(ticker='AXFO.ST',metrics={key:metric for key in FCF_BUNDLE_KEYS})
+        repaired = retain_verified_history(OpenDataSnapshot(ticker='AXFO.ST'),old)
+        self.assertTrue(all(m.as_of <= repaired.generated_at.date().isoformat() for m in repaired.metrics.values()))
 
     def test_issuer_workbook_outage_tries_yahoo(self):
         vendor = {"facts": {"yfinance": {}}}

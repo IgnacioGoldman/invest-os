@@ -109,6 +109,42 @@
             }
           ]
         }
+      },
+      "OperatingIncomeLoss": {
+        "units": {
+          "USD": [
+            {
+              "val": 1813000000.0,
+              "start": "2026-04-01",
+              "end": "2026-06-30",
+              "fy": 2026,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/904851/000155485526001760/MainDocument.htm"
+            },
+            {
+              "val": 878000000.0,
+              "start": "2026-01-01",
+              "end": "2026-03-31",
+              "fy": 2026,
+              "fp": "Q1",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/904851/000155485526001760/MainDocument.htm"
+            },
+            {
+              "val": 412000000.0,
+              "start": "2025-04-01",
+              "end": "2025-06-30",
+              "fy": 2025,
+              "fp": "Q2",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-08-10",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/904851/000155485526001760/MainDocument.htm"
+            }
+          ]
+        }
       }
     }
   },
@@ -118,5 +154,6 @@
     "notes": [
       "YPF: newer issuer revenue report unavailable; retained verified quarterly history: 403 Client Error: Forbidden for url: https://www.sec.gov/Archives/edgar/data/904851/000155485526002124/MainDocument.htm"
     ]
-  }
+  },
+  "operating_income_definition": "Reported consolidated operating income in USD millions, section 5.2 of the SEC-filed earnings release; single quarters, excluding percentage changes and half-year totals. Imported from a verified table excerpt on 2026-10-26."
 }

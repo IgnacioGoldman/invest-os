@@ -190,6 +190,31 @@ class ScreeningMetricsTests(unittest.TestCase):
         m=build_screening_metrics(s,TODAY)['metrics']
         for key in ('revenue','momentum','operating_margin'):self.assertIsNone(m[key]['value'])
 
+    def test_operating_margin_explains_each_rejection_without_mutating_facts(self):
+        cases = [
+            ('financial_sector', lambda s: s.update(sector='Financials')),
+            ('missing_operating_income', lambda s: s['historical_series']['quarterly_fundamentals'][-1]['metrics'].pop('operating_income')),
+            ('proxy_operating_income', lambda s: s['historical_series']['quarterly_fundamentals'][-1]['metrics']['operating_income'].update(tier='proxy_estimate')),
+            ('invalid_operating_income', lambda s: s['historical_series']['quarterly_fundamentals'][-1]['metrics']['operating_income'].update(source='unknown')),
+            ('conflicting_revenue', lambda s: s['historical_series']['quarterly_fundamentals'][-1]['metrics'].update(
+                revenue={**s['historical_series']['quarterly_fundamentals'][-1]['metrics']['revenue'],'value':200})),
+            ('unusual_magnitude', lambda s: s['historical_series']['quarterly_fundamentals'][-1]['metrics']['operating_income'].update(value=-1000)),
+            ('invalid_period', lambda s: s['historical_series']['quarterly_fundamentals'].append(deepcopy(s['historical_series']['quarterly_fundamentals'][-1]))),
+        ]
+        for code, mutate in cases:
+            with self.subTest(code=code):
+                row=ordinary();mutate(row);before=deepcopy(row)
+                metric=build_screening_metrics(row,TODAY)['metrics']['operating_margin']
+                self.assertFalse(metric['validated'])
+                self.assertIsNone(metric['value'])
+                self.assertIn(code, [issue['code'] for issue in metric['validation_issues']])
+                self.assertTrue(all(issue['message'] for issue in metric['validation_issues']))
+                self.assertEqual(row,before)
+        for today, code in [(date(2026,11,18),'stale_report'),(date(2026,6,29),'future_report')]:
+            metric=build_screening_metrics(ordinary(),today)['metrics']['operating_margin']
+            self.assertIn(code,[issue['code'] for issue in metric['validation_issues']])
+        self.assertEqual(build_screening_metrics(ordinary(),TODAY)['metrics']['operating_margin']['validation_issues'],[])
+
     def test_balance_scope_and_date_checks_exclude_ambiguous_cash_and_partial_debt(self):
         for key,concept in [('cash','CashCashEquivalentsAndShortTermInvestments'),('cash','CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents'),('debt','LongTermDebtNoncurrent')]:
             s=ordinary();s['business_health'][key]=fact(20,concept)

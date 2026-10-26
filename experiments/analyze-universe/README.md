@@ -60,6 +60,22 @@ The HTML additionally includes **Proximity to support**, calculated with the arc
 
 The table defaults to the **64 stocks at/near support**. Its financial-rule selector separates **33 passing** revenue growth >0%, operating margin >0% and red-flag count ≤1 from **31 not passing**. Every row shows the three values and exclusion reasons. Unknown or incomplete inputs do not pass, matching the existing filter evaluator. Uncheck the support filter to see all 200 stocks; ranks always refer to the original ranking. [The full support audit](runs/2026-10-25/filter-research/support-audit.md) lists all 64 memberships and reasons, with CSV and JSON alongside it. Regenerating the HTML also regenerates this audit from the frozen inputs.
 
+The 26 October debugging follow-up adds operating-margin rejection metadata to the backend validator and uses it to explain the frozen run's **29 Unknown margins (11 at/near support)**. The HTML and [margin diagnostics](runs/2026-10-25/filter-research/operating-margin-diagnostics.md) distinguish missing inputs, financial-sector exclusions, proxy estimates, stale/future reports, conflicting revenue and extreme margins. Causes can overlap. Explanations use the frozen facts and evaluation date; eligibility still uses the archived metrics. The 64/33/31 counts, qualitative ranks and frozen inputs are unchanged. This follow-up does not backfill missing reports or repair the underlying source conflicts, including AXFO.ST's malformed year 4602.
+
+The subsequent local collector repair recovered **14 margins**, leaving **15 Unknown** (14 financial-sector exclusions and MSTR's extreme margin). At the user's request, the existing `runs/2026-10-25/ranking.html` now displays those repaired financial checks, captured as of 26 October in `financial-refresh.json.gz` with a hash manifest. Original qualitative ranks, tags, rationales, archived Analyze evidence and technical support context remain the 25 October experiment. Each HTML row links the original analysis evidence separately from the refreshed financial data. The [repair report](runs/2026-10-26-data-repair/operating-margin-audit.md) records the before/after comparison; support/financial audits alongside the HTML now use the captured refreshed metrics. The supported pass/fail counts remain 64/33/31.
+
+To capture a subsequent local repair and regenerate this display without reranking:
+
+```sh
+.venv/bin/python experiments/analyze-universe/audit_support.py \
+  --run-dir experiments/analyze-universe/runs/2026-10-25 \
+  --refresh-data-dir frontend/public/data --as-of 2026-10-26
+.venv/bin/python experiments/analyze-universe/render_local.py \
+  --run-dir experiments/analyze-universe/runs/2026-10-25
+```
+
+Ordinary regeneration uses the captured financial refresh when present, and the original frozen screening metrics otherwise. It never downloads new data or changes the original input hashes.
+
 ## Archived API preflight
 
 Before the user selected conversation execution, the full prompt was counted at 1,425,966 Gemini tokens against a 1,048,576 input limit. Attempted 50-stock generations and a one-stock diagnostic were rejected with HTTP 429. There was no successful Gemini generation and no API-reported generation usage; actual invoice costs are unavailable. The abandoned prompts and responses remain under `failed-api-history` for provenance. Provider execution code was removed from the active runner. These failures do not block the completed conversation-authored ranking.

@@ -1,6 +1,6 @@
 Rank within support list,Original rank,Stock,Revenue Growth YoY (%),Operating Margin (%),Red Flag Count,Pass all three?,Reasons,Business quality,Valuation
 1,6,ANIP,25.865894564533455,15.208010704996166,0,Yes,,Solid,Cheap
-2,7,BMY,5.7380389599804404,Unknown,Unknown,No,Operating margin: unavailable or unvalidated; Red flags: incomplete assessment,Solid,Cheap
+2,7,BMY,5.7380389599804404,31.025977029214523,Unknown,No,Red flags: incomplete assessment,Solid,Cheap
 3,8,NVDA,105.85114348672526,66.23710000935347,1,Yes,,Strong,Fair
 4,10,NFLX,11.849110540665864,34.63211936826093,1,Yes,,Strong,Fair
 5,21,RGLD,114.90772408332259,62.134021694015395,Unknown,No,Red flags: incomplete assessment,Strong,Fair
@@ -8,7 +8,7 @@ Rank within support list,Original rank,Stock,Revenue Growth YoY (%),Operating Ma
 7,30,UBER,12.172950754881029,13.318300331195829,0,Yes,,Solid,Fair
 8,32,GRND,32.54461715601611,23.5286452677757,1,Yes,,Solid,Fair
 9,33,RDDT,61.101181481385105,28.787993614153223,0,Yes,,Solid,Fair
-10,41,EVR,19.146699441554095,Unknown,Unknown,No,Operating margin: unavailable or unvalidated; Red flags: incomplete assessment,Solid,Fair
+10,41,EVR,19.146699441554095,Unknown,Unknown,No,Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).; Red flags: incomplete assessment,Solid,Fair
 11,42,TGT,5.267541945975962,9.646181091977844,0,Yes,,Solid,Fair
 12,43,DTM,11.003236245954696,50.437317784256564,0,Yes,,Solid,Fair
 13,44,CLS,62.39026750535701,9.753969267441366,0,Yes,,Solid,Fair
@@ -27,17 +27,17 @@ Rank within support list,Original rank,Stock,Revenue Growth YoY (%),Operating Ma
 26,98,CIEN,37.04687198874843,18.022486594392173,0,Yes,,Solid,Expensive
 27,99,CRDO,114.72829643974647,25.198172036500814,2,No,Red flags: 2 exceeds 1,Solid,Expensive
 28,101,MTSI,35.7657718413672,22.532630896133384,1,Yes,,Solid,Expensive
-29,102,HOOD,32.25480283114257,Unknown,Unknown,No,Operating margin: unavailable or unvalidated; Red flags: incomplete assessment,Solid,Expensive
+29,102,HOOD,32.25480283114257,Unknown,Unknown,No,Operating margin: Excluded by the financial-sector comparability rule.; Red flags: incomplete assessment,Solid,Expensive
 30,111,MU,379.26646045072914,80.67823489276955,0,Yes,,Solid,Unknown
 31,113,WDC,55.46486870120653,46.70166628623602,1,Yes,,Solid,Unknown
-32,116,ARES,24.29173836473637,Unknown,Unknown,No,Operating margin: unavailable or unvalidated; Red flags: incomplete assessment,Solid,Unknown
+32,116,ARES,24.29173836473637,Unknown,Unknown,No,Operating margin: Excluded by the financial-sector comparability rule.; Red flags: incomplete assessment,Solid,Unknown
 33,117,FOUR,34.05797101449275,7.335907335907336,0,Yes,,Solid,Unknown
 34,118,LOAR,39.35576618503447,24.39226245636121,Unknown,No,Red flags: incomplete assessment,Solid,Unknown
-35,121,LPLA,35.243525139992556,Unknown,Unknown,No,Operating margin: unavailable or unvalidated; Red flags: incomplete assessment,Solid,Unknown
-36,122,VIRT,19.046132698662333,Unknown,Unknown,No,Operating margin: unavailable or unvalidated; Red flags: incomplete assessment,Solid,Unknown
+35,121,LPLA,35.243525139992556,Unknown,Unknown,No,Operating margin: Excluded by the financial-sector comparability rule.; Red flags: incomplete assessment,Solid,Unknown
+36,122,VIRT,19.046132698662333,Unknown,Unknown,No,Operating margin: Excluded by the financial-sector comparability rule.; Red flags: incomplete assessment,Solid,Unknown
 37,124,SYM,21.73829335558104,4.5634386644433285,Unknown,No,Red flags: incomplete assessment,Solid,Unknown
 38,125,CTRE,43.4599756377313,40.99647965887399,Unknown,No,Red flags: incomplete assessment,Solid,Unknown
-39,127,NTST,37.16568684275896,Unknown,Unknown,No,Operating margin: unavailable or unvalidated; Red flags: incomplete assessment,Solid,Unknown
+39,127,NTST,37.16568684275896,33.44148984334913,Unknown,No,Red flags: incomplete assessment,Solid,Unknown
 40,130,ALAB,104.45486518171161,22.74413863404689,1,Yes,,Solid,Expensive
 41,132,TER,103.89630513794938,32.94306202454496,2,No,Red flags: 2 exceeds 1,Solid,Expensive
 42,136,CAVA,31.295903640218814,7.2864758058387356,0,Yes,,Solid,Expensive
@@ -51,14 +51,14 @@ Rank within support list,Original rank,Stock,Revenue Growth YoY (%),Operating Ma
 50,166,KTOS,30.526315789473692,-0.34873583260680036,2,No,Operating margin: -0.35% is not above 0%; Red flags: 2 exceeds 1,Average,Expensive
 51,174,AMSC,30.010503330661443,10.451457910346221,1,Yes,,Average,Expensive
 52,175,FTAI,40.93949310670668,21.03747304804923,Unknown,No,Red flags: incomplete assessment,Average,Expensive
-53,177,AFRM,Unknown,Unknown,Unknown,No,Revenue growth: unavailable or unvalidated; Operating margin: unavailable or unvalidated; Red flags: incomplete assessment,Average,Unknown
+53,177,AFRM,33.03712730355528,Unknown,Unknown,No,Operating margin: Excluded by the financial-sector comparability rule.; Red flags: incomplete assessment,Average,Unknown
 54,178,CVNA,52.39669421487603,9.219088937093275,2,No,Red flags: 2 exceeds 1,Average,Unknown
 55,179,RSI,46.26713766218329,11.739669253585795,0,Yes,,Average,Unknown
-56,183,B,43.765281173594126,Unknown,Unknown,No,Operating margin: unavailable or unvalidated; Red flags: incomplete assessment,Average,Unknown
+56,183,B,43.765281173594126,51.341647770219204,Unknown,No,Red flags: incomplete assessment,Average,Unknown
 57,185,TVTX,48.17429597462626,2.3315878856495895,Unknown,No,Red flags: incomplete assessment,Average,Unknown
 58,187,RYTM,46.911467568347696,-68.13837625429794,Unknown,No,Operating margin: -68.14% is not above 0%; Red flags: incomplete assessment,Average,Unknown
-59,188,LMND,79.40280316879951,Unknown,Unknown,No,Operating margin: unavailable or unvalidated; Red flags: incomplete assessment,Average,Unknown
-60,189,YPF,41.65050635638872,Unknown,Unknown,No,Operating margin: unavailable or unvalidated; Red flags: incomplete assessment,Average,Unknown
+59,188,LMND,79.40280316879951,Unknown,Unknown,No,Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).; Red flags: incomplete assessment,Average,Unknown
+60,189,YPF,41.65050635638872,27.578338910860968,Unknown,No,Red flags: incomplete assessment,Average,Unknown
 61,194,ESTA,31.6608187134503,-6.351603446744249,2,No,Operating margin: -6.35% is not above 0%; Red flags: 2 exceeds 1,Weak,Expensive
 62,195,MIRM,37.921508784286104,-24.135426655243045,2,No,Operating margin: -24.14% is not above 0%; Red flags: 2 exceeds 1,Weak,Expensive
 63,196,CALM,-41.5124831725923,-15.226822483770597,1,No,Revenue growth: -41.51% is not above 0%; Operating margin: -15.23% is not above 0%,Weak,Expensive

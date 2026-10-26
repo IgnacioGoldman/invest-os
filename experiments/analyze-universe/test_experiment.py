@@ -87,6 +87,34 @@ class LocalIsolation(unittest.TestCase):
             self.assertEqual(len(csv_rows), 201)
             self.assertTrue(all(len(row) == 5 for row in csv_rows))
             self.assertEqual(len(list((directory / 'evidence').glob('*.json'))), 200)
+            audit = json.loads((directory / 'filter-research/support-audit.json').read_text())
+            _, _, frozen = experiment.verify_inputs(source)
+            original = {s['ticker']: s for s in frozen}
+            self.assertEqual((audit['at_or_near_support'],audit['pass_all_three'],audit['do_not_pass']),(64,33,31))
+            for symbol, row in audit['stocks'].items():
+                for field, rule in row['rules'].items():
+                    self.assertEqual(rule['value'],original[symbol]['screening']['metrics'][field]['value'])
+            unknown = [row for row in audit['stocks'].values() if row['rules']['operating_margin']['status']=='Unknown']
+            self.assertEqual(len(unknown),29)
+            self.assertTrue(all(row['rules']['operating_margin']['validation_issues'] for row in unknown))
+            for symbol, code in [('BMY','proxy_operating_income'),('ARES','financial_sector'),('B','missing_operating_income'),
+                                 ('KO','stale_report'),('MELI','conflicting_revenue'),('MSTR','unusual_magnitude'),('AXFO.ST','future_report')]:
+                self.assertIn(code,[issue['code'] for issue in audit['stocks'][symbol]['rules']['operating_margin']['validation_issues']])
+            document = (directory / 'ranking.html').read_text()
+            self.assertNotIn('Operating margin: unavailable or unvalidated',document)
+            self.assertIn('Operating income is only a proxy estimate',document)
+            self.assertIn('operating-margin-diagnostics.md',document)
+            for name in ['financial-refresh.json','financial-refresh.json.gz']:
+                shutil.copyfile(source / name,directory / name)
+            with patch('socket.create_connection',side_effect=AssertionError('Refreshed export must not use network')):
+                refreshed = render(directory)
+            self.assertEqual(refreshed,rows,'Refreshing financial checks must preserve every qualitative ranking')
+            updated = json.loads((directory / 'filter-research/support-audit.json').read_text())
+            self.assertEqual(sum(s['rules']['operating_margin']['status']=='Unknown' for s in updated['stocks'].values()),15)
+            for symbol in ['BMY','V','KO','KLAC','DY','YPF','AXFO.ST','MELI']:
+                self.assertEqual(updated['stocks'][symbol]['rules']['operating_margin']['status'],'Pass')
+            self.assertIn('Financial checks updated 2026-10-26',(directory / 'ranking.html').read_text())
+            self.assertEqual((directory / 'snapshots.json.gz').read_bytes(),(source / 'snapshots.json.gz').read_bytes())
             (directory / 'local-rank-order.txt').write_text('ADBE ADBE')
             with self.assertRaises(ValueError):
                 render(directory)

@@ -1,8 +1,15 @@
 {
-  "evaluated_on": "2026-10-25",
+  "evaluated_on": "2026-10-26",
   "market_dates": [
     "2026-10-23"
   ],
+  "financial_refresh": {
+    "evaluated_on": "2026-10-26",
+    "baseline_dataset_sha256": "4151a6fec8b1b86f4ab9a9db874ecc490afdee805a7d2d27ea525cbc5242ca80",
+    "metrics_sha256": "86f84454af6cbde038cb1f6827342135a33aca8ea14a3a2d026889299301e64c",
+    "source": "Local fundamentals repair; original qualitative assessments and technical support context retained",
+    "count": 200
+  },
   "dataset_sha256": "4151a6fec8b1b86f4ab9a9db874ecc490afdee805a7d2d27ea525cbc5242ca80",
   "universe": 200,
   "at_or_near_support": 64,
@@ -364,10 +371,10 @@
           "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 31.025977029214523,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
           "value": null,
@@ -377,7 +384,6 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
         "Red flags: incomplete assessment"
       ],
       "support_rank": 2
@@ -566,32 +572,28 @@
         ],
         "as_of": "2026-10-23"
       },
-      "passes_financial_rules": false,
+      "passes_financial_rules": true,
       "rules": {
         "revenue": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Revenue growth: unavailable or unvalidated"
+          "value": 14.362957137239473,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 61.29115447434024,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Red flags: incomplete assessment"
+          "value": 0,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         }
       },
-      "exclusion_reasons": [
-        "Revenue growth: unavailable or unvalidated",
-        "Operating margin: unavailable or unvalidated",
-        "Red flags: incomplete assessment"
-      ]
+      "exclusion_reasons": []
     },
     "MNST": {
       "rank": 13,
@@ -1116,16 +1118,24 @@
       "passes_financial_rules": false,
       "rules": {
         "revenue": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Revenue growth: unavailable or unvalidated"
+          "value": 10.412782956058585,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "operating_margin": {
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule.",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -1135,8 +1145,7 @@
         }
       },
       "exclusion_reasons": [
-        "Revenue growth: unavailable or unvalidated",
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule.",
         "Red flags: incomplete assessment"
       ]
     },
@@ -1290,10 +1299,10 @@
           "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 32.967795669072736,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
           "value": null,
@@ -1303,7 +1312,6 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
         "Red flags: incomplete assessment"
       ]
     },
@@ -1547,7 +1555,19 @@
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            },
+            {
+              "code": "missing_operating_income",
+              "message": "Operating income is missing for the latest fundamentals quarter (2026-06-30)."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -1557,7 +1577,7 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).",
         "Red flags: incomplete assessment"
       ]
     },
@@ -1591,7 +1611,19 @@
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            },
+            {
+              "code": "missing_operating_income",
+              "message": "Operating income is missing for the latest fundamentals quarter (2026-06-30)."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -1601,7 +1633,7 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).",
         "Red flags: incomplete assessment"
       ]
     },
@@ -1632,10 +1664,10 @@
           "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 9.571480631953525,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
           "value": null,
@@ -1645,7 +1677,6 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
         "Red flags: incomplete assessment"
       ]
     },
@@ -1802,7 +1833,19 @@
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            },
+            {
+              "code": "missing_operating_income",
+              "message": "Operating income is missing for the latest fundamentals quarter (2026-06-30)."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -1812,7 +1855,7 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).",
         "Red flags: incomplete assessment"
       ],
       "support_rank": 10
@@ -2336,32 +2379,28 @@
         ],
         "as_of": "2026-10-23"
       },
-      "passes_financial_rules": false,
+      "passes_financial_rules": true,
       "rules": {
         "revenue": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Revenue growth: unavailable or unvalidated"
+          "value": 49.76435935198822,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 6.716491297079359,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Red flags: incomplete assessment"
+          "value": 1,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         }
       },
-      "exclusion_reasons": [
-        "Revenue growth: unavailable or unvalidated",
-        "Operating margin: unavailable or unvalidated",
-        "Red flags: incomplete assessment"
-      ]
+      "exclusion_reasons": []
     },
     "KLAC": {
       "rank": 55,
@@ -2390,10 +2429,10 @@
           "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 42.48596603852409,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
           "value": null,
@@ -2403,7 +2442,6 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
         "Red flags: incomplete assessment"
       ]
     },
@@ -2468,32 +2506,28 @@
         ],
         "as_of": "2026-10-23"
       },
-      "passes_financial_rules": false,
+      "passes_financial_rules": true,
       "rules": {
         "revenue": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Revenue growth: unavailable or unvalidated"
+          "value": 6.741124850418823,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 35.08968609865471,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Red flags: incomplete assessment"
+          "value": 0,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         }
       },
-      "exclusion_reasons": [
-        "Revenue growth: unavailable or unvalidated",
-        "Operating margin: unavailable or unvalidated",
-        "Red flags: incomplete assessment"
-      ]
+      "exclusion_reasons": []
     },
     "BX": {
       "rank": 58,
@@ -2525,7 +2559,19 @@
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            },
+            {
+              "code": "missing_operating_income",
+              "message": "Operating income is missing for the latest fundamentals quarter (2026-06-30)."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -2535,7 +2581,7 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).",
         "Red flags: incomplete assessment"
       ]
     },
@@ -3733,10 +3779,10 @@
           "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 54.222164185601116,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
           "value": null,
@@ -3746,7 +3792,6 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
         "Red flags: incomplete assessment"
       ]
     },
@@ -4366,7 +4411,15 @@
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule.",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -4376,7 +4429,7 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule.",
         "Red flags: incomplete assessment"
       ],
       "support_rank": 29
@@ -4910,7 +4963,15 @@
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule.",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -4920,7 +4981,7 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule.",
         "Red flags: incomplete assessment"
       ]
     },
@@ -4954,7 +5015,15 @@
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule.",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -4964,7 +5033,7 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule.",
         "Red flags: incomplete assessment"
       ],
       "support_rank": 32
@@ -5169,7 +5238,15 @@
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule.",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -5179,7 +5256,7 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule.",
         "Red flags: incomplete assessment"
       ],
       "support_rank": 35
@@ -5214,7 +5291,15 @@
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule.",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -5224,7 +5309,7 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule.",
         "Red flags: incomplete assessment"
       ],
       "support_rank": 36
@@ -5431,10 +5516,10 @@
           "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 33.44148984334913,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
           "value": null,
@@ -5444,7 +5529,6 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
         "Red flags: incomplete assessment"
       ],
       "support_rank": 39
@@ -5510,32 +5594,28 @@
         ],
         "as_of": "2026-10-23"
       },
-      "passes_financial_rules": false,
+      "passes_financial_rules": true,
       "rules": {
         "revenue": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Revenue growth: unavailable or unvalidated"
+          "value": 0.8816782707330884,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 4.155636698720823,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Red flags: incomplete assessment"
+          "value": 0,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         }
       },
-      "exclusion_reasons": [
-        "Revenue growth: unavailable or unvalidated",
-        "Operating margin: unavailable or unvalidated",
-        "Red flags: incomplete assessment"
-      ]
+      "exclusion_reasons": []
     },
     "ALAB": {
       "rank": 130,
@@ -7576,16 +7656,24 @@
       "passes_financial_rules": false,
       "rules": {
         "revenue": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Revenue growth: unavailable or unvalidated"
+          "value": 33.03712730355528,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "operating_margin": {
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule.",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -7595,8 +7683,7 @@
         }
       },
       "exclusion_reasons": [
-        "Revenue growth: unavailable or unvalidated",
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule.",
         "Red flags: incomplete assessment"
       ],
       "support_rank": 53
@@ -7717,7 +7804,19 @@
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            },
+            {
+              "code": "missing_operating_income",
+              "message": "Operating income is missing for the latest fundamentals quarter (2026-06-30)."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -7727,7 +7826,7 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).",
         "Red flags: incomplete assessment"
       ]
     },
@@ -7752,16 +7851,16 @@
       "passes_financial_rules": false,
       "rules": {
         "revenue": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Revenue growth: unavailable or unvalidated"
+          "value": 73.13258636788049,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 34.28609950114602,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
           "value": null,
@@ -7771,8 +7870,6 @@
         }
       },
       "exclusion_reasons": [
-        "Revenue growth: unavailable or unvalidated",
-        "Operating margin: unavailable or unvalidated",
         "Red flags: incomplete assessment"
       ]
     },
@@ -7803,10 +7900,10 @@
           "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 45.44327340359578,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
           "value": null,
@@ -7816,7 +7913,6 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
         "Red flags: incomplete assessment"
       ]
     },
@@ -7847,10 +7943,10 @@
           "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 51.341647770219204,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
           "value": null,
@@ -7860,7 +7956,6 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
         "Red flags: incomplete assessment"
       ],
       "support_rank": 56
@@ -7895,7 +7990,15 @@
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule.",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -7905,7 +8008,7 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule.",
         "Red flags: incomplete assessment"
       ]
     },
@@ -8072,7 +8175,19 @@
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "financial_sector",
+              "message": "Excluded by the financial-sector comparability rule."
+            },
+            {
+              "code": "missing_operating_income",
+              "message": "Operating income is missing for the latest fundamentals quarter (2026-06-30)."
+            }
+          ]
         },
         "red_flag_count": {
           "value": null,
@@ -8082,7 +8197,7 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).",
         "Red flags: incomplete assessment"
       ],
       "support_rank": 59
@@ -8114,10 +8229,10 @@
           "reason": ""
         },
         "operating_margin": {
-          "value": null,
-          "passes": false,
-          "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "value": 27.578338910860968,
+          "passes": true,
+          "status": "Pass",
+          "reason": ""
         },
         "red_flag_count": {
           "value": null,
@@ -8127,7 +8242,6 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
         "Red flags: incomplete assessment"
       ],
       "support_rank": 60
@@ -8592,7 +8706,15 @@
           "value": null,
           "passes": false,
           "status": "Unknown",
-          "reason": "Operating margin: unavailable or unvalidated"
+          "reason": "Operating margin: Absolute operating margin exceeds 100%; the screening rule requires interpretation.",
+          "as_of": "2026-06-30",
+          "valid_until": "2026-11-17",
+          "validation_issues": [
+            {
+              "code": "unusual_magnitude",
+              "message": "Absolute operating margin exceeds 100%; the screening rule requires interpretation."
+            }
+          ]
         },
         "red_flag_count": {
           "value": 3,
@@ -8602,7 +8724,7 @@
         }
       },
       "exclusion_reasons": [
-        "Operating margin: unavailable or unvalidated",
+        "Operating margin: Absolute operating margin exceeds 100%; the screening rule requires interpretation.",
         "Red flags: 3 exceeds 1"
       ]
     }

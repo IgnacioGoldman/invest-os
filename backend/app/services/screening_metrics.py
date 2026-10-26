@@ -1,4 +1,4 @@
-"""Four deterministic business facts, a concern count and preserved AI inputs.
+"""Deterministic business facts, red/green flag counts and preserved AI inputs.
 
 Sources establish provenance, not independent verification. First-filter cards
 use signed revenue/margin changes, the existing 3 pp momentum threshold and the
@@ -217,18 +217,51 @@ def build_business_performance(snapshot: dict, today: date) -> dict:
         consistency.update(momentum, value=None, status=pattern['label'], formula=consistency['formula'],
                            diagnostics=pattern)
 
-    def operating_for(row: dict) -> tuple[float | None, list[dict]]:
+    def operating_issues(row: dict) -> list[dict]:
         income = row.get('metrics', {}).get('operating_income', {})
         revenue = row.get('metrics', {}).get('revenue', {})
-        if (not unique(row, quarters) or financial(snapshot)
-                or not public_input(income, row) or not public_input(revenue, row)
-                or not compatible(income, revenue) or revenue['value'] <= 0):
+        issues = []
+
+        def add(code: str, message: str):
+            issues.append({'code': code, 'message': message})
+
+        if not unique(row, quarters):
+            add('invalid_period', 'Missing, invalid or duplicate fiscal quarter/date.')
+        if financial(snapshot):
+            add('financial_sector', 'Excluded by the financial-sector comparability rule.')
+        for label, key, value in [('Operating income', 'operating_income', income), ('Revenue', 'revenue', revenue)]:
+            if number(value.get('value')) is None:
+                add(f'missing_{key}', f'{label} is missing for the latest fundamentals quarter ({row.get("as_of") or "undated"}).')
+            elif value.get('tier') == 'proxy_estimate' or 'proxy' in (value.get('notes') or '').lower():
+                add(f'proxy_{key}', f'{label} is only a proxy estimate; the screening rule excludes proxies.')
+            elif not public_input(value, row):
+                add(f'invalid_{key}', f'{label} lacks an accepted public source, tier, currency or matching report date.')
+        if number(income.get('value')) is not None and number(revenue.get('value')) is not None:
+            if not compatible(income, revenue):
+                add('incompatible_inputs', 'Operating income and revenue have incompatible currencies or report dates.')
+            elif revenue['value'] <= 0:
+                add('nonpositive_revenue', 'Quarterly revenue is not positive.')
+            elif abs(income['value'] / revenue['value'] * 100) > 100:
+                add('unusual_magnitude', 'Absolute operating margin exceeds 100%; the screening rule requires interpretation.')
+        return issues
+
+    def operating_for(row: dict) -> tuple[float | None, list[dict]]:
+        if operating_issues(row):
             return None, []
-        value = income['value'] / revenue['value'] * 100
-        # Unusual magnitudes require interpretation and stay in AI research.
-        return (value, [income, revenue]) if abs(value) <= 100 else (None, [])
+        income, revenue = (row['metrics'][key] for key in ('operating_income', 'revenue'))
+        return income['value'] / revenue['value'] * 100, [income, revenue]
 
     operating = metric(latest_operating, 'latest quarter operating income / same-quarter revenue × 100')
+    operating['validation_issues'] = operating_issues(latest_operating)
+    operating_date = day(latest_operating.get('as_of'))
+    if not operating_date:
+        operating['validation_issues'].append({'code': 'invalid_date', 'message': 'Missing or invalid fundamentals report date.'})
+    elif operating_date > today:
+        operating['validation_issues'].append({'code': 'future_report', 'message': f'Fundamentals report date {operating_date} is after evaluation date {today}.'})
+    elif (today - operating_date).days > BUSINESS_MAX_AGE_DAYS:
+        operating['validation_issues'].append({'code': 'stale_report', 'message': f'Report {operating_date} expired on {operating["valid_until"]} ({BUSINESS_MAX_AGE_DAYS}-day limit).'})
+    if latest_operating.get('as_of') != latest_report:
+        operating['validation_issues'].append({'code': 'older_fundamentals', 'message': f'Fundamentals quarter {latest_operating.get("as_of")} is behind the latest report {latest_report}.'})
     value, inputs = operating_for(latest_operating)
     if value is not None:
         publish(operating, value, 'Profitable' if value >= 0 else 'Loss-making', inputs, latest_operating)
@@ -250,6 +283,8 @@ def build_business_performance(snapshot: dict, today: date) -> dict:
             and not math.isclose(revenue_input['value'], operating_revenue['value'], rel_tol=1e-12, abs_tol=1e-6)):
         for m in business.values():
             m.update(value=None, validated=False, status='Unknown', notes='Conflicting revenue amounts for the same reporting quarter.')
+        operating['validation_issues'].append({'code': 'conflicting_revenue',
+            'message': f'Conflicting revenue for {latest_operating["as_of"]}: revenue history {revenue_input["value"]:,.0f} versus fundamentals {operating_revenue["value"]:,.0f} {next(iter(currencies(revenue_input)))}.'})
     return business
 
 

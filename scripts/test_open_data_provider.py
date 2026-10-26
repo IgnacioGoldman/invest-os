@@ -15,11 +15,17 @@ sys.path.insert(0, str(ROOT / "backend"))
 
 from app.entry_engine.open_data_metrics import _support_distance_metric, compute_open_data_snapshot  # noqa: E402
 from app.entry_engine.open_data_models import HistoricalPricePoint, OpenDataMetric  # noqa: E402
-from app.entry_engine.providers.open_data_provider import OpenDataProvider  # noqa: E402
+from app.entry_engine.providers.open_data_provider import OpenDataProvider, _period_end_from_issuer_header  # noqa: E402
 from app.entry_engine.utils.file_storage import load_stock_universe  # noqa: E402
 
 
 class OpenDataProviderTests(unittest.TestCase):
+    def test_issuer_annual_headers_distinguish_years_from_excel_dates(self):
+        for header in ['2015',2015,42369,'42369.0']:
+            self.assertEqual(_period_end_from_issuer_header(header,annual=True),date(2015,12,31))
+        self.assertEqual(_period_end_from_issuer_header('46022',annual=True),date(2025,12,31))
+        for header in ['4602','2015 total','42368','n/a']:
+            self.assertIsNone(_period_end_from_issuer_header(header,annual=True))
     def test_stock_universe_loader_merges_ordered_tickers_with_metadata_rows(self) -> None:
         payload = {
             "tickers": ["AAA", "AXFO.ST"],

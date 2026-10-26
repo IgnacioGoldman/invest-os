@@ -29,6 +29,15 @@ class FakeProvider:
 
 
 class IncrementalSecRefreshTests(unittest.TestCase):
+    def test_forced_refresh_reaches_the_per_ticker_provider(self) -> None:
+        with (patch('open_data_poc.OpenDataProvider') as provider,
+              patch('open_data_poc._collect_ticker',return_value={'ticker':'TEST'}) as collect):
+            _collect_item_with_retries({'ticker':'TEST'},save=False,min_coverage=0,include_analysis=False,
+                include_filing_details=False,max_sec_archive_lookups=None,ticker_retries=1,
+                request_timeout=1,request_retries=1,retry_backoff=0,reuse_saved_prices=True,force_refresh=True)
+        self.assertTrue(provider.call_args.kwargs['force_refresh'])
+        self.assertTrue(collect.call_args.kwargs['reuse_saved_prices'])
+
     def test_incomplete_metadata_is_not_counted_as_verified(self) -> None:
         for response in (None, {}, {"filings":{"recent":{"form":["10-Q"]}}},
                          {"filings":{"recent":{"form":["10-Q"],"filingDate":[],"accessionNumber":[]}}}):

@@ -520,6 +520,7 @@ def _collect_item_with_retries(
     request_retries: int,
     retry_backoff: float,
     reuse_saved_prices: bool = False,
+    force_refresh: bool = False,
 ) -> dict[str, Any]:
     ticker = item["ticker"]
     started = time.monotonic()
@@ -531,6 +532,7 @@ def _collect_item_with_retries(
             retry_backoff=retry_backoff,
             include_filing_details=include_filing_details,
             max_sec_archive_lookups=max_sec_archive_lookups,
+            force_refresh=force_refresh,
         )
         try:
             collected = _collect_ticker(
@@ -665,6 +667,7 @@ def main() -> None:
         ),
     )
     parser.add_argument("--no-save", action="store_true", help="Do not persist snapshots to SQLite.")
+    parser.add_argument("--force-refresh", action="store_true", help="Bypass provider caches and download current source data.")
     parser.add_argument("--reuse-saved-prices", action="store_true", help="Use SQLite prices/history and leave them unchanged; do not fetch new prices or market estimates.")
     parser.add_argument(
         "--incremental-sec",
@@ -694,6 +697,7 @@ def main() -> None:
         retry_backoff=args.retry_backoff,
         include_filing_details=not args.skip_filing_details,
         max_sec_archive_lookups=args.max_sec_archive_lookups,
+        force_refresh=args.force_refresh,
     )
     save = not args.no_save
 
@@ -823,6 +827,7 @@ def main() -> None:
                     request_retries=args.request_retries,
                     retry_backoff=args.retry_backoff,
                     reuse_saved_prices=args.reuse_saved_prices,
+                    force_refresh=args.force_refresh,
                 )
                 record_result(index, item, result)
             except Exception as exc:
@@ -844,6 +849,7 @@ def main() -> None:
                     request_retries=args.request_retries,
                     retry_backoff=args.retry_backoff,
                     reuse_saved_prices=args.reuse_saved_prices,
+                    force_refresh=args.force_refresh,
                 ): (index, item)
                 for index, item in work_items
             }

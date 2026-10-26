@@ -20,6 +20,7 @@ COLORS = {'Strong': '🟢', 'Solid': '🟢', 'Average': '🟡', 'Weak': '🟠', 
 
 def render(directory):
     manifest, prompt, _ = verify_inputs(directory)
+    previous_metadata = json.loads((directory / 'result-metadata.json').read_text()) if (directory / 'result-metadata.json').exists() else {}
     compact = [json.loads(block) for block in re.findall(r'```json\n([^\n]+)\n```', prompt)]
     if [r['ticker'] for r in compact] != manifest['symbols']:
         raise ValueError('Archived Analyze JSON does not match the frozen universe')
@@ -102,6 +103,12 @@ def render(directory):
         '.financial{min-width:200px}.pass{color:#89ddae}.fail{color:#ff9a9a}.unknown{color:#bcc6d0}'
         '.financial small{line-height:1.6}.financial .reason{color:#e3bba3}')
     document = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Invest-OS: support and financial filters</title><style>' + css + '</style></head><body><h1 id="view-title">At/near support — ' + str(audit_result['at_or_near_support']) + ' stocks</h1>'
+    if audit_result['financial_refresh']:
+        unknown = sum(s['rules']['operating_margin']['status'] == 'Unknown' for s in audit_result['stocks'].values())
+        document += (f'<p id="financial-refresh"><strong>Financial checks updated {audit_result["evaluated_on"]} after the local data repair.</strong> '
+            f'Operating margins: {len(rows)-unknown} available, {unknown} Unknown. '
+            'Ranks, quality/valuation tags and rationales remain the original 25 October analysis. '
+            '<a href="../2026-10-26-data-repair/operating-margin-audit.md">Repair report</a></p>')
     document += '<p>Analyzed in this conversation on 25 October 2026, using the existing Analyze inputs and criteria. Quotes: 23 October 2026. Valuations are provisional; individual evidence and risks are linked below.</p><details><summary>Method and evidence limits</summary>'
     for paragraph in preamble.split('\n\n')[1:]:
         if paragraph.strip():
@@ -118,14 +125,14 @@ def render(directory):
         'A zone containing the price takes priority; otherwise the closest midpoint is shown. '
         'Near Support means above the zone and within 6% of its midpoint. '
         'Distances use the saved 23 October quote; expand a cell to see all valid timeframes.</p>')
-    document += '<p><a href="filter-research/support-audit.csv">Support and financial checks CSV</a> · <a href="filter-research/support-audit.md">Pass/fail breakdown</a> · <a href="ranking.csv">Full ranking CSV</a> · <a href="research-notes.json">Research notes</a></p>'
+    document += '<p><a href="filter-research/support-audit.csv">Support and financial checks CSV</a> · <a href="filter-research/support-audit.md">Pass/fail breakdown</a> · <a href="filter-research/operating-margin-diagnostics.md">Operating-margin diagnostics</a> · <a href="ranking.csv">Full ranking CSV</a> · <a href="research-notes.json">Research notes</a></p>'
     document += '<div class="controls"><label><input type="checkbox" id="support-only" checked>At/near any support only</label><label>Financial rules <select id="financial-filter"><option value="all">All results</option><option value="pass">Pass all three</option><option value="fail">Do not pass all three</option></select></label></div><input id="search" placeholder="Search stock, assessment or rationale" aria-label="Search ranking">'
     document += f'<p id="count">{audit_result["at_or_near_support"]} stocks</p><table><thead><tr>'
     document += ''.join('<th>' + h + '</th>' for h in ['Original rank','Stock','Business quality','Valuation','Proximity to support','Three financial rules','Rationale']) + '</tr></thead><tbody>'
     for row in rows:
         symbol = row['symbol']
         checked = research['companies'].get(symbol)
-        links = f'<a href="evidence/{html.escape(symbol)}.json">Financial data: {html.escape(inputs[symbol]["financial_as_of"])}</a>'
+        links = f'<a href="evidence/{html.escape(symbol)}.json">Original analysis data: {html.escape(inputs[symbol]["financial_as_of"])}</a>'
         if checked:
             links += f' · <a href="{html.escape(checked["url"],quote=True)}">Company release: {checked["date"]}</a>'
         context = support['stocks'][symbol]
@@ -153,6 +160,8 @@ def render(directory):
             value_label = 'Unknown' if value is None else str(int(value)) if field == 'red_flag_count' else f'{value:.2f}%'
             financial_cell += f'<span class="{rule["status"].lower()}">{label}: {value_label}</span><br>'
         financial_cell += '</small>'
+        if audit_result['financial_refresh']:
+            financial_cell += f'<small><a href="../../../../frontend/public/data/open-data/snapshots/{html.escape(symbol)}.json">Refreshed financial data</a></small>'
         if checked_rules['exclusion_reasons']:
             financial_cell += '<small class="reason">' + html.escape('; '.join(checked_rules['exclusion_reasons'])) + '</small>'
         financial_cell += '</td>'
@@ -170,7 +179,8 @@ search.addEventListener('input',update);supportOnly.addEventListener('change',up
 </script></body></html>'''
     (directory / 'ranking.html').write_text(document)
     metadata = {'status': 'complete', 'execution': 'Analysis authored in the current Codex conversation; no successful Gemini generation',
-        'completed_at': datetime.now(timezone.utc).isoformat(), 'count': len(rows),
+        'completed_at': previous_metadata.get('completed_at') or datetime.now(timezone.utc).isoformat(), 'count': len(rows),
+        'display_financial_evaluated_on': audit_result['evaluated_on'],
         'model_version': 'Current conversation; exact model version not exposed in the artifact',
         'input_prompt_sha256': manifest['prompt_sha256'], 'input_dataset_sha256': manifest['dataset_sha256'],
         'assessments_sha256': hashlib.sha256(assessments_path.read_bytes()).hexdigest(),
