@@ -1,0 +1,36 @@
+{
+  "scope": "Targeted primary-source checks for six companies, not external verification of the entire universe. Original Invest-OS values remain unchanged. Other business-model descriptions and risks are analytical judgments.",
+  "reviewed_on": "2026-10-25",
+  "companies": {
+    "ADBE": {
+      "date": "2026-09-10",
+      "url": "https://www.adobe.com/cc-shared/assets/investor-relations/pdfs/01906202/au56y4ter.pdf",
+      "note": "The Q3 release supports approximately $6.76bn revenue, 13% growth, $2.35bn GAAP operating income and $2.52bn operating cash flow. This supports recurring franchise quality; it does not independently verify the supplied October quote, trailing multiple or normalized long-term AI economics."
+    },
+    "INTU": {
+      "date": "2026-08-25",
+      "url": "https://investors.intuit.com/sec-filings/all-sec-filings/content/0000896878-26-000029/fy26q4earningspressrelease.htm",
+      "note": "The release supports FY2026 revenue of about $21.4bn, $4.566bn net income and $8.838bn operating cash flow. It reports $221m purchases of property and equipment, versus the snapshot's $175m capex input. Cash flow includes $2.056bn share-based compensation and $1.279bn deferred taxes; the supplied FCF yield is not normalized owner earnings. No frozen metric was replaced."
+    },
+    "APH": {
+      "date": "2026-07-29",
+      "url": "https://investors.amphenol.com/news-and-events/news-details/2026/Amphenol-Reports-Record-Second-Quarter-2026-Results/default.aspx",
+      "note": "The release supports 55% reported sales growth, 30% organic growth and about 29.5% operating margin. Its balance sheet reports $17.177bn long-term debt plus a $1.634bn current portion, materially above the raw snapshot debt input. Acquisition-led growth and full debt service must be considered; attractive equity multiples remain conditional on matched quote/share inputs."
+    },
+    "BSX": {
+      "date": "2026-07-29",
+      "url": "https://news.bostonscientific.com/2026-07-29-Boston-Scientific-announces-results-for-second-quarter-2026",
+      "note": "The release supports $5.442bn quarterly sales, 7.5% reported growth, approximately $1.178bn operating income and $0.61 diluted EPS. It supports operating progress despite slower growth. The October quote and resulting trailing valuation were not independently verified."
+    },
+    "ANIP": {
+      "date": "2026-08-07",
+      "url": "https://investor.anipharmaceuticals.com/news-releases/news-release-details/ani-pharmaceuticals-reports-record-second-quarter-2026-financial",
+      "note": "The release supports $266m quarterly revenue and 25.9% growth. Principal outstanding debt including convertible notes is $620.9m, above the snapshot's approximately $301m debt carrying input. Cortrophin concentration and cash conversion matter; the cheap assessment is conditional, not a conclusion that debt is fully covered by the snapshot's cash."
+    },
+    "FIX": {
+      "date": "2026-10-22",
+      "url": "https://investors.comfortsystemsusa.com/news-releases/news-release-details/comfort-systems-usa-reports-third-quarter-2026-results",
+      "note": "The release supports quarterly revenue of about $3.77bn, $489m net income and approximately $1.01bn operating cash flow. These support operating strength. Backlog and cash timing remain cyclical, and this check does not independently verify the supplied October quote or valuation."
+    }
+  }
+}

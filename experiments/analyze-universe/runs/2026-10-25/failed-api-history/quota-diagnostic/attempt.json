@@ -1,0 +1,9 @@
+{
+  "started_at": "2026-10-25T12:08:13.917419+00:00",
+  "status": "http_failed",
+  "model": "gemini-3-flash-preview",
+  "prompt_sha256": "8f9577719cb79db913054e110bc3089b9eda8c3a60df65f9c0e7d03354b9a475",
+  "automatic_retries": false,
+  "http_status": 429,
+  "ended_at": "2026-10-25T12:08:14.219091+00:00"
+}

@@ -1,0 +1,15 @@
+{
+  "model": "gemini-3-flash-preview",
+  "generationConfig": {
+    "thinkingConfig": {
+      "thinkingLevel": "high"
+    },
+    "maxOutputTokens": 65536
+  },
+  "tools": [
+    {
+      "googleSearch": {}
+    }
+  ],
+  "prompt_sha256": "239b12f6c9287f4c94f0c3f6861a8684f5aa839803658aea1c72d24d3ab6dde3"
+}

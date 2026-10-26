@@ -1,0 +1,74 @@
+{
+  "name": "At/near any support only",
+  "expression": {
+    "operator": "and",
+    "groups": [
+      {
+        "id": "any-support",
+        "operator": "or",
+        "conditions": [
+          {
+            "id": "1m-At Support",
+            "field": "support_1m",
+            "value": "At Support"
+          },
+          {
+            "id": "1m-Near Support",
+            "field": "support_1m",
+            "value": "Near Support"
+          },
+          {
+            "id": "3m-At Support",
+            "field": "support_3m",
+            "value": "At Support"
+          },
+          {
+            "id": "3m-Near Support",
+            "field": "support_3m",
+            "value": "Near Support"
+          },
+          {
+            "id": "6m-At Support",
+            "field": "support_6m",
+            "value": "At Support"
+          },
+          {
+            "id": "6m-Near Support",
+            "field": "support_6m",
+            "value": "Near Support"
+          },
+          {
+            "id": "1y-At Support",
+            "field": "support_1y",
+            "value": "At Support"
+          },
+          {
+            "id": "1y-Near Support",
+            "field": "support_1y",
+            "value": "Near Support"
+          },
+          {
+            "id": "2y-At Support",
+            "field": "support_2y",
+            "value": "At Support"
+          },
+          {
+            "id": "2y-Near Support",
+            "field": "support_2y",
+            "value": "Near Support"
+          },
+          {
+            "id": "5y-At Support",
+            "field": "support_5y",
+            "value": "At Support"
+          },
+          {
+            "id": "5y-Near Support",
+            "field": "support_5y",
+            "value": "Near Support"
+          }
+        ]
+      }
+    ]
+  }
+}

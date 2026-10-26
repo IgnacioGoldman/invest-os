@@ -1,0 +1,110 @@
+{
+  "name": "Growth ≥8%, margin >0%, flags =0, support",
+  "expression": {
+    "operator": "and",
+    "groups": [
+      {
+        "id": "rule-0",
+        "operator": "and",
+        "conditions": [
+          {
+            "field": "revenue",
+            "comparison": "gte",
+            "value": "8",
+            "id": "condition-0"
+          }
+        ]
+      },
+      {
+        "id": "rule-1",
+        "operator": "and",
+        "conditions": [
+          {
+            "field": "operating_margin",
+            "comparison": "gt",
+            "value": "0",
+            "id": "condition-1"
+          }
+        ]
+      },
+      {
+        "id": "rule-2",
+        "operator": "and",
+        "conditions": [
+          {
+            "field": "red_flag_count",
+            "comparison": "eq",
+            "value": "0",
+            "id": "condition-2"
+          }
+        ]
+      },
+      {
+        "id": "any-support",
+        "operator": "or",
+        "conditions": [
+          {
+            "id": "1m-At Support",
+            "field": "support_1m",
+            "value": "At Support"
+          },
+          {
+            "id": "1m-Near Support",
+            "field": "support_1m",
+            "value": "Near Support"
+          },
+          {
+            "id": "3m-At Support",
+            "field": "support_3m",
+            "value": "At Support"
+          },
+          {
+            "id": "3m-Near Support",
+            "field": "support_3m",
+            "value": "Near Support"
+          },
+          {
+            "id": "6m-At Support",
+            "field": "support_6m",
+            "value": "At Support"
+          },
+          {
+            "id": "6m-Near Support",
+            "field": "support_6m",
+            "value": "Near Support"
+          },
+          {
+            "id": "1y-At Support",
+            "field": "support_1y",
+            "value": "At Support"
+          },
+          {
+            "id": "1y-Near Support",
+            "field": "support_1y",
+            "value": "Near Support"
+          },
+          {
+            "id": "2y-At Support",
+            "field": "support_2y",
+            "value": "At Support"
+          },
+          {
+            "id": "2y-Near Support",
+            "field": "support_2y",
+            "value": "Near Support"
+          },
+          {
+            "id": "5y-At Support",
+            "field": "support_5y",
+            "value": "At Support"
+          },
+          {
+            "id": "5y-Near Support",
+            "field": "support_5y",
+            "value": "Near Support"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,1155 @@
+{
+  "ticker": "ECG",
+  "company": "Everus Construction Group, Inc.",
+  "sector": "Consumer Cyclical",
+  "industry": "Homebuilding",
+  "snapshot_as_of": "2026-10-23T23:16:44.963798Z",
+  "financial_as_of": "2026-06-30",
+  "currency": "USD",
+  "metrics": {
+    "revenue_growth_yoy_pct": {
+      "v": 33.65083,
+      "t": "c",
+      "s": [
+        1,
+        2
+      ],
+      "period": "FY2026 Q2"
+    },
+    "revenue_momentum_pp": {
+      "v": 6.164429,
+      "t": "c",
+      "s": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        2,
+        9,
+        10,
+        11,
+        12,
+        1
+      ],
+      "period": "FY2024 Q3; FY2024 Q4; FY2025 Q1; FY2025 Q2; FY2025 Q3; FY2025 Q4; FY2026 Q1; FY2026 Q2"
+    },
+    "operating_margin_pct": {
+      "v": 9.075659,
+      "t": "c",
+      "s": [
+        13,
+        1
+      ],
+      "period": "FY2026 Q2"
+    },
+    "operating_margin_trend_pp": {
+      "v": 1.207001,
+      "t": "c",
+      "s": [
+        13,
+        1,
+        14,
+        2
+      ],
+      "period": "FY2026 Q2"
+    },
+    "revenue_ttm": {
+      "v": 4266.792,
+      "t": "c",
+      "s": [
+        11,
+        1,
+        2
+      ]
+    },
+    "operating_income_ttm": {
+      "v": 330.714,
+      "t": "c",
+      "s": [
+        15,
+        13,
+        14
+      ]
+    },
+    "net_income_ttm": {
+      "v": 254.461,
+      "t": "c",
+      "s": [
+        16,
+        17,
+        18
+      ]
+    },
+    "operating_cash_flow_ttm": {
+      "v": 321.185,
+      "t": "c",
+      "s": [
+        19,
+        20,
+        21
+      ]
+    },
+    "capex_ttm": {
+      "v": 70.813,
+      "t": "c",
+      "s": [
+        22,
+        23,
+        24
+      ]
+    },
+    "free_cash_flow_ttm": {
+      "v": 250.372,
+      "t": "c",
+      "s": [
+        19,
+        20,
+        21,
+        22,
+        23,
+        24
+      ]
+    },
+    "cash": {
+      "v": 0.553,
+      "t": "r",
+      "s": [
+        25
+      ],
+      "d": "2024-09-30"
+    },
+    "debt": {
+      "v": 274.499,
+      "t": "c",
+      "s": [
+        26,
+        27
+      ]
+    },
+    "equity": {
+      "v": 773.201,
+      "t": "r",
+      "s": [
+        28
+      ],
+      "period": "FY2026 Q2"
+    },
+    "market_cap": {
+      "v": 4861.29,
+      "t": "c",
+      "s": [
+        29,
+        30
+      ],
+      "d": "2026-10-23"
+    },
+    "shares_diluted_m": {
+      "v": 51.22,
+      "t": "r",
+      "s": [
+        30
+      ]
+    },
+    "gross_margin": {
+      "v": 14.85311,
+      "t": "c",
+      "s": [
+        31,
+        1
+      ],
+      "period": "FY2026 Q2"
+    },
+    "net_margin": {
+      "v": 6.811758,
+      "t": "c",
+      "s": [
+        17,
+        1
+      ],
+      "period": "FY2026 Q2"
+    },
+    "revenue_cagr_3y": {
+      "v": 11.54664,
+      "t": "c",
+      "s": [
+        11,
+        32
+      ],
+      "d": "2025-12-31"
+    },
+    "eps_gaap_growth_yoy": {
+      "v": 59.2233,
+      "t": "c",
+      "s": [
+        33,
+        34
+      ],
+      "period": "FY2026 Q2"
+    },
+    "eps_cagr_3y": {
+      "v": 17.25832,
+      "t": "c",
+      "s": [
+        35,
+        36
+      ],
+      "d": "2025-12-31"
+    },
+    "roe": {
+      "v": 43.39881,
+      "t": "c",
+      "s": [
+        17,
+        28
+      ],
+      "period": "FY2026 Q2"
+    },
+    "roic": {
+      "v": 51.3282,
+      "t": "p",
+      "s": [
+        13,
+        26,
+        27,
+        28,
+        37
+      ],
+      "period": "FY2026 Q2",
+      "caution": "Latest-quarter roic: Proxy annualized quarterly ROIC: operating income divided by quarter-end invested capital. No tax adjustment is applied."
+    },
+    "fcf_margin_ttm": {
+      "v": 5.867921,
+      "t": "c",
+      "s": [
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        11,
+        1,
+        2
+      ]
+    },
+    "debt_to_equity": {
+      "v": 0.3550164,
+      "t": "c",
+      "s": [
+        26,
+        27,
+        28
+      ]
+    },
+    "peg": {
+      "v": 1.10696,
+      "t": "p",
+      "s": [
+        29,
+        30,
+        16,
+        17,
+        18,
+        35,
+        36
+      ],
+      "d": "2026-10-23",
+      "caution": "Trailing P/E divided by saved 3-year EPS CAGR percentage."
+    },
+    "ev_to_ebitda_proxy": {
+      "v": 14.17239,
+      "t": "p",
+      "s": [
+        29,
+        30,
+        26,
+        27,
+        25,
+        15,
+        13,
+        14,
+        38,
+        39,
+        40
+      ],
+      "d": "2026-10-23",
+      "caution": "Current enterprise value divided by saved EBITDA in the listing currency."
+    },
+    "gross_profit_ttm": {
+      "v": 555.378,
+      "t": "c",
+      "s": [
+        41,
+        31,
+        42
+      ]
+    },
+    "ebitda_proxy": {
+      "v": 362.341,
+      "t": "p",
+      "s": [
+        15,
+        13,
+        14,
+        38,
+        39,
+        40
+      ],
+      "caution": "Proxy EBITDA: operating income plus depreciation/amortization where SEC facts are available."
+    },
+    "enterprise_value_proxy": {
+      "v": 5135.236,
+      "t": "p",
+      "s": [
+        29,
+        30,
+        26,
+        27,
+        25
+      ],
+      "d": "2026-10-23",
+      "caution": "Current market cap plus saved debt minus saved cash in the listing currency."
+    },
+    "pe_ttm": {
+      "v": 19.10427,
+      "t": "c",
+      "s": [
+        29,
+        30,
+        16,
+        17,
+        18
+      ],
+      "d": "2026-10-23",
+      "caution": "Recalculated using current market cap and saved net_income in the listing currency."
+    },
+    "price_to_sales": {
+      "v": 1.139331,
+      "t": "c",
+      "s": [
+        10,
+        43,
+        21,
+        44,
+        24,
+        11,
+        19,
+        22,
+        12,
+        45,
+        46,
+        1,
+        20,
+        23,
+        29,
+        30
+      ],
+      "period": "TTM ended 2026-06-30; price 2026-10-23"
+    },
+    "fcf_yield_pct": {
+      "v": 5.15032,
+      "t": "c",
+      "s": [
+        10,
+        43,
+        21,
+        44,
+        24,
+        11,
+        19,
+        22,
+        12,
+        45,
+        46,
+        1,
+        20,
+        23,
+        29,
+        30
+      ],
+      "period": "TTM ended 2026-06-30; price 2026-10-23"
+    }
+  },
+  "missing_metrics": [
+    "forward_pe"
+  ],
+  "market": {
+    "price": {
+      "v": 94.91,
+      "t": "r",
+      "s": [
+        29
+      ],
+      "d": "2026-10-23"
+    },
+    "currency": "USD",
+    "supports": [
+      {
+        "timeframe": "1Y",
+        "distance_pct": 13.40486,
+        "zone": [
+          81.7,
+          85.68
+        ],
+        "as_of": "2026-10-23",
+        "s": [
+          29
+        ]
+      },
+      {
+        "timeframe": "2Y",
+        "distance_pct": 174.6203,
+        "zone": [
+          33.22,
+          35.9
+        ],
+        "as_of": "2026-10-23",
+        "s": [
+          29
+        ]
+      },
+      {
+        "timeframe": "5Y",
+        "distance_pct": 174.6203,
+        "zone": [
+          33.22,
+          35.9
+        ],
+        "as_of": "2026-10-23",
+        "s": [
+          29
+        ]
+      }
+    ],
+    "return_1y_pct": {
+      "v": 8.468576,
+      "t": "c",
+      "s": [
+        29
+      ],
+      "d": "2026-10-23"
+    },
+    "from_52w_high_pct": {
+      "v": -43.89335,
+      "t": "c",
+      "s": [
+        29
+      ],
+      "d": "2026-10-23"
+    },
+    "earnings": {
+      "date": "2026-11-03",
+      "estimated": true,
+      "s": [
+        64
+      ]
+    }
+  },
+  "red_flags": {
+    "count": 0,
+    "observed_count": 0,
+    "max": 4,
+    "as_of": "2026-06-30",
+    "valid_until": "2026-10-30",
+    "coverage": {
+      "assessed": 4,
+      "applicable": 4,
+      "total": 4,
+      "complete": true
+    },
+    "detected": [],
+    "unassessed": []
+  },
+  "revenue_signals": {
+    "revenue": {
+      "label": "Strong",
+      "formula": "(latest quarter revenue / same fiscal quarter prior-year revenue − 1) × 100"
+    },
+    "momentum": {
+      "label": "Accelerating",
+      "formula": "median(latest 4 quarterly YoY growth rates) − median(preceding 4), pp; ±3 pp thresholds",
+      "periods": [
+        "FY2024 Q3",
+        "FY2024 Q4",
+        "FY2025 Q1",
+        "FY2025 Q2",
+        "FY2025 Q3",
+        "FY2025 Q4",
+        "FY2026 Q1",
+        "FY2026 Q2"
+      ]
+    },
+    "revenue_consistency": {
+      "label": "Choppy",
+      "formula": "max absolute second difference ≤ max(3 pp, 25% of median absolute growth); or sustained level shift (≥3 quarters each side)",
+      "periods": [
+        "FY2024 Q3",
+        "FY2024 Q4",
+        "FY2025 Q1",
+        "FY2025 Q2",
+        "FY2025 Q3",
+        "FY2025 Q4",
+        "FY2026 Q1",
+        "FY2026 Q2"
+      ],
+      "diagnostics": {
+        "label": "Choppy",
+        "max_second_difference_pp": 15.915520667917392,
+        "tolerance_pp": 7.5854254681487205,
+        "sustained_level_shift": false,
+        "observation_count": 8
+      }
+    }
+  },
+  "revenue_quarters": [
+    {
+      "period": "FY2023 Q3",
+      "as_of": "2023-09-30",
+      "values": {
+        "revenue": {
+          "v": 717.406,
+          "t": "r",
+          "s": [
+            4
+          ]
+        }
+      }
+    },
+    {
+      "period": "FY2023 Q4",
+      "as_of": "2023-12-31",
+      "values": {
+        "revenue": {
+          "v": 635.718,
+          "t": "c",
+          "s": [
+            6,
+            4
+          ]
+        }
+      }
+    },
+    {
+      "period": "FY2024 Q1",
+      "as_of": "2024-03-31",
+      "values": {
+        "revenue": {
+          "v": 625.689,
+          "t": "r",
+          "s": [
+            8
+          ]
+        }
+      }
+    },
+    {
+      "period": "FY2024 Q2",
+      "as_of": "2024-06-30",
+      "values": {
+        "revenue": {
+          "v": 703.373,
+          "t": "r",
+          "s": [
+            9
+          ]
+        }
+      }
+    },
+    {
+      "period": "FY2024 Q3",
+      "as_of": "2024-09-30",
+      "values": {
+        "revenue": {
+          "v": 760.985,
+          "t": "r",
+          "s": [
+            3
+          ]
+        },
+        "revenue_growth_yoy": {
+          "v": 6.074524,
+          "t": "c",
+          "s": [
+            3,
+            4
+          ]
+        }
+      }
+    },
+    {
+      "period": "FY2024 Q4",
+      "as_of": "2024-12-31",
+      "values": {
+        "revenue": {
+          "v": 759.638,
+          "t": "c",
+          "s": [
+            5,
+            3
+          ]
+        },
+        "revenue_growth_yoy": {
+          "v": 19.49292,
+          "t": "c",
+          "s": [
+            5,
+            3,
+            6,
+            4
+          ]
+        }
+      }
+    },
+    {
+      "period": "FY2025 Q1",
+      "as_of": "2025-03-31",
+      "values": {
+        "revenue": {
+          "v": 826.629,
+          "t": "r",
+          "s": [
+            7
+          ]
+        },
+        "revenue_growth_yoy": {
+          "v": 32.115,
+          "t": "c",
+          "s": [
+            7,
+            8
+          ]
+        }
+      }
+    },
+    {
+      "period": "FY2025 Q2",
+      "as_of": "2025-06-30",
+      "values": {
+        "revenue": {
+          "v": 921.466,
+          "t": "r",
+          "s": [
+            2
+          ]
+        },
+        "revenue_growth_yoy": {
+          "v": 31.00673,
+          "t": "c",
+          "s": [
+            2,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "period": "FY2025 Q3",
+      "as_of": "2025-09-30",
+      "values": {
+        "revenue": {
+          "v": 986.82,
+          "t": "r",
+          "s": [
+            10
+          ]
+        },
+        "revenue_growth_yoy": {
+          "v": 29.67667,
+          "t": "c",
+          "s": [
+            10,
+            3
+          ]
+        }
+      }
+    },
+    {
+      "period": "FY2025 Q4",
+      "as_of": "2025-12-31",
+      "values": {
+        "revenue": {
+          "v": 1011.472,
+          "t": "c",
+          "s": [
+            11,
+            10
+          ]
+        },
+        "revenue_growth_yoy": {
+          "v": 33.15184,
+          "t": "c",
+          "s": [
+            11,
+            10,
+            5,
+            3
+          ]
+        }
+      }
+    },
+    {
+      "period": "FY2026 Q1",
+      "as_of": "2026-03-31",
+      "values": {
+        "revenue": {
+          "v": 1036.953,
+          "t": "r",
+          "s": [
+            12
+          ]
+        },
+        "revenue_growth_yoy": {
+          "v": 25.44358,
+          "t": "c",
+          "s": [
+            12,
+            7
+          ]
+        }
+      }
+    },
+    {
+      "period": "FY2026 Q2",
+      "as_of": "2026-06-30",
+      "values": {
+        "revenue": {
+          "v": 1231.547,
+          "t": "r",
+          "s": [
+            1
+          ]
+        },
+        "revenue_growth_yoy": {
+          "v": 33.65083,
+          "t": "c",
+          "s": [
+            1,
+            2
+          ],
+          "period": "FY2026 Q2"
+        }
+      }
+    }
+  ],
+  "quarters": [
+    {
+      "period": "FY2026 Q2",
+      "as_of": "2026-06-30",
+      "values": {
+        "revenue": {
+          "v": 1231.547,
+          "t": "r",
+          "s": [
+            1
+          ],
+          "period": "FY2026 Q2"
+        },
+        "gross_profit": {
+          "v": 182.923,
+          "t": "r",
+          "s": [
+            31
+          ],
+          "period": "FY2026 Q2"
+        },
+        "operating_income": {
+          "v": 111.771,
+          "t": "r",
+          "s": [
+            13
+          ],
+          "period": "FY2026 Q2"
+        },
+        "net_income": {
+          "v": 83.89,
+          "t": "r",
+          "s": [
+            17
+          ],
+          "period": "FY2026 Q2"
+        },
+        "operating_cash_flow": {
+          "v": 53.135,
+          "t": "c",
+          "s": [
+            20,
+            45
+          ],
+          "period": "FY2026 Q2"
+        },
+        "capex": {
+          "v": 20.13,
+          "t": "c",
+          "s": [
+            23,
+            46
+          ],
+          "period": "FY2026 Q2"
+        },
+        "free_cash_flow": {
+          "v": 33.005,
+          "t": "c",
+          "s": [
+            20,
+            45,
+            23,
+            46
+          ],
+          "period": "FY2026 Q2"
+        },
+        "cash": {
+          "v": 176.67,
+          "t": "r",
+          "s": [
+            37
+          ],
+          "period": "FY2026 Q2"
+        },
+        "debt": {
+          "v": 274.499,
+          "t": "c",
+          "s": [
+            26,
+            27
+          ],
+          "period": "FY2026 Q2"
+        },
+        "equity": {
+          "v": 773.201,
+          "t": "r",
+          "s": [
+            28
+          ],
+          "period": "FY2026 Q2"
+        },
+        "shares_diluted": {
+          "v": 51.22,
+          "t": "r",
+          "s": [
+            30
+          ],
+          "period": "FY2026 Q2"
+        },
+        "eps_diluted": {
+          "v": 1.64,
+          "t": "r",
+          "s": [
+            33
+          ],
+          "period": "FY2026 Q2"
+        }
+      }
+    }
+  ],
+  "annual": [
+    {
+      "period": "2022",
+      "as_of": "2026-10-17",
+      "values": {
+        "revenue": {
+          "v": 2699.25,
+          "t": "r",
+          "s": [
+            32
+          ],
+          "d": "2022-12-31"
+        },
+        "gross_profit": {
+          "v": 276.046,
+          "t": "r",
+          "s": [
+            47
+          ],
+          "d": "2022-12-31"
+        },
+        "operating_income": {
+          "v": 164.644,
+          "t": "r",
+          "s": [
+            48
+          ],
+          "d": "2022-12-31"
+        },
+        "net_income": {
+          "v": 124.781,
+          "t": "r",
+          "s": [
+            49
+          ],
+          "d": "2022-12-31"
+        },
+        "operating_cash_flow": {
+          "v": -25.495,
+          "t": "r",
+          "s": [
+            50
+          ],
+          "d": "2022-12-31"
+        },
+        "capex": {
+          "v": 35.844,
+          "t": "r",
+          "s": [
+            51
+          ],
+          "d": "2022-12-31"
+        },
+        "free_cash_flow": {
+          "v": -61.339,
+          "t": "c",
+          "s": [
+            50,
+            51
+          ],
+          "d": "2022-12-31"
+        },
+        "cash": {
+          "v": 2.112,
+          "t": "r",
+          "s": [
+            52
+          ],
+          "d": "2022-12-31"
+        },
+        "equity": {
+          "v": 382.247,
+          "t": "r",
+          "s": [
+            53
+          ],
+          "d": "2022-12-31"
+        },
+        "shares_diluted": {
+          "v": 50.972,
+          "t": "r",
+          "s": [
+            54
+          ],
+          "d": "2022-12-31"
+        },
+        "eps_diluted": {
+          "v": 2.45,
+          "t": "r",
+          "s": [
+            36
+          ],
+          "d": "2022-12-31"
+        }
+      }
+    },
+    {
+      "period": "2023",
+      "as_of": "2026-10-17",
+      "values": {
+        "revenue": {
+          "v": 2854.39,
+          "t": "r",
+          "s": [
+            6
+          ],
+          "d": "2023-12-31"
+        },
+        "gross_profit": {
+          "v": 321.918,
+          "t": "r",
+          "s": [
+            55
+          ],
+          "d": "2023-12-31"
+        },
+        "operating_income": {
+          "v": 190.543,
+          "t": "r",
+          "s": [
+            56
+          ],
+          "d": "2023-12-31"
+        },
+        "net_income": {
+          "v": 137.23,
+          "t": "r",
+          "s": [
+            57
+          ],
+          "d": "2023-12-31"
+        },
+        "operating_cash_flow": {
+          "v": 171.338,
+          "t": "r",
+          "s": [
+            58
+          ],
+          "d": "2023-12-31"
+        },
+        "capex": {
+          "v": 35.59,
+          "t": "r",
+          "s": [
+            59
+          ],
+          "d": "2023-12-31"
+        },
+        "free_cash_flow": {
+          "v": 135.748,
+          "t": "c",
+          "s": [
+            58,
+            59
+          ],
+          "d": "2023-12-31"
+        },
+        "cash": {
+          "v": 1.567,
+          "t": "r",
+          "s": [
+            60
+          ],
+          "d": "2023-12-31"
+        },
+        "equity": {
+          "v": 448.85,
+          "t": "r",
+          "s": [
+            61
+          ],
+          "d": "2023-12-31"
+        },
+        "shares_diluted": {
+          "v": 50.972,
+          "t": "r",
+          "s": [
+            62
+          ],
+          "d": "2023-12-31"
+        },
+        "eps_diluted": {
+          "v": 2.69,
+          "t": "r",
+          "s": [
+            63
+          ],
+          "d": "2023-12-31"
+        }
+      }
+    }
+  ],
+  "warnings": [
+    "A positive sourced annual EPS estimate, identifiable forecast horizon, currency and estimate date are required; quote and estimate must be no older than seven days. Historical EPS extrapolation is excluded.",
+    "The estimate or market price is stale.",
+    "Net cash/debt requires unrestricted cash equivalents and complete compatible debt. Investments are excluded; inspect component definitions."
+  ],
+  "data_gaps": [
+    "Less than 5 annual fundamental rows were available.",
+    "Less than 5 annual valuation rows were available.",
+    "Only 4 annual values available for revenue.",
+    "Only 4 annual values available for eps_diluted.",
+    "Only 4 annual values available for gross_margin.",
+    "Only 4 annual values available for operating_margin.",
+    "Only 4 annual values available for net_margin.",
+    "Only 4 annual values available for free_cash_flow.",
+    "Only 4 annual values available for cash.",
+    "Only 2 annual values available for debt.",
+    "Only 4 annual values available for shares_diluted.",
+    "Only 2 historical valuation values available for pe.",
+    "Only 2 historical valuation values available for price_to_sales.",
+    "Only 2 historical valuation values available for ev_to_ebitda.",
+    "Only 2 historical valuation values available for fcf_yield."
+  ],
+  "filings": [
+    {
+      "form": "8-K",
+      "date": "2026-09-08",
+      "report_date": "2026-09-01",
+      "items": [
+        "1.01",
+        "2.03"
+      ],
+      "url": "https://www.sec.gov/Archives/edgar/data/2015845/000201584526000056/"
+    },
+    {
+      "form": "8-K",
+      "date": "2026-09-02",
+      "report_date": "2026-09-01",
+      "items": [
+        "7.01",
+        "9.01"
+      ],
+      "url": "https://www.sec.gov/Archives/edgar/data/2015845/000201584526000053/"
+    },
+    {
+      "form": "10-Q",
+      "date": "2026-08-05",
+      "report_date": "2026-06-30",
+      "items": [],
+      "url": "https://www.sec.gov/Archives/edgar/data/2015845/000201584526000050/"
+    }
+  ],
+  "sources": [
+    "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-06-30",
+    "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-06-30",
+    "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-09-30",
+    "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2023-09-30",
+    "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2024-12-31",
+    "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2023-12-31",
+    "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-03-31",
+    "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-03-31",
+    "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2024-06-30",
+    "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2025-09-30",
+    "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2025-12-31",
+    "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-Q:2026-03-31",
+    "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2026-06-30",
+    "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-Q:2025-06-30",
+    "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-K:2025-12-31",
+    "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-K:2025-12-31",
+    "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2026-06-30",
+    "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-Q:2025-06-30",
+    "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2025-12-31",
+    "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-06-30",
+    "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-06-30",
+    "sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-K:2025-12-31",
+    "sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2026-06-30",
+    "sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2025-06-30",
+    "sec_companyfacts:us-gaap/CashAndCashEquivalentsAtCarryingValue:USD:10-Q:2024-09-30",
+    "sec_companyfacts:us-gaap/LongTermDebtCurrent:USD:10-Q:2026-06-30",
+    "sec_companyfacts:us-gaap/LongTermDebtNoncurrent:USD:10-Q:2026-06-30",
+    "sec_companyfacts:us-gaap/StockholdersEquity:USD:10-Q:2026-06-30",
+    "yfinance_history",
+    "sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-Q:2026-06-30",
+    "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2026-06-30",
+    "sec_companyfacts:us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax:USD:10-K:2022-12-31",
+    "sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-Q:2026-06-30",
+    "sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-Q:2025-06-30",
+    "sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-K:2025-12-31",
+    "sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-K:2022-12-31",
+    "sec_companyfacts:us-gaap/CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents:USD:10-Q:2026-06-30",
+    "sec_companyfacts:us-gaap/Depreciation:USD:10-K:2025-12-31",
+    "sec_companyfacts:us-gaap/Depreciation:USD:10-Q:2026-06-30",
+    "sec_companyfacts:us-gaap/Depreciation:USD:10-Q:2025-06-30",
+    "sec_companyfacts:us-gaap/GrossProfit:USD:10-K:2025-12-31",
+    "sec_companyfacts:us-gaap/GrossProfit:USD:10-Q:2025-06-30",
+    "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2025-09-30",
+    "sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2025-09-30",
+    "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-Q:2026-03-31",
+    "sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-Q:2026-03-31",
+    "sec_companyfacts:us-gaap/GrossProfit:USD:10-K:2022-12-31",
+    "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-K:2022-12-31",
+    "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-K:2022-12-31",
+    "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2022-12-31",
+    "sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-K:2022-12-31",
+    "sec_companyfacts:us-gaap/CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents:USD:10-K:2022-12-31",
+    "sec_companyfacts:us-gaap/StockholdersEquity:USD:10-K:2022-12-31",
+    "sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-K:2022-12-31",
+    "sec_companyfacts:us-gaap/GrossProfit:USD:10-K:2023-12-31",
+    "sec_companyfacts:us-gaap/OperatingIncomeLoss:USD:10-K:2023-12-31",
+    "sec_companyfacts:us-gaap/NetIncomeLoss:USD:10-K:2023-12-31",
+    "sec_companyfacts:us-gaap/NetCashProvidedByUsedInOperatingActivities:USD:10-K:2023-12-31",
+    "sec_companyfacts:us-gaap/PaymentsToAcquireProductiveAssets:USD:10-K:2023-12-31",
+    "sec_companyfacts:us-gaap/CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents:USD:10-K:2023-12-31",
+    "sec_companyfacts:us-gaap/StockholdersEquity:USD:10-K:2023-12-31",
+    "sec_companyfacts:us-gaap/WeightedAverageNumberOfDilutedSharesOutstanding:shares:10-K:2023-12-31",
+    "sec_companyfacts:us-gaap/EarningsPerShareDiluted:USD/shares:10-K:2023-12-31",
+    "yfinance:calendar:Earnings Date:2026-11-03"
+  ]
+}

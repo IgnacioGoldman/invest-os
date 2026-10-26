@@ -1,0 +1,4163 @@
+{
+  "date": "2026-10-25",
+  "dataset_sha256": "4151a6fec8b1b86f4ab9a9db874ecc490afdee805a7d2d27ea525cbc5242ca80",
+  "support_definition": "At Support or Near Support on ANY of 1M, 3M, 6M, 1Y, 2Y, 5Y; existing evaluator, frozen date",
+  "reference": "Previously authored qualitative review; not independent return outcomes",
+  "limitations": "All comparisons use the same one-date dataset and review. Thresholds are illustrative, not optimized or out-of-sample validated. Context conditions use supplied sourced finite projections and retain existing warnings; they do not certify earnings normalization, quote/share consistency or sector suitability.",
+  "requested_count": 15,
+  "requested_symbols": [
+    "ANIP",
+    "BMY",
+    "NVDA",
+    "NFLX",
+    "RGLD",
+    "PEP",
+    "UBER",
+    "GRND",
+    "RDDT",
+    "EVR",
+    "TGT",
+    "DTM",
+    "CLS",
+    "DUOL",
+    "ROAD"
+  ],
+  "results": [
+    {
+      "key": "support_only",
+      "name": "At/near any support only",
+      "available_in_current_builder": true,
+      "expression": {
+        "operator": "and",
+        "groups": [
+          {
+            "id": "any-support",
+            "operator": "or",
+            "conditions": [
+              {
+                "id": "1m-At Support",
+                "field": "support_1m",
+                "value": "At Support"
+              },
+              {
+                "id": "1m-Near Support",
+                "field": "support_1m",
+                "value": "Near Support"
+              },
+              {
+                "id": "3m-At Support",
+                "field": "support_3m",
+                "value": "At Support"
+              },
+              {
+                "id": "3m-Near Support",
+                "field": "support_3m",
+                "value": "Near Support"
+              },
+              {
+                "id": "6m-At Support",
+                "field": "support_6m",
+                "value": "At Support"
+              },
+              {
+                "id": "6m-Near Support",
+                "field": "support_6m",
+                "value": "Near Support"
+              },
+              {
+                "id": "1y-At Support",
+                "field": "support_1y",
+                "value": "At Support"
+              },
+              {
+                "id": "1y-Near Support",
+                "field": "support_1y",
+                "value": "Near Support"
+              },
+              {
+                "id": "2y-At Support",
+                "field": "support_2y",
+                "value": "At Support"
+              },
+              {
+                "id": "2y-Near Support",
+                "field": "support_2y",
+                "value": "Near Support"
+              },
+              {
+                "id": "5y-At Support",
+                "field": "support_5y",
+                "value": "At Support"
+              },
+              {
+                "id": "5y-Near Support",
+                "field": "support_5y",
+                "value": "Near Support"
+              }
+            ]
+          }
+        ]
+      },
+      "research_only_context_conditions": [],
+      "count": 64,
+      "requested_tag_matches": 15,
+      "requested_tag_precision_pct": 23.4,
+      "requested_tag_recall_pct": 100.0,
+      "top20": 4,
+      "top50": 13,
+      "bottom50": 18,
+      "selected": [
+        {
+          "rank": 6,
+          "symbol": "ANIP",
+          "stock": "ANIP",
+          "business_quality": "Solid",
+          "valuation": "Cheap",
+          "rationale": "26% growth and the supplied 10.9% FCF yield support 14.7x earnings; product concentration and declining cash-flow margins matter. Company guidance identifies $621m principal debt, above the snapshot's $301m carrying input, making cheapness provisional."
+        },
+        {
+          "rank": 7,
+          "symbol": "BMY",
+          "stock": "BMY",
+          "business_quality": "Solid",
+          "valuation": "Cheap",
+          "rationale": "14.7x reported earnings and an 8.4% trailing FCF yield offer a meaningful buffer for slower growth; patent expirations, replacement-drug execution and $43bn debt remain the central risks."
+        },
+        {
+          "rank": 8,
+          "symbol": "NVDA",
+          "stock": "NVDA",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "106% growth and 66% quarterly operating margins support exceptional AI economics at 26x reported earnings; the earnings-to-cash gap, export constraints and concentration of customer capex prevent an unqualified cheap assessment."
+        },
+        {
+          "rank": 10,
+          "symbol": "NFLX",
+          "stock": "NFLX",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Content/distribution scale, 35% quarterly operating margins and a 4.1% FCF yield support 19x earnings; slowing growth and an earnings-to-cash gap require normalized content-spending analysis."
+        },
+        {
+          "rank": 21,
+          "symbol": "RGLD",
+          "stock": "RGLD",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Royalty/streaming assets provide strong margins and less direct mine-operating exposure at 26x earnings; commodity prices, operator concentration, acquisitions and incomplete capital-spending coverage prevent a cheap assessment."
+        },
+        {
+          "rank": 22,
+          "symbol": "PEP",
+          "stock": "PEP",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Brand/distribution scale and a 5.6% FCF yield support 17x earnings, but modest structural growth and significant leverage warrant a fair rather than clearly cheap valuation; demand elasticity and input costs remain risks."
+        },
+        {
+          "rank": 30,
+          "symbol": "UBER",
+          "stock": "UBER",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Mobility/delivery scale and a 7.4% FCF yield support value, but non-operating gains flatter the 14x P/E and growth has slowed to 12%; regulation, insurance costs and autonomous competition constrain the opportunity."
+        },
+        {
+          "rank": 32,
+          "symbol": "GRND",
+          "stock": "GRND",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "The focused network monetizes effectively, with 33% growth and a 6.3% FCF yield at 26x earnings; negative equity, leverage, user trust and platform dependence temper capital-allocation confidence."
+        },
+        {
+          "rank": 33,
+          "symbol": "RDDT",
+          "stock": "RDDT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "61% growth, expanding operating margins and a 3.5% FCF yield support 33x reported earnings; platform/search dependence, moderation costs and non-operating gains keep the premium conditional."
+        },
+        {
+          "rank": 41,
+          "symbol": "EVR",
+          "stock": "EVR",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Advisory expertise and cash generation support 14x reported earnings, but deal-cycle sensitivity, compensation timing and differing annual/quarterly earnings measures require normalization before calling it cheap."
+        },
+        {
+          "rank": 42,
+          "symbol": "TGT",
+          "stock": "TGT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Retail recovery and a 6.2% FCF yield support 16x earnings, but growth remains modest and the recent margin jump needs confirmation; discretionary demand, inventory execution and leverage remain risks."
+        },
+        {
+          "rank": 43,
+          "symbol": "DTM",
+          "stock": "DTM",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Midstream infrastructure delivers high operating margins and recurring cash flow, but 27x earnings and a 3.8% FCF yield already price durability; leverage, growth capex and customer exposure remain risks."
+        },
+        {
+          "rank": 44,
+          "symbol": "CLS",
+          "stock": "CLS",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "62% growth and higher-margin manufacturing support 27x earnings, but a 1.7% FCF yield reveals heavy investment needs; customer concentration and hardware-cycle risk constrain upside confidence."
+        },
+        {
+          "rank": 52,
+          "symbol": "GOOG",
+          "stock": "GOOG",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Search and cloud operations deliver 24% growth and 34% operating margins, but a 94% quarterly net margin and $112bn quarterly profit distort the 15.5x P/E; normalization and AI-capex returns are essential."
+        },
+        {
+          "rank": 53,
+          "symbol": "AMZN",
+          "stock": "AMZN",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Retail scale and cloud economics support strong business quality, but reported earnings greatly exceed operating profit while capex consumes operating cash flow; normalized earnings and AI investment returns are needed to value the apparent 19x P/E."
+        },
+        {
+          "rank": 59,
+          "symbol": "DUOL",
+          "stock": "DUOL",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "The learning platform produces strong cash flow and retains growth, but growth slowed to 18% and trailing earnings materially exceed operating profit; a 5.7% FCF yield supports value better than the misleading 17x P/E."
+        },
+        {
+          "rank": 63,
+          "symbol": "ROAD",
+          "stock": "ROAD",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "28% growth and positive infrastructure cash generation support the consolidator, but 33x earnings and a 3.8% FCF yield need continued execution; acquisition debt and slowing growth constrain protection."
+        },
+        {
+          "rank": 70,
+          "symbol": "CDE",
+          "stock": "CDE",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Mining cash generation has improved markedly and an 8.3% FCF yield supports valuation; acquisition dilution, inconsistent gross-profit inputs and precious-metal cyclicality keep 16x earnings from proving cheapness."
+        },
+        {
+          "rank": 71,
+          "symbol": "ASTH",
+          "stock": "ASTH",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "49% growth and a 5.1% FCF yield support a developing healthcare-services franchise; thin margins, integration debt and inconsistent gross-profit inputs make the low sales valuation less compelling than it appears."
+        },
+        {
+          "rank": 73,
+          "symbol": "EVC",
+          "stock": "EVC",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Rapid revenue recovery and an 8.5% FCF yield support a turnaround case, but historical losses, leverage and changing business mix make sustainable advertising profitability uncertain."
+        },
+        {
+          "rank": 81,
+          "symbol": "TXN",
+          "stock": "TXN",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Analog scale and strong recovered margins support durable cash generation, but 37x earnings and a 2.8% FCF yield require sustained utilization gains; semiconductor cyclicality and capacity spending remain risks."
+        },
+        {
+          "rank": 86,
+          "symbol": "VRTX",
+          "stock": "VRTX",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Protected drug economics and limited reported debt support resilience, but 33x earnings and a 2.6% FCF yield offer little cushion for 12% growth; product concentration, pipeline spending and cash conversion remain risks."
+        },
+        {
+          "rank": 88,
+          "symbol": "CSCO",
+          "stock": "CSCO",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "The installed networking franchise produces strong cash flow and improving growth, but 30x earnings with a 3.2% FCF yield prices a sustained recovery; competition and infrastructure cyclicality limit protection."
+        },
+        {
+          "rank": 89,
+          "symbol": "UI",
+          "stock": "UI",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Differentiated networking distribution, 23% growth and strong margins support quality, but 37x earnings and a 2.6% FCF yield leave governance/concentration risk and a cash-conversion gap insufficiently cushioned."
+        },
+        {
+          "rank": 93,
+          "symbol": "SHOP",
+          "stock": "SHOP",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Merchant-platform scale and 34% growth support the franchise, but 16.5x sales and a 1.1% FCF yield demand substantial future profitability; non-operating gains inflate earnings and competition remains significant."
+        },
+        {
+          "rank": 98,
+          "symbol": "CIEN",
+          "stock": "CIEN",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "37% growth and improving optical-network margins support the recovery, but 64x earnings and a 1.9% FCF yield require continued AI infrastructure demand; leverage and spending cycles add risk."
+        },
+        {
+          "rank": 99,
+          "symbol": "CRDO",
+          "stock": "CRDO",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "115% growth and strong cash generation support connectivity demand, but 18x sales and a 1.5% FCF yield require sustained hyperscaler adoption; cash conversion, customer concentration and non-operating gains add risk."
+        },
+        {
+          "rank": 101,
+          "symbol": "MTSI",
+          "stock": "MTSI",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "36% growth and improving operating margins support semiconductor demand, but 77x reported earnings and a 1.1% FCF yield provide little protection; non-operating gains and cyclicality add risk."
+        },
+        {
+          "rank": 102,
+          "symbol": "HOOD",
+          "stock": "HOOD",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "32% growth and strong brokerage profitability support operating leverage, but 42x earnings depends on sustained trading/crypto activity; regulatory exposure and financial-sector cash-flow interpretation limit protection."
+        },
+        {
+          "rank": 111,
+          "symbol": "MU",
+          "stock": "MU",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Memory demand and cash generation surge, but 81% quarterly operating margins and a near-fourfold revenue increase make sustainable earnings highly uncertain; the apparent 12x P/E needs cycle-normalized verification."
+        },
+        {
+          "rank": 113,
+          "symbol": "WDC",
+          "stock": "WDC",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Storage demand and operating margins have improved, but net income greatly exceeds operating profit after a changed business perimeter; the apparent 13x P/E needs normalized continuing earnings and matched-period cash flows."
+        },
+        {
+          "rank": 116,
+          "symbol": "ARES",
+          "stock": "ARES",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "24% revenue growth supports the asset-management franchise, but stale annual anchors and financial-sector accounting make cash flow and the apparent 64x P/E difficult to normalize; fee-related/distributable earnings are missing."
+        },
+        {
+          "rank": 117,
+          "symbol": "FOUR",
+          "stock": "FOUR",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "34% payments growth and positive operating cash flow support the business, but a $52m capitalization and 1,108% FCF yield conflict with scale and share data; valuation requires correcting the share denominator and assessing debt."
+        },
+        {
+          "rank": 118,
+          "symbol": "LOAR",
+          "stock": "LOAR",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Aerospace content and 39% growth support operating quality, but a $5.9m market capitalization and 1,803% FCF yield are inconsistent with financial scale; share units must be repaired before valuation."
+        },
+        {
+          "rank": 121,
+          "symbol": "LPLA",
+          "stock": "LPLA",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Advisor-network scale and 35% revenue growth support the franchise, but debt classifications conflict and financial-sector cash movements are not ordinary FCF; normalized distributable earnings and funding analysis are needed."
+        },
+        {
+          "rank": 122,
+          "symbol": "VIRT",
+          "stock": "VIRT",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Trading technology and profitability support the franchise, but reported net income differs from common-share earnings and ownership attribution is unclear; normalize volatility-sensitive equity earnings before calling the apparent 9x P/E cheap."
+        },
+        {
+          "rank": 124,
+          "symbol": "SYM",
+          "stock": "SYM",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Warehouse-automation adoption and emerging operating profit support the business, but ownership-class attribution and advance-payment cash flows can distort generic FCF; sustainable equity-level earnings and share reconciliation are missing."
+        },
+        {
+          "rank": 125,
+          "symbol": "CTRE",
+          "stock": "CTRE",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Healthcare-property growth and rental cash generation are promising, but GAAP income includes non-operating effects; AFFO, tenant coverage and comparable property capital needs are required for a reliable REIT valuation."
+        },
+        {
+          "rank": 127,
+          "symbol": "NTST",
+          "stock": "NTST",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Net-lease rental growth and positive cash generation support the property portfolio, but GAAP P/E and generic FCF cannot replace AFFO, tenant coverage and funding analysis; sustainable REIT valuation remains unresolved."
+        },
+        {
+          "rank": 130,
+          "symbol": "ALAB",
+          "stock": "ALAB",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "AI connectivity demand drives 104% growth and positive cash generation, but 39x sales and a 0.6% FCF yield require exceptional durability; non-operating gains and customer concentration add uncertainty."
+        },
+        {
+          "rank": 132,
+          "symbol": "TER",
+          "stock": "TER",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "104% growth and strong test-equipment margins support the rebound, but 42x earnings and a 1.6% FCF yield leave little protection against cyclical normalization; cash conversion and customer concentration add risk."
+        },
+        {
+          "rank": 136,
+          "symbol": "CAVA",
+          "stock": "CAVA",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "31% growth and profitable restaurant expansion are promising, but 96x earnings and a 0.8% FCF yield demand sustained unit growth and operating leverage; food, labor and rollout costs remain risks."
+        },
+        {
+          "rank": 138,
+          "symbol": "SNOW",
+          "stock": "SNOW",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "35% data-platform growth and positive cash generation support demand, but operating losses persist at 20.9x sales and a 1.1% FCF yield; cloud competition and compensation dilution require exceptional execution."
+        },
+        {
+          "rank": 145,
+          "symbol": "TGTX",
+          "stock": "TGTX",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "70% product growth supports commercial momentum, but falling operating margins and a 0.2% FCF yield contradict the apparent 19x P/E; normalize non-operating earnings and cash conversion before relying on cheapness."
+        },
+        {
+          "rank": 146,
+          "symbol": "PDFS",
+          "stock": "PDFS",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "Semiconductor analytics demand and improving operating margins support the business, but 159x earnings, 6.8x sales and negative trailing FCF require stronger monetization; capex and customer concentration add risk."
+        },
+        {
+          "rank": 150,
+          "symbol": "NIBE-B.ST",
+          "stock": "NIBE-B.ST",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "Heat-pump demand and cash generation are recovering, but growth remains below 8% after contraction; 34x earnings and meaningful debt demand more durable improvement than the recent cycle demonstrates."
+        },
+        {
+          "rank": 153,
+          "symbol": "DASH",
+          "stock": "DASH",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "The delivery network sustains 36% growth and positive FCF, but operating margins remain thin and deteriorating; 94x earnings and a 3.3% FCF yield leave substantial execution and regulatory risk."
+        },
+        {
+          "rank": 157,
+          "symbol": "AXGN",
+          "stock": "AXGN",
+          "business_quality": "Average",
+          "valuation": "Expensive",
+          "rationale": "23% growth and positive trailing cash flow support nerve-repair potential, but operating losses and dilution persist; 8.1x sales and a 0.4% FCF yield require a successful profitability transition."
+        },
+        {
+          "rank": 158,
+          "symbol": "HL",
+          "stock": "HL",
+          "business_quality": "Average",
+          "valuation": "Expensive",
+          "rationale": "Silver/gold exposure currently generates strong cash and carries little reported debt, but 31x commodity-sensitive earnings is demanding; uneven quarterly/TTM revenue and incomplete coverage make the assessment provisional."
+        },
+        {
+          "rank": 166,
+          "symbol": "KTOS",
+          "stock": "KTOS",
+          "business_quality": "Average",
+          "valuation": "Expensive",
+          "rationale": "Defense demand supports 31% growth, but operating profitability is negligible and trailing FCF is negative; 238x earnings requires substantial program success and continued external capital discipline."
+        },
+        {
+          "rank": 174,
+          "symbol": "AMSC",
+          "stock": "AMSC",
+          "business_quality": "Average",
+          "valuation": "Expensive",
+          "rationale": "30% growth and newly positive operations are encouraging, but the apparent 8.7x P/E is dominated by profit far above operating income; a 1.7% FCF yield better reflects the demanding price."
+        },
+        {
+          "rank": 175,
+          "symbol": "FTAI",
+          "stock": "FTAI",
+          "business_quality": "Average",
+          "valuation": "Expensive",
+          "rationale": "Aviation-services growth is strong, but margins fell sharply and positive earnings coexist with negative operating cash flow; 32x reported earnings and substantial leverage provide limited protection without normalized engine-investment economics."
+        },
+        {
+          "rank": 177,
+          "symbol": "AFRM",
+          "stock": "AFRM",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "33% growth and improving operations are encouraging, but non-operating income overwhelms reported profit. The apparent 12x P/E cannot establish cheapness without normalized lender earnings and credit-loss analysis."
+        },
+        {
+          "rank": 178,
+          "symbol": "CVNA",
+          "stock": "CVNA",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "52% growth supports the retail turnaround, but declining margins and an earnings-to-cash gap persist; major share-count changes require reconciliation before relying on the apparent 27x P/E."
+        },
+        {
+          "rank": 179,
+          "symbol": "RSI",
+          "stock": "RSI",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "46% gaming growth and improving operating margins are encouraging, but changing share classes and earnings attribution complicate the apparent 9.9% FCF yield; reconcile ownership interests and gaming liabilities before valuation."
+        },
+        {
+          "rank": 183,
+          "symbol": "B",
+          "stock": "B",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "Gold-price exposure and rising revenue support cash generation, but share counts differ materially across valuation and annual records and reported profit exceeds operating income; the apparent 5x P/E is not reliable evidence of cheapness."
+        },
+        {
+          "rank": 185,
+          "symbol": "TVTX",
+          "stock": "TVTX",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "48% product growth and emerging quarterly operating profit support commercial progress, but trailing losses, thin equity and incomplete comparable cash-flow evidence leave sustainable earnings and funding needs unresolved."
+        },
+        {
+          "rank": 187,
+          "symbol": "RYTM",
+          "stock": "RYTM",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "Rare-disease drug sales are growing, but operating losses and trailing cash burn remain large; pipeline probabilities, patient population, cash availability and funding needs prevent a reliable valuation from supplied operating data alone."
+        },
+        {
+          "rank": 188,
+          "symbol": "LMND",
+          "stock": "LMND",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "Insurance growth is accelerating, but persistent losses require underwriting, reserve, reinsurance and capital-adequacy analysis; generic operating-company FCF and the sales scale cannot establish sustainable insurer value."
+        },
+        {
+          "rank": 189,
+          "symbol": "YPF",
+          "stock": "YPF",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "Resource-growth potential exists, but stale statements show losses and capex exceeding cash generation; normalized commodity earnings, full debt, foreign-exchange and sovereign-policy exposure are needed for reliable equity valuation."
+        },
+        {
+          "rank": 194,
+          "symbol": "ESTA",
+          "stock": "ESTA",
+          "business_quality": "Weak",
+          "valuation": "Expensive",
+          "rationale": "Implant revenue is growing and losses are narrowing, but recurring cash burn and heavy debt relative to equity persist; 7.8x sales leaves little protection against commercialization or funding setbacks."
+        },
+        {
+          "rank": 195,
+          "symbol": "MIRM",
+          "stock": "MIRM",
+          "business_quality": "Weak",
+          "valuation": "Expensive",
+          "rationale": "38% drug-sales growth is offset by operating losses, recurring cash burn, rising debt and negative equity; 8.2x sales needs successful product expansion and acquisition integration without further financial strain."
+        },
+        {
+          "rank": 196,
+          "symbol": "CALM",
+          "stock": "CALM",
+          "business_quality": "Weak",
+          "valuation": "Expensive",
+          "rationale": "Egg-cycle reversal has driven a 42% revenue decline, operating losses and negative FCF; 53x shrinking trailing earnings provides poor downside protection despite limited reported debt."
+        },
+        {
+          "rank": 197,
+          "symbol": "WGS",
+          "stock": "WGS",
+          "business_quality": "Weak",
+          "valuation": "Unknown",
+          "rationale": "Genetic-testing growth has slowed to 11% as operating losses and cash burn worsened; sustainable unit economics, reimbursement and financing runway are needed to value 3.7x sales reliably."
+        }
+      ],
+      "missed_requested": []
+    },
+    {
+      "key": "growth8_zero_flags",
+      "name": "Growth ≥8%, margin >0%, flags =0, support",
+      "available_in_current_builder": true,
+      "expression": {
+        "operator": "and",
+        "groups": [
+          {
+            "id": "rule-0",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "revenue",
+                "comparison": "gte",
+                "value": "8",
+                "id": "condition-0"
+              }
+            ]
+          },
+          {
+            "id": "rule-1",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "operating_margin",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-1"
+              }
+            ]
+          },
+          {
+            "id": "rule-2",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "red_flag_count",
+                "comparison": "eq",
+                "value": "0",
+                "id": "condition-2"
+              }
+            ]
+          },
+          {
+            "id": "any-support",
+            "operator": "or",
+            "conditions": [
+              {
+                "id": "1m-At Support",
+                "field": "support_1m",
+                "value": "At Support"
+              },
+              {
+                "id": "1m-Near Support",
+                "field": "support_1m",
+                "value": "Near Support"
+              },
+              {
+                "id": "3m-At Support",
+                "field": "support_3m",
+                "value": "At Support"
+              },
+              {
+                "id": "3m-Near Support",
+                "field": "support_3m",
+                "value": "Near Support"
+              },
+              {
+                "id": "6m-At Support",
+                "field": "support_6m",
+                "value": "At Support"
+              },
+              {
+                "id": "6m-Near Support",
+                "field": "support_6m",
+                "value": "Near Support"
+              },
+              {
+                "id": "1y-At Support",
+                "field": "support_1y",
+                "value": "At Support"
+              },
+              {
+                "id": "1y-Near Support",
+                "field": "support_1y",
+                "value": "Near Support"
+              },
+              {
+                "id": "2y-At Support",
+                "field": "support_2y",
+                "value": "At Support"
+              },
+              {
+                "id": "2y-Near Support",
+                "field": "support_2y",
+                "value": "Near Support"
+              },
+              {
+                "id": "5y-At Support",
+                "field": "support_5y",
+                "value": "At Support"
+              },
+              {
+                "id": "5y-Near Support",
+                "field": "support_5y",
+                "value": "Near Support"
+              }
+            ]
+          }
+        ]
+      },
+      "research_only_context_conditions": [],
+      "count": 19,
+      "requested_tag_matches": 7,
+      "requested_tag_precision_pct": 36.8,
+      "requested_tag_recall_pct": 46.7,
+      "top20": 1,
+      "top50": 5,
+      "bottom50": 1,
+      "selected": [
+        {
+          "rank": 6,
+          "symbol": "ANIP",
+          "stock": "ANIP",
+          "business_quality": "Solid",
+          "valuation": "Cheap",
+          "rationale": "26% growth and the supplied 10.9% FCF yield support 14.7x earnings; product concentration and declining cash-flow margins matter. Company guidance identifies $621m principal debt, above the snapshot's $301m carrying input, making cheapness provisional."
+        },
+        {
+          "rank": 30,
+          "symbol": "UBER",
+          "stock": "UBER",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Mobility/delivery scale and a 7.4% FCF yield support value, but non-operating gains flatter the 14x P/E and growth has slowed to 12%; regulation, insurance costs and autonomous competition constrain the opportunity."
+        },
+        {
+          "rank": 33,
+          "symbol": "RDDT",
+          "stock": "RDDT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "61% growth, expanding operating margins and a 3.5% FCF yield support 33x reported earnings; platform/search dependence, moderation costs and non-operating gains keep the premium conditional."
+        },
+        {
+          "rank": 43,
+          "symbol": "DTM",
+          "stock": "DTM",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Midstream infrastructure delivers high operating margins and recurring cash flow, but 27x earnings and a 3.8% FCF yield already price durability; leverage, growth capex and customer exposure remain risks."
+        },
+        {
+          "rank": 44,
+          "symbol": "CLS",
+          "stock": "CLS",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "62% growth and higher-margin manufacturing support 27x earnings, but a 1.7% FCF yield reveals heavy investment needs; customer concentration and hardware-cycle risk constrain upside confidence."
+        },
+        {
+          "rank": 52,
+          "symbol": "GOOG",
+          "stock": "GOOG",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Search and cloud operations deliver 24% growth and 34% operating margins, but a 94% quarterly net margin and $112bn quarterly profit distort the 15.5x P/E; normalization and AI-capex returns are essential."
+        },
+        {
+          "rank": 53,
+          "symbol": "AMZN",
+          "stock": "AMZN",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Retail scale and cloud economics support strong business quality, but reported earnings greatly exceed operating profit while capex consumes operating cash flow; normalized earnings and AI investment returns are needed to value the apparent 19x P/E."
+        },
+        {
+          "rank": 59,
+          "symbol": "DUOL",
+          "stock": "DUOL",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "The learning platform produces strong cash flow and retains growth, but growth slowed to 18% and trailing earnings materially exceed operating profit; a 5.7% FCF yield supports value better than the misleading 17x P/E."
+        },
+        {
+          "rank": 63,
+          "symbol": "ROAD",
+          "stock": "ROAD",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "28% growth and positive infrastructure cash generation support the consolidator, but 33x earnings and a 3.8% FCF yield need continued execution; acquisition debt and slowing growth constrain protection."
+        },
+        {
+          "rank": 70,
+          "symbol": "CDE",
+          "stock": "CDE",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Mining cash generation has improved markedly and an 8.3% FCF yield supports valuation; acquisition dilution, inconsistent gross-profit inputs and precious-metal cyclicality keep 16x earnings from proving cheapness."
+        },
+        {
+          "rank": 71,
+          "symbol": "ASTH",
+          "stock": "ASTH",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "49% growth and a 5.1% FCF yield support a developing healthcare-services franchise; thin margins, integration debt and inconsistent gross-profit inputs make the low sales valuation less compelling than it appears."
+        },
+        {
+          "rank": 73,
+          "symbol": "EVC",
+          "stock": "EVC",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Rapid revenue recovery and an 8.5% FCF yield support a turnaround case, but historical losses, leverage and changing business mix make sustainable advertising profitability uncertain."
+        },
+        {
+          "rank": 81,
+          "symbol": "TXN",
+          "stock": "TXN",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Analog scale and strong recovered margins support durable cash generation, but 37x earnings and a 2.8% FCF yield require sustained utilization gains; semiconductor cyclicality and capacity spending remain risks."
+        },
+        {
+          "rank": 88,
+          "symbol": "CSCO",
+          "stock": "CSCO",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "The installed networking franchise produces strong cash flow and improving growth, but 30x earnings with a 3.2% FCF yield prices a sustained recovery; competition and infrastructure cyclicality limit protection."
+        },
+        {
+          "rank": 98,
+          "symbol": "CIEN",
+          "stock": "CIEN",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "37% growth and improving optical-network margins support the recovery, but 64x earnings and a 1.9% FCF yield require continued AI infrastructure demand; leverage and spending cycles add risk."
+        },
+        {
+          "rank": 111,
+          "symbol": "MU",
+          "stock": "MU",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Memory demand and cash generation surge, but 81% quarterly operating margins and a near-fourfold revenue increase make sustainable earnings highly uncertain; the apparent 12x P/E needs cycle-normalized verification."
+        },
+        {
+          "rank": 117,
+          "symbol": "FOUR",
+          "stock": "FOUR",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "34% payments growth and positive operating cash flow support the business, but a $52m capitalization and 1,108% FCF yield conflict with scale and share data; valuation requires correcting the share denominator and assessing debt."
+        },
+        {
+          "rank": 136,
+          "symbol": "CAVA",
+          "stock": "CAVA",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "31% growth and profitable restaurant expansion are promising, but 96x earnings and a 0.8% FCF yield demand sustained unit growth and operating leverage; food, labor and rollout costs remain risks."
+        },
+        {
+          "rank": 179,
+          "symbol": "RSI",
+          "stock": "RSI",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "46% gaming growth and improving operating margins are encouraging, but changing share classes and earnings attribution complicate the apparent 9.9% FCF yield; reconcile ownership interests and gaming liabilities before valuation."
+        }
+      ],
+      "missed_requested": [
+        "BMY",
+        "NVDA",
+        "NFLX",
+        "RGLD",
+        "PEP",
+        "GRND",
+        "EVR",
+        "TGT"
+      ]
+    },
+    {
+      "key": "positive_growth_zero_flags",
+      "name": "Growth >0%, margin >0%, flags =0, support",
+      "available_in_current_builder": true,
+      "expression": {
+        "operator": "and",
+        "groups": [
+          {
+            "id": "rule-0",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "revenue",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-0"
+              }
+            ]
+          },
+          {
+            "id": "rule-1",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "operating_margin",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-1"
+              }
+            ]
+          },
+          {
+            "id": "rule-2",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "red_flag_count",
+                "comparison": "eq",
+                "value": "0",
+                "id": "condition-2"
+              }
+            ]
+          },
+          {
+            "id": "any-support",
+            "operator": "or",
+            "conditions": [
+              {
+                "id": "1m-At Support",
+                "field": "support_1m",
+                "value": "At Support"
+              },
+              {
+                "id": "1m-Near Support",
+                "field": "support_1m",
+                "value": "Near Support"
+              },
+              {
+                "id": "3m-At Support",
+                "field": "support_3m",
+                "value": "At Support"
+              },
+              {
+                "id": "3m-Near Support",
+                "field": "support_3m",
+                "value": "Near Support"
+              },
+              {
+                "id": "6m-At Support",
+                "field": "support_6m",
+                "value": "At Support"
+              },
+              {
+                "id": "6m-Near Support",
+                "field": "support_6m",
+                "value": "Near Support"
+              },
+              {
+                "id": "1y-At Support",
+                "field": "support_1y",
+                "value": "At Support"
+              },
+              {
+                "id": "1y-Near Support",
+                "field": "support_1y",
+                "value": "Near Support"
+              },
+              {
+                "id": "2y-At Support",
+                "field": "support_2y",
+                "value": "At Support"
+              },
+              {
+                "id": "2y-Near Support",
+                "field": "support_2y",
+                "value": "Near Support"
+              },
+              {
+                "id": "5y-At Support",
+                "field": "support_5y",
+                "value": "At Support"
+              },
+              {
+                "id": "5y-Near Support",
+                "field": "support_5y",
+                "value": "Near Support"
+              }
+            ]
+          }
+        ]
+      },
+      "research_only_context_conditions": [],
+      "count": 21,
+      "requested_tag_matches": 9,
+      "requested_tag_precision_pct": 42.9,
+      "requested_tag_recall_pct": 60.0,
+      "top20": 1,
+      "top50": 7,
+      "bottom50": 1,
+      "selected": [
+        {
+          "rank": 6,
+          "symbol": "ANIP",
+          "stock": "ANIP",
+          "business_quality": "Solid",
+          "valuation": "Cheap",
+          "rationale": "26% growth and the supplied 10.9% FCF yield support 14.7x earnings; product concentration and declining cash-flow margins matter. Company guidance identifies $621m principal debt, above the snapshot's $301m carrying input, making cheapness provisional."
+        },
+        {
+          "rank": 22,
+          "symbol": "PEP",
+          "stock": "PEP",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Brand/distribution scale and a 5.6% FCF yield support 17x earnings, but modest structural growth and significant leverage warrant a fair rather than clearly cheap valuation; demand elasticity and input costs remain risks."
+        },
+        {
+          "rank": 30,
+          "symbol": "UBER",
+          "stock": "UBER",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Mobility/delivery scale and a 7.4% FCF yield support value, but non-operating gains flatter the 14x P/E and growth has slowed to 12%; regulation, insurance costs and autonomous competition constrain the opportunity."
+        },
+        {
+          "rank": 33,
+          "symbol": "RDDT",
+          "stock": "RDDT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "61% growth, expanding operating margins and a 3.5% FCF yield support 33x reported earnings; platform/search dependence, moderation costs and non-operating gains keep the premium conditional."
+        },
+        {
+          "rank": 42,
+          "symbol": "TGT",
+          "stock": "TGT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Retail recovery and a 6.2% FCF yield support 16x earnings, but growth remains modest and the recent margin jump needs confirmation; discretionary demand, inventory execution and leverage remain risks."
+        },
+        {
+          "rank": 43,
+          "symbol": "DTM",
+          "stock": "DTM",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Midstream infrastructure delivers high operating margins and recurring cash flow, but 27x earnings and a 3.8% FCF yield already price durability; leverage, growth capex and customer exposure remain risks."
+        },
+        {
+          "rank": 44,
+          "symbol": "CLS",
+          "stock": "CLS",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "62% growth and higher-margin manufacturing support 27x earnings, but a 1.7% FCF yield reveals heavy investment needs; customer concentration and hardware-cycle risk constrain upside confidence."
+        },
+        {
+          "rank": 52,
+          "symbol": "GOOG",
+          "stock": "GOOG",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Search and cloud operations deliver 24% growth and 34% operating margins, but a 94% quarterly net margin and $112bn quarterly profit distort the 15.5x P/E; normalization and AI-capex returns are essential."
+        },
+        {
+          "rank": 53,
+          "symbol": "AMZN",
+          "stock": "AMZN",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Retail scale and cloud economics support strong business quality, but reported earnings greatly exceed operating profit while capex consumes operating cash flow; normalized earnings and AI investment returns are needed to value the apparent 19x P/E."
+        },
+        {
+          "rank": 59,
+          "symbol": "DUOL",
+          "stock": "DUOL",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "The learning platform produces strong cash flow and retains growth, but growth slowed to 18% and trailing earnings materially exceed operating profit; a 5.7% FCF yield supports value better than the misleading 17x P/E."
+        },
+        {
+          "rank": 63,
+          "symbol": "ROAD",
+          "stock": "ROAD",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "28% growth and positive infrastructure cash generation support the consolidator, but 33x earnings and a 3.8% FCF yield need continued execution; acquisition debt and slowing growth constrain protection."
+        },
+        {
+          "rank": 70,
+          "symbol": "CDE",
+          "stock": "CDE",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Mining cash generation has improved markedly and an 8.3% FCF yield supports valuation; acquisition dilution, inconsistent gross-profit inputs and precious-metal cyclicality keep 16x earnings from proving cheapness."
+        },
+        {
+          "rank": 71,
+          "symbol": "ASTH",
+          "stock": "ASTH",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "49% growth and a 5.1% FCF yield support a developing healthcare-services franchise; thin margins, integration debt and inconsistent gross-profit inputs make the low sales valuation less compelling than it appears."
+        },
+        {
+          "rank": 73,
+          "symbol": "EVC",
+          "stock": "EVC",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Rapid revenue recovery and an 8.5% FCF yield support a turnaround case, but historical losses, leverage and changing business mix make sustainable advertising profitability uncertain."
+        },
+        {
+          "rank": 81,
+          "symbol": "TXN",
+          "stock": "TXN",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Analog scale and strong recovered margins support durable cash generation, but 37x earnings and a 2.8% FCF yield require sustained utilization gains; semiconductor cyclicality and capacity spending remain risks."
+        },
+        {
+          "rank": 88,
+          "symbol": "CSCO",
+          "stock": "CSCO",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "The installed networking franchise produces strong cash flow and improving growth, but 30x earnings with a 3.2% FCF yield prices a sustained recovery; competition and infrastructure cyclicality limit protection."
+        },
+        {
+          "rank": 98,
+          "symbol": "CIEN",
+          "stock": "CIEN",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "37% growth and improving optical-network margins support the recovery, but 64x earnings and a 1.9% FCF yield require continued AI infrastructure demand; leverage and spending cycles add risk."
+        },
+        {
+          "rank": 111,
+          "symbol": "MU",
+          "stock": "MU",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Memory demand and cash generation surge, but 81% quarterly operating margins and a near-fourfold revenue increase make sustainable earnings highly uncertain; the apparent 12x P/E needs cycle-normalized verification."
+        },
+        {
+          "rank": 117,
+          "symbol": "FOUR",
+          "stock": "FOUR",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "34% payments growth and positive operating cash flow support the business, but a $52m capitalization and 1,108% FCF yield conflict with scale and share data; valuation requires correcting the share denominator and assessing debt."
+        },
+        {
+          "rank": 136,
+          "symbol": "CAVA",
+          "stock": "CAVA",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "31% growth and profitable restaurant expansion are promising, but 96x earnings and a 0.8% FCF yield demand sustained unit growth and operating leverage; food, labor and rollout costs remain risks."
+        },
+        {
+          "rank": 179,
+          "symbol": "RSI",
+          "stock": "RSI",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "46% gaming growth and improving operating margins are encouraging, but changing share classes and earnings attribution complicate the apparent 9.9% FCF yield; reconcile ownership interests and gaming liabilities before valuation."
+        }
+      ],
+      "missed_requested": [
+        "BMY",
+        "NVDA",
+        "NFLX",
+        "RGLD",
+        "GRND",
+        "EVR"
+      ]
+    },
+    {
+      "key": "positive_growth_one_flag",
+      "name": "Growth >0%, margin >0%, flags ≤1, support",
+      "available_in_current_builder": true,
+      "expression": {
+        "operator": "and",
+        "groups": [
+          {
+            "id": "rule-0",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "revenue",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-0"
+              }
+            ]
+          },
+          {
+            "id": "rule-1",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "operating_margin",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-1"
+              }
+            ]
+          },
+          {
+            "id": "rule-2",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "red_flag_count",
+                "comparison": "lte",
+                "value": "1",
+                "id": "condition-2"
+              }
+            ]
+          },
+          {
+            "id": "any-support",
+            "operator": "or",
+            "conditions": [
+              {
+                "id": "1m-At Support",
+                "field": "support_1m",
+                "value": "At Support"
+              },
+              {
+                "id": "1m-Near Support",
+                "field": "support_1m",
+                "value": "Near Support"
+              },
+              {
+                "id": "3m-At Support",
+                "field": "support_3m",
+                "value": "At Support"
+              },
+              {
+                "id": "3m-Near Support",
+                "field": "support_3m",
+                "value": "Near Support"
+              },
+              {
+                "id": "6m-At Support",
+                "field": "support_6m",
+                "value": "At Support"
+              },
+              {
+                "id": "6m-Near Support",
+                "field": "support_6m",
+                "value": "Near Support"
+              },
+              {
+                "id": "1y-At Support",
+                "field": "support_1y",
+                "value": "At Support"
+              },
+              {
+                "id": "1y-Near Support",
+                "field": "support_1y",
+                "value": "Near Support"
+              },
+              {
+                "id": "2y-At Support",
+                "field": "support_2y",
+                "value": "At Support"
+              },
+              {
+                "id": "2y-Near Support",
+                "field": "support_2y",
+                "value": "Near Support"
+              },
+              {
+                "id": "5y-At Support",
+                "field": "support_5y",
+                "value": "At Support"
+              },
+              {
+                "id": "5y-Near Support",
+                "field": "support_5y",
+                "value": "Near Support"
+              }
+            ]
+          }
+        ]
+      },
+      "research_only_context_conditions": [],
+      "count": 33,
+      "requested_tag_matches": 12,
+      "requested_tag_precision_pct": 36.4,
+      "requested_tag_recall_pct": 80.0,
+      "top20": 3,
+      "top50": 10,
+      "bottom50": 3,
+      "selected": [
+        {
+          "rank": 6,
+          "symbol": "ANIP",
+          "stock": "ANIP",
+          "business_quality": "Solid",
+          "valuation": "Cheap",
+          "rationale": "26% growth and the supplied 10.9% FCF yield support 14.7x earnings; product concentration and declining cash-flow margins matter. Company guidance identifies $621m principal debt, above the snapshot's $301m carrying input, making cheapness provisional."
+        },
+        {
+          "rank": 8,
+          "symbol": "NVDA",
+          "stock": "NVDA",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "106% growth and 66% quarterly operating margins support exceptional AI economics at 26x reported earnings; the earnings-to-cash gap, export constraints and concentration of customer capex prevent an unqualified cheap assessment."
+        },
+        {
+          "rank": 10,
+          "symbol": "NFLX",
+          "stock": "NFLX",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Content/distribution scale, 35% quarterly operating margins and a 4.1% FCF yield support 19x earnings; slowing growth and an earnings-to-cash gap require normalized content-spending analysis."
+        },
+        {
+          "rank": 22,
+          "symbol": "PEP",
+          "stock": "PEP",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Brand/distribution scale and a 5.6% FCF yield support 17x earnings, but modest structural growth and significant leverage warrant a fair rather than clearly cheap valuation; demand elasticity and input costs remain risks."
+        },
+        {
+          "rank": 30,
+          "symbol": "UBER",
+          "stock": "UBER",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Mobility/delivery scale and a 7.4% FCF yield support value, but non-operating gains flatter the 14x P/E and growth has slowed to 12%; regulation, insurance costs and autonomous competition constrain the opportunity."
+        },
+        {
+          "rank": 32,
+          "symbol": "GRND",
+          "stock": "GRND",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "The focused network monetizes effectively, with 33% growth and a 6.3% FCF yield at 26x earnings; negative equity, leverage, user trust and platform dependence temper capital-allocation confidence."
+        },
+        {
+          "rank": 33,
+          "symbol": "RDDT",
+          "stock": "RDDT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "61% growth, expanding operating margins and a 3.5% FCF yield support 33x reported earnings; platform/search dependence, moderation costs and non-operating gains keep the premium conditional."
+        },
+        {
+          "rank": 42,
+          "symbol": "TGT",
+          "stock": "TGT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Retail recovery and a 6.2% FCF yield support 16x earnings, but growth remains modest and the recent margin jump needs confirmation; discretionary demand, inventory execution and leverage remain risks."
+        },
+        {
+          "rank": 43,
+          "symbol": "DTM",
+          "stock": "DTM",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Midstream infrastructure delivers high operating margins and recurring cash flow, but 27x earnings and a 3.8% FCF yield already price durability; leverage, growth capex and customer exposure remain risks."
+        },
+        {
+          "rank": 44,
+          "symbol": "CLS",
+          "stock": "CLS",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "62% growth and higher-margin manufacturing support 27x earnings, but a 1.7% FCF yield reveals heavy investment needs; customer concentration and hardware-cycle risk constrain upside confidence."
+        },
+        {
+          "rank": 52,
+          "symbol": "GOOG",
+          "stock": "GOOG",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Search and cloud operations deliver 24% growth and 34% operating margins, but a 94% quarterly net margin and $112bn quarterly profit distort the 15.5x P/E; normalization and AI-capex returns are essential."
+        },
+        {
+          "rank": 53,
+          "symbol": "AMZN",
+          "stock": "AMZN",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Retail scale and cloud economics support strong business quality, but reported earnings greatly exceed operating profit while capex consumes operating cash flow; normalized earnings and AI investment returns are needed to value the apparent 19x P/E."
+        },
+        {
+          "rank": 59,
+          "symbol": "DUOL",
+          "stock": "DUOL",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "The learning platform produces strong cash flow and retains growth, but growth slowed to 18% and trailing earnings materially exceed operating profit; a 5.7% FCF yield supports value better than the misleading 17x P/E."
+        },
+        {
+          "rank": 63,
+          "symbol": "ROAD",
+          "stock": "ROAD",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "28% growth and positive infrastructure cash generation support the consolidator, but 33x earnings and a 3.8% FCF yield need continued execution; acquisition debt and slowing growth constrain protection."
+        },
+        {
+          "rank": 70,
+          "symbol": "CDE",
+          "stock": "CDE",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Mining cash generation has improved markedly and an 8.3% FCF yield supports valuation; acquisition dilution, inconsistent gross-profit inputs and precious-metal cyclicality keep 16x earnings from proving cheapness."
+        },
+        {
+          "rank": 71,
+          "symbol": "ASTH",
+          "stock": "ASTH",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "49% growth and a 5.1% FCF yield support a developing healthcare-services franchise; thin margins, integration debt and inconsistent gross-profit inputs make the low sales valuation less compelling than it appears."
+        },
+        {
+          "rank": 73,
+          "symbol": "EVC",
+          "stock": "EVC",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Rapid revenue recovery and an 8.5% FCF yield support a turnaround case, but historical losses, leverage and changing business mix make sustainable advertising profitability uncertain."
+        },
+        {
+          "rank": 81,
+          "symbol": "TXN",
+          "stock": "TXN",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Analog scale and strong recovered margins support durable cash generation, but 37x earnings and a 2.8% FCF yield require sustained utilization gains; semiconductor cyclicality and capacity spending remain risks."
+        },
+        {
+          "rank": 86,
+          "symbol": "VRTX",
+          "stock": "VRTX",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Protected drug economics and limited reported debt support resilience, but 33x earnings and a 2.6% FCF yield offer little cushion for 12% growth; product concentration, pipeline spending and cash conversion remain risks."
+        },
+        {
+          "rank": 88,
+          "symbol": "CSCO",
+          "stock": "CSCO",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "The installed networking franchise produces strong cash flow and improving growth, but 30x earnings with a 3.2% FCF yield prices a sustained recovery; competition and infrastructure cyclicality limit protection."
+        },
+        {
+          "rank": 89,
+          "symbol": "UI",
+          "stock": "UI",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Differentiated networking distribution, 23% growth and strong margins support quality, but 37x earnings and a 2.6% FCF yield leave governance/concentration risk and a cash-conversion gap insufficiently cushioned."
+        },
+        {
+          "rank": 93,
+          "symbol": "SHOP",
+          "stock": "SHOP",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Merchant-platform scale and 34% growth support the franchise, but 16.5x sales and a 1.1% FCF yield demand substantial future profitability; non-operating gains inflate earnings and competition remains significant."
+        },
+        {
+          "rank": 98,
+          "symbol": "CIEN",
+          "stock": "CIEN",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "37% growth and improving optical-network margins support the recovery, but 64x earnings and a 1.9% FCF yield require continued AI infrastructure demand; leverage and spending cycles add risk."
+        },
+        {
+          "rank": 101,
+          "symbol": "MTSI",
+          "stock": "MTSI",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "36% growth and improving operating margins support semiconductor demand, but 77x reported earnings and a 1.1% FCF yield provide little protection; non-operating gains and cyclicality add risk."
+        },
+        {
+          "rank": 111,
+          "symbol": "MU",
+          "stock": "MU",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Memory demand and cash generation surge, but 81% quarterly operating margins and a near-fourfold revenue increase make sustainable earnings highly uncertain; the apparent 12x P/E needs cycle-normalized verification."
+        },
+        {
+          "rank": 113,
+          "symbol": "WDC",
+          "stock": "WDC",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Storage demand and operating margins have improved, but net income greatly exceeds operating profit after a changed business perimeter; the apparent 13x P/E needs normalized continuing earnings and matched-period cash flows."
+        },
+        {
+          "rank": 117,
+          "symbol": "FOUR",
+          "stock": "FOUR",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "34% payments growth and positive operating cash flow support the business, but a $52m capitalization and 1,108% FCF yield conflict with scale and share data; valuation requires correcting the share denominator and assessing debt."
+        },
+        {
+          "rank": 130,
+          "symbol": "ALAB",
+          "stock": "ALAB",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "AI connectivity demand drives 104% growth and positive cash generation, but 39x sales and a 0.6% FCF yield require exceptional durability; non-operating gains and customer concentration add uncertainty."
+        },
+        {
+          "rank": 136,
+          "symbol": "CAVA",
+          "stock": "CAVA",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "31% growth and profitable restaurant expansion are promising, but 96x earnings and a 0.8% FCF yield demand sustained unit growth and operating leverage; food, labor and rollout costs remain risks."
+        },
+        {
+          "rank": 146,
+          "symbol": "PDFS",
+          "stock": "PDFS",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "Semiconductor analytics demand and improving operating margins support the business, but 159x earnings, 6.8x sales and negative trailing FCF require stronger monetization; capex and customer concentration add risk."
+        },
+        {
+          "rank": 153,
+          "symbol": "DASH",
+          "stock": "DASH",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "The delivery network sustains 36% growth and positive FCF, but operating margins remain thin and deteriorating; 94x earnings and a 3.3% FCF yield leave substantial execution and regulatory risk."
+        },
+        {
+          "rank": 174,
+          "symbol": "AMSC",
+          "stock": "AMSC",
+          "business_quality": "Average",
+          "valuation": "Expensive",
+          "rationale": "30% growth and newly positive operations are encouraging, but the apparent 8.7x P/E is dominated by profit far above operating income; a 1.7% FCF yield better reflects the demanding price."
+        },
+        {
+          "rank": 179,
+          "symbol": "RSI",
+          "stock": "RSI",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "46% gaming growth and improving operating margins are encouraging, but changing share classes and earnings attribution complicate the apparent 9.9% FCF yield; reconcile ownership interests and gaming liabilities before valuation."
+        }
+      ],
+      "missed_requested": [
+        "BMY",
+        "RGLD",
+        "EVR"
+      ]
+    },
+    {
+      "key": "margin10_one_flag",
+      "name": "Growth >0%, margin ≥10%, flags ≤1, support",
+      "available_in_current_builder": true,
+      "expression": {
+        "operator": "and",
+        "groups": [
+          {
+            "id": "rule-0",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "revenue",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-0"
+              }
+            ]
+          },
+          {
+            "id": "rule-1",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "operating_margin",
+                "comparison": "gte",
+                "value": "10",
+                "id": "condition-1"
+              }
+            ]
+          },
+          {
+            "id": "rule-2",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "red_flag_count",
+                "comparison": "lte",
+                "value": "1",
+                "id": "condition-2"
+              }
+            ]
+          },
+          {
+            "id": "any-support",
+            "operator": "or",
+            "conditions": [
+              {
+                "id": "1m-At Support",
+                "field": "support_1m",
+                "value": "At Support"
+              },
+              {
+                "id": "1m-Near Support",
+                "field": "support_1m",
+                "value": "Near Support"
+              },
+              {
+                "id": "3m-At Support",
+                "field": "support_3m",
+                "value": "At Support"
+              },
+              {
+                "id": "3m-Near Support",
+                "field": "support_3m",
+                "value": "Near Support"
+              },
+              {
+                "id": "6m-At Support",
+                "field": "support_6m",
+                "value": "At Support"
+              },
+              {
+                "id": "6m-Near Support",
+                "field": "support_6m",
+                "value": "Near Support"
+              },
+              {
+                "id": "1y-At Support",
+                "field": "support_1y",
+                "value": "At Support"
+              },
+              {
+                "id": "1y-Near Support",
+                "field": "support_1y",
+                "value": "Near Support"
+              },
+              {
+                "id": "2y-At Support",
+                "field": "support_2y",
+                "value": "At Support"
+              },
+              {
+                "id": "2y-Near Support",
+                "field": "support_2y",
+                "value": "Near Support"
+              },
+              {
+                "id": "5y-At Support",
+                "field": "support_5y",
+                "value": "At Support"
+              },
+              {
+                "id": "5y-Near Support",
+                "field": "support_5y",
+                "value": "Near Support"
+              }
+            ]
+          }
+        ]
+      },
+      "research_only_context_conditions": [],
+      "count": 26,
+      "requested_tag_matches": 10,
+      "requested_tag_precision_pct": 38.5,
+      "requested_tag_recall_pct": 66.7,
+      "top20": 3,
+      "top50": 8,
+      "bottom50": 2,
+      "selected": [
+        {
+          "rank": 6,
+          "symbol": "ANIP",
+          "stock": "ANIP",
+          "business_quality": "Solid",
+          "valuation": "Cheap",
+          "rationale": "26% growth and the supplied 10.9% FCF yield support 14.7x earnings; product concentration and declining cash-flow margins matter. Company guidance identifies $621m principal debt, above the snapshot's $301m carrying input, making cheapness provisional."
+        },
+        {
+          "rank": 8,
+          "symbol": "NVDA",
+          "stock": "NVDA",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "106% growth and 66% quarterly operating margins support exceptional AI economics at 26x reported earnings; the earnings-to-cash gap, export constraints and concentration of customer capex prevent an unqualified cheap assessment."
+        },
+        {
+          "rank": 10,
+          "symbol": "NFLX",
+          "stock": "NFLX",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Content/distribution scale, 35% quarterly operating margins and a 4.1% FCF yield support 19x earnings; slowing growth and an earnings-to-cash gap require normalized content-spending analysis."
+        },
+        {
+          "rank": 22,
+          "symbol": "PEP",
+          "stock": "PEP",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Brand/distribution scale and a 5.6% FCF yield support 17x earnings, but modest structural growth and significant leverage warrant a fair rather than clearly cheap valuation; demand elasticity and input costs remain risks."
+        },
+        {
+          "rank": 30,
+          "symbol": "UBER",
+          "stock": "UBER",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Mobility/delivery scale and a 7.4% FCF yield support value, but non-operating gains flatter the 14x P/E and growth has slowed to 12%; regulation, insurance costs and autonomous competition constrain the opportunity."
+        },
+        {
+          "rank": 32,
+          "symbol": "GRND",
+          "stock": "GRND",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "The focused network monetizes effectively, with 33% growth and a 6.3% FCF yield at 26x earnings; negative equity, leverage, user trust and platform dependence temper capital-allocation confidence."
+        },
+        {
+          "rank": 33,
+          "symbol": "RDDT",
+          "stock": "RDDT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "61% growth, expanding operating margins and a 3.5% FCF yield support 33x reported earnings; platform/search dependence, moderation costs and non-operating gains keep the premium conditional."
+        },
+        {
+          "rank": 43,
+          "symbol": "DTM",
+          "stock": "DTM",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Midstream infrastructure delivers high operating margins and recurring cash flow, but 27x earnings and a 3.8% FCF yield already price durability; leverage, growth capex and customer exposure remain risks."
+        },
+        {
+          "rank": 52,
+          "symbol": "GOOG",
+          "stock": "GOOG",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Search and cloud operations deliver 24% growth and 34% operating margins, but a 94% quarterly net margin and $112bn quarterly profit distort the 15.5x P/E; normalization and AI-capex returns are essential."
+        },
+        {
+          "rank": 53,
+          "symbol": "AMZN",
+          "stock": "AMZN",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Retail scale and cloud economics support strong business quality, but reported earnings greatly exceed operating profit while capex consumes operating cash flow; normalized earnings and AI investment returns are needed to value the apparent 19x P/E."
+        },
+        {
+          "rank": 59,
+          "symbol": "DUOL",
+          "stock": "DUOL",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "The learning platform produces strong cash flow and retains growth, but growth slowed to 18% and trailing earnings materially exceed operating profit; a 5.7% FCF yield supports value better than the misleading 17x P/E."
+        },
+        {
+          "rank": 63,
+          "symbol": "ROAD",
+          "stock": "ROAD",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "28% growth and positive infrastructure cash generation support the consolidator, but 33x earnings and a 3.8% FCF yield need continued execution; acquisition debt and slowing growth constrain protection."
+        },
+        {
+          "rank": 70,
+          "symbol": "CDE",
+          "stock": "CDE",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Mining cash generation has improved markedly and an 8.3% FCF yield supports valuation; acquisition dilution, inconsistent gross-profit inputs and precious-metal cyclicality keep 16x earnings from proving cheapness."
+        },
+        {
+          "rank": 73,
+          "symbol": "EVC",
+          "stock": "EVC",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Rapid revenue recovery and an 8.5% FCF yield support a turnaround case, but historical losses, leverage and changing business mix make sustainable advertising profitability uncertain."
+        },
+        {
+          "rank": 81,
+          "symbol": "TXN",
+          "stock": "TXN",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Analog scale and strong recovered margins support durable cash generation, but 37x earnings and a 2.8% FCF yield require sustained utilization gains; semiconductor cyclicality and capacity spending remain risks."
+        },
+        {
+          "rank": 86,
+          "symbol": "VRTX",
+          "stock": "VRTX",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Protected drug economics and limited reported debt support resilience, but 33x earnings and a 2.6% FCF yield offer little cushion for 12% growth; product concentration, pipeline spending and cash conversion remain risks."
+        },
+        {
+          "rank": 88,
+          "symbol": "CSCO",
+          "stock": "CSCO",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "The installed networking franchise produces strong cash flow and improving growth, but 30x earnings with a 3.2% FCF yield prices a sustained recovery; competition and infrastructure cyclicality limit protection."
+        },
+        {
+          "rank": 89,
+          "symbol": "UI",
+          "stock": "UI",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Differentiated networking distribution, 23% growth and strong margins support quality, but 37x earnings and a 2.6% FCF yield leave governance/concentration risk and a cash-conversion gap insufficiently cushioned."
+        },
+        {
+          "rank": 93,
+          "symbol": "SHOP",
+          "stock": "SHOP",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Merchant-platform scale and 34% growth support the franchise, but 16.5x sales and a 1.1% FCF yield demand substantial future profitability; non-operating gains inflate earnings and competition remains significant."
+        },
+        {
+          "rank": 98,
+          "symbol": "CIEN",
+          "stock": "CIEN",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "37% growth and improving optical-network margins support the recovery, but 64x earnings and a 1.9% FCF yield require continued AI infrastructure demand; leverage and spending cycles add risk."
+        },
+        {
+          "rank": 101,
+          "symbol": "MTSI",
+          "stock": "MTSI",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "36% growth and improving operating margins support semiconductor demand, but 77x reported earnings and a 1.1% FCF yield provide little protection; non-operating gains and cyclicality add risk."
+        },
+        {
+          "rank": 111,
+          "symbol": "MU",
+          "stock": "MU",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Memory demand and cash generation surge, but 81% quarterly operating margins and a near-fourfold revenue increase make sustainable earnings highly uncertain; the apparent 12x P/E needs cycle-normalized verification."
+        },
+        {
+          "rank": 113,
+          "symbol": "WDC",
+          "stock": "WDC",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Storage demand and operating margins have improved, but net income greatly exceeds operating profit after a changed business perimeter; the apparent 13x P/E needs normalized continuing earnings and matched-period cash flows."
+        },
+        {
+          "rank": 130,
+          "symbol": "ALAB",
+          "stock": "ALAB",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "AI connectivity demand drives 104% growth and positive cash generation, but 39x sales and a 0.6% FCF yield require exceptional durability; non-operating gains and customer concentration add uncertainty."
+        },
+        {
+          "rank": 174,
+          "symbol": "AMSC",
+          "stock": "AMSC",
+          "business_quality": "Average",
+          "valuation": "Expensive",
+          "rationale": "30% growth and newly positive operations are encouraging, but the apparent 8.7x P/E is dominated by profit far above operating income; a 1.7% FCF yield better reflects the demanding price."
+        },
+        {
+          "rank": 179,
+          "symbol": "RSI",
+          "stock": "RSI",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "46% gaming growth and improving operating margins are encouraging, but changing share classes and earnings attribution complicate the apparent 9.9% FCF yield; reconcile ownership interests and gaming liabilities before valuation."
+        }
+      ],
+      "missed_requested": [
+        "BMY",
+        "RGLD",
+        "EVR",
+        "TGT",
+        "CLS"
+      ]
+    },
+    {
+      "key": "steady_growth_one_flag",
+      "name": "Positive growth/profit, flags ≤1, steady consistency, support",
+      "available_in_current_builder": true,
+      "expression": {
+        "operator": "and",
+        "groups": [
+          {
+            "id": "rule-0",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "revenue",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-0"
+              }
+            ]
+          },
+          {
+            "id": "rule-1",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "operating_margin",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-1"
+              }
+            ]
+          },
+          {
+            "id": "rule-2",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "red_flag_count",
+                "comparison": "lte",
+                "value": "1",
+                "id": "condition-2"
+              }
+            ]
+          },
+          {
+            "id": "rule-3",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "revenue_consistency",
+                "value": "Steady",
+                "id": "condition-3"
+              }
+            ]
+          },
+          {
+            "id": "any-support",
+            "operator": "or",
+            "conditions": [
+              {
+                "id": "1m-At Support",
+                "field": "support_1m",
+                "value": "At Support"
+              },
+              {
+                "id": "1m-Near Support",
+                "field": "support_1m",
+                "value": "Near Support"
+              },
+              {
+                "id": "3m-At Support",
+                "field": "support_3m",
+                "value": "At Support"
+              },
+              {
+                "id": "3m-Near Support",
+                "field": "support_3m",
+                "value": "Near Support"
+              },
+              {
+                "id": "6m-At Support",
+                "field": "support_6m",
+                "value": "At Support"
+              },
+              {
+                "id": "6m-Near Support",
+                "field": "support_6m",
+                "value": "Near Support"
+              },
+              {
+                "id": "1y-At Support",
+                "field": "support_1y",
+                "value": "At Support"
+              },
+              {
+                "id": "1y-Near Support",
+                "field": "support_1y",
+                "value": "Near Support"
+              },
+              {
+                "id": "2y-At Support",
+                "field": "support_2y",
+                "value": "At Support"
+              },
+              {
+                "id": "2y-Near Support",
+                "field": "support_2y",
+                "value": "Near Support"
+              },
+              {
+                "id": "5y-At Support",
+                "field": "support_5y",
+                "value": "At Support"
+              },
+              {
+                "id": "5y-Near Support",
+                "field": "support_5y",
+                "value": "Near Support"
+              }
+            ]
+          }
+        ]
+      },
+      "research_only_context_conditions": [],
+      "count": 9,
+      "requested_tag_matches": 4,
+      "requested_tag_precision_pct": 44.4,
+      "requested_tag_recall_pct": 26.7,
+      "top20": 1,
+      "top50": 3,
+      "bottom50": 1,
+      "selected": [
+        {
+          "rank": 10,
+          "symbol": "NFLX",
+          "stock": "NFLX",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Content/distribution scale, 35% quarterly operating margins and a 4.1% FCF yield support 19x earnings; slowing growth and an earnings-to-cash gap require normalized content-spending analysis."
+        },
+        {
+          "rank": 22,
+          "symbol": "PEP",
+          "stock": "PEP",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Brand/distribution scale and a 5.6% FCF yield support 17x earnings, but modest structural growth and significant leverage warrant a fair rather than clearly cheap valuation; demand elasticity and input costs remain risks."
+        },
+        {
+          "rank": 33,
+          "symbol": "RDDT",
+          "stock": "RDDT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "61% growth, expanding operating margins and a 3.5% FCF yield support 33x reported earnings; platform/search dependence, moderation costs and non-operating gains keep the premium conditional."
+        },
+        {
+          "rank": 52,
+          "symbol": "GOOG",
+          "stock": "GOOG",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Search and cloud operations deliver 24% growth and 34% operating margins, but a 94% quarterly net margin and $112bn quarterly profit distort the 15.5x P/E; normalization and AI-capex returns are essential."
+        },
+        {
+          "rank": 53,
+          "symbol": "AMZN",
+          "stock": "AMZN",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Retail scale and cloud economics support strong business quality, but reported earnings greatly exceed operating profit while capex consumes operating cash flow; normalized earnings and AI investment returns are needed to value the apparent 19x P/E."
+        },
+        {
+          "rank": 59,
+          "symbol": "DUOL",
+          "stock": "DUOL",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "The learning platform produces strong cash flow and retains growth, but growth slowed to 18% and trailing earnings materially exceed operating profit; a 5.7% FCF yield supports value better than the misleading 17x P/E."
+        },
+        {
+          "rank": 93,
+          "symbol": "SHOP",
+          "stock": "SHOP",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Merchant-platform scale and 34% growth support the franchise, but 16.5x sales and a 1.1% FCF yield demand substantial future profitability; non-operating gains inflate earnings and competition remains significant."
+        },
+        {
+          "rank": 101,
+          "symbol": "MTSI",
+          "stock": "MTSI",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "36% growth and improving operating margins support semiconductor demand, but 77x reported earnings and a 1.1% FCF yield provide little protection; non-operating gains and cyclicality add risk."
+        },
+        {
+          "rank": 153,
+          "symbol": "DASH",
+          "stock": "DASH",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "The delivery network sustains 36% growth and positive FCF, but operating margins remain thin and deteriorating; 94x earnings and a 3.3% FCF yield leave substantial execution and regulatory risk."
+        }
+      ],
+      "missed_requested": [
+        "ANIP",
+        "BMY",
+        "NVDA",
+        "RGLD",
+        "UBER",
+        "GRND",
+        "EVR",
+        "TGT",
+        "DTM",
+        "CLS",
+        "ROAD"
+      ]
+    },
+    {
+      "key": "nondeclining_margin",
+      "name": "Positive growth/profit, flags ≤1, margin trend ≥0 pp, support",
+      "available_in_current_builder": true,
+      "expression": {
+        "operator": "and",
+        "groups": [
+          {
+            "id": "rule-0",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "revenue",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-0"
+              }
+            ]
+          },
+          {
+            "id": "rule-1",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "operating_margin",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-1"
+              }
+            ]
+          },
+          {
+            "id": "rule-2",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "red_flag_count",
+                "comparison": "lte",
+                "value": "1",
+                "id": "condition-2"
+              }
+            ]
+          },
+          {
+            "id": "rule-3",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "operating_margin_trend",
+                "comparison": "gte",
+                "value": "0",
+                "id": "condition-3"
+              }
+            ]
+          },
+          {
+            "id": "any-support",
+            "operator": "or",
+            "conditions": [
+              {
+                "id": "1m-At Support",
+                "field": "support_1m",
+                "value": "At Support"
+              },
+              {
+                "id": "1m-Near Support",
+                "field": "support_1m",
+                "value": "Near Support"
+              },
+              {
+                "id": "3m-At Support",
+                "field": "support_3m",
+                "value": "At Support"
+              },
+              {
+                "id": "3m-Near Support",
+                "field": "support_3m",
+                "value": "Near Support"
+              },
+              {
+                "id": "6m-At Support",
+                "field": "support_6m",
+                "value": "At Support"
+              },
+              {
+                "id": "6m-Near Support",
+                "field": "support_6m",
+                "value": "Near Support"
+              },
+              {
+                "id": "1y-At Support",
+                "field": "support_1y",
+                "value": "At Support"
+              },
+              {
+                "id": "1y-Near Support",
+                "field": "support_1y",
+                "value": "Near Support"
+              },
+              {
+                "id": "2y-At Support",
+                "field": "support_2y",
+                "value": "At Support"
+              },
+              {
+                "id": "2y-Near Support",
+                "field": "support_2y",
+                "value": "Near Support"
+              },
+              {
+                "id": "5y-At Support",
+                "field": "support_5y",
+                "value": "At Support"
+              },
+              {
+                "id": "5y-Near Support",
+                "field": "support_5y",
+                "value": "Near Support"
+              }
+            ]
+          }
+        ]
+      },
+      "research_only_context_conditions": [],
+      "count": 28,
+      "requested_tag_matches": 11,
+      "requested_tag_precision_pct": 39.3,
+      "requested_tag_recall_pct": 73.3,
+      "top20": 3,
+      "top50": 10,
+      "bottom50": 2,
+      "selected": [
+        {
+          "rank": 6,
+          "symbol": "ANIP",
+          "stock": "ANIP",
+          "business_quality": "Solid",
+          "valuation": "Cheap",
+          "rationale": "26% growth and the supplied 10.9% FCF yield support 14.7x earnings; product concentration and declining cash-flow margins matter. Company guidance identifies $621m principal debt, above the snapshot's $301m carrying input, making cheapness provisional."
+        },
+        {
+          "rank": 8,
+          "symbol": "NVDA",
+          "stock": "NVDA",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "106% growth and 66% quarterly operating margins support exceptional AI economics at 26x reported earnings; the earnings-to-cash gap, export constraints and concentration of customer capex prevent an unqualified cheap assessment."
+        },
+        {
+          "rank": 10,
+          "symbol": "NFLX",
+          "stock": "NFLX",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Content/distribution scale, 35% quarterly operating margins and a 4.1% FCF yield support 19x earnings; slowing growth and an earnings-to-cash gap require normalized content-spending analysis."
+        },
+        {
+          "rank": 22,
+          "symbol": "PEP",
+          "stock": "PEP",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Brand/distribution scale and a 5.6% FCF yield support 17x earnings, but modest structural growth and significant leverage warrant a fair rather than clearly cheap valuation; demand elasticity and input costs remain risks."
+        },
+        {
+          "rank": 30,
+          "symbol": "UBER",
+          "stock": "UBER",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Mobility/delivery scale and a 7.4% FCF yield support value, but non-operating gains flatter the 14x P/E and growth has slowed to 12%; regulation, insurance costs and autonomous competition constrain the opportunity."
+        },
+        {
+          "rank": 32,
+          "symbol": "GRND",
+          "stock": "GRND",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "The focused network monetizes effectively, with 33% growth and a 6.3% FCF yield at 26x earnings; negative equity, leverage, user trust and platform dependence temper capital-allocation confidence."
+        },
+        {
+          "rank": 33,
+          "symbol": "RDDT",
+          "stock": "RDDT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "61% growth, expanding operating margins and a 3.5% FCF yield support 33x reported earnings; platform/search dependence, moderation costs and non-operating gains keep the premium conditional."
+        },
+        {
+          "rank": 42,
+          "symbol": "TGT",
+          "stock": "TGT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Retail recovery and a 6.2% FCF yield support 16x earnings, but growth remains modest and the recent margin jump needs confirmation; discretionary demand, inventory execution and leverage remain risks."
+        },
+        {
+          "rank": 43,
+          "symbol": "DTM",
+          "stock": "DTM",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Midstream infrastructure delivers high operating margins and recurring cash flow, but 27x earnings and a 3.8% FCF yield already price durability; leverage, growth capex and customer exposure remain risks."
+        },
+        {
+          "rank": 44,
+          "symbol": "CLS",
+          "stock": "CLS",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "62% growth and higher-margin manufacturing support 27x earnings, but a 1.7% FCF yield reveals heavy investment needs; customer concentration and hardware-cycle risk constrain upside confidence."
+        },
+        {
+          "rank": 52,
+          "symbol": "GOOG",
+          "stock": "GOOG",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Search and cloud operations deliver 24% growth and 34% operating margins, but a 94% quarterly net margin and $112bn quarterly profit distort the 15.5x P/E; normalization and AI-capex returns are essential."
+        },
+        {
+          "rank": 53,
+          "symbol": "AMZN",
+          "stock": "AMZN",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Retail scale and cloud economics support strong business quality, but reported earnings greatly exceed operating profit while capex consumes operating cash flow; normalized earnings and AI investment returns are needed to value the apparent 19x P/E."
+        },
+        {
+          "rank": 63,
+          "symbol": "ROAD",
+          "stock": "ROAD",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "28% growth and positive infrastructure cash generation support the consolidator, but 33x earnings and a 3.8% FCF yield need continued execution; acquisition debt and slowing growth constrain protection."
+        },
+        {
+          "rank": 71,
+          "symbol": "ASTH",
+          "stock": "ASTH",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "49% growth and a 5.1% FCF yield support a developing healthcare-services franchise; thin margins, integration debt and inconsistent gross-profit inputs make the low sales valuation less compelling than it appears."
+        },
+        {
+          "rank": 73,
+          "symbol": "EVC",
+          "stock": "EVC",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Rapid revenue recovery and an 8.5% FCF yield support a turnaround case, but historical losses, leverage and changing business mix make sustainable advertising profitability uncertain."
+        },
+        {
+          "rank": 81,
+          "symbol": "TXN",
+          "stock": "TXN",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Analog scale and strong recovered margins support durable cash generation, but 37x earnings and a 2.8% FCF yield require sustained utilization gains; semiconductor cyclicality and capacity spending remain risks."
+        },
+        {
+          "rank": 88,
+          "symbol": "CSCO",
+          "stock": "CSCO",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "The installed networking franchise produces strong cash flow and improving growth, but 30x earnings with a 3.2% FCF yield prices a sustained recovery; competition and infrastructure cyclicality limit protection."
+        },
+        {
+          "rank": 89,
+          "symbol": "UI",
+          "stock": "UI",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Differentiated networking distribution, 23% growth and strong margins support quality, but 37x earnings and a 2.6% FCF yield leave governance/concentration risk and a cash-conversion gap insufficiently cushioned."
+        },
+        {
+          "rank": 93,
+          "symbol": "SHOP",
+          "stock": "SHOP",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Merchant-platform scale and 34% growth support the franchise, but 16.5x sales and a 1.1% FCF yield demand substantial future profitability; non-operating gains inflate earnings and competition remains significant."
+        },
+        {
+          "rank": 98,
+          "symbol": "CIEN",
+          "stock": "CIEN",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "37% growth and improving optical-network margins support the recovery, but 64x earnings and a 1.9% FCF yield require continued AI infrastructure demand; leverage and spending cycles add risk."
+        },
+        {
+          "rank": 101,
+          "symbol": "MTSI",
+          "stock": "MTSI",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "36% growth and improving operating margins support semiconductor demand, but 77x reported earnings and a 1.1% FCF yield provide little protection; non-operating gains and cyclicality add risk."
+        },
+        {
+          "rank": 111,
+          "symbol": "MU",
+          "stock": "MU",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Memory demand and cash generation surge, but 81% quarterly operating margins and a near-fourfold revenue increase make sustainable earnings highly uncertain; the apparent 12x P/E needs cycle-normalized verification."
+        },
+        {
+          "rank": 113,
+          "symbol": "WDC",
+          "stock": "WDC",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Storage demand and operating margins have improved, but net income greatly exceeds operating profit after a changed business perimeter; the apparent 13x P/E needs normalized continuing earnings and matched-period cash flows."
+        },
+        {
+          "rank": 130,
+          "symbol": "ALAB",
+          "stock": "ALAB",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "AI connectivity demand drives 104% growth and positive cash generation, but 39x sales and a 0.6% FCF yield require exceptional durability; non-operating gains and customer concentration add uncertainty."
+        },
+        {
+          "rank": 136,
+          "symbol": "CAVA",
+          "stock": "CAVA",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "31% growth and profitable restaurant expansion are promising, but 96x earnings and a 0.8% FCF yield demand sustained unit growth and operating leverage; food, labor and rollout costs remain risks."
+        },
+        {
+          "rank": 146,
+          "symbol": "PDFS",
+          "stock": "PDFS",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "Semiconductor analytics demand and improving operating margins support the business, but 159x earnings, 6.8x sales and negative trailing FCF require stronger monetization; capex and customer concentration add risk."
+        },
+        {
+          "rank": 174,
+          "symbol": "AMSC",
+          "stock": "AMSC",
+          "business_quality": "Average",
+          "valuation": "Expensive",
+          "rationale": "30% growth and newly positive operations are encouraging, but the apparent 8.7x P/E is dominated by profit far above operating income; a 1.7% FCF yield better reflects the demanding price."
+        },
+        {
+          "rank": 179,
+          "symbol": "RSI",
+          "stock": "RSI",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "46% gaming growth and improving operating margins are encouraging, but changing share classes and earnings attribution complicate the apparent 9.9% FCF yield; reconcile ownership interests and gaming liabilities before valuation."
+        }
+      ],
+      "missed_requested": [
+        "BMY",
+        "RGLD",
+        "EVR",
+        "DUOL"
+      ]
+    },
+    {
+      "key": "fcf_margin10",
+      "name": "Base + TTM FCF margin ≥10%",
+      "available_in_current_builder": false,
+      "expression": {
+        "operator": "and",
+        "groups": [
+          {
+            "id": "rule-0",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "revenue",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-0"
+              }
+            ]
+          },
+          {
+            "id": "rule-1",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "operating_margin",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-1"
+              }
+            ]
+          },
+          {
+            "id": "rule-2",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "red_flag_count",
+                "comparison": "lte",
+                "value": "1",
+                "id": "condition-2"
+              }
+            ]
+          },
+          {
+            "id": "any-support",
+            "operator": "or",
+            "conditions": [
+              {
+                "id": "1m-At Support",
+                "field": "support_1m",
+                "value": "At Support"
+              },
+              {
+                "id": "1m-Near Support",
+                "field": "support_1m",
+                "value": "Near Support"
+              },
+              {
+                "id": "3m-At Support",
+                "field": "support_3m",
+                "value": "At Support"
+              },
+              {
+                "id": "3m-Near Support",
+                "field": "support_3m",
+                "value": "Near Support"
+              },
+              {
+                "id": "6m-At Support",
+                "field": "support_6m",
+                "value": "At Support"
+              },
+              {
+                "id": "6m-Near Support",
+                "field": "support_6m",
+                "value": "Near Support"
+              },
+              {
+                "id": "1y-At Support",
+                "field": "support_1y",
+                "value": "At Support"
+              },
+              {
+                "id": "1y-Near Support",
+                "field": "support_1y",
+                "value": "Near Support"
+              },
+              {
+                "id": "2y-At Support",
+                "field": "support_2y",
+                "value": "At Support"
+              },
+              {
+                "id": "2y-Near Support",
+                "field": "support_2y",
+                "value": "Near Support"
+              },
+              {
+                "id": "5y-At Support",
+                "field": "support_5y",
+                "value": "At Support"
+              },
+              {
+                "id": "5y-Near Support",
+                "field": "support_5y",
+                "value": "Near Support"
+              }
+            ]
+          }
+        ]
+      },
+      "research_only_context_conditions": [
+        [
+          "fcf_margin",
+          "gte",
+          10
+        ]
+      ],
+      "count": 24,
+      "requested_tag_matches": 9,
+      "requested_tag_precision_pct": 37.5,
+      "requested_tag_recall_pct": 60.0,
+      "top20": 3,
+      "top50": 8,
+      "bottom50": 2,
+      "selected": [
+        {
+          "rank": 6,
+          "symbol": "ANIP",
+          "stock": "ANIP",
+          "business_quality": "Solid",
+          "valuation": "Cheap",
+          "rationale": "26% growth and the supplied 10.9% FCF yield support 14.7x earnings; product concentration and declining cash-flow margins matter. Company guidance identifies $621m principal debt, above the snapshot's $301m carrying input, making cheapness provisional."
+        },
+        {
+          "rank": 8,
+          "symbol": "NVDA",
+          "stock": "NVDA",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "106% growth and 66% quarterly operating margins support exceptional AI economics at 26x reported earnings; the earnings-to-cash gap, export constraints and concentration of customer capex prevent an unqualified cheap assessment."
+        },
+        {
+          "rank": 10,
+          "symbol": "NFLX",
+          "stock": "NFLX",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Content/distribution scale, 35% quarterly operating margins and a 4.1% FCF yield support 19x earnings; slowing growth and an earnings-to-cash gap require normalized content-spending analysis."
+        },
+        {
+          "rank": 22,
+          "symbol": "PEP",
+          "stock": "PEP",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Brand/distribution scale and a 5.6% FCF yield support 17x earnings, but modest structural growth and significant leverage warrant a fair rather than clearly cheap valuation; demand elasticity and input costs remain risks."
+        },
+        {
+          "rank": 30,
+          "symbol": "UBER",
+          "stock": "UBER",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Mobility/delivery scale and a 7.4% FCF yield support value, but non-operating gains flatter the 14x P/E and growth has slowed to 12%; regulation, insurance costs and autonomous competition constrain the opportunity."
+        },
+        {
+          "rank": 32,
+          "symbol": "GRND",
+          "stock": "GRND",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "The focused network monetizes effectively, with 33% growth and a 6.3% FCF yield at 26x earnings; negative equity, leverage, user trust and platform dependence temper capital-allocation confidence."
+        },
+        {
+          "rank": 33,
+          "symbol": "RDDT",
+          "stock": "RDDT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "61% growth, expanding operating margins and a 3.5% FCF yield support 33x reported earnings; platform/search dependence, moderation costs and non-operating gains keep the premium conditional."
+        },
+        {
+          "rank": 43,
+          "symbol": "DTM",
+          "stock": "DTM",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Midstream infrastructure delivers high operating margins and recurring cash flow, but 27x earnings and a 3.8% FCF yield already price durability; leverage, growth capex and customer exposure remain risks."
+        },
+        {
+          "rank": 52,
+          "symbol": "GOOG",
+          "stock": "GOOG",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Search and cloud operations deliver 24% growth and 34% operating margins, but a 94% quarterly net margin and $112bn quarterly profit distort the 15.5x P/E; normalization and AI-capex returns are essential."
+        },
+        {
+          "rank": 59,
+          "symbol": "DUOL",
+          "stock": "DUOL",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "The learning platform produces strong cash flow and retains growth, but growth slowed to 18% and trailing earnings materially exceed operating profit; a 5.7% FCF yield supports value better than the misleading 17x P/E."
+        },
+        {
+          "rank": 70,
+          "symbol": "CDE",
+          "stock": "CDE",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Mining cash generation has improved markedly and an 8.3% FCF yield supports valuation; acquisition dilution, inconsistent gross-profit inputs and precious-metal cyclicality keep 16x earnings from proving cheapness."
+        },
+        {
+          "rank": 81,
+          "symbol": "TXN",
+          "stock": "TXN",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Analog scale and strong recovered margins support durable cash generation, but 37x earnings and a 2.8% FCF yield require sustained utilization gains; semiconductor cyclicality and capacity spending remain risks."
+        },
+        {
+          "rank": 86,
+          "symbol": "VRTX",
+          "stock": "VRTX",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Protected drug economics and limited reported debt support resilience, but 33x earnings and a 2.6% FCF yield offer little cushion for 12% growth; product concentration, pipeline spending and cash conversion remain risks."
+        },
+        {
+          "rank": 88,
+          "symbol": "CSCO",
+          "stock": "CSCO",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "The installed networking franchise produces strong cash flow and improving growth, but 30x earnings with a 3.2% FCF yield prices a sustained recovery; competition and infrastructure cyclicality limit protection."
+        },
+        {
+          "rank": 89,
+          "symbol": "UI",
+          "stock": "UI",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Differentiated networking distribution, 23% growth and strong margins support quality, but 37x earnings and a 2.6% FCF yield leave governance/concentration risk and a cash-conversion gap insufficiently cushioned."
+        },
+        {
+          "rank": 93,
+          "symbol": "SHOP",
+          "stock": "SHOP",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "Merchant-platform scale and 34% growth support the franchise, but 16.5x sales and a 1.1% FCF yield demand substantial future profitability; non-operating gains inflate earnings and competition remains significant."
+        },
+        {
+          "rank": 98,
+          "symbol": "CIEN",
+          "stock": "CIEN",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "37% growth and improving optical-network margins support the recovery, but 64x earnings and a 1.9% FCF yield require continued AI infrastructure demand; leverage and spending cycles add risk."
+        },
+        {
+          "rank": 101,
+          "symbol": "MTSI",
+          "stock": "MTSI",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "36% growth and improving operating margins support semiconductor demand, but 77x reported earnings and a 1.1% FCF yield provide little protection; non-operating gains and cyclicality add risk."
+        },
+        {
+          "rank": 111,
+          "symbol": "MU",
+          "stock": "MU",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Memory demand and cash generation surge, but 81% quarterly operating margins and a near-fourfold revenue increase make sustainable earnings highly uncertain; the apparent 12x P/E needs cycle-normalized verification."
+        },
+        {
+          "rank": 113,
+          "symbol": "WDC",
+          "stock": "WDC",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Storage demand and operating margins have improved, but net income greatly exceeds operating profit after a changed business perimeter; the apparent 13x P/E needs normalized continuing earnings and matched-period cash flows."
+        },
+        {
+          "rank": 117,
+          "symbol": "FOUR",
+          "stock": "FOUR",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "34% payments growth and positive operating cash flow support the business, but a $52m capitalization and 1,108% FCF yield conflict with scale and share data; valuation requires correcting the share denominator and assessing debt."
+        },
+        {
+          "rank": 130,
+          "symbol": "ALAB",
+          "stock": "ALAB",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "AI connectivity demand drives 104% growth and positive cash generation, but 39x sales and a 0.6% FCF yield require exceptional durability; non-operating gains and customer concentration add uncertainty."
+        },
+        {
+          "rank": 153,
+          "symbol": "DASH",
+          "stock": "DASH",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "The delivery network sustains 36% growth and positive FCF, but operating margins remain thin and deteriorating; 94x earnings and a 3.3% FCF yield leave substantial execution and regulatory risk."
+        },
+        {
+          "rank": 179,
+          "symbol": "RSI",
+          "stock": "RSI",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "46% gaming growth and improving operating margins are encouraging, but changing share classes and earnings attribution complicate the apparent 9.9% FCF yield; reconcile ownership interests and gaming liabilities before valuation."
+        }
+      ],
+      "missed_requested": [
+        "BMY",
+        "RGLD",
+        "EVR",
+        "TGT",
+        "CLS",
+        "ROAD"
+      ]
+    },
+    {
+      "key": "fcf_yield3",
+      "name": "Base + TTM FCF yield ≥3%",
+      "available_in_current_builder": false,
+      "expression": {
+        "operator": "and",
+        "groups": [
+          {
+            "id": "rule-0",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "revenue",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-0"
+              }
+            ]
+          },
+          {
+            "id": "rule-1",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "operating_margin",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-1"
+              }
+            ]
+          },
+          {
+            "id": "rule-2",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "red_flag_count",
+                "comparison": "lte",
+                "value": "1",
+                "id": "condition-2"
+              }
+            ]
+          },
+          {
+            "id": "any-support",
+            "operator": "or",
+            "conditions": [
+              {
+                "id": "1m-At Support",
+                "field": "support_1m",
+                "value": "At Support"
+              },
+              {
+                "id": "1m-Near Support",
+                "field": "support_1m",
+                "value": "Near Support"
+              },
+              {
+                "id": "3m-At Support",
+                "field": "support_3m",
+                "value": "At Support"
+              },
+              {
+                "id": "3m-Near Support",
+                "field": "support_3m",
+                "value": "Near Support"
+              },
+              {
+                "id": "6m-At Support",
+                "field": "support_6m",
+                "value": "At Support"
+              },
+              {
+                "id": "6m-Near Support",
+                "field": "support_6m",
+                "value": "Near Support"
+              },
+              {
+                "id": "1y-At Support",
+                "field": "support_1y",
+                "value": "At Support"
+              },
+              {
+                "id": "1y-Near Support",
+                "field": "support_1y",
+                "value": "Near Support"
+              },
+              {
+                "id": "2y-At Support",
+                "field": "support_2y",
+                "value": "At Support"
+              },
+              {
+                "id": "2y-Near Support",
+                "field": "support_2y",
+                "value": "Near Support"
+              },
+              {
+                "id": "5y-At Support",
+                "field": "support_5y",
+                "value": "At Support"
+              },
+              {
+                "id": "5y-Near Support",
+                "field": "support_5y",
+                "value": "Near Support"
+              }
+            ]
+          }
+        ]
+      },
+      "research_only_context_conditions": [
+        [
+          "fcf_yield",
+          "gte",
+          3
+        ]
+      ],
+      "count": 19,
+      "requested_tag_matches": 10,
+      "requested_tag_precision_pct": 52.6,
+      "requested_tag_recall_pct": 66.7,
+      "top20": 2,
+      "top50": 8,
+      "bottom50": 2,
+      "selected": [
+        {
+          "rank": 6,
+          "symbol": "ANIP",
+          "stock": "ANIP",
+          "business_quality": "Solid",
+          "valuation": "Cheap",
+          "rationale": "26% growth and the supplied 10.9% FCF yield support 14.7x earnings; product concentration and declining cash-flow margins matter. Company guidance identifies $621m principal debt, above the snapshot's $301m carrying input, making cheapness provisional."
+        },
+        {
+          "rank": 10,
+          "symbol": "NFLX",
+          "stock": "NFLX",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Content/distribution scale, 35% quarterly operating margins and a 4.1% FCF yield support 19x earnings; slowing growth and an earnings-to-cash gap require normalized content-spending analysis."
+        },
+        {
+          "rank": 22,
+          "symbol": "PEP",
+          "stock": "PEP",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Brand/distribution scale and a 5.6% FCF yield support 17x earnings, but modest structural growth and significant leverage warrant a fair rather than clearly cheap valuation; demand elasticity and input costs remain risks."
+        },
+        {
+          "rank": 30,
+          "symbol": "UBER",
+          "stock": "UBER",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Mobility/delivery scale and a 7.4% FCF yield support value, but non-operating gains flatter the 14x P/E and growth has slowed to 12%; regulation, insurance costs and autonomous competition constrain the opportunity."
+        },
+        {
+          "rank": 32,
+          "symbol": "GRND",
+          "stock": "GRND",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "The focused network monetizes effectively, with 33% growth and a 6.3% FCF yield at 26x earnings; negative equity, leverage, user trust and platform dependence temper capital-allocation confidence."
+        },
+        {
+          "rank": 33,
+          "symbol": "RDDT",
+          "stock": "RDDT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "61% growth, expanding operating margins and a 3.5% FCF yield support 33x reported earnings; platform/search dependence, moderation costs and non-operating gains keep the premium conditional."
+        },
+        {
+          "rank": 42,
+          "symbol": "TGT",
+          "stock": "TGT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Retail recovery and a 6.2% FCF yield support 16x earnings, but growth remains modest and the recent margin jump needs confirmation; discretionary demand, inventory execution and leverage remain risks."
+        },
+        {
+          "rank": 43,
+          "symbol": "DTM",
+          "stock": "DTM",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Midstream infrastructure delivers high operating margins and recurring cash flow, but 27x earnings and a 3.8% FCF yield already price durability; leverage, growth capex and customer exposure remain risks."
+        },
+        {
+          "rank": 59,
+          "symbol": "DUOL",
+          "stock": "DUOL",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "The learning platform produces strong cash flow and retains growth, but growth slowed to 18% and trailing earnings materially exceed operating profit; a 5.7% FCF yield supports value better than the misleading 17x P/E."
+        },
+        {
+          "rank": 63,
+          "symbol": "ROAD",
+          "stock": "ROAD",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "28% growth and positive infrastructure cash generation support the consolidator, but 33x earnings and a 3.8% FCF yield need continued execution; acquisition debt and slowing growth constrain protection."
+        },
+        {
+          "rank": 70,
+          "symbol": "CDE",
+          "stock": "CDE",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Mining cash generation has improved markedly and an 8.3% FCF yield supports valuation; acquisition dilution, inconsistent gross-profit inputs and precious-metal cyclicality keep 16x earnings from proving cheapness."
+        },
+        {
+          "rank": 71,
+          "symbol": "ASTH",
+          "stock": "ASTH",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "49% growth and a 5.1% FCF yield support a developing healthcare-services franchise; thin margins, integration debt and inconsistent gross-profit inputs make the low sales valuation less compelling than it appears."
+        },
+        {
+          "rank": 73,
+          "symbol": "EVC",
+          "stock": "EVC",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Rapid revenue recovery and an 8.5% FCF yield support a turnaround case, but historical losses, leverage and changing business mix make sustainable advertising profitability uncertain."
+        },
+        {
+          "rank": 88,
+          "symbol": "CSCO",
+          "stock": "CSCO",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "The installed networking franchise produces strong cash flow and improving growth, but 30x earnings with a 3.2% FCF yield prices a sustained recovery; competition and infrastructure cyclicality limit protection."
+        },
+        {
+          "rank": 111,
+          "symbol": "MU",
+          "stock": "MU",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Memory demand and cash generation surge, but 81% quarterly operating margins and a near-fourfold revenue increase make sustainable earnings highly uncertain; the apparent 12x P/E needs cycle-normalized verification."
+        },
+        {
+          "rank": 113,
+          "symbol": "WDC",
+          "stock": "WDC",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Storage demand and operating margins have improved, but net income greatly exceeds operating profit after a changed business perimeter; the apparent 13x P/E needs normalized continuing earnings and matched-period cash flows."
+        },
+        {
+          "rank": 117,
+          "symbol": "FOUR",
+          "stock": "FOUR",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "34% payments growth and positive operating cash flow support the business, but a $52m capitalization and 1,108% FCF yield conflict with scale and share data; valuation requires correcting the share denominator and assessing debt."
+        },
+        {
+          "rank": 153,
+          "symbol": "DASH",
+          "stock": "DASH",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "The delivery network sustains 36% growth and positive FCF, but operating margins remain thin and deteriorating; 94x earnings and a 3.3% FCF yield leave substantial execution and regulatory risk."
+        },
+        {
+          "rank": 179,
+          "symbol": "RSI",
+          "stock": "RSI",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "46% gaming growth and improving operating margins are encouraging, but changing share classes and earnings attribution complicate the apparent 9.9% FCF yield; reconcile ownership interests and gaming liabilities before valuation."
+        }
+      ],
+      "missed_requested": [
+        "BMY",
+        "NVDA",
+        "RGLD",
+        "EVR",
+        "CLS"
+      ]
+    },
+    {
+      "key": "fcf_yield5",
+      "name": "Base + TTM FCF yield ≥5%",
+      "available_in_current_builder": false,
+      "expression": {
+        "operator": "and",
+        "groups": [
+          {
+            "id": "rule-0",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "revenue",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-0"
+              }
+            ]
+          },
+          {
+            "id": "rule-1",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "operating_margin",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-1"
+              }
+            ]
+          },
+          {
+            "id": "rule-2",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "red_flag_count",
+                "comparison": "lte",
+                "value": "1",
+                "id": "condition-2"
+              }
+            ]
+          },
+          {
+            "id": "any-support",
+            "operator": "or",
+            "conditions": [
+              {
+                "id": "1m-At Support",
+                "field": "support_1m",
+                "value": "At Support"
+              },
+              {
+                "id": "1m-Near Support",
+                "field": "support_1m",
+                "value": "Near Support"
+              },
+              {
+                "id": "3m-At Support",
+                "field": "support_3m",
+                "value": "At Support"
+              },
+              {
+                "id": "3m-Near Support",
+                "field": "support_3m",
+                "value": "Near Support"
+              },
+              {
+                "id": "6m-At Support",
+                "field": "support_6m",
+                "value": "At Support"
+              },
+              {
+                "id": "6m-Near Support",
+                "field": "support_6m",
+                "value": "Near Support"
+              },
+              {
+                "id": "1y-At Support",
+                "field": "support_1y",
+                "value": "At Support"
+              },
+              {
+                "id": "1y-Near Support",
+                "field": "support_1y",
+                "value": "Near Support"
+              },
+              {
+                "id": "2y-At Support",
+                "field": "support_2y",
+                "value": "At Support"
+              },
+              {
+                "id": "2y-Near Support",
+                "field": "support_2y",
+                "value": "Near Support"
+              },
+              {
+                "id": "5y-At Support",
+                "field": "support_5y",
+                "value": "At Support"
+              },
+              {
+                "id": "5y-Near Support",
+                "field": "support_5y",
+                "value": "Near Support"
+              }
+            ]
+          }
+        ]
+      },
+      "research_only_context_conditions": [
+        [
+          "fcf_yield",
+          "gte",
+          5
+        ]
+      ],
+      "count": 12,
+      "requested_tag_matches": 6,
+      "requested_tag_precision_pct": 50.0,
+      "requested_tag_recall_pct": 40.0,
+      "top20": 1,
+      "top50": 5,
+      "bottom50": 1,
+      "selected": [
+        {
+          "rank": 6,
+          "symbol": "ANIP",
+          "stock": "ANIP",
+          "business_quality": "Solid",
+          "valuation": "Cheap",
+          "rationale": "26% growth and the supplied 10.9% FCF yield support 14.7x earnings; product concentration and declining cash-flow margins matter. Company guidance identifies $621m principal debt, above the snapshot's $301m carrying input, making cheapness provisional."
+        },
+        {
+          "rank": 22,
+          "symbol": "PEP",
+          "stock": "PEP",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Brand/distribution scale and a 5.6% FCF yield support 17x earnings, but modest structural growth and significant leverage warrant a fair rather than clearly cheap valuation; demand elasticity and input costs remain risks."
+        },
+        {
+          "rank": 30,
+          "symbol": "UBER",
+          "stock": "UBER",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Mobility/delivery scale and a 7.4% FCF yield support value, but non-operating gains flatter the 14x P/E and growth has slowed to 12%; regulation, insurance costs and autonomous competition constrain the opportunity."
+        },
+        {
+          "rank": 32,
+          "symbol": "GRND",
+          "stock": "GRND",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "The focused network monetizes effectively, with 33% growth and a 6.3% FCF yield at 26x earnings; negative equity, leverage, user trust and platform dependence temper capital-allocation confidence."
+        },
+        {
+          "rank": 42,
+          "symbol": "TGT",
+          "stock": "TGT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Retail recovery and a 6.2% FCF yield support 16x earnings, but growth remains modest and the recent margin jump needs confirmation; discretionary demand, inventory execution and leverage remain risks."
+        },
+        {
+          "rank": 59,
+          "symbol": "DUOL",
+          "stock": "DUOL",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "The learning platform produces strong cash flow and retains growth, but growth slowed to 18% and trailing earnings materially exceed operating profit; a 5.7% FCF yield supports value better than the misleading 17x P/E."
+        },
+        {
+          "rank": 70,
+          "symbol": "CDE",
+          "stock": "CDE",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Mining cash generation has improved markedly and an 8.3% FCF yield supports valuation; acquisition dilution, inconsistent gross-profit inputs and precious-metal cyclicality keep 16x earnings from proving cheapness."
+        },
+        {
+          "rank": 71,
+          "symbol": "ASTH",
+          "stock": "ASTH",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "49% growth and a 5.1% FCF yield support a developing healthcare-services franchise; thin margins, integration debt and inconsistent gross-profit inputs make the low sales valuation less compelling than it appears."
+        },
+        {
+          "rank": 73,
+          "symbol": "EVC",
+          "stock": "EVC",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Rapid revenue recovery and an 8.5% FCF yield support a turnaround case, but historical losses, leverage and changing business mix make sustainable advertising profitability uncertain."
+        },
+        {
+          "rank": 111,
+          "symbol": "MU",
+          "stock": "MU",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Memory demand and cash generation surge, but 81% quarterly operating margins and a near-fourfold revenue increase make sustainable earnings highly uncertain; the apparent 12x P/E needs cycle-normalized verification."
+        },
+        {
+          "rank": 117,
+          "symbol": "FOUR",
+          "stock": "FOUR",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "34% payments growth and positive operating cash flow support the business, but a $52m capitalization and 1,108% FCF yield conflict with scale and share data; valuation requires correcting the share denominator and assessing debt."
+        },
+        {
+          "rank": 179,
+          "symbol": "RSI",
+          "stock": "RSI",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "46% gaming growth and improving operating margins are encouraging, but changing share classes and earnings attribution complicate the apparent 9.9% FCF yield; reconcile ownership interests and gaming liabilities before valuation."
+        }
+      ],
+      "missed_requested": [
+        "BMY",
+        "NVDA",
+        "NFLX",
+        "RGLD",
+        "RDDT",
+        "EVR",
+        "DTM",
+        "CLS",
+        "ROAD"
+      ]
+    },
+    {
+      "key": "fcf_margin10_yield3",
+      "name": "Base + FCF margin ≥10% + FCF yield ≥3%",
+      "available_in_current_builder": false,
+      "expression": {
+        "operator": "and",
+        "groups": [
+          {
+            "id": "rule-0",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "revenue",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-0"
+              }
+            ]
+          },
+          {
+            "id": "rule-1",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "operating_margin",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-1"
+              }
+            ]
+          },
+          {
+            "id": "rule-2",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "red_flag_count",
+                "comparison": "lte",
+                "value": "1",
+                "id": "condition-2"
+              }
+            ]
+          },
+          {
+            "id": "any-support",
+            "operator": "or",
+            "conditions": [
+              {
+                "id": "1m-At Support",
+                "field": "support_1m",
+                "value": "At Support"
+              },
+              {
+                "id": "1m-Near Support",
+                "field": "support_1m",
+                "value": "Near Support"
+              },
+              {
+                "id": "3m-At Support",
+                "field": "support_3m",
+                "value": "At Support"
+              },
+              {
+                "id": "3m-Near Support",
+                "field": "support_3m",
+                "value": "Near Support"
+              },
+              {
+                "id": "6m-At Support",
+                "field": "support_6m",
+                "value": "At Support"
+              },
+              {
+                "id": "6m-Near Support",
+                "field": "support_6m",
+                "value": "Near Support"
+              },
+              {
+                "id": "1y-At Support",
+                "field": "support_1y",
+                "value": "At Support"
+              },
+              {
+                "id": "1y-Near Support",
+                "field": "support_1y",
+                "value": "Near Support"
+              },
+              {
+                "id": "2y-At Support",
+                "field": "support_2y",
+                "value": "At Support"
+              },
+              {
+                "id": "2y-Near Support",
+                "field": "support_2y",
+                "value": "Near Support"
+              },
+              {
+                "id": "5y-At Support",
+                "field": "support_5y",
+                "value": "At Support"
+              },
+              {
+                "id": "5y-Near Support",
+                "field": "support_5y",
+                "value": "Near Support"
+              }
+            ]
+          }
+        ]
+      },
+      "research_only_context_conditions": [
+        [
+          "fcf_margin",
+          "gte",
+          10
+        ],
+        [
+          "fcf_yield",
+          "gte",
+          3
+        ]
+      ],
+      "count": 15,
+      "requested_tag_matches": 8,
+      "requested_tag_precision_pct": 53.3,
+      "requested_tag_recall_pct": 53.3,
+      "top20": 2,
+      "top50": 7,
+      "bottom50": 2,
+      "selected": [
+        {
+          "rank": 6,
+          "symbol": "ANIP",
+          "stock": "ANIP",
+          "business_quality": "Solid",
+          "valuation": "Cheap",
+          "rationale": "26% growth and the supplied 10.9% FCF yield support 14.7x earnings; product concentration and declining cash-flow margins matter. Company guidance identifies $621m principal debt, above the snapshot's $301m carrying input, making cheapness provisional."
+        },
+        {
+          "rank": 10,
+          "symbol": "NFLX",
+          "stock": "NFLX",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Content/distribution scale, 35% quarterly operating margins and a 4.1% FCF yield support 19x earnings; slowing growth and an earnings-to-cash gap require normalized content-spending analysis."
+        },
+        {
+          "rank": 22,
+          "symbol": "PEP",
+          "stock": "PEP",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Brand/distribution scale and a 5.6% FCF yield support 17x earnings, but modest structural growth and significant leverage warrant a fair rather than clearly cheap valuation; demand elasticity and input costs remain risks."
+        },
+        {
+          "rank": 30,
+          "symbol": "UBER",
+          "stock": "UBER",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Mobility/delivery scale and a 7.4% FCF yield support value, but non-operating gains flatter the 14x P/E and growth has slowed to 12%; regulation, insurance costs and autonomous competition constrain the opportunity."
+        },
+        {
+          "rank": 32,
+          "symbol": "GRND",
+          "stock": "GRND",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "The focused network monetizes effectively, with 33% growth and a 6.3% FCF yield at 26x earnings; negative equity, leverage, user trust and platform dependence temper capital-allocation confidence."
+        },
+        {
+          "rank": 33,
+          "symbol": "RDDT",
+          "stock": "RDDT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "61% growth, expanding operating margins and a 3.5% FCF yield support 33x reported earnings; platform/search dependence, moderation costs and non-operating gains keep the premium conditional."
+        },
+        {
+          "rank": 43,
+          "symbol": "DTM",
+          "stock": "DTM",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Midstream infrastructure delivers high operating margins and recurring cash flow, but 27x earnings and a 3.8% FCF yield already price durability; leverage, growth capex and customer exposure remain risks."
+        },
+        {
+          "rank": 59,
+          "symbol": "DUOL",
+          "stock": "DUOL",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "The learning platform produces strong cash flow and retains growth, but growth slowed to 18% and trailing earnings materially exceed operating profit; a 5.7% FCF yield supports value better than the misleading 17x P/E."
+        },
+        {
+          "rank": 70,
+          "symbol": "CDE",
+          "stock": "CDE",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Mining cash generation has improved markedly and an 8.3% FCF yield supports valuation; acquisition dilution, inconsistent gross-profit inputs and precious-metal cyclicality keep 16x earnings from proving cheapness."
+        },
+        {
+          "rank": 88,
+          "symbol": "CSCO",
+          "stock": "CSCO",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "The installed networking franchise produces strong cash flow and improving growth, but 30x earnings with a 3.2% FCF yield prices a sustained recovery; competition and infrastructure cyclicality limit protection."
+        },
+        {
+          "rank": 111,
+          "symbol": "MU",
+          "stock": "MU",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Memory demand and cash generation surge, but 81% quarterly operating margins and a near-fourfold revenue increase make sustainable earnings highly uncertain; the apparent 12x P/E needs cycle-normalized verification."
+        },
+        {
+          "rank": 113,
+          "symbol": "WDC",
+          "stock": "WDC",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Storage demand and operating margins have improved, but net income greatly exceeds operating profit after a changed business perimeter; the apparent 13x P/E needs normalized continuing earnings and matched-period cash flows."
+        },
+        {
+          "rank": 117,
+          "symbol": "FOUR",
+          "stock": "FOUR",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "34% payments growth and positive operating cash flow support the business, but a $52m capitalization and 1,108% FCF yield conflict with scale and share data; valuation requires correcting the share denominator and assessing debt."
+        },
+        {
+          "rank": 153,
+          "symbol": "DASH",
+          "stock": "DASH",
+          "business_quality": "Solid",
+          "valuation": "Expensive",
+          "rationale": "The delivery network sustains 36% growth and positive FCF, but operating margins remain thin and deteriorating; 94x earnings and a 3.3% FCF yield leave substantial execution and regulatory risk."
+        },
+        {
+          "rank": 179,
+          "symbol": "RSI",
+          "stock": "RSI",
+          "business_quality": "Average",
+          "valuation": "Unknown",
+          "rationale": "46% gaming growth and improving operating margins are encouraging, but changing share classes and earnings attribution complicate the apparent 9.9% FCF yield; reconcile ownership interests and gaming liabilities before valuation."
+        }
+      ],
+      "missed_requested": [
+        "BMY",
+        "NVDA",
+        "RGLD",
+        "EVR",
+        "TGT",
+        "CLS",
+        "ROAD"
+      ]
+    },
+    {
+      "key": "pe30",
+      "name": "Base + positive trailing P/E ≤30",
+      "available_in_current_builder": false,
+      "expression": {
+        "operator": "and",
+        "groups": [
+          {
+            "id": "rule-0",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "revenue",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-0"
+              }
+            ]
+          },
+          {
+            "id": "rule-1",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "operating_margin",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-1"
+              }
+            ]
+          },
+          {
+            "id": "rule-2",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "red_flag_count",
+                "comparison": "lte",
+                "value": "1",
+                "id": "condition-2"
+              }
+            ]
+          },
+          {
+            "id": "any-support",
+            "operator": "or",
+            "conditions": [
+              {
+                "id": "1m-At Support",
+                "field": "support_1m",
+                "value": "At Support"
+              },
+              {
+                "id": "1m-Near Support",
+                "field": "support_1m",
+                "value": "Near Support"
+              },
+              {
+                "id": "3m-At Support",
+                "field": "support_3m",
+                "value": "At Support"
+              },
+              {
+                "id": "3m-Near Support",
+                "field": "support_3m",
+                "value": "Near Support"
+              },
+              {
+                "id": "6m-At Support",
+                "field": "support_6m",
+                "value": "At Support"
+              },
+              {
+                "id": "6m-Near Support",
+                "field": "support_6m",
+                "value": "Near Support"
+              },
+              {
+                "id": "1y-At Support",
+                "field": "support_1y",
+                "value": "At Support"
+              },
+              {
+                "id": "1y-Near Support",
+                "field": "support_1y",
+                "value": "Near Support"
+              },
+              {
+                "id": "2y-At Support",
+                "field": "support_2y",
+                "value": "At Support"
+              },
+              {
+                "id": "2y-Near Support",
+                "field": "support_2y",
+                "value": "Near Support"
+              },
+              {
+                "id": "5y-At Support",
+                "field": "support_5y",
+                "value": "At Support"
+              },
+              {
+                "id": "5y-Near Support",
+                "field": "support_5y",
+                "value": "Near Support"
+              }
+            ]
+          }
+        ]
+      },
+      "research_only_context_conditions": [
+        [
+          "pe",
+          "lte",
+          30
+        ]
+      ],
+      "count": 18,
+      "requested_tag_matches": 10,
+      "requested_tag_precision_pct": 55.6,
+      "requested_tag_recall_pct": 66.7,
+      "top20": 3,
+      "top50": 9,
+      "bottom50": 1,
+      "selected": [
+        {
+          "rank": 6,
+          "symbol": "ANIP",
+          "stock": "ANIP",
+          "business_quality": "Solid",
+          "valuation": "Cheap",
+          "rationale": "26% growth and the supplied 10.9% FCF yield support 14.7x earnings; product concentration and declining cash-flow margins matter. Company guidance identifies $621m principal debt, above the snapshot's $301m carrying input, making cheapness provisional."
+        },
+        {
+          "rank": 8,
+          "symbol": "NVDA",
+          "stock": "NVDA",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "106% growth and 66% quarterly operating margins support exceptional AI economics at 26x reported earnings; the earnings-to-cash gap, export constraints and concentration of customer capex prevent an unqualified cheap assessment."
+        },
+        {
+          "rank": 10,
+          "symbol": "NFLX",
+          "stock": "NFLX",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Content/distribution scale, 35% quarterly operating margins and a 4.1% FCF yield support 19x earnings; slowing growth and an earnings-to-cash gap require normalized content-spending analysis."
+        },
+        {
+          "rank": 22,
+          "symbol": "PEP",
+          "stock": "PEP",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Brand/distribution scale and a 5.6% FCF yield support 17x earnings, but modest structural growth and significant leverage warrant a fair rather than clearly cheap valuation; demand elasticity and input costs remain risks."
+        },
+        {
+          "rank": 30,
+          "symbol": "UBER",
+          "stock": "UBER",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Mobility/delivery scale and a 7.4% FCF yield support value, but non-operating gains flatter the 14x P/E and growth has slowed to 12%; regulation, insurance costs and autonomous competition constrain the opportunity."
+        },
+        {
+          "rank": 32,
+          "symbol": "GRND",
+          "stock": "GRND",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "The focused network monetizes effectively, with 33% growth and a 6.3% FCF yield at 26x earnings; negative equity, leverage, user trust and platform dependence temper capital-allocation confidence."
+        },
+        {
+          "rank": 42,
+          "symbol": "TGT",
+          "stock": "TGT",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Retail recovery and a 6.2% FCF yield support 16x earnings, but growth remains modest and the recent margin jump needs confirmation; discretionary demand, inventory execution and leverage remain risks."
+        },
+        {
+          "rank": 43,
+          "symbol": "DTM",
+          "stock": "DTM",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Midstream infrastructure delivers high operating margins and recurring cash flow, but 27x earnings and a 3.8% FCF yield already price durability; leverage, growth capex and customer exposure remain risks."
+        },
+        {
+          "rank": 44,
+          "symbol": "CLS",
+          "stock": "CLS",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "62% growth and higher-margin manufacturing support 27x earnings, but a 1.7% FCF yield reveals heavy investment needs; customer concentration and hardware-cycle risk constrain upside confidence."
+        },
+        {
+          "rank": 52,
+          "symbol": "GOOG",
+          "stock": "GOOG",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Search and cloud operations deliver 24% growth and 34% operating margins, but a 94% quarterly net margin and $112bn quarterly profit distort the 15.5x P/E; normalization and AI-capex returns are essential."
+        },
+        {
+          "rank": 53,
+          "symbol": "AMZN",
+          "stock": "AMZN",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Retail scale and cloud economics support strong business quality, but reported earnings greatly exceed operating profit while capex consumes operating cash flow; normalized earnings and AI investment returns are needed to value the apparent 19x P/E."
+        },
+        {
+          "rank": 59,
+          "symbol": "DUOL",
+          "stock": "DUOL",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "The learning platform produces strong cash flow and retains growth, but growth slowed to 18% and trailing earnings materially exceed operating profit; a 5.7% FCF yield supports value better than the misleading 17x P/E."
+        },
+        {
+          "rank": 70,
+          "symbol": "CDE",
+          "stock": "CDE",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Mining cash generation has improved markedly and an 8.3% FCF yield supports valuation; acquisition dilution, inconsistent gross-profit inputs and precious-metal cyclicality keep 16x earnings from proving cheapness."
+        },
+        {
+          "rank": 88,
+          "symbol": "CSCO",
+          "stock": "CSCO",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "The installed networking franchise produces strong cash flow and improving growth, but 30x earnings with a 3.2% FCF yield prices a sustained recovery; competition and infrastructure cyclicality limit protection."
+        },
+        {
+          "rank": 111,
+          "symbol": "MU",
+          "stock": "MU",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Memory demand and cash generation surge, but 81% quarterly operating margins and a near-fourfold revenue increase make sustainable earnings highly uncertain; the apparent 12x P/E needs cycle-normalized verification."
+        },
+        {
+          "rank": 113,
+          "symbol": "WDC",
+          "stock": "WDC",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Storage demand and operating margins have improved, but net income greatly exceeds operating profit after a changed business perimeter; the apparent 13x P/E needs normalized continuing earnings and matched-period cash flows."
+        },
+        {
+          "rank": 117,
+          "symbol": "FOUR",
+          "stock": "FOUR",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "34% payments growth and positive operating cash flow support the business, but a $52m capitalization and 1,108% FCF yield conflict with scale and share data; valuation requires correcting the share denominator and assessing debt."
+        },
+        {
+          "rank": 174,
+          "symbol": "AMSC",
+          "stock": "AMSC",
+          "business_quality": "Average",
+          "valuation": "Expensive",
+          "rationale": "30% growth and newly positive operations are encouraging, but the apparent 8.7x P/E is dominated by profit far above operating income; a 1.7% FCF yield better reflects the demanding price."
+        }
+      ],
+      "missed_requested": [
+        "BMY",
+        "RGLD",
+        "RDDT",
+        "EVR",
+        "ROAD"
+      ]
+    },
+    {
+      "key": "pe30_fcf10",
+      "name": "Base + positive P/E ≤30 + FCF margin ≥10%",
+      "available_in_current_builder": false,
+      "expression": {
+        "operator": "and",
+        "groups": [
+          {
+            "id": "rule-0",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "revenue",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-0"
+              }
+            ]
+          },
+          {
+            "id": "rule-1",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "operating_margin",
+                "comparison": "gt",
+                "value": "0",
+                "id": "condition-1"
+              }
+            ]
+          },
+          {
+            "id": "rule-2",
+            "operator": "and",
+            "conditions": [
+              {
+                "field": "red_flag_count",
+                "comparison": "lte",
+                "value": "1",
+                "id": "condition-2"
+              }
+            ]
+          },
+          {
+            "id": "any-support",
+            "operator": "or",
+            "conditions": [
+              {
+                "id": "1m-At Support",
+                "field": "support_1m",
+                "value": "At Support"
+              },
+              {
+                "id": "1m-Near Support",
+                "field": "support_1m",
+                "value": "Near Support"
+              },
+              {
+                "id": "3m-At Support",
+                "field": "support_3m",
+                "value": "At Support"
+              },
+              {
+                "id": "3m-Near Support",
+                "field": "support_3m",
+                "value": "Near Support"
+              },
+              {
+                "id": "6m-At Support",
+                "field": "support_6m",
+                "value": "At Support"
+              },
+              {
+                "id": "6m-Near Support",
+                "field": "support_6m",
+                "value": "Near Support"
+              },
+              {
+                "id": "1y-At Support",
+                "field": "support_1y",
+                "value": "At Support"
+              },
+              {
+                "id": "1y-Near Support",
+                "field": "support_1y",
+                "value": "Near Support"
+              },
+              {
+                "id": "2y-At Support",
+                "field": "support_2y",
+                "value": "At Support"
+              },
+              {
+                "id": "2y-Near Support",
+                "field": "support_2y",
+                "value": "Near Support"
+              },
+              {
+                "id": "5y-At Support",
+                "field": "support_5y",
+                "value": "At Support"
+              },
+              {
+                "id": "5y-Near Support",
+                "field": "support_5y",
+                "value": "Near Support"
+              }
+            ]
+          }
+        ]
+      },
+      "research_only_context_conditions": [
+        [
+          "pe",
+          "lte",
+          30
+        ],
+        [
+          "fcf_margin",
+          "gte",
+          10
+        ]
+      ],
+      "count": 14,
+      "requested_tag_matches": 8,
+      "requested_tag_precision_pct": 57.1,
+      "requested_tag_recall_pct": 53.3,
+      "top20": 3,
+      "top50": 7,
+      "bottom50": 0,
+      "selected": [
+        {
+          "rank": 6,
+          "symbol": "ANIP",
+          "stock": "ANIP",
+          "business_quality": "Solid",
+          "valuation": "Cheap",
+          "rationale": "26% growth and the supplied 10.9% FCF yield support 14.7x earnings; product concentration and declining cash-flow margins matter. Company guidance identifies $621m principal debt, above the snapshot's $301m carrying input, making cheapness provisional."
+        },
+        {
+          "rank": 8,
+          "symbol": "NVDA",
+          "stock": "NVDA",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "106% growth and 66% quarterly operating margins support exceptional AI economics at 26x reported earnings; the earnings-to-cash gap, export constraints and concentration of customer capex prevent an unqualified cheap assessment."
+        },
+        {
+          "rank": 10,
+          "symbol": "NFLX",
+          "stock": "NFLX",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Content/distribution scale, 35% quarterly operating margins and a 4.1% FCF yield support 19x earnings; slowing growth and an earnings-to-cash gap require normalized content-spending analysis."
+        },
+        {
+          "rank": 22,
+          "symbol": "PEP",
+          "stock": "PEP",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "Brand/distribution scale and a 5.6% FCF yield support 17x earnings, but modest structural growth and significant leverage warrant a fair rather than clearly cheap valuation; demand elasticity and input costs remain risks."
+        },
+        {
+          "rank": 30,
+          "symbol": "UBER",
+          "stock": "UBER",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Mobility/delivery scale and a 7.4% FCF yield support value, but non-operating gains flatter the 14x P/E and growth has slowed to 12%; regulation, insurance costs and autonomous competition constrain the opportunity."
+        },
+        {
+          "rank": 32,
+          "symbol": "GRND",
+          "stock": "GRND",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "The focused network monetizes effectively, with 33% growth and a 6.3% FCF yield at 26x earnings; negative equity, leverage, user trust and platform dependence temper capital-allocation confidence."
+        },
+        {
+          "rank": 43,
+          "symbol": "DTM",
+          "stock": "DTM",
+          "business_quality": "Solid",
+          "valuation": "Fair",
+          "rationale": "Midstream infrastructure delivers high operating margins and recurring cash flow, but 27x earnings and a 3.8% FCF yield already price durability; leverage, growth capex and customer exposure remain risks."
+        },
+        {
+          "rank": 52,
+          "symbol": "GOOG",
+          "stock": "GOOG",
+          "business_quality": "Strong",
+          "valuation": "Unknown",
+          "rationale": "Search and cloud operations deliver 24% growth and 34% operating margins, but a 94% quarterly net margin and $112bn quarterly profit distort the 15.5x P/E; normalization and AI-capex returns are essential."
+        },
+        {
+          "rank": 59,
+          "symbol": "DUOL",
+          "stock": "DUOL",
+          "business_quality": "Strong",
+          "valuation": "Fair",
+          "rationale": "The learning platform produces strong cash flow and retains growth, but growth slowed to 18% and trailing earnings materially exceed operating profit; a 5.7% FCF yield supports value better than the misleading 17x P/E."
+        },
+        {
+          "rank": 70,
+          "symbol": "CDE",
+          "stock": "CDE",
+          "business_quality": "Average",
+          "valuation": "Fair",
+          "rationale": "Mining cash generation has improved markedly and an 8.3% FCF yield supports valuation; acquisition dilution, inconsistent gross-profit inputs and precious-metal cyclicality keep 16x earnings from proving cheapness."
+        },
+        {
+          "rank": 88,
+          "symbol": "CSCO",
+          "stock": "CSCO",
+          "business_quality": "Strong",
+          "valuation": "Expensive",
+          "rationale": "The installed networking franchise produces strong cash flow and improving growth, but 30x earnings with a 3.2% FCF yield prices a sustained recovery; competition and infrastructure cyclicality limit protection."
+        },
+        {
+          "rank": 111,
+          "symbol": "MU",
+          "stock": "MU",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Memory demand and cash generation surge, but 81% quarterly operating margins and a near-fourfold revenue increase make sustainable earnings highly uncertain; the apparent 12x P/E needs cycle-normalized verification."
+        },
+        {
+          "rank": 113,
+          "symbol": "WDC",
+          "stock": "WDC",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "Storage demand and operating margins have improved, but net income greatly exceeds operating profit after a changed business perimeter; the apparent 13x P/E needs normalized continuing earnings and matched-period cash flows."
+        },
+        {
+          "rank": 117,
+          "symbol": "FOUR",
+          "stock": "FOUR",
+          "business_quality": "Solid",
+          "valuation": "Unknown",
+          "rationale": "34% payments growth and positive operating cash flow support the business, but a $52m capitalization and 1,108% FCF yield conflict with scale and share data; valuation requires correcting the share denominator and assessing debt."
+        }
+      ],
+      "missed_requested": [
+        "BMY",
+        "RGLD",
+        "RDDT",
+        "EVR",
+        "TGT",
+        "CLS",
+        "ROAD"
+      ]
+    }
+  ]
+}

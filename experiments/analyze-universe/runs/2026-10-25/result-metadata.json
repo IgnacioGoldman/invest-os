@@ -1,0 +1,30 @@
+{
+  "status": "complete",
+  "execution": "Analysis authored in the current Codex conversation; no successful Gemini generation",
+  "completed_at": "2026-10-25T13:46:36.969109+00:00",
+  "count": 200,
+  "model_version": "Current conversation; exact model version not exposed in the artifact",
+  "input_prompt_sha256": "8f0d8c3b359f3a38247c41d918e6306c90b6c0e2622bc4abacea48ce500326ee",
+  "input_dataset_sha256": "4151a6fec8b1b86f4ab9a9db874ecc490afdee805a7d2d27ea525cbc5242ca80",
+  "assessments_sha256": "00d570c2deabc9b0ec1bb49009fdb85619110afbd8332898a0545c5bb22a230c",
+  "rank_order_sha256": "be91b209bb11b613564377e902cc89c1dcc372e9cc9c97e660419d9e58d7d00e",
+  "research_notes_sha256": "43d3d8963a53dd76a4491a6952ea73bf49ebd98f09be7bfb67f81d8d664458df",
+  "method": "Independent qualitative assessments followed by global comparison; equal importance to quality and valuation; no numerical score",
+  "single_full_context_request": false,
+  "external_research_companies": [
+    "ADBE",
+    "INTU",
+    "APH",
+    "BSX",
+    "ANIP",
+    "FIX"
+  ],
+  "independently_verified_quotes": false,
+  "deterministic_membership_used_for_rank": false,
+  "validation": {
+    "every_stock_once": true,
+    "consecutive_ranks": true,
+    "valid_tags": true,
+    "five_columns": true
+  }
+}
