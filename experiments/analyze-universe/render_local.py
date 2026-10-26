@@ -18,6 +18,41 @@ COLORS = {'Strong': '🟢', 'Solid': '🟢', 'Average': '🟡', 'Weak': '🟠', 
           'Unknown': '⚪', 'Cheap': '🟢', 'Fair': '🟡', 'Expensive': '🔴'}
 
 
+def flag_cell(metric, color):
+    value, observed = metric.get('value'), metric.get('observed_count') or 0
+    label = str(value) if value is not None else f'≥{observed}' if observed else 'Not fully assessed'
+    detected = [group for group in metric['checks'] if group['state'] == 'flagged']
+    tone = color if detected else 'unknown'
+    cell = f'<td class="flags {color}-flags"><strong class="{tone}">{html.escape(label)}</strong>'
+    if value is not None:
+        cell += f'<small>of {metric["max_count"]} {"concern groups" if color == "red" else "positive rules"}</small>'
+    else:
+        coverage = metric.get('coverage') or {}
+        cell += f'<small>{coverage.get("assessed", 0)}/{coverage.get("applicable", coverage.get("total", 0))} assessed</small>'
+    if detected:
+        cell += '<ul class="flag-names">' + ''.join(f'<li>{html.escape(group["title"])}</li>' for group in detected) + '</ul>'
+    elif value == 0:
+        cell += '<small>None detected by these rules</small>'
+    if metric['checks']:
+        cell += '<details><summary>All checks</summary>'
+        for group in metric['checks']:
+            state = {'flagged': 'Detected', 'clear': 'Rule not met' if color == 'green' else 'No flag detected',
+                     'unassessed': 'Not assessed', 'not_applicable': 'Outside rule scope'}[group['state']]
+            cell += f'<section><b>{html.escape(group["title"])} · {state}</b>'
+            if group.get('reason'):
+                cell += f'<small>{html.escape(group["reason"])}</small>'
+            for branch in group['checks']:
+                branch_state = {'flagged': 'Detected', 'clear': 'Rule not met' if color == 'green' else 'No flag detected', 'unassessed': 'Not assessed'}[branch['state']]
+                cell += f'<p><b>{html.escape(branch["title"])} · {branch_state}</b><br>{html.escape(branch["formula"])}<br>{html.escape(branch["reason"])}</p>'
+            cell += '</section>'
+        if metric.get('notes'):
+            cell += '<small>' + html.escape(metric['notes']) + '</small>'
+        cell += '</details>'
+    elif metric.get('notes'):
+        cell += '<small>' + html.escape(metric['notes']) + '</small>'
+    return cell + '</td>'
+
+
 def render(directory):
     manifest, prompt, _ = verify_inputs(directory)
     previous_metadata = json.loads((directory / 'result-metadata.json').read_text()) if (directory / 'result-metadata.json').exists() else {}
@@ -102,6 +137,11 @@ def render(directory):
         '.controls input[type=checkbox]{width:auto;margin:0 6px 0 0}.controls select{padding:10px;font:inherit}'
         '.financial{min-width:200px}.pass{color:#89ddae}.fail{color:#ff9a9a}.unknown{color:#bcc6d0}'
         '.financial small{line-height:1.6}.financial .reason{color:#e3bba3}')
+    css += ('.flags{min-width:195px;max-width:260px}.flags>strong{font-size:22px}'
+        '.red{color:#ff9a9a}.green{color:#89ddae}.flag-names{padding-left:18px;line-height:1.5}'
+        '.flags details{font-size:12px;margin-top:12px}.flags summary{cursor:pointer;color:#9acbff}'
+        '.flags section{margin:14px 0}.flags section p{line-height:1.6}'
+        '.flags>small:last-child{font-size:11px;line-height:1.5}')
     document = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Invest-OS: support and financial filters</title><style>' + css + '</style></head><body><h1 id="view-title">At/near support — ' + str(audit_result['at_or_near_support']) + ' stocks</h1>'
     if audit_result['financial_refresh']:
         unknown = sum(s['rules']['operating_margin']['status'] == 'Unknown' for s in audit_result['stocks'].values())
@@ -114,6 +154,11 @@ def render(directory):
         if paragraph.strip():
             document += '<p>' + html.escape(paragraph.replace('**','')).replace('[research notes](research-notes.json)', '<a href="research-notes.json">research notes</a>') + '</p>'
     document += '</details>'
+    document += (f'<p id="flag-explanation"><strong>Separate red and green flag columns for every stock, assessed {audit_result["evaluated_on"]}.</strong> '
+        'Red flags count up to four concern groups. Green flags count up to three rules: sustained revenue growth, '
+        'profitable growth and cash-backed earnings. The two growth rules overlap. '
+        'Expand All checks for conditions and explanations. Incomplete assessments show a lower bound or Not fully assessed; '
+        'they never imply zero. These counts do not change the original ranking or the existing financial-rule filter.</p>')
     document += (f'<p><strong>{audit_result["universe"]} stocks → {audit_result["at_or_near_support"]} at/near support → '
         f'{audit_result["pass_all_three"]} pass all three financial rules; {audit_result["do_not_pass"]} do not pass.</strong><br>'
         'Rules: Revenue Growth YoY &gt;0%, Operating Margin &gt;0%, Red Flag Count ≤1. '
@@ -128,7 +173,7 @@ def render(directory):
     document += '<p><a href="filter-research/support-audit.csv">Support and financial checks CSV</a> · <a href="filter-research/support-audit.md">Pass/fail breakdown</a> · <a href="filter-research/operating-margin-diagnostics.md">Operating-margin diagnostics</a> · <a href="ranking.csv">Full ranking CSV</a> · <a href="research-notes.json">Research notes</a></p>'
     document += '<div class="controls"><label><input type="checkbox" id="support-only" checked>At/near any support only</label><label>Financial rules <select id="financial-filter"><option value="all">All results</option><option value="pass">Pass all three</option><option value="fail">Do not pass all three</option></select></label></div><input id="search" placeholder="Search stock, assessment or rationale" aria-label="Search ranking">'
     document += f'<p id="count">{audit_result["at_or_near_support"]} stocks</p><table><thead><tr>'
-    document += ''.join('<th>' + h + '</th>' for h in ['Original rank','Stock','Business quality','Valuation','Proximity to support','Three financial rules','Rationale']) + '</tr></thead><tbody>'
+    document += ''.join('<th>' + h + '</th>' for h in ['Original rank','Stock','Red flags','Green flags','Business quality','Valuation','Proximity to support','Three financial rules','Rationale']) + '</tr></thead><tbody>'
     for row in rows:
         symbol = row['symbol']
         checked = research['companies'].get(symbol)
@@ -167,6 +212,8 @@ def render(directory):
         financial_cell += '</td>'
         supported = checked_rules['at_or_near_support']
         document += (f'<tr data-support="{int(supported)}" data-financial="{"pass" if passes else "fail"}"' + ('' if supported else ' hidden') + f'><td>{row["rank"]}</td><td><strong>{html.escape(symbol)}</strong><small>{html.escape(inputs[symbol]["company"] or symbol)}</small></td>'
+            + flag_cell(checked_rules['flag_metrics']['red_flag_count'], 'red')
+            + flag_cell(checked_rules['flag_metrics']['green_flag_count'], 'green') +
             f'<td class="{row["business_quality"]}">{row["business_quality"]}</td><td class="{row["valuation"]}">{row["valuation"]}</td>'
             + support_cell + financial_cell +
             f'<td>{html.escape(row["rationale"])}<small>{links}</small></td></tr>')

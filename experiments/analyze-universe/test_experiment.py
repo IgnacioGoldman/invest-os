@@ -104,6 +104,10 @@ class LocalIsolation(unittest.TestCase):
             self.assertNotIn('Operating margin: unavailable or unvalidated',document)
             self.assertIn('Operating income is only a proxy estimate',document)
             self.assertIn('operating-margin-diagnostics.md',document)
+            self.assertIn('<th>Red flags</th><th>Green flags</th>',document)
+            self.assertEqual(document.count('<td class="flags red-flags">'),200)
+            self.assertEqual(document.count('<td class="flags green-flags">'),200)
+            self.assertTrue(all(s['flag_metrics']['green_flag_count']['value'] is None for s in audit['stocks'].values()))
             for name in ['financial-refresh.json','financial-refresh.json.gz']:
                 shutil.copyfile(source / name,directory / name)
             with patch('socket.create_connection',side_effect=AssertionError('Refreshed export must not use network')):
@@ -114,6 +118,8 @@ class LocalIsolation(unittest.TestCase):
             for symbol in ['BMY','V','KO','KLAC','DY','YPF','AXFO.ST','MELI']:
                 self.assertEqual(updated['stocks'][symbol]['rules']['operating_margin']['status'],'Pass')
             self.assertIn('Financial checks updated 2026-10-26',(directory / 'ranking.html').read_text())
+            self.assertEqual(updated['stocks']['ANIP']['flag_metrics']['green_flag_count']['value'],2)
+            self.assertIn('Cash-backed earnings',(directory / 'ranking.html').read_text())
             self.assertEqual((directory / 'snapshots.json.gz').read_bytes(),(source / 'snapshots.json.gz').read_bytes())
             (directory / 'local-rank-order.txt').write_text('ADBE ADBE')
             with self.assertRaises(ValueError):

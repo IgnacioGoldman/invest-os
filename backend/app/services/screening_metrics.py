@@ -1,4 +1,4 @@
-"""Deterministic business facts, red/green flag counts and preserved AI inputs.
+"""Four deterministic business facts, a concern count and preserved AI inputs.
 
 Sources establish provenance, not independent verification. First-filter cards
 use signed revenue/margin changes, the existing 3 pp momentum threshold and the

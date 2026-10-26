@@ -19,6 +19,7 @@ from evaluate_saved_filters import condition_matches, expression_matches
 from evaluate_filters import expression, numeric
 from app.services.screening_metrics import build_business_performance
 from app.services.static_stock_assets import load_full_stock_rows
+from green_flags import build_green_flag_count
 
 RULES = [
     ('revenue', 'Revenue growth', numeric('revenue', 'gt', 0)),
@@ -33,6 +34,8 @@ def capture_financial_refresh(directory, data_dir, today):
     if {s['ticker'] for s in current} != {s['ticker'] for s in snapshots}:
         raise ValueError('Refreshed financial data must cover the original universe exactly')
     metrics = {s['ticker']: {field: s['screening']['metrics'][field] for field, _, _ in RULES} for s in current}
+    for snapshot in current:
+        metrics[snapshot['ticker']]['green_flag_count'] = build_green_flag_count(snapshot, today)
     data = json.dumps(metrics, sort_keys=True, allow_nan=False).encode()
     path = directory / 'financial-refresh.json.gz'
     path.write_bytes(gzip.compress(data, mtime=0))
@@ -54,6 +57,26 @@ def load_financial_refresh(directory, manifest):
             or set(metrics) != set(manifest['symbols']) or len(metrics) != metadata['count']):
         raise ValueError('Refreshed financial data hash or universe mismatch')
     return metadata, metrics
+
+
+def flag_assessment(metric, today, version):
+    """Small display projection; detailed source evidence stays in the capture."""
+    current = (metric.get('assessment_version') == version
+        and metric.get('status') in {'Complete assessment', 'Partial assessment', 'Not assessed'}
+        and str(metric.get('valid_until') or '') >= today.isoformat())
+    if not current:
+        return {'value': None, 'observed_count': 0, 'coverage': {}, 'checks': [],
+            'status': 'Not assessed', 'notes': 'A current captured assessment is unavailable.'}
+    value = metric.get('value')
+    complete = (metric.get('validated') and metric.get('coverage', {}).get('complete')
+        and metric.get('status') == 'Complete assessment' and type(value) is int
+        and 0 <= value <= metric.get('max_count', 0))
+    return {key: metric.get(key) for key in ('observed_count', 'max_count', 'coverage', 'status', 'notes', 'as_of')} | {
+        'value': value if complete else None,
+        'checks': [{key: group.get(key) for key in ('id', 'title', 'state', 'reason')} | {
+            'checks': [{key: branch.get(key) for key in ('id', 'title', 'state', 'formula', 'reason', 'values')}
+                       for branch in group.get('checks', [])]}
+            for group in metric.get('checks', [])]}
 
 
 def audit(directory):
@@ -114,6 +137,8 @@ def audit(directory):
             raise ValueError('Per-rule explanations disagree with the combined existing filter')
         stocks[symbol] = {**row, 'at_or_near_support':at_support, 'support':nearest,
             'passes_financial_rules':all_pass, 'rules':rules,
+            'flag_metrics': {field: flag_assessment(snapshot.get('screening', {}).get('metrics', {}).get(field, {}), today, version)
+                for field, version in [('red_flag_count', 2), ('green_flag_count', 1)]},
             'exclusion_reasons':[r['reason'] for r in rules.values() if not r['passes']]}
     supported = [stocks[r['symbol']] for r in ranked if stocks[r['symbol']]['at_or_near_support']]
     for i, row in enumerate(supported,1):

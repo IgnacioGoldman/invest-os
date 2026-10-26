@@ -76,6 +76,13 @@ To capture a subsequent local repair and regenerate this display without reranki
 
 Ordinary regeneration uses the captured financial refresh when present, and the original frozen screening metrics otherwise. It never downloads new data or changes the original input hashes.
 
+The HTML now places separate **Red flags** and **Green flags** columns immediately after Stock for every row. Each shows the assessed count, the names of detected concerns or positive patterns, and expandable conditions and explanations. Green flags use the three experiment-local rules: sustained revenue growth, profitable growth and cash-backed earnings; the two growth rules overlap. Partial assessments show **≥N** or **Not fully assessed**, never an assumed zero. The 26 October financial capture includes the green assessments computed from full saved histories. Existing financial-filter membership, support context and original qualitative ranks are preserved. Reproducing without that capture leaves unsupported green assessments explicitly unavailable.
+
 ## Archived API preflight
 
 Before the user selected conversation execution, the full prompt was counted at 1,425,966 Gemini tokens against a 1,048,576 input limit. Attempted 50-stock generations and a one-stock diagnostic were rejected with HTTP 429. There was no successful Gemini generation and no API-reported generation usage; actual invoice costs are unavailable. The abandoned prompts and responses remain under `failed-api-history` for provenance. Provider execution code was removed from the active runner. These failures do not block the completed conversation-authored ranking.
+
+
+## Experiment-only green flags
+
+Green-flag calculations, input validation, regression tests and rule documentation live entirely in this experiment: `green_flags.py`, `flag_facts.py`, `test_green_flags.py` and [the rule documentation](docs/green-flag-count.md). They reuse existing read-only fact helpers from the app, and never register a main-app metric or change app UI, filters, exported snapshots or refresh workflows. Capturing a financial refresh computes green flags directly from full saved histories; rendering uses that captured result. The main app retains its original red-flag metric and screening schema.
