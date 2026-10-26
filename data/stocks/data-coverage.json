@@ -366,8 +366,10 @@
         "reason": null
       },
       "missing_inputs": {
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
         "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.25); GAAP EPS growth is not meaningful.",
@@ -751,11 +753,8 @@
         "reason": null
       },
       "missing_inputs": {
-        "business_health.roic": "roic: Quarterly SEC facts were unavailable for roic.",
-        "business_health.debt": "debt: SEC companyfacts did not include usable debt facts.",
-        "business_health.debt_to_equity": "debt_to_equity: Inputs required for this open/free computation were unavailable.",
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.15); GAAP EPS growth is not meaningful.",
@@ -1618,8 +1617,9 @@
         "reason": null
       },
       "missing_inputs": {
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
         "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.03); GAAP EPS growth is not meaningful.",
@@ -1927,7 +1927,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
+        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "not_meaningful": {}
     },
@@ -1979,7 +1979,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
+        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "not_meaningful": {
         "business_health.gross_margin": "gross_margin: Gross margin is not meaningful for banks, insurers, brokers, and similar financial businesses.",
@@ -2364,11 +2364,9 @@
         "reason": null
       },
       "missing_inputs": {
-        "business_health.roic": "roic: Quarterly SEC facts were unavailable for roic.",
-        "business_health.debt": "debt: SEC companyfacts did not include usable debt facts.",
-        "business_health.debt_to_equity": "debt_to_equity: Inputs required for this open/free computation were unavailable.",
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
@@ -2683,11 +2681,8 @@
         "reason": null
       },
       "missing_inputs": {
-        "business_health.roic": "roic: Quarterly SEC facts were unavailable for roic.",
-        "business_health.debt": "debt: SEC companyfacts did not include usable debt facts.",
-        "business_health.debt_to_equity": "debt_to_equity: Inputs required for this open/free computation were unavailable.",
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS turned positive from a loss-making comparison period (latest 2.51, comparison -0.11); 3-year GAAP EPS CAGR is not meaningful.",
@@ -3114,7 +3109,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
+        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "not_meaningful": {
         "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS turned positive from a loss-making comparison period (latest 13.53, comparison -11.12); 3-year GAAP EPS CAGR is not meaningful.",
@@ -3226,8 +3221,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
@@ -3596,9 +3590,11 @@
         "reason": null
       },
       "missing_inputs": {
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
         "business_health.fcf_margin": "fcf_margin: Inputs required for this open/free computation were unavailable.",
         "valuation.fcf_yield": "fcf_yield: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
@@ -3877,8 +3873,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -4038,8 +4033,8 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -4092,7 +4087,9 @@
       },
       "missing_inputs": {
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: Quarterly SEC diluted EPS facts were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -4470,11 +4467,8 @@
         "reason": null
       },
       "missing_inputs": {
-        "business_health.roic": "roic: Quarterly SEC facts were unavailable for roic.",
-        "business_health.debt": "debt: SEC companyfacts did not include usable debt facts.",
-        "business_health.debt_to_equity": "debt_to_equity: Inputs required for this open/free computation were unavailable.",
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.22); GAAP EPS growth is not meaningful.",
@@ -4910,8 +4904,8 @@
         "reason": null
       },
       "missing_inputs": {
-        "business_health.gross_margin": "gross_margin: Quarterly SEC facts were unavailable for gross_margin.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -4963,8 +4957,9 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS turned positive from a loss-making comparison period (latest 0.03, comparison -0.03); YoY GAAP EPS growth is not meaningful.",
@@ -5128,7 +5123,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
+        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "not_meaningful": {
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -22.6); GAAP EPS growth is not meaningful.",
@@ -5622,7 +5617,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
+        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "not_meaningful": {}
     },
@@ -6109,7 +6104,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
+        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "not_meaningful": {}
     },
@@ -6860,7 +6855,9 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in SEK; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
@@ -7335,7 +7332,7 @@
       },
       "missing_inputs": {
         "business_health.gross_margin": "gross_margin: Quarterly SEC facts were unavailable for gross_margin.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS turned positive from a loss-making comparison period (latest 1.1, comparison -0.89); YoY GAAP EPS growth is not meaningful.",
@@ -7767,11 +7764,9 @@
         "reason": null
       },
       "missing_inputs": {
-        "business_health.roic": "roic: Quarterly SEC facts were unavailable for roic.",
-        "business_health.debt": "debt: SEC companyfacts did not include usable debt facts.",
-        "business_health.debt_to_equity": "debt_to_equity: Inputs required for this open/free computation were unavailable.",
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.03); GAAP EPS growth is not meaningful.",
@@ -8322,8 +8317,10 @@
         "reason": null
       },
       "missing_inputs": {
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
         "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS turned positive from a loss-making comparison period (latest 0.31, comparison -0.68); 3-year GAAP EPS CAGR is not meaningful.",
@@ -8378,10 +8375,8 @@
         "reason": null
       },
       "missing_inputs": {
-        "business_health.free_cash_flow": "free_cash_flow: Quarterly SEC facts were unavailable for free_cash_flow.",
-        "business_health.fcf_margin": "fcf_margin: Inputs required for this open/free computation were unavailable.",
-        "valuation.fcf_yield": "fcf_yield: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -8704,8 +8699,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.27); GAAP EPS growth is not meaningful.",
@@ -8762,7 +8756,9 @@
       },
       "missing_inputs": {
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: Comparable 1-year prior quarterly SEC diluted EPS fact was unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -8917,11 +8913,9 @@
         "reason": null
       },
       "missing_inputs": {
-        "business_health.roic": "roic: Quarterly SEC facts were unavailable for roic.",
-        "business_health.debt": "debt: SEC companyfacts did not include usable debt facts.",
-        "business_health.debt_to_equity": "debt_to_equity: Inputs required for this open/free computation were unavailable.",
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.55); GAAP EPS growth is not meaningful.",
@@ -9244,10 +9238,12 @@
       },
       "missing_inputs": {
         "business_health.roic": "roic: Quarterly SEC facts were unavailable for roic.",
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
         "business_health.debt": "debt: SEC companyfacts did not include usable debt facts.",
         "business_health.debt_to_equity": "debt_to_equity: Inputs required for this open/free computation were unavailable.",
         "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS turned positive from a loss-making comparison period (latest 0.09, comparison -0.04); YoY GAAP EPS growth is not meaningful.",
@@ -9471,8 +9467,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.ev_to_ebitda": "ev_to_ebitda: Inputs required for this open/free computation were unavailable.",
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
