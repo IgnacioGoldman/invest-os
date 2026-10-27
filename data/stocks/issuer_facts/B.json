@@ -113,7 +113,7 @@
     }
   },
   "last_report_check": {
-    "checked_on": "2026-10-20",
+    "checked_on": "2026-10-27",
     "status": "retained_unverified",
     "notes": [
       "B: newer issuer revenue report unavailable; retained verified quarterly history: 404 Client Error: Not Found for url: https://s25.q4cdn.com/322814910/files/doc_financial/quarterly_results/2026/q3/Barrick_Q3_2026_MD-A.pdf"

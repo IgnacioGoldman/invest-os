@@ -1,6 +1,6 @@
 {
   "entityName": "Novartis AG",
-  "verified_on": "2026-10-13",
+  "verified_on": "2026-10-27",
   "revenue_definition": "Consolidated net sales from continuing operations, reported USD; excludes discontinued Sandoz.",
   "facts": {
     "issuer": {
@@ -68,14 +68,14 @@
               "source_url": "https://www.novartis.com/sites/novartis_com/files/q2-2026-media-release-en.pdf"
             },
             {
-              "val": 13909000000,
+              "val": 13909000000.0,
               "start": "2025-07-01",
               "end": "2025-09-30",
               "fy": 2025,
               "fp": "Q3",
               "form": "ISSUER-QUARTER",
-              "filed": "2025-10-28",
-              "source_url": "https://www.novartis.com/sites/novartis_com/files/q3-2025-media-release-en.pdf"
+              "filed": "2026-10-27",
+              "source_url": "https://www.novartis.com/sites/novartis_com/files/q3-2026-media-release-en.pdf"
             },
             {
               "val": 13336000000,
@@ -106,6 +106,16 @@
               "form": "ISSUER-QUARTER",
               "filed": "2026-07-21",
               "source_url": "https://www.novartis.com/sites/novartis_com/files/q2-2026-media-release-en.pdf"
+            },
+            {
+              "val": 14522000000.0,
+              "start": "2026-07-01",
+              "end": "2026-09-30",
+              "fy": 2026,
+              "fp": "Q3",
+              "form": "ISSUER-QUARTER",
+              "filed": "2026-10-27",
+              "source_url": "https://www.novartis.com/sites/novartis_com/files/q3-2026-media-release-en.pdf"
             }
           ]
         }
@@ -113,10 +123,7 @@
     }
   },
   "last_report_check": {
-    "checked_on": "2026-10-20",
-    "status": "retained_unverified",
-    "notes": [
-      "NVS: newer issuer revenue report unavailable; retained verified quarterly history: 404 Client Error: Not Found for url: https://www.novartis.com/sites/novartiscom/files/q3-2026-media-release-en.pdf"
-    ]
+    "checked_on": "2026-10-27",
+    "status": "updated"
   }
 }

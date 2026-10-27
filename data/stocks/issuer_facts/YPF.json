@@ -149,10 +149,10 @@
     }
   },
   "last_report_check": {
-    "checked_on": "2026-10-20",
+    "checked_on": "2026-10-27",
     "status": "retained_unverified",
     "notes": [
-      "YPF: newer issuer revenue report unavailable; retained verified quarterly history: 403 Client Error: Forbidden for url: https://www.sec.gov/Archives/edgar/data/904851/000155485526002124/MainDocument.htm"
+      "YPF: newer issuer revenue report unavailable; retained verified quarterly history: 403 Client Error: Forbidden for url: https://www.sec.gov/Archives/edgar/data/904851/000155485526002169/MainDocument.htm"
     ]
   },
   "operating_income_definition": "Reported consolidated operating income in USD millions, section 5.2 of the SEC-filed earnings release; single quarters, excluding percentage changes and half-year totals. Imported from a verified table excerpt on 2026-10-26."
