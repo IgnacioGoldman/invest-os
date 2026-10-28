@@ -8,9 +8,9 @@
     "currency": "EUR",
     "strategy_version": "1.0.0",
     "analysis_version": "1.0.0",
-    "latest_successful_update": "2026-10-27T01:37:36.557771+00:00",
+    "latest_successful_update": "2026-10-28T01:36:22.709208+00:00",
     "last_successful_analysis": null,
-    "last_attempt": "2026-10-27T01:37:36.557771+00:00",
+    "last_attempt": "2026-10-28T01:36:22.709208+00:00",
     "status": "awaiting_api_key",
     "transaction_fee_rate": 0.001,
     "return_basis": "Recorded cash dividends and split-adjusted quantities; taxes and additional execution costs excluded. Corporate-action coverage may be incomplete.",
@@ -97,6 +97,23 @@
       "market_cutoff": "2026-10-26",
       "metrics": null,
       "red_flag_ids": []
+    },
+    {
+      "id": "decision:2026-10-27:portfolio",
+      "session": "2026-10-27",
+      "analysis_date": "2026-10-28T01:36:22.709208+00:00",
+      "symbol": null,
+      "action": "NO_ACTION",
+      "explanation": "No companies pass all reliable V1 entry conditions; uninvested capital remains cash.",
+      "model": "gemini-3-flash-preview",
+      "analysis_version": "2.0.0",
+      "strategy_version": "1.0.0",
+      "assessment": null,
+      "execution_status": "no_transaction",
+      "financial_as_of": null,
+      "market_cutoff": "2026-10-27",
+      "metrics": null,
+      "red_flag_ids": []
     }
   ],
   "portfolio_snapshots": [
@@ -159,6 +176,38 @@
       "stale_symbols": [],
       "valuation_complete": true,
       "daily_return_pct": -0.0999000999000077
+    },
+    {
+      "cash": 10000.0,
+      "fees": 0.0,
+      "dividends": 0.0,
+      "realized_pnl": 0.0,
+      "date": "2026-10-27",
+      "portfolio_id": "strategy",
+      "invested_value": 0.0,
+      "equity": 10000.0,
+      "unrealized_pnl": 0.0,
+      "cumulative_return_pct": 0.0,
+      "stale_symbols": [],
+      "valuation_complete": true,
+      "daily_return_pct": 0.0
+    },
+    {
+      "cash": 0.0,
+      "fees": 9.99000999,
+      "dividends": 0.0,
+      "realized_pnl": 0.0,
+      "date": "2026-10-27",
+      "portfolio_id": "vwce",
+      "invested_value": 9990.00999001,
+      "equity": 9990.00999001,
+      "unrealized_pnl": -9.99000999,
+      "cumulative_return_pct": -0.0999000999000077,
+      "stale_symbols": [
+        "VWCE.DE"
+      ],
+      "valuation_complete": false,
+      "daily_return_pct": 0.0
     }
   ],
   "sessions": {
@@ -2971,6 +3020,2818 @@
       "analysis_status": "not_needed",
       "analysis_message": "No companies pass all reliable V1 entry conditions; uninvested capital remains cash.",
       "decisions_applied": true
+    },
+    "2026-10-27": {
+      "accounted": true,
+      "screening": [
+        {
+          "symbol": "AAOI",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -12.883879909546586,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AAPL",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 32.62290137729969,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-27",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ABBV",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 37.85756327251325,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ABNB",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 21.008869179600886,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ADBE",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 34.82248520710059,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-08-28",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ADI",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 40.10466200170616,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-08-01",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ADPT",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -22.03960700459799,
+          "forward_pe_class": "Unknown",
+          "red_flags": 3.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AEIS",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 16.565058352203447,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AFRM",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AJG",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ALAB",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 22.74413863404689,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ALHC",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 3.152063478515431,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AMAT",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 33.73560065825562,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-07-26",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AMBA",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": -7.531098265895954,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AMD",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 17.250346740638005,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-27",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AMGN",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 34.951263178834296,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AMSC",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 10.451457910346221,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AMZN",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 13.689022262544489,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ANET",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 45.39315479131666,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ANIP",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 15.208010704996166,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "APH",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 29.510966990557314,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "APP",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 77.67780188658648,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ARES",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ARQT",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 12.651219380722464,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ASTH",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 3.5291819191379097,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AUPH",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 55.68493150684931,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AVGO",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 53.918421141563314,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-08-02",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AVPT",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 8.212378007148882,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AXFO.ST",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Flat",
+          "operating_margin": 4.155636698720823,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AXGN",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -3.091881659520156,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AXON",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 5.172331817392737,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AXSM",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -22.734287349742416,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "AZN",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Flat",
+          "operating_margin": 20.566822672906916,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "B",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 51.341647770219204,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "BKV",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 37.72840608834803,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "BMY",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Flat",
+          "operating_margin": 31.025977029214523,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "BRO",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Flat",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-09-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "BROS",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 12.781133192097318,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "BRZE",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -7.975619416450293,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "BSX",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Flat",
+          "operating_margin": 21.646453509739068,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "BX",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "CALM",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Weak",
+          "operating_margin": -15.226822483770597,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-08-29",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "CAT",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 20.9073650391861,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "CAVA",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 7.2864758058387356,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-07-12",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "CDE",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 19.94432530821893,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "CIEN",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 18.022486594392173,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-08-01",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "CLS",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 7.890629020361254,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-09-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "COMP",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "COP",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 31.2040081415375,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "CRDO",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 25.198172036500814,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-08-01",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "CRM",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 20.546496253856326,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "CRWD",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -2.2593016370282895,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "CRWV",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -1.9029126213592233,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "CSCO",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 24.715974959424994,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-07-25",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "CTRE",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 40.99647965887399,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "CVNA",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 9.219088937093275,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "DASH",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 3.5024696901661425,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "DAVE",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "DDOG",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 0.4864220913207319,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "DT",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 12.889055591220236,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "DTM",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 50.437317784256564,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "DUOL",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 11.373612013911693,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "DVN",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 34.28609950114602,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "DXCM",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 24.3274228064812,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "DY",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 9.571480631953525,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-08-01",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ECG",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 9.075658501055988,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "EPRT",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 56.02919292587345,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-09-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ESTA",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -6.351603446744249,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "EVC",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 13.149130543525478,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "EVR",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "FA",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 12.70670710374964,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "FIVE",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 21.827310971999054,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-08-01",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "FIX",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 16.583109904622624,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-09-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "FLYW",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -1.6519219763449067,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "FN",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 10.202935427287677,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-26",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "FOUR",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 7.335907335907336,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "FROG",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -8.089905478347948,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "FTAI",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 21.03747304804923,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "GH",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -38.54521789490653,
+          "forward_pe_class": "Unknown",
+          "red_flags": 4.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "GKOS",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -9.302839286676365,
+          "forward_pe_class": "Unknown",
+          "red_flags": 3.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "GOOG",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 34.03285585495342,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "GRND",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 23.5286452677757,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "GTLB",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -19.88967839750711,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "HALO",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 59.803450734824814,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "HL",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 43.64162455706288,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "HON",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Flat",
+          "operating_margin": 21.265518622346814,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-09-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "HOOD",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "HWM",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 27.915194346289752,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "INOD",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 17.212563217642334,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "INSM",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -0.36381925609773297,
+          "forward_pe_class": "Unknown",
+          "red_flags": 3.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "INTU",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 10.909508497932935,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "IOT",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 0.958820856861322,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-08-01",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "IRTC",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -1.133950716414182,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ISRG",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 19.437793157739364,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-09-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "KLAC",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 42.48596603852409,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "KO",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Flat",
+          "operating_margin": 35.08968609865471,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "KRYS",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 48.998506986965495,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "KTOS",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -0.34873583260680036,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-28",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "KVYO",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -4.037768231078105,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "LASR",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -4.318872516375876,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "LGND",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 13.488138413954436,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "LIF",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -0.03585830308444316,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "LITE",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 27.755142601609855,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-27",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "LLY",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 54.222164185601116,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "LMND",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "LMT",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 11.795664139829077,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-09-27",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "LOAR",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 24.39226245636121,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "LPLA",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "LRCX",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 39.95084566814828,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-09-27",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "MA",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 60.224210412848976,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "MDB",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 3.679838501735614,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "MDT",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 18.081180811808117,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "MELI",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 6.716491297079359,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "META",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 20.10495193572855,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-09-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "MIRM",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -24.135426655243045,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "MNST",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 29.18029078536008,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "MPC",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 14.082394122398739,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "MPWR",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 30.989290689160775,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "MRVL",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 16.781659548059725,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-08-01",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "MSFT",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 45.11093581610319,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "MSTR",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Flat",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": 3.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "MTSI",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 22.532630896133384,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-07-03",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "MU",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 80.67823489276955,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-09-03",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "NBIX",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 15.797705943691346,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "NET",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -29.551432992223383,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "NFLX",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 34.63211936826093,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-09-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "NIBE-B.ST",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Flat",
+          "operating_margin": 11.355885335053923,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "NOW",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 4.063205417607223,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "NTRA",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -10.068681501162406,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "NTST",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 33.44148984334913,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-09-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "NVDA",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 66.23710000935347,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-07-26",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "NVS",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Flat",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-09-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "NVT",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 20.43770814925576,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "OKE",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 13.221014192049132,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ORCL",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 34.77901266477126,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-08-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "OSCR",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 7.963472958186311,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "OUST",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -36.6949804122579,
+          "forward_pe_class": "Unknown",
+          "red_flags": 3.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "OXY",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 45.44327340359578,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "PANW",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 5.043988269794721,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "PAY",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 9.042901179810166,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "PDFS",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 8.230265403305758,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "PEP",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Flat",
+          "operating_margin": 16.855266281554165,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-09-05",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "PH",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 25.612510860121635,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "PL",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -11.640471512770137,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "PLMR",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "PLTR",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 47.120690439088506,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "PODD",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 16.17812149182986,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "PRCT",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": -28.984740417786618,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "PRM",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -94.95299565034377,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "PWR",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 7.270421869966056,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "RBLX",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -15.588835942818244,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "RBRK",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -16.828628937883256,
+          "forward_pe_class": "Unknown",
+          "red_flags": 3.0,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "RDDT",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 28.787993614153223,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "RELY",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 13.466665051014227,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "RGLD",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 62.134021694015395,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "RKLB",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -24.571701998581595,
+          "forward_pe_class": "Unknown",
+          "red_flags": 3.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ROAD",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 10.944769856056224,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "RSI",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 11.739669253585795,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "RUN",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 3.998675843804742,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "RYTM",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -68.13837625429794,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "S",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -31.084556871851248,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "SEI",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 25.757976298997264,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "SHOP",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 13.619871615964277,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "SITM",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 5.218125921032573,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "SNOW",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -17.000788082180357,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "SNPS",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 14.43345545218833,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "SPGI",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "SSRM",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 43.1899197382593,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "STX",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 42.959492973270876,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-07-03",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "SYK",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 25.17832751555623,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "SYM",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 4.5634386644433285,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-27",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "TARS",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -11.447168683012098,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "TEAM",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 11.929051684462054,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "TEM",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -19.84726238345979,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "TER",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 32.94306202454496,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-28",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "TGT",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Flat",
+          "operating_margin": 9.646181091977844,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-08-01",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "TGTX",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 9.01824536584351,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "TMDX",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 12.496051550950787,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "TOST",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 7.966457023060797,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "TPB",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 11.690682708449916,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "TSLA",
+          "eligible": false,
+          "reasons": [
+            "Revenue strength is not Strong or Solid, or is unavailable.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Weak",
+          "operating_margin": 2.560079868786993,
+          "forward_pe_class": "Unknown",
+          "red_flags": 2.0,
+          "financial_as_of": "2026-09-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "TVTX",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 2.3315878856495895,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "TXN",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 47.46490503715937,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-09-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "UBER",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 13.318300331195829,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "UI",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 36.2734084195096,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "UNP",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 40.892038349312216,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-09-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "V",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 61.29115447434024,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "VIAV",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 13.834348905438954,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-27",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "VIRT",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": null,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "VLO",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 11.682705279251731,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "VRT",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 19.482026692728216,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "VRTX",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": 37.400641890878546,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "VSEC",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 10.900460215925207,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "VTR",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 13.430106370554354,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "WDC",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 46.70166628623602,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-10-02",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "WGS",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Solid",
+          "operating_margin": -15.25253407899336,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "XMTR",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -2.418440334961619,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "YPF",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 27.578338910860968,
+          "forward_pe_class": "Unknown",
+          "red_flags": null,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ZETA",
+          "eligible": false,
+          "reasons": [
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": 3.8223350483099425,
+          "forward_pe_class": "Unknown",
+          "red_flags": 0.0,
+          "financial_as_of": "2026-06-30",
+          "price_as_of": "2026-10-27"
+        },
+        {
+          "symbol": "ZS",
+          "eligible": false,
+          "reasons": [
+            "Positive validated operating margin is required.",
+            "A fresh, sourced annual forward EPS estimate with Cheap/Fair forward P/E is required.",
+            "A complete current zero-red-flag assessment is required."
+          ],
+          "revenue_strength": "Strong",
+          "operating_margin": -1.7248117036022648,
+          "forward_pe_class": "Unknown",
+          "red_flags": 1.0,
+          "financial_as_of": "2026-07-31",
+          "price_as_of": "2026-10-27"
+        }
+      ],
+      "universe_count": 200,
+      "unavailable_symbols": [],
+      "candidates": [],
+      "analysis_status": "not_needed",
+      "analysis_message": "No companies pass all reliable V1 entry conditions; uninvested capital remains cash.",
+      "decisions_applied": true
     }
   },
   "ai_usage": [],
@@ -3006,6 +5867,21 @@
         "observed_at": "2026-10-27T01:36:20.214952+00:00",
         "fx_to_eur": 0.89381,
         "fx_date": "2026-10-26",
+        "fx_source": "frankfurter:historical:USD/EUR"
+      },
+      "2026-10-27": {
+        "date": "2026-10-27",
+        "close": 769.6599731445312,
+        "currency": "USD",
+        "source": "yfinance:history:SPY:Close:auto_adjust=False:as_traded",
+        "close_timestamp": "2026-10-27T20:00:00+00:00",
+        "split_ratio": 1.0,
+        "dividend": 0.0,
+        "corporate_actions_available": true,
+        "unsupported_action": false,
+        "observed_at": "2026-10-28T01:35:08.141102+00:00",
+        "fx_to_eur": 0.89686,
+        "fx_date": "2026-10-27",
         "fx_source": "frankfurter:historical:USD/EUR"
       }
     }
@@ -3046,6 +5922,11 @@
       "2026-10-26": {
         "rate": 0.89381,
         "date": "2026-10-26",
+        "source": "frankfurter:historical:USD/EUR"
+      },
+      "2026-10-27": {
+        "rate": 0.89686,
+        "date": "2026-10-27",
         "source": "frankfurter:historical:USD/EUR"
       }
     }

@@ -8,9 +8,9 @@
     "currency": "EUR",
     "strategy_version": "1.0.0",
     "analysis_version": "1.0.0",
-    "latest_successful_update": "2026-10-27T01:37:36.557771+00:00",
+    "latest_successful_update": "2026-10-28T01:36:22.709208+00:00",
     "last_successful_analysis": null,
-    "last_attempt": "2026-10-27T01:37:36.557771+00:00",
+    "last_attempt": "2026-10-28T01:36:22.709208+00:00",
     "status": "awaiting_api_key",
     "transaction_fee_rate": 0.001,
     "return_basis": "Recorded cash dividends and split-adjusted quantities; taxes and additional execution costs excluded. Corporate-action coverage may be incomplete.",
@@ -35,7 +35,7 @@
       "fees": 0.0,
       "dividends": 0.0,
       "realized_pnl": 0.0,
-      "date": "2026-10-26",
+      "date": "2026-10-27",
       "portfolio_id": "strategy",
       "invested_value": 0.0,
       "equity": 10000.0,
@@ -48,7 +48,7 @@
         "fees": 0.0,
         "dividends": 0.0,
         "realized_pnl": 0.0,
-        "date": "2026-10-26",
+        "date": "2026-10-27",
         "portfolio_id": "strategy",
         "invested_value": 0.0,
         "equity": 10000.0,
@@ -94,7 +94,7 @@
           "current_price": 170.0,
           "price_date": "2026-10-26",
           "fx_to_eur": 1.0,
-          "fx_date": "2026-10-26",
+          "fx_date": "2026-10-27",
           "fx_source": "fx:EUR/EUR:identity",
           "market_value": 9990.00999001,
           "unrealized_pnl": -9.99000999,
@@ -104,35 +104,39 @@
           "thesis_status": "unknown",
           "last_assessment_date": null,
           "last_explanation": null,
-          "holding_days": 0,
+          "holding_days": 1,
           "realized_return_pct": 0.0
         }
       ],
       "fees": 9.99000999,
       "dividends": 0.0,
       "realized_pnl": 0.0,
-      "date": "2026-10-26",
+      "date": "2026-10-27",
       "portfolio_id": "vwce",
       "invested_value": 9990.00999001,
       "equity": 9990.00999001,
       "unrealized_pnl": -9.99000999,
       "cumulative_return_pct": -0.0999000999000077,
-      "stale_symbols": [],
-      "valuation_complete": true,
+      "stale_symbols": [
+        "VWCE.DE"
+      ],
+      "valuation_complete": false,
       "performance": {
         "cash": 0.0,
         "fees": 9.99000999,
         "dividends": 0.0,
         "realized_pnl": 0.0,
-        "date": "2026-10-26",
+        "date": "2026-10-27",
         "portfolio_id": "vwce",
         "invested_value": 9990.00999001,
         "equity": 9990.00999001,
         "unrealized_pnl": -9.99000999,
         "cumulative_return_pct": -0.0999000999000077,
-        "stale_symbols": [],
-        "valuation_complete": true,
-        "daily_return_pct": -0.0999000999000077,
+        "stale_symbols": [
+          "VWCE.DE"
+        ],
+        "valuation_complete": false,
+        "daily_return_pct": 0.0,
         "max_drawdown_pct": -0.0999000999000077,
         "annualized_return_pct": null
       }
@@ -198,6 +202,38 @@
       "stale_symbols": [],
       "valuation_complete": true,
       "daily_return_pct": -0.0999000999000077
+    },
+    {
+      "cash": 10000.0,
+      "fees": 0.0,
+      "dividends": 0.0,
+      "realized_pnl": 0.0,
+      "date": "2026-10-27",
+      "portfolio_id": "strategy",
+      "invested_value": 0.0,
+      "equity": 10000.0,
+      "unrealized_pnl": 0.0,
+      "cumulative_return_pct": 0.0,
+      "stale_symbols": [],
+      "valuation_complete": true,
+      "daily_return_pct": 0.0
+    },
+    {
+      "cash": 0.0,
+      "fees": 9.99000999,
+      "dividends": 0.0,
+      "realized_pnl": 0.0,
+      "date": "2026-10-27",
+      "portfolio_id": "vwce",
+      "invested_value": 9990.00999001,
+      "equity": 9990.00999001,
+      "unrealized_pnl": -9.99000999,
+      "cumulative_return_pct": -0.0999000999000077,
+      "stale_symbols": [
+        "VWCE.DE"
+      ],
+      "valuation_complete": false,
+      "daily_return_pct": 0.0
     }
   ],
   "transactions": [
@@ -269,6 +305,23 @@
       "metrics": null,
       "red_flag_ids": [],
       "assessment": null
+    },
+    {
+      "id": "decision:2026-10-27:portfolio",
+      "session": "2026-10-27",
+      "analysis_date": "2026-10-28T01:36:22.709208+00:00",
+      "symbol": null,
+      "action": "NO_ACTION",
+      "explanation": "No companies pass all reliable V1 entry conditions; uninvested capital remains cash.",
+      "model": "gemini-3-flash-preview",
+      "analysis_version": "2.0.0",
+      "strategy_version": "1.0.0",
+      "execution_status": "no_transaction",
+      "financial_as_of": null,
+      "market_cutoff": "2026-10-27",
+      "metrics": null,
+      "red_flag_ids": [],
+      "assessment": null
     }
   ],
   "ai_usage": [],
@@ -281,6 +334,14 @@
   "reviews": [
     {
       "session": "2026-10-26",
+      "status": "not_needed",
+      "candidates": [],
+      "screened_count": 200,
+      "eligible_count": 0,
+      "message": "No companies pass all reliable V1 entry conditions; uninvested capital remains cash."
+    },
+    {
+      "session": "2026-10-27",
       "status": "not_needed",
       "candidates": [],
       "screened_count": 200,
