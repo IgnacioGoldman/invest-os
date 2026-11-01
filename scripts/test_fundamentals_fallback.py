@@ -51,6 +51,27 @@ def fallback_snapshot(primary, vendor):
 
 
 class FundamentalsFallbackTests(unittest.TestCase):
+    def test_quarter_date_uses_revenue_instead_of_stale_debt_observation(self):
+        debt = OpenDataMetric(value=10, source='sec_companyfacts:us-gaap/LongTermDebt:USD',
+            tier='exact_public_fact', as_of='2024-12-31', notes='Older balance-sheet observation')
+        with patch('app.entry_engine.open_data_metrics._quarterly_debt_metrics', return_value={(2026, 'Q2'): debt}):
+            snapshot = compute_open_data_snapshot(ticker='TEST', cik=123, price=None, companyfacts=primary_facts())
+        quarter = next(r for r in snapshot.historical_series['quarterly_fundamentals'] if r.period == 'FY2026 Q2')
+        self.assertEqual(quarter.as_of, '2026-06-30')
+        self.assertEqual(quarter.metrics['revenue'].as_of, quarter.as_of)
+
+    def test_missing_historical_flag_inputs_trigger_bounded_statement_fallback(self):
+        from app.services.stock_data_quality import fundamental_gap_reasons
+        from test_screening_metrics import ordinary
+        payload = ordinary()
+        # Current metrics remain complete; the two-year FCF check needs this older quarter.
+        payload['historical_series']['quarterly_fundamentals'][-7]['metrics'].pop('capex')
+        snapshot = OpenDataSnapshot.model_validate(payload)
+        reason = 'historical_series.red_flags.negative_fcf'
+        self.assertIn(reason, fundamental_gap_reasons(snapshot, include_history=True))
+        self.assertNotIn(reason, fundamental_gap_reasons(snapshot, include_history=False))
+        self.assertNotIn(reason, fundamental_gap_reasons(snapshot.model_copy(update={'sector': 'Financials'}), include_history=True))
+
     def test_full_collection_uses_yahoo_history_without_waiting_for_stooq(self):
         history = [HistoricalPricePoint(date="2026-10-12", close=100, source="yfinance")]
         cache = SimpleNamespace(get=lambda *args: None, set=lambda *args: None)

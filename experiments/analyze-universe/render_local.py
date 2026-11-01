@@ -20,19 +20,30 @@ COLORS = {'Strong': '🟢', 'Solid': '🟢', 'Average': '🟡', 'Weak': '🟠', 
 
 def flag_cell(metric, color):
     value, observed = metric.get('value'), metric.get('observed_count') or 0
-    label = str(value) if value is not None else f'≥{observed}' if observed else 'Not fully assessed'
+    coverage = metric.get('coverage') or {}
+    assessed = coverage.get('assessed', 0)
+    outside_scope = bool(metric.get('checks')) and all(g['state'] == 'not_applicable' for g in metric['checks'])
+    label = 'Not applicable' if outside_scope else str(value) if value is not None else f'{observed} detected' if assessed else 'Not assessed'
     detected = [group for group in metric['checks'] if group['state'] == 'flagged']
     tone = color if detected else 'unknown'
     cell = f'<td class="flags {color}-flags"><strong class="{tone}">{html.escape(label)}</strong>'
     if value is not None:
         cell += f'<small>of {metric["max_count"]} {"concern groups" if color == "red" else "positive rules"}</small>'
+    elif outside_scope:
+        cell += '<small>Outside these rules’ sector scope</small>'
     else:
-        coverage = metric.get('coverage') or {}
         cell += f'<small>{coverage.get("assessed", 0)}/{coverage.get("applicable", coverage.get("total", 0))} assessed</small>'
     if detected:
         cell += '<ul class="flag-names">' + ''.join(f'<li>{html.escape(group["title"])}</li>' for group in detected) + '</ul>'
     elif value == 0:
         cell += '<small>None detected by these rules</small>'
+    elif assessed and observed == 0:
+        cell += '<small>None detected among assessed checks</small>'
+    if color == 'red':
+        clear = [group for group in metric['checks'] if group['state'] == 'clear']
+        if clear:
+            cell += '<ul class="assessed-checks">' + ''.join(
+                f'<li>{html.escape(group["title"])} · No flag detected</li>' for group in clear) + '</ul>'
     if metric['checks']:
         cell += '<details><summary>All checks</summary>'
         for group in metric['checks']:
@@ -42,7 +53,7 @@ def flag_cell(metric, color):
             if group.get('reason'):
                 cell += f'<small>{html.escape(group["reason"])}</small>'
             for branch in group['checks']:
-                branch_state = {'flagged': 'Detected', 'clear': 'Rule not met' if color == 'green' else 'No flag detected', 'unassessed': 'Not assessed'}[branch['state']]
+                branch_state = 'Outside rule scope' if group['state'] == 'not_applicable' else {'flagged': 'Detected', 'clear': 'Rule not met' if color == 'green' else 'No flag detected', 'unassessed': 'Not assessed'}[branch['state']]
                 cell += f'<p><b>{html.escape(branch["title"])} · {branch_state}</b><br>{html.escape(branch["formula"])}<br>{html.escape(branch["reason"])}</p>'
             cell += '</section>'
         if metric.get('notes'):
@@ -50,6 +61,24 @@ def flag_cell(metric, color):
         cell += '</details>'
     elif metric.get('notes'):
         cell += '<small>' + html.escape(metric['notes']) + '</small>'
+    return cell + '</td>'
+
+
+def unassessed_flags_cell(missing):
+    cell = '<td class="flags-not-assessed">'
+    if not any(missing.values()):
+        return cell + '<span class="pass">None</span></td>'
+    for color, checks in missing.items():
+        if not checks:
+            continue
+        label = (f'{color.capitalize()}-flag assessment not available'
+                 if any(c['id'] == 'assessment_unavailable' for c in checks)
+                 else f'{len(checks)} {color}-flag check' + ('s' if len(checks) != 1 else '') + ' not assessed')
+        cell += f'<strong>{html.escape(label)}</strong><ul>'
+        for check in checks:
+            group = f'{check["group"]}: ' if check['group'] and check['group'] != check['title'] else ''
+            cell += f'<li>{html.escape(group + check["title"])}<small>{html.escape(check["reason"])}</small></li>'
+        cell += '</ul>'
     return cell + '</td>'
 
 
@@ -142,38 +171,21 @@ def render(directory):
         '.flags details{font-size:12px;margin-top:12px}.flags summary{cursor:pointer;color:#9acbff}'
         '.flags section{margin:14px 0}.flags section p{line-height:1.6}'
         '.flags>small:last-child{font-size:11px;line-height:1.5}')
-    document = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Invest-OS: support and financial filters</title><style>' + css + '</style></head><body><h1 id="view-title">At/near support — ' + str(audit_result['at_or_near_support']) + ' stocks</h1>'
-    if audit_result['financial_refresh']:
-        unknown = sum(s['rules']['operating_margin']['status'] == 'Unknown' for s in audit_result['stocks'].values())
-        document += (f'<p id="financial-refresh"><strong>Financial checks updated {audit_result["evaluated_on"]} after the local data repair.</strong> '
-            f'Operating margins: {len(rows)-unknown} available, {unknown} Unknown. '
-            'Ranks, quality/valuation tags and rationales remain the original 25 October analysis. '
-            '<a href="../2026-10-26-data-repair/operating-margin-audit.md">Repair report</a></p>')
-    document += '<p>Analyzed in this conversation on 25 October 2026, using the existing Analyze inputs and criteria. Quotes: 23 October 2026. Valuations are provisional; individual evidence and risks are linked below.</p><details><summary>Method and evidence limits</summary>'
-    for paragraph in preamble.split('\n\n')[1:]:
-        if paragraph.strip():
-            document += '<p>' + html.escape(paragraph.replace('**','')).replace('[research notes](research-notes.json)', '<a href="research-notes.json">research notes</a>') + '</p>'
-    document += '</details>'
-    document += (f'<p id="flag-explanation"><strong>Separate red and green flag columns for every stock, assessed {audit_result["evaluated_on"]}.</strong> '
-        'Red flags count up to four concern groups. Green flags count up to three rules: sustained revenue growth, '
-        'profitable growth and cash-backed earnings. The two growth rules overlap. '
-        'Expand All checks for conditions and explanations. Incomplete assessments show a lower bound or Not fully assessed; '
-        'they never imply zero. These counts do not change the original ranking or the existing financial-rule filter.</p>')
-    document += (f'<p><strong>{audit_result["universe"]} stocks → {audit_result["at_or_near_support"]} at/near support → '
-        f'{audit_result["pass_all_three"]} pass all three financial rules; {audit_result["do_not_pass"]} do not pass.</strong><br>'
-        'Rules: Revenue Growth YoY &gt;0%, Operating Margin &gt;0%, Red Flag Count ≤1. '
-        'Incomplete or unvalidated data does not pass. Rank always refers to the original 200-stock ranking.</p>')
-    near_count = sum(support['stocks'][r['symbol']]['nearest'] is not None
-        and support['stocks'][r['symbol']]['nearest']['status'] in {'At Support', 'Near Support'} for r in rows[:10])
-    document += (f'<p><strong>{near_count} of the top 10 stocks are at or near support.</strong> '
-        'Proximity uses the archived app rules across 1M, 3M, 6M, 1Y, 2Y and 5Y. '
-        'A zone containing the price takes priority; otherwise the closest midpoint is shown. '
-        'Near Support means above the zone and within 6% of its midpoint. '
-        'Distances use the saved 23 October quote; expand a cell to see all valid timeframes.</p>')
-    document += '<p><a href="filter-research/support-audit.csv">Support and financial checks CSV</a> · <a href="filter-research/support-audit.md">Pass/fail breakdown</a> · <a href="filter-research/operating-margin-diagnostics.md">Operating-margin diagnostics</a> · <a href="ranking.csv">Full ranking CSV</a> · <a href="research-notes.json">Research notes</a></p>'
-    document += '<div class="controls"><label><input type="checkbox" id="support-only" checked>At/near any support only</label><label>Financial rules <select id="financial-filter"><option value="all">All results</option><option value="pass">Pass all three</option><option value="fail">Do not pass all three</option></select></label></div><input id="search" placeholder="Search stock, assessment or rationale" aria-label="Search ranking">'
-    document += f'<p id="count">{audit_result["at_or_near_support"]} stocks</p><table><thead><tr>'
-    document += ''.join('<th>' + h + '</th>' for h in ['Original rank','Stock','Red flags','Green flags','Business quality','Valuation','Proximity to support','Three financial rules','Rationale']) + '</tr></thead><tbody>'
+    css += ('.assessed-checks{padding-left:18px;font-size:12px;line-height:1.5;color:#adbed0}'
+        '.flags-not-assessed{min-width:220px;max-width:300px;color:#e3bba3}'
+        '.flags-not-assessed ul{padding-left:18px;font-size:12px;line-height:1.5}'
+        '.flags-not-assessed small{font-size:11px}')
+    assets = Path(__file__).parent
+    playground = json.loads(subprocess.run(
+        ['node', str(assets / 'filter_playground.cjs'), str(directory)],
+        check=True, capture_output=True, text=True).stdout)
+    css += (assets / 'filter_playground.css').read_text()
+    document = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width,initial-scale=1">'
+        '<title>Invest-OS: filter playground</title><style>' + css + '</style></head><body>')
+    document += (assets / 'filter_playground.html').read_text()
+    document += '<div class="table-wrap"><table><thead><tr>'
+    document += ''.join('<th>' + h + '</th>' for h in ['Original rank','Stock','Red flags','Green flags','flags_not_assessed','Business quality','Valuation','Proximity to support','Three financial rules','Rationale']) + '</tr></thead><tbody>'
     for row in rows:
         symbol = row['symbol']
         checked = research['companies'].get(symbol)
@@ -203,27 +215,32 @@ def render(directory):
             rule = checked_rules['rules'][field]
             value = rule['value']
             value_label = 'Unknown' if value is None else str(int(value)) if field == 'red_flag_count' else f'{value:.2f}%'
+            if field == 'red_flag_count' and value is None:
+                flag_metric = checked_rules['flag_metrics'][field]
+                coverage = flag_metric.get('coverage') or {}
+                if coverage.get('assessed', 0):
+                    value_label = f'{flag_metric["observed_count"]} detected · {coverage["assessed"]}/{coverage.get("applicable", coverage.get("total", 0))} assessed'
             financial_cell += f'<span class="{rule["status"].lower()}">{label}: {value_label}</span><br>'
         financial_cell += '</small>'
         if audit_result['financial_refresh']:
             financial_cell += f'<small><a href="../../../../frontend/public/data/open-data/snapshots/{html.escape(symbol)}.json">Refreshed financial data</a></small>'
         if checked_rules['exclusion_reasons']:
-            financial_cell += '<small class="reason">' + html.escape('; '.join(checked_rules['exclusion_reasons'])) + '</small>'
+            reasons = [reason.replace('Red flags: incomplete assessment', 'Unassessed red-flag checks: see flags_not_assessed')
+                       for reason in checked_rules['exclusion_reasons']]
+            financial_cell += '<small class="reason">' + html.escape('; '.join(reasons)) + '</small>'
         financial_cell += '</td>'
         supported = checked_rules['at_or_near_support']
-        document += (f'<tr data-support="{int(supported)}" data-financial="{"pass" if passes else "fail"}"' + ('' if supported else ' hidden') + f'><td>{row["rank"]}</td><td><strong>{html.escape(symbol)}</strong><small>{html.escape(inputs[symbol]["company"] or symbol)}</small></td>'
+        document += (f'<tr data-symbol="{html.escape(symbol, quote=True)}" data-support="{int(supported)}" data-financial="{"pass" if passes else "fail"}"><td>{row["rank"]}</td><td><strong>{html.escape(symbol)}</strong><small>{html.escape(inputs[symbol]["company"] or symbol)}</small></td>'
             + flag_cell(checked_rules['flag_metrics']['red_flag_count'], 'red')
-            + flag_cell(checked_rules['flag_metrics']['green_flag_count'], 'green') +
+            + flag_cell(checked_rules['flag_metrics']['green_flag_count'], 'green')
+            + unassessed_flags_cell(checked_rules['flags_not_assessed']) +
             f'<td class="{row["business_quality"]}">{row["business_quality"]}</td><td class="{row["valuation"]}">{row["valuation"]}</td>'
             + support_cell + financial_cell +
             f'<td>{html.escape(row["rationale"])}<small>{links}</small></td></tr>')
-    document += '''</tbody></table><script>
-const search=document.getElementById('search'),supportOnly=document.getElementById('support-only'),financial=document.getElementById('financial-filter');
-function update(){let n=0;for(const row of document.querySelectorAll('tbody tr')){
-row.hidden=(supportOnly.checked&&row.dataset.support!=='1')||(financial.value!=='all'&&row.dataset.financial!==financial.value)||!row.textContent.toLowerCase().includes(search.value.toLowerCase());if(!row.hidden)n++}
-document.getElementById('count').textContent=n+' stocks';document.getElementById('view-title').textContent=(supportOnly.checked?'At/near support':'Full-universe Analyze')+' — '+n+' stocks';}
-search.addEventListener('input',update);supportOnly.addEventListener('change',update);financial.addEventListener('change',update);update();
-</script></body></html>'''
+    # Inline the UI and data so the experiment also works directly over file://.
+    payload = json.dumps(playground, ensure_ascii=False, allow_nan=False).replace('<', '\\u003c')
+    document += ('</tbody></table></div><script id="playground-data" type="application/json">'
+        + payload + '</script><script>' + (assets / 'filter_playground.js').read_text() + '</script></body></html>')
     (directory / 'ranking.html').write_text(document)
     metadata = {'status': 'complete', 'execution': 'Analysis authored in the current Codex conversation; no successful Gemini generation',
         'completed_at': previous_metadata.get('completed_at') or datetime.now(timezone.utc).isoformat(), 'count': len(rows),

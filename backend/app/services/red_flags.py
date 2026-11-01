@@ -5,7 +5,7 @@ import math
 from datetime import date, timedelta
 
 from app.services.screening_metrics import (
-    BUSINESS_MAX_AGE_DAYS, currencies, day, financial, number, quarter_index, result,
+    BUSINESS_MAX_AGE_DAYS, day, result,
 )
 
 RED_FLAG_VERSION = 2
@@ -13,65 +13,19 @@ MAX_RED_FLAGS = 4
 
 
 def build_red_flag_count(snapshot: dict, today: date, valuation: dict | None = None) -> dict:
-    history = snapshot.get('historical_series', {})
-    rows = sorted(history.get('quarterly_fundamentals', []), key=lambda r: r.get('as_of', ''))
-    latest = rows[-1] if rows else {}
-    end = day(latest.get('as_of'))
-    latest_report = max((r.get('as_of', '') for key in ('quarterly_fundamentals', 'quarterly_revenue')
-                         for r in history.get(key, [])), default='')
-    fresh = bool(end and 0 <= (today - end).days <= BUSINESS_MAX_AGE_DAYS
-                 and latest.get('as_of') == latest_report)
-    classification = f"{snapshot.get('sector') or ''} {snapshot.get('industry') or ''}".strip().lower()
-    excluded = financial(snapshot) or any(term in classification for term in ('reit', 'real estate investment trust', 'investment fund'))
-    eligible = bool(classification) and not excluded
-    inputs: list[dict] = []
+    from app.services.financial_flag_facts import QuarterlyFlagFacts
+    context = QuarterlyFlagFacts(snapshot, today)
+    latest, end = context.latest, context.end
+    fresh, eligible, excluded = context.fresh, context.eligible, context.excluded
+    inputs, facts = context.inputs, context.facts
 
     def lower(a: float, b: float) -> bool:
         return a < b and not math.isclose(a, b, rel_tol=1e-12, abs_tol=1e-10)
 
-    def facts(count: int, keys: tuple[str, ...]) -> tuple[list[dict], list[dict]] | None:
-        if not fresh or not eligible or len(rows) < count:
-            return None
-        window = rows[-count:]
-        indices = [quarter_index(r.get('period', '')) for r in window]
-        if any(i is None for i in indices) or indices != list(range(indices[-1] - count + 1, indices[-1] + 1)):
-            return None
-        dates = [day(r.get('as_of')) for r in window]
-        if any(d is None for d in dates) or any(not 60 <= (b - a).days <= 120 for a, b in zip(dates, dates[1:])):
-            return None
-        if any(not 350 <= (dates[i] - dates[i-4]).days <= 380 for i in range(4, len(dates))):
-            return None
-        evidence, units = [], set()
-        for row in window:
-            if (sum(r.get('period') == row['period'] for r in rows) != 1
-                    or sum(r.get('as_of') == row['as_of'] for r in rows) != 1):
-                return None
-            for key in keys:
-                m = row.get('metrics', {}).get(key, {})
-                sources = m.get('source', '').split('; ')
-                if (number(m.get('value')) is None or m.get('as_of') != row['as_of']
-                        or m.get('tier') not in {'exact_public_fact', 'computed_from_public_facts'}
-                        or not sources or not all(s.startswith(('sec_companyfacts:', 'issuer_statement:', 'yfinance_statement:')) for s in sources)
-                        or 'proxy' in (m.get('notes') or '').lower() or len(currencies(m)) != 1):
-                    return None
-                units.update(currencies(m))
-                if key == 'revenue':
-                    comparable = [r.get('metrics', {}).get('revenue', {}) for r in history.get('quarterly_revenue', [])
-                                  if r.get('period') == row['period'] and r.get('as_of') == row['as_of']]
-                    if any(number(other.get('value')) is not None and currencies(other) == currencies(m)
-                           and not math.isclose(other['value'], m['value'], rel_tol=1e-12, abs_tol=1e-6) for other in comparable):
-                        return None
-                evidence.append({'period': row['period'], 'as_of': row['as_of'], 'metric': key,
-                                 'value': m['value'], 'currency': next(iter(currencies(m))), 'source': m['source']})
-        if len(units) != 1:
-            return None
-        inputs.extend(evidence)
-        return window, evidence
-
     def outcome(key: str, title: str, formula: str, data, predicate, describe) -> dict:
         if data is None:
             return {'id': key, 'title': title, 'state': 'unassessed', 'formula': formula,
-                    'reason': 'Comparable, sourced quarterly inputs are missing, invalid or stale.', 'evidence': []}
+                    'reason': context.failure or 'Comparable, sourced quarterly inputs are missing, invalid or stale.', 'evidence': []}
         window, evidence = data
         triggered, values = predicate(window)
         return {'id': key, 'title': title, 'state': 'flagged' if triggered else 'clear',
@@ -116,6 +70,7 @@ def build_red_flag_count(snapshot: dict, today: date, valuation: dict | None = N
         data = facts(count, ('operating_income', 'revenue'))
         if data and any(r['metrics']['revenue']['value'] <= 0
                         or abs(r['metrics']['operating_income']['value'] / r['metrics']['revenue']['value']) > 1 for r in data[0]):
+            context.failure = 'Reported operating margin is outside the validated range (−100% to 100%) in a required quarter.'
             return None
         return data
 

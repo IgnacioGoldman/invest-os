@@ -1,0 +1,35 @@
+<header class="playground-header">
+  <div><span class="eyebrow">INVEST-OS / EXPERIMENTS</span><h1 id="view-title">Filter playground</h1>
+    <p class="snapshot-note">Explore filters against the original 200-stock ranking. Financial checks: <span id="financial-date"></span>. Quotes: <span id="quote-date"></span>.</p></div>
+  <button id="new-filter" class="primary" type="button">+ Create filter</button>
+</header>
+<section aria-label="Compare filters"><div id="filter-cards" class="filter-cards"></div></section>
+<section id="filter-builder" class="panel" aria-labelledby="builder-title" hidden>
+  <div class="panel-heading"><h2 id="builder-title">Create filter</h2><button id="close-builder" type="button">Cancel</button></div>
+  <form id="filter-form">
+    <div class="builder-meta"><label>Filter name<input id="filter-name" maxlength="80" required placeholder="e.g. Profitable growth near support"></label>
+      <label>Match<select id="rule-logic"><option value="and">All conditions (AND)</option><option value="or">Any condition (OR)</option></select></label></div>
+    <div id="rules"></div><button id="add-rule" type="button">+ Add condition</button>
+    <p class="muted">Unknown or incomplete numeric metrics do not match a condition. Support matches any selected timeframe. Review quality and valuation refer to the original analysis.</p>
+    <div class="builder-footer"><span id="preview-count" role="status" aria-live="polite"></span><button class="primary" type="submit">Save filter</button></div>
+    <p id="form-error" class="fail" role="alert" hidden></p>
+  </form>
+</section>
+<section id="capture-panel" class="panel" aria-labelledby="capture-title">
+  <h2 id="capture-title">Ranked Filter Capture Chart</h2>
+  <p id="capture-summary" class="muted" aria-live="polite"></p>
+  <div id="capture-chart" class="capture-chart"></div>
+  <div id="capture-legend" class="capture-legend"><span><i class="capture-swatch"></i>Retained in rank group</span><span><i class="capture-baseline"></i>Overall retention</span></div>
+  <p id="capture-detail" class="capture-detail muted" role="status"></p>
+  <p class="muted capture-note">Each bar shows the percentage retained from 20 stocks in the original ranking. A descending shape means the filter favors higher-ranked stocks. Table search does not affect this chart.</p>
+</section>
+<section class="panel result-panel" aria-label="Filter results">
+  <div class="panel-heading"><div><h2 id="active-name">All stocks</h2><p id="active-description" class="muted"></p></div>
+    <div class="actions"><button id="customize-filter" type="button">Customize</button><button id="edit-filter" type="button" hidden>Edit</button><button id="delete-filter" type="button" hidden>Delete</button><button id="export-results" type="button">Export CSV</button></div></div>
+  <div id="result-stats" class="result-stats"></div>
+  <div class="result-controls"><label class="search-label">Search<input id="search" type="search" placeholder="Stock, company or rationale" aria-label="Search ranking"></label>
+    <label>Sort<select id="sort"><option value="rank-asc">Original rank: best first</option><option value="rank-desc">Original rank: worst first</option><option value="symbol">Stock: A–Z</option></select></label>
+    <p id="count" role="status" aria-live="polite">200 stocks</p></div>
+  <p id="empty-results" class="empty" hidden>No stocks match. Adjust your conditions or clear the search.</p>
+</section>
+<p id="storage-message" class="muted" role="status" hidden></p>

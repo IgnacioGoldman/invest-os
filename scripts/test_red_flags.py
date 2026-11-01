@@ -56,6 +56,9 @@ class RedFlagTests(unittest.TestCase):
         self.assertFalse(m['coverage']['complete'])
         self.assertEqual(m['coverage']['assessed'], 2)
         self.assertEqual(check(m, 'cash_generation')['state'], 'unassessed')
+        fcf = next(b for b in check(m, 'cash_generation')['checks'] if b['id'] == 'negative_fcf')
+        self.assertIn('capex is unavailable', fcf['reason'])
+        self.assertIn('FY2025 Q4', fcf['reason'])
 
     def test_detected_flags_remain_visible_in_partial_assessment(self):
         s = clean()

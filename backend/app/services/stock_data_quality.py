@@ -37,6 +37,13 @@ def fundamental_gap_reasons(snapshot: OpenDataSnapshot, *, include_history: bool
             reasons.append(f"{group_name}.{key}")
     if include_history and calculate_revenue_growth_momentum(snapshot.model_dump(mode="json"))["label"] == "Unknown":
         reasons.append("historical_series.latest_six_revenue_growth_quarters")
+    if include_history:
+        from app.services.red_flags import build_red_flag_count
+        flags = build_red_flag_count(snapshot.model_dump(mode='json'), snapshot.generated_at.date())
+        for group in flags['checks']:
+            if group['state'] != 'not_applicable':
+                reasons.extend(f'historical_series.red_flags.{check["id"]}' for check in group.get('checks', [])
+                               if check['state'] == 'unassessed')
     from app.services.screening_metrics import financial
     payload = snapshot.model_dump(mode='json')
     if not financial(payload):

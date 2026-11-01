@@ -1,6 +1,6 @@
 # Support list and the three financial rules
 
-**200 stocks → 64 at/near any support → 33 pass all three rules; 31 do not pass.**
+**200 stocks → 64 at/near any support → 34 pass all three rules; 30 do not pass.**
 
 Support uses ANY existing timeframe. The financial rules are revenue growth >0%, operating margin >0%, and a complete validated red-flag count ≤1. Financial checks use 2026-10-26. Original ranks and support context refer to the frozen 200-stock experiment. Unknown inputs do not pass a numeric rule.
 
@@ -39,6 +39,7 @@ Support uses ANY existing timeframe. The financial rules are revenue growth >0%,
 | 42 | 136 | CAVA | 31.30% | 7.29% | 0 | — |
 | 45 | 146 | PDFS | 18.95% | 8.23% | 1 | — |
 | 47 | 153 | DASH | 35.63% | 3.50% | 1 | — |
+| 49 | 158 | HL | 52.45% | 43.64% | 0 | — |
 | 51 | 174 | AMSC | 30.01% | 10.45% | 1 | — |
 | 55 | 179 | RSI | 46.27% | 11.74% | 0 | — |
 
@@ -46,31 +47,30 @@ Support uses ANY existing timeframe. The financial rules are revenue growth >0%,
 
 | Support-list position | Original rank | Stock | Growth | Operating margin | Flags | Reason if excluded |
 | --- | --- | --- | --- | --- | --- | --- |
-| 2 | 7 | BMY | 5.74% | 31.03% | Unknown | Red flags: incomplete assessment |
-| 5 | 21 | RGLD | 114.91% | 62.13% | Unknown | Red flags: incomplete assessment |
+| 2 | 7 | BMY | 5.74% | 31.03% | 0 detected (3/4 assessed) | Red flags: incomplete assessment |
+| 5 | 21 | RGLD | 114.91% | 62.13% | 2 detected (3/4 assessed) | Red flags: incomplete assessment |
 | 10 | 41 | EVR | 19.15% | Unknown | Unknown | Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).; Red flags: incomplete assessment |
 | 27 | 99 | CRDO | 114.73% | 25.20% | 2 | Red flags: 2 exceeds 1 |
 | 29 | 102 | HOOD | 32.25% | Unknown | Unknown | Operating margin: Excluded by the financial-sector comparability rule.; Red flags: incomplete assessment |
 | 32 | 116 | ARES | 24.29% | Unknown | Unknown | Operating margin: Excluded by the financial-sector comparability rule.; Red flags: incomplete assessment |
-| 34 | 118 | LOAR | 39.36% | 24.39% | Unknown | Red flags: incomplete assessment |
+| 34 | 118 | LOAR | 39.36% | 24.39% | 0 detected (3/4 assessed) | Red flags: incomplete assessment |
 | 35 | 121 | LPLA | 35.24% | Unknown | Unknown | Operating margin: Excluded by the financial-sector comparability rule.; Red flags: incomplete assessment |
 | 36 | 122 | VIRT | 19.05% | Unknown | Unknown | Operating margin: Excluded by the financial-sector comparability rule.; Red flags: incomplete assessment |
-| 37 | 124 | SYM | 21.74% | 4.56% | Unknown | Red flags: incomplete assessment |
+| 37 | 124 | SYM | 21.74% | 4.56% | 0 detected (3/4 assessed) | Red flags: incomplete assessment |
 | 38 | 125 | CTRE | 43.46% | 41.00% | Unknown | Red flags: incomplete assessment |
 | 39 | 127 | NTST | 37.17% | 33.44% | Unknown | Red flags: incomplete assessment |
 | 41 | 132 | TER | 103.90% | 32.94% | 2 | Red flags: 2 exceeds 1 |
 | 43 | 138 | SNOW | 35.09% | -17.00% | 2 | Operating margin: -17.00% is not above 0%; Red flags: 2 exceeds 1 |
 | 44 | 145 | TGTX | 70.27% | 9.02% | 2 | Red flags: 2 exceeds 1 |
-| 46 | 150 | NIBE-B.ST | 7.61% | 11.36% | Unknown | Red flags: incomplete assessment |
+| 46 | 150 | NIBE-B.ST | 7.61% | 11.36% | 0 detected (3/4 assessed) | Red flags: incomplete assessment |
 | 48 | 157 | AXGN | 23.06% | -3.09% | 1 | Operating margin: -3.09% is not above 0% |
-| 49 | 158 | HL | 52.45% | 43.64% | Unknown | Red flags: incomplete assessment |
 | 50 | 166 | KTOS | 30.53% | -0.35% | 2 | Operating margin: -0.35% is not above 0%; Red flags: 2 exceeds 1 |
-| 52 | 175 | FTAI | 40.94% | 21.04% | Unknown | Red flags: incomplete assessment |
+| 52 | 175 | FTAI | 40.94% | 21.04% | 1 detected (3/4 assessed) | Red flags: incomplete assessment |
 | 53 | 177 | AFRM | 33.04% | Unknown | Unknown | Operating margin: Excluded by the financial-sector comparability rule.; Red flags: incomplete assessment |
 | 54 | 178 | CVNA | 52.40% | 9.22% | 2 | Red flags: 2 exceeds 1 |
-| 56 | 183 | B | 43.77% | 51.34% | Unknown | Red flags: incomplete assessment |
-| 57 | 185 | TVTX | 48.17% | 2.33% | Unknown | Red flags: incomplete assessment |
-| 58 | 187 | RYTM | 46.91% | -68.14% | Unknown | Operating margin: -68.14% is not above 0%; Red flags: incomplete assessment |
+| 56 | 183 | B | 43.77% | 51.34% | 0 detected (2/4 assessed) | Red flags: incomplete assessment |
+| 57 | 185 | TVTX | 48.17% | 2.33% | 0 detected (3/4 assessed) | Red flags: incomplete assessment |
+| 58 | 187 | RYTM | 46.91% | -68.14% | 2 detected (3/4 assessed) | Operating margin: -68.14% is not above 0%; Red flags: incomplete assessment |
 | 59 | 188 | LMND | 79.40% | Unknown | Unknown | Operating margin: Excluded by the financial-sector comparability rule. Operating income is missing for the latest fundamentals quarter (2026-06-30).; Red flags: incomplete assessment |
 | 60 | 189 | YPF | 41.65% | 27.58% | Unknown | Red flags: incomplete assessment |
 | 61 | 194 | ESTA | 31.66% | -6.35% | 2 | Operating margin: -6.35% is not above 0%; Red flags: 2 exceeds 1 |
