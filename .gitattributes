@@ -1,1 +1,0 @@
-data/invest_os.sqlite filter=lfs diff=lfs merge=lfs -text

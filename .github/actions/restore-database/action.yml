@@ -1,0 +1,27 @@
+name: Restore S3 database
+description: Assume the database role and validate the current SQLite snapshot before collection.
+inputs:
+  bucket:
+    required: true
+    description: Private database bucket
+  region:
+    required: true
+    description: AWS region
+  role-arn:
+    required: true
+    description: Repository-scoped database role
+runs:
+  using: composite
+  steps:
+    - uses: aws-actions/configure-aws-credentials@v5
+      with:
+        role-to-assume: ${{ inputs.role-arn }}
+        aws-region: ${{ inputs.region }}
+        role-duration-seconds: 7200
+        allowed-account-ids: '701598337266'
+    - name: Download and validate persistent SQLite
+      shell: bash
+      env:
+        INVEST_OS_DATA_BUCKET: ${{ inputs.bucket }}
+        AWS_REGION: ${{ inputs.region }}
+      run: python3 scripts/database_s3.py pull

@@ -1,0 +1,29 @@
+name: Manage S3 database infrastructure
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: storage-infrastructure
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate persistence and infrastructure configuration
+        run: python3 -m unittest discover -s scripts -p 'test_database_s3.py'
+      - uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_INFRA_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          allowed-account-ids: '701598337266'
+      - name: Create or update project resources
+        run: >-
+          python3 scripts/deploy_s3.py
+          --region '${{ vars.AWS_REGION }}'
+          --stack '${{ vars.AWS_STORAGE_STACK }}'
+          --repository '${{ github.repository }}'

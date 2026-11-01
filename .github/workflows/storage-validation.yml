@@ -1,0 +1,47 @@
+name: Validate S3 database persistence
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'infrastructure/**'
+      - 'scripts/*s3*.py'
+      - '.github/actions/restore-database/**'
+      - '.github/workflows/storage-*.yml'
+  pull_request:
+    paths:
+      - 'infrastructure/**'
+      - 'scripts/*s3*.py'
+      - '.github/actions/restore-database/**'
+      - '.github/workflows/storage-*.yml'
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: python3 -m unittest discover -s scripts -p 'test_database_s3.py' -v
+      - run: bash -n scripts/persist_simulation.sh
+  live:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      INVEST_OS_DATA_BUCKET: ${{ vars.INVEST_OS_DATA_BUCKET }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/restore-database
+        with:
+          bucket: ${{ vars.INVEST_OS_DATA_BUCKET }}
+          region: ${{ vars.AWS_REGION }}
+          role-arn: ${{ vars.AWS_DATA_ROLE_ARN }}
+      - name: Verify real AWS round trip and reject a stale upload
+        run: python3 scripts/validate_s3.py

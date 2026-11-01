@@ -8,7 +8,8 @@ node_modules/
 dist/
 .DS_Store
 data/*.sqlite
-!data/invest_os.sqlite
+data/*.sqlite-*
+data/*.sqlite.s3.json
 .cache/
 data/stocks/open_data/
 data/stocks/derived_signals/

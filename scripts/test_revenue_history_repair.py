@@ -112,6 +112,9 @@ class RevenueHistoryRepairTests(unittest.TestCase):
         for ticker,label in expected.items():
             with self.subTest(ticker=ticker):
                 rows=_quarterly_revenue_rows(load_issuer_revenue(ticker),"2026-10-13")
+                # Keep this historical assertion window fixed as the production
+                # issuer seed gains newer quarters during scheduled refreshes.
+                rows=[row for row in rows if row.as_of <= "2026-06-30"]
                 result=calculate_revenue_growth_momentum({"historical_series":{"quarterly_revenue":[r.model_dump(mode="json") for r in rows]}})
                 self.assertEqual(len(rows),10)
                 self.assertEqual(rows[-1].as_of,"2026-06-30")

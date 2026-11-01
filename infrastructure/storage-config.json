@@ -1,0 +1,7 @@
+{
+  "bucket": "invest-os-data-701598337266-eu-central-1",
+  "region": "eu-central-1",
+  "data_role_arn": "arn:aws:iam::701598337266:role/invest-os-data-github",
+  "infrastructure_role_arn": "arn:aws:iam::701598337266:role/invest-os-infra-github",
+  "stack": "invest-os-data"
+}

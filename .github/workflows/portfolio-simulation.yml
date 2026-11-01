@@ -18,9 +18,12 @@ concurrency:
 
 jobs:
   build:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
+      INVEST_OS_DATA_BUCKET: ${{ vars.INVEST_OS_DATA_BUCKET }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
       SIMULATION_RUN_OWNER: ${{ github.run_id }}-${{ github.run_attempt }}
       GEMINI_API_KEY_CONFIGURED: ${{ secrets.GEMINI_API_KEY != '' }}
       GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-3-flash-preview' }}
@@ -28,7 +31,12 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: main
-          lfs: true
+      - name: Restore persistent database from S3
+        uses: ./.github/actions/restore-database
+        with:
+          bucket: ${{ vars.INVEST_OS_DATA_BUCKET }}
+          region: ${{ vars.AWS_REGION }}
+          role-arn: ${{ vars.AWS_DATA_ROLE_ARN }}
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
@@ -40,6 +48,7 @@ jobs:
         run: python -m pip install --disable-pip-version-check -r backend/requirements-simulation.txt
       - name: Validate deterministic accounting and decision rules
         run: |
+          python3 -m unittest discover -s scripts -p 'test_database_s3.py'
           python -m unittest discover -s scripts -p 'test_portfolio_simulation.py'
           python -m unittest discover -s scripts -p 'test_priced_for_perfection.py'
           python -m unittest discover -s scripts -p 'test_revenue_growth_consistency.py'

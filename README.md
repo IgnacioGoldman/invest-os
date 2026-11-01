@@ -47,7 +47,7 @@ The price workflow refreshes daily candles and recalculates price-dependent metr
 
 ## Kept Data
 
-- `data/invest_os.sqlite`: local SQLite cache for stock snapshots, metric series, derived signals, and price history.
+- `data/invest_os.sqlite`: local SQLite working database for stock snapshots, metric series, derived signals, and price history, persisted in private S3 storage. See [database synchronization and infrastructure](docs/s3-storage.md).
 - `data/stocks/stocks.json`: stock universe used by refresh.
 - `data/stocks/derived_signals/latest.json`: deterministic derived stock signals.
 - `data/stocks/industry-classifications.json`: explicit business peer groups with original labels and review metadata.

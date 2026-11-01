@@ -16,19 +16,25 @@ concurrency:
 
 jobs:
   build:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
+      INVEST_OS_DATA_BUCKET: ${{ vars.INVEST_OS_DATA_BUCKET }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
       SUPABASE_PERSONALIZATION_CONFIGURED: ${{ secrets.SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           ref: ${{ github.ref }}
-          lfs: true
 
-      - name: Ensure Git LFS is active
-        run: git lfs install --local
+      - name: Restore persistent database from S3
+        uses: ./.github/actions/restore-database
+        with:
+          bucket: ${{ vars.INVEST_OS_DATA_BUCKET }}
+          region: ${{ vars.AWS_REGION }}
+          role-arn: ${{ vars.AWS_DATA_ROLE_ARN }}
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -42,6 +48,7 @@ jobs:
 
       - name: Test price refresh and SEC isolation
         run: |
+          python3 -m unittest discover -s scripts -p 'test_database_s3.py'
           python -m unittest discover -s scripts -p 'test_refresh_static_prices.py'
           python -m unittest discover -s scripts -p 'test_refresh_separation.py'
           python -m unittest discover -s scripts -p 'test_industry_strength.py'
@@ -64,11 +71,14 @@ jobs:
           --report /tmp/price-refresh-report.json
           --summary "$GITHUB_STEP_SUMMARY"
 
+      - name: Persist validated database to S3
+        run: python3 scripts/database_s3.py push
+
       - name: Persist refreshed tracked data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/invest_os.sqlite frontend/public/data data/stocks/benchmarks
+          git add frontend/public/data data/stocks/benchmarks
           if git diff --cached --quiet; then
             echo "No tracked data changes to persist."
           else

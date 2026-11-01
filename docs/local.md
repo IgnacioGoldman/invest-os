@@ -6,7 +6,7 @@ The current goal is:
 
 `local collectors -> data/invest_os.sqlite -> derived metrics -> static export -> review -> commit publishable data`
 
-GitHub Actions persist both the tracked SQLite database and the static exports back to the repo. `data/invest_os.sqlite` is tracked with Git LFS, so local backfills and remote update workflows share the same source-of-truth file.
+GitHub Actions persist the SQLite database in private S3 storage and commit static exports back to the repo. Local backfills pull and push the same shared database through [the S3 persistence commands](s3-storage.md).
 
 ## 1. What Local Is Responsible For
 
@@ -22,14 +22,9 @@ Adjusted EPS growth YoY and EPS alignment were intentionally removed because cov
 
 Local writes to `data/invest_os.sqlite`.
 
-Important: this SQLite file is tracked through Git LFS. A local backfill should update the database first, then regenerate static files under `frontend/public/data/`, then commit both the LFS pointer change and the exported static data.
+The SQLite file and its S3 baseline sidecar are ignored by Git. Before a local backfill, save any existing local work, close database writers, and restore the latest S3 snapshot with `python3 scripts/database_s3.py pull --replace-local --profile invest-os`. The first pull into a missing database does not need `--replace-local`.
 
-Both local scripts and GitHub Actions modify the persistent SQLite database, then export or refresh static JSON for GitHub Pages.
-
-Longer-term persistence choices remain open if the dataset outgrows Git LFS:
-
-- Track a smaller normalized data artifact instead of the full SQLite database.
-- Use Supabase/Postgres as the shared persistent database and keep SQLite as a local cache or development mirror.
+After collection, regenerate and validate static files, then run `python3 scripts/database_s3.py push --profile invest-os`. Commit only the publishable static JSON and normalized facts. Keep the downloaded `.s3.json` sidecar: S3 rejects uploads if another writer changed the remote database since your pull. See [S3 persistence](s3-storage.md) for setup and conflict recovery.
 
 ## 3. Local Backfill Loop
 
@@ -172,9 +167,9 @@ The daily remote refresh should:
 - Recollect non-SEC tickers, check the newest supported issuer report, and try a bounded Yahoo statement fallback when current primary-source collection is unavailable or incomplete. Preserve verified history and report unresolved gaps. Older report downloads stay in the local backfill workflow.
 - Add or update only facts that are newer or better.
 - Export static JSON from the updated database.
-- Commit `data/invest_os.sqlite` and tracked static data changes back to `main`.
+- Persist the validated database to S3 and commit tracked static data changes back to `main`.
 
-The price refresh continues to run more frequently. It reads the checked-out SQLite database when available, falls back to the deployed static dataset when needed, updates price-derived metrics and histories, and commits both the database and tracked static data changes.
+The price refresh continues to run more frequently. It restores the SQLite database from S3, uses deployed static data as a data-level fallback when needed, updates price-derived metrics and histories, persists SQLite to S3 and commits tracked static data changes. A failed S3 restore stops the workflow.
 
 See [data-refresh.md](data-refresh.md) for the automated refresh model:
 

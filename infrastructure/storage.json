@@ -1,0 +1,430 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Invest OS SQLite persistence and repository-scoped GitHub OIDC roles. No compute resources.",
+  "Parameters": {
+    "GitHubRepository": {
+      "Type": "String",
+      "Default": "IgnacioGoldman/invest-os",
+      "AllowedPattern": "[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+"
+    },
+    "ExistingGitHubProviderArn": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Keep this value stable after bootstrap. Reuse an existing GitHub OIDC provider if present."
+    }
+  },
+  "Conditions": {
+    "CreateGitHubProvider": {
+      "Fn::Equals": [
+        {
+          "Ref": "ExistingGitHubProviderArn"
+        },
+        ""
+      ]
+    }
+  },
+  "Resources": {
+    "DatabaseBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "BucketName": {
+          "Fn::Sub": "invest-os-data-${AWS::AccountId}-${AWS::Region}"
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "BucketOwnerEnforced"
+            }
+          ]
+        },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "Id": "ExpireDailyBackups",
+              "Status": "Enabled",
+              "Prefix": "backups/",
+              "ExpirationInDays": 7
+            },
+            {
+              "Id": "AbortIncompleteUploads",
+              "Status": "Enabled",
+              "Prefix": "",
+              "AbortIncompleteMultipartUpload": {
+                "DaysAfterInitiation": 1
+              }
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "invest-os"
+          }
+        ]
+      }
+    },
+    "DatabaseBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "DatabaseBucket"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "RequireTLS",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:*",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "DatabaseBucket",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Sub": "${DatabaseBucket.Arn}/*"
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false"
+                }
+              }
+            },
+            {
+              "Sid": "RequireConditionalWrites",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:PutObject",
+              "Resource": {
+                "Fn::Sub": "${DatabaseBucket.Arn}/*"
+              },
+              "Condition": {
+                "Null": {
+                  "s3:if-match": "true",
+                  "s3:if-none-match": "true"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "GitHubProvider": {
+      "Type": "AWS::IAM::OIDCProvider",
+      "Condition": "CreateGitHubProvider",
+      "Properties": {
+        "Url": "https://token.actions.githubusercontent.com",
+        "ClientIdList": [
+          "sts.amazonaws.com"
+        ]
+      }
+    },
+    "DataRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "invest-os-data-github",
+        "MaxSessionDuration": 7200,
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Federated": {
+                  "Fn::If": [
+                    "CreateGitHubProvider",
+                    {
+                      "Ref": "GitHubProvider"
+                    },
+                    {
+                      "Ref": "ExistingGitHubProviderArn"
+                    }
+                  ]
+                }
+              },
+              "Action": "sts:AssumeRoleWithWebIdentity",
+              "Condition": {
+                "StringEquals": {
+                  "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+                  "token.actions.githubusercontent.com:sub": {
+                    "Fn::Sub": "repo:${GitHubRepository}:ref:refs/heads/main"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "database-transfer",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject",
+                    "s3:PutObject"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "${DatabaseBucket.Arn}/database/latest.sqlite.gz"
+                    },
+                    {
+                      "Fn::Sub": "${DatabaseBucket.Arn}/backups/*"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "PermissionsBoundary": {
+          "Ref": "DataPermissionsBoundary"
+        }
+      }
+    },
+    "InfrastructureRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "invest-os-infra-github",
+        "MaxSessionDuration": 3600,
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Federated": {
+                  "Fn::If": [
+                    "CreateGitHubProvider",
+                    {
+                      "Ref": "GitHubProvider"
+                    },
+                    {
+                      "Ref": "ExistingGitHubProviderArn"
+                    }
+                  ]
+                }
+              },
+              "Action": "sts:AssumeRoleWithWebIdentity",
+              "Condition": {
+                "StringEquals": {
+                  "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+                  "token.actions.githubusercontent.com:sub": {
+                    "Fn::Sub": "repo:${GitHubRepository}:ref:refs/heads/main"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "manage-project-stack",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "cloudformation:CreateChangeSet",
+                    "cloudformation:DescribeChangeSet",
+                    "cloudformation:ExecuteChangeSet",
+                    "cloudformation:DeleteChangeSet",
+                    "cloudformation:DescribeStacks",
+                    "cloudformation:DescribeStackEvents",
+                    "cloudformation:DescribeStackResources",
+                    "cloudformation:GetTemplate"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}/*"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "cloudformation:ValidateTemplate",
+                    "cloudformation:GetTemplateSummary"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "s3:*",
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "DatabaseBucket",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "iam:GetRole",
+                    "iam:UpdateRole",
+                    "iam:DeleteRole",
+                    "iam:UpdateAssumeRolePolicy",
+                    "iam:PutRolePolicy",
+                    "iam:DeleteRolePolicy",
+                    "iam:GetRolePolicy",
+                    "iam:ListRolePolicies",
+                    "iam:ListAttachedRolePolicies",
+                    "iam:TagRole",
+                    "iam:UntagRole"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/invest-os-data-github"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "iam:GetOpenIDConnectProvider"
+                  ],
+                  "Resource": {
+                    "Fn::If": [
+                      "CreateGitHubProvider",
+                      {
+                        "Ref": "GitHubProvider"
+                      },
+                      {
+                        "Ref": "ExistingGitHubProviderArn"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "iam:ListOpenIDConnectProviders"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "iam:GetRole",
+                    "iam:GetRolePolicy",
+                    "iam:ListRolePolicies",
+                    "iam:ListAttachedRolePolicies"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/invest-os-infra-github"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "iam:GetPolicy",
+                    "iam:GetPolicyVersion",
+                    "iam:ListPolicyVersions"
+                  ],
+                  "Resource": {
+                    "Ref": "DataPermissionsBoundary"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "iam:CreateRole",
+                    "iam:PutRolePermissionsBoundary"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/invest-os-data-github"
+                  },
+                  "Condition": {
+                    "StringEquals": {
+                      "iam:PermissionsBoundary": {
+                        "Ref": "DataPermissionsBoundary"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "DataPermissionsBoundary": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": "invest-os-data-boundary",
+        "Description": "Maximum permissions for the database runtime role; changes require bootstrap access.",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "${DatabaseBucket.Arn}/database/latest.sqlite.gz"
+                },
+                {
+                  "Fn::Sub": "${DatabaseBucket.Arn}/backups/*"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "DatabaseBucketName": {
+      "Value": {
+        "Ref": "DatabaseBucket"
+      }
+    },
+    "DataRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "DataRole",
+          "Arn"
+        ]
+      }
+    },
+    "InfrastructureRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "InfrastructureRole",
+          "Arn"
+        ]
+      }
+    },
+    "Region": {
+      "Value": {
+        "Ref": "AWS::Region"
+      }
+    }
+  }
+}
