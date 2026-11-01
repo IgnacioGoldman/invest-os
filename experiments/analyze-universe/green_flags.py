@@ -19,8 +19,10 @@ def build_green_flag_count(snapshot: dict, today: date) -> dict:
         return a < b and not math.isclose(a, b, rel_tol=1e-12, abs_tol=1e-10)
 
     growth_data = context.facts(8, ('revenue',))
+    growth_error = context.failure
     if growth_data and any(r['metrics']['revenue']['value'] <= 0 for r in growth_data[0]):
         growth_data = None
+        growth_error = 'Positive reported revenue is required in all eight comparison quarters.'
     growth_values = []
     if growth_data:
         for previous, current in zip(growth_data[0][:4], growth_data[0][4:]):
@@ -31,20 +33,22 @@ def build_green_flag_count(snapshot: dict, today: date) -> dict:
     growth_met = bool(growth_data) and all(not lower(v['growth_yoy'], SUSTAINED_GROWTH_MIN_PERCENT) for v in growth_values)
 
     operating_data = context.facts(4, ('revenue', 'operating_income'))
+    operating_error = context.failure
     if operating_data and any(r['metrics']['revenue']['value'] <= 0
                               or abs(r['metrics']['operating_income']['value'] / r['metrics']['revenue']['value']) > 1
                               for r in operating_data[0]):
         operating_data = None
+        operating_error = 'Positive revenue and operating margins within the validated range (−100% to 100%) are required.'
 
-    def rule(key, title, formula, data, met, values, reason):
+    def rule(key, title, formula, data, met, values, reason, missing_reason):
         return {'id': key, 'title': title, 'state': 'flagged' if data and met else 'clear' if data else 'unassessed',
-                'formula': formula, 'reason': reason if data else 'Comparable, sourced quarterly inputs are missing, invalid or stale.',
+                'formula': formula, 'reason': reason if data else missing_reason or 'Comparable, sourced quarterly inputs are missing, invalid or stale.',
                 'evidence': data[1] if data else [], 'values': values if data else []}
 
     growth = rule('sustained_revenue_growth', 'Sustained revenue growth',
                   'Revenue YoY growth ≥ 8% in each of the latest four quarters (eight comparable revenue quarters required)',
                   growth_data, growth_met, growth_values,
-                  'Four consecutive quarters of at least 8% reported revenue growth. Acquisitions, currency changes and base effects can contribute; organic growth is not established.')
+                  'Four consecutive quarters of at least 8% reported revenue growth. Acquisitions, currency changes and base effects can contribute; organic growth is not established.', growth_error)
 
     profitable_data = None
     operating_values = []
@@ -58,9 +62,11 @@ def build_green_flag_count(snapshot: dict, today: date) -> dict:
                       'Sustained revenue growth AND operating income > 0 in each of the latest four quarters',
                       profitable_data, growth_met and all(lower(0, v['operating_income']) for v in operating_values),
                       {'growth': growth_values, 'operating_income': operating_values},
-                      'Persistent revenue growth accompanied by strictly positive reported operating income. Break-even does not qualify. This overlaps with Sustained revenue growth.')
+                      'Persistent revenue growth accompanied by strictly positive reported operating income. Break-even does not qualify. This overlaps with Sustained revenue growth.',
+                      growth_error or operating_error or 'Revenue and operating-income inputs use different reporting currencies.')
 
     cash_data = context.facts(8, ('net_income', 'operating_cash_flow', 'capex'))
+    cash_error = context.failure
     cash_values = []
     if cash_data:
         for four in (cash_data[0][:4], cash_data[0][4:]):
@@ -75,7 +81,7 @@ def build_green_flag_count(snapshot: dict, today: date) -> dict:
                 'Net income > 0 AND operating cash flow ≥ net income AND (operating cash flow − abs(capex)) > 0 in each of the latest two non-overlapping four-quarter periods',
                 cash_data, all(lower(0, v['net_income']) and not lower(v['operating_cash_flow'], v['net_income'])
                                and lower(0, v['free_cash_flow']) for v in cash_values), cash_values,
-                'Positive profits, earnings-to-cash conversion and positive free cash flow across two separate years. Working capital, stock compensation and other non-cash items still require review.')
+                'Positive profits, earnings-to-cash conversion and positive free cash flow across two separate years. Working capital, stock compensation and other non-cash items still require review.', cash_error)
 
     checks = []
     for branch in (growth, profitable, cash):

@@ -1298,9 +1298,13 @@ def _quarterly_fundamental_rows(companyfacts: dict[str, Any], fallback_as_of: st
 
     def sort_period(key: tuple[int | None, str]) -> tuple[date, date, str]:
         facts = [mapping[key] for mapping in facts_by_period if key in mapping]
-        if key in debt:
-            return (date.fromisoformat(debt[key].as_of), date.min, key[1])
+        # Revenue fixes the statement period. A stale debt observation must
+        # not date an otherwise current income/cash-flow quarter in the past.
+        if key in revenue:
+            return _quarterly_sort_key(revenue[key])
         if not facts:
+            if key in debt:
+                return (date.fromisoformat(debt[key].as_of), date.min, key[1])
             return (date.min, date.min, key[1])
         return max((_quarterly_sort_key(fact) for fact in facts))
 

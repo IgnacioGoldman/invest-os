@@ -19,6 +19,7 @@ from evaluate_saved_filters import condition_matches, expression_matches
 from evaluate_filters import expression, numeric
 from app.services.screening_metrics import build_business_performance
 from app.services.static_stock_assets import load_full_stock_rows
+from app.services.red_flags import build_red_flag_count
 from green_flags import build_green_flag_count
 
 RULES = [
@@ -35,6 +36,7 @@ def capture_financial_refresh(directory, data_dir, today):
         raise ValueError('Refreshed financial data must cover the original universe exactly')
     metrics = {s['ticker']: {field: s['screening']['metrics'][field] for field, _, _ in RULES} for s in current}
     for snapshot in current:
+        metrics[snapshot['ticker']]['red_flag_count'] = build_red_flag_count(snapshot, today)
         metrics[snapshot['ticker']]['green_flag_count'] = build_green_flag_count(snapshot, today)
     data = json.dumps(metrics, sort_keys=True, allow_nan=False).encode()
     path = directory / 'financial-refresh.json.gz'
@@ -77,6 +79,26 @@ def flag_assessment(metric, today, version):
             'checks': [{key: branch.get(key) for key in ('id', 'title', 'state', 'formula', 'reason', 'values')}
                        for branch in group.get('checks', [])]}
             for group in metric.get('checks', [])]}
+
+
+def unassessed_flag_checks(metric):
+    """Expose missing checks even when another branch already detected a flag."""
+    missing = []
+    for group in metric.get('checks', []):
+        if group.get('state') == 'not_applicable':
+            continue
+        branches = [check for check in group.get('checks', []) if check.get('state') == 'unassessed']
+        if branches:
+            missing.extend({'id': check['id'], 'group': group['title'], 'title': check['title'],
+                            'reason': check.get('reason') or group.get('reason') or 'Required inputs unavailable.'}
+                           for check in branches)
+        elif group.get('state') == 'unassessed':
+            missing.append({'id': group['id'], 'group': group['title'], 'title': group['title'],
+                            'reason': group.get('reason') or 'Required inputs unavailable.'})
+    if not metric.get('checks') and metric.get('value') is None:
+        missing.append({'id': 'assessment_unavailable', 'group': '', 'title': 'Assessment unavailable',
+                        'reason': metric.get('notes') or 'A current captured assessment is unavailable.'})
+    return missing
 
 
 def audit(directory):
@@ -140,6 +162,8 @@ def audit(directory):
             'flag_metrics': {field: flag_assessment(snapshot.get('screening', {}).get('metrics', {}).get(field, {}), today, version)
                 for field, version in [('red_flag_count', 2), ('green_flag_count', 1)]},
             'exclusion_reasons':[r['reason'] for r in rules.values() if not r['passes']]}
+        stocks[symbol]['flags_not_assessed'] = {color: unassessed_flag_checks(stocks[symbol]['flag_metrics'][field])
+            for color, field in [('red', 'red_flag_count'), ('green', 'green_flag_count')]}
     supported = [stocks[r['symbol']] for r in ranked if stocks[r['symbol']]['at_or_near_support']]
     for i, row in enumerate(supported,1):
         row['support_rank'] = i
@@ -159,11 +183,17 @@ def audit(directory):
     write_json(output / 'support-audit.json', result)
     with (output / 'support-audit.csv').open('w',newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['Rank within support list','Original rank','Stock','Revenue Growth YoY (%)','Operating Margin (%)','Red Flag Count','Pass all three?','Reasons','Business quality','Valuation'])
+        writer.writerow(['Rank within support list','Original rank','Stock','Revenue Growth YoY (%)','Operating Margin (%)','Red Flag Count','Pass all three?','Reasons','Business quality','Valuation',
+                         'Detected red flags','Red flag assessment coverage','flags_not_assessed'])
         for row in supported:
+            red = row['flag_metrics']['red_flag_count']
+            coverage = red.get('coverage') or {}
+            missing = '; '.join(f'{color}: {check["title"]} — {check["reason"]}' for color, checks in row['flags_not_assessed'].items() for check in checks)
             writer.writerow([row['support_rank'],row['rank'],row['symbol'],
                 *[row['rules'][field]['value'] if row['rules'][field]['value'] is not None else 'Unknown' for field,_,_ in RULES],
-                'Yes' if row['passes_financial_rules'] else 'No','; '.join(row['exclusion_reasons']),row['business_quality'],row['valuation']])
+                'Yes' if row['passes_financial_rules'] else 'No','; '.join(row['exclusion_reasons']),row['business_quality'],row['valuation'],
+                red.get('observed_count') if coverage.get('assessed', 0) else 'Unknown',
+                f'{coverage.get("assessed", 0)}/{coverage.get("applicable", coverage.get("total", 0))}',missing or 'None'])
     lines = ['# Support list and the three financial rules','',
         f"**{len(ranked)} stocks → {len(supported)} at/near any support → {len(passed)} pass all three rules; {len(excluded)} do not pass.**",'',
         f'Support uses ANY existing timeframe. The financial rules are revenue growth >0%, operating margin >0%, and a complete validated red-flag count ≤1. Financial checks use {today}. Original ranks and support context refer to the frozen 200-stock experiment. Unknown inputs do not pass a numeric rule.','']
@@ -173,6 +203,10 @@ def audit(directory):
         for row in rows:
             values = [row['rules'][field]['value'] for field,_,_ in RULES]
             formatted = ['Unknown' if value is None else f'{value:.2f}%' if i<2 else str(int(value)) for i,value in enumerate(values)]
+            red = row['flag_metrics']['red_flag_count']
+            coverage = red.get('coverage') or {}
+            if values[2] is None and coverage.get('assessed', 0):
+                formatted[2] = f'{red["observed_count"]} detected ({coverage["assessed"]}/{coverage.get("applicable", coverage.get("total", 0))} assessed)'
             lines.append(f"| {row['support_rank']} | {row['rank']} | {row['symbol']} | {' | '.join(formatted)} | {'; '.join(row['exclusion_reasons']) or '—'} |")
         lines.append('')
     (output / 'support-audit.md').write_text('\n'.join(lines))
