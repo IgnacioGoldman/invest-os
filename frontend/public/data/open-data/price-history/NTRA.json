@@ -22814,5 +22814,13 @@
     "low": 376.375,
     "volume": 2626800.0,
     "source": "yfinance_history"
+  },
+  {
+    "date": "2026-11-03",
+    "close": 390.7900085449219,
+    "high": 398.0299987792969,
+    "low": 382.1000061035156,
+    "volume": 2434916.0,
+    "source": "yfinance_history"
   }
 ]
