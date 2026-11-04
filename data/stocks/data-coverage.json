@@ -1,5 +1,5 @@
 {
-  "audited_on": "2026-11-03",
+  "audited_on": "2026-11-04",
   "symbol_count": 200,
   "symbols": [
     {
@@ -106,26 +106,22 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
+        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "not_meaningful": {}
     },
     {
       "ticker": "ABBV",
-      "revenue_growth_observations": 48,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 49,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
-        "label": "Accelerating",
-        "change": 3.9762741599171783,
-        "recentMedian": 10.099277966947238,
-        "priorMedian": 6.123003807030059,
-        "latestChange": -2.273335298160534,
+        "label": "Steady",
+        "change": 2.721535382888989,
+        "recentMedian": 10.239811520661629,
+        "priorMedian": 7.51827613777264,
+        "latestChange": 0.15932219194246144,
         "latestMovement": "Steady",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 3.8270984418754934
-          },
           {
             "period": "FY2024 Q4",
             "value": 5.601006922592826
@@ -153,12 +149,16 @@
           {
             "period": "FY2026 Q2",
             "value": 10.160150424690398
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 10.31947261663286
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -546,20 +546,16 @@
     },
     {
       "ticker": "ALAB",
-      "revenue_growth_observations": 10,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 11,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Decelerating",
-        "change": -65.8833661483792,
-        "recentMedian": 98.64680243040706,
-        "priorMedian": 164.53016857878626,
-        "latestChange": 11.054757305493297,
+        "change": -48.10518981682138,
+        "recentMedian": 98.92748652896496,
+        "priorMedian": 147.03267634578634,
+        "latestChange": 49.21487351502479,
         "latestMovement": "Improving",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 206.23375216637783
-          },
           {
             "period": "FY2024 Q4",
             "value": 179.32058439244565
@@ -587,12 +583,18 @@
           {
             "period": "FY2026 Q2",
             "value": 104.45486518171161
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 153.6697386967364
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS turned positive from a loss-making comparison period (latest 1.22, comparison -1.71); 3-year GAAP EPS CAGR is not meaningful.",
@@ -767,20 +769,16 @@
     },
     {
       "ticker": "AMD",
-      "revenue_growth_observations": 65,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 66,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 8.787879044051401,
-        "recentMedian": 36.71896210314402,
-        "priorMedian": 27.93108305909262,
-        "latestChange": 12.264409861053942,
-        "latestMovement": "Improving",
+        "change": 7.61400957812355,
+        "recentMedian": 41.26248761337286,
+        "priorMedian": 33.64847803524931,
+        "latestChange": -5.4318250618424955,
+        "latestMovement": "Weakening",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 17.56896551724138
-          },
           {
             "period": "FY2024 Q4",
             "value": 24.156939040207522
@@ -808,31 +806,31 @@
           {
             "period": "FY2026 Q2",
             "value": 50.11060507482108
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 44.678780012978585
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
     {
       "ticker": "AMGN",
-      "revenue_growth_observations": 69,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 70,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Steady",
-        "change": -1.085914675470823,
-        "recentMedian": 9.058632264974671,
+        "change": -1.6249611176849648,
+        "recentMedian": 8.51958582276053,
         "priorMedian": 10.144546940445494,
-        "latestChange": 3.777321426988628,
-        "latestMovement": "Rebounding",
+        "latestChange": -1.0780928844282816,
+        "latestMovement": "Steady",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 23.178328263074025
-          },
           {
             "period": "FY2024 Q4",
             "value": 10.858955588091753
@@ -860,12 +858,18 @@
           {
             "period": "FY2026 Q2",
             "value": 9.532628826669571
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 8.45453594224129
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -979,20 +983,16 @@
     },
     {
       "ticker": "ANET",
-      "revenue_growth_observations": 49,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 50,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 5.5537777247571825,
-        "recentMedian": 32.0002714579084,
-        "priorMedian": 26.446493733151215,
-        "latestChange": 2.5602595859921635,
-        "latestMovement": "Steady",
+        "change": 8.882074706960644,
+        "recentMedian": 36.40582811701843,
+        "priorMedian": 27.523753410057786,
+        "latestChange": 20.768315797909068,
+        "latestMovement": "Improving",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 19.970373432547888
-          },
           {
             "period": "FY2024 Q4",
             "value": 25.312486002639456
@@ -1020,12 +1020,17 @@
           {
             "period": "FY2026 Q2",
             "value": 37.68595791001451
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 58.454273707923576
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
@@ -2278,20 +2283,16 @@
     },
     {
       "ticker": "CAT",
-      "revenue_growth_observations": 68,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 69,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 24.705778396991292,
+        "change": 22.971304970918222,
         "recentMedian": 20.10739305225654,
-        "priorMedian": -4.598385344734753,
-        "latestChange": 1.7654463648805994,
-        "latestMovement": "Steady",
+        "priorMedian": -2.863911918661682,
+        "latestChange": -6.726356920998029,
+        "latestMovement": "Weakening",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": -4.187983343248066
-          },
           {
             "period": "FY2024 Q4",
             "value": -5.008787346221441
@@ -2319,6 +2320,10 @@
           {
             "period": "FY2026 Q2",
             "value": 23.984549459834632
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 17.258192538836603
           }
         ],
         "reason": null
@@ -3184,7 +3189,9 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS turned positive from a loss-making comparison period (latest 0.31, comparison -0.16); 3-year GAAP EPS CAGR is not meaningful.",
@@ -3239,7 +3246,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
+        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "not_meaningful": {}
     },
@@ -3299,20 +3306,16 @@
     },
     {
       "ticker": "DUOL",
-      "revenue_growth_observations": 21,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 22,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Decelerating",
-        "change": -8.604529196290073,
-        "recentMedian": 30.76086212229744,
-        "priorMedian": 39.36539131858751,
-        "latestChange": -8.223701973708646,
+        "change": -17.513105227778922,
+        "recentMedian": 22.42156497809369,
+        "priorMedian": 39.934670205872614,
+        "latestChange": -4.584202146020335,
         "latestMovement": "Weakening",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 39.9421612509446
-          },
           {
             "period": "FY2024 Q4",
             "value": 38.78862138623042
@@ -3340,12 +3343,17 @@
           {
             "period": "FY2026 Q2",
             "value": 18.30971399123937
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 13.725511845219035
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -3557,7 +3565,8 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -3952,20 +3961,16 @@
     },
     {
       "ticker": "FLYW",
-      "revenue_growth_observations": 21,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 22,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 8.767176755591692,
-        "recentMedian": 30.824895181575528,
-        "priorMedian": 22.057718425983836,
-        "latestChange": -13.774736019134085,
-        "latestMovement": "Weakening",
+        "change": 8.517351215396012,
+        "recentMedian": 30.603389911757077,
+        "priorMedian": 22.086038696361065,
+        "latestChange": -2.1201048313004627,
+        "latestMovement": "Steady",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 27.15795107157627
-          },
           {
             "period": "FY2024 Q4",
             "value": 16.91282510318763
@@ -3993,18 +3998,18 @@
           {
             "period": "FY2026 Q2",
             "value": 27.18381087413091
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 25.063706042830447
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
-      "not_meaningful": {
-        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.07); GAAP EPS growth is not meaningful.",
-        "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS turned positive from a loss-making comparison period (latest 0.11, comparison -0.36); 3-year GAAP EPS CAGR is not meaningful.",
-        "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
-      }
+      "not_meaningful": {}
     },
     {
       "ticker": "FN",
@@ -4554,20 +4559,16 @@
     },
     {
       "ticker": "HL",
-      "revenue_growth_observations": 57,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 58,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 51.761392735864256,
-        "recentMedian": 73.29706246226378,
-        "priorMedian": 21.535669726399526,
-        "latestChange": -47.92361581866962,
+        "change": 57.7739017447404,
+        "recentMedian": 76.41075581610765,
+        "priorMedian": 18.636854071367253,
+        "latestChange": -27.50511914836298,
         "latestMovement": "Weakening",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 34.73167460116763
-          },
           {
             "period": "FY2024 Q4",
             "value": 55.36436617088805
@@ -4582,11 +4583,11 @@
           },
           {
             "period": "FY2025 Q3",
-            "value": 67.10202582777404
+            "value": 28.934043291103084
           },
           {
             "period": "FY2025 Q4",
-            "value": 79.49209909675352
+            "value": 173.4553684084036
           },
           {
             "period": "FY2026 Q1",
@@ -4595,15 +4596,19 @@
           {
             "period": "FY2026 Q2",
             "value": 52.448947906772844
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 24.943828758409865
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
-        "business_health.eps_cagr_3y": "eps_cagr_3y: EPS turned positive from a loss-making comparison period (latest 0.17, comparison -0.03); 3-year EPS CAGR is not meaningful.",
+        "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS turned positive from a loss-making comparison period (latest 0.49, comparison -0.07); 3-year GAAP EPS CAGR is not meaningful.",
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       }
     },
@@ -5512,20 +5517,16 @@
     },
     {
       "ticker": "LITE",
-      "revenue_growth_observations": 44,
-      "latest_revenue_period": "FY2026 Q4",
+      "revenue_growth_observations": 45,
+      "latest_revenue_period": "FY2027 Q1",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 64.9599155701241,
-        "recentMedian": 77.79361910246233,
-        "priorMedian": 12.833703532338236,
-        "latestChange": 19.218249648081027,
+        "change": 63.76345523994905,
+        "recentMedian": 99.73142021444502,
+        "priorMedian": 35.96796497449597,
+        "latestChange": 27.189990742705902,
         "latestMovement": "Improving",
         "points": [
-          {
-            "period": "FY2025 Q1",
-            "value": 6.076826196473552
-          },
           {
             "period": "FY2025 Q2",
             "value": 9.65103598691385
@@ -5553,6 +5554,10 @@
           {
             "period": "FY2026 Q4",
             "value": 109.34054503848554
+          },
+          {
+            "period": "FY2027 Q1",
+            "value": 136.53053578119145
           }
         ],
         "reason": null
@@ -5562,7 +5567,6 @@
         "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
-        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -95.55); GAAP EPS growth is not meaningful.",
         "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS remains loss-making (latest -92.96); GAAP EPS growth is not meaningful.",
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       }
@@ -6165,20 +6169,16 @@
     },
     {
       "ticker": "MIRM",
-      "revenue_growth_observations": 17,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 18,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Decelerating",
-        "change": -17.416770068637,
-        "recentMedian": 45.227549672537705,
-        "priorMedian": 62.644319741174705,
-        "latestChange": -5.361190503252544,
-        "latestMovement": "Weakening",
+        "change": -12.729550717647413,
+        "recentMedian": 41.45602523207096,
+        "priorMedian": 54.18557594971837,
+        "latestChange": 1.7078423923171542,
+        "latestMovement": "Steady",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 89.37035096909376
-          },
           {
             "period": "FY2024 Q4",
             "value": 42.93067257095207
@@ -6206,15 +6206,19 @@
           {
             "period": "FY2026 Q2",
             "value": 37.921508784286104
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 39.62935117660326
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
-        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -1.06); GAAP EPS growth is not meaningful.",
+        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.87); GAAP EPS growth is not meaningful.",
         "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS remains loss-making (latest -0.47); GAAP EPS growth is not meaningful.",
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       }
@@ -6273,20 +6277,16 @@
     },
     {
       "ticker": "MPC",
-      "revenue_growth_observations": 39,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 40,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 13.55886807985398,
-        "recentMedian": 3.8320162531614734,
-        "priorMedian": -9.726851826692506,
-        "latestChange": 45.320087565403135,
+        "change": 37.29071568220402,
+        "recentMedian": 31.172909854980023,
+        "priorMedian": -6.117805827224004,
+        "latestChange": 7.136910477920701,
         "latestMovement": "Improving",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": -14.199476990004154
-          },
           {
             "period": "FY2024 Q4",
             "value": -8.600193076816991
@@ -6314,6 +6314,10 @@
           {
             "period": "FY2026 Q2",
             "value": 53.83295363768159
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 60.96986411560229
           }
         ],
         "reason": null
@@ -6326,20 +6330,16 @@
     },
     {
       "ticker": "MPWR",
-      "revenue_growth_observations": 61,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 62,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
-        "label": "Decelerating",
-        "change": -10.464908631688623,
-        "recentMedian": 23.482764333453723,
+        "label": "Steady",
+        "change": 2.9000627567133606,
+        "recentMedian": 36.847735721855706,
         "priorMedian": 33.947672965142345,
-        "latestChange": 21.423507029716685,
+        "latestChange": 15.550677127899014,
         "latestMovement": "Improving",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 30.587933042304478
-          },
           {
             "period": "FY2024 Q4",
             "value": 36.926997524294514
@@ -6367,12 +6367,16 @@
           {
             "period": "FY2026 Q2",
             "value": 47.55948923671405
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 63.110166364613065
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -6696,7 +6700,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
+        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "not_meaningful": {}
     },
@@ -7351,20 +7355,16 @@
     },
     {
       "ticker": "OUST",
-      "revenue_growth_observations": 22,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 23,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 26.265457613723054,
-        "recentMedian": 52.361115427439515,
-        "priorMedian": 26.09565781371646,
-        "latestChange": 6.989943529554189,
-        "latestMovement": "Improving",
+        "change": 25.15657833857052,
+        "recentMedian": 52.97548192627908,
+        "priorMedian": 27.81890358770856,
+        "latestChange": -5.761210531875051,
+        "latestMovement": "Weakening",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 26.41271556576163
-          },
           {
             "period": "FY2024 Q4",
             "value": 23.105874652266404
@@ -7392,15 +7392,20 @@
           {
             "period": "FY2026 Q2",
             "value": 55.856087192216606
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 50.094876660341555
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
-        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.27); GAAP EPS growth is not meaningful.",
+        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.2); GAAP EPS growth is not meaningful.",
         "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS remains loss-making (latest -1.07); GAAP EPS growth is not meaningful.",
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       }
@@ -7946,7 +7951,8 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -8613,20 +8619,16 @@
     },
     {
       "ticker": "RYTM",
-      "revenue_growth_observations": 18,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 19,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
-        "label": "Decelerating",
-        "change": -6.684534936604848,
-        "recentMedian": 50.59326348252878,
-        "priorMedian": 57.27779841913363,
-        "latestChange": -36.894794662572075,
-        "latestMovement": "Weakening",
+        "label": "Steady",
+        "change": 2.715256087617803,
+        "recentMedian": 63.252606956617214,
+        "priorMedian": 60.53735086899941,
+        "latestChange": 32.68227877653904,
+        "latestMovement": "Improving",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 47.75595449697831
-          },
           {
             "period": "FY2024 Q4",
             "value": 72.60873153420813
@@ -8654,6 +8656,10 @@
           {
             "period": "FY2026 Q2",
             "value": 46.911467568347696
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 79.59374634488674
           }
         ],
         "reason": null
@@ -8663,7 +8669,7 @@
         "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
-        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.73); GAAP EPS growth is not meaningful.",
+        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.61); GAAP EPS growth is not meaningful.",
         "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS remains loss-making (latest -3.11); GAAP EPS growth is not meaningful.",
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       }
@@ -8819,7 +8825,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
+        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "not_meaningful": {
         "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS turned positive from a loss-making comparison period (latest 0.94, comparison -2.73); 3-year GAAP EPS CAGR is not meaningful.",
@@ -9049,20 +9055,16 @@
     },
     {
       "ticker": "SSRM",
-      "revenue_growth_observations": 18,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 19,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
-        "label": "Accelerating",
-        "change": 48.97580416303133,
-        "recentMedian": 55.677768521586955,
-        "priorMedian": 6.70196435855563,
-        "latestChange": -74.29082440685323,
-        "latestMovement": "Weakening",
+        "label": "Decelerating",
+        "change": -4.995909986673169,
+        "recentMedian": 38.7262488783511,
+        "priorMedian": 43.72215886502427,
+        "latestChange": 6.564407065345414,
+        "latestMovement": "Improving",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": -33.22193103090376
-          },
           {
             "period": "FY2024 Q4",
             "value": -24.116159540921867
@@ -9090,12 +9092,16 @@
           {
             "period": "FY2026 Q2",
             "value": 9.456783120198295
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 16.02119018554371
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -9274,20 +9280,16 @@
     },
     {
       "ticker": "TARS",
-      "revenue_growth_observations": 14,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 15,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Decelerating",
-        "change": -178.13955449868277,
-        "recentMedian": 117.63059563043075,
-        "priorMedian": 295.7701501291135,
-        "latestChange": -37.4672396825659,
+        "change": -79.46860916101005,
+        "recentMedian": 88.13942541307333,
+        "priorMedian": 167.60803457408338,
+        "latestChange": -5.485066210222691,
         "latestMovement": "Weakening",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 2471.7797969000535
-          },
           {
             "period": "FY2024 Q4",
             "value": 407.86173141633526
@@ -9315,15 +9317,19 @@
           {
             "period": "FY2026 Q2",
             "value": 69.40580557179038
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 63.92073936156769
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
-        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.43); GAAP EPS growth is not meaningful.",
+        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -14.4); GAAP EPS growth is not meaningful.",
         "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS remains loss-making (latest -1.59); GAAP EPS growth is not meaningful.",
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       }
@@ -9658,20 +9664,16 @@
     },
     {
       "ticker": "TOST",
-      "revenue_growth_observations": 20,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 21,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
-        "label": "Decelerating",
-        "change": -3.0537966739144764,
-        "recentMedian": 22.572303389748782,
-        "priorMedian": 25.62610006366326,
-        "latestChange": 1.1820397133688765,
+        "label": "Steady",
+        "change": -2.985122152981525,
+        "recentMedian": 21.981283533064342,
+        "priorMedian": 24.966405686045867,
+        "latestChange": -1.7863026687474033,
         "latestMovement": "Steady",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 26.453488372093027
-          },
           {
             "period": "FY2024 Q4",
             "value": 29.150579150579148
@@ -9699,12 +9701,18 @@
           {
             "period": "FY2026 Q2",
             "value": 23.096774193548384
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 21.31047152480098
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.short_term_investments": "short_term_investments: SEC companyfacts did not include a usable public fact.",
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
         "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS turned positive from a loss-making comparison period (latest 0.56, comparison -0.72); 3-year GAAP EPS CAGR is not meaningful.",
@@ -9977,7 +9985,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -10363,20 +10371,16 @@
     },
     {
       "ticker": "VRTX",
-      "revenue_growth_observations": 66,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 67,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Steady",
-        "change": -1.5711157537826583,
-        "recentMedian": 10.26597403732672,
-        "priorMedian": 11.837089791109378,
-        "latestChange": 4.630659423086706,
-        "latestMovement": "Rebounding",
+        "change": -0.8275319821980833,
+        "recentMedian": 10.695858474512095,
+        "priorMedian": 11.523390456710178,
+        "latestChange": -0.608185659582503,
+        "latestMovement": "Steady",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 11.61264344674854
-          },
           {
             "period": "FY2024 Q4",
             "value": 15.661119275529254
@@ -10404,6 +10408,10 @@
           {
             "period": "FY2026 Q2",
             "value": 12.453199311903397
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 11.845013652320894
           }
         ],
         "reason": null
@@ -10411,7 +10419,9 @@
       "missing_inputs": {
         "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
-      "not_meaningful": {}
+      "not_meaningful": {
+        "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
+      }
     },
     {
       "ticker": "VSEC",
@@ -10627,20 +10637,16 @@
     },
     {
       "ticker": "XMTR",
-      "revenue_growth_observations": 21,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 22,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Accelerating",
-        "change": 11.831548952213375,
-        "recentMedian": 32.699612377390366,
-        "priorMedian": 20.86806342517699,
-        "latestChange": 5.175511174643944,
-        "latestMovement": "Improving",
+        "change": 14.964111873332932,
+        "recentMedian": 37.78404460043023,
+        "priorMedian": 22.819932727097296,
+        "latestChange": -1.3655742016948125,
+        "latestMovement": "Steady",
         "points": [
-          {
-            "period": "FY2024 Q3",
-            "value": 19.14703978070581
-          },
           {
             "period": "FY2024 Q4",
             "value": 15.920246595653362
@@ -10668,6 +10674,10 @@
           {
             "period": "FY2026 Q2",
             "value": 41.054587288599606
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 39.689013086904794
           }
         ],
         "reason": null
@@ -10677,7 +10687,7 @@
         "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
-        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -0.38); GAAP EPS growth is not meaningful.",
+        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS turned positive from a loss-making comparison period (latest 0.032, comparison -0.2277); YoY GAAP EPS growth is not meaningful.",
         "business_health.eps_cagr_3y": "eps_cagr_3y: GAAP EPS remains loss-making (latest -1.03); GAAP EPS growth is not meaningful.",
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       }
