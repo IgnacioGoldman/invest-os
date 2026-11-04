@@ -5,7 +5,7 @@
   "market": "US",
   "source_url": "https://finance.yahoo.com/quote/%5EGSPC/history/",
   "return_basis": "price",
-  "fetched_at": "2026-11-04T02:36:14.321590+00:00",
+  "fetched_at": "2026-11-04T12:20:37.237380+00:00",
   "prices": [
     {
       "date": "2024-08-26",
@@ -4404,7 +4404,7 @@
       "close": 7568.919921875,
       "high": 7594.60986328125,
       "low": 7545.39013671875,
-      "volume": 3106803000.0,
+      "volume": 5481240000.0,
       "source": "yfinance_history"
     }
   ]
