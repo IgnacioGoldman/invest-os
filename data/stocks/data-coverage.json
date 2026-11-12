@@ -1,5 +1,5 @@
 {
-  "audited_on": "2026-11-11",
+  "audited_on": "2026-11-12",
   "symbol_count": 200,
   "symbols": [
     {
@@ -2837,31 +2837,27 @@
     },
     {
       "ticker": "CRWV",
-      "revenue_growth_observations": 6,
-      "latest_revenue_period": "FY2026 Q2",
+      "revenue_growth_observations": 7,
+      "latest_revenue_period": "FY2026 Q3",
       "revenue_momentum": {
         "label": "Decelerating",
-        "change": -94.9385598854969,
-        "recentMedian": 111.60896130346232,
-        "priorMedian": 206.54752118895922,
-        "latestChange": 0.8497845711251415,
-        "latestMovement": "Steady",
+        "change": -21.297746647773522,
+        "recentMedian": 112.45874587458746,
+        "priorMedian": 133.756492522361,
+        "latestChange": 55.74638233054074,
+        "latestMovement": "Improving",
         "points": [
-          {
-            "period": "FY2025 Q1",
-            "value": 420.4468847385046
-          },
           {
             "period": "FY2025 Q2",
             "value": 206.54752118895922
           },
           {
             "period": "FY2025 Q3",
-            "value": 133.70100746479525
+            "value": 133.756492522361
           },
           {
             "period": "FY2025 Q4",
-            "value": 110.42778887395517
+            "value": 110.44064021076193
           },
           {
             "period": "FY2026 Q1",
@@ -2870,6 +2866,10 @@
           {
             "period": "FY2026 Q2",
             "value": 112.45874587458746
+          },
+          {
+            "period": "FY2026 Q3",
+            "value": 168.2051282051282
           }
         ],
         "reason": null
@@ -2880,7 +2880,7 @@
         "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {
-        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -1.14); GAAP EPS growth is not meaningful.",
+        "business_health.eps_gaap_growth_yoy": "eps_gaap_growth_yoy: GAAP EPS remains loss-making (latest -1.27); GAAP EPS growth is not meaningful.",
         "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
       }
     },
