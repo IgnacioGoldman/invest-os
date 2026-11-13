@@ -1,5 +1,5 @@
 {
-  "audited_on": "2026-11-12",
+  "audited_on": "2026-11-13",
   "symbol_count": 200,
   "symbols": [
     {
@@ -711,7 +711,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -2932,7 +2932,8 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
@@ -6579,20 +6580,16 @@
     },
     {
       "ticker": "MTSI",
-      "revenue_growth_observations": 54,
-      "latest_revenue_period": "FY2026 Q3",
+      "revenue_growth_observations": 55,
+      "latest_revenue_period": "FY2026 Q4",
       "revenue_momentum": {
-        "label": "Decelerating",
-        "change": -5.58080373170074,
-        "recentMedian": 27.323018253885955,
-        "priorMedian": 32.903821985586696,
-        "latestChange": 13.26855919293807,
-        "latestMovement": "Rebounding",
+        "label": "Steady",
+        "change": -1.1009779513393028,
+        "recentMedian": 30.144372611618024,
+        "priorMedian": 31.245350562957327,
+        "latestChange": 26.8941814457638,
+        "latestMovement": "Improving",
         "points": [
-          {
-            "period": "FY2024 Q4",
-            "value": 33.47298420615129
-          },
           {
             "period": "FY2025 Q1",
             "value": 38.800366533458906
@@ -6620,12 +6617,16 @@
           {
             "period": "FY2026 Q3",
             "value": 35.76577184136719
+          },
+          {
+            "period": "FY2026 Q4",
+            "value": 62.65995328713099
           }
         ],
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
