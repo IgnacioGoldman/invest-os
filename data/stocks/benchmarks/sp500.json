@@ -5,7 +5,7 @@
   "market": "US",
   "source_url": "https://finance.yahoo.com/quote/%5EGSPC/history/",
   "return_basis": "price",
-  "fetched_at": "2026-11-14T00:56:52.808657+00:00",
+  "fetched_at": "2026-11-14T02:38:25.261355+00:00",
   "prices": [
     {
       "date": "2024-09-04",
