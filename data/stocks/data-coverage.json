@@ -1,5 +1,5 @@
 {
-  "audited_on": "2026-11-17",
+  "audited_on": "2026-11-18",
   "symbol_count": 200,
   "symbols": [
     {
@@ -2886,20 +2886,16 @@
     },
     {
       "ticker": "CSCO",
-      "revenue_growth_observations": 68,
-      "latest_revenue_period": "FY2026 Q4",
+      "revenue_growth_observations": 69,
+      "latest_revenue_period": "FY2027 Q1",
       "revenue_momentum": {
-        "label": "Steady",
-        "change": 2.3627713505053514,
-        "recentMedian": 10.832341009139691,
+        "label": "Accelerating",
+        "change": 6.297902015917442,
+        "recentMedian": 14.767471674551782,
         "priorMedian": 8.46956965863434,
-        "latestChange": 5.618058763620491,
+        "latestChange": 6.840619147897865,
         "latestMovement": "Improving",
         "points": [
-          {
-            "period": "FY2025 Q1",
-            "value": -5.638123806926643
-          },
           {
             "period": "FY2025 Q2",
             "value": 9.381596434993353
@@ -2927,6 +2923,10 @@
           {
             "period": "FY2026 Q4",
             "value": 17.576501056362027
+          },
+          {
+            "period": "FY2027 Q1",
+            "value": 24.41712020425989
           }
         ],
         "reason": null
@@ -7120,11 +7120,10 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
-      "not_meaningful": {
-        "valuation.peg": "peg: Positive 3-year EPS CAGR was unavailable; PEG is not meaningful."
-      }
+      "not_meaningful": {}
     },
     {
       "ticker": "NVS",
@@ -9594,7 +9593,8 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
+        "business_health.long_term_investments": "long_term_investments: SEC companyfacts did not include a usable public fact.",
+        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
       },
       "not_meaningful": {}
     },
