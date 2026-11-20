@@ -1,5 +1,5 @@
 {
-  "audited_on": "2026-11-19",
+  "audited_on": "2026-11-20",
   "symbol_count": 200,
   "symbols": [
     {
@@ -4911,20 +4911,16 @@
     },
     {
       "ticker": "INTU",
-      "revenue_growth_observations": 66,
-      "latest_revenue_period": "FY2026 Q4",
+      "revenue_growth_observations": 67,
+      "latest_revenue_period": "FY2027 Q1",
       "revenue_momentum": {
-        "label": "Steady",
-        "change": -0.5620612689750022,
-        "recentMedian": 15.506186729993237,
-        "priorMedian": 16.06824799896824,
-        "latestChange": 3.2829461568391167,
-        "latestMovement": "Rebounding",
+        "label": "Decelerating",
+        "change": -4.826891465487925,
+        "recentMedian": 12.861930058484482,
+        "priorMedian": 17.688821523972408,
+        "latestChange": -1.57971597282482,
+        "latestMovement": "Steady",
         "points": [
-          {
-            "period": "FY2025 Q1",
-            "value": 10.241773002014776
-          },
           {
             "period": "FY2025 Q2",
             "value": 17.040756054341404
@@ -4952,6 +4948,10 @@
           {
             "period": "FY2026 Q4",
             "value": 13.651788044896893
+          },
+          {
+            "period": "FY2027 Q1",
+            "value": 12.072072072072073
           }
         ],
         "reason": null
@@ -7546,7 +7546,7 @@
         "reason": null
       },
       "missing_inputs": {
-        "valuation.forward_pe": "Expected EPS implied by the stored forward P/E and its reference price; not an independently verified analyst estimate."
+        "valuation.forward_pe": "Yahoo expected EPS per listed share in USD; estimate methodology is not independently verified."
       },
       "not_meaningful": {}
     },
