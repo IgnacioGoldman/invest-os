@@ -5,32 +5,8 @@
   "market": "US",
   "source_url": "https://finance.yahoo.com/quote/%5EGSPC/history/",
   "return_basis": "price",
-  "fetched_at": "2026-11-23T07:56:28.521025+00:00",
+  "fetched_at": "2026-11-23T20:24:51.680363+00:00",
   "prices": [
-    {
-      "date": "2024-09-11",
-      "close": 5554.1298828125,
-      "high": 5560.41015625,
-      "low": 5406.9599609375,
-      "volume": 3839450000.0,
-      "source": "yfinance_history"
-    },
-    {
-      "date": "2024-09-12",
-      "close": 5595.759765625,
-      "high": 5600.7099609375,
-      "low": 5535.5,
-      "volume": 3655070000.0,
-      "source": "yfinance_history"
-    },
-    {
-      "date": "2024-09-13",
-      "close": 5626.02001953125,
-      "high": 5636.27001953125,
-      "low": 5601.64990234375,
-      "volume": 3500790000.0,
-      "source": "yfinance_history"
-    },
     {
       "date": "2024-09-16",
       "close": 5633.08984375,
@@ -4421,6 +4397,14 @@
       "high": 7198.669921875,
       "low": 6882.66015625,
       "volume": 6679680000.0,
+      "source": "yfinance_history"
+    },
+    {
+      "date": "2026-11-23",
+      "close": 7262.7998046875,
+      "high": 7295.60009765625,
+      "low": 7152.66015625,
+      "volume": 2823316000.0,
       "source": "yfinance_history"
     }
   ]
