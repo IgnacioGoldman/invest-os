@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "refreshed_at": "2026-11-24T19:36:25.596034Z",
+  "refreshed_at": "2026-11-24T20:50:34.010390Z",
   "market_as_of": "2026-11-24",
   "market_date_counts": {
     "2026-11-24": 200
   },
-  "source": "github_actions_price_refresh",
+  "source": "github_actions_static_export",
   "stock_count": 200,
   "tickers": [
     "AAOI",
