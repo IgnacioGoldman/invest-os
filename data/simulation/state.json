@@ -8,9 +8,9 @@
     "currency": "EUR",
     "strategy_version": "1.0.0",
     "analysis_version": "1.0.0",
-    "latest_successful_update": "2026-11-26T04:19:34.724450+00:00",
+    "latest_successful_update": "2026-11-27T04:27:04.698503+00:00",
     "last_successful_analysis": null,
-    "last_attempt": "2026-11-26T04:19:34.724450+00:00",
+    "last_attempt": "2026-11-27T04:27:04.698503+00:00",
     "status": "awaiting_api_key",
     "transaction_fee_rate": 0.001,
     "return_basis": "Recorded cash dividends and split-adjusted quantities; taxes and additional execution costs excluded. Corporate-action coverage may be incomplete.",
@@ -60647,6 +60647,21 @@
         "fx_to_eur": 1.0,
         "fx_date": "2026-11-24",
         "fx_source": "fx:EUR/EUR:identity"
+      },
+      "2026-11-25": {
+        "date": "2026-11-25",
+        "close": 158.72000122070312,
+        "currency": "EUR",
+        "source": "yfinance:history:VWCE.DE:Close:auto_adjust=False:as_traded",
+        "close_timestamp": "2026-11-25T16:30:00+00:00",
+        "split_ratio": 1.0,
+        "dividend": 0.0,
+        "corporate_actions_available": true,
+        "unsupported_action": false,
+        "observed_at": "2026-11-27T04:27:03.310720+00:00",
+        "fx_to_eur": 1.0,
+        "fx_date": "2026-11-25",
+        "fx_source": "fx:EUR/EUR:identity"
       }
     },
     "SPY": {
@@ -61143,6 +61158,11 @@
       "2026-11-25": {
         "rate": 0.91449,
         "date": "2026-11-25",
+        "source": "frankfurter:historical:USD/EUR"
+      },
+      "2026-11-26": {
+        "rate": 0.91116,
+        "date": "2026-11-26",
         "source": "frankfurter:historical:USD/EUR"
       }
     }
